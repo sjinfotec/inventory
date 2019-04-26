@@ -43,7 +43,8 @@ class User extends Authenticatable
             ->join('card_informations','users.code','=','card_informations.user_code')
             ->select(
                 'users.id',
-                'users.department_code',
+                'users.code',
+                'users.department_code as department_code',
                 'users.name',
                 'card_informations.card_idm'
             )
