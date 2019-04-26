@@ -11,6 +11,10 @@ use Carbon\Carbon;
 
 class ApiGetAttendanceResultController extends Controller
 {
+    const REGISTRATION_SUCCESS = 1;
+    const REGISTRATION_FAILED = 2;
+    const INFO_NOT_EXIST = 3;
+
     /**
      * 初期処理
      *
@@ -26,12 +30,12 @@ class ApiGetAttendanceResultController extends Controller
      * @return void
      */
     public function store(Request $request) { 
-        $card_id = $request->card_id;
-        $mode = $request->mode;
+        $card_id = $request->card_id;       // カードID
+        $mode = $request->mode;             // 打刻モード 1出勤 2退勤 3中抜け開始 4中抜け終了
         $user = new User();
         $work_time = new WorkTime();
         $systemdate = Carbon::now();
-        $response = collect();
+        $response = collect();              // 端末の戻り値
         // カード情報存在チェック
         $is_exists = DB::table('card_informations')->where('card_idm', $card_id)->exists();
         if($is_exists){
@@ -39,15 +43,15 @@ class ApiGetAttendanceResultController extends Controller
             $user_code = $user_data[0]->{'code'};
             $result = $this->dbConnect($user_code,$mode);
             if($result){
-                $response->put('result','OK');
+                $response->put('result',self::REGISTRATION_SUCCESS);
                 $response->put('user_name',$user_data[0]->{'name'});
                 $response->put('user_code',$user_code);
                 $response->put('record_time',$systemdate->format('H:i:s'));
             }else{
-                // エラー
+                $response->put('result',self::REGISTRATION_FAILED);
             }
-        }else{  // カード情報がない
-
+        }else{  // カード情報が存在しない
+            $response->put('result',self::INFO_NOT_EXIST);
         }
 
         return $response;
