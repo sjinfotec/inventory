@@ -29,7 +29,7 @@ class ApiGetAttendanceResultController extends Controller
         $card_id = $request->card_id;
         $mode = $request->mode;
         $user = new User();
-        $collections = collect("");
+        $response = collect();
         // カード情報存在チェック
         $is_exists = DB::table('card_informations')->where('card_idm', $card_id)->exists();
         if($is_exists){
@@ -37,7 +37,9 @@ class ApiGetAttendanceResultController extends Controller
             $user_code = $user_data[0]->{'code'};
             $result = $this->dbConnect($user_code,$mode);
             if($result){
-                // 成功
+                $response->put('result','OK');
+                $response->put('user_name',$user_data[0]->{'name'});
+                $response->put('user_name',$user_code);
             }else{
                 // エラー
             }
@@ -80,11 +82,15 @@ class ApiGetAttendanceResultController extends Controller
      * @param [type] $mode
      * @return void
      */
-    private function dbConnect($user_id,$mode){
+    private function dbConnect($user_code,$mode){
         $work_time = new WorkTime();
+        $systemdate = Carbon::now();
         DB::beginTransaction();
         try{
-
+            $work_time->setUserCodeAttribute($user_code);
+            $work_time->setModeAttribute($mode);
+            $work_time->setSystemDateAttribute($systemdate);
+            $work_time->insertWorkTime();
 
             DB::commit();
             return true;
