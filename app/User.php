@@ -38,13 +38,18 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function getUserData(){
+    public function getUserCardData($card_id){
         $data = DB::table('users')
+            ->join('card_informations','users.code','=','card_informations.user_code')
             ->select(
                 'users.id',
                 'users.department_code',
-                'users.name'
-            )->get();
+                'users.name',
+                'card_informations.card_idm'
+            )
+            ->where('card_informations.card_idm',$card_id)
+            ->where('users.is_deleted',0)
+            ->get();
 
         return $data;
     }

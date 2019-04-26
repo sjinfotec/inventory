@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\User;
 
 class ApiGetAttendanceResultController extends Controller
@@ -26,8 +27,10 @@ class ApiGetAttendanceResultController extends Controller
         $mode = $request->mode;
         $user = new User();
         // カード情報存在チェック
-        // $is_exists = DB::table($table_name)->where($column, $user_id)->exists();
-        $user_data = $user->getUserData();
+        $is_exists = DB::table('card_informations')->where('card_idm', $card_id)->exists();
+        if($is_exists){
+            $user_data = $user->getUserCardData($card_id);
+        }
 
         return $user_data;
     }
