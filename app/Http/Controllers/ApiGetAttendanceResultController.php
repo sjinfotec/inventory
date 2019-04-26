@@ -25,9 +25,11 @@ class ApiGetAttendanceResultController extends Controller
         $card_id = $request->card_id;
         $mode = $request->mode;
         $user = new User();
+        // カード情報存在チェック
+        // $is_exists = DB::table($table_name)->where($column, $user_id)->exists();
         $user_data = $user->getUserData();
 
-        return $results;
+        return $user_data;
     }
 
     /**
