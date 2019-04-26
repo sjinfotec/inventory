@@ -30,6 +30,7 @@ class ApiGetAttendanceResultController extends Controller
         $mode = $request->mode;
         $user = new User();
         $work_time = new WorkTime();
+        $systemdate = Carbon::now();
         $response = collect();
         // カード情報存在チェック
         $is_exists = DB::table('card_informations')->where('card_idm', $card_id)->exists();
@@ -41,7 +42,7 @@ class ApiGetAttendanceResultController extends Controller
                 $response->put('result','OK');
                 $response->put('user_name',$user_data[0]->{'name'});
                 $response->put('user_code',$user_code);
-                $response->put('record_time',$work_time->getSystemDateAttribute());
+                $response->put('record_time',$systemdate->format('H:i:s'));
             }else{
                 // エラー
             }
