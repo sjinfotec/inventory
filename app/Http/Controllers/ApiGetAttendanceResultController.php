@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\User;
 
 class ApiGetAttendanceResultController extends Controller
 {
@@ -21,7 +22,11 @@ class ApiGetAttendanceResultController extends Controller
      * @return void
      */
     public function store(Request $request) { 
-        $results = $request->all();
+        $card_id = $request->card_id;
+        $mode = $request->mode;
+        $user = new User();
+        $user_data = $user->getUserData();
+
         return $results;
     }
 
