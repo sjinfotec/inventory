@@ -18,3 +18,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::resource('get_attendance_results', 'ApiGetAttendanceResultController');
+Route::resource('card_register', 'ApiCardRegisterController');

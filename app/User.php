@@ -38,6 +38,12 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    /**
+     * カードに紐づいたユーザー取得
+     *
+     * @param [type] $card_id
+     * @return void
+     */
     public function getUserCardData($card_id){
         $data = DB::table('users')
             ->join('card_informations','users.code','=','card_informations.user_code')
@@ -54,4 +60,25 @@ class User extends Authenticatable
 
         return $data;
     }
+
+    /**
+     * 全ユーザー取得
+     *
+     * @return void
+     */
+    public function getNotRegistUser(){
+        $data = DB::table('users')
+            ->leftjoin('card_informations','users.code','=','card_informations.user_code')
+            ->select(
+                'users.id',
+                'users.code',
+                'users.name',
+                'card_informations.card_idm'
+            )
+            ->where('users.is_deleted',0)
+            ->get();
+
+        return $data;
+    }
+
 }

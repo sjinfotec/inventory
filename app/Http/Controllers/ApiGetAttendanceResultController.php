@@ -11,8 +11,8 @@ use Carbon\Carbon;
 
 class ApiGetAttendanceResultController extends Controller
 {
-    const REGISTRATION_SUCCESS = 1;
-    const REGISTRATION_FAILED = 2;
+    const RECORD_SUCCESS = 1;
+    const RECORD_FAILED = 2;
     const INFO_NOT_EXIST = 3;
 
     /**
@@ -43,12 +43,12 @@ class ApiGetAttendanceResultController extends Controller
             $user_code = $user_data[0]->{'code'};
             $result = $this->dbConnect($user_code,$mode);
             if($result){
-                $response->put('result',self::REGISTRATION_SUCCESS);
+                $response->put('result',self::RECORD_SUCCESS);
                 $response->put('user_name',$user_data[0]->{'name'});
                 $response->put('user_code',$user_code);
                 $response->put('record_time',$systemdate->format('H:i:s'));
             }else{
-                $response->put('result',self::REGISTRATION_FAILED);
+                $response->put('result',self::RECORD_FAILED);
             }
         }else{  // カード情報が存在しない
             $response->put('result',self::INFO_NOT_EXIST);
@@ -83,7 +83,7 @@ class ApiGetAttendanceResultController extends Controller
     public function destroy($id) { }
 
     /**
-     * 勤怠登録
+     * DB書き込み
      *
      * @param [type] $user_id
      * @param [type] $mode
