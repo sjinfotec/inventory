@@ -16,3 +16,6 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::resource('get_attendance_results', 'ApiGetAttendanceResultController');
+Route::resource('card_register', 'ApiCardRegisterController');

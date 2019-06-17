@@ -1,0 +1,111 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
+use App\User;
+use App\WorkTime;
+use Carbon\Carbon;
+
+class ApiGetAttendanceResultController extends Controller
+{
+    const RECORD_SUCCESS = 1;
+    const RECORD_FAILED = 2;
+    const INFO_NOT_EXIST = 3;
+
+    /**
+     * 初期処理
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function index(){}
+
+    /**
+     * 登録
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function store(Request $request) { 
+        $card_id = $request->card_id;       // カードID
+        $mode = $request->mode;             // 打刻モード 1出勤 2退勤 3中抜け開始 4中抜け終了
+        $user = new User();
+        $work_time = new WorkTime();
+        $systemdate = Carbon::now();
+        $response = collect();              // 端末の戻り値
+        // カード情報存在チェック
+        $is_exists = DB::table('card_informations')->where('card_idm', $card_id)->exists();
+        if($is_exists){
+            $user_data = $user->getUserCardData($card_id);
+            $user_code = $user_data[0]->{'code'};
+            $result = $this->dbConnect($user_code,$mode);
+            if($result){
+                $response->put('result',self::RECORD_SUCCESS);
+                $response->put('user_name',$user_data[0]->{'name'});
+                $response->put('user_code',$user_code);
+                $response->put('record_time',$systemdate->format('H:i:s'));
+            }else{
+                $response->put('result',self::RECORD_FAILED);
+            }
+        }else{  // カード情報が存在しない
+            $response->put('result',self::INFO_NOT_EXIST);
+        }
+
+        return $response;
+    }
+
+    /**
+     * 1件取得
+     *
+     * @param [type] $id
+     * @return void
+     */
+    public function show($id) { }
+
+    /**
+     * 更新
+     *
+     * @param Request $request
+     * @param [type] $id
+     * @return void
+     */
+    public function update(Request $request, $id) { }
+
+    /**
+     * 削除
+     *
+     * @param [type] $id
+     * @return void
+     */
+    public function destroy($id) { }
+
+    /**
+     * DB書き込み
+     *
+     * @param [type] $user_id
+     * @param [type] $mode
+     * @return void
+     */
+    private function dbConnect($user_code,$mode){
+        $work_time = new WorkTime();
+        $systemdate = Carbon::now();
+        DB::beginTransaction();
+        try{
+            $work_time->setUserCodeAttribute($user_code);
+            $work_time->setModeAttribute($mode);
+            $work_time->setSystemDateAttribute($systemdate);
+            $work_time->insertWorkTime();
+
+            DB::commit();
+            return true;
+
+        }catch(\PDOException $e){
+            DB::rollBack();
+            return false;
+        }
+    }
+
+}
