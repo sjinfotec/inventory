@@ -17,7 +17,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name','code', 'email', 'password',
     ];
 
     /**
@@ -49,9 +49,9 @@ class User extends Authenticatable
             ->join('card_informations','users.code','=','card_informations.user_code')
             ->select(
                 'users.id',
-                'users.code',
                 'users.department_code as department_code',
                 'users.name',
+                'users.code',
                 'card_informations.card_idm'
             )
             ->where('card_informations.card_idm',$card_id)
@@ -71,8 +71,8 @@ class User extends Authenticatable
             ->leftjoin('card_informations','users.code','=','card_informations.user_code')
             ->select(
                 'users.id',
-                'users.code',
                 'users.name',
+                'users.code',
                 'card_informations.card_idm'
             )
             ->where('users.is_deleted',0)
