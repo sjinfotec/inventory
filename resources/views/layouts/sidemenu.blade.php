@@ -1,18 +1,10 @@
 			    <div class="col-lg-2 col-xs-12 sidebar align-stretch min-height-side-fit">
                     <nav>
                         <!-- block -->
-                        <h1 class="font-size-regular">ログインユーザー</h1>
-                        <ul class="list-unstyled">
-                            @if(Auth::check())
-                            <li>{{ Auth::user()->name }}</li>
-                            @endif
-                        </ul>
-                        <!-- /block -->
-                        <!-- block -->
                         <h1 class="font-size-regular">業務メニュー</h1>
                         <ul class="list-unstyled">
-                            <li>日次集計</a></li>
-                            <li>月次集計</a></li>
+                            <li><a href="{{ url('/daily') }}">日次集計</a></li>
+                            <li><a href="{{ url('/monthly') }}">月次集計</a></li>
                             <li>ユーザー編集</a></li>
                             <li>シフト編集</a></li>
                         </ul>
@@ -35,6 +27,13 @@
                                 <!-- /block -->
                             @endif
                         @endif
-                   
+                        <!-- block -->
+                        <h1 class="font-size-regular">ログインユーザー</h1>
+                        <ul class="list-unstyled">
+                            @if(Auth::check())
+                            <li>{{ Auth::user()->name }}</li>
+                            @endif
+                        </ul>
+                        <!-- /block -->
                     </nav>
                 </div>

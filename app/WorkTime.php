@@ -50,7 +50,7 @@ class WorkTime extends Model
      * @return void
      */
     public function insertWorkTime(){
-        DB::table('work_times')->insert(
+        DB::table($table)->insert(
             [
                 'user_code' => $this->user_code,
                 'record_time' => $this->systemdate,
@@ -58,6 +58,26 @@ class WorkTime extends Model
                 'created_at'=>$this->systemdate
             ]
         );
+    }
+
+    /**
+     * 日次集計取得
+     *
+     * @return void
+     */
+    public function getDailyData(){
+        $tasks = DB::table($table)
+            ->join('users', 'work_times.user_code', '=', 'users.code')
+            ->select(
+                    'work_times.user_code',
+                    'work_times.',
+                    'work_times.end_date'
+                    )
+            // ->where('tasks.department_id',$department_id)
+            ->limit(1)
+            ->get();
+
+        return $tasks;
     }
 
 }

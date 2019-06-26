@@ -6,7 +6,7 @@
     @include('layouts.sidemenu')
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">TOP</div>
+                <div class="card-header">月次集計画面</div>
 
                 <div class="card-body">
                     @if (session('status'))
@@ -14,8 +14,6 @@
                             {{ session('status') }}
                         </div>
                     @endif
-
-                    <!-- <example-component></example-component> -->
                     
                 </div>
             </div>

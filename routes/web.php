@@ -16,6 +16,11 @@
 // });
 
 Auth::routes();
+// Route::get('/{any}', function () {
+//     return view('app');
+// })->where('any', '.*');
 
 Route::get('/', 'HomeController@index')->name('home');
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/daily', 'DailyWorkingInformationController@index')->middleware('auth');
+Route::get('/monthly', 'MonthlyWorkingInformationController@index')->middleware('auth');
