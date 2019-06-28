@@ -23,10 +23,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-<<<<<<< HEAD
-        //
-=======
         \Illuminate\Support\Facades\Schema::defaultStringLength(191);
->>>>>>> feature-takeda
     }
 }

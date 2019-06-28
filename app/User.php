@@ -5,10 +5,7 @@ namespace App;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-<<<<<<< HEAD
-=======
 use Illuminate\Support\Facades\DB;
->>>>>>> feature-takeda
 
 class User extends Authenticatable
 {
@@ -20,12 +17,8 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-<<<<<<< HEAD
-        'name', 'email', 'password',
-=======
         'name','code', 'email', 'password',
->>>>>>> feature-takeda
-    ];
+   ];
 
     /**
      * The attributes that should be hidden for arrays.
@@ -44,8 +37,6 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-<<<<<<< HEAD
-=======
 
     /**
      * カードに紐づいたユーザー取得
@@ -90,5 +81,4 @@ class User extends Authenticatable
         return $data;
     }
 
->>>>>>> feature-takeda
 }
