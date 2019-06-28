@@ -9,7 +9,13 @@ require("./bootstrap");
 window.Vue = require("vue");
 import axios from "axios";
 import toasted from "vue-toasted";
-Vue.use(toasted);
+var options = {
+    position: "bottom-center",
+    duration: 2000,
+    fullWidth: false,
+    type: "success"
+};
+Vue.use(toasted, options);
 
 Vue.prototype.$axios = axios;
 // Vue.prototype.$toasted = toasted;

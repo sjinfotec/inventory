@@ -1775,13 +1775,13 @@ __webpack_require__.r(__webpack_exports__);
       })["catch"](function (reason) {});
     },
     doClick: function doClick() {
-      var options = {
-        position: "top-center",
-        duration: 1000,
-        fullWidth: true,
-        type: "error"
-      };
-      this.$toasted.show("hello billo", options);
+      // var options = {
+      //   position: "bottom-center",
+      //   duration: 2000,
+      //   fullWidth: false,
+      //   type: "success"
+      // };
+      this.$toasted.show("シフト時間を登録しました");
     }
   }
 });
@@ -49567,7 +49567,13 @@ __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
 
 
-Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_1___default.a);
+var options = {
+  position: "bottom-center",
+  duration: 2000,
+  fullWidth: false,
+  type: "success"
+};
+Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_1___default.a, options);
 Vue.prototype.$axios = axios__WEBPACK_IMPORTED_MODULE_0___default.a; // Vue.prototype.$toasted = toasted;
 
 /**

@@ -58,13 +58,13 @@ export default {
         .catch(reason => {});
     },
     doClick() {
-      var options = {
-        position: "top-center",
-        duration: 1000,
-        fullWidth: true,
-        type: "error"
-      };
-      this.$toasted.show("hello billo", options);
+      // var options = {
+      //   position: "bottom-center",
+      //   duration: 2000,
+      //   fullWidth: false,
+      //   type: "success"
+      // };
+      this.$toasted.show("シフト時間を登録しました");
     }
   }
 };
