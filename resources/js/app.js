@@ -13,7 +13,7 @@ var options = {
     position: "bottom-center",
     duration: 2000,
     fullWidth: false,
-    type: "success"
+    type: "info"
 };
 Vue.use(toasted, options);
 

@@ -1743,45 +1743,76 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "CreateShiftTime",
   data: function data() {
     return {
       start: "",
-      end: ""
+      end: "",
+      shiftTimes: []
     };
   },
   mounted: function mounted() {
-    console.log("create shift time Component mounted."); // this.$axios
-    //   .get("/daily/show")
-    //   .then(response => {
-    //     this.dailies = response.data;
-    //     console.log(this.dailies);
-    //     // alert(this.contents.work_times[0].user_code);
-    //   })
-    //   .catch(reason => {
-    //     alert("error");
-    //   });
+    var _this = this;
+
+    console.log("create shift time Component mounted.");
+    this.$axios.get("/create_shift_time/get").then(function (response) {
+      _this.shiftTimes = response.data;
+      console.log(_this.shiftTimes);
+    })["catch"](function (reason) {
+      alert("error");
+    });
   },
   methods: {
     createShiftBtn: function createShiftBtn() {
+      var _this2 = this;
+
       this.$axios.post("/create_shift_time/store", {
         start: this.start,
-        end: this.end,
-        toastCount: 0
+        end: this.end
       }).then(function (response) {
-        console.log(response.data); // alert(this.contents.work_times[0].user_code);
-      })["catch"](function (reason) {});
-    },
-    doClick: function doClick() {
-      // var options = {
-      //   position: "bottom-center",
-      //   duration: 2000,
-      //   fullWidth: false,
-      //   type: "success"
-      // };
-      this.$toasted.show("シフト時間を登録しました");
+        var res = response.data;
+        console.log(res.result);
+
+        if (res.result == 0) {
+          _this2.$toasted.show("シフト時間を登録しました");
+        } else {
+          var options = {
+            position: "bottom-center",
+            duration: 2000,
+            fullWidth: false,
+            type: "error"
+          };
+
+          _this2.$toasted.show("シフト時間の登録に失敗しました", options);
+        }
+      })["catch"](function (reason) {
+        var options = {
+          position: "bottom-center",
+          duration: 2000,
+          fullWidth: false,
+          type: "error"
+        };
+
+        _this2.$toasted.show("シフト時間の登録に失敗しました", options);
+      });
     }
   }
 });
@@ -37205,7 +37236,7 @@ var render = function() {
             }
           ],
           staticClass: "form-control",
-          attrs: { placeholder: "例 13:00" },
+          attrs: { type: "time", placeholder: "例 13:00" },
           domProps: { value: _vm.start },
           on: {
             input: function($event) {
@@ -37231,7 +37262,7 @@ var render = function() {
             }
           ],
           staticClass: "form-control",
-          attrs: { placeholder: "例 22:00" },
+          attrs: { type: "time", placeholder: "例 22:00" },
           domProps: { value: _vm.end },
           on: {
             input: function($event) {
@@ -37244,6 +37275,27 @@ var render = function() {
         })
       ])
     ]),
+    _vm._v(" "),
+    _vm.shiftTimes.length
+      ? _c("div", [
+          _vm._v("\n    登録済みシフト\n    "),
+          _c("table", { staticClass: "table" }, [
+            _vm._m(0),
+            _vm._v(" "),
+            _c(
+              "tbody",
+              _vm._l(_vm.shiftTimes, function(item) {
+                return _c("tr", [
+                  _c("td", [_vm._v(_vm._s(item.shift_start_time))]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v(_vm._s(item.shift_end_time))])
+                ])
+              }),
+              0
+            )
+          ])
+        ])
+      : _vm._e(),
     _vm._v(" "),
     _c("div", [
       _c(
@@ -37258,23 +37310,23 @@ var render = function() {
         },
         [_vm._v("作成")]
       )
-    ]),
-    _vm._v(" "),
-    _c(
-      "button",
-      {
-        staticClass: "btn btn-default",
-        on: {
-          click: function($event) {
-            return _vm.doClick()
-          }
-        }
-      },
-      [_vm._v("Show!")]
-    )
+    ])
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th", [_vm._v("シフト開始時間")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("シフト終了時間")])
+      ])
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -49571,7 +49623,7 @@ var options = {
   position: "bottom-center",
   duration: 2000,
   fullWidth: false,
-  type: "success"
+  type: "info"
 };
 Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_1___default.a, options);
 Vue.prototype.$axios = axios__WEBPACK_IMPORTED_MODULE_0___default.a; // Vue.prototype.$toasted = toasted;
