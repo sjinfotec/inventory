@@ -9,8 +9,11 @@ Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
+<<<<<<< HEAD
+=======
 package.json
 package-lock.json
 mix-manifest.json
 /.vscode
 /config/database.php
+>>>>>>> feature-takeda
