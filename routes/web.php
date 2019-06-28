@@ -11,11 +11,6 @@
 |
 */
 
-<<<<<<< HEAD
-Route::get('/', function () {
-    return view('welcome');
-});
-=======
 // Route::get('/', function () {
 //     return view('home');
 // });
@@ -33,4 +28,3 @@ Route::get('/daily/show', 'DailyWorkingInformationController@show')->middleware(
 Route::get('/monthly', 'MonthlyWorkingInformationController@index')->middleware('auth');
 Route::get('/create_shift_time', 'CreateShiftTimeController@index')->middleware('auth');
 Route::post('/create_shift_time/store', 'CreateShiftTimeController@store')->middleware('auth');
->>>>>>> feature-takeda
