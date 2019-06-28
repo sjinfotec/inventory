@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddUseridToUsersTable1022 extends Migration
+class AddIndexToMstWorkingTime1833 extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class AddUseridToUsersTable1022 extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('userid');
-            $table->dropColumn('user_id');
+        Schema::table('mst_working_time', function (Blueprint $table) {
+            //
+            $table->index(['working_time_style', 'code','sort_seq'],'mst_working_time_index');
         });
     }
 
@@ -26,7 +26,8 @@ class AddUseridToUsersTable1022 extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('mst_working_time', function (Blueprint $table) {
+            //
         });
     }
 }

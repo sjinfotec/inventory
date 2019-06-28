@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddDepartmentCodeToUsersTable1711 extends Migration
+class AddIndexToWorkingTimeDateTable1847 extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,9 @@ class AddDepartmentCodeToUsersTable1711 extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('userid');
+        Schema::table('working_time_date', function (Blueprint $table) {
+            //
+            $table->index(['user_code', 'working_date','working_time_style'],'working_time_date_index');
         });
     }
 
@@ -25,7 +26,7 @@ class AddDepartmentCodeToUsersTable1711 extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('working_time_date', function (Blueprint $table) {
             //
         });
     }
