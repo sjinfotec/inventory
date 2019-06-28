@@ -51,8 +51,8 @@ class CreateShiftTimeController extends Controller
     /**
      * DB書き込み(新規)
      *
-     * @param [type] $user_id
-     * @param [type] $mode
+     * @param [type] $shift_start_time
+     * @param [type] $shift_end_time
      * @return void
      */
     private function dbConnectInsert($shift_start_time,$shift_end_time){
@@ -72,5 +72,15 @@ class CreateShiftTimeController extends Controller
             DB::rollBack();
             return false;
         }
+    }
+
+    /**
+     * 登録済シフト時間表示
+     *
+     * @return void
+     */
+    public function get(){
+        $shift_times = DB::table('shift_times')->where('is_deleted', 0)->get();
+        return $shift_times;
     }
 }
