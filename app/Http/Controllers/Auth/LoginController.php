@@ -36,12 +36,9 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
-<<<<<<< HEAD
-=======
 
     public function username()
     {
         return 'code';
     }
->>>>>>> feature-takeda
 }
