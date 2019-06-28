@@ -26,6 +26,7 @@ class DailyWorkingInformationController extends Controller
      */
     public function show(){
         $work_time = new WorkTime();
-        
+        $results = DB::table('work_times')->get(); // 試しに全部取得
+        return $results;
     }
 }

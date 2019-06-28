@@ -7,6 +7,12 @@
 require("./bootstrap");
 
 window.Vue = require("vue");
+import axios from "axios";
+import toasted from "vue-toasted";
+Vue.use(toasted);
+
+Vue.prototype.$axios = axios;
+// Vue.prototype.$toasted = toasted;
 
 /**
  * The following block of code may be used to automatically register your
@@ -28,6 +34,11 @@ Vue.component(
     require("./components/MonthlyWorkingInformation.vue").default
 );
 Vue.component("app-component", require("./components/App.vue").default);
+
+Vue.component(
+    "create-shift-time",
+    require("./components/CreateShiftTime.vue").default
+);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
