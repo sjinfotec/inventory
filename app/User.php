@@ -5,6 +5,10 @@ namespace App;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+<<<<<<< HEAD
+=======
+use Illuminate\Support\Facades\DB;
+>>>>>>> feature-takeda
 
 class User extends Authenticatable
 {
@@ -16,7 +20,11 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
+<<<<<<< HEAD
         'name', 'email', 'password',
+=======
+        'name','code', 'email', 'password',
+>>>>>>> feature-takeda
     ];
 
     /**
@@ -36,4 +44,51 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+<<<<<<< HEAD
+=======
+
+    /**
+     * カードに紐づいたユーザー取得
+     *
+     * @param [type] $card_id
+     * @return void
+     */
+    public function getUserCardData($card_id){
+        $data = DB::table('users')
+            ->join('card_informations','users.code','=','card_informations.user_code')
+            ->select(
+                'users.id',
+                'users.department_code as department_code',
+                'users.name',
+                'users.code',
+                'card_informations.card_idm'
+            )
+            ->where('card_informations.card_idm',$card_id)
+            ->where('users.is_deleted',0)
+            ->get();
+
+        return $data;
+    }
+
+    /**
+     * 全ユーザー取得
+     *
+     * @return void
+     */
+    public function getNotRegistUser(){
+        $data = DB::table('users')
+            ->leftjoin('card_informations','users.code','=','card_informations.user_code')
+            ->select(
+                'users.id',
+                'users.name',
+                'users.code',
+                'card_informations.card_idm'
+            )
+            ->where('users.is_deleted',0)
+            ->get();
+
+        return $data;
+    }
+
+>>>>>>> feature-takeda
 }
