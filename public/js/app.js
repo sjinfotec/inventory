@@ -1759,6 +1759,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "CreateShiftTime",
@@ -1769,20 +1771,15 @@ __webpack_require__.r(__webpack_exports__);
       shiftTimes: []
     };
   },
+  // マウント時
   mounted: function mounted() {
-    var _this = this;
-
     console.log("create shift time Component mounted.");
-    this.$axios.get("/create_shift_time/get").then(function (response) {
-      _this.shiftTimes = response.data;
-      console.log(_this.shiftTimes);
-    })["catch"](function (reason) {
-      alert("error");
-    });
+    this.getShiftTimes();
   },
   methods: {
+    // シフト作成ボタン押下
     createShiftBtn: function createShiftBtn() {
-      var _this2 = this;
+      var _this = this;
 
       this.$axios.post("/create_shift_time/store", {
         start: this.start,
@@ -1792,7 +1789,9 @@ __webpack_require__.r(__webpack_exports__);
         console.log(res.result);
 
         if (res.result == 0) {
-          _this2.$toasted.show("シフト時間を登録しました");
+          _this.$toasted.show("シフト時間を登録しました");
+
+          _this.getShiftTimes();
         } else {
           var options = {
             position: "bottom-center",
@@ -1801,7 +1800,7 @@ __webpack_require__.r(__webpack_exports__);
             type: "error"
           };
 
-          _this2.$toasted.show("シフト時間の登録に失敗しました", options);
+          _this.$toasted.show("シフト時間の登録に失敗しました", options);
         }
       })["catch"](function (reason) {
         var options = {
@@ -1811,8 +1810,36 @@ __webpack_require__.r(__webpack_exports__);
           type: "error"
         };
 
-        _this2.$toasted.show("シフト時間の登録に失敗しました", options);
+        _this.$toasted.show("シフト時間の登録に失敗しました", options);
       });
+    },
+    // 登録済みシフト再描画
+    getShiftTimes: function getShiftTimes() {
+      var _this2 = this;
+
+      this.$axios.get("/create_shift_time/get").then(function (response) {
+        _this2.shiftTimes = response.data;
+        console.log("登録済みシフト一覧更新");
+      })["catch"](function (reason) {
+        alert("error");
+      });
+    },
+    // 削除
+    delShiftTimes: function delShiftTimes(itemid) {
+      var _this3 = this;
+
+      console.log(itemid);
+      this.$axios.post("/create_shift_time/del", {
+        id: itemid
+      }).then(function (response) {
+        var res = response.data;
+
+        if (res.result == 0) {
+          _this3.$toasted.show("シフト時間を削除しました");
+
+          _this3.getShiftTimes();
+        } else {}
+      })["catch"](function (reason) {});
     }
   }
 });
@@ -37286,9 +37313,45 @@ var render = function() {
               "tbody",
               _vm._l(_vm.shiftTimes, function(item) {
                 return _c("tr", [
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: item.id,
+                        expression: "item.id"
+                      }
+                    ],
+                    attrs: { type: "hidden" },
+                    domProps: { value: item.id },
+                    on: {
+                      input: function($event) {
+                        if ($event.target.composing) {
+                          return
+                        }
+                        _vm.$set(item, "id", $event.target.value)
+                      }
+                    }
+                  }),
+                  _vm._v(" "),
                   _c("td", [_vm._v(_vm._s(item.shift_start_time))]),
                   _vm._v(" "),
-                  _c("td", [_vm._v(_vm._s(item.shift_end_time))])
+                  _c("td", [_vm._v(_vm._s(item.shift_end_time))]),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-danger",
+                        on: {
+                          click: function($event) {
+                            return _vm.delShiftTimes(item.id)
+                          }
+                        }
+                      },
+                      [_vm._v("削除")]
+                    )
+                  ])
                 ])
               }),
               0
@@ -37301,7 +37364,7 @@ var render = function() {
       _c(
         "button",
         {
-          staticClass: "btn btn-default",
+          staticClass: "btn btn-success",
           on: {
             click: function($event) {
               return _vm.createShiftBtn()
@@ -37322,7 +37385,9 @@ var staticRenderFns = [
       _c("tr", [
         _c("th", [_vm._v("シフト開始時間")]),
         _vm._v(" "),
-        _c("th", [_vm._v("シフト終了時間")])
+        _c("th", [_vm._v("シフト終了時間")]),
+        _vm._v(" "),
+        _c("th")
       ])
     ])
   }

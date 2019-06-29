@@ -49,7 +49,7 @@ class CreateShiftTimeController extends Controller
     }
 
     /**
-     * DB書き込み(新規)
+     * DB書き込み(INSERT)
      *
      * @param [type] $shift_start_time
      * @param [type] $shift_end_time
@@ -82,5 +82,41 @@ class CreateShiftTimeController extends Controller
     public function get(){
         $shift_times = DB::table('shift_times')->where('is_deleted', 0)->get();
         return $shift_times;
+    }
+
+    /**
+     * 削除
+     *
+     * @return void
+     */
+    public function del(Request $request){
+        $id = $request->id;
+        $response = collect();
+        $result = $this->dbConnectUpdate($id);
+        if($result){
+            $response->put('result',self::SUCCESS);
+        }else{
+            $response->put('result',self::FAILED);
+        }
+        return $response;
+    }
+
+    /**
+     * DB書き込み（UPDATE）
+     *
+     * @param [type] $id
+     * @return void
+     */
+    private function dbConnectUpdate($id){
+        DB::beginTransaction();
+        try{
+            DB::table('shift_times')->where('id', $id)->update(['is_deleted' => 1]);
+            DB::commit();
+            return true;
+
+        }catch(\PDOException $e){
+            DB::rollBack();
+            return false;
+        }
     }
 }

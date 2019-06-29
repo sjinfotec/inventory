@@ -19,22 +19,24 @@
           <tr>
             <th>シフト開始時間</th>
             <th>シフト終了時間</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="item in shiftTimes">
+            <input type="hidden" v-model="item.id"></input>
             <td>{{item.shift_start_time}}</td>
             <td>{{item.shift_end_time}}</td>
+            <td><button class="btn btn-danger" @click="delShiftTimes(item.id)">削除</button></td>
           </tr>
         </tbody>
       </table>
     </div>
     <div>
-      <button class="btn btn-default" @click="createShiftBtn()">作成</button>
+      <button class="btn btn-success" @click="createShiftBtn()">作成</button>
     </div>
   </div>
 </template>
-
 <script>
 import toasted from "vue-toasted";
 
@@ -47,19 +49,13 @@ export default {
       shiftTimes:[]
     };
   },
+  // マウント時
   mounted() {
     console.log("create shift time Component mounted.");
-    this.$axios
-      .get("/create_shift_time/get")
-      .then(response => {
-        this.shiftTimes = response.data;
-        console.log(this.shiftTimes);
-      })
-      .catch(reason => {
-        alert("error");
-      });
+    this.getShiftTimes();
   },
   methods: {
+    // シフト作成ボタン押下
     createShiftBtn() {
       this.$axios
         .post("/create_shift_time/store", {
@@ -71,6 +67,7 @@ export default {
           console.log(res.result);
           if(res.result == 0){
             this.$toasted.show("シフト時間を登録しました");
+            this.getShiftTimes();
           }else{
             var options = {
               position: "bottom-center",
@@ -91,6 +88,36 @@ export default {
             this.$toasted.show("シフト時間の登録に失敗しました",options);
         });
     },
+    // 登録済みシフト再描画
+    getShiftTimes(){
+      this.$axios
+        .get("/create_shift_time/get")
+        .then(response => {
+          this.shiftTimes = response.data;
+          console.log("登録済みシフト一覧更新");
+        })
+        .catch(reason => {
+          alert("error");
+        });
+    },
+    // 削除
+    delShiftTimes: function (itemid) {
+      console.log(itemid);
+      this.$axios
+      .post("/create_shift_time/del", {
+          id: itemid,
+        })
+        .then(response => {
+          var res = response.data;
+          if(res.result == 0){
+            this.$toasted.show("シフト時間を削除しました");
+            this.getShiftTimes();
+          }else{
+          }
+        })
+        .catch(reason => {
+        });
+    }
   }
 };
 </script>
