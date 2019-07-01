@@ -9,6 +9,7 @@ require("./bootstrap");
 window.Vue = require("vue");
 import axios from "axios";
 import toasted from "vue-toasted";
+
 var options = {
     position: "bottom-center",
     duration: 2000,

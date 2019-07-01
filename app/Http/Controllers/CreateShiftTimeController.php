@@ -25,6 +25,12 @@ class CreateShiftTimeController extends Controller
         return view('create_shift_time');
     }
 
+    /**
+     * シフト時間作成
+     *
+     * @param Request $request
+     * @return void
+     */
     public function store(Request $request){
         $shift_start_time = $request->start;
         $shift_end_time = $request->end;
@@ -80,7 +86,7 @@ class CreateShiftTimeController extends Controller
      * @return void
      */
     public function get(){
-        $shift_times = DB::table('shift_times')->where('is_deleted', 0)->get();
+        $shift_times = DB::table('shift_times')->where('is_deleted', 0)->orderby('shift_start_time','asc')->get();
         return $shift_times;
     }
 

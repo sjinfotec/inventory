@@ -31,3 +31,4 @@ Route::post('/create_shift_time/store', 'CreateShiftTimeController@store')->midd
 Route::get('/create_shift_time/get', 'CreateShiftTimeController@get')->middleware('auth');
 Route::post('/create_shift_time/del', 'CreateShiftTimeController@del')->middleware('auth');
 Route::get('/setting_shift_time', 'SttingShiftTimeController@index')->middleware('auth');
+Route::get('/get_user_list', 'ApiCommonController@getUserList')->middleware('auth');
