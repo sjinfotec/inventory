@@ -32,18 +32,23 @@ Vue.prototype.$axios = axios;
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default));
 
 Vue.component(
-  "daily-working-information",
-  require("./components/DailyWorkingInformation.vue").default
+    "daily-working-information",
+    require("./components/DailyWorkingInformation.vue").default
 );
 Vue.component(
-  "monthly-working-information",
-  require("./components/MonthlyWorkingInformation.vue").default
+    "monthly-working-information",
+    require("./components/MonthlyWorkingInformation.vue").default
 );
 Vue.component("app-component", require("./components/App.vue").default);
 
 Vue.component(
-  "create-shift-time",
-  require("./components/CreateShiftTime.vue").default
+    "create-shift-time",
+    require("./components/CreateShiftTime.vue").default
+);
+
+Vue.component(
+    "setting-shift-time",
+    require("./components/SettingShiftTime.vue").default
 );
 
 /**
@@ -53,8 +58,8 @@ Vue.component(
  */
 
 const app = new Vue({
-  el: "#app"
-  // router, // ルーティングの定義を読み込む
-  // components: { App }, // ルートコンポーネントの使用を宣言する
-  // template: "<App />" // ルートコンポーネントを描画する
+    el: "#app"
+    // router, // ルーティングの定義を読み込む
+    // components: { App }, // ルートコンポーネントの使用を宣言する
+    // template: "<App />" // ルートコンポーネントを描画する
 });

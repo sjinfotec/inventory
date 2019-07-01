@@ -30,3 +30,4 @@ Route::get('/create_shift_time', 'CreateShiftTimeController@index')->middleware(
 Route::post('/create_shift_time/store', 'CreateShiftTimeController@store')->middleware('auth');
 Route::get('/create_shift_time/get', 'CreateShiftTimeController@get')->middleware('auth');
 Route::post('/create_shift_time/del', 'CreateShiftTimeController@del')->middleware('auth');
+Route::get('/setting_shift_time', 'SttingShiftTimeController@index')->middleware('auth');
