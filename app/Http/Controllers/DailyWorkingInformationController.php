@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\WorkTime;
+use App\Http\Controllers\WorkingTimeDateCalcController;
 use Carbon\Carbon;
 
 class DailyWorkingInformationController extends Controller

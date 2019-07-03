@@ -1,48 +1,45 @@
 <template>
-  <table class="table" id="daily_table">
-    <thead>
-      <tr>
-        <th>No</th>
-        <th>社員名</th>
-        <th>打刻時間</th>
-        <th>モード</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="item in dailies" :key="item.id">
-        <td>{{ item.id }}</td>
-        <td>{{ item.user_code }}</td>
-        <td>{{ item.record_time }}</td>
-        <td>{{ item.mode }}</td>
-        <td>
-          <button type="button" class="btn btn-default">編集</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <span>
+    <div class="form-group col-md-6">
+      <label for="target_department" class>部署選択</label>
+      <select-department v-bind:selectdepartment="valuedepartment" v-on:change-event="departmentChanges"></select-department>&nbsp;
+    </div>
+    <div class="form-group col-md-6">
+      <label for="target_users" class>ユーザー選択</label>
+      <select-user ref="selectuser" v-bind:get-do="getDo" v-on:change-event="userChanges"></select-user>&nbsp;
+    </div>
+    <div class="form-group col-md-6">
+      <label for="target_fromdate" class>計算開始日付入力</label>
+    </div>
+  </span>
 </template>
 
 <script>
+
+import toasted from "vue-toasted";
+import Datepicker from "vuejs-datepicker";
+
 export default {
-  name: "Daily",
-  data() {
-    return {
-      dailies: []
-    };
+  name: "dailyworkingtime",
+  data: function() {
+      return {
+          valuedepartment: '',
+          getDo: 0,
+          initialized: false
+      }
   },
-  mounted() {
-    console.log("RRR Component mounted.");
-    this.$axios
-      .get("/daily/show")
-      .then(response => {
-        this.dailies = response.data;
-        console.log(this.dailies);
-        // alert(this.contents.work_times[0].user_code);
-      })
-      .catch(reason => {
-        alert("error");
-      });
+  methods: {
+    // 部署選択が変更された場合の処理
+    departmentChanges: function(value){
+      console.log("departmentChanges = " + value);
+      // ユーザー選択コンポーネントの取得メソッドを実行
+      this.getDo = 1;
+      this.$refs.selectuser.getUserList(this.getDo, value);
+    },
+    // ユーザー選択が変更された場合の処理
+    userChanges: function(value){
+      console.log("userChanges = " + value);
+    }
   }
 };
 </script>

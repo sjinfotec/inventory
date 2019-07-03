@@ -36,6 +36,7 @@ Vue.component(
     "daily-working-information",
     require("./components/DailyWorkingInformation.vue").default
 );
+
 Vue.component(
     "monthly-working-information",
     require("./components/MonthlyWorkingInformation.vue").default
@@ -51,6 +52,13 @@ Vue.component(
     "setting-shift-time",
     require("./components/SettingShiftTime.vue").default
 );
+
+Vue.component(
+    "select-department",
+    require("./components/SelectDepartment.vue").default
+);
+
+Vue.component("select-user", require("./components/SelectUser.vue").default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
