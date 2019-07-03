@@ -4,11 +4,7 @@
     <div class="col-md-12 padding-dis-left padding-dis-right">
       <div class="form-group col-md-6">
         <label for="shift_start" class>シフトを設定する社員</label>
-        <select class="form-control" v-model="selectedUser">
-        <option v-for="user in userList" v-bind:value="user.code">
-          {{ user.name }}
-        </option>
-      </select>
+        <select-user ref="selectuser" v-bind:get-do="getDo" v-on:change-event="userChanges"></select-user>&nbsp;
       </div>
       <div class="form-group col-md-6">
         <label for="shift_end" class>シフト選択</label>
@@ -57,9 +53,8 @@ export default {
       start: "",
       end: "",
       shiftTimes:[],
-      userList:[],
-      selectedTime:"",
-      selectedUser:""
+      getDo: 1,
+      selectedTime:""
     };
   },
   components: {
@@ -106,15 +101,7 @@ export default {
         });
     },
     getUserList(){
-      this.$axios
-        .get("/get_user_list")
-        .then(response => {
-          this.userList = response.data;
-          console.log("ユーザーリスト取得");
-        })
-        .catch(reason => {
-          alert("error");
-        });
+      this.$refs.selectuser.getUserList(this.getDo, "");
     },
     // 登録済みシフト再描画
     getShiftTimes(){
