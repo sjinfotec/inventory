@@ -3,13 +3,13 @@
   <div class="panel-body">
     <div class="col-md-12 padding-dis-left padding-dis-right">
       <div class="form-group col-md-6">
+        <p v-if="errors.length">
+          <ul class="error-red">
+            <li v-for="error in errors">{{ error }}</li>
+          </ul>
+        </p>
         <label for="shift_start" class>シフトを設定する社員</label>
-        <!-- <select class="form-control" v-model="selectedUser" @change="getUserShift(selectedUser)">
-        <option v-for="user in userList" v-bind:value="user.code">
-          {{ user.name }}
-        </option>
-      </select> -->
-      <select-user ref="selectuser" v-bind:get-do="getDo" v-on:change-event="userChanges"></select-user>&nbsp;
+        <select-user ref="selectuser" v-bind:get-do="getDo" v-on:change-event="userChanges"></select-user>&nbsp;
       </div>
       <div class="form-group col-md-6">
         <label for="shift_end" class>シフト選択</label>
@@ -82,11 +82,9 @@ export default {
       shiftInfo: [],
       selectedShift: [],
       selectedUser: "",
-      // start: "",
-      // end: "",
-      // shiftTimes:[],
       getDo: 1,
-      // selectedTime:""
+      errors: [],
+      validate: false
     };
   },
   components: {
@@ -99,9 +97,39 @@ export default {
     this.getUserList();
   },
   methods: {
+    // バリデーション
+    checkForm: function () {
+      var flag = false;
+      if (this.selectedUser && this.selectedShift.id && this.from && this.to) {
+        flag = true;
+        return flag;
+      }else{
+        this.errors = [];
+
+        if (!this.selectedUser) {
+          flag = false;
+          this.errors.push('ユーザーを選択してください');
+        }
+        if (!this.selectedShift.id) {
+          flag = false;
+          this.errors.push('シフト選択をしてください');
+        }
+        if (!this.from) {
+          flag = false;
+          this.errors.push('開始日を入力してください');
+        }
+        if (!this.to) {
+          flag = false;
+          this.errors.push('終了日を入力してください');
+        }
+        return flag;
+      }
+    },
     // 登録ボタン押下
     StoreShiftTime() {
-      this.$axios
+      this.validate = this.checkForm();
+      if(this.validate){
+        this.$axios
         .post("/setting_shift_time/store", {
           user_code: this.selectedUser,
           shift_start_time: this.selectedShift.shift_start_time,
@@ -134,6 +162,11 @@ export default {
             };
             this.$toasted.show("シフト時間の登録に失敗しました",options);
         });
+
+      }else{
+
+      }
+      
     },
     // ユーザーリスト
     getUserList(){

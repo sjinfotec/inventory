@@ -892,6 +892,10 @@ div.list-rows.font-color-red .border-set-left-skyblue {
     animation: 1s opt 5 0.5s;
 }
 
+.error-red {
+    color: crimson;
+}
+
 @keyframes fade {
     from {
         opacity: 0;

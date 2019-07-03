@@ -2140,11 +2140,9 @@ __webpack_require__.r(__webpack_exports__);
       shiftInfo: [],
       selectedShift: [],
       selectedUser: "",
-      // start: "",
-      // end: "",
-      // shiftTimes:[],
-      getDo: 1 // selectedTime:""
-
+      getDo: 1,
+      errors: [],
+      validate: false
     };
   },
   components: {
@@ -2157,25 +2155,71 @@ __webpack_require__.r(__webpack_exports__);
     this.getUserList();
   },
   methods: {
+    // バリデーション
+    checkForm: function checkForm() {
+      var flag = false;
+
+      if (this.selectedUser && this.selectedShift.id && this.from && this.to) {
+        flag = true;
+        return flag;
+      } else {
+        this.errors = [];
+
+        if (!this.selectedUser) {
+          flag = false;
+          this.errors.push('ユーザーを選択してください');
+        }
+
+        if (!this.selectedShift.id) {
+          flag = false;
+          this.errors.push('シフト選択をしてください');
+        }
+
+        if (!this.from) {
+          flag = false;
+          this.errors.push('開始日を入力してください');
+        }
+
+        if (!this.to) {
+          flag = false;
+          this.errors.push('終了日を入力してください');
+        }
+
+        return flag;
+      }
+    },
     // 登録ボタン押下
     StoreShiftTime: function StoreShiftTime() {
       var _this = this;
 
-      this.$axios.post("/setting_shift_time/store", {
-        user_code: this.selectedUser,
-        shift_start_time: this.selectedShift.shift_start_time,
-        shift_end_time: this.selectedShift.shift_end_time,
-        from: this.from,
-        to: this.to
-      }).then(function (response) {
-        var res = response.data;
-        console.log(res.result);
+      this.validate = this.checkForm();
 
-        if (res.result == 0) {
-          _this.$toasted.show("シフトを登録しました");
+      if (this.validate) {
+        this.$axios.post("/setting_shift_time/store", {
+          user_code: this.selectedUser,
+          shift_start_time: this.selectedShift.shift_start_time,
+          shift_end_time: this.selectedShift.shift_end_time,
+          from: this.from,
+          to: this.to
+        }).then(function (response) {
+          var res = response.data;
+          console.log(res.result);
 
-          _this.getUserShift(_this.selectedUser);
-        } else {
+          if (res.result == 0) {
+            _this.$toasted.show("シフトを登録しました");
+
+            _this.getUserShift(_this.selectedUser);
+          } else {
+            var options = {
+              position: "bottom-center",
+              duration: 2000,
+              fullWidth: false,
+              type: "error"
+            };
+
+            _this.$toasted.show("シフトの登録に失敗しました", options);
+          }
+        })["catch"](function (reason) {
           var options = {
             position: "bottom-center",
             duration: 2000,
@@ -2183,18 +2227,9 @@ __webpack_require__.r(__webpack_exports__);
             type: "error"
           };
 
-          _this.$toasted.show("シフトの登録に失敗しました", options);
-        }
-      })["catch"](function (reason) {
-        var options = {
-          position: "bottom-center",
-          duration: 2000,
-          fullWidth: false,
-          type: "error"
-        };
-
-        _this.$toasted.show("シフト時間の登録に失敗しました", options);
-      });
+          _this.$toasted.show("シフト時間の登録に失敗しました", options);
+        });
+      } else {}
     },
     // ユーザーリスト
     getUserList: function getUserList() {
@@ -38000,6 +38035,19 @@ var render = function() {
         "div",
         { staticClass: "form-group col-md-6" },
         [
+          _vm.errors.length
+            ? _c("p", [
+                _c(
+                  "ul",
+                  { staticClass: "error-red" },
+                  _vm._l(_vm.errors, function(error) {
+                    return _c("li", [_vm._v(_vm._s(error))])
+                  }),
+                  0
+                )
+              ])
+            : _vm._e(),
+          _vm._v(" "),
           _c("label", { attrs: { for: "shift_start" } }, [
             _vm._v("シフトを設定する社員")
           ]),
