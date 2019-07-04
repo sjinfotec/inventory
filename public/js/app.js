@@ -1851,71 +1851,9 @@ __webpack_require__.r(__webpack_exports__);
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/DailyWorkingInformation.vue?vue&type=script&lang=js& ***!
   \**********************************************************************************************************************************************************************************/
 /*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
-/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/* harmony default export */ __webpack_exports__["default"] = ({
-  name: "dailyworkingtime",
-  data: function data() {
-    return {
-      valuedepartment: '',
-      getDo: 0,
-      valueuser: '',
-      valuefromdate: '',
-      valuetodate: '',
-      initialized: false
-    };
-  },
-  methods: {
-    // 部署選択が変更された場合の処理
-    departmentChanges: function departmentChanges(value) {
-      console.log("departmentChanges = " + value); // ユーザー選択コンポーネントの取得メソッドを実行
-
-      this.getDo = 1;
-      this.$refs.selectuser.getUserList(this.getDo, value);
-    },
-    // ユーザー選択が変更された場合の処理
-    userChanges: function userChanges(value) {
-      console.log("userChanges = " + value);
-      this.valueuser = value;
-    },
-    // 計算開始日付が変更された場合の処理
-    fromdateChanges: function fromdateChanges(value) {
-      console.log("fromdateChanges = " + value);
-      this.valuefromdate = value;
-    },
-    // 計算終了日付が変更された場合の処理
-    todateChanges: function todateChanges(value) {
-      console.log("todateChanges = " + value);
-      this.valuetodate = value;
-    }
-  }
-});
+throw new Error("Module build failed (from ./node_modules/babel-loader/lib/index.js):\nSyntaxError: /var/www/html/laravel/resources/js/components/DailyWorkingInformation.vue: Unexpected token, expected \";\" (41:15)\n\n\u001b[0m \u001b[90m 39 | \u001b[39m      initialized\u001b[33m:\u001b[39m \u001b[36mfalse\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 40 | \u001b[39m    }\u001b[33m,\u001b[39m\u001b[0m\n\u001b[0m\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 41 | \u001b[39m    validation {\u001b[0m\n\u001b[0m \u001b[90m    | \u001b[39m               \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 42 | \u001b[39m        title\u001b[33m:\u001b[39m \u001b[36mfalse\u001b[39m\u001b[33m,\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 43 | \u001b[39m        description\u001b[33m:\u001b[39m \u001b[36mfalse\u001b[39m\u001b[33m,\u001b[39m\u001b[0m\n\u001b[0m \u001b[90m 44 | \u001b[39m        date\u001b[33m:\u001b[39m \u001b[36mfalse\u001b[39m\u001b[33m,\u001b[39m\u001b[0m\n    at Parser.raise (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:6344:17)\n    at Parser.unexpected (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:7659:16)\n    at Parser.semicolon (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:7641:40)\n    at Parser.parseReturnStatement (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:10158:12)\n    at Parser.parseStatementContent (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:9836:21)\n    at Parser.parseStatement (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:9788:17)\n    at Parser.parseBlockOrModuleBlockBody (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:10364:25)\n    at Parser.parseBlockBody (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:10351:10)\n    at Parser.parseBlock (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:10335:10)\n    at Parser.parseFunctionBody (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:9408:24)\n    at Parser.parseFunctionBodyAndFinish (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:9378:10)\n    at withTopicForbiddingContext (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:10498:12)\n    at Parser.withTopicForbiddingContext (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:9683:14)\n    at Parser.parseFunction (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:10497:10)\n    at Parser.parseFunctionExpression (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:8864:17)\n    at Parser.parseExprAtom (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:8777:21)\n    at Parser.parseExprSubscripts (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:8413:23)\n    at Parser.parseMaybeUnary (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:8393:21)\n    at Parser.parseExprOps (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:8280:23)\n    at Parser.parseMaybeConditional (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:8253:23)\n    at Parser.parseMaybeAssign (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:8200:21)\n    at Parser.parseObjectProperty (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:9265:101)\n    at Parser.parseObjPropValue (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:9290:101)\n    at Parser.parseObjectMember (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:9214:10)\n    at Parser.parseObj (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:9138:25)\n    at Parser.parseExprAtom (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:8774:21)\n    at Parser.parseExprSubscripts (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:8413:23)\n    at Parser.parseMaybeUnary (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:8393:21)\n    at Parser.parseExprOps (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:8280:23)\n    at Parser.parseMaybeConditional (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:8253:23)\n    at Parser.parseMaybeAssign (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:8200:21)\n    at Parser.parseExportDefaultExpression (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:10973:24)\n    at Parser.parseExport (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:10868:31)\n    at Parser.parseStatementContent (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:9892:27)\n    at Parser.parseStatement (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:9788:17)\n    at Parser.parseBlockOrModuleBlockBody (/var/www/html/laravel/node_modules/@babel/parser/lib/index.js:10364:25)");
 
 /***/ }),
 
@@ -2253,6 +2191,39 @@ __webpack_require__.r(__webpack_exports__);
           _this3.getShiftTimes();
         } else {}
       })["catch"](function (reason) {});
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkTimeSearchButton.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkTimeSearchButton.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "WorkTimeSearchButton",
+  props: {
+    searchparam: {
+      type: Object
+    }
+  },
+  // マウント時
+  mounted: function mounted() {
+    console.log("WorkTimeSearchButton Component mounted.");
+  },
+  methods: {
+    searchclickBtn: function searchclickBtn(value) {
+      console.log("searchclickBtn start ");
+      this.$emit('searchclick-event');
     }
   }
 });
@@ -37797,6 +37768,17 @@ var render = function() {
         _c("input-datepicker", { on: { "change-event": _vm.todateChanges } })
       ],
       1
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      { staticClass: "form-group col-md-6" },
+      [
+        _c("search-workingtimebutton", {
+          on: { "searchclick-event": _vm.searchclick }
+        })
+      ],
+      1
     )
   ])
 }
@@ -38203,6 +38185,41 @@ var staticRenderFns = [
     ])
   }
 ]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkTimeSearchButton.vue?vue&type=template&id=398a2483&":
+/*!***********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkTimeSearchButton.vue?vue&type=template&id=398a2483& ***!
+  \***********************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "button",
+    {
+      staticClass: "btn btn-success",
+      on: {
+        click: function($event) {
+          return _vm.searchclickBtn()
+        }
+      }
+    },
+    [_vm._v("集計開始")]
+  )
+}
+var staticRenderFns = []
 render._withStripped = true
 
 
@@ -52865,6 +52882,7 @@ Vue.component("monthly-working-information", __webpack_require__(/*! ./component
 Vue.component("app-component", __webpack_require__(/*! ./components/App.vue */ "./resources/js/components/App.vue")["default"]);
 Vue.component("create-shift-time", __webpack_require__(/*! ./components/CreateShiftTime.vue */ "./resources/js/components/CreateShiftTime.vue")["default"]);
 Vue.component("setting-shift-time", __webpack_require__(/*! ./components/SettingShiftTime.vue */ "./resources/js/components/SettingShiftTime.vue")["default"]);
+Vue.component("search-workingtimebutton", __webpack_require__(/*! ./components/WorkTimeSearchButton.vue */ "./resources/js/components/WorkTimeSearchButton.vue")["default"]);
 Vue.component("select-department", __webpack_require__(/*! ./components/SelectDepartment.vue */ "./resources/js/components/SelectDepartment.vue")["default"]);
 Vue.component("select-user", __webpack_require__(/*! ./components/SelectUser.vue */ "./resources/js/components/SelectUser.vue")["default"]);
 Vue.component("input-datepicker", __webpack_require__(/*! ./components/InputDatepicker.vue */ "./resources/js/components/InputDatepicker.vue")["default"]);
@@ -53488,6 +53506,76 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_SettingShiftTime_vue_vue_type_template_id_b3a66e2c___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_SettingShiftTime_vue_vue_type_template_id_b3a66e2c___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkTimeSearchButton.vue":
+/*!**********************************************************!*\
+  !*** ./resources/js/components/WorkTimeSearchButton.vue ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _WorkTimeSearchButton_vue_vue_type_template_id_398a2483___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WorkTimeSearchButton.vue?vue&type=template&id=398a2483& */ "./resources/js/components/WorkTimeSearchButton.vue?vue&type=template&id=398a2483&");
+/* harmony import */ var _WorkTimeSearchButton_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WorkTimeSearchButton.vue?vue&type=script&lang=js& */ "./resources/js/components/WorkTimeSearchButton.vue?vue&type=script&lang=js&");
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _WorkTimeSearchButton_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _WorkTimeSearchButton_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _WorkTimeSearchButton_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _WorkTimeSearchButton_vue_vue_type_template_id_398a2483___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _WorkTimeSearchButton_vue_vue_type_template_id_398a2483___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/WorkTimeSearchButton.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkTimeSearchButton.vue?vue&type=script&lang=js&":
+/*!***********************************************************************************!*\
+  !*** ./resources/js/components/WorkTimeSearchButton.vue?vue&type=script&lang=js& ***!
+  \***********************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeSearchButton_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkTimeSearchButton.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkTimeSearchButton.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeSearchButton_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkTimeSearchButton.vue?vue&type=template&id=398a2483&":
+/*!*****************************************************************************************!*\
+  !*** ./resources/js/components/WorkTimeSearchButton.vue?vue&type=template&id=398a2483& ***!
+  \*****************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeSearchButton_vue_vue_type_template_id_398a2483___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkTimeSearchButton.vue?vue&type=template&id=398a2483& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkTimeSearchButton.vue?vue&type=template&id=398a2483&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeSearchButton_vue_vue_type_template_id_398a2483___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeSearchButton_vue_vue_type_template_id_398a2483___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

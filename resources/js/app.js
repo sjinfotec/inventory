@@ -54,6 +54,11 @@ Vue.component(
 );
 
 Vue.component(
+    "search-workingtimebutton",
+    require("./components/WorkTimeSearchButton.vue").default
+);
+
+Vue.component(
     "select-department",
     require("./components/SelectDepartment.vue").default
 );

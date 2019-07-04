@@ -16,6 +16,9 @@
       <label for="target_fromdate" class>計算終了日付入力</label>
       <input-datepicker v-on:change-event="todateChanges"></input-datepicker>
     </div>
+    <div class="form-group col-md-6">
+      <search-workingtimebutton v-on:searchclick-event="searchclick"></search-workingtimebutton>
+    </div>
   </span>
 </template>
 
@@ -32,13 +35,21 @@ export default {
       valueuser: '',
       valuefromdate: '',
       valuetodate: '',
+      results: [],
       initialized: false
+    },
+    validation {
+        title: false,
+        description: false,
+        date: false,
+        location: false
     }
   },
   methods: {
     // 部署選択が変更された場合の処理
     departmentChanges: function(value){
       console.log("departmentChanges = " + value);
+      this.valuedepartment = value;
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       this.$refs.selectuser.getUserList(this.getDo, value);
@@ -57,6 +68,28 @@ export default {
     todateChanges: function(value){
       console.log("todateChanges = " + value);
       this.valuetodate = value;
+    },
+    // 集計開始ボタンがクリックされた場合の処理
+    searchclick: function(){
+      console.log("searchclick 1 ");
+      this.$axios
+        .get("/daily/calc", {
+          params: {
+            departmentcodefrom: this.valuedepartment,
+            departmentcodeto: this.valuedepartment,
+            usercodefrom: this.valueuser,
+            usercodeto: this.valueuser,
+            datefrom: this.valuefromdate,
+            dateto: this.valuetodate
+          }
+        })
+        .then(response => {
+          this.results = response.data;
+          console.log("集計時間取得");
+        })
+        .catch(reason => {
+          alert("error");
+        });
     }
   }
 };
