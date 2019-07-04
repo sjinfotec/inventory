@@ -1,5 +1,5 @@
 <template>
-  <select class="form-control" v-model="selectedUser" v-on:change="selChanges(selectedUser)">
+  <select class="form-control" v-model="selectedUser" v-on:change="selChanges(selectedUser)" placeholder="社員を選択してください">
     <option v-for="users in userList" v-bind:value="users.code">
       {{ users.name }}
     </option>
@@ -10,10 +10,10 @@
 export default {
   name: "selectUser",
   props: {
-      getDo: {
-          type: Number,
-          default: 0
-      }
+    getDo: {
+        type: Number,
+        default: 0
+    }
   },
   data() {
     return {

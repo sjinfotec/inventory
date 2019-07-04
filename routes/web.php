@@ -23,6 +23,7 @@ Auth::routes();
 Route::get('/', 'HomeController@index')->name('home');
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/daily', 'DailyWorkingInformationController@index')->middleware('auth');
+Route::get('/daily/calc', 'DailyWorkingInformationController@show')->middleware('auth');
 Route::get('/daily/show', 'DailyWorkingInformationController@show')->middleware('auth');
 
 Route::get('/monthly', 'MonthlyWorkingInformationController@index')->middleware('auth');
@@ -32,3 +33,4 @@ Route::get('/create_shift_time/get', 'CreateShiftTimeController@get')->middlewar
 Route::post('/create_shift_time/del', 'CreateShiftTimeController@del')->middleware('auth');
 Route::get('/setting_shift_time', 'SttingShiftTimeController@index')->middleware('auth');
 Route::get('/get_user_list', 'ApiCommonController@getUserList')->middleware('auth');
+Route::get('/get_departments_list', 'ApiCommonController@getDepartmentList')->middleware('auth');

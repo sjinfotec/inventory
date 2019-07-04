@@ -121,10 +121,35 @@ class WorkTime extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
 
+    private $department_code_from;              // 開始部署
+    private $department_code_to;                // 終了部署
     private $user_code_from;                    // 開始ユーザー
     private $user_code_to;                      // 終了ユーザー
     private $date_from;                         // 開始日付
     private $date_to;                           // 終了日付
+
+    // 開始部署
+    public function getDepartmentcodefromAttribute()
+    {
+        return $this->department_code_from;
+    }
+
+    public function setDepartmentcodefromAttribute($value)
+    {
+        $this->department_code_from = $value;
+    }
+
+
+    // 終了部署
+    public function getDepartmentcodetoAttribute()
+    {
+        return $this->department_code_to;
+    }
+
+    public function setDepartmentcodetoAttribute($value)
+    {
+        $this->department_code_to = $value;
+    }
 
     // 開始ユーザー
     public function getUsercodefromAttribute()
@@ -219,29 +244,37 @@ class WorkTime extends Model
      *      指定したユーザー、日付範囲内の労働時間計算のもとデータを取得するSQL
      *
      *      INPUT：
-     *          ①テーブル：users　      ユーザー範囲内 and 削除=0
-     *          ②テーブル：work_times　 ユーザーand日付範囲内 and 削除=0
-     *          ③①と②の結合             ①.ユーザー = ②.ユーザー
+     *          ①テーブル：departments　部署範囲内 and 削除=0
+     *          ②テーブル：users　      ユーザー範囲内 and 削除=0
+     *          ③テーブル：work_times　 ユーザーand日付範囲内 and 削除=0
+     *          ④①と②と③の結合          ①.ユーザー = ②.ユーザー and ②.ユーザー = ③.ユーザー
      *
      *      使用方法：
-     *          ①user_code範囲指定プロパティを事前設定（未設定有効）
-     *          ②メソッド：calcWorkingTimeDateを実行
+     *          ①department_code範囲指定プロパティを事前設定（未設定有効）
+     *          ②user_code範囲指定プロパティを事前設定（未設定有効）
+     *          ③日付範囲指定プロパティを事前設定（未設定無効）
+     *          ④メソッド：calcWorkingTimeDateを実行
      *
      * @return sql取得結果
      */
     public function getWorkingTimeData(){
 
         // 日付範囲指定必須チェック
-        $array_record_time = array();     //初期化
+        $array_record_time = array();       //初期化
         if(isset($this->date_from) && isset($this->date_to)){
             $array_record_time = array($this->$date_from,$this->$date_to);
         } else {
             $result = null;
         }
 
+        // department_code範囲指定配列
+        $array_department = array();        //初期化
+        if(isset($this->department_code_from) && isset($this->department_code_to)){
+            $array_department = array($this->$department_code_from,$this->$department_code_to);
+        }
 
         // user_code範囲指定配列
-        $array_user = array();     //初期化
+        $array_user = array();              //初期化
         if(isset($this->user_code_from) && isset($this->user_code_to)){
             $array_user = array($this->$user_code_from,$this->$user_code_to);
         }

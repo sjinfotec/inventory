@@ -1,5 +1,5 @@
 <template>
-  <select class="form-control" v-model="selectedDepartment" v-on:change="selChanges(selectedDepartment)">
+  <select class="form-control" v-model="selectedDepartment" v-on:change="selChanges(selectedDepartment)" placeholder="部署を選択してください">
     <option v-for="departments in departmentList" v-bind:value="departments.code">
       {{ departments.name }}
     </option>
@@ -32,6 +32,7 @@ export default {
           alert("error");
         });
     },
+    // 選択が変更された場合、親コンポーネントに選択値を返却
     selChanges : function(value) {
 
         console.log("selectdepartment = ["+ value + ']');

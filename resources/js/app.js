@@ -64,7 +64,7 @@ Vue.component(
 );
 
 Vue.component(
-    "inpu-datepicker",
+    "input-datepicker",
     require("./components/InputDatepicker.vue").default
 );
 
