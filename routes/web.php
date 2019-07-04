@@ -39,4 +39,5 @@ Route::post('/setting_shift_time/del', 'SttingShiftTimeController@del')->middlew
 Route::post('/setting_shift_time/store', 'SttingShiftTimeController@store')->middleware('auth');
 Route::post('/setting_shift_time/range_del', 'SttingShiftTimeController@rangeDel')->middleware('auth');
 Route::get('/user_add', 'UserAddController@index')->middleware('auth');
+Route::post('/user_add/store', 'UserAddController@store')->middleware('auth');
 Route::get('/user_edit', 'UserEditController@index')->middleware('auth');
