@@ -60,6 +60,10 @@ Vue.component(
 
 Vue.component("select-user", require("./components/SelectUser.vue").default);
 
+Vue.component("user-add", require("./components/UserAdd.vue").default);
+
+Vue.component("user-edit", require("./components/UserEdit.vue").default);
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
