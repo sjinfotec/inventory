@@ -60,6 +60,10 @@ Vue.component(
 
 Vue.component("select-user", require("./components/SelectUser.vue").default);
 
+Vue.component(
+    "input-datepicker",
+    require("./components/InputDatepicker.vue").default
+);
 Vue.component("user-add", require("./components/UserAdd.vue").default);
 
 Vue.component("user-edit", require("./components/UserEdit.vue").default);

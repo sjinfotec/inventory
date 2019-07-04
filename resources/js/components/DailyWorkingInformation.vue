@@ -2,14 +2,19 @@
   <span>
     <div class="form-group col-md-6">
       <label for="target_department" class>部署選択</label>
-      <select-department v-bind:selectdepartment="valuedepartment" v-on:change-event="departmentChanges"></select-department>&nbsp;
+      <select-department v-bind:selectdepartment="valuedepartment" v-on:change-event="departmentChanges"></select-department>
     </div>
     <div class="form-group col-md-6">
       <label for="target_users" class>ユーザー選択</label>
-      <select-user ref="selectuser" v-bind:get-do="getDo" v-on:change-event="userChanges"></select-user>&nbsp;
+      <select-user ref="selectuser" v-bind:get-do="getDo" v-on:change-event="userChanges"></select-user>
     </div>
     <div class="form-group col-md-6">
       <label for="target_fromdate" class>計算開始日付入力</label>
+      <input-datepicker v-on:change-event="fromdateChanges"></input-datepicker>
+    </div>
+    <div class="form-group col-md-6">
+      <label for="target_fromdate" class>計算終了日付入力</label>
+      <input-datepicker v-on:change-event="todateChanges"></input-datepicker>
     </div>
   </span>
 </template>
@@ -17,16 +22,18 @@
 <script>
 
 import toasted from "vue-toasted";
-import Datepicker from "vuejs-datepicker";
 
 export default {
   name: "dailyworkingtime",
   data: function() {
-      return {
-          valuedepartment: '',
-          getDo: 0,
-          initialized: false
-      }
+    return {
+      valuedepartment: '',
+      getDo: 0,
+      valueuser: '',
+      valuefromdate: '',
+      valuetodate: '',
+      initialized: false
+    }
   },
   methods: {
     // 部署選択が変更された場合の処理
@@ -39,6 +46,17 @@ export default {
     // ユーザー選択が変更された場合の処理
     userChanges: function(value){
       console.log("userChanges = " + value);
+      this.valueuser = value;
+    },
+    // 計算開始日付が変更された場合の処理
+    fromdateChanges: function(value){
+      console.log("fromdateChanges = " + value);
+      this.valuefromdate = value;
+    },
+    // 計算終了日付が変更された場合の処理
+    todateChanges: function(value){
+      console.log("todateChanges = " + value);
+      this.valuetodate = value;
     }
   }
 };
