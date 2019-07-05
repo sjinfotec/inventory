@@ -10,11 +10,11 @@
     </div>
     <div class="form-group col-md-6">
       <label for="target_fromdate" class>計算開始日付入力</label>
-      <input-datepicker v-on:change-event="fromdateChanges"></input-datepicker>
+      <input-datepicker v-bind:defaultDate="defaultDate" v-on:change-event="fromdateChanges"></input-datepicker>
     </div>
     <div class="form-group col-md-6">
       <label for="target_fromdate" class>計算終了日付入力</label>
-      <input-datepicker v-on:change-event="todateChanges"></input-datepicker>
+      <input-datepicker v-bind:defaultDate="defaultDate" v-on:change-event="todateChanges"></input-datepicker>
     </div>
     <div class="form-group col-md-6">
       <search-workingtimebutton v-on:searchclick-event="searchclick"></search-workingtimebutton>
@@ -35,14 +35,9 @@ export default {
       valueuser: '',
       valuefromdate: '',
       valuetodate: '',
+      defaultDate: new Date(),
       results: [],
       initialized: false
-    },
-    validation {
-        title: false,
-        description: false,
-        date: false,
-        location: false
     }
   },
   methods: {
