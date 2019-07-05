@@ -7,8 +7,16 @@
 </template>
 <script>
 
+import { FvlForm, FvlInput, FvlSubmit,FvlSelect } from 'formvuelar'
+
 export default {
   name: "selectDepartment",
+  components: {
+        FvlForm,
+        FvlInput,
+        FvlSubmit,
+        FvlSelect,
+    },
   data() {
     return {
       selectedDepartment:'',

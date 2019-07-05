@@ -11,17 +11,17 @@
   <!-- Textarea component -->
   <!-- <fvl-textarea :value.sync="form.bio" label="Bio" name="bio" /> -->
   <!-- Submit button -->
-   <div class="form-group">
-      <label>部署</label>
-      <select-department v-bind:selectdepartment="valuedepartment" v-on:change-event="departmentChanges"></select-department>&nbsp;
-    </div>
+  <!--  <div class="form-group">
+      <label>部署</label> -->
+  <select-department v-bind:selectdepartment="valuedepartment" v-on:change-event="departmentChanges"></select-department>&nbsp;
+  <!--   </div> -->
   <fvl-submit>追加</fvl-submit>
 </fvl-form>
   </div>
 </template>
 <script>
 import toasted from "vue-toasted";
-import { FvlForm, FvlInput, FvlSubmit } from 'formvuelar'
+import { FvlForm, FvlInput, FvlSubmit,FvlSelect } from 'formvuelar'
 
 export default {
   name: "CreateShiftTime",
@@ -29,6 +29,7 @@ export default {
         FvlForm,
         FvlInput,
         FvlSubmit,
+        FvlSelect,
     },
   data() {
     return {

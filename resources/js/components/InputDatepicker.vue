@@ -1,5 +1,5 @@
 <template>
-  <datepicker :value="defaultDate" :language="ja" :format="DatePickerFormat" v-model="inputdate" v-on:closed="dateselected()" placeholder="日付を選択してください"></datepicker>
+  <datepicker :value="this.defaultDate" :language="ja" :format="DatePickerFormat" v-model="inputdate" v-on:closed="dateselected()" placeholder="日付を選択してください"></datepicker>
 </template>
 
 <script>
@@ -12,6 +12,10 @@ export default {
     defaultDate: {
       type: Date
     }
+  },
+  // マウント時
+  mounted() {
+    console.log("inputDatePicker Component mounted." + this.defaultDate);
   },
   data: function() {
     return {
