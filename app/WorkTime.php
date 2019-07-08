@@ -128,6 +128,7 @@ class WorkTime extends Model
     private $user_code_to;                      // 終了ユーザー
     private $date_from;                         // 開始日付
     private $date_to;                           // 終了日付
+    private $massegedata;                       // メッセージ
 
     // 開始部署
     public function getDepartmentcodefromAttribute()
@@ -200,6 +201,17 @@ class WorkTime extends Model
         $this->date_to = $value;
     }
 
+    // メッセージ
+    public function getMassegedataAttribute()
+    {
+        return $this->massegedata;
+    }
+
+    public function setMassegedataAttribute($value)
+    {
+        $this->massegedata = $value;
+    }
+
 
     // --------------------- メソッド ------------------------------------------------------
 
@@ -240,7 +252,46 @@ class WorkTime extends Model
     }
 
     /**
-     * 日次労働時間取得SQL
+     * 日次労働時間取得事前チェック
+     *
+     *      指定したユーザー、日付範囲内の労働時間計算のもとデータを取得するSQL
+     *
+     *      INPUT：
+     *          ①テーブル：departments　部署範囲内 and 削除=0
+     *          ②テーブル：users　      ユーザー範囲内 and 削除=0
+     *          ③テーブル：work_times　 ユーザーand日付範囲内 and 削除=0
+     *          ④①と②と③の結合          ①.ユーザー = ②.ユーザー and ②.ユーザー = ③.ユーザー
+     *
+     *      チェック方法：
+     *          ①日付範囲指定必須チェック
+     *          ②user_code範囲指定プロパティを事前設定（未設定有効）
+     *          ③日付範囲指定プロパティを事前設定（未設定無効）
+     *          ④メソッド：calcWorkingTimeDateを実行
+     *s
+     * @return sql取得結果
+     */
+    public function chkWorkingTimeData(){
+        $this->massegedata = "";
+
+        // 日付範囲指定必須チェック
+        $array_record_time = array();       //初期化
+        if(isset($this->date_from) && isset($this->date_to)){
+            if(isset($this->date_from <= isset($this->date_to)){
+                // 日付範囲指定比較チェック
+                $array_record_time = array($this->getDatefromAttribute(), $this->getDatetoAttribute());
+            } else {
+                $this->massegedata .= "計算開始日付　＞　計算終了日付　となっています。";
+                $result = false;
+            }
+        } else {
+            $this->massegedata .= "計算開始日付と計算終了日付は必ず入力してください。";
+            $result = false;
+        }
+
+    }
+
+    /**
+     * 日次労働時間取得
      *
      *      指定したユーザー、日付範囲内の労働時間計算のもとデータを取得するSQL
      *
@@ -255,18 +306,10 @@ class WorkTime extends Model
      *          ②user_code範囲指定プロパティを事前設定（未設定有効）
      *          ③日付範囲指定プロパティを事前設定（未設定無効）
      *          ④メソッド：calcWorkingTimeDateを実行
-     *s
+     *
      * @return sql取得結果
      */
-    public function getWorkingTimeData(){
-
-        // 日付範囲指定必須チェック
-        $array_record_time = array();       //初期化
-        if(isset($this->date_from) && isset($this->date_to)){
-            $array_record_time = array($this->getDatefromAttribute(), $this->getDatetoAttribute());
-        } else {
-            $result = null;
-        }
+    private function getWorkTimes($array_record_time, $array_user){
 
         // department_code範囲指定配列
         $array_department = array();        //初期化
@@ -283,15 +326,6 @@ class WorkTime extends Model
         // 日次労働時間取得
         $result = $this->getWorkTimes($array_record_time, $array_user);
         return $result;
-
-    }
-
-    /**
-     * 日次労働時間取得
-     *
-     * @return sql取得結果
-     */
-    private function getWorkTimes($array_record_time, $array_user){
 
         // 日次労働時間取得SQL作成
         // sunquery1    work_times
