@@ -38,6 +38,7 @@ export default {
         FvlSelect,
         FvlSearchSelect,
         FvlSubmit,
+        FvlSelect,
     },
   data() {
     return {
