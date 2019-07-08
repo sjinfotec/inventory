@@ -899,6 +899,16 @@ div.list-rows.font-color-red .border-set-left-skyblue {
     color: crimson;
 }
 
+.fvl-select div {
+    position: absolute;
+    right: 5px;
+    top: 10px;
+}
+
+.fvl-select svg {
+    width: 20px;
+}
+
 @keyframes fade {
     from {
         opacity: 0;

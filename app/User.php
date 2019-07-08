@@ -6,6 +6,8 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
 
 class User extends Authenticatable
 {
@@ -79,6 +81,25 @@ class User extends Authenticatable
             ->get();
 
         return $data;
+    }
+
+    /**
+     * ユーザー新規登録
+     *
+     * @return void
+     */
+    public function insertNewUser($code,$kana,$department_code,$name,$password){
+        $systemdate = Carbon::now();
+        DB::table('users')->insert(
+            [
+                'code' => $code,
+                'department_code' => $department_code,
+                'name' => $name,
+                'kana' => $kana,
+                'password' => $password,
+                'created_at'=>$systemdate
+            ]
+        );
     }
 
 }
