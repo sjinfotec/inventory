@@ -55260,7 +55260,7 @@ var render = function() {
               label: "部署",
               name: "departmentCode",
               options: _vm.departmentList,
-              "search-keys": ["code"],
+              "search-keys": ["name"],
               "option-key": "code",
               "option-value": "name"
             },

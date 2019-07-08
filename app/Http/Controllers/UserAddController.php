@@ -27,7 +27,7 @@ class UserAddController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:30',
             'kana' => 'required',
-            'email' => 'required|unique:users,email|email',
+            'email' => 'required|email',
             'satus' => 'required|max:30|alpha_num',
             'loginid' => 'required|unique:users,code|max:10|alpha_num',
             'password' => 'required|max:30|alpha_num',
@@ -35,6 +35,8 @@ class UserAddController extends Controller
             'name.required'  => '社員名を入力してください',
             'name.max'  => '社員名の最大文字数は 30 です',
             'kana.required'  => 'ふりがなを入力してください',
+            'email.required'  => 'メールアドレスを入力してください',
+            'email.email'  => 'メールアドレスの入力形式で入力してください (例: sanjyo-tarou@ssjjoo.com)',
             'loginid.required'  => 'ログインIDを入力してください',
             'loginid.unique'  => 'ログインIDは既に使用済です',
             'loginid.max'  => 'ログインIDの最大文字数は 10 です',
@@ -46,9 +48,12 @@ class UserAddController extends Controller
         $kana = $request->kana;
         $code = $request->loginid;
         $name = $request->name;
+        $email = $request->email;
+        $status = $request->status;
+        $table_no = $request->table_no;
         $password = bcrypt($request->password);
         
-        $result = $this->dbConnectInsert($code,$kana,$department_code,$name,$password);
+        $result = $this->dbConnectInsert($code,$kana,$department_code,$name,$password,$email,$status,$table_no);
         if($result){
         }else{
             return false;
@@ -61,11 +66,20 @@ class UserAddController extends Controller
      * @param [type] $id
      * @return void
      */
-    private function dbConnectInsert($code,$kana,$department_code,$name,$password){
+    private function dbConnectInsert($code,$kana,$department_code,$name,$password,$email,$status,$table_no){
         $users = new User();
+        $users->setCodeAttribute($code);
+        $users->setDepartmentcodeAttribute($department_code);
+        $users->setNameAttribute($name);
+        $users->setKanaAttribute($kana);
+        $users->setPasswordAttribute($password);
+        $users->setEmailAttribute($email);
+        $users->setEmploymentstatusAttribute($status);
+        $users->setWorkingtimetablenoAttribute($table_no);
+        
         DB::beginTransaction();
         try{
-            $users->insertNewUser($code,$kana,$department_code,$name,$password);
+            $users->insertNewUser();
             DB::commit();
             return true;
 

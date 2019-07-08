@@ -12,7 +12,7 @@
       <!-- Textarea component -->
      <fvl-search-select :selected.sync="form.departmentCode" label="部署" name="departmentCode"
       :options="departmentList"
-      :search-keys="['code']"
+      :search-keys="['name']"
       option-key="code"
       option-value="name"/>
   
