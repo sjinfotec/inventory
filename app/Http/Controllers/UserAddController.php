@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use App\User;
 use Carbon\Carbon;
 
 class UserAddController extends Controller
@@ -26,6 +27,8 @@ class UserAddController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:30',
             'kana' => 'required',
+            'email' => 'required|unique:users,email|email',
+            'satus' => 'required|max:30|alpha_num',
             'loginid' => 'required|unique:users,code|max:10|alpha_num',
             'password' => 'required|max:30|alpha_num',
         ],[
@@ -44,5 +47,31 @@ class UserAddController extends Controller
         $code = $request->loginid;
         $name = $request->name;
         $password = bcrypt($request->password);
+        
+        $result = $this->dbConnectInsert($code,$kana,$department_code,$name,$password);
+        if($result){
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * DB書き込み（新規）
+     *
+     * @param [type] $id
+     * @return void
+     */
+    private function dbConnectInsert($code,$kana,$department_code,$name,$password){
+        $users = new User();
+        DB::beginTransaction();
+        try{
+            $users->insertNewUser($code,$kana,$department_code,$name,$password);
+            DB::commit();
+            return true;
+
+        }catch(\PDOException $e){
+            DB::rollBack();
+            return false;
+        }
     }
 }

@@ -5,11 +5,14 @@
                         <ul class="list-unstyled">
                             <li><a href="{{ url('/daily') }}">日次集計</a></li>
                             <li><a href="{{ url('/monthly') }}">月次集計</a></li>
+                            <li><a href="{{ url('/setting_shift_time') }}">シフト割り当て</a></li>
+                        </ul>
+                        <h1 class="font-size-regular">マスタメンテナンス</h1>
+                        <ul class="list-unstyled">
                             <li><a href="{{ url('/user_add') }}">ユーザー追加</a></li>
                             <li><a href="{{ url('/user_edit') }}">ユーザー編集</a></li>
-                            <li><a href="{{ url('/setting_shift_time') }}">シフト割り当て</a></li>
                             <li><a href="{{ url('/create_shift_time') }}">シフト時間作成</a></li>
-                            </ul>
+                        </ul>
                         <!-- /block -->
                         @if(Auth::check())
                             @if(Auth::user()->is_admin == 1)

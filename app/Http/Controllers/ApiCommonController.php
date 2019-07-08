@@ -54,7 +54,16 @@ class ApiCommonController extends Controller
      * @return list departments
      */
     public function getDepartmentList(){
-        $departments = DB::table('departments')->where('is_deleted', 0)->orderby('code','asc')->get();
+        $departments = DB::table('departments')->select('code','name')->where('is_deleted', 0)->orderby('code','asc')->get();
         return $departments;
+    }
+
+    /** 雇用形態リスト取得
+     *
+     * @return list statuses
+     */
+    public function getEmploymentStatusList(){
+        $statuses = DB::table('mst_code')->where('identification_id', 'C001')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        return $statuses;
     }
 }

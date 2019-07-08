@@ -2427,6 +2427,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var formvuelar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! formvuelar */ "./node_modules/formvuelar/dist/formvuelar.common.js");
 /* harmony import */ var formvuelar__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(formvuelar__WEBPACK_IMPORTED_MODULE_1__);
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2452,29 +2461,59 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "CreateShiftTime",
-  components: {
+  components: _defineProperty({
     FvlForm: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlForm"],
     FvlInput: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlInput"],
-    FvlSubmit: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSubmit"],
-    FvlSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"]
-  },
+    FvlSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"],
+    FvlSearchSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSearchSelect"],
+    FvlSubmit: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSubmit"]
+  }, "FvlSelect", formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"]),
   data: function data() {
     return {
       form: {},
-      valuedepartment: ''
+      valuedepartment: '',
+      departmentList: [],
+      employStatusList: []
     };
   },
   // マウント時
   mounted: function mounted() {
     console.log("UserAdd Component mounted.");
+    this.getDepartmentList();
+    this.getEmploymentStatusList();
   },
   methods: {
-    // 部署選択が変更された場合の処理
-    departmentChanges: function departmentChanges(value) {
-      this.form.departmentCode = value;
+    getDepartmentList: function getDepartmentList() {
+      var _this = this;
+
+      this.$axios.get("/get_departments_list").then(function (response) {
+        _this.departmentList = response.data;
+        console.log("部署リスト取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
+    },
+    getEmploymentStatusList: function getEmploymentStatusList() {
+      var _this2 = this;
+
+      this.$axios.get("/get_employment_status_list").then(function (response) {
+        _this2.employStatusList = response.data;
+        console.log("雇用形態リスト取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
     },
     addSuccess: function addSuccess() {
       this.$toasted.show("ユーザーを追加しました");
+    },
+    error: function error() {
+      var options = {
+        position: "bottom-center",
+        duration: 2000,
+        fullWidth: false,
+        type: "error"
+      };
+      this.$toasted.show("ユーザー追加に失敗しました", options);
     }
   }
 });
@@ -55147,6 +55186,9 @@ var render = function() {
           on: {
             success: function($event) {
               return _vm.addSuccess()
+            },
+            error: function($event) {
+              return _vm.error()
             }
           }
         },
@@ -55199,11 +55241,52 @@ var render = function() {
             }
           }),
           _vm._v(" "),
-          _c("select-department", {
-            attrs: { selectdepartment: _vm.valuedepartment },
-            on: { "change-event": _vm.departmentChanges }
+          _c("fvl-input", {
+            attrs: {
+              value: _vm.form.email,
+              label: "メールアドレス",
+              name: "email"
+            },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "email", $event)
+              }
+            }
           }),
-          _vm._v(" \n  "),
+          _vm._v(" "),
+          _c("fvl-search-select", {
+            attrs: {
+              selected: _vm.form.departmentCode,
+              label: "部署",
+              name: "departmentCode",
+              options: _vm.departmentList,
+              "search-keys": ["code"],
+              "option-key": "code",
+              "option-value": "name"
+            },
+            on: {
+              "update:selected": function($event) {
+                return _vm.$set(_vm.form, "departmentCode", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-search-select", {
+            attrs: {
+              selected: _vm.form.status,
+              label: "雇用形態",
+              name: "status",
+              options: _vm.employStatusList,
+              "search-keys": ["code"],
+              "option-key": "code",
+              "option-value": "code_name"
+            },
+            on: {
+              "update:selected": function($event) {
+                return _vm.$set(_vm.form, "status", $event)
+              }
+            }
+          }),
           _vm._v(" "),
           _c("fvl-submit", [_vm._v("追加")])
         ],
