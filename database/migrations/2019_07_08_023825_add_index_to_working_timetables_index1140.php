@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddIndexToWorkingTimetableTable2007 extends Migration
+class AddIndexToWorkingTimetablesIndex1140 extends Migration
 {
     /**
      * Run the migrations.
@@ -15,7 +15,7 @@ class AddIndexToWorkingTimetableTable2007 extends Migration
     {
         Schema::table('working_timetables', function (Blueprint $table) {
             //
-            $table->index(['no'],'working_timetables_no');
+            $table->index(['no'],'working_timetable_no');
         });
     }
 
@@ -26,5 +26,8 @@ class AddIndexToWorkingTimetableTable2007 extends Migration
      */
     public function down()
     {
+        Schema::table('working_timetables', function (Blueprint $table) {
+            //
+        });
     }
 }
