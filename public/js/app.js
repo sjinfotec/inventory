@@ -2427,8 +2427,28 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var formvuelar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! formvuelar */ "./node_modules/formvuelar/dist/formvuelar.common.js");
 /* harmony import */ var formvuelar__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(formvuelar__WEBPACK_IMPORTED_MODULE_1__);
+var _components;
+
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2461,19 +2481,32 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "CreateShiftTime",
-  components: _defineProperty({
+  components: (_components = {
     FvlForm: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlForm"],
     FvlInput: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlInput"],
     FvlSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"],
     FvlSearchSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSearchSelect"],
     FvlSubmit: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSubmit"]
-  }, "FvlSelect", formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"]),
+  }, _defineProperty(_components, "FvlSelect", formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"]), _defineProperty(_components, "getDo", 1), _components),
   data: function data() {
     return {
-      form: {},
+      form: {
+        name: "",
+        kana: "",
+        email: "",
+        loginid: "",
+        password: "",
+        status: "",
+        table_no: "",
+        departmentCode: ""
+      },
       valuedepartment: '',
       departmentList: [],
-      employStatusList: []
+      employStatusList: [],
+      timeTableList: [],
+      userList: [],
+      userDetails: [],
+      userCode: ""
     };
   },
   // マウント時
@@ -2481,30 +2514,95 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     console.log("UserAdd Component mounted.");
     this.getDepartmentList();
     this.getEmploymentStatusList();
+    this.getTimeTableList();
+    this.getUserList(1, null);
+  },
+  watch: {
+    userCode: function userCode(val, oldVal) {
+      var _this = this;
+
+      console.log(this.userCode);
+
+      if (this.userCode != "") {
+        this.$axios.get("/user_add/get", {
+          params: {
+            code: this.userCode
+          }
+        }).then(function (response) {
+          _this.userDetails = response.data;
+          _this.form.name = _this.userDetails[0].name;
+          _this.form.kana = _this.userDetails[0].kana;
+          _this.form.loginid = _this.userDetails[0].code;
+          _this.form.password = _this.userDetails[0].password;
+          _this.form.email = _this.userDetails[0].email;
+          _this.form.departmentCode = _this.userDetails[0].department_code;
+          _this.form.status = "" + _this.userDetails[0].employment_status + "";
+          _this.form.table_no = "" + _this.userDetails[0].working_timetable_no + "";
+          console.log("ユーザー詳細情報取得");
+        })["catch"](function (reason) {
+          alert("error");
+        });
+      } else {
+        this.inputClear();
+      }
+    }
   },
   methods: {
     getDepartmentList: function getDepartmentList() {
-      var _this = this;
+      var _this2 = this;
 
       this.$axios.get("/get_departments_list").then(function (response) {
-        _this.departmentList = response.data;
+        _this2.departmentList = response.data;
         console.log("部署リスト取得");
       })["catch"](function (reason) {
         alert("error");
       });
     },
     getEmploymentStatusList: function getEmploymentStatusList() {
-      var _this2 = this;
+      var _this3 = this;
 
       this.$axios.get("/get_employment_status_list").then(function (response) {
-        _this2.employStatusList = response.data;
+        _this3.employStatusList = response.data;
         console.log("雇用形態リスト取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
+    },
+    getTimeTableList: function getTimeTableList() {
+      var _this4 = this;
+
+      this.$axios.get("/get_time_table_list").then(function (response) {
+        _this4.timeTableList = response.data;
+        console.log("タイムテーブルリスト取得");
       })["catch"](function (reason) {
         alert("error");
       });
     },
     addSuccess: function addSuccess() {
       this.$toasted.show("ユーザーを追加しました");
+    },
+    getUserList: function getUserList(getdovalue, value) {
+      var _this5 = this;
+
+      console.log("getdovalue = " + getdovalue);
+      this.$axios.get("/get_user_list", {
+        params: {
+          getdo: getdovalue,
+          code: value
+        }
+      }).then(function (response) {
+        _this5.userList = response.data;
+        _this5.object = {
+          code: "",
+          name: "新規登録"
+        };
+
+        _this5.userList.unshift(_this5.object);
+
+        console.log("ユーザーリスト取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
     },
     error: function error() {
       var options = {
@@ -2514,6 +2612,42 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         type: "error"
       };
       this.$toasted.show("ユーザー追加に失敗しました", options);
+    },
+    test: function test() {
+      this.selectedIndex = this.userList.indexOf(this.userCode);
+      alert('this is selected Index ' + this.selectedIndex);
+    },
+    // 削除
+    del: function del() {
+      var _this6 = this;
+
+      var confirm = window.confirm("選択したユーザーを削除しますか？");
+
+      if (confirm) {
+        this.$axios.post("/user_add/del", {
+          user_code: this.userCode
+        }).then(function (response) {
+          var res = response.data;
+
+          if (res.result == 0) {
+            _this6.$toasted.show("選択したユーザーを削除しました");
+
+            _this6.inputClear();
+
+            _this6.getUserList(1, null);
+          } else {}
+        })["catch"](function (reason) {});
+      } else {}
+    },
+    inputClear: function inputClear() {
+      this.form.name = "";
+      this.form.kana = "";
+      this.form.loginid = "";
+      this.form.password = "";
+      this.form.email = "";
+      this.form.departmentCode = "";
+      this.form.status = "";
+      this.form.table_no = "";
     }
   }
 });
@@ -55193,6 +55327,25 @@ var render = function() {
           }
         },
         [
+          _c("fvl-search-select", {
+            attrs: {
+              selected: _vm.userCode,
+              label: "ユーザー",
+              name: "userCode",
+              options: _vm.userList,
+              placeholder: "ユーザーを選択すると編集モードになります",
+              allowEmpty: true,
+              "search-keys": ["code"],
+              "option-key": "code",
+              "option-value": "name"
+            },
+            on: {
+              "update:selected": function($event) {
+                _vm.userCode = $event
+              }
+            }
+          }),
+          _vm._v(" "),
           _c("fvl-input", {
             attrs: { value: _vm.form.name, label: "社員名", name: "name" },
             on: {
@@ -55226,20 +55379,28 @@ var render = function() {
             }
           }),
           _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.password,
-              label: "パスワード",
-              name: "password",
-              title: "半角英数字4-10文字",
-              pattern: "^[a-zA-Z0-9]{4,10}$"
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "password", $event)
-              }
-            }
-          }),
+          _vm.userCode == "" || _vm.userCode == null
+            ? _c(
+                "span",
+                [
+                  _c("fvl-input", {
+                    attrs: {
+                      value: _vm.form.password,
+                      label: "パスワード",
+                      name: "password",
+                      title: "半角英数字4-10文字",
+                      pattern: "^[a-zA-Z0-9]{4,10}$"
+                    },
+                    on: {
+                      "update:value": function($event) {
+                        return _vm.$set(_vm.form, "password", $event)
+                      }
+                    }
+                  })
+                ],
+                1
+              )
+            : _vm._e(),
           _vm._v(" "),
           _c("fvl-input", {
             attrs: {
@@ -55288,10 +55449,65 @@ var render = function() {
             }
           }),
           _vm._v(" "),
-          _c("fvl-submit", [_vm._v("追加")])
+          _c("fvl-search-select", {
+            attrs: {
+              selected: _vm.form.table_no,
+              label: "タイムテーブル",
+              name: "timetable_no",
+              options: _vm.timeTableList,
+              "search-keys": ["name"],
+              "option-key": "no",
+              "option-value": "name"
+            },
+            on: {
+              "update:selected": function($event) {
+                return _vm.$set(_vm.form, "table_no", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _vm.userCode == "" || _vm.userCode == null
+            ? _c("fvl-submit", [_vm._v("追加")])
+            : _vm._e()
         ],
         1
-      )
+      ),
+      _vm._v(" "),
+      _vm.userCode != ""
+        ? _c(
+            "span",
+            {
+              staticClass: "padding-set-small margin-set-top-regular",
+              model: {
+                value: _vm.form.userCode,
+                callback: function($$v) {
+                  _vm.$set(_vm.form, "userCode", $$v)
+                },
+                expression: "form.userCode"
+              }
+            },
+            [
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-warning",
+                  on: {
+                    click: function($event) {
+                      return _vm.test()
+                    }
+                  }
+                },
+                [_vm._v("編集")]
+              ),
+              _vm._v(" "),
+              _c(
+                "button",
+                { staticClass: "btn btn-danger", on: { click: _vm.del } },
+                [_vm._v("削除")]
+              )
+            ]
+          )
+        : _vm._e()
     ],
     1
   )

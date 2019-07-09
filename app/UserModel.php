@@ -113,7 +113,7 @@ class UserModel extends Model
         DB::table('users')->insert(
             [
                 'code' => $this->code,
-                'employment_status' => $this->password,
+                'employment_status' => $this->employment_status,
                 'department_code' => $this->department_code,
                 'name' => $this->name,
                 'kana' => $this->kana,
@@ -123,5 +123,40 @@ class UserModel extends Model
                 'created_at'=>$systemdate
             ]
         );
+    }
+
+    /**
+     * ユーザー詳細取得
+     *
+     * @return void
+     */
+    public function getUserDetails(){
+        $data = DB::table($this->table)
+            ->select(
+                $this->table.'.code',
+                $this->table.'.employment_status',
+                $this->table.'.department_code',
+                $this->table.'.name',
+                $this->table.'.kana',
+                $this->table.'.working_timetable_no',
+                $this->table.'.email',
+                $this->table.'.password'
+            )
+            ->where($this->table.'.code', $this->code)
+            ->where($this->table.'.is_deleted', 0)
+            ->get();
+
+        return $data;
+    }
+
+    /**
+     * 論理削除
+     *
+     * @return void
+     */
+    public function updateIsDelete(){
+        DB::table($this->table)
+            ->where('code', $this->code)
+            ->update(['is_deleted' => 1]);
     }
 }

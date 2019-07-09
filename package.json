@@ -24,6 +24,7 @@
     },
     "dependencies": {
         "formvuelar": "^1.1.13",
+        "moment": "^2.24.0",
         "vue-toasted": "^1.1.27",
         "vuejs-datepicker": "^1.6.2"
     }

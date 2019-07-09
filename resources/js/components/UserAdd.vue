@@ -3,11 +3,18 @@
   <div class="panel-body">
     <!-- form wrapper -->
     <fvl-form method="post" :data="form" url="/user_add/store" @success="addSuccess()" @error="error()">
+     <fvl-search-select :selected.sync="userCode" label="ユーザー" name="userCode"
+      :options="userList"
+      placeholder="ユーザーを選択すると編集モードになります"
+      :allowEmpty="true"
+      :search-keys="['code']"
+      option-key="code"
+      option-value="name"/>
       <!-- Text input component -->
       <fvl-input :value.sync="form.name" label="社員名" name="name" />
       <fvl-input :value.sync="form.kana" label="ふりがな" name="kana" />
       <fvl-input :value.sync="form.loginid" label="ログインID" name="loginid" title="半角英数字4-10文字" pattern="^[a-zA-Z0-9]{4,10}$"/>
-      <fvl-input :value.sync="form.password" label="パスワード" name="password" title="半角英数字4-10文字" pattern="^[a-zA-Z0-9]{4,10}$"/>
+      <span v-if="userCode=='' || userCode == null "><fvl-input :value.sync="form.password" label="パスワード" name="password" title="半角英数字4-10文字" pattern="^[a-zA-Z0-9]{4,10}$"/></span>
       <fvl-input :value.sync="form.email" label="メールアドレス" name="email"/>
       <!-- Textarea component -->
      <fvl-search-select :selected.sync="form.departmentCode" label="部署" name="departmentCode"
@@ -21,9 +28,20 @@
       :search-keys="['code']"
       option-key="code"
       option-value="code_name"/>
+  
+     <fvl-search-select :selected.sync="form.table_no" label="タイムテーブル" name="timetable_no"
+      :options="timeTableList"
+      :search-keys="['name']"
+      option-key="no"
+      option-value="name"/>
       <!-- Submit button -->
-      <fvl-submit>追加</fvl-submit>
+     
+    <fvl-submit v-if="userCode=='' || userCode==null ">追加</fvl-submit>
     </fvl-form>
+    <span class="padding-set-small margin-set-top-regular" v-if="userCode != ''" v-model="form.userCode">
+      <button class="btn btn-warning" @click="test()">編集</button>
+      <button class="btn btn-danger" @click="del">削除</button>
+    </span>
   </div>
 </template>
 <script>
@@ -39,13 +57,27 @@ export default {
         FvlSearchSelect,
         FvlSubmit,
         FvlSelect,
+        getDo: 1,
     },
   data() {
     return {
-      form: {},
+      form: {
+        name:"",
+        kana:"",
+        email:"",
+        loginid:"",
+        password:"",
+        status:"",
+        table_no:"",
+        departmentCode:""
+      },
       valuedepartment: '',
       departmentList:[],
-      employStatusList:[]
+      employStatusList:[],
+      timeTableList:[],
+      userList:[],
+      userDetails:[],
+      userCode:""
     };
   },
   // マウント時
@@ -53,6 +85,39 @@ export default {
     console.log("UserAdd Component mounted.");
     this.getDepartmentList();
     this.getEmploymentStatusList();
+    this.getTimeTableList();
+    this.getUserList(1,null);
+  },
+  watch: {
+      userCode: function (val, oldVal) {
+        console.log(this.userCode);
+        if(this.userCode != ""){
+          this.$axios
+            .get("/user_add/get", {
+              params: {
+                code: this.userCode
+              }
+            })
+            .then(response => {
+              this.userDetails = response.data;
+              this.form.name = this.userDetails[0].name;
+              this.form.kana = this.userDetails[0].kana;
+              this.form.loginid = this.userDetails[0].code;
+              this.form.password = this.userDetails[0].password;
+              this.form.email = this.userDetails[0].email;
+              this.form.departmentCode = this.userDetails[0].department_code;
+              this.form.status = ""+this.userDetails[0].employment_status+"";
+              this.form.table_no = ""+this.userDetails[0].working_timetable_no+"";
+              
+              console.log("ユーザー詳細情報取得");
+            })
+            .catch(reason => {
+              alert("error");
+            });
+        }else{
+          this.inputClear();
+        }
+      }
   },
   methods: {
     getDepartmentList(){
@@ -77,8 +142,38 @@ export default {
           alert("error");
         });
     },
+    getTimeTableList(){
+      this.$axios
+        .get("/get_time_table_list")
+        .then(response => {
+          this.timeTableList = response.data;
+          console.log("タイムテーブルリスト取得");
+        })
+        .catch(reason => {
+          alert("error");
+        });
+    },
     addSuccess(){
       this.$toasted.show("ユーザーを追加しました");
+    },
+    getUserList(getdovalue, value){
+    console.log("getdovalue = " + getdovalue);
+      this.$axios
+        .get("/get_user_list", {
+          params: {
+            getdo: getdovalue,
+            code: value
+          }
+        })
+        .then(response => {
+          this.userList = response.data;
+          this.object = {code:"",name:"新規登録"};
+          this.userList.unshift(this.object);
+          console.log("ユーザーリスト取得");
+        })
+        .catch(reason => {
+          alert("error");
+        });
     },
     error(){
       var options = {
@@ -88,6 +183,42 @@ export default {
           type: "error"
         };
       this.$toasted.show("ユーザー追加に失敗しました",options);
+    },
+    test(){
+      this.selectedIndex = this.userList.indexOf(this.userCode);
+      alert('this is selected Index ' + this.selectedIndex)
+    },
+    // 削除
+    del: function () {
+      var confirm = window.confirm("選択したユーザーを削除しますか？");
+      if(confirm){
+        this.$axios
+        .post("/user_add/del", {
+            user_code: this.userCode
+          })
+          .then(response => {
+            var res = response.data;
+            if(res.result == 0){
+              this.$toasted.show("選択したユーザーを削除しました");
+              this.inputClear();
+              this.getUserList(1,null);
+            }else{
+            }
+          })
+          .catch(reason => {
+          });
+      }else{
+      }
+    },
+    inputClear(){
+      this.form.name = "";
+      this.form.kana = "";
+      this.form.loginid = "";
+      this.form.password = "";
+      this.form.email = "";
+      this.form.departmentCode = "";
+      this.form.status = "";
+      this.form.table_no = "";
     }
   }
 };

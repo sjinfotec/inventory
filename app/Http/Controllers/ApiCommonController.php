@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\ShiftInformation;
+use App\WorkingTimeTable;
 
 
 
@@ -63,7 +64,17 @@ class ApiCommonController extends Controller
      * @return list statuses
      */
     public function getEmploymentStatusList(){
-        $statuses = DB::table('mst_code')->where('identification_id', 'C001')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        $statuses = DB::table('generalcodes')->where('identification_id', 'C001')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
         return $statuses;
+    }
+
+    /** タイムテーブルリスト取得
+     *
+     * @return list results
+     */
+    public function getTimeTableList(){
+        $time_tables = new WorkingTimeTable();
+        $results = $time_tables->getTimeTables();
+        return $results;
     }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
-use App\User;
+use App\UserModel;
 use Carbon\Carbon;
 
 class UserAddController extends Controller
@@ -28,15 +28,16 @@ class UserAddController extends Controller
             'name' => 'required|string|max:30',
             'kana' => 'required',
             'email' => 'required|email',
-            'satus' => 'required|max:30|alpha_num',
-            'loginid' => 'required|unique:users,code|max:10|alpha_num',
-            'password' => 'required|max:30|alpha_num',
+            'status' => 'required',
+            'loginid' => 'required|unique:users,code|max:10',
+            'password' => 'required|max:30',
         ],[
             'name.required'  => '社員名を入力してください',
             'name.max'  => '社員名の最大文字数は 30 です',
             'kana.required'  => 'ふりがなを入力してください',
             'email.required'  => 'メールアドレスを入力してください',
             'email.email'  => 'メールアドレスの入力形式で入力してください (例: sanjyo-tarou@ssjjoo.com)',
+            'status.required' => '雇用形態を選択してください',
             'loginid.required'  => 'ログインIDを入力してください',
             'loginid.unique'  => 'ログインIDは既に使用済です',
             'loginid.max'  => 'ログインIDの最大文字数は 10 です',
@@ -61,13 +62,53 @@ class UserAddController extends Controller
     }
 
     /**
+     * ユーザー削除
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function del(Request $request){
+        $code = $request->user_code;
+        $response = collect();
+        $result = $this->dbConnectUpdate($code);
+        if($result){
+            $response->put('result',self::SUCCESS);
+        }else{
+            $response->put('result',self::FAILED);
+        }
+        return $response;
+    }
+
+    /**
+     * 論理削除
+     *
+     * @param [type] $code
+     * @return void
+     */
+    public function dbConnectUpdate($code){
+        $users = new UserModel();
+        $users->setCodeAttribute($code);
+        
+        DB::beginTransaction();
+        try{
+            $users->updateIsDelete();
+            DB::commit();
+            return true;
+
+        }catch(\PDOException $e){
+            DB::rollBack();
+            return false;
+        }
+    }
+
+    /**
      * DB書き込み（新規）
      *
      * @param [type] $id
      * @return void
      */
     private function dbConnectInsert($code,$kana,$department_code,$name,$password,$email,$status,$table_no){
-        $users = new User();
+        $users = new UserModel();
         $users->setCodeAttribute($code);
         $users->setDepartmentcodeAttribute($department_code);
         $users->setNameAttribute($name);
@@ -87,5 +128,21 @@ class UserAddController extends Controller
             DB::rollBack();
             return false;
         }
+    }
+
+    /** ユーザー詳細取得
+     *
+     * @return list results
+     */
+    public function getUserDetails(Request $request){
+        $code = $request->code;
+        $users = new UserModel();
+        $users->setCodeAttribute($code);
+        $details = $users->getUserDetails();
+        foreach ($details as $detail) {
+            // $detail->password = dencrypt($detail->password);
+        }
+        
+        return $details;
     }
 }
