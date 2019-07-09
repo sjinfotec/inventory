@@ -1,14 +1,6 @@
 <template>
   <span>
     <div class="form-group col-md-6">
-      <label for="target_department" class>部署選択</label>
-      <select-department v-bind:blank-data="true" v-on:change-event="departmentChanges"></select-department>
-    </div>
-    <div class="form-group col-md-6">
-      <label for="target_users" class>ユーザー選択</label>
-      <select-user ref="selectuser" v-bind:blank-data="true" v-bind:get-Do="getDo" v-on:change-event="userChanges"></select-user>
-    </div>
-    <div class="form-group col-md-6">
       <label for="target_fromdate" class>計算開始日付入力</label>
       <input-datepicker v-bind:default-Date="defaultDate" v-on:change-event="fromdateChanges"></input-datepicker>
       <message-data v-bind:messagedatas="messagedatasfromdate"></message-data>
@@ -17,6 +9,14 @@
       <label for="target_fromdate" class>計算終了日付入力</label>
       <input-datepicker v-bind:default-Date="defaultDate" v-on:change-event="todateChanges"></input-datepicker>
       <message-data v-bind:messagedatas="messagedatastodate"></message-data>
+    </div>
+    <div class="form-group col-md-6">
+      <label for="target_department" class>部署選択</label>
+      <select-department v-bind:blank-data="true" v-on:change-event="departmentChanges"></select-department>
+    </div>
+    <div class="form-group col-md-6">
+      <label for="target_users" class>ユーザー選択</label>
+      <select-user ref="selectuser" v-bind:blank-data="true" v-bind:get-Do="getDo" v-on:change-event="userChanges"></select-user>
     </div>
     <div class="form-group col-md-6">
       <search-workingtimebutton v-on:searchclick-event="searchclick"></search-workingtimebutton>
