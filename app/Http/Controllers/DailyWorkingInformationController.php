@@ -42,9 +42,9 @@ class DailyWorkingInformationController extends Controller
         $work_time->setDatefromAttribute($datefrom);
         $work_time->setDatetoAttribute($dateto);
         if (!$work_time->chkWorkingTimeData()) {
-            return view('status');
+            $results = DB::table('work_times')->get(); // 試しに全部取得
         }
-        $results = DB::table('work_times')->get(); // 試しに全部取得
+        $results = DB::table('work_times')->get(); // 試しに全部取得 */
         return $results;
     }
 }
