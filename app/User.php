@@ -83,23 +83,4 @@ class User extends Authenticatable
         return $data;
     }
 
-    /**
-     * ユーザー新規登録
-     *
-     * @return void
-     */
-    public function insertNewUser($code,$kana,$department_code,$name,$password){
-        $systemdate = Carbon::now();
-        DB::table('users')->insert(
-            [
-                'code' => $code,
-                'department_code' => $department_code,
-                'name' => $name,
-                'kana' => $kana,
-                'password' => $password,
-                'created_at'=>$systemdate
-            ]
-        );
-    }
-
 }
