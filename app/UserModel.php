@@ -159,4 +159,17 @@ class UserModel extends Model
             ->where('code', $this->code)
             ->update(['is_deleted' => 1]);
     }
+
+    
+    /**
+     * 削除
+     *
+     * @return void
+     */
+    public function delUserData(){
+        DB::table($this->table)
+            ->where('code', $this->code)
+            ->where('is_deleted', 0)
+            ->delete();
+    }
 }

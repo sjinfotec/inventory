@@ -39,7 +39,7 @@
     <fvl-submit v-if="userCode=='' || userCode==null ">追加</fvl-submit>
     </fvl-form>
     <span class="padding-set-small margin-set-top-regular" v-if="userCode != ''" v-model="form.userCode">
-      <button class="btn btn-warning" @click="test()">編集</button>
+      <button class="btn btn-warning" @click="edit">編集</button>
       <button class="btn btn-danger" @click="del">削除</button>
     </span>
   </div>
@@ -77,7 +77,8 @@ export default {
       timeTableList:[],
       userList:[],
       userDetails:[],
-      userCode:""
+      userCode:"",
+      oldCode:""
     };
   },
   // マウント時
@@ -91,6 +92,7 @@ export default {
   watch: {
       userCode: function (val, oldVal) {
         console.log(this.userCode);
+        console.log(val+" "+oldVal);
         if(this.userCode != ""){
           this.$axios
             .get("/user_add/get", {
@@ -108,6 +110,8 @@ export default {
               this.form.departmentCode = this.userDetails[0].department_code;
               this.form.status = ""+this.userDetails[0].employment_status+"";
               this.form.table_no = ""+this.userDetails[0].working_timetable_no+"";
+              // hidden
+              this.oldCode = this.userDetails[0].code;
               
               console.log("ユーザー詳細情報取得");
             })
@@ -184,9 +188,33 @@ export default {
         };
       this.$toasted.show("ユーザー追加に失敗しました",options);
     },
-    test(){
-      this.selectedIndex = this.userList.indexOf(this.userCode);
-      alert('this is selected Index ' + this.selectedIndex)
+    edit: function (){
+      var confirm = window.confirm("編集内容を確定しますか？");
+      if(confirm){
+        this.$axios
+        .post("/user_add/edit", {
+            old_code: this.oldCode,
+            departmentCode: this.form.departmentCode,
+            kana: this.form.kana,
+            loginid: this.form.loginid,
+            name: this.form.name,
+            email: this.form.email,
+            password: this.form.password,
+            status: this.form.status,
+            table_no: this.form.table_no
+          })
+          .then(response => {
+            var res = response.data;
+            if(res.result == 0){
+              this.$toasted.show("編集内容を確定しました");
+              this.getUserList(1,null);
+            }else{
+            }
+          })
+          .catch(reason => {
+          });
+      }else{
+      }
     },
     // 削除
     del: function () {
