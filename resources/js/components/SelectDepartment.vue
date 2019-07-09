@@ -1,5 +1,6 @@
 <template>
   <select class="form-control" v-model="selectedDepartment" v-on:change="selChanges(selectedDepartment)" placeholder="部署を選択してください">
+    <option v-if="this.blankData" value=""></option>
     <option v-for="departments in departmentList" v-bind:value="departments.code">
       {{ departments.name }}
     </option>
@@ -7,25 +8,23 @@
 </template>
 <script>
 
-import { FvlForm, FvlInput, FvlSubmit,FvlSelect } from 'formvuelar'
-
 export default {
   name: "selectDepartment",
-  components: {
-        FvlForm,
-        FvlInput,
-        FvlSubmit,
-        FvlSelect,
-    },
+  props: {
+    blankData: {
+        type: Boolean,
+        default: false
+    }
+  },
   data() {
     return {
-      selectedDepartment:'',
-      departmentList:[]
+      selectedDepartment: '',
+      departmentList: []
     };
   },
   // マウント時
   mounted() {
-    console.log("selectedDepartment Component mounted.");
+    console.log("selectedDepartment Component mounted." + this.blankdata);
     this.getDepartmentList();
   },
   methods: {

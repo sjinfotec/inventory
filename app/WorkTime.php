@@ -275,18 +275,19 @@ class WorkTime extends Model
 
         // 日付範囲指定必須チェック
         $array_record_time = array();       //初期化
-        if(isset($this->date_from) && isset($this->date_to)){
+        /*if(isset($this->date_from) && isset($this->date_to)){
             if(isset($this->date_from <= isset($this->date_to)){
                 // 日付範囲指定比較チェック
                 $array_record_time = array($this->getDatefromAttribute(), $this->getDatetoAttribute());
             } else {
-                $this->massegedata .= "計算開始日付　＞　計算終了日付　となっています。";
+                //$this->massegedata .= "計算開始日付　＞　計算終了日付　となっています。";
                 $result = false;
             }
         } else {
-            $this->massegedata .= "計算開始日付と計算終了日付は必ず入力してください。";
+            //$this->massegedata .= "計算開始日付と計算終了日付は必ず入力してください。";
             $result = false;
-        }
+        }*/
+        $result = true;
 
     }
 

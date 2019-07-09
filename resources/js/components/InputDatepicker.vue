@@ -1,5 +1,15 @@
 <template>
-  <datepicker :value="this.defaultDate" :language="ja" :format="DatePickerFormat" v-model="inputdate" v-on:closed="dateselected()" placeholder="日付を選択してください"></datepicker>
+  <datepicker 
+    :value="this.defaultDate"
+    :language="ja"
+    :format="DatePickerFormat"
+    :clear-button="true"
+    v-model="inputdate"
+    v-on:opened="todaySet()"
+    v-on:closed="dateselected()"
+    v-on:cleared="clearDate()"
+    placeholder="日付を選択してください">
+  </datepicker>
 </template>
 
 <script>
@@ -15,12 +25,13 @@ export default {
   },
   // マウント時
   mounted() {
-    console.log("inputDatePicker Component mounted." + this.defaultDate);
+    console.log("inputDatePicker Component mounted.");
   },
   data: function() {
     return {
       ja:ja,
-      DatePickerFormat: 'yyyy/MM/dd',
+      DatePickerFormat: 'yyyy年MM月dd日',
+      todaydate: new Date(),
       inputdate:''
     }
   },
@@ -33,6 +44,15 @@ export default {
       console.log("dateselected = ["+ this.inputdate + ']');
       this.$emit('change-event', this.inputdate);
 
+    },
+    // TODO openedイベントが発生しない？
+    todaySet() {
+      console.log("todaySet = ["+ this.defaultDate + ']');
+    },
+    // 
+    clearDate() {
+      console.log("clearDate = ["+ this.inputdate + ']');
+      this.$emit('change-event', this.inputdate);
     }
   }
 

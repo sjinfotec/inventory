@@ -73,6 +73,8 @@ Vue.component("user-add", require("./components/UserAdd.vue").default);
 
 Vue.component("user-edit", require("./components/UserEdit.vue").default);
 
+Vue.component("message-data", require("./components/MessageData.vue").default);
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
