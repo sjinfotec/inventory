@@ -12,7 +12,7 @@ export default {
   methods: {
     searchclickBtn : function() {
       console.log("searchclickBtn start ");
-      this.$emit('searchclick-event');
+      this.$emit('searchclick-event',event);
     }
 
   }

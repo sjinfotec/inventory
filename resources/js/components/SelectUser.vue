@@ -1,5 +1,6 @@
 <template>
   <select class="form-control" v-model="selectedUser" v-on:change="selChanges(selectedUser)" placeholder="社員を選択してください">
+    <option v-if="this.blankData" value=""></option>
     <option v-for="users in userList" v-bind:value="users.code">
       {{ users.name }}
     </option>
@@ -10,6 +11,10 @@
 export default {
   name: "selectUser",
   props: {
+    blankData: {
+        type: Boolean,
+        default: false
+    },
     getDo: {
         type: Number,
         default: 0
@@ -39,6 +44,7 @@ export default {
         .then(response => {
           this.userList = response.data;
           console.log("ユーザーリスト取得");
+          console.log("ユーザーリスト取得1");
         })
         .catch(reason => {
           alert("error");

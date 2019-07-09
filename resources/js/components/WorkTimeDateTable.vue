@@ -25,10 +25,14 @@
     <tbody>
       <tr v-for="item in workingtimedates">
         <input type="hidden" v-model="item.id"></input>
-        <td>{{item.target_date}}</td>
-        <td>{{item.shift_start_time}}</td>
-        <td>{{item.shift_end_time}}</td>
-        <td><button class="btn btn-danger" @click="delShiftTimes(item.id)">削除</button></td>
+        <td>{{item.departments_name}}</td>
+        <td>{{users.name}}</td>
+        <td>{{employment.name}}</td>
+        <td><button class="btn btn-danger" @click="delShiftTimes(item.id)">編集</button></td>
+        <td>{{item.attendance_time}}</td>
+        <td>{{item.leaving_time}}</td>
+        <td>{{item.missing_middle_time}}</td>
+        <td>{{item.missing_middle_return_time}}</td>
       </tr>
     </tbody>
   </table>
