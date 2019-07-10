@@ -15,6 +15,7 @@ class WorkTime extends Model
     //--------------- メンバー属性 -----------------------------------
 
     private $user_code;                     // ユーザーコード
+    private $department_code;               // 部署コード
     private $record_time;                   // 打刻時間
     private $mode;                          // 打刻モード
     private $created_user;                  // 作成ユーザー
@@ -31,6 +32,17 @@ class WorkTime extends Model
     public function setUsercodeAttribute($value)
     {
         $this->user_code = $value;
+    }
+
+    // 部署コード
+    public function getDepartmentcodeAttribute()
+    {
+        return $this->department_code;
+    }
+
+    public function setDepartmentcodeAttribute($value)
+    {
+        $this->department_code = $value;
     }
 
 
@@ -122,83 +134,71 @@ class WorkTime extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
 
-    private $department_code_from;              // 開始部署
-    private $department_code_to;                // 終了部署
-    private $user_code_from;                    // 開始ユーザー
-    private $user_code_to;                      // 終了ユーザー
-    private $date_from;                         // 開始日付
-    private $date_to;                           // 終了日付
+    private $param_user_code;                   // ユーザー
+    private $param_department_code;             // 部署
+    private $param_date_from;                   // 開始日付
+    private $param_date_to;                     // 終了日付
+    private $array_record_time;                 // 日付範囲配列
     private $massegedata;                       // メッセージ
 
-    // 開始部署
-    public function getDepartmentcodefromAttribute()
+    // ユーザー
+    public function getParamUsercodeAttribute()
     {
-        return $this->department_code_from;
+        return $this->param_user_code;
     }
 
-    public function setDepartmentcodefromAttribute($value)
+    public function setParamUsercodeAttribute($value)
     {
-        $this->department_code_from = $value;
+        $this->param_user_code = $value;
     }
 
-
-    // 終了部署
-    public function getDepartmentcodetoAttribute()
+    // 部署
+    public function getParamDepartmentcodeAttribute()
     {
-        return $this->department_code_to;
+        return $this->param_department_code;
     }
 
-    public function setDepartmentcodetoAttribute($value)
+    public function setParamDepartmentcodeAttribute($value)
     {
-        $this->department_code_to = $value;
+        $this->param_department_code = $value;
     }
 
-    // 開始ユーザー
-    public function getUsercodefromAttribute()
-    {
-        return $this->user_code_from;
-    }
-
-    public function setUsercodefromAttribute($value)
-    {
-        $this->user_code_from = $value;
-    }
-
-
-    // 終了ユーザー
-    public function getUsercodetoAttribute()
-    {
-        return $this->user_code_to;
-    }
-
-    public function setUsercodetoAttribute($value)
-    {
-        $this->user_code_to = $value;
-    }
 
     // 開始日付
     public function getDatefromAttribute()
     {
-        $date = date_create($this->date_from);
+        $date = date_create($this->param_date_from);
         return $date->format('Y/m/d').' 00:00:00';
     }
 
     public function setDatefromAttribute($value)
     {
-        $this->date_from = $value;
+        $this->param_date_from = $value;
     }
 
 
     // 終了日付
     public function getDatetoAttribute()
     {
-        $date = date_create($this->date_to);
+        $date = date_create($this->param_date_to);
         return $date->format('Y/m/d').' 23:59:59';
     }
 
     public function setDatetoAttribute($value)
     {
-        $this->date_to = $value;
+        $this->param_date_to = $value;
+    }
+
+    // 日付範囲配列
+    public function getArrayrecordtimeAttribute()
+    {
+        return $this->array_record_time;
+    }
+
+    public function setArrayrecordtimeAttribute($valuefrom, $valueto)
+    {
+        $this->array_record_time = array();       //初期化
+        $this->array_record_time = array($valuefrom, $valueto);
     }
 
     // メッセージ
@@ -254,11 +254,11 @@ class WorkTime extends Model
     /**
      * 日次労働時間取得事前チェック
      *
-     *      指定したユーザー、日付範囲内の労働時間計算のもとデータを取得するSQL
+     *      指定したユーザー、部署、日付範囲内の労働時間計算のもとデータを取得するSQL
      *
      *      INPUT：
-     *          ①テーブル：departments　部署範囲内 and 削除=0
-     *          ②テーブル：users　      ユーザー範囲内 and 削除=0
+     *          ①テーブル：departments　指定部署内 and 削除=0
+     *          ②テーブル：users　      指定ユーザー内 and 削除=0
      *          ③テーブル：work_times　 ユーザーand日付範囲内 and 削除=0
      *          ④①と②と③の結合          ①.ユーザー = ②.ユーザー and ②.ユーザー = ③.ユーザー
      *
@@ -272,22 +272,25 @@ class WorkTime extends Model
      */
     public function chkWorkingTimeData(){
         $this->massegedata = "";
+        /*$result = true;
 
         // 日付範囲指定必須チェック
-        $array_record_time = array();       //初期化
-        /*if(isset($this->date_from) && isset($this->date_to)){
-            if(isset($this->date_from <= isset($this->date_to)){
-                // 日付範囲指定比較チェック
-                $array_record_time = array($this->getDatefromAttribute(), $this->getDatetoAttribute());
+        if(isset($this->param_date_from) && isset($this->param_date_to)){
+            // 日付範囲指定比較チェック
+            $chkDateFrom = $this->getDatefromAttribute();
+            $chkDateTo = $this->getDatetoAttribute();
+            if($chkDateFrom <= $chkDateTo){
+                $this->setArrayrecordtimeAttribute($chkDateFrom, $chkDateTo);
             } else {
-                //$this->massegedata .= "計算開始日付　＞　計算終了日付　となっています。";
+                $this->massegedata .= "計算開始日付が計算終了日付より未来の日付になっています";
                 $result = false;
             }
         } else {
-            //$this->massegedata .= "計算開始日付と計算終了日付は必ず入力してください。";
+            $this->massegedata .= "計算開始日付と計算終了日付は必ず入力してください。";
             $result = false;
         }*/
-        $result = true;
+
+        return true;
 
     }
 
@@ -303,42 +306,30 @@ class WorkTime extends Model
      *          ④①と②と③の結合          ①.ユーザー = ②.ユーザー and ②.ユーザー = ③.ユーザー
      *
      *      使用方法：
-     *          ①department_code範囲指定プロパティを事前設定（未設定有効）
-     *          ②user_code範囲指定プロパティを事前設定（未設定有効）
+     *          ①department_code指定プロパティを事前設定（未設定有効）
+     *          ②user_code指定プロパティを事前設定（未設定有効）
      *          ③日付範囲指定プロパティを事前設定（未設定無効）
      *          ④メソッド：calcWorkingTimeDateを実行
      *
      * @return sql取得結果
      */
-    private function getWorkTimes($array_record_time, $array_user){
+    public function getWorkTimes(){
 
-        // department_code範囲指定配列
-        $array_department = array();        //初期化
-        if(isset($this->department_code_from) && isset($this->department_code_to)){
-            $array_department = array($this->getDepartmentcodefromAttribute(),$this->getDepartmentcodetoAttribute());
-        }
-
-        // user_code範囲指定配列
-        $array_user = array();              //初期化
-        if(isset($this->user_code_from) && isset($this->user_code_to)){
-            $array_user = array($this->getUsercodefromAttribute(),$this->getUsercodetoAttribute());
-        }
-
-        // 日次労働時間取得
-        $result = $this->getWorkTimes($array_record_time, $array_user);
-        return $result;
 
         // 日次労働時間取得SQL作成
         // sunquery1    work_times
-        \DB::enableQueryLog();
+        /*\DB::enableQueryLog();
         $sunquery1 = DB::table($this->table)
             ->select(
                 $this->table.'.user_code',
+                $this->table.'.department_code',
                 $this->table.'.record_time',
                 $this->table.'.mode'
             );
-        if(!empty($array_record_time)){
-            $sunquery1->whereBetween($this->table.'.record_time', $array_record_time);     //record_time範囲指定
+
+        $record_time = $this->getArrayrecordtimeAttribute();
+        if(!empty($record_time)){
+            $sunquery1->whereBetween($this->table.'.record_time', $record_time);     //record_time範囲指定
         }
         $sunquery1->where($this->table.'.is_deleted', '=', 0);
 
@@ -355,9 +346,13 @@ class WorkTime extends Model
                 )
             ->leftJoinSub($sunquery1, 't2', function ($join) { 
                 $join->on('t1.code', '=', 't2.user_code');
+                $join->on('t1.department_code', '=', 't2.department_code');
             });
-        if(!empty($array_user)){
-            $mainquery->whereBetween('t1.code', $array_user);     //user_code範囲指定
+        if(!empty($this->param_user_code)){
+            $mainquery->where('t1.code', $param_user_code);     //user_code指定
+        }
+        if(!empty($this->param_department_code)){
+            $mainquery->where('t1.department_code', $param_department_code);     //department_code指定
         }
         $mainquery
             ->where('t1.is_deleted', '=', 0)
@@ -367,9 +362,9 @@ class WorkTime extends Model
             [
                 'getWorkTimes' => \DB::getQueryLog()
             ]
-        ); 
+        ); */
     
-        return $mainquery;
+        return true;
     }
 
 }

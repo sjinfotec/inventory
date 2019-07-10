@@ -14,8 +14,9 @@ use App\WorkTime;
  * を作成する
  *
  *      可能範囲指定：
- *          ①開始ユーザーから終了ユーザー（省略可：全ユーザー対象）
- *          ②開始計算日付から終了計算日付
+ *          ①指定部署（省略可：全部署対象）
+ *          ②指定ユーザー（省略可：全ユーザー対象）
+ *          ③開始計算日付から終了計算日付
  *
  *      使用方法：
  *          ①範囲指定プロパティを事前設定（設定しない場合はerrorとするので注意）
@@ -27,30 +28,30 @@ use App\WorkTime;
 class WorkingTimeDateCalcController extends Controller
 {
     //
-    private $user_code_from;                 // 開始ユーザー
+    private $department_code;           // 指定部署
 
-    // 開始ユーザー
-    public function getUsercodefromAttribute()
+    // 指定部署
+    public function getDepartmentcodeAttribute()
     {
-        return $this->user_code_from;
+        return $this->department_code;
     }
 
-    public function setUsercodefromAttribute($value)
+    public function setDepartmentcodeAttribute($value)
     {
-        $this->user_code_from = $value;
+        $this->department_code = $value;
+    }
+    //
+    private $user_code;                 // 指定ユーザー
+
+    // 指定ユーザー
+    public function getUsercodeAttribute()
+    {
+        return $this->user_code;
     }
 
-    private $user_code_to;                 // 終了ユーザー
-
-    // 終了ユーザー
-    public function getUsercodetoAttribute()
+    public function setUsercodeAttribute($value)
     {
-        return $this->user_code_to;
-    }
-
-    public function setUsercodetoAttribute($value)
-    {
-        $this->user_code_to = $value;
+        $this->user_code = $value;
     }
 
     private $date_from;                 // 開始計算日付
@@ -116,14 +117,26 @@ class WorkingTimeDateCalcController extends Controller
      */
     public function calcWorkingTimeDate()
     {
+        // json形式でresponceする
+        //$results = collect();       // 処理結果をコレクションで初期化
+
         $this->messageout="";
-        if(!chkParam) { return false }  //  パラメータチェック
+        //  パラメータチェック
+        /*if(!chkParam()) {
+            $results->put(
+                'datas', null
+                'messageout', $this->messageout
+            );
+            // コレクションをjson化して返却
+            //return $results->toJson();
+            return null;
+        }
 
         try {
-            // 対象ユーザーの範囲で計算開始
+          // 対象ユーザーの範囲で計算開始
             $WorkTime_model = new WorkTime();
-            $WorkTime_model->setUsercodefromAttribute($this->user_code_from);
-            $WorkTime_model->setUsercodetoAttribute($this->user_code_to);
+            $WorkTime_model->setParamUsercodeAttribute($this->user_code);
+            $WorkTime_model->setParamDepartmentcodeAttribute($this->department_code);
             $WorkTime_model->setDatefromAttribute($this->date_from);
             $WorkTime_model->setDatetoAttribute($this->date_to);
             $WorkTime_model->setIsdeletedAttribute(0);
@@ -135,9 +148,8 @@ class WorkingTimeDateCalcController extends Controller
         } catch (Exception $e) {
             if ($this->messageout != "") {$this->messageout .= "\r\n";}
             $this->messageout .= $e->getMessage();
-            return false
-        }
-
+            return false;
+        } */
 
     }
 
@@ -153,11 +165,11 @@ class WorkingTimeDateCalcController extends Controller
     private function chkParam()
     {
         $result = true;
-        if(!isset($this->user_code_from)){
-            $this->user_code_from = 0;
+        /*if(!isset($this->user_code)){
+            $this->user_code = '';
         }
-        if(!isset($this->user_code_to)){
-            $this->user_code_to = 9999999999;
+        if(!isset($this->department_code)){
+            $this->department_code = '';
         }
         if(!isset($this->date_from)){
             if ($this->messageout != "") {$this->messageout .= "\r\n";}
@@ -171,19 +183,13 @@ class WorkingTimeDateCalcController extends Controller
         }
 
         if ($result) {
-            // ユーザー範囲が不正はerror
-            if($this->user_code_from > $this->user_code_to){
-                if ($this->messageout != "") {$this->messageout .= "\r\n";}
-                $this->messageout .= "開始ユーザー　＞　終了ユーザー";
-                $result = false;
-            }
-            // ユーザー範囲が不正はerror
+            // 計算日付範囲が不正はerror
             if($this->date_from > $this->date_to){
                 if ($this->messageout != "") {$this->messageout .= "\r\n";}
                 $this->messageout .= "開始計算日付　＞　終了計算日付";
                 $result = false;
             }
-        }
+        }*/
         return $result;
     }
 
