@@ -2525,6 +2525,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var formvuelar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! formvuelar */ "./node_modules/formvuelar/dist/formvuelar.common.js");
 /* harmony import */ var formvuelar__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(formvuelar__WEBPACK_IMPORTED_MODULE_1__);
+var _components;
+
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 //
@@ -2555,23 +2557,55 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "CreateShiftTime",
-  components: _defineProperty({
+  components: (_components = {
     FvlForm: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlForm"],
     FvlInput: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlInput"],
     FvlSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"],
     FvlSearchSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSearchSelect"],
     FvlSubmit: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSubmit"]
-  }, "FvlSelect", formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"]),
+  }, _defineProperty(_components, "FvlSelect", formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"]), _defineProperty(_components, "getDo", 1), _components),
   data: function data() {
     return {
-      form: {},
+      form: {
+        name: "",
+        kana: "",
+        email: "",
+        loginid: "",
+        password: "",
+        status: "",
+        table_no: "",
+        departmentCode: ""
+      },
       valuedepartment: '',
       departmentList: [],
-      employStatusList: []
+      employStatusList: [],
+      timeTableList: [],
+      userList: [],
+      userDetails: [],
+      userCode: "",
+      oldCode: ""
     };
   },
   // マウント時
@@ -2579,30 +2613,98 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     console.log("UserAdd Component mounted.");
     this.getDepartmentList();
     this.getEmploymentStatusList();
+    this.getTimeTableList();
+    this.getUserList(1, null);
+  },
+  watch: {
+    userCode: function userCode(val, oldVal) {
+      var _this = this;
+
+      console.log(this.userCode);
+      console.log(val + " " + oldVal);
+
+      if (this.userCode != "") {
+        this.$axios.get("/user_add/get", {
+          params: {
+            code: this.userCode
+          }
+        }).then(function (response) {
+          _this.userDetails = response.data;
+          _this.form.name = _this.userDetails[0].name;
+          _this.form.kana = _this.userDetails[0].kana;
+          _this.form.loginid = _this.userDetails[0].code;
+          _this.form.password = _this.userDetails[0].password;
+          _this.form.email = _this.userDetails[0].email;
+          _this.form.departmentCode = _this.userDetails[0].department_code;
+          _this.form.status = "" + _this.userDetails[0].employment_status + "";
+          _this.form.table_no = "" + _this.userDetails[0].working_timetable_no + ""; // hidden
+
+          _this.oldCode = _this.userDetails[0].code;
+          console.log("ユーザー詳細情報取得");
+        })["catch"](function (reason) {
+          alert("error");
+        });
+      } else {
+        this.inputClear();
+      }
+    }
   },
   methods: {
     getDepartmentList: function getDepartmentList() {
-      var _this = this;
+      var _this2 = this;
 
       this.$axios.get("/get_departments_list").then(function (response) {
-        _this.departmentList = response.data;
+        _this2.departmentList = response.data;
         console.log("部署リスト取得");
       })["catch"](function (reason) {
         alert("error");
       });
     },
     getEmploymentStatusList: function getEmploymentStatusList() {
-      var _this2 = this;
+      var _this3 = this;
 
       this.$axios.get("/get_employment_status_list").then(function (response) {
-        _this2.employStatusList = response.data;
+        _this3.employStatusList = response.data;
         console.log("雇用形態リスト取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
+    },
+    getTimeTableList: function getTimeTableList() {
+      var _this4 = this;
+
+      this.$axios.get("/get_time_table_list").then(function (response) {
+        _this4.timeTableList = response.data;
+        console.log("タイムテーブルリスト取得");
       })["catch"](function (reason) {
         alert("error");
       });
     },
     addSuccess: function addSuccess() {
       this.$toasted.show("ユーザーを追加しました");
+    },
+    getUserList: function getUserList(getdovalue, value) {
+      var _this5 = this;
+
+      console.log("getdovalue = " + getdovalue);
+      this.$axios.get("/get_user_list", {
+        params: {
+          getdo: getdovalue,
+          code: value
+        }
+      }).then(function (response) {
+        _this5.userList = response.data;
+        _this5.object = {
+          code: "",
+          name: "新規登録"
+        };
+
+        _this5.userList.unshift(_this5.object);
+
+        console.log("ユーザーリスト取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
     },
     error: function error() {
       var options = {
@@ -2612,272 +2714,65 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         type: "error"
       };
       this.$toasted.show("ユーザー追加に失敗しました", options);
-    }
-  }
-});
-
-/***/ }),
-
-/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/UserEdit.vue?vue&type=script&lang=js&":
-/*!*******************************************************************************************************************************************************************!*\
-  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/UserEdit.vue?vue&type=script&lang=js& ***!
-  \*******************************************************************************************************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
-/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var vuejs_datepicker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuejs-datepicker */ "./node_modules/vuejs-datepicker/dist/vuejs-datepicker.esm.js");
-/* harmony import */ var vuejs_datepicker_dist_locale__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vuejs-datepicker/dist/locale */ "./node_modules/vuejs-datepicker/dist/locale/index.js");
-/* harmony import */ var vuejs_datepicker_dist_locale__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(vuejs_datepicker_dist_locale__WEBPACK_IMPORTED_MODULE_2__);
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-
-/* harmony default export */ __webpack_exports__["default"] = ({
-  name: "CreateShiftTime",
-  data: function data() {
-    return {
-      ja: vuejs_datepicker_dist_locale__WEBPACK_IMPORTED_MODULE_2__["ja"],
-      "default": '2019/10/24',
-      DatePickerFormat: 'yyyy/MM/dd',
-      from: "",
-      to: "",
-      shiftTimes: [],
-      userList: [],
-      shiftInfo: [],
-      selectedShift: [],
-      selectedUser: "",
-      getDo: 1,
-      errors: [],
-      validate: false
-    };
-  },
-  components: {
-    Datepicker: vuejs_datepicker__WEBPACK_IMPORTED_MODULE_1__["default"]
-  },
-  // マウント時
-  mounted: function mounted() {
-    console.log("create shift time Component mounted.");
-    this.getShiftTimes();
-    this.getUserList();
-  },
-  methods: {
-    // バリデーション
-    checkForm: function checkForm() {
-      var flag = false;
-
-      if (this.selectedUser && this.selectedShift.id && this.from && this.to) {
-        flag = true;
-        return flag;
-      } else {
-        this.errors = [];
-
-        if (!this.selectedUser) {
-          flag = false;
-          this.errors.push('ユーザーを選択してください');
-        }
-
-        if (!this.selectedShift.id) {
-          flag = false;
-          this.errors.push('シフト選択をしてください');
-        }
-
-        if (!this.from) {
-          flag = false;
-          this.errors.push('開始日を入力してください');
-        }
-
-        if (!this.to) {
-          flag = false;
-          this.errors.push('終了日を入力してください');
-        }
-
-        return flag;
-      }
     },
-    // 登録ボタン押下
-    StoreShiftTime: function StoreShiftTime() {
-      var _this = this;
+    edit: function edit() {
+      var _this6 = this;
 
-      this.validate = this.checkForm();
-
-      if (this.validate) {
-        this.$axios.post("/setting_shift_time/store", {
-          user_code: this.selectedUser,
-          shift_start_time: this.selectedShift.shift_start_time,
-          shift_end_time: this.selectedShift.shift_end_time,
-          from: this.from,
-          to: this.to
-        }).then(function (response) {
-          var res = response.data;
-          console.log(res.result);
-
-          if (res.result == 0) {
-            _this.$toasted.show("シフトを登録しました");
-
-            _this.getUserShift(_this.selectedUser);
-          } else {
-            var options = {
-              position: "bottom-center",
-              duration: 2000,
-              fullWidth: false,
-              type: "error"
-            };
-
-            _this.$toasted.show("シフトの登録に失敗しました", options);
-          }
-        })["catch"](function (reason) {
-          var options = {
-            position: "bottom-center",
-            duration: 2000,
-            fullWidth: false,
-            type: "error"
-          };
-
-          _this.$toasted.show("シフト時間の登録に失敗しました", options);
-        });
-      } else {}
-    },
-    // ユーザーリスト
-    getUserList: function getUserList() {
-      this.$refs.selectuser.getUserList(this.getDo, "");
-    },
-    // シフトタイムリスト
-    getShiftTimes: function getShiftTimes() {
-      var _this2 = this;
-
-      this.$axios.get("/create_shift_time/get").then(function (response) {
-        _this2.shiftTimes = response.data;
-        console.log("登録済みシフト一覧更新");
-      })["catch"](function (reason) {
-        alert("error");
-      });
-    },
-    // ユーザーリスト変更時
-    getUserShift: function getUserShift(code) {
-      var _this3 = this;
-
-      console.log(code);
-      this.$axios.post("/get_user_shift", {
-        code: code
-      }).then(function (response) {
-        _this3.shiftInfo = response.data;
-      })["catch"](function (reason) {});
-    },
-    // 削除
-    delShiftTimes: function delShiftTimes(itemid) {
-      var _this4 = this;
-
-      console.log(itemid);
-      this.$axios.post("/setting_shift_time/del", {
-        id: itemid
-      }).then(function (response) {
-        var res = response.data;
-
-        if (res.result == 0) {
-          _this4.$toasted.show("シフトを削除しました");
-
-          _this4.getUserShift(_this4.selectedUser);
-        } else {}
-      })["catch"](function (reason) {});
-    },
-    // 範囲削除
-    rangeDell: function rangeDell() {
-      var _this5 = this;
-
-      var confirm = window.confirm("選択した日付のシフトを削除しますか？");
+      var confirm = window.confirm("編集内容を確定しますか？");
 
       if (confirm) {
-        console.log(confirm);
-        this.$axios.post("/setting_shift_time/range_del", {
-          user_code: this.selectedUser,
-          from: this.from,
-          to: this.to
+        this.$axios.post("/user_add/edit", {
+          old_code: this.oldCode,
+          departmentCode: this.form.departmentCode,
+          kana: this.form.kana,
+          loginid: this.form.loginid,
+          name: this.form.name,
+          email: this.form.email,
+          password: this.form.password,
+          status: this.form.status,
+          table_no: this.form.table_no
         }).then(function (response) {
           var res = response.data;
 
           if (res.result == 0) {
-            _this5.$toasted.show("選択した日付のシフトを削除しました");
+            _this6.$toasted.show("編集内容を確定しました");
 
-            _this5.getUserShift(_this5.selectedUser);
+            _this6.getUserList(1, null);
           } else {}
         })["catch"](function (reason) {});
-      } else {
-        console.log(confirm);
-      }
+      } else {}
     },
-    // ユーザー選択が変更された場合の処理
-    userChanges: function userChanges(value) {
-      this.selectedUser = value;
-      this.getUserShift(value);
-      console.log("userChanges = " + value);
+    // 削除
+    del: function del() {
+      var _this7 = this;
+
+      var confirm = window.confirm("選択したユーザーを削除しますか？");
+
+      if (confirm) {
+        this.$axios.post("/user_add/del", {
+          user_code: this.userCode
+        }).then(function (response) {
+          var res = response.data;
+
+          if (res.result == 0) {
+            _this7.$toasted.show("選択したユーザーを削除しました");
+
+            _this7.inputClear();
+
+            _this7.getUserList(1, null);
+          } else {}
+        })["catch"](function (reason) {});
+      } else {}
+    },
+    inputClear: function inputClear() {
+      this.form.name = "";
+      this.form.kana = "";
+      this.form.loginid = "";
+      this.form.password = "";
+      this.form.email = "";
+      this.form.departmentCode = "";
+      this.form.status = "";
+      this.form.table_no = "";
     }
   }
 });
@@ -73049,6 +72944,25 @@ var render = function() {
           }
         },
         [
+          _c("fvl-search-select", {
+            attrs: {
+              selected: _vm.userCode,
+              label: "ユーザー",
+              name: "userCode",
+              options: _vm.userList,
+              placeholder: "ユーザーを選択すると編集モードになります",
+              allowEmpty: true,
+              "search-keys": ["code"],
+              "option-key": "code",
+              "option-value": "name"
+            },
+            on: {
+              "update:selected": function($event) {
+                _vm.userCode = $event
+              }
+            }
+          }),
+          _vm._v(" "),
           _c("fvl-input", {
             attrs: { value: _vm.form.name, label: "社員名", name: "name" },
             on: {
@@ -73082,20 +72996,28 @@ var render = function() {
             }
           }),
           _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.password,
-              label: "パスワード",
-              name: "password",
-              title: "半角英数字4-10文字",
-              pattern: "^[a-zA-Z0-9]{4,10}$"
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "password", $event)
-              }
-            }
-          }),
+          _vm.userCode == "" || _vm.userCode == null
+            ? _c(
+                "span",
+                [
+                  _c("fvl-input", {
+                    attrs: {
+                      value: _vm.form.password,
+                      label: "パスワード",
+                      name: "password",
+                      title: "半角英数字4-10文字",
+                      pattern: "^[a-zA-Z0-9]{4,10}$"
+                    },
+                    on: {
+                      "update:value": function($event) {
+                        return _vm.$set(_vm.form, "password", $event)
+                      }
+                    }
+                  })
+                ],
+                1
+              )
+            : _vm._e(),
           _vm._v(" "),
           _c("fvl-input", {
             attrs: {
@@ -73144,268 +73066,63 @@ var render = function() {
             }
           }),
           _vm._v(" "),
-          _c("fvl-submit", [_vm._v("追加")])
+          _c("fvl-search-select", {
+            attrs: {
+              selected: _vm.form.table_no,
+              label: "タイムテーブル",
+              name: "timetable_no",
+              options: _vm.timeTableList,
+              "search-keys": ["name"],
+              "option-key": "no",
+              "option-value": "name"
+            },
+            on: {
+              "update:selected": function($event) {
+                return _vm.$set(_vm.form, "table_no", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _vm.userCode == "" || _vm.userCode == null
+            ? _c("fvl-submit", [_vm._v("追加")])
+            : _vm._e()
         ],
         1
-      )
+      ),
+      _vm._v(" "),
+      _vm.userCode != ""
+        ? _c(
+            "span",
+            {
+              staticClass: "padding-set-small margin-set-top-regular",
+              model: {
+                value: _vm.form.userCode,
+                callback: function($$v) {
+                  _vm.$set(_vm.form, "userCode", $$v)
+                },
+                expression: "form.userCode"
+              }
+            },
+            [
+              _c(
+                "button",
+                { staticClass: "btn btn-warning", on: { click: _vm.edit } },
+                [_vm._v("編集")]
+              ),
+              _vm._v(" "),
+              _c(
+                "button",
+                { staticClass: "btn btn-danger", on: { click: _vm.del } },
+                [_vm._v("削除")]
+              )
+            ]
+          )
+        : _vm._e()
     ],
     1
   )
 }
 var staticRenderFns = []
-render._withStripped = true
-
-
-
-/***/ }),
-
-/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/UserEdit.vue?vue&type=template&id=4be6c360&":
-/*!***********************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/UserEdit.vue?vue&type=template&id=4be6c360& ***!
-  \***********************************************************************************************************************************************************************************************************/
-/*! exports provided: render, staticRenderFns */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
-var render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "panel-body" }, [
-    _c("div", { staticClass: "col-md-12 padding-dis-left padding-dis-right" }, [
-      _c(
-        "div",
-        { staticClass: "form-group col-md-6" },
-        [
-          _vm.errors.length
-            ? _c("p", [
-                _c(
-                  "ul",
-                  { staticClass: "error-red" },
-                  _vm._l(_vm.errors, function(error) {
-                    return _c("li", [_vm._v(_vm._s(error))])
-                  }),
-                  0
-                )
-              ])
-            : _vm._e(),
-          _vm._v(" "),
-          _c("label", { attrs: { for: "shift_start" } }, [
-            _vm._v("シフトを設定する社員")
-          ]),
-          _vm._v(" "),
-          _c("select-user", {
-            ref: "selectuser",
-            attrs: { "get-do": _vm.getDo },
-            on: { "change-event": _vm.userChanges }
-          }),
-          _vm._v(" \n    ")
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c("div", { staticClass: "form-group col-md-6" }, [
-        _c("label", { attrs: { for: "shift_end" } }, [_vm._v("シフト選択")]),
-        _vm._v(" "),
-        _c(
-          "select",
-          {
-            directives: [
-              {
-                name: "model",
-                rawName: "v-model",
-                value: _vm.selectedShift,
-                expression: "selectedShift"
-              }
-            ],
-            staticClass: "form-control",
-            on: {
-              change: function($event) {
-                var $$selectedVal = Array.prototype.filter
-                  .call($event.target.options, function(o) {
-                    return o.selected
-                  })
-                  .map(function(o) {
-                    var val = "_value" in o ? o._value : o.value
-                    return val
-                  })
-                _vm.selectedShift = $event.target.multiple
-                  ? $$selectedVal
-                  : $$selectedVal[0]
-              }
-            }
-          },
-          _vm._l(_vm.shiftTimes, function(option) {
-            return _c("option", { domProps: { value: option } }, [
-              _vm._v(
-                "\n        " +
-                  _vm._s(option.shift_start_time) +
-                  " ~ " +
-                  _vm._s(option.shift_end_time) +
-                  "\n      "
-              )
-            ])
-          }),
-          0
-        )
-      ])
-    ]),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "form-group col-md-6" },
-      [
-        _c("datepicker", {
-          attrs: {
-            language: _vm.ja,
-            value: this.default,
-            format: _vm.DatePickerFormat
-          },
-          model: {
-            value: _vm.from,
-            callback: function($$v) {
-              _vm.from = $$v
-            },
-            expression: "from"
-          }
-        })
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "form-group col-md-6" },
-      [
-        _c("datepicker", {
-          attrs: {
-            language: _vm.ja,
-            value: this.default,
-            format: _vm.DatePickerFormat
-          },
-          model: {
-            value: _vm.to,
-            callback: function($$v) {
-              _vm.to = $$v
-            },
-            expression: "to"
-          }
-        })
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c("div", [
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-success",
-          on: {
-            click: function($event) {
-              return _vm.StoreShiftTime()
-            }
-          }
-        },
-        [_vm._v("登録")]
-      )
-    ]),
-    _vm._v(" "),
-    _c("div", [
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-danger",
-          on: {
-            click: function($event) {
-              return _vm.rangeDell()
-            }
-          }
-        },
-        [_vm._v("選択した日付のシフトを削除")]
-      )
-    ]),
-    _vm._v(" "),
-    _vm.shiftInfo.length
-      ? _c("div", [
-          _vm._v("\n    登録済みシフト\n    "),
-          _c("table", { staticClass: "table" }, [
-            _vm._m(0),
-            _vm._v(" "),
-            _c(
-              "tbody",
-              _vm._l(_vm.shiftInfo, function(item) {
-                return _c("tr", [
-                  _c("input", {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: item.id,
-                        expression: "item.id"
-                      }
-                    ],
-                    attrs: { type: "hidden" },
-                    domProps: { value: item.id },
-                    on: {
-                      input: function($event) {
-                        if ($event.target.composing) {
-                          return
-                        }
-                        _vm.$set(item, "id", $event.target.value)
-                      }
-                    }
-                  }),
-                  _vm._v(" "),
-                  _c("td", [_vm._v(_vm._s(item.target_date))]),
-                  _vm._v(" "),
-                  _c("td", [_vm._v(_vm._s(item.shift_start_time))]),
-                  _vm._v(" "),
-                  _c("td", [_vm._v(_vm._s(item.shift_end_time))]),
-                  _vm._v(" "),
-                  _c("td", [
-                    _c(
-                      "button",
-                      {
-                        staticClass: "btn btn-danger",
-                        on: {
-                          click: function($event) {
-                            return _vm.delShiftTimes(item.id)
-                          }
-                        }
-                      },
-                      [_vm._v("削除")]
-                    )
-                  ])
-                ])
-              }),
-              0
-            )
-          ])
-        ])
-      : _vm._e()
-  ])
-}
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("thead", [
-      _c("tr", [
-        _c("th", [_vm._v("日付")]),
-        _vm._v(" "),
-        _c("th", [_vm._v("シフト開始時間")]),
-        _vm._v(" "),
-        _c("th", [_vm._v("シフト終了時間")]),
-        _vm._v(" "),
-        _c("th")
-      ])
-    ])
-  }
-]
 render._withStripped = true
 
 
@@ -89075,67 +88792,9 @@ __webpack_require__.r(__webpack_exports__);
   !*** ./resources/js/components/UserEdit.vue ***!
   \**********************************************/
 /*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _UserEdit_vue_vue_type_template_id_4be6c360___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./UserEdit.vue?vue&type=template&id=4be6c360& */ "./resources/js/components/UserEdit.vue?vue&type=template&id=4be6c360&");
-/* harmony import */ var _UserEdit_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./UserEdit.vue?vue&type=script&lang=js& */ "./resources/js/components/UserEdit.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
-
-
-
-
-
-/* normalize component */
-
-var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
-  _UserEdit_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
-  _UserEdit_vue_vue_type_template_id_4be6c360___WEBPACK_IMPORTED_MODULE_0__["render"],
-  _UserEdit_vue_vue_type_template_id_4be6c360___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* hot reload */
-if (false) { var api; }
-component.options.__file = "resources/js/components/UserEdit.vue"
-/* harmony default export */ __webpack_exports__["default"] = (component.exports);
-
-/***/ }),
-
-/***/ "./resources/js/components/UserEdit.vue?vue&type=script&lang=js&":
-/*!***********************************************************************!*\
-  !*** ./resources/js/components/UserEdit.vue?vue&type=script&lang=js& ***!
-  \***********************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_UserEdit_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./UserEdit.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/UserEdit.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_UserEdit_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
-
-/***/ }),
-
-/***/ "./resources/js/components/UserEdit.vue?vue&type=template&id=4be6c360&":
-/*!*****************************************************************************!*\
-  !*** ./resources/js/components/UserEdit.vue?vue&type=template&id=4be6c360& ***!
-  \*****************************************************************************/
-/*! exports provided: render, staticRenderFns */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_UserEdit_vue_vue_type_template_id_4be6c360___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./UserEdit.vue?vue&type=template&id=4be6c360& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/UserEdit.vue?vue&type=template&id=4be6c360&");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_UserEdit_vue_vue_type_template_id_4be6c360___WEBPACK_IMPORTED_MODULE_0__["render"]; });
-
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_UserEdit_vue_vue_type_template_id_4be6c360___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
-
-
+throw new Error("Module build failed (from ./node_modules/vue-loader/lib/index.js):\nError: ENOENT: no such file or directory, open '/var/www/html/laravel/resources/js/components/UserEdit.vue'");
 
 /***/ }),
 

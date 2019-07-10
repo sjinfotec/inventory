@@ -39,8 +39,12 @@ Route::post('/setting_shift_time/store', 'SttingShiftTimeController@store')->mid
 Route::post('/setting_shift_time/range_del', 'SttingShiftTimeController@rangeDel')->middleware('auth');
 Route::get('/user_add', 'UserAddController@index')->middleware('auth');
 Route::post('/user_add/store', 'UserAddController@store')->middleware('auth');
-Route::get('/user_edit', 'UserEditController@index')->middleware('auth');
+Route::get('/user_add/get', 'UserAddController@getUserDetails')->middleware('auth');
+Route::post('/user_add/del', 'UserAddController@del')->middleware('auth');
+Route::post('/user_add/edit', 'UserAddController@edit')->middleware('auth');
 
 // リスト取得
 Route::get('/get_departments_list', 'ApiCommonController@getDepartmentList')->middleware('auth');
 Route::get('/get_employment_status_list', 'ApiCommonController@getEmploymentStatusList')->middleware('auth');
+Route::get('/get_time_table_list', 'ApiCommonController@getTimeTableList')->middleware('auth');
+

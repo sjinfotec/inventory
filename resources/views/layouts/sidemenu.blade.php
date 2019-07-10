@@ -9,8 +9,10 @@
                         </ul>
                         <h1 class="font-size-regular">マスタメンテナンス</h1>
                         <ul class="list-unstyled">
-                            <li><a href="{{ url('/user_add') }}">ユーザー追加</a></li>
-                            <li><a href="{{ url('/user_edit') }}">ユーザー編集</a></li>
+                            <li><a href="{{ url('/user_add') }}">ユーザー</a></li>
+                            <li><a href="{{ url('/') }}">部署</a></li>
+                            <li><a href="{{ url('/') }}">雇用形態</a></li>
+                            <li><a href="{{ url('/') }}">タイムテーブル</a></li>
                             <li><a href="{{ url('/create_shift_time') }}">シフト時間作成</a></li>
                         </ul>
                         <!-- /block -->
