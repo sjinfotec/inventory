@@ -204,58 +204,83 @@ class WorkingTimedate extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
 
-    private $user_code_from;                    // 開始ユーザー
-    private $user_code_to;                      // 終了ユーザー
-    private $date_to;                           // 終了計算日付
-    private $date_from;                         // 開始計算日付
+    private $param_user_code;                   // ユーザー
+    private $param_department_code;             // 部署
+    private $param_date_from;                   // 開始日付
+    private $param_date_to;                     // 終了日付
+    private $array_record_time;                 // 日付範囲配列
+    private $massegedata;                       // メッセージ
 
-    // 開始ユーザー
-    public function getUsercodefromAttribute()
+
+    // ユーザー
+    public function getParamUsercodeAttribute()
     {
-        return $this->user_code_from;
+        return $this->param_user_code;
     }
 
-    public function setUsercodefromAttribute($value)
+    public function setParamUsercodeAttribute($value)
     {
-        $this->user_code_from = $value;
+        $this->param_user_code = $value;
+    }
+
+    // 部署
+    public function getParamDepartmentcodeAttribute()
+    {
+        return $this->param_department_code;
+    }
+
+    public function setParamDepartmentcodeAttribute($value)
+    {
+        $this->param_department_code = $value;
     }
 
 
-    // 終了ユーザー
-    public function getUsercodetoAttribute()
-    {
-        return $this->user_code_to;
-    }
-
-    public function setUsercodetoAttribute($value)
-    {
-        $this->user_code_to = $value;
-    }
-
-
-    // 開始計算日付
+    // 開始日付
     public function getDatefromAttribute()
     {
-        $date = new DateTime($this->date_from);
-        return $date->format('Ymd');
+        $date = date_create($this->param_date_from);
+        return $date->format('Y/m/d').' 00:00:00';
     }
 
     public function setDatefromAttribute($value)
     {
-        $this->date_from = $value;
+        $this->param_date_from = $value;
     }
 
 
-    // 終了計算日付
+    // 終了日付
     public function getDatetoAttribute()
     {
-        $date = new DateTime($this->date_to);
-        return $date->format('Ymd');
+        $date = date_create($this->param_date_to);
+        return $date->format('Y/m/d').' 23:59:59';
     }
 
     public function setDatetoAttribute($value)
     {
-        $this->date_to = $value;
+        $this->param_date_to = $value;
+    }
+
+    // 日付範囲配列
+    public function getArrayrecordtimeAttribute()
+    {
+        return $this->array_record_time;
+    }
+
+    public function setArrayrecordtimeAttribute($valuefrom, $valueto)
+    {
+        $this->array_record_time = array();       //初期化
+        $this->array_record_time = array($valuefrom, $valueto);
+    }
+
+    // メッセージ
+    public function getMassegedataAttribute()
+    {
+        return $this->massegedata;
+    }
+
+    public function setMassegedataAttribute($value)
+    {
+        $this->massegedata = $value;
     }
 
 

@@ -42,6 +42,9 @@ Route::post('/user_add/store', 'UserAddController@store')->middleware('auth');
 Route::get('/user_add/get', 'UserAddController@getUserDetails')->middleware('auth');
 Route::post('/user_add/del', 'UserAddController@del')->middleware('auth');
 Route::post('/user_add/edit', 'UserAddController@edit')->middleware('auth');
+Route::get('/create_department', 'CreateDepartmentController@index')->middleware('auth');
+Route::get('/create_calendar', 'CreateCalendarController@index')->middleware('auth');
+Route::get('/create_employment_status', 'CreateEmploymentStatusController@index')->middleware('auth');
 
 // リスト取得
 Route::get('/get_departments_list', 'ApiCommonController@getDepartmentList')->middleware('auth');

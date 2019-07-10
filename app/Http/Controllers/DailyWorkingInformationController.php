@@ -57,7 +57,8 @@ class DailyWorkingInformationController extends Controller
         if ($chk_result) {
             $work_time_result = $work_time->getWorkTimes();
             if(isset($work_time_result)){
-                $calc_results = $this->calcDayTime($work_time->getWorkTimes());
+                $working_timedate = new WorkingTimedate();
+                $calc_results = $working_timedate->calcWorkingTimeDate($work_time->getWorkTimes());
             } else {
                 $calc_results = null;
                 $massegedata .= "該当する勤務時間は見つかりませんでした。";

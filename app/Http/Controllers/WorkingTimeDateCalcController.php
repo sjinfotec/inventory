@@ -110,7 +110,7 @@ class WorkingTimeDateCalcController extends Controller
     /**
      * 労働時間計算（日次）
      *  テーブル：タイムレコード（work_times）より、
-     *  労働時間を計算してテーブル：日次タイムレコード（working_time_date）
+     *  労働時間を計算してテーブル：日次タイムレコード（working_time_dates）
      *  を作成する
      *
      * @return bool  true:正常
