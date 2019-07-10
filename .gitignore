@@ -14,3 +14,4 @@ package-lock.json
 mix-manifest.json
 /.vscode
 /config/database.php
+/public/js/app.js

@@ -70,8 +70,10 @@ Vue.component(
     require("./components/InputDatepicker.vue").default
 );
 Vue.component("user-add", require("./components/UserAdd.vue").default);
-
-Vue.component("user-edit", require("./components/UserEdit.vue").default);
+Vue.component(
+    "create-department",
+    require("./components/CreateDepartment.vue").default
+);
 
 Vue.component("message-data", require("./components/MessageData.vue").default);
 
