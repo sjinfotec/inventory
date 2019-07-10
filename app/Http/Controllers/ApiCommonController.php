@@ -55,7 +55,7 @@ class ApiCommonController extends Controller
      * @return list departments
      */
     public function getDepartmentList(){
-        $departments = DB::table('departments')->select('code','name')->where('is_deleted', 0)->orderby('code','asc')->get();
+        $departments = DB::table('departments')->select('id','name')->where('is_deleted', 0)->orderby('id','asc')->get();
         return $departments;
     }
 

@@ -20,7 +20,7 @@
      <fvl-search-select :selected.sync="form.departmentCode" label="部署" name="departmentCode"
       :options="departmentList"
       :search-keys="['name']"
-      option-key="code"
+      option-key="id"
       option-value="name"/>
   
      <fvl-search-select :selected.sync="form.status" label="雇用形態" name="status"
@@ -107,12 +107,11 @@ export default {
               this.form.loginid = this.userDetails[0].code;
               this.form.password = this.userDetails[0].password;
               this.form.email = this.userDetails[0].email;
-              this.form.departmentCode = this.userDetails[0].department_code;
+              this.form.departmentCode = this.userDetails[0].department_id;
               this.form.status = ""+this.userDetails[0].employment_status+"";
               this.form.table_no = ""+this.userDetails[0].working_timetable_no+"";
               // hidden
               this.oldCode = this.userDetails[0].code;
-              
               console.log("ユーザー詳細情報取得");
             })
             .catch(reason => {

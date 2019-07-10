@@ -114,7 +114,7 @@ class UserModel extends Model
             [
                 'code' => $this->code,
                 'employment_status' => $this->employment_status,
-                'department_code' => $this->department_code,
+                'department_id' => $this->department_code,
                 'name' => $this->name,
                 'kana' => $this->kana,
                 'working_timetable_no' => $this->working_timetable_no,
@@ -135,7 +135,7 @@ class UserModel extends Model
             ->select(
                 $this->table.'.code',
                 $this->table.'.employment_status',
-                $this->table.'.department_code',
+                $this->table.'.department_id',
                 $this->table.'.name',
                 $this->table.'.kana',
                 $this->table.'.working_timetable_no',

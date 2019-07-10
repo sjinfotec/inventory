@@ -3,20 +3,19 @@
   <div class="panel-body">
     <!-- form wrapper -->
     <fvl-form method="post" :data="form" url="/user_add/store" @success="addSuccess()" @error="error()">
-     <fvl-search-select :selected.sync="selectCode" label="部署" name="selectCode"
+     <fvl-search-select :selected.sync="selectId" label="部署" name="selectId"
       :options="departmentList"
       placeholder="部署を選択すると編集モードになります!"
       :allowEmpty="true"
-      :search-keys="['code']"
-      option-key="code"
+      :search-keys="['id']"
+      option-key="id"
       option-value="name"/>
       <!-- Text input component -->
       <fvl-input :value.sync="form.name" label="部署名" name="name" />
-      <fvl-input :value.sync="form.code" label="部署コード" name="code" title="半角英数字8文字以内" pattern="^[a-zA-Z0-9]{,8}$"/>
      
-    <fvl-submit v-if="selectCode=='' || selectCode==null ">追加</fvl-submit>
+    <fvl-submit v-if="selectId=='' || selectId==null ">追加</fvl-submit>
     </fvl-form>
-    <span class="padding-set-small margin-set-top-regular" v-if="selectCode != ''" v-model="form.selectCode">
+    <span class="padding-set-small margin-set-top-regular" v-if="selectId != ''" v-model="form.selectId">
       <button class="btn btn-warning" @click="edit">編集</button>
       <button class="btn btn-danger" @click="del">削除</button>
     </span>
@@ -41,12 +40,13 @@ export default {
     return {
       form: {
         name:"",
-        code:""
+        id:""
       },
       valuedepartment: '',
       departmentList:[],
-      selectCode:"",
-      oldCode:""
+      details:[],
+      selectId:"",
+      oldId:""
     };
   },
   // マウント時
@@ -55,21 +55,20 @@ export default {
     this.getDepartmentList();
   },
   watch: {
-      userCode: function (val, oldVal) {
-        console.log(this.userCode);
+      selectId: function (val, oldVal) {
         console.log(val+" "+oldVal);
-        if(this.userCode != ""){
+        if(this.selectId != ""){
           this.$axios
             .get("/user_add/get", {
               params: {
-                code: this.userCode
+                id: this.selectId
               }
             })
             .then(response => {
-              this.userDetails = response.data;
-              this.form.name = this.userDetails[0].name;
+              this.details = response.data;
+              this.form.name = this.details[0].name;
               // hidden
-              this.oldCode = this.userDetails[0].code;
+              this.oldCode = this.details[0].id;
               
               console.log("ユーザー詳細情報取得");
             })
@@ -129,7 +128,7 @@ export default {
     },
     // 削除
     del: function () {
-      var confirm = window.confirm("選択したユーザーを削除しますか？");
+      var confirm = window.confirm("選択した部署を削除しますか？");
       if(confirm){
         this.$axios
         .post("/user_add/del", {
@@ -138,7 +137,7 @@ export default {
           .then(response => {
             var res = response.data;
             if(res.result == 0){
-              this.$toasted.show("選択したユーザーを削除しました");
+              this.$toasted.show("選択した部署を削除しました");
               this.inputClear();
               this.getUserList(1,null);
             }else{
