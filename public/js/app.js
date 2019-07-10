@@ -1888,6 +1888,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -1979,10 +1982,19 @@ __webpack_require__.r(__webpack_exports__);
           }
         }).then(function (response) {
           _this.results = response.data;
-          console.log("集計時間取得" + _this.results);
+
+          _this.dispmessage(_this.results.massegedata);
+
+          console.log("集計時間取得" + Object.keys(_this.results).length);
         })["catch"](function (reason) {
           alert("error");
         });
+      }
+    },
+    // メッセージ処理
+    dispmessage: function dispmessage(value) {
+      if (value.length > 0) {
+        alert(value);
       }
     }
   }
@@ -72304,91 +72316,103 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("span", [
-    _c(
-      "div",
-      { staticClass: "form-group col-md-6" },
-      [
-        _c("label", { attrs: { for: "target_fromdate" } }, [
-          _vm._v("計算開始日付入力")
-        ]),
-        _vm._v(" "),
-        _c("input-datepicker", {
-          attrs: { "default-Date": _vm.defaultDate },
-          on: { "change-event": _vm.fromdateChanges }
-        }),
-        _vm._v(" "),
-        _c("message-data", {
-          attrs: { messagedatas: _vm.messagedatasfromdate }
-        })
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "form-group col-md-6" },
-      [
-        _c("label", { attrs: { for: "target_fromdate" } }, [
-          _vm._v("計算終了日付入力")
-        ]),
-        _vm._v(" "),
-        _c("input-datepicker", {
-          attrs: { "default-Date": _vm.defaultDate },
-          on: { "change-event": _vm.todateChanges }
-        }),
-        _vm._v(" "),
-        _c("message-data", { attrs: { messagedatas: _vm.messagedatastodate } })
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "form-group col-md-6" },
-      [
-        _c("label", { attrs: { for: "target_department" } }, [
-          _vm._v("部署選択")
-        ]),
-        _vm._v(" "),
-        _c("select-department", {
-          attrs: { "blank-data": true },
-          on: { "change-event": _vm.departmentChanges }
-        })
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "form-group col-md-6" },
-      [
-        _c("label", { attrs: { for: "target_users" } }, [
-          _vm._v("ユーザー選択")
-        ]),
-        _vm._v(" "),
-        _c("select-user", {
-          ref: "selectuser",
-          attrs: { "blank-data": true, "get-Do": _vm.getDo },
-          on: { "change-event": _vm.userChanges }
-        })
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "form-group col-md-6" },
-      [
-        _c("search-workingtimebutton", {
-          on: { "searchclick-event": _vm.searchclick }
-        })
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c("div", { staticClass: "form-group col-md-6" }, [_c("worktime-day")], 1)
-  ])
+  return _c(
+    "span",
+    [
+      _c(
+        "div",
+        { staticClass: "form-group col-md-6" },
+        [
+          _c("label", { attrs: { for: "target_fromdate" } }, [
+            _vm._v("計算開始日付入力")
+          ]),
+          _vm._v(" "),
+          _c("input-datepicker", {
+            attrs: { "default-Date": _vm.defaultDate },
+            on: { "change-event": _vm.fromdateChanges }
+          }),
+          _vm._v(" "),
+          _c("message-data", {
+            attrs: { messagedatas: _vm.messagedatasfromdate }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "form-group col-md-6" },
+        [
+          _c("label", { attrs: { for: "target_fromdate" } }, [
+            _vm._v("計算終了日付入力")
+          ]),
+          _vm._v(" "),
+          _c("input-datepicker", {
+            attrs: { "default-Date": _vm.defaultDate },
+            on: { "change-event": _vm.todateChanges }
+          }),
+          _vm._v(" "),
+          _c("message-data", {
+            attrs: { messagedatas: _vm.messagedatastodate }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "form-group col-md-6" },
+        [
+          _c("label", { attrs: { for: "target_department" } }, [
+            _vm._v("部署選択")
+          ]),
+          _vm._v(" "),
+          _c("select-department", {
+            attrs: { "blank-data": true },
+            on: { "change-event": _vm.departmentChanges }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "form-group col-md-6" },
+        [
+          _c("label", { attrs: { for: "target_users" } }, [
+            _vm._v("ユーザー選択")
+          ]),
+          _vm._v(" "),
+          _c("select-user", {
+            ref: "selectuser",
+            attrs: { "blank-data": true, "get-Do": _vm.getDo },
+            on: { "change-event": _vm.userChanges }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "form-group col-md-6" },
+        [
+          _c("search-workingtimebutton", {
+            on: { "searchclick-event": _vm.searchclick }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _vm._l(_vm.results.calc_results, function(result) {
+        return _c("div", { staticClass: "form-group col-md-6" }, [
+          _c("p", [_vm._v(_vm._s(result.name))])
+        ])
+      }),
+      _vm._v(" "),
+      _c("div", { staticClass: "form-group col-md-6" }, [_c("worktime-day")], 1)
+    ],
+    2
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -88021,7 +88045,6 @@ Vue.component("select-department", __webpack_require__(/*! ./components/SelectDe
 Vue.component("select-user", __webpack_require__(/*! ./components/SelectUser.vue */ "./resources/js/components/SelectUser.vue")["default"]);
 Vue.component("input-datepicker", __webpack_require__(/*! ./components/InputDatepicker.vue */ "./resources/js/components/InputDatepicker.vue")["default"]);
 Vue.component("user-add", __webpack_require__(/*! ./components/UserAdd.vue */ "./resources/js/components/UserAdd.vue")["default"]);
-Vue.component("user-edit", __webpack_require__(/*! ./components/UserEdit.vue */ "./resources/js/components/UserEdit.vue")["default"]);
 Vue.component("message-data", __webpack_require__(/*! ./components/MessageData.vue */ "./resources/js/components/MessageData.vue")["default"]);
 Vue.component("worktime-day", __webpack_require__(/*! ./components/WorkTimeDateTable.vue */ "./resources/js/components/WorkTimeDateTable.vue")["default"]);
 /**
@@ -88784,17 +88807,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_UserAdd_vue_vue_type_template_id_fded698a___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
-
-/***/ }),
-
-/***/ "./resources/js/components/UserEdit.vue":
-/*!**********************************************!*\
-  !*** ./resources/js/components/UserEdit.vue ***!
-  \**********************************************/
-/*! exports provided: default */
-/***/ (function(module, exports) {
-
-throw new Error("Module build failed (from ./node_modules/vue-loader/lib/index.js):\nError: ENOENT: no such file or directory, open '/var/www/html/laravel/resources/js/components/UserEdit.vue'");
 
 /***/ }),
 

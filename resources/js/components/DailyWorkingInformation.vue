@@ -21,6 +21,9 @@
     <div class="form-group col-md-6">
       <search-workingtimebutton v-on:searchclick-event="searchclick"></search-workingtimebutton>
     </div>
+    <div class="form-group col-md-6" v-for="result in results.calc_results">
+      <p>{{ result.name }}</p>
+    </div>
     <div class="form-group col-md-6">
       <worktime-day></worktime-day>
     </div>
@@ -117,12 +120,17 @@ export default {
           })
           .then(response => {
             this.results = response.data;
-            console.log("集計時間取得"+this.results);
+            this.dispmessage(this.results.massegedata);
+            console.log("集計時間取得"+Object.keys(this.results).length);
           })
           .catch(reason => {
             alert("error");
           });
       }
+    },
+    // メッセージ処理
+    dispmessage: function(value){
+      if (value.length > 0) {alert(value);}
     }
   }
 };

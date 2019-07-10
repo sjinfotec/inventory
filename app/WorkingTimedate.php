@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 */
 class WorkingTimedate extends Model
 {
-    protected $table = 'working_time_date';
+    protected $table = 'working_time_dates';
     protected $table_users = 'users';
     protected $table_work_times = 'work_times';
     protected $guarded = array('id');
@@ -261,5 +261,47 @@ class WorkingTimedate extends Model
 
     // --------------------- メソッド ------------------------------------------------------
 
+
+    /**
+     * 日次労働時間取得
+     *
+     *      指定したユーザー、日付範囲内の労働時間計算のもとデータを取得するSQL
+     *
+     *      INPUT：
+     *          ①テーブル：departments　部署範囲内 and 削除=0
+     *          ②テーブル：users　      ユーザー範囲内 and 削除=0
+     *          ③テーブル：work_times　 ユーザーand日付範囲内 and 削除=0
+     *          ④①と②と③の結合          ①.ユーザー = ②.ユーザー and ②.ユーザー = ③.ユーザー
+     *
+     *      使用方法：
+     *          ①department_code指定プロパティを事前設定（未設定有効）
+     *          ②user_code指定プロパティを事前設定（未設定有効）
+     *          ③日付範囲指定プロパティを事前設定（未設定無効）
+     *          ④メソッド：calcWorkingTimeDateを実行
+     *
+     * @return sql取得結果
+     */
+    public function getWorkingTimeDates(){
+
+
+        // 日次労働時間取得SQL作成
+        \DB::enableQueryLog();
+        $mainquery = DB::table($this->table)
+            ->select(
+                $this->table.'.working_date',
+                $this->table.'.department_code',
+                $this->table.'.department_name',
+                $this->table.'.mode'
+            ->where('t1.is_deleted', '=', 0)
+            ->get();
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getWorkTimes' => \DB::getQueryLog()
+            ]
+        );
+    
+        return $mainquery;
+    }
 
 }

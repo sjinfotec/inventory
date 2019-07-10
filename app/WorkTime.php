@@ -272,7 +272,7 @@ class WorkTime extends Model
      */
     public function chkWorkingTimeData(){
         $this->massegedata = "";
-        /*$result = true;
+        $result = true;
 
         // 日付範囲指定必須チェック
         if(isset($this->param_date_from) && isset($this->param_date_to)){
@@ -288,7 +288,7 @@ class WorkTime extends Model
         } else {
             $this->massegedata .= "計算開始日付と計算終了日付は必ず入力してください。";
             $result = false;
-        }*/
+        }
 
         return true;
 
@@ -318,7 +318,7 @@ class WorkTime extends Model
 
         // 日次労働時間取得SQL作成
         // sunquery1    work_times
-        /*\DB::enableQueryLog();
+        \DB::enableQueryLog();
         $sunquery1 = DB::table($this->table)
             ->select(
                 $this->table.'.user_code',
@@ -362,9 +362,9 @@ class WorkTime extends Model
             [
                 'getWorkTimes' => \DB::getQueryLog()
             ]
-        ); */
+        );
     
-        return true;
+        return $mainquery;
     }
 
 }
