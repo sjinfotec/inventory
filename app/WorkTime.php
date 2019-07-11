@@ -15,7 +15,7 @@ class WorkTime extends Model
     //--------------- メンバー属性 -----------------------------------
 
     private $user_code;                     // ユーザーコード
-    private $department_code;               // 部署コード
+    private $department_id;                 // 部署コード
     private $record_time;                   // 打刻時間
     private $mode;                          // 打刻モード
     private $created_user;                  // 作成ユーザー
@@ -37,12 +37,12 @@ class WorkTime extends Model
     // 部署コード
     public function getDepartmentcodeAttribute()
     {
-        return $this->department_code;
+        return $this->department_id;
     }
 
     public function setDepartmentcodeAttribute($value)
     {
-        $this->department_code = $value;
+        $this->department_id = $value;
     }
 
 
@@ -135,9 +135,10 @@ class WorkTime extends Model
     //--------------- パラメータ項目属性 -----------------------------------
 
     private $param_user_code;                   // ユーザー
-    private $param_department_code;             // 部署
+    private $param_department_id;               // 部署
     private $param_date_from;                   // 開始日付
     private $param_date_to;                     // 終了日付
+
     private $array_record_time;                 // 日付範囲配列
     private $massegedata;                       // メッセージ
 
@@ -155,36 +156,36 @@ class WorkTime extends Model
     // 部署
     public function getParamDepartmentcodeAttribute()
     {
-        return $this->param_department_code;
+        return $this->param_department_id;
     }
 
     public function setParamDepartmentcodeAttribute($value)
     {
-        $this->param_department_code = $value;
+        $this->param_department_id = $value;
     }
 
 
     // 開始日付
-    public function getDatefromAttribute()
+    public function getParamdatefromAttribute()
     {
         $date = date_create($this->param_date_from);
         return $date->format('Y/m/d').' 00:00:00';
     }
 
-    public function setDatefromAttribute($value)
+    public function setParamdatefromAttribute($value)
     {
         $this->param_date_from = $value;
     }
 
 
     // 終了日付
-    public function getDatetoAttribute()
+    public function getParamdatetoAttribute()
     {
         $date = date_create($this->param_date_to);
         return $date->format('Y/m/d').' 23:59:59';
     }
 
-    public function setDatetoAttribute($value)
+    public function setParamdatetoAttribute($value)
     {
         $this->param_date_to = $value;
     }
@@ -277,8 +278,8 @@ class WorkTime extends Model
         // 日付範囲指定必須チェック
         if(isset($this->param_date_from) && isset($this->param_date_to)){
             // 日付範囲指定比較チェック
-            $chkDateFrom = $this->getDatefromAttribute();
-            $chkDateTo = $this->getDatetoAttribute();
+            $chkDateFrom = $this->getParamDatefromAttribute();
+            $chkDateTo = $this->getParamDatetoAttribute();
             if($chkDateFrom <= $chkDateTo){
                 $this->setArrayrecordtimeAttribute($chkDateFrom, $chkDateTo);
             } else {
@@ -306,7 +307,7 @@ class WorkTime extends Model
      *          ④①と②と③の結合          ①.ユーザー = ②.ユーザー and ②.ユーザー = ③.ユーザー
      *
      *      使用方法：
-     *          ①department_code指定プロパティを事前設定（未設定有効）
+     *          ①department_id指定プロパティを事前設定（未設定有効）
      *          ②user_code指定プロパティを事前設定（未設定有効）
      *          ③日付範囲指定プロパティを事前設定（未設定無効）
      *          ④メソッド：calcWorkingTimeDateを実行
@@ -318,11 +319,11 @@ class WorkTime extends Model
 
         // 日次労働時間取得SQL作成
         // sunquery1    work_times
-        \DB::enableQueryLog();
+        //\DB::enableQueryLog();
         $sunquery1 = DB::table($this->table)
             ->select(
                 $this->table.'.user_code',
-                $this->table.'.department_code',
+                $this->table.'.department_id',
                 $this->table.'.record_time',
                 $this->table.'.mode'
             );
@@ -338,32 +339,42 @@ class WorkTime extends Model
         // sunquery2    t2:work_times
         $mainquery = DB::table($this->table_users.' AS t1')
             ->select(
-                't1.code',
-                't1.department_code',
-                't1.name',
-                't2.record_time',
-                't2.mode'
+                't1.code as code',
+                't1.department_id as department_id',
+                't1.name as name',
+                't2.record_time as record_time',
+                't2.mode as mode'
                 )
             ->leftJoinSub($sunquery1, 't2', function ($join) { 
                 $join->on('t1.code', '=', 't2.user_code');
-                $join->on('t1.department_code', '=', 't2.department_code');
+                $join->on('t1.department_id', '=', 't2.department_id');
             });
         if(!empty($this->param_user_code)){
             $mainquery->where('t1.code', $param_user_code);     //user_code指定
         }
-        if(!empty($this->param_department_code)){
-            $mainquery->where('t1.department_code', $param_department_code);     //department_code指定
+        if(!empty($this->param_department_id)){
+            $mainquery->where('t1.department_id', $param_department_id);     //department_id指定
         }
         $mainquery
             ->where('t1.is_deleted', '=', 0)
+            ->orderBy('t1.code', 'asc')
+            ->orderBy('t1.department_id', 'asc')
+            ->orderBy('t2.mode', 'asc')
             ->get();
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getWorkTimes' => \DB::getQueryLog()
-            ]
-        );
-    
+        $collections = collect($mainquery);
+        $array = $collections->toArray();
+var_dump($mainquery);
+        foreach ($mainquery as $result) {
+            Log::debug('calcWorkingTimeDates.' +  $result->mode);
+            // ユーザーの出勤・退勤・中抜・戻り時刻の確定処理
+        }
+        /*\Log::debug(
+        'sql_debug_log',
+        [
+            'getWorkTimes' => \DB::getQueryLog()
+        ]
+        ); */
+
         return $mainquery;
     }
 
