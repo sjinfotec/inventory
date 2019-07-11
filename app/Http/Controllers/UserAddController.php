@@ -25,7 +25,7 @@ class UserAddController extends Controller
     }
 
     /**
-     * 新規
+     * 登録
      *
      * @param Request $request
      * @return void
@@ -39,8 +39,13 @@ class UserAddController extends Controller
         $status = $request->status;
         $table_no = $request->table_no;
         $password = bcrypt($request->password);
-        
-        $result = $this->insertNewUser($code,$kana,$department_code,$name,$password,$email,$status,$table_no);
+
+        if(isset($request->id)){    // UPDATE
+            $id = $request->id;
+            $result = $this->updateUser($id,$code,$kana,$department_code,$name,$password,$email,$status,$table_no);
+        }else{                      // INSERT
+            $result = $this->insertNewUser($code,$kana,$department_code,$name,$password,$email,$status,$table_no);
+        }
         if($result){
         }else{
             return false;
@@ -48,20 +53,39 @@ class UserAddController extends Controller
     }
 
     /**
-     * 編集
+     * ユーザー追加
      *
-     * @param Request $request
+     * @param [type] $code
+     * @param [type] $kana
+     * @param [type] $department_code
+     * @param [type] $name
+     * @param [type] $password
+     * @param [type] $email
+     * @param [type] $status
+     * @param [type] $table_no
      * @return void
      */
-    public function edit(Request $request){
-        $response = collect();
-        $result = $this->updateUserData($request);
-        if($result){
-            $response->put('result',self::SUCCESS);
-        }else{
-            $response->put('result',self::FAILED);
+    private function insertNewUser($code,$kana,$department_code,$name,$password,$email,$status,$table_no){
+        $users = new UserModel();
+        $users->setCodeAttribute($code);
+        $users->setDepartmentcodeAttribute($department_code);
+        $users->setNameAttribute($name);
+        $users->setKanaAttribute($kana);
+        $users->setPasswordAttribute($password);
+        $users->setEmailAttribute($email);
+        $users->setEmploymentstatusAttribute($status);
+        $users->setWorkingtimetablenoAttribute($table_no);
+        
+        DB::beginTransaction();
+        try{
+            $users->insertNewUser();
+            DB::commit();
+            return true;
+
+        }catch(\PDOException $e){
+            DB::rollBack();
+            return false;
         }
-        return $response;
     }
 
     /**
@@ -71,44 +95,17 @@ class UserAddController extends Controller
      * @param [type] $kana
      * @param [type] $department_code
      * @param [type] $name
+     * @param [type] $password
      * @param [type] $email
      * @param [type] $status
      * @param [type] $table_no
      * @return void
      */
-    public function updateUserData($request){
-        $old_code = $request->old_code;
+    public function updateUser($id,$code,$kana,$department_code,$name,$password,$email,$status,$table_no){
         $users = new UserModel();
-        $users->setCodeAttribute($request->old_code);
         DB::beginTransaction();
         try{
-            $result = $users->delUserData();
-            $validatedData = $request->validate([
-                'name' => 'required|string|max:30',
-                'kana' => 'required',
-                'email' => 'required|email',
-                'status' => 'required',
-                'loginid' => 'required|unique:users,code|max:10',
-            ],[
-                'name.required'  => '社員名を入力してください',
-                'name.max'  => '社員名の最大文字数は 30 です',
-                'kana.required'  => 'ふりがなを入力してください',
-                'email.required'  => 'メールアドレスを入力してください',
-                'email.email'  => 'メールアドレスの入力形式で入力してください (例: sanjyo-tarou@ssjjoo.com)',
-                'status.required' => '雇用形態を選択してください',
-                'loginid.required'  => 'ログインIDを入力してください',
-                'loginid.unique'  => 'ログインIDは既に使用済です',
-                'loginid.max'  => 'ログインIDの最大文字数は 10 です'
-            ]);
-            $department_code = $request->departmentCode;
-            $kana = $request->kana;
-            $code = $request->loginid;
-            $name = $request->name;
-            $email = $request->email;
-            $status = $request->status;
-            $table_no = $request->table_no;
-            $password = $request->password;
-            
+            $users->setIdAttribute($id);
             $users->setDepartmentcodeAttribute($department_code);
             $users->setCodeAttribute($code);
             $users->setNameAttribute($name);
@@ -118,7 +115,7 @@ class UserAddController extends Controller
             $users->setEmploymentstatusAttribute($status);
             $users->setWorkingtimetablenoAttribute($table_no);
 
-            $users->insertNewUser();
+            $users->updateUser();
             DB::commit();
             return true;
 
@@ -148,7 +145,7 @@ class UserAddController extends Controller
     }
 
     /**
-     * DB書き込み（論理削除）
+     * 論理削除
      *
      * @param [type] $code
      * @return void
@@ -169,36 +166,7 @@ class UserAddController extends Controller
         }
     }
 
-    /**
-     * DB書き込み（新規）
-     *
-     * @param [type] $code,$kana,$department_code,$name,$password,$email,$status,$table_no
-     * @return void
-     */
-    private function insertNewUser($code,$kana,$department_code,$name,$password,$email,$status,$table_no){
-        $users = new UserModel();
-        $users->setCodeAttribute($code);
-        $users->setDepartmentcodeAttribute($department_code);
-        $users->setNameAttribute($name);
-        $users->setKanaAttribute($kana);
-        $users->setPasswordAttribute($password);
-        $users->setEmailAttribute($email);
-        $users->setEmploymentstatusAttribute($status);
-        $users->setWorkingtimetablenoAttribute($table_no);
-        
-        DB::beginTransaction();
-        try{
-            $users->insertNewUser();
-            DB::commit();
-            return true;
-
-        }catch(\PDOException $e){
-            DB::rollBack();
-            return false;
-        }
-    }
-
-    /** ユーザー詳細取得
+    /** 詳細取得
      *
      * @return list results
      */

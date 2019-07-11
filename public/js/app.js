@@ -2802,6 +2802,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   data: function data() {
     return {
       form: {
+        id: "",
         name: "",
         kana: "",
         email: "",
@@ -2843,6 +2844,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           }
         }).then(function (response) {
           _this.userDetails = response.data;
+          _this.form.id = _this.userDetails[0].id;
           _this.form.name = _this.userDetails[0].name;
           _this.form.kana = _this.userDetails[0].kana;
           _this.form.code = _this.userDetails[0].code;
@@ -2894,7 +2896,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
     },
     addSuccess: function addSuccess() {
-      this.$toasted.show("ユーザーを追加しました");
+      this.getUserList(1, null);
+      this.$toasted.show("登録しました");
     },
     getUserList: function getUserList(getdovalue, value) {
       var _this5 = this;
@@ -2928,36 +2931,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       };
       this.$toasted.show("ユーザー追加に失敗しました", options);
     },
-    edit: function edit() {
-      var _this6 = this;
-
-      var confirm = window.confirm("編集内容を確定しますか？");
-
-      if (confirm) {
-        this.$axios.post("/user_add/edit", {
-          old_code: this.oldCode,
-          departmentCode: this.form.departmentCode,
-          kana: this.form.kana,
-          code: this.form.code,
-          name: this.form.name,
-          email: this.form.email,
-          password: this.form.password,
-          status: this.form.status,
-          table_no: this.form.table_no
-        }).then(function (response) {
-          var res = response.data;
-
-          if (res.result == 0) {
-            _this6.$toasted.show("編集内容を確定しました");
-
-            _this6.getUserList(1, null);
-          } else {}
-        })["catch"](function (reason) {});
-      } else {}
-    },
     // 削除
     del: function del() {
-      var _this7 = this;
+      var _this6 = this;
 
       var confirm = window.confirm("選択したユーザーを削除しますか？");
 
@@ -2968,16 +2944,17 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           var res = response.data;
 
           if (res.result == 0) {
-            _this7.$toasted.show("選択したユーザーを削除しました");
+            _this6.$toasted.show("選択したユーザーを削除しました");
 
-            _this7.inputClear();
+            _this6.inputClear();
 
-            _this7.getUserList(1, null);
+            _this6.getUserList(1, null);
           } else {}
         })["catch"](function (reason) {});
       } else {}
     },
     inputClear: function inputClear() {
+      this.form.id = "";
       this.form.name = "";
       this.form.kana = "";
       this.form.code = "";

@@ -103,6 +103,7 @@ export default {
   data() {
     return {
       form: {
+        id: "",
         name: "",
         kana: "",
         email: "",
@@ -143,6 +144,7 @@ export default {
           })
           .then(response => {
             this.userDetails = response.data;
+            this.form.id = this.userDetails[0].id;
             this.form.name = this.userDetails[0].name;
             this.form.kana = this.userDetails[0].kana;
             this.form.code = this.userDetails[0].code;
@@ -199,7 +201,8 @@ export default {
         });
     },
     addSuccess() {
-      this.$toasted.show("ユーザーを追加しました");
+      this.getUserList(1, null);
+      this.$toasted.show("登録しました");
     },
     getUserList(getdovalue, value) {
       console.log("getdovalue = " + getdovalue);
@@ -229,33 +232,6 @@ export default {
       };
       this.$toasted.show("ユーザー追加に失敗しました", options);
     },
-    edit: function() {
-      var confirm = window.confirm("編集内容を確定しますか？");
-      if (confirm) {
-        this.$axios
-          .post("/user_add/edit", {
-            old_code: this.oldCode,
-            departmentCode: this.form.departmentCode,
-            kana: this.form.kana,
-            code: this.form.code,
-            name: this.form.name,
-            email: this.form.email,
-            password: this.form.password,
-            status: this.form.status,
-            table_no: this.form.table_no
-          })
-          .then(response => {
-            var res = response.data;
-            if (res.result == 0) {
-              this.$toasted.show("編集内容を確定しました");
-              this.getUserList(1, null);
-            } else {
-            }
-          })
-          .catch(reason => {});
-      } else {
-      }
-    },
     // 削除
     del: function() {
       var confirm = window.confirm("選択したユーザーを削除しますか？");
@@ -278,6 +254,7 @@ export default {
       }
     },
     inputClear() {
+      this.form.id = "";
       this.form.name = "";
       this.form.kana = "";
       this.form.code = "";

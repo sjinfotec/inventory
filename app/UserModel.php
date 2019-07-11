@@ -13,7 +13,7 @@ class UserModel extends Model
     protected $guarded = array('id');
 
     //--------------- メンバー属性 -----------------------------------
-
+    private $id;
     private $code;                  
     private $department_code;                  
     private $name;                  
@@ -23,6 +23,16 @@ class UserModel extends Model
     private $employment_status;                  
     private $working_timetable_no;                  
  
+    public function getIdAttribute()
+    {
+        return $this->id;
+    }
+
+    public function setIdAttribute($value)
+    {
+        $this->id = $value;
+    }
+
     public function getCodeAttribute()
     {
         return $this->code;
@@ -126,6 +136,26 @@ class UserModel extends Model
     }
 
     /**
+     * ユーザー編集
+     *
+     * @return void
+     */
+    public function updateUser(){
+        DB::table($this->table)
+            ->where('id', $this->id)
+            ->update([
+                'code' => $this->code,
+                'department_id' => $this->department_code,
+                'employment_status' => $this->employment_status,
+                'name' => $this->name,
+                'kana' => $this->kana,
+                'working_timetable_no' => $this->working_timetable_no,
+                'email' => $this->email
+                ]
+            );
+    }
+
+    /**
      * ユーザー詳細取得
      *
      * @return void
@@ -133,6 +163,7 @@ class UserModel extends Model
     public function getUserDetails(){
         $data = DB::table($this->table)
             ->select(
+                $this->table.'.id',
                 $this->table.'.code',
                 $this->table.'.employment_status',
                 $this->table.'.department_id',

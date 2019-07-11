@@ -30,9 +30,8 @@ class StoreUserPost extends FormRequest
             'kana' => 'required',
             'email' => 'required|email',
             'status' => 'required',
-            // 'loginid' => 'required|unique:users,code|max:10',
             'code' => ['required',Rule::unique('users')->ignore($this->id),'max:10'],
-            'password' => 'required|max:30',
+            'password' => 'required',
         ];
     }
 
@@ -52,7 +51,6 @@ class StoreUserPost extends FormRequest
             'code.unique'  => 'ログインIDは既に使用済です',
             'code.max'  => 'ログインIDの最大文字数は 10 です',
             'password.required'  => 'パスワードを入力してください',
-            'password.max'  => 'パスワードの最大文字数は 30 です',
         ];
     }
 }

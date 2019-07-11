@@ -363,7 +363,6 @@ class WorkTime extends Model
             ->get();
         $collections = collect($mainquery);
         $array = $collections->toArray();
-var_dump($mainquery);
         foreach ($mainquery as $result) {
             Log::debug('calcWorkingTimeDates.' +  $result->mode);
             // ユーザーの出勤・退勤・中抜・戻り時刻の確定処理
