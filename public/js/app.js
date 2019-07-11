@@ -2051,6 +2051,12 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2074,21 +2080,29 @@ __webpack_require__.r(__webpack_exports__);
     // バリデーション
     checkForm: function checkForm(e) {
       console.log("checkForm in ");
+      this.validate = true;
       this.messagedatasfromdate = [];
       this.messagedatastodate = [];
       console.log("checkForm start " + moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format('YYYYMMDD'));
 
       if (!this.valuefromdate) {
         this.messagedatasfromdate.push('計算開始日付は必ず入力してください。');
+        this.validate = false;
       }
 
       if (!this.valuetodate) {
         this.messagedatastodate.push('計算終了日付は必ず入力してください。');
+        this.validate = false;
       }
 
       if (moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).isAfter(this.valuetodate)) {
         this.messagedatasfromdate.push('計算開始日付が計算終了日付より未来の日付になっています。');
         this.messagedatastodate.push('計算開始日付が計算終了日付より未来の日付になっています。');
+        this.validate = false;
+      }
+
+      if (this.validate) {
+        return this.validate;
       }
 
       e.preventDefault();
@@ -2118,6 +2132,8 @@ __webpack_require__.r(__webpack_exports__);
     },
     // 集計開始ボタンがクリックされた場合の処理
     searchclick: function searchclick(e) {
+      var _this = this;
+
       console.log("searchclick 1 ");
       this.validate = this.checkForm(e);
       console.log( true ? 'true' : undefined);
@@ -2125,19 +2141,26 @@ __webpack_require__.r(__webpack_exports__);
       if (this.validate) {
         this.$axios.get("/daily/calc", {
           params: {
-            departmentcodefrom: this.valuedepartment,
-            departmentcodeto: this.valuedepartment,
-            usercodefrom: this.valueuser,
-            usercodeto: this.valueuser,
+            departmentcode: this.valuedepartment,
+            usercode: this.valueuser,
             datefrom: this.valuefromdate,
             dateto: this.valuetodate
           }
         }).then(function (response) {
-          //this.results = response.data;
-          console.log("集計時間取得");
+          _this.results = response.data;
+
+          _this.dispmessage(_this.results.massegedata);
+
+          console.log("集計時間取得" + Object.keys(_this.results).length);
         })["catch"](function (reason) {
           alert("error");
         });
+      }
+    },
+    // メッセージ処理
+    dispmessage: function dispmessage(value) {
+      if (value.length > 0) {
+        alert(value);
       }
     }
   }
@@ -2963,6 +2986,102 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.form.departmentCode = "";
       this.form.status = "";
       this.form.table_no = "";
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkTimeDateTable.vue?vue&type=script&lang=js&":
+/*!****************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkTimeDateTable.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "worktimedatetable",
+  props: {
+    depCode: {
+      type: String,
+      "default": ''
+    }
+  },
+  data: function data() {
+    return {
+      workingtimedates: []
+    };
+  },
+  // マウント時
+  mounted: function mounted() {
+    console.log("worktimedatetable Component mounted.");
+  },
+  methods: {
+    editClick: function editClick(value) {
+      console.log("editClick = " + value);
+    },
+    fixedClick: function fixedClick(value) {
+      console.log("fixedClick = " + value);
     }
   }
 });
@@ -72498,89 +72617,103 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("span", [
-    _c(
-      "div",
-      { staticClass: "form-group col-md-6" },
-      [
-        _c("label", { attrs: { for: "target_fromdate" } }, [
-          _vm._v("計算開始日付入力")
-        ]),
-        _vm._v(" "),
-        _c("input-datepicker", {
-          attrs: { "default-Date": _vm.defaultDate },
-          on: { "change-event": _vm.fromdateChanges }
-        }),
-        _vm._v(" "),
-        _c("message-data", {
-          attrs: { messagedatas: _vm.messagedatasfromdate }
-        })
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "form-group col-md-6" },
-      [
-        _c("label", { attrs: { for: "target_fromdate" } }, [
-          _vm._v("計算終了日付入力")
-        ]),
-        _vm._v(" "),
-        _c("input-datepicker", {
-          attrs: { "default-Date": _vm.defaultDate },
-          on: { "change-event": _vm.todateChanges }
-        }),
-        _vm._v(" "),
-        _c("message-data", { attrs: { messagedatas: _vm.messagedatastodate } })
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "form-group col-md-6" },
-      [
-        _c("label", { attrs: { for: "target_department" } }, [
-          _vm._v("部署選択")
-        ]),
-        _vm._v(" "),
-        _c("select-department", {
-          attrs: { "blank-data": true },
-          on: { "change-event": _vm.departmentChanges }
-        })
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "form-group col-md-6" },
-      [
-        _c("label", { attrs: { for: "target_users" } }, [
-          _vm._v("ユーザー選択")
-        ]),
-        _vm._v(" "),
-        _c("select-user", {
-          ref: "selectuser",
-          attrs: { "blank-data": true, "get-Do": _vm.getDo },
-          on: { "change-event": _vm.userChanges }
-        })
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "form-group col-md-6" },
-      [
-        _c("search-workingtimebutton", {
-          on: { "searchclick-event": _vm.searchclick }
-        })
-      ],
-      1
-    )
-  ])
+  return _c(
+    "span",
+    [
+      _c(
+        "div",
+        { staticClass: "form-group col-md-6" },
+        [
+          _c("label", { attrs: { for: "target_fromdate" } }, [
+            _vm._v("計算開始日付入力")
+          ]),
+          _vm._v(" "),
+          _c("input-datepicker", {
+            attrs: { "default-Date": _vm.defaultDate },
+            on: { "change-event": _vm.fromdateChanges }
+          }),
+          _vm._v(" "),
+          _c("message-data", {
+            attrs: { messagedatas: _vm.messagedatasfromdate }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "form-group col-md-6" },
+        [
+          _c("label", { attrs: { for: "target_fromdate" } }, [
+            _vm._v("計算終了日付入力")
+          ]),
+          _vm._v(" "),
+          _c("input-datepicker", {
+            attrs: { "default-Date": _vm.defaultDate },
+            on: { "change-event": _vm.todateChanges }
+          }),
+          _vm._v(" "),
+          _c("message-data", {
+            attrs: { messagedatas: _vm.messagedatastodate }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "form-group col-md-6" },
+        [
+          _c("label", { attrs: { for: "target_department" } }, [
+            _vm._v("部署選択")
+          ]),
+          _vm._v(" "),
+          _c("select-department", {
+            attrs: { "blank-data": true },
+            on: { "change-event": _vm.departmentChanges }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "form-group col-md-6" },
+        [
+          _c("label", { attrs: { for: "target_users" } }, [
+            _vm._v("ユーザー選択")
+          ]),
+          _vm._v(" "),
+          _c("select-user", {
+            ref: "selectuser",
+            attrs: { "blank-data": true, "get-Do": _vm.getDo },
+            on: { "change-event": _vm.userChanges }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "form-group col-md-6" },
+        [
+          _c("search-workingtimebutton", {
+            on: { "searchclick-event": _vm.searchclick }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _vm._l(_vm.results.calc_results, function(result) {
+        return _c("div", { staticClass: "form-group col-md-6" }, [
+          _c("p", [_vm._v(_vm._s(result.name))])
+        ])
+      }),
+      _vm._v(" "),
+      _c("div", { staticClass: "form-group col-md-6" }, [_c("worktime-day")], 1)
+    ],
+    2
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -73304,6 +73437,202 @@ var render = function() {
   )
 }
 var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkTimeDateTable.vue?vue&type=template&id=66c55507&":
+/*!********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkTimeDateTable.vue?vue&type=template&id=66c55507& ***!
+  \********************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _vm.workingtimedates.length
+    ? _c("div", [
+        _c("table", { staticClass: "table table-striped table-bordered" }, [
+          _vm._m(0),
+          _vm._v(" "),
+          _c(
+            "tbody",
+            _vm._l(_vm.workingtimedates, function(item) {
+              return _c("tr", [
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: item.id,
+                      expression: "item.id"
+                    }
+                  ],
+                  attrs: { type: "hidden" },
+                  domProps: { value: item.id },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.$set(item, "id", $event.target.value)
+                    }
+                  }
+                }),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(item.department_name))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(item.user_name))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(item.working_time_style_name))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(item.attendance_time))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(item.leaving_time))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(item.missing_middle_time))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(item.missing_middle_return_time))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(item.regular_working_times))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(item.out_of_regular_working_times))]),
+                _vm._v(" "),
+                _c("td", [
+                  _vm._v(_vm._s(item.out_of_regular_night_working_times))
+                ]),
+                _vm._v(" "),
+                _c("td", [
+                  _vm._v(_vm._s(item.out_of_regular_total_working_times))
+                ]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(item.not_employment_time))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(item.working_timetable_name))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(item.prescribed_outside_total_month))]),
+                _vm._v(" "),
+                _c("td", [
+                  _vm._v(_vm._s(item.remaining_prescribed_outside_month))
+                ]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(item.leave_item_code))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(item.leave_item_name))]),
+                _vm._v(" "),
+                _c("td", [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-danger",
+                      on: {
+                        click: function($event) {
+                          return _vm.editClick(item.id)
+                        }
+                      }
+                    },
+                    [_vm._v("編集")]
+                  )
+                ]),
+                _vm._v(
+                  "\n        @if (" +
+                    _vm._s(item.fixedtime) +
+                    " == '1')\n          "
+                ),
+                _c("td", [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-danger",
+                      on: {
+                        click: function($event) {
+                          return _vm.fixedClick(item.fixedtime)
+                        }
+                      }
+                    },
+                    [_vm._v("解除")]
+                  )
+                ]),
+                _vm._v("\n        @else\n          "),
+                _c("td", [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-danger",
+                      on: {
+                        click: function($event) {
+                          return _vm.fixedClick(item.fixedtime)
+                        }
+                      }
+                    },
+                    [_vm._v("確定")]
+                  )
+                ]),
+                _vm._v("\n        @endif\n      ")
+              ])
+            }),
+            0
+          )
+        ])
+      ])
+    : _vm._e()
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", [
+      _c("tr", [
+        _c("th", [_vm._v("部署")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("社員")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("雇用形態")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("出勤")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("退勤")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("中抜")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("戻り")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("所定時間")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("所定外時間")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("所定外深夜時間")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("所定外時間")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("不就労時間")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("タイムテーブル")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("所定外累計（月）")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("残所定外（月）")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("休暇")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("編集")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("確定")]),
+        _vm._v(" "),
+        _c("th")
+      ])
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -88008,6 +88337,7 @@ Vue.component("input-datepicker", __webpack_require__(/*! ./components/InputDate
 Vue.component("user-add", __webpack_require__(/*! ./components/UserAdd.vue */ "./resources/js/components/UserAdd.vue")["default"]);
 Vue.component("create-department", __webpack_require__(/*! ./components/CreateDepartment.vue */ "./resources/js/components/CreateDepartment.vue")["default"]);
 Vue.component("message-data", __webpack_require__(/*! ./components/MessageData.vue */ "./resources/js/components/MessageData.vue")["default"]);
+Vue.component("worktime-day", __webpack_require__(/*! ./components/WorkTimeDateTable.vue */ "./resources/js/components/WorkTimeDateTable.vue")["default"]);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -88835,6 +89165,75 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_UserAdd_vue_vue_type_template_id_fded698a___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_UserAdd_vue_vue_type_template_id_fded698a___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkTimeDateTable.vue":
+/*!*******************************************************!*\
+  !*** ./resources/js/components/WorkTimeDateTable.vue ***!
+  \*******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _WorkTimeDateTable_vue_vue_type_template_id_66c55507___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WorkTimeDateTable.vue?vue&type=template&id=66c55507& */ "./resources/js/components/WorkTimeDateTable.vue?vue&type=template&id=66c55507&");
+/* harmony import */ var _WorkTimeDateTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WorkTimeDateTable.vue?vue&type=script&lang=js& */ "./resources/js/components/WorkTimeDateTable.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _WorkTimeDateTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _WorkTimeDateTable_vue_vue_type_template_id_66c55507___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _WorkTimeDateTable_vue_vue_type_template_id_66c55507___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/WorkTimeDateTable.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkTimeDateTable.vue?vue&type=script&lang=js&":
+/*!********************************************************************************!*\
+  !*** ./resources/js/components/WorkTimeDateTable.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeDateTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkTimeDateTable.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkTimeDateTable.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeDateTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkTimeDateTable.vue?vue&type=template&id=66c55507&":
+/*!**************************************************************************************!*\
+  !*** ./resources/js/components/WorkTimeDateTable.vue?vue&type=template&id=66c55507& ***!
+  \**************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeDateTable_vue_vue_type_template_id_66c55507___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkTimeDateTable.vue?vue&type=template&id=66c55507& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkTimeDateTable.vue?vue&type=template&id=66c55507&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeDateTable_vue_vue_type_template_id_66c55507___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeDateTable_vue_vue_type_template_id_66c55507___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 
