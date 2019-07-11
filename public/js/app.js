@@ -1711,6 +1711,172 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateDepartment.vue?vue&type=script&lang=js&":
+/*!***************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/CreateDepartment.vue?vue&type=script&lang=js& ***!
+  \***************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var formvuelar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! formvuelar */ "./node_modules/formvuelar/dist/formvuelar.common.js");
+/* harmony import */ var formvuelar__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(formvuelar__WEBPACK_IMPORTED_MODULE_1__);
+var _components;
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "CreateShiftTime",
+  components: (_components = {
+    FvlForm: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlForm"],
+    FvlInput: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlInput"],
+    FvlSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"],
+    FvlSearchSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSearchSelect"],
+    FvlSubmit: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSubmit"]
+  }, _defineProperty(_components, "FvlSelect", formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"]), _defineProperty(_components, "getDo", 1), _components),
+  data: function data() {
+    return {
+      form: {
+        name: "",
+        id: ""
+      },
+      valuedepartment: "",
+      departmentList: [],
+      details: [],
+      selectId: "",
+      oldId: ""
+    };
+  },
+  // マウント時
+  mounted: function mounted() {
+    console.log("UserAdd Component mounted.");
+    this.getDepartmentList();
+  },
+  watch: {
+    selectId: function selectId(val, oldVal) {
+      var _this = this;
+
+      console.log(val + " " + oldVal);
+
+      if (this.selectId != "") {
+        this.$axios.get("/create_department/get", {
+          params: {
+            id: this.selectId
+          }
+        }).then(function (response) {
+          _this.details = response.data;
+          _this.form.name = _this.details[0].name;
+          _this.form.id = _this.details[0].id; // hidden
+
+          _this.oldId = _this.details[0].id;
+          console.log("部署名取得");
+        })["catch"](function (reason) {
+          alert("error");
+        });
+      } else {
+        this.inputClear();
+      }
+    }
+  },
+  methods: {
+    getDepartmentList: function getDepartmentList() {
+      var _this2 = this;
+
+      this.$axios.get("/get_departments_list").then(function (response) {
+        _this2.departmentList = response.data;
+        _this2.object = {
+          id: "",
+          name: "新規登録"
+        };
+
+        _this2.departmentList.unshift(_this2.object);
+
+        console.log("部署リスト取得");
+      })["catch"](function (reason) {});
+    },
+    addSuccess: function addSuccess() {
+      this.$toasted.show("登録しました");
+      this.getDepartmentList();
+    },
+    error: function error() {
+      var options = {
+        position: "bottom-center",
+        duration: 2000,
+        fullWidth: false,
+        type: "error"
+      };
+      this.$toasted.show("登録に失敗しました", options);
+    },
+    // 削除
+    del: function del() {
+      var _this3 = this;
+
+      var confirm = window.confirm("選択した部署を削除しますか？");
+
+      if (confirm) {
+        this.$axios.post("/create_department/del", {
+          id: this.selectId
+        }).then(function (response) {
+          var res = response.data;
+
+          if (res.result == 0) {
+            _this3.$toasted.show("選択した部署を削除しました");
+
+            _this3.inputClear();
+
+            _this3.getDepartmentList();
+          } else {}
+        })["catch"](function (reason) {});
+      } else {}
+    },
+    inputClear: function inputClear() {
+      this.form.name = "";
+      this.form.id = "";
+      this.selectId = "";
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateShiftTime.vue?vue&type=script&lang=js&":
 /*!**************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/CreateShiftTime.vue?vue&type=script&lang=js& ***!
@@ -2564,6 +2730,41 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2581,13 +2782,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         name: "",
         kana: "",
         email: "",
-        loginid: "",
+        code: "",
         password: "",
         status: "",
         table_no: "",
         departmentCode: ""
       },
-      valuedepartment: '',
+      valuedepartment: "",
       departmentList: [],
       employStatusList: [],
       timeTableList: [],
@@ -2621,10 +2822,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           _this.userDetails = response.data;
           _this.form.name = _this.userDetails[0].name;
           _this.form.kana = _this.userDetails[0].kana;
-          _this.form.loginid = _this.userDetails[0].code;
+          _this.form.code = _this.userDetails[0].code;
           _this.form.password = _this.userDetails[0].password;
           _this.form.email = _this.userDetails[0].email;
-          _this.form.departmentCode = _this.userDetails[0].department_code;
+          _this.form.departmentCode = _this.userDetails[0].department_id;
           _this.form.status = "" + _this.userDetails[0].employment_status + "";
           _this.form.table_no = "" + _this.userDetails[0].working_timetable_no + ""; // hidden
 
@@ -2714,7 +2915,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           old_code: this.oldCode,
           departmentCode: this.form.departmentCode,
           kana: this.form.kana,
-          loginid: this.form.loginid,
+          code: this.form.code,
           name: this.form.name,
           email: this.form.email,
           password: this.form.password,
@@ -2756,7 +2957,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     inputClear: function inputClear() {
       this.form.name = "";
       this.form.kana = "";
-      this.form.loginid = "";
+      this.form.code = "";
       this.form.password = "";
       this.form.email = "";
       this.form.departmentCode = "";
@@ -72017,6 +72218,106 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateDepartment.vue?vue&type=template&id=32743e4e&":
+/*!*******************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/CreateDepartment.vue?vue&type=template&id=32743e4e& ***!
+  \*******************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "panel-body" },
+    [
+      _c(
+        "fvl-form",
+        {
+          attrs: {
+            method: "post",
+            data: _vm.form,
+            url: "/create_department/store"
+          },
+          on: {
+            success: function($event) {
+              return _vm.addSuccess()
+            },
+            error: function($event) {
+              return _vm.error()
+            }
+          }
+        },
+        [
+          _c("fvl-search-select", {
+            attrs: {
+              selected: _vm.selectId,
+              label: "部署",
+              name: "selectId",
+              options: _vm.departmentList,
+              placeholder: "部署を選択すると編集モードになります!",
+              allowEmpty: true,
+              "search-keys": ["id"],
+              "option-key": "id",
+              "option-value": "name"
+            },
+            on: {
+              "update:selected": function($event) {
+                _vm.selectId = $event
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: { value: _vm.form.name, label: "部署名", name: "name" },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "name", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _vm.selectId == "" || _vm.selectId == null
+            ? _c("fvl-submit", [_vm._v("追加")])
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.selectId != ""
+            ? _c("fvl-submit", { attrs: { id: "edit" } }, [_vm._v("編集")])
+            : _vm._e()
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _vm.selectId != ""
+        ? _c(
+            "span",
+            { staticClass: "padding-set-small margin-set-top-regular" },
+            [
+              _c(
+                "button",
+                { staticClass: "btn btn-danger", on: { click: _vm.del } },
+                [_vm._v("削除")]
+              )
+            ]
+          )
+        : _vm._e()
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateShiftTime.vue?vue&type=template&id=734667b8&":
 /*!******************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/CreateShiftTime.vue?vue&type=template&id=734667b8& ***!
@@ -72874,15 +73175,15 @@ var render = function() {
           _vm._v(" "),
           _c("fvl-input", {
             attrs: {
-              value: _vm.form.loginid,
+              value: _vm.form.code,
               label: "ログインID",
-              name: "loginid",
+              name: "code",
               title: "半角英数字4-10文字",
               pattern: "^[a-zA-Z0-9]{4,10}$"
             },
             on: {
               "update:value": function($event) {
-                return _vm.$set(_vm.form, "loginid", $event)
+                return _vm.$set(_vm.form, "code", $event)
               }
             }
           }),
@@ -72930,7 +73231,7 @@ var render = function() {
               name: "departmentCode",
               options: _vm.departmentList,
               "search-keys": ["name"],
-              "option-key": "code",
+              "option-key": "id",
               "option-value": "name"
             },
             on: {
@@ -72976,6 +73277,10 @@ var render = function() {
           _vm._v(" "),
           _vm.userCode == "" || _vm.userCode == null
             ? _c("fvl-submit", [_vm._v("追加")])
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.userCode != ""
+            ? _c("fvl-submit", { attrs: { id: "edit" } }, [_vm._v("編集")])
             : _vm._e()
         ],
         1
@@ -72984,23 +73289,8 @@ var render = function() {
       _vm.userCode != ""
         ? _c(
             "span",
-            {
-              staticClass: "padding-set-small margin-set-top-regular",
-              model: {
-                value: _vm.form.userCode,
-                callback: function($$v) {
-                  _vm.$set(_vm.form, "userCode", $$v)
-                },
-                expression: "form.userCode"
-              }
-            },
+            { staticClass: "padding-set-small margin-set-top-regular" },
             [
-              _c(
-                "button",
-                { staticClass: "btn btn-warning", on: { click: _vm.edit } },
-                [_vm._v("編集")]
-              ),
-              _vm._v(" "),
               _c(
                 "button",
                 { staticClass: "btn btn-danger", on: { click: _vm.del } },
@@ -87716,7 +88006,7 @@ Vue.component("select-department", __webpack_require__(/*! ./components/SelectDe
 Vue.component("select-user", __webpack_require__(/*! ./components/SelectUser.vue */ "./resources/js/components/SelectUser.vue")["default"]);
 Vue.component("input-datepicker", __webpack_require__(/*! ./components/InputDatepicker.vue */ "./resources/js/components/InputDatepicker.vue")["default"]);
 Vue.component("user-add", __webpack_require__(/*! ./components/UserAdd.vue */ "./resources/js/components/UserAdd.vue")["default"]);
-Vue.component("user-edit", __webpack_require__(/*! ./components/UserEdit.vue */ "./resources/js/components/UserEdit.vue")["default"]);
+Vue.component("create-department", __webpack_require__(/*! ./components/CreateDepartment.vue */ "./resources/js/components/CreateDepartment.vue")["default"]);
 Vue.component("message-data", __webpack_require__(/*! ./components/MessageData.vue */ "./resources/js/components/MessageData.vue")["default"]);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -87855,6 +88145,75 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_332fccf4___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_332fccf4___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/CreateDepartment.vue":
+/*!******************************************************!*\
+  !*** ./resources/js/components/CreateDepartment.vue ***!
+  \******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _CreateDepartment_vue_vue_type_template_id_32743e4e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./CreateDepartment.vue?vue&type=template&id=32743e4e& */ "./resources/js/components/CreateDepartment.vue?vue&type=template&id=32743e4e&");
+/* harmony import */ var _CreateDepartment_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./CreateDepartment.vue?vue&type=script&lang=js& */ "./resources/js/components/CreateDepartment.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _CreateDepartment_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _CreateDepartment_vue_vue_type_template_id_32743e4e___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _CreateDepartment_vue_vue_type_template_id_32743e4e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/CreateDepartment.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/CreateDepartment.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************!*\
+  !*** ./resources/js/components/CreateDepartment.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_CreateDepartment_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./CreateDepartment.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateDepartment.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_CreateDepartment_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/CreateDepartment.vue?vue&type=template&id=32743e4e&":
+/*!*************************************************************************************!*\
+  !*** ./resources/js/components/CreateDepartment.vue?vue&type=template&id=32743e4e& ***!
+  \*************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CreateDepartment_vue_vue_type_template_id_32743e4e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./CreateDepartment.vue?vue&type=template&id=32743e4e& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateDepartment.vue?vue&type=template&id=32743e4e&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CreateDepartment_vue_vue_type_template_id_32743e4e___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CreateDepartment_vue_vue_type_template_id_32743e4e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 
@@ -88478,17 +88837,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_UserAdd_vue_vue_type_template_id_fded698a___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
-
-/***/ }),
-
-/***/ "./resources/js/components/UserEdit.vue":
-/*!**********************************************!*\
-  !*** ./resources/js/components/UserEdit.vue ***!
-  \**********************************************/
-/*! exports provided: default */
-/***/ (function(module, exports) {
-
-throw new Error("Module build failed (from ./node_modules/vue-loader/lib/index.js):\nError: ENOENT: no such file or directory, open '/var/www/html/laravel/resources/js/components/UserEdit.vue'");
 
 /***/ }),
 
