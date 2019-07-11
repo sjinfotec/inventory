@@ -70,12 +70,15 @@ Vue.component(
     require("./components/InputDatepicker.vue").default
 );
 Vue.component("user-add", require("./components/UserAdd.vue").default);
+
 Vue.component(
     "create-department",
     require("./components/CreateDepartment.vue").default
 );
 
 Vue.component("message-data", require("./components/MessageData.vue").default);
+
+Vue.component("worktime-day", require("./components/WorkTimeDateTable.vue").default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

@@ -21,6 +21,12 @@
     <div class="form-group col-md-6">
       <search-workingtimebutton v-on:searchclick-event="searchclick"></search-workingtimebutton>
     </div>
+    <div class="form-group col-md-6" v-for="result in results.calc_results">
+      <p>{{ result.name }}</p>
+    </div>
+    <div class="form-group col-md-6">
+      <worktime-day></worktime-day>
+    </div>
   </span>
 </template>
 
@@ -50,22 +56,29 @@ export default {
     // バリデーション
     checkForm: function (e) {
       console.log("checkForm in ");
+      this.validate = true;
       this.messagedatasfromdate = [];
       this.messagedatastodate = [];
 
       console.log("checkForm start " + (moment(this.valuefromdate).format('YYYYMMDD')));
       if (!this.valuefromdate) {
         this.messagedatasfromdate.push('計算開始日付は必ず入力してください。');
+        this.validate = false;
       }
       if (!this.valuetodate) {
         this.messagedatastodate.push('計算終了日付は必ず入力してください。');
+        this.validate = false;
       }
       if (moment(this.valuefromdate).isAfter(this.valuetodate)) {
         this.messagedatasfromdate.push('計算開始日付が計算終了日付より未来の日付になっています。');
         this.messagedatastodate.push('計算開始日付が計算終了日付より未来の日付になっています。');
+        this.validate = false;
       }
 
+      if (this.validate) {return this.validate;}
+
       e.preventDefault();
+      
     },
     // 部署選択が変更された場合の処理
     departmentChanges: function(value){
@@ -99,22 +112,25 @@ export default {
         this.$axios
           .get("/daily/calc", {
             params: {
-              departmentcodefrom: this.valuedepartment,
-              departmentcodeto: this.valuedepartment,
-              usercodefrom: this.valueuser,
-              usercodeto: this.valueuser,
+              departmentcode: this.valuedepartment,
+              usercode: this.valueuser,
               datefrom: this.valuefromdate,
               dateto: this.valuetodate
             }
           })
           .then(response => {
-            //this.results = response.data;
-            console.log("集計時間取得");
+            this.results = response.data;
+            this.dispmessage(this.results.massegedata);
+            console.log("集計時間取得"+Object.keys(this.results).length);
           })
           .catch(reason => {
             alert("error");
           });
       }
+    },
+    // メッセージ処理
+    dispmessage: function(value){
+      if (value.length > 0) {alert(value);}
     }
   }
 };
