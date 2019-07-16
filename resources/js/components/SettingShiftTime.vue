@@ -69,7 +69,7 @@ import Datepicker from "vuejs-datepicker";
 import {ja} from 'vuejs-datepicker/dist/locale'
 
 export default {
-  name: "CreateShiftTime",
+  name: "SettingShiftTime",
   data() {
     return {
       ja:ja,

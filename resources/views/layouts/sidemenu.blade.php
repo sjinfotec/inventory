@@ -12,7 +12,7 @@
                             <li><a href="{{ url('/user_add') }}">ユーザー</a></li>
                             <li><a href="{{ url('/create_department') }}">部署</a></li>
                             <li><a href="{{ url('/') }}">雇用形態</a></li>
-                            <li><a href="{{ url('/') }}">タイムテーブル</a></li>
+                            <li><a href="{{ url('/create_time_table') }}">タイムテーブル</a></li>
                             <li><a href="{{ url('/create_shift_time') }}">シフト時間作成</a></li>
                         </ul>
                         <!-- /block -->

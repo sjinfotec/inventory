@@ -90,7 +90,7 @@ import {
 } from "formvuelar";
 
 export default {
-  name: "CreateShiftTime",
+  name: "UserAdd",
   components: {
     FvlForm,
     FvlInput,

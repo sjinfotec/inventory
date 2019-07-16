@@ -68,9 +68,10 @@ class ApiCommonController extends Controller
         return $statuses;
     }
 
-    /** タイムテーブルリスト取得
+    /**
+     * リスト取得
      *
-     * @return list results
+     * @return void
      */
     public function getTimeTableList(){
         $time_tables = new WorkingTimeTable();

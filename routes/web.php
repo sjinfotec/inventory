@@ -53,6 +53,11 @@ Route::post('/create_department/edit', 'CreateDepartmentController@edit')->middl
 // カレンダー
 Route::get('/create_calendar', 'CreateCalendarController@index')->middleware('auth');
 Route::get('/create_employment_status', 'CreateEmploymentStatusController@index')->middleware('auth');
+// タイムテーブル
+Route::get('/create_time_table', 'CreateTimeTableController@index')->middleware('auth');
+Route::get('/create_time_table/get', 'CreateTimeTableController@getDetail')->middleware('auth');
+Route::post('/create_time_table/store', 'CreateTimeTableController@store')->middleware('auth');
+Route::post('/create_time_table/del', 'CreateTimeTableController@del')->middleware('auth');
 // リスト取得
 Route::get('/get_departments_list', 'ApiCommonController@getDepartmentList')->middleware('auth');
 Route::get('/get_employment_status_list', 'ApiCommonController@getEmploymentStatusList')->middleware('auth');

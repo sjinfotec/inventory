@@ -14,7 +14,7 @@
         label="部署"
         name="selectId"
         :options="departmentList"
-        placeholder="部署を選択すると編集モードになります!"
+        placeholder="部署を選択すると編集モードになります"
         :allowEmpty="true"
         :search-keys="['id']"
         option-key="id"
@@ -42,7 +42,7 @@ import {
 } from "formvuelar";
 
 export default {
-  name: "CreateShiftTime",
+  name: "CreateDepartment",
   components: {
     FvlForm,
     FvlInput,
@@ -67,7 +67,6 @@ export default {
   },
   // マウント時
   mounted() {
-    console.log("UserAdd Component mounted.");
     this.getDepartmentList();
   },
   watch: {

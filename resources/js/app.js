@@ -76,9 +76,17 @@ Vue.component(
     require("./components/CreateDepartment.vue").default
 );
 
+Vue.component(
+    "create-time-table",
+    require("./components/CreateTimeTable.vue").default
+);
+
 Vue.component("message-data", require("./components/MessageData.vue").default);
 
-Vue.component("worktime-day", require("./components/WorkTimeDateTable.vue").default);
+Vue.component(
+    "worktime-day",
+    require("./components/WorkTimeDateTable.vue").default
+);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
