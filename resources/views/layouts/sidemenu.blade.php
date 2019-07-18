@@ -9,11 +9,12 @@
                         </ul>
                         <h1 class="font-size-regular">マスタメンテナンス</h1>
                         <ul class="list-unstyled">
-                            <li><a href="{{ url('/user_add') }}">ユーザー</a></li>
-                            <li><a href="{{ url('/create_department') }}">部署</a></li>
-                            <li><a href="{{ url('/') }}">雇用形態</a></li>
-                            <li><a href="{{ url('/create_time_table') }}">タイムテーブル</a></li>
-                            <li><a href="{{ url('/create_shift_time') }}">シフト時間作成</a></li>
+                            <li><a href="{{ url('/user_add') }}">ユーザー登録/編集</a></li>
+                            <li><a href="{{ url('/create_department') }}">部署登録/編集</a></li>
+                            <li><a href="{{ url('/create_time_table') }}">タイムテーブル登録/編集</a></li>
+                            <li><a href="{{ url('/create_shift_time') }}">シフト時間登録/編集</a></li>
+                            <li><a href="{{ url('/create_calendar') }}">カレンダー登録</a></li>
+                            <li><a href="{{ url('/edit_calendar') }}">カレンダー編集</a></li>
                         </ul>
                         <!-- /block -->
                         @if(Auth::check())

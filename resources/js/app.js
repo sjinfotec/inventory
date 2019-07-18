@@ -9,6 +9,7 @@ require("./bootstrap");
 window.Vue = require("vue");
 import axios from "axios";
 import toasted from "vue-toasted";
+import VCalendar from "v-calendar";
 
 var options = {
     position: "bottom-center",
@@ -17,6 +18,7 @@ var options = {
     type: "info"
 };
 Vue.use(toasted, options);
+Vue.use(VCalendar);
 
 Vue.prototype.$axios = axios;
 // Vue.prototype.$toasted = toasted;
@@ -63,12 +65,23 @@ Vue.component(
     require("./components/SelectDepartment.vue").default
 );
 
+Vue.component(
+    "select-business-day",
+    require("./components/SelectBusinessDay.vue").default
+);
+
+Vue.component(
+    "select-holi-day",
+    require("./components/SelectHoliDay.vue").default
+);
+
 Vue.component("select-user", require("./components/SelectUser.vue").default);
 
 Vue.component(
     "input-datepicker",
     require("./components/InputDatepicker.vue").default
 );
+
 Vue.component("user-add", require("./components/UserAdd.vue").default);
 
 Vue.component(
@@ -79,6 +92,16 @@ Vue.component(
 Vue.component(
     "create-time-table",
     require("./components/CreateTimeTable.vue").default
+);
+
+Vue.component(
+    "create-calendar",
+    require("./components/CreateCalendar.vue").default
+);
+
+Vue.component(
+    "edit-calendar",
+    require("./components/EditCalendar.vue").default
 );
 
 Vue.component("message-data", require("./components/MessageData.vue").default);

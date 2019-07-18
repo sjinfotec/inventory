@@ -50,8 +50,14 @@ Route::get('/create_department/get', 'CreateDepartmentController@getDetails')->m
 Route::post('/create_department/store', 'CreateDepartmentController@store')->middleware('auth');
 Route::post('/create_department/del', 'CreateDepartmentController@del')->middleware('auth');
 Route::post('/create_department/edit', 'CreateDepartmentController@edit')->middleware('auth');
-// カレンダー
+// カレンダー登録
 Route::get('/create_calendar', 'CreateCalendarController@index')->middleware('auth');
+Route::post('/create_calendar/store', 'CreateCalendarController@store')->middleware('auth');
+// カレンダー編集
+Route::get('/edit_calendar', 'EditCalendarController@index')->middleware('auth');
+Route::get('/edit_calendar/get', 'EditCalendarController@getDetail')->middleware('auth');
+Route::post('/edit_calendar/store', 'EditCalendarController@store')->middleware('auth');
+
 Route::get('/create_employment_status', 'CreateEmploymentStatusController@index')->middleware('auth');
 // タイムテーブル
 Route::get('/create_time_table', 'CreateTimeTableController@index')->middleware('auth');
@@ -62,4 +68,6 @@ Route::post('/create_time_table/del', 'CreateTimeTableController@del')->middlewa
 Route::get('/get_departments_list', 'ApiCommonController@getDepartmentList')->middleware('auth');
 Route::get('/get_employment_status_list', 'ApiCommonController@getEmploymentStatusList')->middleware('auth');
 Route::get('/get_time_table_list', 'ApiCommonController@getTimeTableList')->middleware('auth');
+Route::get('/get_business_day_list', 'ApiCommonController@getBusinessDayList')->middleware('auth');
+Route::get('/get_holi_day_list', 'ApiCommonController@getHoliDayList')->middleware('auth');
 
