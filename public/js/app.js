@@ -1804,6 +1804,122 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateCompanyInformation.vue?vue&type=script&lang=js&":
+/*!***********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/CreateCompanyInformation.vue?vue&type=script&lang=js& ***!
+  \***********************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var formvuelar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! formvuelar */ "./node_modules/formvuelar/dist/formvuelar.common.js");
+/* harmony import */ var formvuelar__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(formvuelar__WEBPACK_IMPORTED_MODULE_1__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "CreateCompanyInformation",
+  components: {
+    FvlForm: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlForm"],
+    FvlInput: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlInput"],
+    FvlSubmit: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSubmit"]
+  },
+  data: function data() {
+    return {
+      form: {
+        companyName: "",
+        companyKana: "",
+        postCode: "",
+        address1: "",
+        address2: "",
+        addressKana: "",
+        tell: "",
+        fax: "",
+        representativeName: "",
+        representativeKana: "",
+        email: ""
+      },
+      CompanyInfo: []
+    };
+  },
+  // マウント時
+  mounted: function mounted() {
+    this.getCompanyInformation();
+    console.log("CreateCompanyInformation Component mounted.");
+  },
+  methods: {
+    addSuccess: function addSuccess() {
+      // ここで会社情報呼び出す
+      this.getCompanyInformation();
+      this.$toasted.show("登録しました");
+    },
+    getCompanyInformation: function getCompanyInformation() {
+      var _this = this;
+
+      this.$axios.get("/create_company_information/get").then(function (response) {
+        _this.CompanyInfo = response.data;
+        _this.form.companyName = _this.CompanyInfo[0].name;
+        _this.form.companyKana = _this.CompanyInfo[0].kana;
+        _this.form.address1 = _this.CompanyInfo[0].address1;
+        _this.form.address2 = _this.CompanyInfo[0].address2;
+        _this.form.addressKana = _this.CompanyInfo[0].address_kana;
+        _this.form.postCode = _this.CompanyInfo[0].post_code;
+        _this.form.tell = _this.CompanyInfo[0].tel_no;
+        _this.form.fax = _this.CompanyInfo[0].fax_no;
+        _this.form.representativeName = _this.CompanyInfo[0].represent_name;
+        _this.form.representativeKana = _this.CompanyInfo[0].represent_kana;
+        _this.form.email = _this.CompanyInfo[0].email;
+        console.log("会社情報取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
+    },
+    error: function error() {
+      var options = {
+        position: "bottom-center",
+        duration: 2000,
+        fullWidth: false,
+        type: "error"
+      };
+      this.$toasted.show("登録に失敗しました", options);
+    },
+    inputClear: function inputClear() {}
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateDepartment.vue?vue&type=script&lang=js&":
 /*!***************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/CreateDepartment.vue?vue&type=script&lang=js& ***!
@@ -73876,6 +73992,189 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateCompanyInformation.vue?vue&type=template&id=25a38876&":
+/*!***************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/CreateCompanyInformation.vue?vue&type=template&id=25a38876& ***!
+  \***************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "panel-body" },
+    [
+      _c(
+        "fvl-form",
+        {
+          attrs: {
+            method: "post",
+            data: _vm.form,
+            url: "/create_company_information/store"
+          },
+          on: {
+            success: function($event) {
+              return _vm.addSuccess()
+            },
+            error: function($event) {
+              return _vm.error()
+            }
+          }
+        },
+        [
+          _c("fvl-input", {
+            attrs: {
+              value: _vm.form.companyName,
+              label: "会社名",
+              name: "companyName"
+            },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "companyName", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: {
+              value: _vm.form.companyKana,
+              label: "会社カナ",
+              name: "companyKana"
+            },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "companyKana", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: {
+              value: _vm.form.postCode,
+              label: "郵便番号",
+              name: "postCode"
+            },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "postCode", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: {
+              value: _vm.form.address1,
+              label: "住所１",
+              name: "address1"
+            },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "address1", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: {
+              value: _vm.form.address2,
+              label: "住所２",
+              name: "address2"
+            },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "address2", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: {
+              value: _vm.form.addressKana,
+              label: "住所カナ",
+              name: "addressKana"
+            },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "addressKana", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: { value: _vm.form.tell, label: "電話番号", name: "tell" },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "tell", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: { value: _vm.form.fax, label: "FAX", name: "fax" },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "fax", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: {
+              value: _vm.form.representativeName,
+              label: "代表者氏名",
+              name: "representativeName"
+            },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "representativeName", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: {
+              value: _vm.form.representativeKana,
+              label: "代表者カナ",
+              name: "representativeKana"
+            },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "representativeKana", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: { value: _vm.form.email, label: "e-mail", name: "email" },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "email", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-submit", [_vm._v("登録")])
+        ],
+        1
+      )
+    ],
+    1
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateDepartment.vue?vue&type=template&id=32743e4e&":
 /*!*******************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/CreateDepartment.vue?vue&type=template&id=32743e4e& ***!
@@ -90813,6 +91112,7 @@ Vue.component("create-department", __webpack_require__(/*! ./components/CreateDe
 Vue.component("create-time-table", __webpack_require__(/*! ./components/CreateTimeTable.vue */ "./resources/js/components/CreateTimeTable.vue")["default"]);
 Vue.component("create-calendar", __webpack_require__(/*! ./components/CreateCalendar.vue */ "./resources/js/components/CreateCalendar.vue")["default"]);
 Vue.component("edit-calendar", __webpack_require__(/*! ./components/EditCalendar.vue */ "./resources/js/components/EditCalendar.vue")["default"]);
+Vue.component("create-company-information", __webpack_require__(/*! ./components/CreateCompanyInformation.vue */ "./resources/js/components/CreateCompanyInformation.vue")["default"]);
 Vue.component("message-data", __webpack_require__(/*! ./components/MessageData.vue */ "./resources/js/components/MessageData.vue")["default"]);
 Vue.component("worktime-day", __webpack_require__(/*! ./components/WorkTimeDateTable.vue */ "./resources/js/components/WorkTimeDateTable.vue")["default"]);
 /**
@@ -91021,6 +91321,75 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CreateCalendar_vue_vue_type_template_id_ef521af6___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CreateCalendar_vue_vue_type_template_id_ef521af6___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/CreateCompanyInformation.vue":
+/*!**************************************************************!*\
+  !*** ./resources/js/components/CreateCompanyInformation.vue ***!
+  \**************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _CreateCompanyInformation_vue_vue_type_template_id_25a38876___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./CreateCompanyInformation.vue?vue&type=template&id=25a38876& */ "./resources/js/components/CreateCompanyInformation.vue?vue&type=template&id=25a38876&");
+/* harmony import */ var _CreateCompanyInformation_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./CreateCompanyInformation.vue?vue&type=script&lang=js& */ "./resources/js/components/CreateCompanyInformation.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _CreateCompanyInformation_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _CreateCompanyInformation_vue_vue_type_template_id_25a38876___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _CreateCompanyInformation_vue_vue_type_template_id_25a38876___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/CreateCompanyInformation.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/CreateCompanyInformation.vue?vue&type=script&lang=js&":
+/*!***************************************************************************************!*\
+  !*** ./resources/js/components/CreateCompanyInformation.vue?vue&type=script&lang=js& ***!
+  \***************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_CreateCompanyInformation_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./CreateCompanyInformation.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateCompanyInformation.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_CreateCompanyInformation_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/CreateCompanyInformation.vue?vue&type=template&id=25a38876&":
+/*!*********************************************************************************************!*\
+  !*** ./resources/js/components/CreateCompanyInformation.vue?vue&type=template&id=25a38876& ***!
+  \*********************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CreateCompanyInformation_vue_vue_type_template_id_25a38876___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./CreateCompanyInformation.vue?vue&type=template&id=25a38876& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateCompanyInformation.vue?vue&type=template&id=25a38876&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CreateCompanyInformation_vue_vue_type_template_id_25a38876___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CreateCompanyInformation_vue_vue_type_template_id_25a38876___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

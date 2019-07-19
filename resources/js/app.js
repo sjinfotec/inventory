@@ -104,6 +104,11 @@ Vue.component(
     require("./components/EditCalendar.vue").default
 );
 
+Vue.component(
+    "create-company-information",
+    require("./components/CreateCompanyInformation.vue").default
+);
+
 Vue.component("message-data", require("./components/MessageData.vue").default);
 
 Vue.component(

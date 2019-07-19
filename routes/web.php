@@ -57,8 +57,10 @@ Route::post('/create_calendar/store', 'CreateCalendarController@store')->middlew
 Route::get('/edit_calendar', 'EditCalendarController@index')->middleware('auth');
 Route::get('/edit_calendar/get', 'EditCalendarController@getDetail')->middleware('auth');
 Route::post('/edit_calendar/store', 'EditCalendarController@store')->middleware('auth');
-
-Route::get('/create_employment_status', 'CreateEmploymentStatusController@index')->middleware('auth');
+// 会社情報
+Route::get('/create_company_information', 'CreateCompanyInformationController@index')->middleware('auth');
+Route::get('/create_company_information/get', 'CreateCompanyInformationController@getCompanyInfo')->middleware('auth');
+Route::post('/create_company_information/store', 'CreateCompanyInformationController@store')->middleware('auth');
 // タイムテーブル
 Route::get('/create_time_table', 'CreateTimeTableController@index')->middleware('auth');
 Route::get('/create_time_table/get', 'CreateTimeTableController@getDetail')->middleware('auth');
