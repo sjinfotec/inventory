@@ -168,7 +168,7 @@ class GeneralCodes extends Model
         return $this->codes;
     }
 
-    private function setGeneralcodes($value)
+    public function setGeneralcodes($value)
     {
         $this->codes = $value;
     }
@@ -192,15 +192,16 @@ class GeneralCodes extends Model
      * @return 取得結果
      */
     public function getGeneralcode(){
+        \DB::enableQueryLog();
         $data = DB::table($this->table)
             ->select(
-                $this->table.'.identification_id',
-                $this->table.'.code',
-                $this->table.'.sort_seq',
-                $this->table.'.identification_name',
-                $this->table.'.description',
-                $this->table.'.code_name',
-                $this->table.'.is_deleted'
+                $this->table.'.identification_id as identification_id',
+                $this->table.'.code as code',
+                $this->table.'.sort_seq as sort_seq',
+                $this->table.'.identification_name as identification_name',
+                $this->table.'.description as description',
+                $this->table.'.code_name as code_name',
+                $this->table.'.is_deleted as is_deleted'
             );
         if (isset($this->param_identification_id)) {
             $data->where($this->table.'.identification_id',$this->param_identification_id);
@@ -208,12 +209,18 @@ class GeneralCodes extends Model
         if (isset($this->param_code)) {
             $data->where($this->table.'.code',$this->param_code);
         }
-        $data->where($this->table.'.is_deleted',0)
+        $result = $data->where($this->table.'.is_deleted',0)
             ->orderBy($this->table.'.identification_id', 'asc')
             ->orderBy($this->table.'.sort_seq', 'asc')
             ->get();
-
-        return $data;
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getGeneralcode' => \DB::getQueryLog()
+            ]
+            );
+        
+        return $result;
     }
 
 }

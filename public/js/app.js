@@ -1751,6 +1751,16 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -1768,7 +1778,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         name: "",
         id: ""
       },
-      valuedepartment: '',
+      valuedepartment: "",
       departmentList: [],
       details: [],
       selectId: "",
@@ -1787,16 +1797,17 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       console.log(val + " " + oldVal);
 
       if (this.selectId != "") {
-        this.$axios.get("/user_add/get", {
+        this.$axios.get("/create_department/get", {
           params: {
             id: this.selectId
           }
         }).then(function (response) {
           _this.details = response.data;
-          _this.form.name = _this.details[0].name; // hidden
+          _this.form.name = _this.details[0].name;
+          _this.form.id = _this.details[0].id; // hidden
 
-          _this.oldCode = _this.details[0].id;
-          console.log("ユーザー詳細情報取得");
+          _this.oldId = _this.details[0].id;
+          console.log("部署名取得");
         })["catch"](function (reason) {
           alert("error");
         });
@@ -1811,13 +1822,19 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       this.$axios.get("/get_departments_list").then(function (response) {
         _this2.departmentList = response.data;
+        _this2.object = {
+          id: "",
+          name: "新規登録"
+        };
+
+        _this2.departmentList.unshift(_this2.object);
+
         console.log("部署リスト取得");
-      })["catch"](function (reason) {
-        alert("error");
-      });
+      })["catch"](function (reason) {});
     },
     addSuccess: function addSuccess() {
-      this.$toasted.show("部署を追加しました");
+      this.$toasted.show("登録しました");
+      this.getDepartmentList();
     },
     error: function error() {
       var options = {
@@ -1826,54 +1843,34 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         fullWidth: false,
         type: "error"
       };
-      this.$toasted.show("部署追加に失敗しました", options);
-    },
-    edit: function edit() {
-      var _this3 = this;
-
-      var confirm = window.confirm("編集内容を確定しますか？");
-
-      if (confirm) {
-        this.$axios.post("/user_add/edit", {
-          old_code: this.oldCode,
-          code: this.form.code,
-          name: this.form.name
-        }).then(function (response) {
-          var res = response.data;
-
-          if (res.result == 0) {
-            _this3.$toasted.show("編集内容を確定しました");
-
-            _this3.getUserList(1, null);
-          } else {}
-        })["catch"](function (reason) {});
-      } else {}
+      this.$toasted.show("登録に失敗しました", options);
     },
     // 削除
     del: function del() {
-      var _this4 = this;
+      var _this3 = this;
 
       var confirm = window.confirm("選択した部署を削除しますか？");
 
       if (confirm) {
-        this.$axios.post("/user_add/del", {
-          user_code: this.userCode
+        this.$axios.post("/create_department/del", {
+          id: this.selectId
         }).then(function (response) {
           var res = response.data;
 
           if (res.result == 0) {
-            _this4.$toasted.show("選択した部署を削除しました");
+            _this3.$toasted.show("選択した部署を削除しました");
 
-            _this4.inputClear();
+            _this3.inputClear();
 
-            _this4.getUserList(1, null);
+            _this3.getDepartmentList();
           } else {}
         })["catch"](function (reason) {});
       } else {}
     },
     inputClear: function inputClear() {
       this.form.name = "";
-      this.form.code = "";
+      this.form.id = "";
+      this.selectId = "";
     }
   }
 });
@@ -2060,6 +2057,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2084,23 +2082,24 @@ __webpack_require__.r(__webpack_exports__);
     checkForm: function checkForm(e) {
       console.log("checkForm in ");
       this.validate = true;
+      this.messagedatasserver = [];
       this.messagedatasfromdate = [];
       this.messagedatastodate = [];
       console.log("checkForm start " + moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format('YYYYMMDD'));
 
       if (!this.valuefromdate) {
-        this.messagedatasfromdate.push('計算開始日付は必ず入力してください。');
+        this.messagedatasfromdate.push("計算開始日付は必ず入力してください。");
         this.validate = false;
       }
 
       if (!this.valuetodate) {
-        this.messagedatastodate.push('計算終了日付は必ず入力してください。');
+        this.messagedatastodate.push("計算終了日付は必ず入力してください。");
         this.validate = false;
       }
 
       if (moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).isAfter(this.valuetodate)) {
-        this.messagedatasfromdate.push('計算開始日付が計算終了日付より未来の日付になっています。');
-        this.messagedatastodate.push('計算開始日付が計算終了日付より未来の日付になっています。');
+        this.messagedatasfromdate.push("計算開始日付が計算終了日付より未来の日付になっています。");
+        this.messagedatastodate.push("計算開始日付が計算終了日付より未来の日付になっています。");
         this.validate = false;
       }
 
@@ -2161,10 +2160,10 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     // メッセージ処理
-    dispmessage: function dispmessage(value) {
-      if (value.length > 0) {
-        alert(value);
-      }
+    dispmessage: function dispmessage(items) {
+      items.forEach(function (value) {
+        this.messagedatasserver.push(value);
+      });
     }
   }
 });
@@ -2756,6 +2755,41 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2773,13 +2807,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         name: "",
         kana: "",
         email: "",
-        loginid: "",
+        code: "",
         password: "",
         status: "",
         table_no: "",
         departmentCode: ""
       },
-      valuedepartment: '',
+      valuedepartment: "",
       departmentList: [],
       employStatusList: [],
       timeTableList: [],
@@ -2813,7 +2847,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           _this.userDetails = response.data;
           _this.form.name = _this.userDetails[0].name;
           _this.form.kana = _this.userDetails[0].kana;
-          _this.form.loginid = _this.userDetails[0].code;
+          _this.form.code = _this.userDetails[0].code;
           _this.form.password = _this.userDetails[0].password;
           _this.form.email = _this.userDetails[0].email;
           _this.form.departmentCode = _this.userDetails[0].department_id;
@@ -2906,7 +2940,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           old_code: this.oldCode,
           departmentCode: this.form.departmentCode,
           kana: this.form.kana,
-          loginid: this.form.loginid,
+          code: this.form.code,
           name: this.form.name,
           email: this.form.email,
           password: this.form.password,
@@ -2948,7 +2982,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     inputClear: function inputClear() {
       this.form.name = "";
       this.form.kana = "";
-      this.form.loginid = "";
+      this.form.code = "";
       this.form.password = "";
       this.form.email = "";
       this.form.departmentCode = "";
@@ -72327,7 +72361,11 @@ var render = function() {
       _c(
         "fvl-form",
         {
-          attrs: { method: "post", data: _vm.form, url: "/user_add/store" },
+          attrs: {
+            method: "post",
+            data: _vm.form,
+            url: "/create_department/store"
+          },
           on: {
             success: function($event) {
               return _vm.addSuccess()
@@ -72368,6 +72406,10 @@ var render = function() {
           _vm._v(" "),
           _vm.selectId == "" || _vm.selectId == null
             ? _c("fvl-submit", [_vm._v("追加")])
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.selectId != ""
+            ? _c("fvl-submit", { attrs: { id: "edit" } }, [_vm._v("編集")])
             : _vm._e()
         ],
         1
@@ -72376,23 +72418,8 @@ var render = function() {
       _vm.selectId != ""
         ? _c(
             "span",
-            {
-              staticClass: "padding-set-small margin-set-top-regular",
-              model: {
-                value: _vm.form.selectId,
-                callback: function($$v) {
-                  _vm.$set(_vm.form, "selectId", $$v)
-                },
-                expression: "form.selectId"
-              }
-            },
+            { staticClass: "padding-set-small margin-set-top-regular" },
             [
-              _c(
-                "button",
-                { staticClass: "btn btn-warning", on: { click: _vm.edit } },
-                [_vm._v("編集")]
-              ),
-              _vm._v(" "),
               _c(
                 "button",
                 { staticClass: "btn btn-danger", on: { click: _vm.del } },
@@ -72595,6 +72622,8 @@ var render = function() {
   return _c(
     "span",
     [
+      _c("message-data", { attrs: { messagedatas: _vm.messagedatasserver } }),
+      _vm._v(" "),
       _c(
         "div",
         { staticClass: "form-group col-md-6" },
@@ -73283,15 +73312,15 @@ var render = function() {
           _vm._v(" "),
           _c("fvl-input", {
             attrs: {
-              value: _vm.form.loginid,
+              value: _vm.form.code,
               label: "ログインID",
-              name: "loginid",
+              name: "code",
               title: "半角英数字4-10文字",
               pattern: "^[a-zA-Z0-9]{4,10}$"
             },
             on: {
               "update:value": function($event) {
-                return _vm.$set(_vm.form, "loginid", $event)
+                return _vm.$set(_vm.form, "code", $event)
               }
             }
           }),
@@ -73385,6 +73414,10 @@ var render = function() {
           _vm._v(" "),
           _vm.userCode == "" || _vm.userCode == null
             ? _c("fvl-submit", [_vm._v("追加")])
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.userCode != ""
+            ? _c("fvl-submit", { attrs: { id: "edit" } }, [_vm._v("編集")])
             : _vm._e()
         ],
         1
@@ -73393,23 +73426,8 @@ var render = function() {
       _vm.userCode != ""
         ? _c(
             "span",
-            {
-              staticClass: "padding-set-small margin-set-top-regular",
-              model: {
-                value: _vm.form.userCode,
-                callback: function($$v) {
-                  _vm.$set(_vm.form, "userCode", $$v)
-                },
-                expression: "form.userCode"
-              }
-            },
+            { staticClass: "padding-set-small margin-set-top-regular" },
             [
-              _c(
-                "button",
-                { staticClass: "btn btn-warning", on: { click: _vm.edit } },
-                [_vm._v("編集")]
-              ),
-              _vm._v(" "),
               _c(
                 "button",
                 { staticClass: "btn btn-danger", on: { click: _vm.del } },
