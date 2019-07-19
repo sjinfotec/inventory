@@ -2615,6 +2615,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2639,23 +2640,24 @@ __webpack_require__.r(__webpack_exports__);
     checkForm: function checkForm(e) {
       console.log("checkForm in ");
       this.validate = true;
+      this.messagedatasserver = [];
       this.messagedatasfromdate = [];
       this.messagedatastodate = [];
       console.log("checkForm start " + moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format('YYYYMMDD'));
 
       if (!this.valuefromdate) {
-        this.messagedatasfromdate.push('計算開始日付は必ず入力してください。');
+        this.messagedatasfromdate.push("計算開始日付は必ず入力してください。");
         this.validate = false;
       }
 
       if (!this.valuetodate) {
-        this.messagedatastodate.push('計算終了日付は必ず入力してください。');
+        this.messagedatastodate.push("計算終了日付は必ず入力してください。");
         this.validate = false;
       }
 
       if (moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).isAfter(this.valuetodate)) {
-        this.messagedatasfromdate.push('計算開始日付が計算終了日付より未来の日付になっています。');
-        this.messagedatastodate.push('計算開始日付が計算終了日付より未来の日付になっています。');
+        this.messagedatasfromdate.push("計算開始日付が計算終了日付より未来の日付になっています。");
+        this.messagedatastodate.push("計算開始日付が計算終了日付より未来の日付になっています。");
         this.validate = false;
       }
 
@@ -2716,10 +2718,10 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     // メッセージ処理
-    dispmessage: function dispmessage(value) {
-      if (value.length > 0) {
-        alert(value);
-      }
+    dispmessage: function dispmessage(items) {
+      items.forEach(function (value) {
+        this.messagedatasserver.push(value);
+      });
     }
   }
 });
@@ -74979,6 +74981,8 @@ var render = function() {
   return _c(
     "span",
     [
+      _c("message-data", { attrs: { messagedatas: _vm.messagedatasserver } }),
+      _vm._v(" "),
       _c(
         "div",
         { staticClass: "form-group col-md-6" },

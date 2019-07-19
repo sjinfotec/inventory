@@ -1,5 +1,6 @@
 <template>
   <span>
+    <message-data v-bind:messagedatas="messagedatasserver"></message-data>
     <div class="form-group col-md-6">
       <label for="target_fromdate" class>計算開始日付入力</label>
       <input-datepicker v-bind:default-Date="defaultDate" v-on:change-event="fromdateChanges"></input-datepicker>
@@ -57,21 +58,22 @@ export default {
     checkForm: function (e) {
       console.log("checkForm in ");
       this.validate = true;
+      this.messagedatasserver = [];
       this.messagedatasfromdate = [];
       this.messagedatastodate = [];
 
       console.log("checkForm start " + (moment(this.valuefromdate).format('YYYYMMDD')));
       if (!this.valuefromdate) {
-        this.messagedatasfromdate.push('計算開始日付は必ず入力してください。');
+        this.messagedatasfromdate.push("計算開始日付は必ず入力してください。");
         this.validate = false;
       }
       if (!this.valuetodate) {
-        this.messagedatastodate.push('計算終了日付は必ず入力してください。');
+        this.messagedatastodate.push("計算終了日付は必ず入力してください。");
         this.validate = false;
       }
       if (moment(this.valuefromdate).isAfter(this.valuetodate)) {
-        this.messagedatasfromdate.push('計算開始日付が計算終了日付より未来の日付になっています。');
-        this.messagedatastodate.push('計算開始日付が計算終了日付より未来の日付になっています。');
+        this.messagedatasfromdate.push("計算開始日付が計算終了日付より未来の日付になっています。");
+        this.messagedatastodate.push("計算開始日付が計算終了日付より未来の日付になっています。");
         this.validate = false;
       }
 
@@ -129,8 +131,10 @@ export default {
       }
     },
     // メッセージ処理
-    dispmessage: function(value){
-      if (value.length > 0) {alert(value);}
+    dispmessage: function(items){
+      items.forEach(function( value ) {
+        this.messagedatasserver.push(value);
+      });
     }
   }
 };
