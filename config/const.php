@@ -33,7 +33,14 @@ return [
     ],
 
     'C006' => [
-        'value' => 'C006'
+        'value' => 'C006',
+        'sun' => 0,
+        'mon' => 1,
+        'tue' => 2,
+        'wed' => 3,
+        'thu' => 4,
+        'fri' => 5,
+        'sat' => 6
     ],
 
     'C007' => [
@@ -53,6 +60,16 @@ return [
         'continue_work' => 5,
         'forget' => 9,
         'unknown' => 99
+    ],
+
+    'WEEK_KANJI' => [
+        'sun' => '(日)',
+        'mon' => '(月)',
+        'tue' => '(火)',
+        'wed' => '(水)',
+        'thu' => '(木)',
+        'fri' => '(金)',
+        'sat' => '(土)'
     ],
 
     'MEMO_DATA' => [
@@ -80,6 +97,8 @@ return [
         'not_setting_time_unit' => '時間計算の単位が設定されていません。',
         'not_setting_time_rounding' => '時間計算の端数処理（丸め）が設定されていません。',
         'not_setting_beginning_month' => '期首月が設定されていません。',
+        'data_eror_dailycalc' => '労働時間計算処理にてエラーのため計算できませんでした。',
+        'data_accesee_eror_dailycalc' => '労働時間計算処理にてデータアクセスエラーのため計算できませんでした。',
         'mismatch_data' => 'データ不整合'
     ]
 

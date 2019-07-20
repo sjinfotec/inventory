@@ -1,7 +1,7 @@
 <template>
   <select class="form-control" v-model="selectedDepartment" v-on:change="selChanges(selectedDepartment)" placeholder="部署を選択してください">
     <option v-if="this.blankData" value=""></option>
-    <option v-for="departments in departmentList" v-bind:value="departments.code">
+    <option v-for="departments in departmentList" v-bind:value="departments.id">
       {{ departments.name }}
     </option>
   </select>
@@ -24,7 +24,6 @@ export default {
   },
   // マウント時
   mounted() {
-    console.log("selectedDepartment Component mounted." + this.blankdata);
     this.getDepartmentList();
   },
   methods: {

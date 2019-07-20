@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
 use App\ShiftInformation;
 use App\WorkingTimeTable;
@@ -25,9 +26,30 @@ class ApiCommonController extends Controller
 
         if ($getdo == 1) {
             if (isset($request->code)) {
-                $users = DB::table('users')->where('department_code', $request->code)->where('is_deleted', 0)->orderby('name','asc')->get();
+                if (isset($request->employment)) {
+                    $users = DB::table('users')
+                        ->where('department_id', $request->code)
+                        ->where('employment_status', $request->employment)
+                        ->where('is_deleted', 0)
+                        ->orderby('name','asc')
+                        ->get();
+                } else {
+                    $users = DB::table('users')
+                        ->where('department_id', $request->code)
+                        ->where('is_deleted', 0)
+                        ->orderby('name','asc')
+                        ->get();
+                }
             } else {
-                $users = DB::table('users')->where('is_deleted', 0)->orderby('name','asc')->get();
+                if (isset($request->employment)) {
+                    $users = DB::table('users')
+                        ->where('employment_status', $request->employment)
+                        ->where('is_deleted', 0)
+                        ->orderby('name','asc')
+                        ->get();
+                } else {
+                    $users = DB::table('users')->where('is_deleted', 0)->orderby('name','asc')->get();
+                }
             }
         } else {
             return null;
@@ -64,7 +86,7 @@ class ApiCommonController extends Controller
      * @return list statuses
      */
     public function getEmploymentStatusList(){
-        $statuses = DB::table('generalcodes')->where('identification_id', 'C001')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        $statuses = DB::table('generalcodes')->where('identification_id', Config::get('const.C001.value'))->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
         return $statuses;
     }
 
@@ -85,7 +107,7 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getBusinessDayList(){
-        $businessDays = DB::table('generalcodes')->where('identification_id', 'C007')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        $businessDays = DB::table('generalcodes')->where('identification_id', Config::get('const.C007.value'))->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
         return $businessDays;
     }
     
@@ -95,7 +117,7 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getHoliDayList(){
-        $holiDays = DB::table('generalcodes')->where('identification_id', 'C008')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        $holiDays = DB::table('generalcodes')->where('identification_id', Config::get('const.C008.value'))->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
         return $holiDays;
     }
 
@@ -124,26 +146,26 @@ class ApiCommonController extends Controller
         // $is_holiday = JpCarbon::createFromDate($dt->year,$dt->month,$dt->day)->holiday;   //祝日以外は""を返す
 
         if($dt->isSaturday()){
-            $what_weekday['id'] = 6;
-            $what_weekday['week_name'] = '(土)';
+            $what_weekday['id'] = Config::get('const.C006.sat');
+            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.sat');
         }elseif($dt->isSunday()){
-            $what_weekday['id'] = 0;
-            $what_weekday['week_name'] = '(日)';
+            $what_weekday['id'] = Config::get('const.C006.sun');
+            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.sun');
         }elseif($dt->isMonday()){
-            $what_weekday['id'] = 1;
-            $what_weekday['week_name'] = '(月)';
+            $what_weekday['id'] = Config::get('const.C006.mon');
+            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.mon');
         }elseif($dt->isTuesday()){
-            $what_weekday['id'] = 2;
-            $what_weekday['week_name'] = '(火)';
+            $what_weekday['id'] = Config::get('const.C006.tue');
+            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.tue');
         }elseif($dt->isWednesday()){
-            $what_weekday['id'] = 3;
-            $what_weekday['week_name'] = '(水)';
+            $what_weekday['id'] = Config::get('const.C006.wed');
+            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.wed');
         }elseif($dt->isThursday()){
-            $what_weekday['id'] = 4;
-            $what_weekday['week_name'] = '(木)';
+            $what_weekday['id'] = Config::get('const.C006.thu');
+            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.thu');
         }elseif($dt->isFriday()){
-            $what_weekday['id'] = 5;
-            $what_weekday['week_name'] = '(金)';
+            $what_weekday['id'] = Config::get('const.C006.fri');
+            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.fri');
         }
 
         return $what_weekday;
