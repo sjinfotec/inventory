@@ -46,6 +46,12 @@ class ApiCommonController extends Controller
 
         $shift_info->setUsercodeAttribute($code);
         $results = $shift_info->getUserShift();
+        foreach ($results as $item) {
+            if(isset($item->target_date)){
+                $date = new Carbon($item->target_date);
+                $item->target_date = $date->format('Y/m/d');
+            }
+        }
 
         return $results;
     }

@@ -12,10 +12,10 @@
         <select-user ref="selectuser" v-bind:get-do="getDo" v-on:change-event="userChanges"></select-user>&nbsp;
       </div>
       <div class="form-group col-md-6">
-        <label for="shift_end" class>シフト選択</label>
-        <select class="form-control" v-model="selectedShift">
-        <option v-for="option in shiftTimes" v-bind:value="option">
-          {{ option.shift_start_time }} ~ {{ option.shift_end_time }}
+        <label for="shift_end" class>タイムテーブル選択</label>
+        <select class="form-control" v-model="no">
+        <option v-for="option in timeTableList" v-bind:value="option.no">
+          {{ option.name }}
         </option>
       </select>
       </div>
@@ -45,8 +45,7 @@
         <thead>
           <tr>
             <th>日付</th>
-            <th>シフト開始時間</th>
-            <th>シフト終了時間</th>
+            <th>タイムテーブル</th>
             <th></th>
           </tr>
         </thead>
@@ -54,8 +53,7 @@
           <tr v-for="item in shiftInfo">
             <input type="hidden" v-model="item.id"></input>
             <td>{{item.target_date}}</td>
-            <td>{{item.shift_start_time}}</td>
-            <td>{{item.shift_end_time}}</td>
+            <td>{{item.name}}</td>
             <td><button class="btn btn-danger" @click="delShiftTimes(item.id)">削除</button></td>
           </tr>
         </tbody>
@@ -80,10 +78,11 @@ export default {
       shiftTimes: [],
       userList: [],
       shiftInfo: [],
-      selectedShift: [],
+      timeTableList: [],
       selectedUser: "",
-      getDo: 1,
+      no: "",
       errors: [],
+      getDo: 1,
       validate: false
     };
   },
@@ -93,14 +92,14 @@ export default {
   // マウント時
   mounted() {
     console.log("create shift time Component mounted.");
-    this.getShiftTimes();
+    this.getTimeTableList();
     this.getUserList();
   },
   methods: {
     // バリデーション
     checkForm: function () {
       var flag = false;
-      if (this.selectedUser && this.selectedShift.id && this.from && this.to) {
+      if (this.selectedUser && this.no && this.from && this.to) {
         flag = true;
         return flag;
       }else{
@@ -110,9 +109,9 @@ export default {
           flag = false;
           this.errors.push('ユーザーを選択してください');
         }
-        if (!this.selectedShift.id) {
+        if (!this.no) {
           flag = false;
-          this.errors.push('シフト選択をしてください');
+          this.errors.push('タイムテーブル選択をしてください');
         }
         if (!this.from) {
           flag = false;
@@ -132,8 +131,7 @@ export default {
         this.$axios
         .post("/setting_shift_time/store", {
           user_code: this.selectedUser,
-          shift_start_time: this.selectedShift.shift_start_time,
-          shift_end_time: this.selectedShift.shift_end_time,
+          time_table_no : this.no,
           from: this.from,
           to: this.to
         })
@@ -172,13 +170,12 @@ export default {
     getUserList(){
       this.$refs.selectuser.getUserList(this.getDo, "");
     },
-    // シフトタイムリスト
-    getShiftTimes(){
+    getTimeTableList() {
       this.$axios
-        .get("/create_shift_time/get")
+        .get("/get_time_table_list")
         .then(response => {
-          this.shiftTimes = response.data;
-          console.log("登録済みシフト一覧更新");
+          this.timeTableList = response.data;
+          console.log("タイムテーブルリスト取得");
         })
         .catch(reason => {
           alert("error");

@@ -9,13 +9,24 @@ use Carbon\Carbon;
 
 class ShiftInformation extends Model
 {
+    private $working_timetable_no; 
     private $user_code;                  
-    private $shift_satrt_time;                  
-    private $shift_end_time;                  
     private $target_date;        
     private $start_target_date;        
-    private $end_target_date;        
+    private $end_target_date;
+    private $created_at;                  
+    private $updated_at;         
+                     
+     
+    public function getWorkingtimetablenoAttribute()
+    {
+        return $this->working_timetable_no;
+    }
 
+    public function setWorkingtimetablenoAttribute($value)
+    {
+        $this->working_timetable_no = $value;
+    }        
      
     public function getUsercodeAttribute()
     {
@@ -25,26 +36,6 @@ class ShiftInformation extends Model
     public function setUsercodeAttribute($value)
     {
         $this->user_code = $value;
-    }
-     
-    public function getShiftsatrttimeAttribute()
-    {
-        return $this->shift_satrt_time;
-    }
-
-    public function setShiftsatrttimeAttribute($value)
-    {
-        $this->shift_satrt_time = $value;
-    }
-     
-    public function getShiftendtimeAttribute()
-    {
-        return $this->shift_end_time;
-    }
-
-    public function setShiftendtimeAttribute($value)
-    {
-        $this->shift_end_time = $value;
     }
      
     public function getTargetdateAttribute()
@@ -78,6 +69,26 @@ class ShiftInformation extends Model
         $this->end_target_date = $value;
     }
 
+    public function getCreatedatAttribute()
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedatAttribute($value)
+    {
+        $this->created_at = $value;
+    }
+     
+    public function getUpdatedatAttribute()
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedatAttribute($value)
+    {
+        $this->updated_at = $value;
+    }
+
 
     /**
      * ユーザーシフト取得
@@ -90,13 +101,22 @@ class ShiftInformation extends Model
         $end_date = $today->copy()->addMonth(1)->format("Y/m/d");
         $shift_informatinos = DB::table('shift_informations')
             ->join('users', 'shift_informations.user_code', '=', 'users.code')
-            ->select('shift_informations.id', 
-                    'shift_informations.shift_start_time',
-                    'shift_informations.shift_end_time',
-                    'shift_informations.target_date')
+            ->join('working_timetables', 'shift_informations.working_timetable_no', '=', 'working_timetables.no')
+            ->select( 
+                    'shift_informations.id',
+                    'shift_informations.working_timetable_no',
+                    'working_timetables.name',
+                    'shift_informations.target_date'
+                    )
             ->where('users.code',$this->user_code)
             ->where('shift_informations.is_deleted', 0)
             ->whereBetween('shift_informations.target_date',[$start_date,$end_date])
+            ->groupBy(
+                    'shift_informations.id'
+                    ,'shift_informations.working_timetable_no'
+                    ,'working_timetables.name'
+                    ,'shift_informations.target_date'
+                    )
             ->orderBy('shift_informations.target_date','asc')
             ->get();
 
@@ -113,9 +133,9 @@ class ShiftInformation extends Model
             DB::table('shift_informations')->insert(
                 [
                     'user_code' => $this->user_code,
-                    'shift_start_time' => $this->shift_satrt_time,
-                    'shift_end_time' => $this->shift_end_time,
-                    'target_date' => $i
+                    'working_timetable_no' => $this->working_timetable_no,
+                    'target_date' => $i,
+                    'created_at' => $this->created_at,
                 ]
             );
         }

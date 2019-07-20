@@ -3385,8 +3385,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
 
 
 
@@ -3402,10 +3400,11 @@ __webpack_require__.r(__webpack_exports__);
       shiftTimes: [],
       userList: [],
       shiftInfo: [],
-      selectedShift: [],
+      timeTableList: [],
       selectedUser: "",
-      getDo: 1,
+      no: "",
       errors: [],
+      getDo: 1,
       validate: false
     };
   },
@@ -3415,7 +3414,7 @@ __webpack_require__.r(__webpack_exports__);
   // マウント時
   mounted: function mounted() {
     console.log("create shift time Component mounted.");
-    this.getShiftTimes();
+    this.getTimeTableList();
     this.getUserList();
   },
   methods: {
@@ -3423,7 +3422,7 @@ __webpack_require__.r(__webpack_exports__);
     checkForm: function checkForm() {
       var flag = false;
 
-      if (this.selectedUser && this.selectedShift.id && this.from && this.to) {
+      if (this.selectedUser && this.no && this.from && this.to) {
         flag = true;
         return flag;
       } else {
@@ -3434,9 +3433,9 @@ __webpack_require__.r(__webpack_exports__);
           this.errors.push('ユーザーを選択してください');
         }
 
-        if (!this.selectedShift.id) {
+        if (!this.no) {
           flag = false;
-          this.errors.push('シフト選択をしてください');
+          this.errors.push('タイムテーブル選択をしてください');
         }
 
         if (!this.from) {
@@ -3461,8 +3460,7 @@ __webpack_require__.r(__webpack_exports__);
       if (this.validate) {
         this.$axios.post("/setting_shift_time/store", {
           user_code: this.selectedUser,
-          shift_start_time: this.selectedShift.shift_start_time,
-          shift_end_time: this.selectedShift.shift_end_time,
+          time_table_no: this.no,
           from: this.from,
           to: this.to
         }).then(function (response) {
@@ -3499,13 +3497,12 @@ __webpack_require__.r(__webpack_exports__);
     getUserList: function getUserList() {
       this.$refs.selectuser.getUserList(this.getDo, "");
     },
-    // シフトタイムリスト
-    getShiftTimes: function getShiftTimes() {
+    getTimeTableList: function getTimeTableList() {
       var _this2 = this;
 
-      this.$axios.get("/create_shift_time/get").then(function (response) {
-        _this2.shiftTimes = response.data;
-        console.log("登録済みシフト一覧更新");
+      this.$axios.get("/get_time_table_list").then(function (response) {
+        _this2.timeTableList = response.data;
+        console.log("タイムテーブルリスト取得");
       })["catch"](function (reason) {
         alert("error");
       });
@@ -75803,7 +75800,9 @@ var render = function() {
       ),
       _vm._v(" "),
       _c("div", { staticClass: "form-group col-md-6" }, [
-        _c("label", { attrs: { for: "shift_end" } }, [_vm._v("シフト選択")]),
+        _c("label", { attrs: { for: "shift_end" } }, [
+          _vm._v("タイムテーブル選択")
+        ]),
         _vm._v(" "),
         _c(
           "select",
@@ -75812,8 +75811,8 @@ var render = function() {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.selectedShift,
-                expression: "selectedShift"
+                value: _vm.no,
+                expression: "no"
               }
             ],
             staticClass: "form-control",
@@ -75827,21 +75826,15 @@ var render = function() {
                     var val = "_value" in o ? o._value : o.value
                     return val
                   })
-                _vm.selectedShift = $event.target.multiple
+                _vm.no = $event.target.multiple
                   ? $$selectedVal
                   : $$selectedVal[0]
               }
             }
           },
-          _vm._l(_vm.shiftTimes, function(option) {
-            return _c("option", { domProps: { value: option } }, [
-              _vm._v(
-                "\n        " +
-                  _vm._s(option.shift_start_time) +
-                  " ~ " +
-                  _vm._s(option.shift_end_time) +
-                  "\n      "
-              )
+          _vm._l(_vm.timeTableList, function(option) {
+            return _c("option", { domProps: { value: option.no } }, [
+              _vm._v("\n        " + _vm._s(option.name) + "\n      ")
             ])
           }),
           0
@@ -75956,9 +75949,7 @@ var render = function() {
                   _vm._v(" "),
                   _c("td", [_vm._v(_vm._s(item.target_date))]),
                   _vm._v(" "),
-                  _c("td", [_vm._v(_vm._s(item.shift_start_time))]),
-                  _vm._v(" "),
-                  _c("td", [_vm._v(_vm._s(item.shift_end_time))]),
+                  _c("td", [_vm._v(_vm._s(item.name))]),
                   _vm._v(" "),
                   _c("td", [
                     _c(
@@ -75992,9 +75983,7 @@ var staticRenderFns = [
       _c("tr", [
         _c("th", [_vm._v("日付")]),
         _vm._v(" "),
-        _c("th", [_vm._v("シフト開始時間")]),
-        _vm._v(" "),
-        _c("th", [_vm._v("シフト終了時間")]),
+        _c("th", [_vm._v("タイムテーブル")]),
         _vm._v(" "),
         _c("th")
       ])
