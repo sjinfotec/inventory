@@ -72,15 +72,14 @@ class SttingShiftTimeController extends Controller
     public function store(Request $request){
         $response = collect();
         $code = $request->user_code;
-        $shift_start_time = $request->shift_start_time;
-        $shift_end_time = $request->shift_end_time;
+        $time_table_no = $request->time_table_no;
             
         $from = new Carbon($request->from);
         $from = $from->format("Y/m/d");
         $to = new Carbon($request->to);
         $to = $to->format("Y/m/d");
 
-        $result = $this->dbConnectInsert($code,$shift_start_time,$shift_end_time,$from,$to);
+        $result = $this->dbConnectInsert($code,$time_table_no,$from,$to);
         if($result){
             $response->put('result',self::SUCCESS);
         }else{
@@ -99,15 +98,16 @@ class SttingShiftTimeController extends Controller
      * @param [type] $to
      * @return void
      */
-    private function dbConnectInsert($code,$shift_start_time,$shift_end_time,$from,$to){
+    private function dbConnectInsert($code,$time_table_no,$from,$to){
+        $systemdate = Carbon::now();
         DB::beginTransaction();
         try{
             $shift_info = new ShiftInformation();
             $shift_info->setUsercodeAttribute($code);
-            $shift_info->setShiftsatrttimeAttribute($shift_start_time);
-            $shift_info->setShiftendtimeAttribute($shift_end_time);
+            $shift_info->setWorkingtimetablenoAttribute($time_table_no);
             $shift_info->setStarttargetdateAttribute($from);
             $shift_info->setEndtargetdateAttribute($to);
+            $shift_info->setCreatedatAttribute($systemdate);
             $is_exists = $shift_info->isExistsShiftInfo();
             if($is_exists){
                $shift_info->delShiftInfo();
