@@ -12,6 +12,10 @@
       <message-data v-bind:messagedatas="messagedatastodate"></message-data>
     </div>
     <div class="form-group col-md-6">
+      <label for="target_employmentstatus" class>雇用形態選択</label>
+      <select-employmentstatus v-bind:blank-data="true" v-on:change-event="employmentChanges"></select-employmentstatus>
+    </div>
+    <div class="form-group col-md-6">
       <label for="target_department" class>部署選択</label>
       <select-department v-bind:blank-data="true" v-on:change-event="departmentChanges"></select-department>
     </div>
@@ -41,12 +45,14 @@ export default {
   data: function() {
     return {
       valuedepartment: '',
+      valueemploymentstatus: '',
       getDo: 0,
       valueuser: '',
       valuefromdate: '',
       valuetodate: '',
       defaultDate: new Date(),
       results: [],
+      messagedatasserver: [],
       messagedatasfromdate: [],
       messagedatastodate: [],
       validate: false,
@@ -82,13 +88,29 @@ export default {
       e.preventDefault();
       
     },
+    // 雇用形態が変更された場合の処理
+    employmentChanges: function(value){
+      console.log("employmentChanges = " + value);
+      this.valueemploymentstatus = value;
+      // ユーザー選択コンポーネントの取得メソッドを実行
+      this.getDo = 1;
+      if(this.valueemploymentstatus == ''){
+        this.$refs.selectuser.getUserListByEmployment(this.getDo, value);
+      } else {
+        this.$refs.selectuser.getUserListByEmployment(this.getDo, value, this.valueemploymentstatus);
+      }
+    },
     // 部署選択が変更された場合の処理
     departmentChanges: function(value){
       console.log("departmentChanges = " + value);
       this.valuedepartment = value;
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
-      this.$refs.selectuser.getUserList(this.getDo, value);
+      if(this.valuedepartment == ''){
+        this.$refs.selectuser.getUserListByEmployment(this.getDo, value);
+      } else {
+        this.$refs.selectuser.getUserListByEmployment(this.getDo, this.valuedepartment, value);
+      }
     },
     // ユーザー選択が変更された場合の処理
     userChanges: function(value){
@@ -107,17 +129,16 @@ export default {
     },
     // 集計開始ボタンがクリックされた場合の処理
     searchclick: function(e){
-      console.log("searchclick 1 ");
       this.validate = this.checkForm(e);
-      console.log("searchclick 2 " + (this.validate) ? 'true' : 'false');
       if(this.validate){
         this.$axios
           .get("/daily/calc", {
             params: {
-              departmentcode: this.valuedepartment,
-              usercode: this.valueuser,
               datefrom: this.valuefromdate,
-              dateto: this.valuetodate
+              dateto: this.valuetodate,
+              employmentstatus: this.valueemploymentstatus,
+              departmentcode: this.valuedepartment,
+              usercode: this.valueuser
             }
           })
           .then(response => {

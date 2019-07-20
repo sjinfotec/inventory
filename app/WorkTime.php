@@ -136,36 +136,14 @@ class WorkTime extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
 
-    private $param_user_code;                   // ユーザー
-    private $param_department_id;               // 部署
     private $param_date_from;                   // 開始日付（00:00:00から）
     private $param_date_to;                     // 終了日付（23:59:59まで）
     private $param_employment_status;           // 雇用形態
+    private $param_department_id;               // 部署
+    private $param_user_code;                   // ユーザー
 
     private $array_record_time;                 // 日付範囲配列
     private $massegedata;                       // メッセージ
-
-    // ユーザー
-    public function getParamUsercodeAttribute()
-    {
-        return $this->param_user_code;
-    }
-
-    public function setParamUsercodeAttribute($value)
-    {
-        $this->param_user_code = $value;
-    }
-
-    // 部署
-    public function getParamDepartmentcodeAttribute()
-    {
-        return $this->param_department_id;
-    }
-
-    public function setParamDepartmentcodeAttribute($value)
-    {
-        $this->param_department_id = $value;
-    }
 
 
     // 開始日付（00:00:00から）
@@ -202,6 +180,28 @@ class WorkTime extends Model
     public function setParamemploymentstatusAttribute($value)
     {
         $this->param_employment_status = $value;
+    }
+
+    // 部署
+    public function getParamDepartmentcodeAttribute()
+    {
+        return $this->param_department_id;
+    }
+
+    public function setParamDepartmentcodeAttribute($value)
+    {
+        $this->param_department_id = $value;
+    }
+
+    // ユーザー
+    public function getParamUsercodeAttribute()
+    {
+        return $this->param_user_code;
+    }
+
+    public function setParamUsercodeAttribute($value)
+    {
+        $this->param_user_code = $value;
     }
 
     // 日付範囲配列
@@ -354,14 +354,13 @@ class WorkTime extends Model
         $sunquery1->where($this->table.'.is_deleted', '=', 0);
 
         // sunquery2    shift_informations
-        \DB::enableQueryLog();
-        $sunquery2 = DB::table($this->table_shift_informations)
+        /*$sunquery2 = DB::table($this->table_shift_informations)
             ->select(
                 $this->table_shift_informations.'.user_code as user_code',
                 $this->table_shift_informations.'.working_timetable_no as shift_no'
                 )
             ->selectRaw('DATE_FORMAT('.$this->table_shift_informations.'.target_date'.",'%Y%m%d') as target_date");
-        $sunquery2->where($this->table.'.is_deleted', '=', 0);
+        $sunquery2->where($this->table.'.is_deleted', '=', 0); */
 
         // mainqueryにsunqueryを組み込む
         // sunquery1    t1:users
@@ -382,8 +381,8 @@ class WorkTime extends Model
                 't2.mode as mode',
                 't3.weekday_kubun as weekday_kubun',
                 't11.code_name as weekday_name',
-                't3.leave_kubun as leave_kubun',
-                't12.code_name as leave_name',
+                't3.business_kubun as business_kubun',
+                't12.code_name as business_name',
                 't3.holiday_kubun as holiday_kubun',
                 't13.code_name as holiday_name',
                 't4.closing as closing',
@@ -400,20 +399,20 @@ class WorkTime extends Model
                 't6.no as working_timetable_no',
                 't6.name as working_timetable_name',
                 't6.from_time as working_timetable_from_time',
-                't6.to_time as working_timetable_to_time',
-                't9.shift_no as shift_no',
+                't6.to_time as working_timetable_to_time'
+                /*'t9.shift_no as shift_no',
                 't10.name as shift_name',
                 't10.from_time as shift_from_time',
-                't10.to_time as shift_to_time'
+                't10.to_time as shift_to_time' */
                 )
             ->leftJoinSub($sunquery1, 't2', function ($join) { 
                 $join->on('t2.user_code', '=', 't1.code');
                 $join->on('t2.department_id', '=', 't1.department_id');
             })
-            ->leftJoinSub($sunquery2, 't9', function ($join) { 
+            /*->leftJoinSub($sunquery2, 't9', function ($join) { 
                 $join->on('t9.user_code', '=', 't1.code');
                 $join->on('t9.target_date', '=', 't2.record_date');
-            })
+            }) */
             ->leftJoin('calendars as t3', function ($join) { 
                 $join->on('t3.date', '=', 't2.record_date');
             })
@@ -425,39 +424,43 @@ class WorkTime extends Model
                 $join->on('t5.id', '=', 't1.department_id');
             })
             ->leftJoin('working_timetables as t6', function ($join) { 
-                $join->on('t6.no', '=', 't1.working_timetable_no');
+                $join->on('t6.no', '=', 't1.working_timetable_no')
+                ->where('t6.working_time_kubun', '=', Config::get('const.C004.regular_working_time'));
             })
             ->leftJoin('generalcodes as t7', function ($join) { 
-                $join->on('t7.code', '=', 't6.working_time_kubun');
+                $join->on('t7.code', '=', 't6.working_time_kubun')
+                ->where('t7.identification_id', '=', Config::get('const.C004.value'));
             })
             ->leftJoin('generalcodes as t8', function ($join) { 
-                $join->on('t8.code', '=', 't1.employment_status');
+                $join->on('t8.code', '=', 't1.employment_status')
+                ->where('t8.identification_id', '=', Config::get('const.C001.value'));
             })
-            ->leftJoin('working_timetables as t10', function ($join) { 
+            /*->leftJoin('working_timetables as t10', function ($join) { 
                 $join->on('t10.no', '=', 't9.shift_no');
-            })
+            }) */
             ->leftJoin('generalcodes as t11', function ($join) { 
-                $join->on('t11.code', '=', 't3.weekday_kubun');
+                $join->on('t11.code', '=', 't3.weekday_kubun')
+                ->where('t11.identification_id', '=', Config::get('const.C006.value'));
             })
             ->leftJoin('generalcodes as t12', function ($join) { 
-                $join->on('t12.code', '=', 't3.leave_kubun');
+                $join->on('t12.code', '=', 't3.business_kubun')
+                ->where('t12.identification_id', '=', Config::get('const.C007.value'));
             })
             ->leftJoin('generalcodes as t13', function ($join) { 
-                $join->on('t13.code', '=', 't3.holiday_kubun');
+                $join->on('t13.code', '=', 't3.holiday_kubun')
+                ->where('t13.identification_id', '=', Config::get('const.C008.value'));
             });
-        if(!empty($this->param_user_code)){
-            $mainquery->where('t1.code', $this->param_user_code);     //user_code指定
+
+        if(!empty($this->param_employment_status)){
+            $mainquery->where('t1.employment_status', $this->param_employment_status);  //　雇用形態指定
         }
         if(!empty($this->param_department_id)){
-            $mainquery->where('t1.department_id', $this->param_department_id);     //department_id指定
+            $mainquery->where('t1.department_id', $this->param_department_id);      //department_id指定
+        }
+        if(!empty($this->param_user_code)){
+            $mainquery->where('t1.code', $this->param_user_code);                   //user_code指定
         }
         $result = $mainquery
-            ->where('t6.working_time_kubun', '=', Config::get('const.C004.regular_working_time'))
-            ->where('t7.identification_id', '=', Config::get('const.C004.value'))
-            ->where('t8.identification_id', '=', Config::get('const.C001.value'))
-            ->where('t11.identification_id', '=', Config::get('const.C006.value'))
-            ->where('t12.identification_id', '=', Config::get('const.C007.value'))
-            ->where('t13.identification_id', '=', Config::get('const.C008.value'))
             ->where('t1.is_deleted', '=', 0)
             ->where('t3.is_deleted', '=', 0)
             ->where('t4.is_deleted', '=', 0)
@@ -465,8 +468,8 @@ class WorkTime extends Model
             ->where('t6.is_deleted', '=', 0)
             ->where('t7.is_deleted', '=', 0)
             ->where('t8.is_deleted', '=', 0)
-            ->where('t9.is_deleted', '=', 0)
-            ->where('t10.is_deleted', '=', 0)
+            /*->where('t9.is_deleted', '=', 0)
+            ->where('t10.is_deleted', '=', 0) */
             ->orderBy('t2.record_datetime', 'asc')
             ->orderBy('t1.employment_status', 'asc')
             ->orderBy('t1.department_id', 'asc')
