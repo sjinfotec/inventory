@@ -28,12 +28,10 @@ export default {
   },
   // マウント時
   mounted() {
-    console.log("selectedUser Component mounted.");
     this.getUserList(this.getDo, '');
   },
   methods: {
     getUserList(getdovalue, value){
-    console.log("getdovalue = " + getdovalue);
       this.$axios
         .get("/get_user_list", {
           params: {
@@ -43,17 +41,31 @@ export default {
         })
         .then(response => {
           this.userList = response.data;
-          console.log("ユーザーリスト取得");
-          console.log("ユーザーリスト取得1");
         })
         .catch(reason => {
-          alert("error");
+          alert("社員選択リスト作成エラー");
+        });
+    },
+    getUserListByEmployment(getdovalue, depvalue, empvalue){
+      this.$axios
+        .get("/get_user_list", {
+          params: {
+            getdo: getdovalue,
+            code: depvalue,
+            employment: empvalue
+          }
+        })
+        .then(response => {
+          this.userList = response.data;
+        })
+        .catch(reason => {
+          alert("社員選択リスト作成エラー");
         });
     },
     // 選択が変更された場合、親コンポーネントに選択値を返却
     selChanges : function(value) {
 
-        console.log("selecteduser = ["+ value + ']');
+        console.log("selectuser = ["+ value + ']');
         this.$emit('change-event', value);
 
     }
