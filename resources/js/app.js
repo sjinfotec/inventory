@@ -109,6 +109,8 @@ Vue.component(
     require("./components/CreateCompanyInformation.vue").default
 );
 
+Vue.component("setting-calc", require("./components/SettingCalc.vue").default);
+
 Vue.component("message-data", require("./components/MessageData.vue").default);
 
 Vue.component(

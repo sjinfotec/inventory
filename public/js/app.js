@@ -3308,6 +3308,287 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/SettingCalc.vue?vue&type=script&lang=js&":
+/*!**********************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/SettingCalc.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var formvuelar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! formvuelar */ "./node_modules/formvuelar/dist/formvuelar.common.js");
+/* harmony import */ var formvuelar__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(formvuelar__WEBPACK_IMPORTED_MODULE_1__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "SettingCalc",
+  components: {
+    FvlForm: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlForm"],
+    FvlInput: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlInput"],
+    FvlSearchSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSearchSelect"],
+    FvlSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"],
+    FvlSubmit: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSubmit"]
+  },
+  data: function data() {
+    return {
+      year: "",
+      form: {
+        year: "",
+        threeMonthTotal: "",
+        sixMonthTotal: "",
+        yaerTotal: "",
+        interval: "",
+        closingDate: [{}],
+        upTime: [{}],
+        timeunit: [{}],
+        timeround: [{}]
+      },
+      TimeUnitList: [],
+      TimeRoundingList: [],
+      days_max: [{}],
+      yearList: [{}],
+      monthList: [{}],
+      baseYear: "",
+      details: [],
+      hidden: "",
+      testList: []
+    };
+  },
+  // マウント時
+  mounted: function mounted() {
+    var date = new Date();
+    this.baseYear = date.getFullYear();
+    this.getTimeUnitList();
+    this.getTimeRoundingList();
+    this.form.closingDate[0] = "";
+    this.form.upTime[0] = "";
+    this.form.timeround[0] = "";
+    this.form.timeunit[0] = "";
+    this.get_days();
+    this.get_month();
+    this.get_years();
+  },
+  watch: {
+    year: function year(val, oldVal) {
+      this.form.year = val;
+      this.getDetail();
+      console.log(val + " " + oldVal);
+    },
+    details: function details(val, oldVal) {
+      var _this = this;
+
+      this.details.forEach(function (detail, i) {
+        if (detail.closing != null) {
+          _this.form.closingDate[i] = detail.closing.toString();
+        } else {
+          _this.form.closingDate[i] = "";
+        }
+
+        if (detail.uplimit_time != null) {
+          _this.form.upTime[i] = detail.uplimit_time.toString();
+        } else {
+          _this.form.upTime[i] = "";
+        }
+
+        if (detail.time_unit != null) {
+          _this.form.timeunit[i] = detail.time_unit.toString();
+        } else {
+          _this.form.timeunit[i] = "";
+        }
+
+        if (detail.time_rounding != null) {
+          _this.form.timeround[i] = detail.time_rounding.toString();
+        } else {
+          _this.form.timeround[i] = "";
+        }
+      });
+      this.hidden = "GET";
+    }
+  },
+  methods: {
+    get_days: function get_days() {
+      for (var index = 0; index < 12; index++) {
+        var month = index + 1;
+        this.days_max[index] = new Date(this.form.year, month, 0).getDate();
+      }
+    },
+    get_month: function get_month() {
+      for (var index = 0; index < 12; index++) {
+        var code = index + 1;
+        var target_month = index + 1;
+        this.monthList[index] = {
+          code: code,
+          name: target_month
+        };
+      }
+
+      console.log("年度更新");
+    },
+    get_years: function get_years() {
+      for (var index = 0; index < 30; index++) {
+        var code = index + 1;
+        var target_year = this.baseYear + index;
+        this.yearList[index] = {
+          code: code,
+          name: target_year
+        };
+      }
+
+      console.log("年度更新");
+    },
+    getDetail: function getDetail() {
+      var _this2 = this;
+
+      this.$axios.get("/setting_calc/get", {
+        params: {
+          year: this.year
+        }
+      }).then(function (response) {
+        _this2.details = response.data; // this.form.year = this.details[0].year;
+
+        if (_this2.details.length > 0) {
+          _this2.form.biginningMonth = _this2.details[0].beginning_month;
+          _this2.form.threeMonthTotal = _this2.details[0].max_3month_total.toString();
+          _this2.form.sixMonthTotal = _this2.details[0].max_6month_total.toString();
+          _this2.form.yaerTotal = _this2.details[0].max_12month_total.toString();
+          _this2.form.interval = _this2.details[0].interval.toString();
+        }
+
+        console.log("詳細取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
+    },
+    addSuccess: function addSuccess() {
+      // ここで会社情報呼び出す
+      this.$toasted.show("登録しました");
+    },
+    getTimeUnitList: function getTimeUnitList() {
+      var _this3 = this;
+
+      this.$axios.get("/get_time_unit_list").then(function (response) {
+        _this3.TimeUnitList = response.data;
+        console.log("時間単位リスト取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
+    },
+    getTimeRoundingList: function getTimeRoundingList() {
+      var _this4 = this;
+
+      this.$axios.get("/get_time_rounding_list", {}).then(function (response) {
+        _this4.TimeRoundingList = response.data;
+        console.log("時間の丸めリスト取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
+    },
+    error: function error() {
+      var options = {
+        position: "bottom-center",
+        duration: 2000,
+        fullWidth: false,
+        type: "error"
+      };
+      this.$toasted.show("登録に失敗しました", options);
+    },
+    inputClear: function inputClear() {}
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/SettingShiftTime.vue?vue&type=script&lang=js&":
 /*!***************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/SettingShiftTime.vue?vue&type=script&lang=js& ***!
@@ -8451,6 +8732,25 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 // module
 exports.push([module.i, "\n.margin-set-mid[data-v-2f2aa353] {\n  margin-top: 30px;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/SettingCalc.vue?vue&type=style&index=0&id=c2ff35ac&scoped=true&lang=css&":
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/SettingCalc.vue?vue&type=style&index=0&id=c2ff35ac&scoped=true&lang=css& ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n.width15[data-v-c2ff35ac]{\n  width: 15%;\n}\n", ""]);
 
 // exports
 
@@ -73279,6 +73579,36 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/SettingCalc.vue?vue&type=style&index=0&id=c2ff35ac&scoped=true&lang=css&":
+/*!*********************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/SettingCalc.vue?vue&type=style&index=0&id=c2ff35ac&scoped=true&lang=css& ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./SettingCalc.vue?vue&type=style&index=0&id=c2ff35ac&scoped=true&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/SettingCalc.vue?vue&type=style&index=0&id=c2ff35ac&scoped=true&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/lib/addStyles.js":
 /*!****************************************************!*\
   !*** ./node_modules/style-loader/lib/addStyles.js ***!
@@ -75742,6 +76072,388 @@ var render = function() {
       })
     ],
     2
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/SettingCalc.vue?vue&type=template&id=c2ff35ac&scoped=true&":
+/*!**************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/SettingCalc.vue?vue&type=template&id=c2ff35ac&scoped=true& ***!
+  \**************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "panel-body" },
+    [
+      _c(
+        "fvl-form",
+        {
+          attrs: { method: "post", data: _vm.form, url: "/setting_calc/store" },
+          on: {
+            success: function($event) {
+              return _vm.addSuccess()
+            },
+            error: function($event) {
+              return _vm.error()
+            }
+          }
+        },
+        [
+          _c("div", { staticClass: "row" }, [
+            _c(
+              "div",
+              { staticClass: "form-group col-md-6" },
+              [
+                _c("fvl-search-select", {
+                  attrs: {
+                    selected: _vm.year,
+                    label: "年度",
+                    name: "year",
+                    options: _vm.yearList,
+                    placeholder: "年度を選択してください",
+                    allowEmpty: true,
+                    "search-keys": ["name"],
+                    "option-key": "name",
+                    "option-value": "name"
+                  },
+                  on: {
+                    "update:selected": function($event) {
+                      _vm.year = $event
+                    }
+                  }
+                })
+              ],
+              1
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "form-group col-md-6" },
+              [
+                _c("fvl-search-select", {
+                  attrs: {
+                    selected: _vm.form.biginningMonth,
+                    label: "期首月",
+                    name: "biginningMonth",
+                    options: _vm.monthList,
+                    placeholder: "期首月を選択してください",
+                    allowEmpty: true,
+                    "search-keys": ["name"],
+                    "option-key": "name",
+                    "option-value": "name"
+                  },
+                  on: {
+                    "update:selected": function($event) {
+                      return _vm.$set(_vm.form, "biginningMonth", $event)
+                    }
+                  }
+                })
+              ],
+              1
+            )
+          ]),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: {
+              value: _vm.form.threeMonthTotal,
+              label: "３ヶ月累計",
+              name: "threeMonthTotal"
+            },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "threeMonthTotal", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: {
+              value: _vm.form.sixMonthTotal,
+              label: "６ヶ月累計",
+              name: "sixMonthTotal"
+            },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "sixMonthTotal", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: {
+              value: _vm.form.yaerTotal,
+              label: "１２ヶ月累計",
+              name: "yaerTotal"
+            },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "yaerTotal", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("fvl-input", {
+            attrs: {
+              value: _vm.form.interval,
+              label: "勤務間インターバル",
+              name: "interval"
+            },
+            on: {
+              "update:value": function($event) {
+                return _vm.$set(_vm.form, "interval", $event)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("table", { staticClass: "table" }, [
+            _c("thead", [
+              _c("tr", [
+                _c("th", { staticClass: "width15" }, [_vm._v("月")]),
+                _vm._v(" "),
+                _c("th", { staticClass: "width15" }, [_vm._v("締日")]),
+                _vm._v(" "),
+                _c("th", { staticClass: "width15" }, [_vm._v("上限残業")]),
+                _vm._v(" "),
+                _c("th", [_vm._v("時間単位")]),
+                _vm._v(" "),
+                _c("th", [_vm._v("時間の丸め")]),
+                _vm._v(" "),
+                _c("th")
+              ])
+            ]),
+            _vm._v(" "),
+            _c(
+              "tbody",
+              _vm._l(12, function(n, index) {
+                return _c("tr", { key: index }, [
+                  _c("input", { attrs: { type: "hidden" } }),
+                  _vm._v(" "),
+                  _c("td", [_vm._v(_vm._s(n) + "月")]),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.form.closingDate[index],
+                            expression: "form.closingDate[index]"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        on: {
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.$set(
+                              _vm.form.closingDate,
+                              index,
+                              $event.target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
+                            )
+                          }
+                        }
+                      },
+                      _vm._l(_vm.days_max[index], function(n) {
+                        return _c(
+                          "option",
+                          { key: n, domProps: { value: n } },
+                          [
+                            _vm._v(
+                              "\n                " +
+                                _vm._s(n) +
+                                " 日\n              "
+                            )
+                          ]
+                        )
+                      }),
+                      0
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.form.upTime[index],
+                          expression: "form.upTime[index]"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      domProps: { value: _vm.form.upTime[index] },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(_vm.form.upTime, index, $event.target.value)
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.form.timeunit[index],
+                            expression: "form.timeunit[index]"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        on: {
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.$set(
+                              _vm.form.timeunit,
+                              index,
+                              $event.target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
+                            )
+                          }
+                        }
+                      },
+                      [
+                        _c("option", { attrs: { value: "" } }),
+                        _vm._v(" "),
+                        _vm._l(_vm.TimeUnitList, function(tulist) {
+                          return _c(
+                            "option",
+                            {
+                              key: tulist.code,
+                              domProps: { value: tulist.code }
+                            },
+                            [_vm._v(_vm._s(tulist.code_name))]
+                          )
+                        })
+                      ],
+                      2
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.form.timeround[index],
+                            expression: "form.timeround[index]"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        on: {
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.$set(
+                              _vm.form.timeround,
+                              index,
+                              $event.target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
+                            )
+                          }
+                        }
+                      },
+                      [
+                        _c("option", { attrs: { value: "" } }),
+                        _vm._v(" "),
+                        _vm._l(_vm.TimeRoundingList, function(trlist) {
+                          return _c(
+                            "option",
+                            {
+                              key: trlist.code,
+                              domProps: { value: trlist.code }
+                            },
+                            [_vm._v(_vm._s(trlist.code_name))]
+                          )
+                        })
+                      ],
+                      2
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.hidden,
+                          expression: "hidden"
+                        }
+                      ],
+                      attrs: { type: "hidden", value: "" },
+                      domProps: { value: _vm.hidden },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.hidden = $event.target.value
+                        }
+                      }
+                    })
+                  ])
+                ])
+              }),
+              0
+            )
+          ]),
+          _vm._v(" "),
+          _c("fvl-submit", [_vm._v("登録")])
+        ],
+        1
+      )
+    ],
+    1
   )
 }
 var staticRenderFns = []
@@ -91106,6 +91818,7 @@ Vue.component("create-time-table", __webpack_require__(/*! ./components/CreateTi
 Vue.component("create-calendar", __webpack_require__(/*! ./components/CreateCalendar.vue */ "./resources/js/components/CreateCalendar.vue")["default"]);
 Vue.component("edit-calendar", __webpack_require__(/*! ./components/EditCalendar.vue */ "./resources/js/components/EditCalendar.vue")["default"]);
 Vue.component("create-company-information", __webpack_require__(/*! ./components/CreateCompanyInformation.vue */ "./resources/js/components/CreateCompanyInformation.vue")["default"]);
+Vue.component("setting-calc", __webpack_require__(/*! ./components/SettingCalc.vue */ "./resources/js/components/SettingCalc.vue")["default"]);
 Vue.component("message-data", __webpack_require__(/*! ./components/MessageData.vue */ "./resources/js/components/MessageData.vue")["default"]);
 Vue.component("worktime-day", __webpack_require__(/*! ./components/WorkTimeDateTable.vue */ "./resources/js/components/WorkTimeDateTable.vue")["default"]);
 /**
@@ -92247,6 +92960,93 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_SelectUser_vue_vue_type_template_id_96facfdc___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_SelectUser_vue_vue_type_template_id_96facfdc___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/SettingCalc.vue":
+/*!*************************************************!*\
+  !*** ./resources/js/components/SettingCalc.vue ***!
+  \*************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _SettingCalc_vue_vue_type_template_id_c2ff35ac_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./SettingCalc.vue?vue&type=template&id=c2ff35ac&scoped=true& */ "./resources/js/components/SettingCalc.vue?vue&type=template&id=c2ff35ac&scoped=true&");
+/* harmony import */ var _SettingCalc_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./SettingCalc.vue?vue&type=script&lang=js& */ "./resources/js/components/SettingCalc.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _SettingCalc_vue_vue_type_style_index_0_id_c2ff35ac_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./SettingCalc.vue?vue&type=style&index=0&id=c2ff35ac&scoped=true&lang=css& */ "./resources/js/components/SettingCalc.vue?vue&type=style&index=0&id=c2ff35ac&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _SettingCalc_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _SettingCalc_vue_vue_type_template_id_c2ff35ac_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _SettingCalc_vue_vue_type_template_id_c2ff35ac_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  "c2ff35ac",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/SettingCalc.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/SettingCalc.vue?vue&type=script&lang=js&":
+/*!**************************************************************************!*\
+  !*** ./resources/js/components/SettingCalc.vue?vue&type=script&lang=js& ***!
+  \**************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_SettingCalc_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./SettingCalc.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/SettingCalc.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_SettingCalc_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/SettingCalc.vue?vue&type=style&index=0&id=c2ff35ac&scoped=true&lang=css&":
+/*!**********************************************************************************************************!*\
+  !*** ./resources/js/components/SettingCalc.vue?vue&type=style&index=0&id=c2ff35ac&scoped=true&lang=css& ***!
+  \**********************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SettingCalc_vue_vue_type_style_index_0_id_c2ff35ac_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./SettingCalc.vue?vue&type=style&index=0&id=c2ff35ac&scoped=true&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/SettingCalc.vue?vue&type=style&index=0&id=c2ff35ac&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SettingCalc_vue_vue_type_style_index_0_id_c2ff35ac_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SettingCalc_vue_vue_type_style_index_0_id_c2ff35ac_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SettingCalc_vue_vue_type_style_index_0_id_c2ff35ac_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SettingCalc_vue_vue_type_style_index_0_id_c2ff35ac_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_SettingCalc_vue_vue_type_style_index_0_id_c2ff35ac_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./resources/js/components/SettingCalc.vue?vue&type=template&id=c2ff35ac&scoped=true&":
+/*!********************************************************************************************!*\
+  !*** ./resources/js/components/SettingCalc.vue?vue&type=template&id=c2ff35ac&scoped=true& ***!
+  \********************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_SettingCalc_vue_vue_type_template_id_c2ff35ac_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./SettingCalc.vue?vue&type=template&id=c2ff35ac&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/SettingCalc.vue?vue&type=template&id=c2ff35ac&scoped=true&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_SettingCalc_vue_vue_type_template_id_c2ff35ac_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_SettingCalc_vue_vue_type_template_id_c2ff35ac_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

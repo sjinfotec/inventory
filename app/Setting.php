@@ -3,6 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+
 
 /**
  * テーブル：設定マスタ（settings）のモデル
@@ -26,10 +28,13 @@ class Setting extends Model
     private $max_3month_total;              // ３ヶ月累計
     private $max_6month_total;              // ６ヶ月累計
     private $max_12month_total;             // １年間累計
+    private $interval;                      // インターバル
     private $beginning_month;               // 期首月
     private $year;                          // 年
     private $created_user;                  // 作成ユーザー
     private $updated_user;                  // 修正ユーザー
+    private $created_at;                    // 作成日次
+    private $updated_at;                    // 更新日時
     private $is_deleted;                    // 削除フラグ
 
     // 年度
@@ -150,6 +155,17 @@ class Setting extends Model
         $this->max_12month_total = $value;
     }
 
+    // インターバル
+    public function getIntervalAttribute()
+    {
+        return $this->interval;
+    }
+
+    public function setIntervalAttribute($value)
+    {
+        $this->interval = $value;
+    }
+
 
     // 期首月
     public function getBeginningmonthAttribute()
@@ -209,7 +225,26 @@ class Setting extends Model
     {
         $this->is_deleted = $value;
     }
+     
+    public function getCreatedatAttribute()
+    {
+        return $this->created_at;
+    }
 
+    public function setCreatedatAttribute($value)
+    {
+        $this->created_at = $value;
+    }
+
+    public function getUpdatedatAttribute()
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedatAttribute($value)
+    {
+        $this->updated_at = $value;
+    }
 
     //--------------- パラメータ項目属性 -----------------------------------
 
@@ -310,6 +345,66 @@ class Setting extends Model
             ->get();
 
         return $data;
+    }
+
+    public function insertSettings(){
+        DB::table($this->table)->insert(
+            [
+                'fiscal_year' => $this->fiscal_year,
+                'fiscal_month' => $this->fiscal_month,
+                'closing' => $this->closing,
+                'uplimit_time' => $this->uplimit_time,
+                'time_unit' => $this->time_unit,
+                'time_rounding' => $this->time_rounding,
+                'max_3month_total' => $this->max_3month_total,
+                'max_6month_total' => $this->max_6month_total,
+                'max_12month_total' => $this->max_12month_total,
+                'beginning_month' => $this->beginning_month,
+                'interval' => $this->interval,
+                'year' => $this->year,
+                'created_user' => $this->created_user,
+                'created_at'=>$this->created_at
+            ]
+        );
+    }
+
+    /**
+     * 存在チェック
+     *
+     * @return boolean
+     */
+    public function isExistsSetting(){
+        $is_exists = DB::table($this->table)
+            ->where('fiscal_year',$this->fiscal_year)
+            ->where('is_deleted',0)
+            ->exists();
+
+        return $is_exists;
+    }
+
+    /**
+     * 詳細取得
+     *
+     * @return void
+     */
+    public function getDetails(){
+        $details = DB::table($this->table)
+            ->where('fiscal_year',$this->fiscal_year)
+            ->where('is_deleted',0)
+            ->get();
+
+        return $details;
+    }
+
+    /**
+     * date削除
+     *
+     * @return void
+     */
+    public function delSetting(){
+        DB::table($this->table)
+            ->where('fiscal_year',$this->fiscal_year)
+            ->delete();
     }
 
 }

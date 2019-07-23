@@ -9,6 +9,7 @@
                         </ul>
                         <h1 class="font-size-regular">マスタメンテナンス</h1>
                         <ul class="list-unstyled">
+                            <li><a href="{{ url('/setting_calc') }}">設定</a></li>
                             <li><a href="{{ url('/user_add') }}">ユーザー</a></li>
                             <li><a href="{{ url('/create_department') }}">部署/編集</a></li>
                             <li><a href="{{ url('/create_time_table') }}">タイムテーブル</a></li>
