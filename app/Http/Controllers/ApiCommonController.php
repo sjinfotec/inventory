@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\ShiftInformation;
 use App\WorkingTimeTable;
@@ -176,4 +177,197 @@ class ApiCommonController extends Controller
 
         return $what_weekday;
     }
+    
+    /**
+     * 時間差を求める（時間）
+     *
+     * @return 時間差
+     */
+    public function diffTimeTime($time_from, $time_to){
+        $from = new Carbon($time_from);
+        $to   = new Carbon($time_to); 
+        $interval = $from->diff($to);
+        // 時間単位の差
+        $dif_time = $interval->format('%H:%I:%S');
+        Log::DEBUG('dif_time = '.$dif_time);
+        return $dif_time;
+    }
+    
+    /**
+     * 時間差を求める（シリアルで返却）
+     *
+     * @return 時間差
+     */
+    public function diffTimeSerial($time_from, $time_to){
+        $from = strtotime($time_from);
+        $to   = strtotime($time_to); 
+        $interval = $to - $from;
+        Log::DEBUG('interval = '.$interval);
+        return $interval;
+    }
+    
+    /**
+     * 時間丸め処理（シリアルで丸めする）
+     *
+     * @return 分で返却
+     */
+    public function roundTime($round_time, $time_unit, $time_rounding){
+
+        if ($time_rounding == Config::get('const.C010.round_half_up')) {
+            if ($time_rounding == Config::get('const.C009.round1')) {
+                // 分求める
+                $result_round_time = round($round_time / 60);
+            } elseif ($time_rounding == Config::get('const.C009.round10')) {
+                // 分求める
+                $result_round_time = round($round_time / 60 / 10) * 10;
+            } elseif ($time_rounding == Config::get('const.C009.round15')) {
+                // 時間求める（切り捨て）
+                $w_time1 = floor($round_time / 60 / 60);
+                $w_time2 = $w_time1 * 60;
+                // 分の差を求める
+                $w_time3 = ($round_time / 60) - $w_time2;
+                if ($w_time3 < 8) {
+                    $result_round_time = $w_time2;
+                } elseif ($w_time3 < 23) {
+                    $result_round_time = $w_time2 + 15;
+                } elseif ($w_time3 < 38) {
+                    $result_round_time = $w_time2 + 30;
+                } elseif ($w_time3 < 53) {
+                    $result_round_time = $w_time2 + 45;
+                } else {
+                    $result_round_time = $w_time2 + 60;
+                }
+            } elseif ($time_rounding == Config::get('const.C009.round30')) {
+                // 時間求める（切り捨て）
+                $w_time1 = floor($round_time / 60 / 60);
+                $w_time2 = $w_time1 * 60;
+                // 分の差を求める
+                $w_time3 = ($round_time / 60) - $w_time2;
+                if ($w_time3 < 15) {
+                    $result_round_time = $w_time2;
+                } elseif ($w_time3 < 45) {
+                    $result_round_time = $w_time2 + 30;
+                } else {
+                    $result_round_time = $w_time2 + 60;
+                }
+            } elseif ($time_rounding == Config::get('const.C009.round60')) {
+                // 時間求める（切り捨て）
+                $w_time1 = floor($round_time / 60 / 60);
+                $w_time2 = $w_time1 * 60;
+                // 分の差を求める
+                $w_time3 = ($round_time / 60) - $w_time2;
+                if ($w_time3 < 30) {
+                    $result_round_time = $w_time2;
+                } else {
+                    $result_round_time = $w_time2 + 60;
+                }
+            }
+        } elseif ($time_rounding == Config::get('const.C010.round_down')) {
+            if ($time_rounding == Config::get('const.C009.round1')) {
+                // 分求める
+                $result_round_time = floor($round_time / 60);
+            } elseif ($time_rounding == Config::get('const.C009.round10')) {
+                // 分求める
+                $result_round_time = floor($round_time / 60 / 10) * 10;
+            } elseif ($time_rounding == Config::get('const.C009.round15')) {
+                // 時間求める（切り捨て）
+                $w_time1 = floor($round_time / 60 / 60);
+                $w_time2 = $w_time1 * 60;
+                // 分の差を求める
+                $w_time3 = ($round_time / 60) - $w_time2;
+                if ($w_time3 < 15) {
+                    $result_round_time = $w_time2;
+                } elseif ($w_time3 < 30) {
+                    $result_round_time = $w_time2 + 15;
+                } elseif ($w_time3 < 45) {
+                    $result_round_time = $w_time2 + 30;
+                } elseif ($w_time3 < 60) {
+                    $result_round_time = $w_time2 + 45;
+                } else {
+                    $result_round_time = $w_time2 + 60;
+                }
+            } elseif ($time_rounding == Config::get('const.C009.round30')) {
+                // 時間求める（切り捨て）
+                $w_time1 = floor($round_time / 60 / 60);
+                $w_time2 = $w_time1 * 60;
+                // 分の差を求める
+                $w_time3 = ($round_time / 60) - $w_time2;
+                if ($w_time3 < 30) {
+                    $result_round_time = $w_time2;
+                } elseif ($w_time3 < 60) {
+                    $result_round_time = $w_time2 + 30;
+                } else {
+                    $result_round_time = $w_time2 + 60;
+                }
+            } elseif ($time_rounding == Config::get('const.C009.round60')) {
+                // 時間求める（切り捨て）
+                $w_time1 = floor($round_time / 60 / 60);
+                $w_time2 = $w_time1 * 60;
+                // 分の差を求める
+                $w_time3 = ($round_time / 60) - $w_time2;
+                if ($w_time3 < 60) {
+                    $result_round_time = $w_time2;
+                } else {
+                    $result_round_time = $w_time2 + 60;
+                }
+            }
+        } elseif ($time_rounding == Config::get('const.C010.round_up')) {
+            if ($time_rounding == Config::get('const.C009.round1')) {
+                // 分求める
+                $result_round_time = ceil($round_time / 60);
+            } elseif ($time_rounding == Config::get('const.C009.round10')) {
+                // 分求める
+                $result_round_time = ceil($round_time / 60 / 10) * 10;
+            } elseif ($time_rounding == Config::get('const.C009.round15')) {
+                // 時間求める（切り捨て）
+                $w_time1 = floor($round_time / 60 / 60);
+                $w_time2 = $w_time1 * 60;
+                // 分の差を求める
+                $w_time3 = ($round_time / 60) - $w_time2;
+                if ($w_time3 < 15) {
+                    $result_round_time = $w_time2 + 15;
+                } elseif ($w_time3 < 30) {
+                    $result_round_time = $w_time2 + 30;
+                } elseif ($w_time3 < 45) {
+                    $result_round_time = $w_time2 + 45;
+                } elseif ($w_time3 < 60) {
+                    $result_round_time = $w_time2 + 60;
+                } else {
+                    $result_round_time = $w_time2 + 60;
+                }
+            } elseif ($time_rounding == Config::get('const.C009.round30')) {
+                // 時間求める（切り捨て）
+                $w_time1 = floor($round_time / 60 / 60);
+                $w_time2 = $w_time1 * 60;
+                // 分の差を求める
+                $w_time3 = ($round_time / 60) - $w_time2;
+                if ($w_time3 < 30) {
+                    $result_round_time = $w_time2 + 30;
+                } elseif ($w_time3 < 60) {
+                    $result_round_time = $w_time2 + 60;
+                } else {
+                    $result_round_time = $w_time2 + 60;
+                }
+            } elseif ($time_rounding == Config::get('const.C009.round60')) {
+                // 時間求める（切り捨て）
+                $w_time1 = floor($round_time / 60 / 60);
+                $w_time2 = $w_time1 * 60;
+                // 分の差を求める
+                $w_time3 = ($round_time / 60) - $w_time2;
+                if ($w_time3 < 60) {
+                    $result_round_time = $w_time2 + 60;
+                } else {
+                    $result_round_time = $w_time2 + 60;
+                }
+            }
+        } elseif ($time_rounding == Config::get('const.C010.non')) {
+            $result_round_time = $round_time / 60;
+        } else {
+            $result_round_time = $round_time / 60;
+            Log::DEBUG(Config::get('const.LOG_MSG.not_set_time_rounding'));
+        }
+
+        return $result_round_time;
+    }
+
 }

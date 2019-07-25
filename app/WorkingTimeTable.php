@@ -4,12 +4,15 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 
 class WorkingTimeTable extends Model
 {
     protected $table = 'working_timetables';
     protected $table_users = 'users';
+    protected $table_temp_calc_workingtimes = 'temp_calc_workingtimes';
     protected $table_generalcodes = 'generalcodes';
     // protected $guarded = array('id');
 
@@ -135,6 +138,84 @@ class WorkingTimeTable extends Model
         $this->is_deleted = $value;
     }
 
+    //--------------- パラメータ項目属性 -----------------------------------
+
+    private $param_date_from;                   // 開始日付
+    private $param_date_to;                     // 終了日付
+    private $param_employment_status;           // 雇用形態
+    private $param_department_id;               // 部署
+    private $param_user_code;                   // ユーザー
+
+    private $massegedata;                       // メッセージ
+
+
+    // 開始日付
+    public function getParamdatefromAttribute()
+    {
+        return $this->param_date_from;
+    }
+
+    public function setParamdatefromAttribute($value)
+    {
+        $this->param_date_from = $value;
+    }
+
+
+    // 終了日付
+    public function getParamdatetoAttribute()
+    {
+        return $this->param_date_to;
+    }
+
+    public function setParamdatetoAttribute($value)
+    {
+        $this->param_date_to = $value;
+    }
+
+    // 雇用形態
+    public function getParamemploymentstatusAttribute()
+    {
+        return $this->param_employment_status;
+    }
+
+    public function setParamemploymentstatusAttribute($value)
+    {
+        $this->param_employment_status = $value;
+    }
+
+    // 部署
+    public function getParamDepartmentcodeAttribute()
+    {
+        return $this->param_department_id;
+    }
+
+    public function setParamDepartmentcodeAttribute($value)
+    {
+        $this->param_department_id = $value;
+    }
+
+    // ユーザー
+    public function getParamUsercodeAttribute()
+    {
+        return $this->param_user_code;
+    }
+
+    public function setParamUsercodeAttribute($value)
+    {
+        $this->param_user_code = $value;
+    }
+
+    // メッセージ
+    public function getMassegedataAttribute()
+    {
+        return $this->massegedata;
+    }
+
+    public function setMassegedataAttribute($value)
+    {
+        $this->massegedata = $value;
+    }
+
     /**
      * セレクト用データ取得
      *
@@ -233,6 +314,64 @@ class WorkingTimeTable extends Model
         DB::table($this->table)
             ->where('no', $this->no)
             ->update(['is_deleted' => 1]);
+    }
+
+    /**
+     * 取得
+     *
+     * @return void
+     */
+    public function getWorkingTimeTableJoin(){
+        // sunquery1    日次タイムレコード
+        \DB::enableQueryLog();
+        $sunquery1 = DB::table($this->table_temp_calc_workingtimes)
+            ->select(
+                $this->table_temp_calc_workingtimes.'.working_timetable_no as working_timetable_no'
+            );
+
+            if(!empty($this->param_date_from) && !empty($this->param_date_to)){
+                $date = date_create($this->param_date_from);
+                $this->param_date_from = $date->format('Ymd');
+                $date = date_create($this->param_date_to);
+                $this->param_date_to = $date->format('Ymd');
+                $sunquery1->where($this->table_temp_calc_workingtimes.'.working_date', '>=', $this->param_date_from);             // 日付範囲指定
+                $sunquery1->where($this->table_temp_calc_workingtimes.'.working_date', '<=', $this->param_date_to);               // 日付範囲指定
+            }
+            if(!empty($this->param_employment_status)){
+                $sunquery1->where($this->table_temp_calc_workingtimes.'.employment_status', $this->param_employment_status);      //　雇用形態指定
+            }
+            if(!empty($this->param_department_id)){
+                $sunquery1->where($this->table_temp_calc_workingtimes.'.department_id', $this->param_department_id);              // department_id指定
+            }
+            if(!empty($this->param_user_code)){
+                $sunquery1->where($this->table_temp_calc_workingtimes.'.user_code', $this->param_user_code);                      // user_code指定
+            }
+            $sunquery1->groupBy($this->table_temp_calc_workingtimes.'.working_timetable_no');
+
+        $mainquery = DB::table($this->table.' AS t1')
+            ->select(
+                't1.no as no',
+                't1.name as name',
+                't1.working_time_kubun as working_time_kubun',
+                't1.from_time as from_time',
+                't1.to_time as to_time'
+                )
+            ->leftJoinSub($sunquery1, 't2', function ($join) { 
+                $join->on('t2.working_timetable_no', '=', 't1.no');
+            });
+        
+        $results = $mainquery
+            ->orderBy('t1.no','asc')
+            ->orderBy('t1.working_time_kubun','asc')
+            ->get();
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getWorkingTimeTableJoin' => \DB::getQueryLog()
+            ]
+        );
+    
+        return $results;
     }
 
 }
