@@ -61,6 +61,10 @@ Route::post('/edit_calendar/store', 'EditCalendarController@store')->middleware(
 Route::get('/create_company_information', 'CreateCompanyInformationController@index')->middleware('auth');
 Route::get('/create_company_information/get', 'CreateCompanyInformationController@getCompanyInfo')->middleware('auth');
 Route::post('/create_company_information/store', 'CreateCompanyInformationController@store')->middleware('auth');
+// 設定
+Route::get('/setting_calc', 'SettingCalcController@index')->middleware('auth');
+Route::get('/setting_calc/get', 'SettingCalcController@get')->middleware('auth');
+Route::post('/setting_calc/store', 'SettingCalcController@store')->middleware('auth');
 // タイムテーブル
 Route::get('/create_time_table', 'CreateTimeTableController@index')->middleware('auth');
 Route::get('/create_time_table/get', 'CreateTimeTableController@getDetail')->middleware('auth');
@@ -72,4 +76,6 @@ Route::get('/get_employment_status_list', 'ApiCommonController@getEmploymentStat
 Route::get('/get_time_table_list', 'ApiCommonController@getTimeTableList')->middleware('auth');
 Route::get('/get_business_day_list', 'ApiCommonController@getBusinessDayList')->middleware('auth');
 Route::get('/get_holi_day_list', 'ApiCommonController@getHoliDayList')->middleware('auth');
+Route::get('/get_time_unit_list', 'ApiCommonController@getTimeUnitList')->middleware('auth');
+Route::get('/get_time_rounding_list', 'ApiCommonController@getTimeRoundingList')->middleware('auth');
 

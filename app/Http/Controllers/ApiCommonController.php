@@ -129,6 +129,26 @@ class ApiCommonController extends Controller
     }
 
     /**
+     * 時間単位リスト取得
+     *
+     * @return list
+     */
+    public function getTimeUnitList(){
+        $timeUnits = DB::table('generalcodes')->where('identification_id', 'C009')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        return $timeUnits;
+    }
+
+    /**
+     * 時間の丸めリスト取得
+     *
+     * @return list
+     */
+    public function getTimeRoundingList(){
+        $timeRounds = DB::table('generalcodes')->where('identification_id', 'C010')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        return $timeRounds;
+    }
+
+    /**
      * 曜日取得
      *
      * @param [type] $dt
