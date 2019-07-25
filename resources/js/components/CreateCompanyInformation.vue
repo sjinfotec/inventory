@@ -86,7 +86,7 @@ export default {
           console.log("会社情報取得");
         })
         .catch(reason => {
-          alert("error");
+          // alert("error");
         });
     },
     error() {

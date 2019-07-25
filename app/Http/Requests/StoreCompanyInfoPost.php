@@ -34,7 +34,7 @@ class StoreCompanyInfoPost extends FormRequest
             'fax' => 'max:191',
             'representativeName' => 'max:191',
             'representativeKana' => 'max:191',
-            'email' => 'email|max:191',
+            'email' => 'nullable|email|max:191',
         ];
     }
 

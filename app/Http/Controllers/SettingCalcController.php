@@ -23,6 +23,12 @@ class SettingCalcController extends Controller
         return view('setting_calc');
     }
 
+    /**
+     * 詳細取得
+     *
+     * @param Request $request
+     * @return void
+     */
     public function get(Request $request){
         $target_year = $request->year;
         $setting = new Setting();
@@ -31,6 +37,12 @@ class SettingCalcController extends Controller
         return $details;
     }
 
+    /**
+     * 登録
+     *
+     * @param StoreSettingPost $request
+     * @return void
+     */
     public function store(StoreSettingPost $request){
         // request
         $year = $request->year;
@@ -57,7 +69,7 @@ class SettingCalcController extends Controller
     }
 
     /**
-     * 登録
+     * 書き込み
      *
      * @param [type] $year
      * @param [type] $b_month
