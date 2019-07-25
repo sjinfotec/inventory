@@ -4,6 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 /**
  * テーブル：temp日次集計タイムレコード（temp_calc_workingtimes）のモデル
@@ -14,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 class TempCalcWorkingTime extends Model
 {
     protected $table = 'temp_calc_workingtimes';
+    protected $table_working_timetables = 'working_timetables';
     protected $guarded = array('id');
 
     //--------------- 項目属性 -----------------------------------
@@ -330,17 +333,17 @@ class TempCalcWorkingTime extends Model
         $this->late = $value;
     }
 
-    private $Leave_early;                 // 早退有無
+    private $leave_early;                 // 早退有無
 
     // 早退有無
     public function getLeaveearlyAttribute()
     {
-        return $this->Leave_early;
+        return $this->leave_early;
     }
 
     public function setLeaveearlyAttribute($value)
     {
-        $this->Leave_early = $value;
+        $this->leave_early = $value;
     }
 
     private $current_calc;                 // 当日計算有無
@@ -590,6 +593,31 @@ class TempCalcWorkingTime extends Model
         $this->year = $value;
     }
 
+    private $pattern;                 // 打刻パターン
+
+    // 打刻パターン
+    public function getPatternAttribute()
+    {
+        return $this->pattern;
+    }
+
+    public function setPatternAttribute($value)
+    {
+        $this->pattern = $value;
+    }
+
+    private $systemdate;
+
+    public function getSystemDateAttribute()
+    {
+        return $this->systemdate;
+    }
+
+    public function setSystemDateAttribute($value)
+    {
+        $this->systemdate = $value;
+    }
+
 
     //--------------- パラメータ項目属性 -----------------------------------
 
@@ -688,55 +716,157 @@ class TempCalcWorkingTime extends Model
     // --------------------- メソッド ------------------------------------------------------
 
     /**
+     * 取得
+     *
+     * @return void
+     */
+    public function getTempCalcWorkingtimes(){
+        \DB::enableQueryLog();
+        $mainquery = DB::table($this->table.' AS t1')
+            ->select(
+                't1.working_date as working_date',
+                't1.employment_status as employment_status',
+                't1.department_id as department_id',
+                't1.user_code as user_code',
+                't1.employment_status_name as employment_status_name',
+                't1.department_name as department_name',
+                't1.user_name as user_name',
+                't1.working_timetable_no as working_timetable_no',
+                't1.working_timetable_name as working_timetable_name',
+                't1.working_timetable_from_time as working_timetable_from_time',
+                't1.working_timetable_to_time as working_timetable_to_time',
+                't1.shift_no as shift_no',
+                't1.shift_name as shift_name',
+                't1.shift_from_time as shift_from_time',
+                't1.shift_to_time as shift_to_time',
+                't1.mode as mode',
+                't1.record_datetime as record_datetime',
+                't1.record_year as record_year',
+                't1.record_month as record_month',
+                't1.record_date as record_date',
+                't1.record_time as record_time',
+                't1.working_status as working_status',
+                't1.note as note',
+                't1.late as late',
+                't1.leave_early as leave_early',
+                't1.current_calc as current_calc',
+                't1.to_be_confirmed as to_be_confirmed',
+                't1.weekday_kubun as weekday_kubun',
+                't1.weekday_name as weekday_name',
+                't1.business_kubun as business_kubun',
+                't1.business_name as business_name',
+                't1.holiday_kubun as holiday_kubun',
+                't1.holiday_name as holiday_name',
+                't1.closing as closing',
+                't1.uplimit_time as uplimit_time',
+                't1.statutory_uplimit_time as statutory_uplimit_time',
+                't1.time_unit as time_unit',
+                't1.time_rounding as time_rounding',
+                't1.max_3month_total as max_3month_total',
+                't1.max_6month_total as max_6month_total',
+                't1.max_12month_total as max_12month_total',
+                't1.beginning_month as beginning_month',
+                't1.working_interval as working_interval',
+                't1.year as year',
+                't1.pattern as pattern'
+            );
+
+        if(!empty($this->param_date_from) && !empty($this->param_date_to)){
+            $date = date_create($this->param_date_from);
+            $this->param_date_from = $date->format('Ymd');
+            $date = date_create($this->param_date_to);
+            $this->param_date_to = $date->format('Ymd');
+            $mainquery->where('t1.working_date', '>=', $this->param_date_from);             // 日付範囲指定
+            $mainquery->where('t1.working_date', '<=', $this->param_date_to);               // 日付範囲指定
+        }
+        if(!empty($this->param_employment_status)){
+            $mainquery->where('t1.employment_status', $this->param_employment_status);      //　雇用形態指定
+        }
+        if(!empty($this->param_department_id)){
+            $mainquery->where('t1.department_id', $this->param_department_id);              // department_id指定
+        }
+        if(!empty($this->param_user_code)){
+            $mainquery->where('t1.user_code', $this->param_user_code);                      // user_code指定
+        }
+        
+        $results = $mainquery
+            ->orderBy('t1.working_date','asc')
+            ->orderBy('t1.department_id','asc')
+            ->orderBy('t1.user_code','asc')
+            ->orderBy('t1.record_time','asc')
+            ->get();
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getTempCalcWorkingtimes' => \DB::getQueryLog()
+            ]
+        );
+    
+        return $results;
+    }
+
+    /**
      * 登録
      *
      * @return void
      */
     public function insertTempCalcWorkingtimes(){
-        DB::table($table)->insert(
-            [
-                'working_date' => $this->working_date,
-                'employment_status' => $this->employment_status,
-                'department_id' => $this->department_id,
-                'user_code' => $this->user_code,
-                'employment_status_name' => $this->employment_status_name,
-                'department_name' => $this->department_name,
-                'user_name' => $this->user_name,
-                'working_timetable_no' => $this->working_timetable_no,
-                'working_timetable_name' => $this->working_timetable_name,
-                'working_timetable_from_time' => $this->working_timetable_from_time,
-                'working_timetable_to_time' => $this->working_timetable_to_time,
-                'shift_no' => $this->shift_no,
-                'shift_name' => $this->shift_name,
-                'shift_from_time' => $this->shift_from_time,
-                'shift_to_time' => $this->shift_to_time,
-                'mode' => $this->mode,
-                'record_datetime' => $this->record_datetime,
-                'record_year' => $this->record_year,
-                'record_month' => $this->record_month,
-                'record_date' => $this->record_date,
-                'record_time' => $this->record_time,
-                'attendance_time' => $this->attendance_time,
-                'leaving_time' => $this->leaving_time,
-                'weekday_kubun' => $this->weekday_kubun,
-                'weekday_name' => $this->weekday_name,
-                'business_kubun' => $this->business_kubun,
-                'business_name' => $this->business_name,
-                'holiday_kubun' => $this->holiday_kubun,
-                'holiday_name' => $this->holiday_name,
-                'closing' => $this->closing,
-                'uplimit_time' => $this->uplimit_time,
-                'statutory_uplimit_time' => $this->statutory_uplimit_time,
-                'time_unit' => $this->time_unit,
-                'time_rounding' => $this->time_rounding,
-                'max_3month_total' => $this->max_3month_total,
-                'max_6month_total' => $this->max_6month_total,
-                'max_12month_total' => $this->max_12month_total,
-                'beginning_month' => $this->beginning_month,
-                'working_interval' => $this->working_interval,
-                'year' => $this->year
-            ]
-        );
+        try{
+            DB::table($this->table)->insert(
+                [
+                    'working_date' => $this->working_date,
+                    'employment_status' => $this->employment_status,
+                    'department_id' => $this->department_id,
+                    'user_code' => $this->user_code,
+                    'employment_status_name' => $this->employment_status_name,
+                    'department_name' => $this->department_name,
+                    'user_name' => $this->user_name,
+                    'working_timetable_no' => $this->working_timetable_no,
+                    'working_timetable_name' => $this->working_timetable_name,
+                    'working_timetable_from_time' => $this->working_timetable_from_time,
+                    'working_timetable_to_time' => $this->working_timetable_to_time,
+                    'shift_no' => $this->shift_no,
+                    'shift_name' => $this->shift_name,
+                    'shift_from_time' => $this->shift_from_time,
+                    'shift_to_time' => $this->shift_to_time,
+                    'mode' => $this->mode,
+                    'record_datetime' => $this->record_datetime,
+                    'record_year' => $this->record_year,
+                    'record_month' => $this->record_month,
+                    'record_date' => $this->record_date,
+                    'record_time' => $this->record_time,
+                    'working_status' => $this->working_status,
+                    'note' => $this->note,
+                    'late' => $this->late,
+                    'leave_early' => $this->leave_early,
+                    'current_calc' => $this->current_calc,
+                    'to_be_confirmed' => $this->to_be_confirmed,
+                    'weekday_kubun' => $this->weekday_kubun,
+                    'weekday_name' => $this->weekday_name,
+                    'business_kubun' => $this->business_kubun,
+                    'business_name' => $this->business_name,
+                    'holiday_kubun' => $this->holiday_kubun,
+                    'holiday_name' => $this->holiday_name,
+                    'closing' => $this->closing,
+                    'uplimit_time' => $this->uplimit_time,
+                    'statutory_uplimit_time' => $this->statutory_uplimit_time,
+                    'time_unit' => $this->time_unit,
+                    'time_rounding' => $this->time_rounding,
+                    'max_3month_total' => $this->max_3month_total,
+                    'max_6month_total' => $this->max_6month_total,
+                    'max_12month_total' => $this->max_12month_total,
+                    'beginning_month' => $this->beginning_month,
+                    'working_interval' => $this->working_interval,
+                    'year' => $this->year,
+                    'pattern' => $this->pattern,
+                    'created_at'=>$this->systemdate
+                ]
+            );
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')));
+            Log::error($pe->getMessage());
+            throw $pe;
+        }
     }
 
     /**
@@ -745,27 +875,33 @@ class TempCalcWorkingTime extends Model
      * @return void
      */
     public function delTempCalcWorkingtimes(){
-        $mainquery = DB::table($this->table);
+        try{
+            $mainquery = DB::table($this->table);
 
-        if(!empty($this->param_date_from) && !empty($this->param_date_to)){
-            $date = date_create($this->param_date_from);
-            $this->param_date_from = $date->format('Ymd');
-            $date = date_create($this->param_date_to);
-            $this->param_date_to = $date->format('Ymd');
-            $mainquery->where($this->table.'.working_date', '>=', $this->param_date_from);          // 日付範囲指定
-            $mainquery->where($this->table.'.working_date', '<=', $this->param_date_to);            // 日付範囲指定
-        }
-        if(!empty($this->param_employment_status)){
-            $mainquery->where($this->table.'.employment_status', $this->param_employment_status);   //　雇用形態指定
-        }
-        if(!empty($this->param_department_id)){
-            $mainquery->where($this->table.'.department_id', $this->param_department_id);           // department_id指定
-        }
-        if(!empty($this->param_user_code)){
-            $mainquery->where($this->table.'.user_code', $this->param_user_code);                   // user_code指定
-        }
+            if(!empty($this->param_date_from) && !empty($this->param_date_to)){
+                $date = date_create($this->param_date_from);
+                $this->param_date_from = $date->format('Ymd');
+                $date = date_create($this->param_date_to);
+                $this->param_date_to = $date->format('Ymd');
+                $mainquery->where($this->table.'.working_date', '>=', $this->param_date_from);          // 日付範囲指定
+                $mainquery->where($this->table.'.working_date', '<=', $this->param_date_to);            // 日付範囲指定
+            }
+            if(!empty($this->param_employment_status)){
+                $mainquery->where($this->table.'.employment_status', $this->param_employment_status);   //　雇用形態指定
+            }
+            if(!empty($this->param_department_id)){
+                $mainquery->where($this->table.'.department_id', $this->param_department_id);           // department_id指定
+            }
+            if(!empty($this->param_user_code)){
+                $mainquery->where($this->table.'.user_code', $this->param_user_code);                   // user_code指定
+            }
         
-        $mainquery->delete();
+            $mainquery->delete();
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')));
+            Log::error($pe->getMessage());
+            throw $pe;
+        }
     }
 
 }

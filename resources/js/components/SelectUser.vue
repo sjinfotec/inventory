@@ -65,7 +65,6 @@ export default {
     // 選択が変更された場合、親コンポーネントに選択値を返却
     selChanges : function(value) {
 
-        console.log("selectuser = ["+ value + ']');
         this.$emit('change-event', value);
 
     }
