@@ -90,41 +90,36 @@ export default {
     },
     // 雇用形態が変更された場合の処理
     employmentChanges: function(value){
-      console.log("employmentChanges = " + value);
       this.valueemploymentstatus = value;
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
-      if(this.valueemploymentstatus == ''){
-        this.$refs.selectuser.getUserListByEmployment(this.getDo, value);
-      } else {
-        this.$refs.selectuser.getUserListByEmployment(this.getDo, value, this.valueemploymentstatus);
-      }
-    },
-    // 部署選択が変更された場合の処理
-    departmentChanges: function(value){
-      console.log("departmentChanges = " + value);
-      this.valuedepartment = value;
-      // ユーザー選択コンポーネントの取得メソッドを実行
-      this.getDo = 1;
       if(this.valuedepartment == ''){
-        this.$refs.selectuser.getUserListByEmployment(this.getDo, value);
+        this.$refs.selectuser.getUserList(this.getDo, value);
       } else {
         this.$refs.selectuser.getUserListByEmployment(this.getDo, this.valuedepartment, value);
       }
     },
+    // 部署選択が変更された場合の処理
+    departmentChanges: function(value){
+      this.valuedepartment = value;
+      // ユーザー選択コンポーネントの取得メソッドを実行
+      this.getDo = 1;
+      if(this.valueemploymentstatus == ''){
+        this.$refs.selectuser.getUserList(this.getDo, value);
+      } else {
+        this.$refs.selectuser.getUserListByEmployment(this.getDo, value, this.valueemploymentstatus);
+      }
+    },
     // ユーザー選択が変更された場合の処理
     userChanges: function(value){
-      console.log("userChanges = " + value);
       this.valueuser = value;
     },
     // 計算開始日付が変更された場合の処理
     fromdateChanges: function(value){
-      console.log("fromdateChanges = " + value);
       this.valuefromdate = value;
     },
     // 計算終了日付が変更された場合の処理
     todateChanges: function(value){
-      console.log("todateChanges = " + value);
       this.valuetodate = value;
     },
     // 集計開始ボタンがクリックされた場合の処理
@@ -134,8 +129,8 @@ export default {
         this.$axios
           .get("/daily/calc", {
             params: {
-              datefrom: this.valuefromdate,
-              dateto: this.valuetodate,
+              datefrom: moment(this.valuefromdate).format('YYYYMMDD'),
+              dateto: moment(this.valuetodate).format('YYYYMMDD'),
               employmentstatus: this.valueemploymentstatus,
               departmentcode: this.valuedepartment,
               usercode: this.valueuser

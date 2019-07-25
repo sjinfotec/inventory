@@ -2721,43 +2721,38 @@ __webpack_require__.r(__webpack_exports__);
     },
     // 雇用形態が変更された場合の処理
     employmentChanges: function employmentChanges(value) {
-      console.log("employmentChanges = " + value);
       this.valueemploymentstatus = value; // ユーザー選択コンポーネントの取得メソッドを実行
 
       this.getDo = 1;
 
-      if (this.valueemploymentstatus == '') {
-        this.$refs.selectuser.getUserListByEmployment(this.getDo, value);
-      } else {
-        this.$refs.selectuser.getUserListByEmployment(this.getDo, value, this.valueemploymentstatus);
-      }
-    },
-    // 部署選択が変更された場合の処理
-    departmentChanges: function departmentChanges(value) {
-      console.log("departmentChanges = " + value);
-      this.valuedepartment = value; // ユーザー選択コンポーネントの取得メソッドを実行
-
-      this.getDo = 1;
-
       if (this.valuedepartment == '') {
-        this.$refs.selectuser.getUserListByEmployment(this.getDo, value);
+        this.$refs.selectuser.getUserList(this.getDo, value);
       } else {
         this.$refs.selectuser.getUserListByEmployment(this.getDo, this.valuedepartment, value);
       }
     },
+    // 部署選択が変更された場合の処理
+    departmentChanges: function departmentChanges(value) {
+      this.valuedepartment = value; // ユーザー選択コンポーネントの取得メソッドを実行
+
+      this.getDo = 1;
+
+      if (this.valueemploymentstatus == '') {
+        this.$refs.selectuser.getUserList(this.getDo, value);
+      } else {
+        this.$refs.selectuser.getUserListByEmployment(this.getDo, value, this.valueemploymentstatus);
+      }
+    },
     // ユーザー選択が変更された場合の処理
     userChanges: function userChanges(value) {
-      console.log("userChanges = " + value);
       this.valueuser = value;
     },
     // 計算開始日付が変更された場合の処理
     fromdateChanges: function fromdateChanges(value) {
-      console.log("fromdateChanges = " + value);
       this.valuefromdate = value;
     },
     // 計算終了日付が変更された場合の処理
     todateChanges: function todateChanges(value) {
-      console.log("todateChanges = " + value);
       this.valuetodate = value;
     },
     // 集計開始ボタンがクリックされた場合の処理
@@ -2769,8 +2764,8 @@ __webpack_require__.r(__webpack_exports__);
       if (this.validate) {
         this.$axios.get("/daily/calc", {
           params: {
-            datefrom: this.valuefromdate,
-            dateto: this.valuetodate,
+            datefrom: moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format('YYYYMMDD'),
+            dateto: moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuetodate).format('YYYYMMDD'),
             employmentstatus: this.valueemploymentstatus,
             departmentcode: this.valuedepartment,
             usercode: this.valueuser
@@ -3437,7 +3432,6 @@ __webpack_require__.r(__webpack_exports__);
     },
     // 選択が変更された場合、親コンポーネントに選択値を返却
     selChanges: function selChanges(value) {
-      console.log("selectuser = [" + value + ']');
       this.$emit('change-event', value);
     }
   }

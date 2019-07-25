@@ -4,6 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 
 /**
  * テーブル：日次タイムレコード（working_time_date）のモデル
@@ -14,13 +16,57 @@ use Illuminate\Support\Facades\DB;
 class WorkingTimedate extends Model
 {
     protected $table = 'working_time_dates';
-    protected $table_users = 'users';
-    protected $table_work_times = 'work_times';
     protected $guarded = array('id');
 
     //--------------- 項目属性 -----------------------------------
 
-    private $working_date;                 // 日付
+    private $working_date;                  // 日付
+    private $employment_status;             // 雇用形態
+    private $department_id;                 // 部署ID
+    private $user_code;                     // ユーザー
+    private $employment_status_name;        // 雇用形態名称
+    private $department_name;               // 部署名称
+    private $user_name;                     // ユーザー名称
+    private $working_timetable_no;          // タイムテーブルNo
+    private $working_timetable_name;        // タイムテーブル名称
+    private $total_working_times;           // 合計勤務時間
+    private $regular_working_times;         // 所定労働時間
+    private $out_of_regular_working_times;  // 所定外労働時間
+    private $overtime_hours;                // 残業時間
+    private $late_night_overtime_hours;     // 深夜残業時間
+    private $legal_working_times;           // 法定労働時間
+    private $out_of_legal_working_times;    // 法定外労働時間
+    private $not_employment_working_hours;  // 未就労労働時間
+    private $off_hours_working_hours;       // 時間外労働時間
+    private $working_status;                // 勤務状態
+    private $note;                          // メモ
+    private $late;                          // 遅刻有無
+    private $leave_early;                   // 早退有無
+    private $current_calc;                  // 当日計算有無
+    private $to_be_confirmed;               // 要確認有無
+    private $weekday_kubun;                 // 曜日区分
+    private $weekday_name;                  // 曜日名称
+    private $business_kubun;                // 営業日区分
+    private $business_name;                 // 営業日名称
+    private $holiday_kubun;                 // 休暇区分
+    private $holiday_name;                  // 休暇名称
+    private $closing;                       // 締日
+    private $uplimit_time;                  // 上限残業時間
+    private $statutory_uplimit_time;        // 法定上限残業時間
+    private $time_unit;                     // 時間単位
+    private $time_rounding;                 // 時間の丸め
+    private $max_3month_total;              // ３ヶ月累計
+    private $max_6month_total;              // ６ヶ月累計
+    private $max_12month_total;             // １年間累計
+    private $beginning_month;               // 期首月
+    private $working_interval;              // 勤務間インターバル
+    private $year;                          // 年
+    private $pattern;                       // 打刻パターン
+    private $fixedtime;                     // 確定
+    private $created_user;                  // 作成ユーザー
+    private $updated_user;                  // 修正ユーザー
+    private $is_deleted;                    // 削除フラグ
+    private $systemdate;
 
     // 日付
     public function getWorkingdateAttribute()
@@ -33,7 +79,18 @@ class WorkingTimedate extends Model
         $this->working_date = $value;
     }
 
-    private $department_id;                 // 部署ID
+
+    // 雇用形態
+    public function getEmploymentstatusAttribute()
+    {
+        return $this->employment_status;
+    }
+
+    public function setEmploymentstatusAttribute($value)
+    {
+        $this->employment_status = $value;
+    }
+
 
     // 部署ID
     public function getDepartmentidAttribute()
@@ -46,7 +103,30 @@ class WorkingTimedate extends Model
         $this->department_id = $value;
     }
 
-    private $department_name;                 // 部署名称
+
+
+    // ユーザー
+    public function getUsercodeAttribute()
+    {
+        return $this->user_code;
+    }
+
+    public function setUsercodeAttribute($value)
+    {
+        $this->user_code = $value;
+    }
+
+    // 雇用形態名称
+    public function getEmploymentstatusnameAttribute()
+    {
+        return $this->employment_status_name;
+    }
+
+    public function setEmploymentstatusnameAttribute($value)
+    {
+        $this->employment_status_name = $value;
+    }
+
 
     // 部署名称
     public function getDepartmentnameAttribute()
@@ -59,33 +139,30 @@ class WorkingTimedate extends Model
         $this->department_name = $value;
     }
 
-    private $user_code;                 // ユーザーCODE
 
-    // ユーザーCODE
-    public function getUsercodeAttribute()
+    // ユーザー名称
+    public function getUsernameAttribute()
     {
-        return $this->user_code;
+        return $this->user_name;
     }
 
-    public function setUsercodeAttribute($value)
+    public function setUsernameAttribute($value)
     {
-        $this->user_code = $value;
+        $this->user_name = $value;
     }
 
-    private $leaworking_timetable_noving_time;                 // タイムテーブルNo
 
     // タイムテーブルNo
-    public function getLeaworkingtimetablenovingtimeAttribute()
+    public function getWorkingtimetablenoAttribute()
     {
-        return $this->leaworking_timetable_noving_time;
+        return $this->working_timetable_no;
     }
 
-    public function setLeaworkingtimetablenovingtimeAttribute($value)
+    public function setWorkingtimetablenoAttribute($value)
     {
-        $this->leaworking_timetable_noving_time = $value;
+        $this->working_timetable_no = $value;
     }
 
-    private $working_timetable_name;                 // タイムテーブル名称
 
     // タイムテーブル名称
     public function getWorkingtimetablenameAttribute()
@@ -98,85 +175,18 @@ class WorkingTimedate extends Model
         $this->working_timetable_name = $value;
     }
 
-    private $working_time_style;                 // 雇用形態
 
-    // 雇用形態
-    public function getWorkingtimestyleAttribute()
+    // 合計勤務時間
+    public function getTotalworkingtimesAttribute()
     {
-        return $this->working_time_style;
+        return $this->total_working_times;
     }
 
-    public function setWorkingtimestyleAttribute($value)
+    public function setTotalworkingtimesAttribute($value)
     {
-        $this->working_time_style = $value;
+        $this->total_working_times = $value;
     }
 
-    private $working_time_style_name;                 // 雇用形態名称
-
-    // 雇用形態名称
-    public function getWorkingtimestylenameAttribute()
-    {
-        return $this->working_time_style_name;
-    }
-
-    public function setWorkingtimestylenameAttribute($value)
-    {
-        $this->working_time_style_name = $value;
-    }
-
-    private $attendance_time;                 // 出勤時刻
-
-    // 出勤時刻
-    public function getAttendancetimeAttribute()
-    {
-        return $this->attendance_time;
-    }
-
-    public function setAttendancetimeAttribute($value)
-    {
-        $this->attendance_time = $value;
-    }
-
-    private $leaving_time;                 // 退勤時刻
-
-    // 退勤時刻
-    public function getLeavingtimeAttribute()
-    {
-        return $this->leaving_time;
-    }
-
-    public function setLeavingtimeAttribute($value)
-    {
-        $this->leaving_time = $value;
-    }
-
-    private $missing_middle_time;                 // 中抜時刻
-
-    // 中抜時刻
-    public function getMissingmiddletimeAttribute()
-    {
-        return $this->missing_middle_time;
-    }
-
-    public function setMissingmiddletimeAttribute($value)
-    {
-        $this->missing_middle_time = $value;
-    }
-
-    private $missing_middle_return_time;                 // 中抜戻り時刻
-
-    // 中抜戻り時刻
-    public function getMissingmiddlereturntimeAttribute()
-    {
-        return $this->missing_middle_return_time;
-    }
-
-    public function setMissingmiddlereturntimeAttribute($value)
-    {
-        $this->missing_middle_return_time = $value;
-    }
-
-    private $regular_working_times;                 // 所定労働時間
 
     // 所定労働時間
     public function getRegularworkingtimesAttribute()
@@ -189,7 +199,6 @@ class WorkingTimedate extends Model
         $this->regular_working_times = $value;
     }
 
-    private $out_of_regular_working_times;                 // 所定外労働時間
 
     // 所定外労働時間
     public function getOutofregularworkingtimesAttribute()
@@ -202,126 +211,368 @@ class WorkingTimedate extends Model
         $this->out_of_regular_working_times = $value;
     }
 
-    private $out_of_regular_night_working_times;                 // 所定外深夜労働時間
 
-    // 所定外深夜労働時間
-    public function getOutofregularnightworkingtimesAttribute()
+    // 残業時間
+    public function getOvertimehoursAttribute()
     {
-        return $this->out_of_regular_night_working_times;
+        return $this->overtime_hours;
     }
 
-    public function setOutofregularnightworkingtimesAttribute($value)
+    public function setOvertimehoursAttribute($value)
     {
-        $this->out_of_regular_night_working_times = $value;
+        $this->overtime_hours = $value;
     }
 
-    private $out_of_regular_total_working_times;                 // 所定外合計労働時間
 
-    // 所定外合計労働時間
-    public function getOutofregulartotalworkingtimesAttribute()
+    // 深夜残業時間
+    public function getLatenightovertimehoursAttribute()
     {
-        return $this->out_of_regular_total_working_times;
+        return $this->late_night_overtime_hours;
     }
 
-    public function setOutofregulartotalworkingtimesAttribute($value)
+    public function setLatenightovertimehoursAttribute($value)
     {
-        $this->out_of_regular_total_working_times = $value;
+        $this->late_night_overtime_hours = $value;
     }
 
-    private $not_employment_time;                 // 不就労時間
-
-    // 不就労時間
-    public function getNotemploymenttimeAttribute()
-    {
-        return $this->not_employment_time;
-    }
-
-    public function setNotemploymenttimeAttribute($value)
-    {
-        $this->not_employment_time = $value;
-    }
-
-    private $statutory_working_times;                 // 法定労働時間
 
     // 法定労働時間
-    public function getStatutoryworkingtimesAttribute()
+    public function getLegalworkingtimesAttribute()
     {
-        return $this->statutory_working_times;
+        return $this->legal_working_times;
     }
 
-    public function setStatutoryworkingtimesAttribute($value)
+    public function setLegalworkingtimesAttribute($value)
     {
-        $this->statutory_working_times = $value;
+        $this->legal_working_times = $value;
     }
 
-    private $out_of_statutory_working_times;                 // 法定外労働時間
 
     // 法定外労働時間
-    public function getOutofstatutoryworkingtimesAttribute()
+    public function getOutoflegalworkingtimesAttribute()
     {
-        return $this->out_of_statutory_working_times;
+        return $this->out_of_legal_working_times;
     }
 
-    public function setOutofstatutoryworkingtimesAttribute($value)
+    public function setOutoflegalworkingtimesAttribute($value)
     {
-        $this->out_of_statutory_working_times = $value;
+        $this->out_of_legal_working_times = $value;
     }
 
-    private $prescribed_outside_total_month;                 // 所定外累計（月）
 
-    // 所定外累計（月）
-    public function getPrescribedoutsidetotalmonthAttribute()
+    // 未就労労働時間
+    public function getNotemploymentworkinghoursAttribute()
     {
-        return $this->prescribed_outside_total_month;
+        return $this->not_employment_working_hours;
     }
 
-    public function setPrescribedoutsidetotalmonthAttribute($value)
+    public function setNotemploymentworkinghoursAttribute($value)
     {
-        $this->prescribed_outside_total_month = $value;
+        $this->not_employment_working_hours = $value;
     }
 
-    private $remaining_prescribed_outside_month;                 // 所定外累計（月）
 
-    // 所定外累計（月）
-    public function getRemainingprescribedoutsidemonthAttribute()
+    // 時間外労働時間
+    public function getOffhoursworkinghoursAttribute()
     {
-        return $this->remaining_prescribed_outside_month;
+        return $this->off_hours_working_hours;
     }
 
-    public function setRemainingprescribedoutsidemonthAttribute($value)
+    public function setOffhoursworkinghoursAttribute($value)
     {
-        $this->remaining_prescribed_outside_month = $value;
+        $this->off_hours_working_hours = $value;
     }
 
-    private $leave_item_code;                 // 休暇項目コード
 
-    // 休暇項目コード
-    public function getLeaveitemcodeAttribute()
+    // 勤務状態
+    public function getWorkingstatusAttribute()
     {
-        return $this->leave_item_code;
+        return $this->working_status;
     }
 
-    public function setLeaveitemcodeAttribute($value)
+    public function setWorkingstatusAttribute($value)
     {
-        $this->leave_item_code = $value;
+        $this->working_status = $value;
     }
 
-    private $leave_item_name;                 // 休暇項目名称
 
-    // 休暇項目名称
-    public function getLeaveitemnameAttribute()
+    // メモ
+    public function getNoteAttribute()
     {
-        return $this->leave_item_name;
+        return $this->note;
     }
 
-    public function setLeaveitemnameAttribute($value)
+    public function setNoteAttribute($value)
     {
-        $this->leave_item_name = $value;
+        $this->note = $value;
     }
 
-    private $fixedtime;                 // 確定 1:確定
 
-    // 確定 1:確定
+    // 遅刻有無
+    public function getLateAttribute()
+    {
+        return $this->late;
+    }
+
+    public function setLateAttribute($value)
+    {
+        $this->late = $value;
+    }
+
+
+    // 早退有無
+    public function getLeaveearlyAttribute()
+    {
+        return $this->leave_early;
+    }
+
+    public function setLeaveearlyAttribute($value)
+    {
+        $this->leave_early = $value;
+    }
+
+
+    // 当日計算有無
+    public function getCurrentcalcAttribute()
+    {
+        return $this->current_calc;
+    }
+
+    public function setCurrentcalcAttribute($value)
+    {
+        $this->current_calc = $value;
+    }
+
+
+    // 要確認有無
+    public function getTobeconfirmedAttribute()
+    {
+        return $this->to_be_confirmed;
+    }
+
+    public function setTobeconfirmedAttribute($value)
+    {
+        $this->to_be_confirmed = $value;
+    }
+
+
+    // 曜日区分
+    public function getWeekdaykubunAttribute()
+    {
+        return $this->weekday_kubun;
+    }
+
+    public function setWeekdaykubunAttribute($value)
+    {
+        $this->weekday_kubun = $value;
+    }
+
+
+    // 曜日名称
+    public function getWeekdaynameAttribute()
+    {
+        return $this->weekday_name;
+    }
+
+    public function setWeekdaynameAttribute($value)
+    {
+        $this->weekday_name = $value;
+    }
+
+
+    // 営業日区分
+    public function getBusinesskubunAttribute()
+    {
+        return $this->business_kubun;
+    }
+
+    public function setBusinesskubunAttribute($value)
+    {
+        $this->business_kubun = $value;
+    }
+
+
+    // 営業日名称
+    public function getBusinessnameAttribute()
+    {
+        return $this->business_name;
+    }
+
+    public function setBusinessnameAttribute($value)
+    {
+        $this->business_name = $value;
+    }
+
+
+    // 休暇区分
+    public function getHolidaykubunAttribute()
+    {
+        return $this->holiday_kubun;
+    }
+
+    public function setHolidaykubunAttribute($value)
+    {
+        $this->holiday_kubun = $value;
+    }
+
+
+    // 休暇名称
+    public function getHolidaynameAttribute()
+    {
+        return $this->holiday_name;
+    }
+
+    public function setHolidaynameAttribute($value)
+    {
+        $this->holiday_name = $value;
+    }
+
+
+    // 締日
+    public function getClosingAttribute()
+    {
+        return $this->closing;
+    }
+
+    public function setClosingAttribute($value)
+    {
+        $this->closing = $value;
+    }
+
+
+    // 上限残業時間
+    public function getUplimittimeAttribute()
+    {
+        return $this->uplimit_time;
+    }
+
+    public function setUplimittimeAttribute($value)
+    {
+        $this->uplimit_time = $value;
+    }
+
+
+    // 法定上限残業時間
+    public function getStatutoryuplimittimeAttribute()
+    {
+        return $this->statutory_uplimit_time;
+    }
+
+    public function setStatutoryuplimittimeAttribute($value)
+    {
+        $this->statutory_uplimit_time = $value;
+    }
+
+
+    // 時間単位
+    public function getTimeunitAttribute()
+    {
+        return $this->time_unit;
+    }
+
+    public function setTimeunitAttribute($value)
+    {
+        $this->time_unit = $value;
+    }
+
+
+    // 時間の丸め
+    public function getTimeroundingAttribute()
+    {
+        return $this->time_rounding;
+    }
+
+    public function setTimeroundingAttribute($value)
+    {
+        $this->time_rounding = $value;
+    }
+
+
+    // ３ヶ月累計
+    public function getMax3MonthtotalAttribute()
+    {
+        return $this->max_3month_total;
+    }
+
+    public function setMax3MonthtotalAttribute($value)
+    {
+        $this->max_3month_total = $value;
+    }
+
+
+    // ６ヶ月累計
+    public function getMax6MonthtotalAttribute()
+    {
+        return $this->max_6month_total;
+    }
+
+    public function setMax6MonthtotalAttribute($value)
+    {
+        $this->max_6month_total = $value;
+    }
+
+
+    // １年間累計
+    public function getMax12MonthtotalAttribute()
+    {
+        return $this->max_12month_total;
+    }
+
+    public function setMax12MonthtotalAttribute($value)
+    {
+        $this->max_12month_total = $value;
+    }
+
+
+    // 期首月
+    public function getBeginningmonthAttribute()
+    {
+        return $this->beginning_month;
+    }
+
+    public function setBeginningmonthAttribute($value)
+    {
+        $this->beginning_month = $value;
+    }
+
+
+    // 勤務間インターバル
+    public function getWorkingintervalAttribute()
+    {
+        return $this->working_interval;
+    }
+
+    public function setWorkingintervalAttribute($value)
+    {
+        $this->working_interval = $value;
+    }
+
+
+    // 年
+    public function getYearAttribute()
+    {
+        return $this->year;
+    }
+
+    public function setYearAttribute($value)
+    {
+        $this->year = $value;
+    }
+
+
+    // 打刻パターン
+    public function getPatternAttribute()
+    {
+        return $this->pattern;
+    }
+
+    public function setPatternAttribute($value)
+    {
+        $this->pattern = $value;
+    }
+
+
+    // 確定
     public function getFixedtimeAttribute()
     {
         return $this->fixedtime;
@@ -332,7 +583,6 @@ class WorkingTimedate extends Model
         $this->fixedtime = $value;
     }
 
-    private $created_user;                 // 作成ユーザー
 
     // 作成ユーザー
     public function getCreateduserAttribute()
@@ -345,7 +595,6 @@ class WorkingTimedate extends Model
         $this->created_user = $value;
     }
 
-    private $updated_user;                 // 修正ユーザー
 
     // 修正ユーザー
     public function getUpdateduserAttribute()
@@ -358,7 +607,8 @@ class WorkingTimedate extends Model
         $this->updated_user = $value;
     }
 
-    private $is_deleted;                 // 削除フラグ
+
+
 
     // 削除フラグ
     public function getIsdeletedAttribute()
@@ -372,8 +622,20 @@ class WorkingTimedate extends Model
     }
 
 
+    public function getSystemDateAttribute()
+    {
+        return $this->systemdate;
+    }
+
+    public function setSystemDateAttribute($value)
+    {
+        $this->systemdate = $value;
+    }
+
+
     //--------------- パラメータ項目属性 -----------------------------------
 
+    private $param_employment_status;           // 雇用形態
     private $param_user_code;                   // ユーザー
     private $param_department_id;               // 部署
     private $param_date_from;                   // 開始日付
@@ -382,6 +644,17 @@ class WorkingTimedate extends Model
     private $array_record_time;                 // 日付範囲配列
     private $massegedata;                       // メッセージ
 
+
+    // 雇用形態
+    public function getParamEmploymentStatusAttribute()
+    {
+        return $this->param_employment_status;
+    }
+
+    public function setParamEmploymentStatusAttribute($value)
+    {
+        $this->param_employment_status = $value;
+    }
 
     // ユーザー
     public function getParamUsercodeAttribute()
@@ -410,7 +683,7 @@ class WorkingTimedate extends Model
     public function getParamdatefromAttribute()
     {
         $date = date_create($this->param_date_from);
-        return $date->format('Y/m/d').' 00:00:00';
+        return $date->format('Ymd');
     }
 
     public function setParamdatefromAttribute($value)
@@ -423,7 +696,7 @@ class WorkingTimedate extends Model
     public function getParamdatetoAttribute()
     {
         $date = date_create($this->param_date_to);
-        return $date->format('Y/m/d').' 23:59:59';
+        return $date->format('Ymd');
     }
 
     public function setParamdatetoAttribute($value)
@@ -470,51 +743,91 @@ class WorkingTimedate extends Model
      *
      * @return sql取得結果
      */
-    public function getWorkingTimeDates(){
+    public function getWorkingTimeDate(){
 
 
         // 日次労働時間取得SQL作成
         \DB::enableQueryLog();
-        $mainquery = DB::table($this->table)
-            ->select(
-                $this->table.'.working_date',
-                $this->table.'.department_id',
-                $this->table.'.department_name',
-                $this->table.'.user_code',
-                $this->table.'.working_timetable_no',
-                $this->table.'.working_timetable_name',
-                $this->table.'.working_time_style',
-                $this->table.'.working_time_style_name',
-                $this->table.'.attendance_time',
-                $this->table.'.leaving_time',
-                $this->table.'.missing_middle_time',
-                $this->table.'.missing_middle_return_time',
-                $this->table.'.regular_working_times',
-                $this->table.'.out_of_regular_working_times',
-                $this->table.'.out_of_regular_night_working_times',
-                $this->table.'.out_of_regular_total_working_times',
-                $this->table.'.not_employment_time',
-                $this->table.'.statutory_working_times',
-                $this->table.'.out_of_statutory_working_times',
-                $this->table.'.leave_item_code',
-                $this->table.'.leave_item_name',
-                $this->table.'.fixedtime',
-                $this->table.'.is_deleted');
+        try{
+            $mainquery = DB::table($this->table)
+                ->select(
+                    $this->table.'.working_date',
+                    $this->table.'.employment_status',
+                    $this->table.'.department_id',
+                    $this->table.'.user_code',
+                    $this->table.'.employment_status_name',
+                    $this->table.'.department_name',
+                    $this->table.'.user_name',
+                    $this->table.'.working_timetable_no',
+                    $this->table.'.working_timetable_name',
+                    $this->table.'.total_working_times',
+                    $this->table.'.regular_working_times',
+                    $this->table.'.out_of_regular_working_times',
+                    $this->table.'.overtime_hours',
+                    $this->table.'.late_night_overtime_hours',
+                    $this->table.'.legal_working_times',
+                    $this->table.'.out_of_legal_working_times',
+                    $this->table.'.not_employment_working_hours',
+                    $this->table.'.off_hours_working_hours',
+                    $this->table.'.working_status',
+                    $this->table.'.note',
+                    $this->table.'.late',
+                    $this->table.'.leave_early',
+                    $this->table.'.current_calc',
+                    $this->table.'.to_be_confirmed',
+                    $this->table.'.weekday_kubun',
+                    $this->table.'.weekday_name',
+                    $this->table.'.business_kubun',
+                    $this->table.'.business_name',
+                    $this->table.'.holiday_kubun',
+                    $this->table.'.holiday_name',
+                    $this->table.'.closing',
+                    $this->table.'.uplimit_time',
+                    $this->table.'.statutory_uplimit_time',
+                    $this->table.'.time_unit',
+                    $this->table.'.time_rounding',
+                    $this->table.'.max_3month_total',
+                    $this->table.'.max_6month_total',
+                    $this->table.'.max_12month_total',
+                    $this->table.'.beginning_month',
+                    $this->table.'.working_interval',
+                    $this->table.'.year',
+                    $this->table.'.pattern',
+                    $this->table.'.fixedtime',
+                    $this->table.'.created_user',
+                    $this->table.'.updated_user',
+                    $this->table.'.is_deleted');
 
-        if(!empty($this->param_user_code)){
-            $mainquery->where($this->table.'.user_code', $this->param_user_code);               //user_code指定
+            if(!empty($this->param_date_from) && !empty($this->param_date_to)){
+                $date = date_create($this->param_date_from);
+                $this->param_date_from = $date->format('Ymd');
+                $date = date_create($this->param_date_to);
+                $this->param_date_to = $date->format('Ymd');
+                $mainquery->where($this->table.'.working_date', '>=', $this->param_date_from);          // 日付範囲指定
+                $mainquery->where($this->table.'.working_date', '<=', $this->param_date_to);            // 日付範囲指定
+            }
+            
+            if(!empty($this->param_employment_status)){
+                $mainquery->where($this->table.'.employment_status', $this->param_employment_status);   //employment_status指定
+            }
+            
+            if(!empty($this->param_user_code)){
+                $mainquery->where($this->table.'.user_code', $this->param_user_code);                   //user_code指定
+            }
+            
+            if(!empty($this->param_department_id)){
+                $mainquery->where($this->table.'.department_id', $this->param_department_id);           //department_id指定
+            }
+            $mainquery->where('t1.is_deleted', '=', 0)->get();
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
         }
-        
-        if(!empty($this->param_department_id)){
-            $mainquery->where($this->table.'.department_id', $this->param_department_id);       //department_id指定
-        }
-
-        $record_time = $this->getArrayrecordtimeAttribute();
-        if(!empty($record_time)){
-            $mainquery->whereBetween($this->table.'.record_time', $record_time);       //record_time範囲指定
-        }
-        $mainquery->where('t1.is_deleted', '=', 0)
-            ->get();
 
         \Log::debug(
             'sql_debug_log',
@@ -526,4 +839,156 @@ class WorkingTimedate extends Model
         return $mainquery;
     }
 
+    /**
+     * 登録
+     *
+     * @return void
+     */
+    public function insertWorkingTimeDate(){
+        try{
+            DB::table($this->table)->insert(
+                [
+                    'working_date' => $this->working_date,
+                    'employment_status' => $this->employment_status,
+                    'department_id' => $this->department_id,
+                    'user_code' => $this->user_code,
+                    'employment_status_name' => $this->employment_status_name,
+                    'department_name' => $this->department_name,
+                    'user_name' => $this->user_name,
+                    'working_timetable_no' => $this->working_timetable_no,
+                    'working_timetable_name' => $this->working_timetable_name,
+                    'total_working_times' => $this->total_working_times,
+                    'regular_working_times' => $this->regular_working_times,
+                    'out_of_regular_working_times' => $this->out_of_regular_working_times,
+                    'overtime_hours' => $this->overtime_hours,
+                    'late_night_overtime_hours' => $this->late_night_overtime_hours,
+                    'legal_working_times' => $this->legal_working_times,
+                    'out_of_legal_working_times' => $this->out_of_legal_working_times,
+                    'not_employment_working_hours' => $this->not_employment_working_hours,
+                    'off_hours_working_hours' => $this->off_hours_working_hours,
+                    'working_status' => $this->working_status,
+                    'note' => $this->note,
+                    'late' => $this->late,
+                    'leave_early' => $this->leave_early,
+                    'current_calc' => $this->current_calc,
+                    'to_be_confirmed' => $this->to_be_confirmed,
+                    'weekday_kubun' => $this->weekday_kubun,
+                    'weekday_name' => $this->weekday_name,
+                    'business_kubun' => $this->business_kubun,
+                    'business_name' => $this->business_name,
+                    'holiday_kubun' => $this->holiday_kubun,
+                    'holiday_name' => $this->holiday_name,
+                    'closing' => $this->closing,
+                    'uplimit_time' => $this->uplimit_time,
+                    'statutory_uplimit_time' => $this->statutory_uplimit_time,
+                    'time_unit' => $this->time_unit,
+                    'time_rounding' => $this->time_rounding,
+                    'max_3month_total' => $this->max_3month_total,
+                    'max_6month_total' => $this->max_6month_total,
+                    'max_12month_total' => $this->max_12month_total,
+                    'beginning_month' => $this->beginning_month,
+                    'working_interval' => $this->working_interval,
+                    'year' => $this->year,
+                    'pattern' => $this->pattern,
+                    'fixedtime' => $this->fixedtime,
+                    'created_user' => $this->created_user,
+                    'updated_user' => $this->updated_user,
+                    'created_at'=>$this->systemdate
+                ]
+            );
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 存在チェック
+     *
+     * @return boolean
+     */
+    public function isExistsWorkingTimeDate(){
+        try{
+            $mainquery = DB::table($this->table);
+
+            if(!empty($this->param_date_from) && !empty($this->param_date_to)){
+                $date = date_create($this->param_date_from);
+                $this->param_date_from = $date->format('Ymd');
+                $date = date_create($this->param_date_to);
+                $this->param_date_to = $date->format('Ymd');
+                $mainquery->where($this->table.'.working_date', '>=', $this->param_date_from);          // 日付範囲指定
+                $mainquery->where($this->table.'.working_date', '<=', $this->param_date_to);            // 日付範囲指定
+            }
+            
+            if(!empty($this->param_employment_status)){
+                $mainquery->where($this->table.'.employment_status', $this->param_employment_status);   //employment_status指定
+            }
+            
+            if(!empty($this->param_user_code)){
+                $mainquery->where($this->table.'.user_code', $this->param_user_code);                   //user_code指定
+            }
+            
+            if(!empty($this->param_department_id)){
+                $mainquery->where($this->table.'.department_id', $this->param_department_id);           //department_id指定
+            }
+            return $mainquery->exists();
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+    }
+
+    /**
+     * 削除
+     *
+     * @return void
+     */
+    public function delWorkingTimeDate(){
+        try{
+            $mainquery = DB::table($this->table);
+
+            if(!empty($this->param_date_from) && !empty($this->param_datte_to)){
+                $date = date_create($this->param_date_from);
+                $this->param_date_from = $date->format('Ymd');
+                $date = date_create($this->param_date_to);
+                $this->param_date_to = $date->format('Ymd');
+                $mainquery->where($this->table.'.working_date', '>=', $this->param_date_from);          // 日付範囲指定
+                $mainquery->where($this->table.'.working_date', '<=', $this->param_date_to);            // 日付範囲指定
+            }
+            
+            if(!empty($this->param_employment_status)){
+                $mainquery->where($this->table.'.employment_status', $this->param_employment_status);   //employment_status指定
+            }
+            
+            if(!empty($this->param_user_code)){
+                $mainquery->where($this->table.'.user_code', $this->param_user_code);                   //user_code指定
+            }
+            
+            if(!empty($this->param_department_id)){
+                $mainquery->where($this->table.'.department_id', $this->param_department_id);           //department_id指定
+            }
+            
+            $mainquery->delete();
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+    }
 }

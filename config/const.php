@@ -12,6 +12,12 @@ return [
         'temporary_staff' => 6
     ],
 
+    'C002' => [
+        'value' => 'C002',
+        'legal_working_hours_day' => 8,
+        'legal_working_hours_week' => 40
+    ],
+
     'C004' => [
         'value' => 'C004',
         'regular_working_time' => 1,
@@ -51,6 +57,23 @@ return [
         'value' => 'C008'
     ],
 
+    'C009' => [
+        'value' => 'C009',
+        'round1' => 1,
+        'round10' => 2,
+        'round15' => 3,
+        'round30' => 4,
+        'round60' => 5
+    ],
+
+    'C010' => [
+        'value' => 'C010',
+        'round_half_up' => 1,
+        'round_down' => 2,
+        'round_up' => 3,
+        'non' => 4
+    ],
+
     'C012' => [
         'value' => 'C012',
         'attendance' => 1,
@@ -60,6 +83,11 @@ return [
         'continue_work' => 5,
         'forget' => 9,
         'unknown' => 99
+    ],
+
+    'C014' => [
+        'value' => 'C014',
+        'fixed' => 1
     ],
 
     'WEEK_KANJI' => [
@@ -82,6 +110,11 @@ return [
         'MEMO_DATA_007' => '勤務間インターバルオーバー',
         'MEMO_DATA_008' => '未出勤',
         'MEMO_DATA_009' => '中抜けなし',
+        'MEMO_DATA_010' => '部署設定ミス',
+        'MEMO_DATA_011' => '締日設定ミス',
+        'MEMO_DATA_012' => '時間単位設定ミス',
+        'MEMO_DATA_013' => '時間端数処理設定ミス',
+        'MEMO_DATA_014' => '期首月設定ミス',
         'MEMO_DATA_NON' => ''
     ],
 
@@ -97,9 +130,20 @@ return [
         'not_setting_time_unit' => '時間計算の単位が設定されていません。',
         'not_setting_time_rounding' => '時間計算の端数処理（丸め）が設定されていません。',
         'not_setting_beginning_month' => '期首月が設定されていません。',
+        'not_setting_timetable' => 'タイムテーブルが設定されていません。',
         'data_eror_dailycalc' => '労働時間計算処理にてエラーのため計算できませんでした。',
         'data_accesee_eror_dailycalc' => '労働時間計算処理にてデータアクセスエラーのため計算できませんでした。',
         'mismatch_data' => 'データ不整合'
+    ],
+
+    'LOG_MSG' => [
+        'data_eror_dailycalc' => 'data_error_dailycalc not calc',
+        'data_select_erorr' => 'データselectエラー table = [{0}]',
+        'data_insert_erorr' => 'データinsertエラー table = [{0}]',
+        'data_delete_erorr' => 'データdeleteエラー table = [{0}]',
+        'data_exists_erorr' => 'データexistsエラー table = [{0}]',
+        'mismatch_data' => 'データ不整合',
+        'not_set_time_rounding ' => '時間の端数処理が設定されていない'
     ]
 
 ];
