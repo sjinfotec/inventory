@@ -123,8 +123,16 @@ Vue.component(
     require("./components/WorkTimeDateTable.vue").default
 );
 
-Vue.component("select-employmentstatus", require("./components/SelectEmploymentStatus.vue").default);
+Vue.component(
+    "select-employmentstatus",
+    require("./components/SelectEmploymentStatus.vue").default
+);
 
+// CSV ダウンロードボタン
+Vue.component(
+    "btn-csv-download",
+    require("./components/BtnCsvDownload.vue").default
+);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application

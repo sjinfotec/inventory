@@ -32,6 +32,7 @@
                   :format="DatePickerFormat"
                   v-model="to"></datepicker>
     </div>
+    <!-- <btn-csv-download :csvData="shiftInfo" v-model="shiftInfo"></btn-csv-download> -->
     <div>
       <button class="btn btn-success" @click="StoreShiftTime()">登録</button>
     </div>
@@ -79,6 +80,7 @@ export default {
       userList: [],
       shiftInfo: [],
       timeTableList: [],
+      csvData:[{}],
       selectedUser: "",
       no: "",
       errors: [],
