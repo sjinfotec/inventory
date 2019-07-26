@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 class WorkingTimedate extends Model
 {
     protected $table = 'working_time_dates';
+    protected $table_work_times = 'work_times';
     protected $guarded = array('id');
 
     //--------------- 項目属性 -----------------------------------
@@ -818,6 +819,115 @@ class WorkingTimedate extends Model
             if(!empty($this->param_department_id)){
                 $mainquery->where($this->table.'.department_id', $this->param_department_id);           //department_id指定
             }
+            $mainquery->where('t1.is_deleted', '=', 0)->get();
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getWorkTimes' => \DB::getQueryLog()
+            ]
+        );
+        
+        return $mainquery;
+    }
+
+    /**
+     * 日次労働時間取得
+     *
+     *      指定したユーザー、日付範囲内の労働時間計算のもとデータを取得するSQL
+     *
+     *      INPUT：
+     *          ①テーブル：departments　部署範囲内 and 削除=0
+     *          ②テーブル：users　      ユーザー範囲内 and 削除=0
+     *          ③テーブル：work_times　 ユーザーand日付範囲内 and 削除=0
+     *
+     * @return sql取得結果
+     */
+    public function getWorkingTimeDateJoin(){
+
+
+        // 日次労働時間取得SQL作成
+        \DB::enableQueryLog();
+        try{
+            $mainquery = DB::table($this->table)
+                ->select(
+                    $this->table.'.working_date',
+                    $this->table.'.employment_status',
+                    $this->table.'.department_id',
+                    $this->table.'.user_code',
+                    $this->table.'.employment_status_name',
+                    $this->table.'.department_name',
+                    $this->table.'.user_name',
+                    $this->table.'.working_timetable_no',
+                    $this->table.'.working_timetable_name',
+                    $this->table.'.total_working_times',
+                    $this->table.'.regular_working_times',
+                    $this->table.'.out_of_regular_working_times',
+                    $this->table.'.overtime_hours',
+                    $this->table.'.late_night_overtime_hours',
+                    $this->table.'.legal_working_times',
+                    $this->table.'.out_of_legal_working_times',
+                    $this->table.'.not_employment_working_hours',
+                    $this->table.'.off_hours_working_hours',
+                    $this->table.'.working_status',
+                    $this->table.'.note',
+                    $this->table.'.late',
+                    $this->table.'.leave_early',
+                    $this->table.'.current_calc',
+                    $this->table.'.to_be_confirmed',
+                    $this->table.'.weekday_kubun',
+                    $this->table.'.weekday_name',
+                    $this->table.'.business_kubun',
+                    $this->table.'.business_name',
+                    $this->table.'.holiday_kubun',
+                    $this->table.'.holiday_name',
+                    $this->table.'.closing',
+                    $this->table.'.uplimit_time',
+                    $this->table.'.statutory_uplimit_time',
+                    $this->table.'.time_unit',
+                    $this->table.'.time_rounding',
+                    $this->table.'.max_3month_total',
+                    $this->table.'.max_6month_total',
+                    $this->table.'.max_12month_total',
+                    $this->table.'.beginning_month',
+                    $this->table.'.working_interval',
+                    $this->table.'.year',
+                    $this->table.'.pattern',
+                    $this->table.'.fixedtime',
+                    $this->table.'.created_user',
+                    $this->table.'.updated_user',
+                    $this->table.'.is_deleted');
+    
+            if(!empty($this->param_date_from) && !empty($this->param_date_to)){
+                $date = date_create($this->param_date_from);
+                $this->param_date_from = $date->format('Ymd');
+                $date = date_create($this->param_date_to);
+                $this->param_date_to = $date->format('Ymd');
+                $mainquery->where($this->table.'.working_date', '>=', $this->param_date_from);          // 日付範囲指定
+                $mainquery->where($this->table.'.working_date', '<=', $this->param_date_to);            // 日付範囲指定
+            }
+            
+            if(!empty($this->param_employment_status)){
+                $mainquery->where($this->table.'.employment_status', $this->param_employment_status);   //employment_status指定
+            }
+            
+            if(!empty($this->param_user_code)){
+                $mainquery->where($this->table.'.user_code', $this->param_user_code);                   //user_code指定
+            }
+            
+            if(!empty($this->param_department_id)){
+                $mainquery->where($this->table.'.department_id', $this->param_department_id);           //department_id指定
+            }
+
             $mainquery->where('t1.is_deleted', '=', 0)->get();
         }catch(\PDOException $pe){
             Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');

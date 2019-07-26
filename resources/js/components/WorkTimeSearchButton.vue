@@ -1,5 +1,7 @@
 <template>
-  <button class="btn btn-success"  v-on:click="searchclickBtn()">集計開始</button>
+  <div class="btn-group d-flex" v-on:click="searchclickBtn()">
+    <button type="button" class="btn btn-primary btn-lg font-size-rg w-100"><img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt="">この条件で表示する</button>
+  </div>
 </template>
 <script>
 

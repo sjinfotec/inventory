@@ -36,10 +36,10 @@
           />
         </div>
       </div>
-      <fvl-input :value.sync="form.threeMonthTotal" label="３ヶ月累計" name="threeMonthTotal" />
-      <fvl-input :value.sync="form.sixMonthTotal" label="６ヶ月累計" name="sixMonthTotal" />
-      <fvl-input :value.sync="form.yaerTotal" label="１２ヶ月累計" name="yaerTotal" />
-      <fvl-input :value.sync="form.interval" label="勤務間インターバル" name="interval" />
+      <fvl-input :value.sync="form.threeMonthTotal" label="３ヶ月累計" name="threeMonthTotal" type="number" :max="99999.99" :step="0.01" />
+      <fvl-input :value.sync="form.sixMonthTotal" label="６ヶ月累計" name="sixMonthTotal" type="number" :max="99999.99" :step="0.01" />
+      <fvl-input :value.sync="form.yaerTotal" label="１２ヶ月累計" name="yaerTotal" type="number" :max="99999.99" :step="0.01" />
+      <fvl-input :value.sync="form.interval" label="勤務間インターバル" name="interval" type="number" :max="99.99" :step="0.01" />
       <table class="table">
         <thead>
           <tr>
@@ -64,7 +64,7 @@
               </select>
             </td>
             <td>
-              <input class="form-control" v-model="form.upTime[index]"></input>
+              <input title="整数４桁少数２桁まで" type="number" max="9999.99" step="0.01" class="form-control" v-model="form.upTime[index]"></input>
             </td>
             <td>
               <select class="form-control" v-model="form.timeunit[index]">
