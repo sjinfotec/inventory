@@ -40,6 +40,11 @@ Vue.component(
 );
 
 Vue.component(
+    "daily-working-information-panel-header",
+    require("./components/DailyWorkingInformationPanelHeader.vue").default
+);
+
+Vue.component(
     "monthly-working-information",
     require("./components/MonthlyWorkingInformation.vue").default
 );
