@@ -35,8 +35,8 @@
           :value.sync="form.password"
           label="パスワード"
           name="password"
-          title="半角英数字4-10文字"
-          pattern="^[a-zA-Z0-9]{4,10}$"
+          title="半角英数字6-12文字"
+          pattern="^[a-zA-Z0-9]{6,12}$"
         />
       </span>
       <fvl-input :value.sync="form.email" label="メールアドレス" name="email" />

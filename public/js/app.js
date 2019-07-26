@@ -2457,6 +2457,18 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2520,9 +2532,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
       }).then(function (response) {
         _this.details = response.data;
-        console.log(_this.details);
-        _this.form.id = _this.details[0].id; // console.log(this.details[0].no);
-
+        _this.form.id = _this.details[0].id;
         _this.form.no = _this.details[0].no;
         _this.form.name = _this.details[0].name;
         _this.form.regularFrom = _this.details[0].from_time;
@@ -2542,7 +2552,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
         _this.oldId = _this.details[0].id;
       })["catch"](function (reason) {
-        alert("error");
+        alert("詳細取得でエラーが発生しました");
       });
     },
     getTimeTableList: function getTimeTableList() {
@@ -2558,7 +2568,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     addSuccess: function addSuccess() {
       this.$toasted.show("登録しました");
       this.getTimeTableList();
-      this.inputClear();
+      this.getDetail();
     },
     error: function error() {
       var options = {
@@ -2573,7 +2583,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     del: function del() {
       var _this3 = this;
 
-      var confirm = window.confirm("選択した部署を削除しますか？");
+      var confirm = window.confirm("選択したタイムテーブルを削除しますか？");
 
       if (confirm) {
         this.$axios.post("/create_time_table/del", {
@@ -2582,13 +2592,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           var res = response.data;
 
           if (res.result == 0) {
-            _this3.$toasted.show("選択した部署を削除しました");
+            _this3.$toasted.show("選択したタイムテーブルを削除しました");
 
             _this3.inputClear();
 
             _this3.getTimeTableList();
           } else {}
-        })["catch"](function (reason) {});
+        })["catch"](function (reason) {
+          alert("削除でエラーが発生しました");
+        });
       } else {}
     },
     inputClear: function inputClear() {
@@ -74986,18 +74998,36 @@ var render = function() {
             }
           }),
           _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.no,
-              label: "タイムテーブルNo",
-              name: "no"
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "no", $event)
-              }
-            }
-          }),
+          _vm.selectId == "" || _vm.selectId == null
+            ? _c("fvl-input", {
+                attrs: {
+                  value: _vm.form.no,
+                  label: "タイムテーブルNo",
+                  name: "no"
+                },
+                on: {
+                  "update:value": function($event) {
+                    return _vm.$set(_vm.form, "no", $event)
+                  }
+                }
+              })
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.selectId != ""
+            ? _c("fvl-input", {
+                attrs: {
+                  value: _vm.form.no,
+                  label: "タイムテーブルNo (編集不可)",
+                  name: "no",
+                  readonly: "true"
+                },
+                on: {
+                  "update:value": function($event) {
+                    return _vm.$set(_vm.form, "no", $event)
+                  }
+                }
+              })
+            : _vm._e(),
           _vm._v(" "),
           _c("fvl-input", {
             attrs: {
@@ -75080,7 +75110,7 @@ var render = function() {
                     attrs: {
                       type: "time",
                       value: _vm.form.regularRestFrom1,
-                      label: "所定労働時間休憩　２パターンまで",
+                      label: "所定労働時間内休憩　２パターンまで",
                       name: "syoteifrom"
                     },
                     on: {
@@ -77065,8 +77095,8 @@ var render = function() {
                       value: _vm.form.password,
                       label: "パスワード",
                       name: "password",
-                      title: "半角英数字4-10文字",
-                      pattern: "^[a-zA-Z0-9]{4,10}$"
+                      title: "半角英数字6-12文字",
+                      pattern: "^[a-zA-Z0-9]{6,12}$"
                     },
                     on: {
                       "update:value": function($event) {

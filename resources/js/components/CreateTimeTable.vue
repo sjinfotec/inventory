@@ -21,7 +21,19 @@
         option-value="name"
       />
       <!-- Text input component -->
-      <fvl-input :value.sync="form.no" label="タイムテーブルNo" name="no" />
+      <fvl-input
+        v-if="selectId=='' || selectId==null "
+        :value.sync="form.no"
+        label="タイムテーブルNo"
+        name="no"
+      />
+      <fvl-input
+        v-if="selectId != ''"
+        :value.sync="form.no"
+        label="タイムテーブルNo (編集不可)"
+        name="no"
+        readonly="true"
+      />
       <fvl-input :value.sync="form.name" label="タイムテーブル名称" name="name" />
       <!-- 所定労働時間 -->
       <div class="row">
@@ -49,7 +61,7 @@
             <fvl-input
               type="time"
               :value.sync="form.regularRestFrom1"
-              label="所定労働時間休憩　２パターンまで"
+              label="所定労働時間内休憩　２パターンまで"
               name="syoteifrom"
             />
           </div>
@@ -245,9 +257,7 @@ export default {
         })
         .then(response => {
           this.details = response.data;
-          console.log(this.details);
           this.form.id = this.details[0].id;
-          // console.log(this.details[0].no);
           this.form.no = this.details[0].no;
           this.form.name = this.details[0].name;
           this.form.regularFrom = this.details[0].from_time;
@@ -272,7 +282,7 @@ export default {
           this.oldId = this.details[0].id;
         })
         .catch(reason => {
-          alert("error");
+          alert("詳細取得でエラーが発生しました");
         });
     },
     getTimeTableList() {
@@ -289,7 +299,7 @@ export default {
     addSuccess() {
       this.$toasted.show("登録しました");
       this.getTimeTableList();
-      this.inputClear();
+      this.getDetail();
     },
     error() {
       var options = {
@@ -302,7 +312,7 @@ export default {
     },
     // 削除
     del: function() {
-      var confirm = window.confirm("選択した部署を削除しますか？");
+      var confirm = window.confirm("選択したタイムテーブルを削除しますか？");
       if (confirm) {
         this.$axios
           .post("/create_time_table/del", {
@@ -311,13 +321,15 @@ export default {
           .then(response => {
             var res = response.data;
             if (res.result == 0) {
-              this.$toasted.show("選択した部署を削除しました");
+              this.$toasted.show("選択したタイムテーブルを削除しました");
               this.inputClear();
               this.getTimeTableList();
             } else {
             }
           })
-          .catch(reason => {});
+          .catch(reason => {
+            alert("削除でエラーが発生しました");
+          });
       } else {
       }
     },
