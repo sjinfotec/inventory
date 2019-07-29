@@ -1758,6 +1758,100 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColAttendance.vue?vue&type=script&lang=js&":
+/*!************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColAttendance.vue?vue&type=script&lang=js& ***!
+  \************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "ColAttendance",
+  props: {
+    attendancetime: {
+      type: String,
+      "default": null
+    },
+    leavingtime: {
+      type: String,
+      "default": null
+    },
+    displaynone: {
+      type: Boolean,
+      "default": true
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColMissingMiddle.vue?vue&type=script&lang=js&":
+/*!***************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColMissingMiddle.vue?vue&type=script&lang=js& ***!
+  \***************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "ColMissingMiddle",
+  props: {
+    missingmiddletime: {
+      type: String,
+      "default": null
+    },
+    missingmiddlereturntime: {
+      type: String,
+      "default": null
+    },
+    displaynone: {
+      type: Boolean,
+      "default": true
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateCalendar.vue?vue&type=script&lang=js&":
 /*!*************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/CreateCalendar.vue?vue&type=script&lang=js& ***!
@@ -2954,27 +3048,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2989,7 +3062,8 @@ __webpack_require__.r(__webpack_exports__);
       defaultDate: new Date(),
       stringtext: '',
       datejaFormat: '',
-      results: [],
+      resresults: [],
+      calcresults: [],
       messagedatasserver: [],
       messagedatasfromdate: [],
       messagedatastodate: [],
@@ -3073,11 +3147,12 @@ __webpack_require__.r(__webpack_exports__);
             usercode: this.valueuser
           }
         }).then(function (response) {
-          _this.results = response.data;
+          _this.resresults = response.data;
+          _this.calcresults = _this.resresults.calcresults;
 
-          _this.dispmessage(_this.results.massegedata);
+          _this.dispmessage(_this.resresults.massegedata);
 
-          console.log("集計時間取得" + Object.keys(_this.results).length);
+          console.log("集計時間取得" + Object.keys(_this.resresults).length);
         })["catch"](function (reason) {
           alert("error");
         });
@@ -74753,6 +74828,180 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColAttendance.vue?vue&type=template&id=28c40fae&":
+/*!****************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColAttendance.vue?vue&type=template&id=28c40fae& ***!
+  \****************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return this.attendancetime !== null || this.displaynone
+    ? _c("div", [
+        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
+          _vm._m(0),
+          _vm._v(" "),
+          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+            _vm._v("出勤時間")
+          ]),
+          _vm._v(" "),
+          _c("p", { staticClass: "font-size-lg m-0" }, [
+            _vm._v(_vm._s(this.attendancetime))
+          ])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
+          _vm._m(1),
+          _vm._v(" "),
+          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+            _vm._v("退勤時間")
+          ]),
+          _vm._v(" "),
+          _c("p", { staticClass: "font-size-lg m-0" }, [
+            _vm._v(_vm._s(this.leavingtime))
+          ])
+        ])
+      ])
+    : _vm._e()
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "span",
+      {
+        staticClass:
+          "float-left mr-2 py-2 px-2 font-size-lg text-white bg-success rounded"
+      },
+      [
+        _c("img", {
+          staticClass: "icon-size-lg",
+          attrs: { src: "/images/round-play-circle-filled-w.svg", alt: "" }
+        })
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "span",
+      {
+        staticClass:
+          "float-left mr-2 py-2 px-2 font-size-lg text-white bg-success rounded"
+      },
+      [
+        _c("img", {
+          staticClass: "icon-size-lg",
+          attrs: { src: "/images/round-pause-circle-filled-w.svg", alt: "" }
+        })
+      ]
+    )
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColMissingMiddle.vue?vue&type=template&id=494a4434&":
+/*!*******************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColMissingMiddle.vue?vue&type=template&id=494a4434& ***!
+  \*******************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return this.missingmiddletime !== null || this.displaynone
+    ? _c("div", [
+        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
+          _vm._m(0),
+          _vm._v(" "),
+          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+            _vm._v("中抜開始")
+          ]),
+          _vm._v(" "),
+          _c("p", { staticClass: "font-size-lg m-0" }, [
+            _vm._v(_vm._s(this.missingmiddletime))
+          ])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
+          _vm._m(1),
+          _vm._v(" "),
+          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+            _vm._v("戻り時間")
+          ]),
+          _vm._v(" "),
+          _c("p", { staticClass: "font-size-lg m-0" }, [
+            _vm._v(_vm._s(this.missingmiddlereturntime))
+          ])
+        ])
+      ])
+    : _vm._e()
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "span",
+      {
+        staticClass:
+          "float-left mr-2 py-2 px-2 font-size-lg text-white bg-warning rounded"
+      },
+      [
+        _c("img", {
+          staticClass: "icon-size-lg",
+          attrs: { src: "/images/round-skip_previous-w.svg", alt: "" }
+        })
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "span",
+      {
+        staticClass:
+          "float-left mr-2 py-2 px-2 font-size-lg text-white bg-warning rounded"
+      },
+      [
+        _c("img", {
+          staticClass: "icon-size-lg",
+          attrs: { src: "/images/round-skip-next-w.svg", alt: "" }
+        })
+      ]
+    )
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateCalendar.vue?vue&type=template&id=ef521af6&":
 /*!*****************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/CreateCalendar.vue?vue&type=template&id=ef521af6& ***!
@@ -75933,14 +76182,157 @@ var render = function() {
               }
             }),
             _vm._v(" "),
-            _vm._m(5)
+            _c(
+              "div",
+              { staticClass: "card-body mb-3 py-0 pt-4 border-top" },
+              _vm._l(_vm.calcresults, function(calclist, index) {
+                return _c("div", [
+                  _c(
+                    "div",
+                    { staticClass: "row" },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch"
+                        },
+                        [
+                          _vm._m(5, true),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("氏名")
+                          ]),
+                          _vm._v(" "),
+                          _c(
+                            "p",
+                            {
+                              staticClass: "font-size-rg font-weight-bold m-0"
+                            },
+                            [_vm._v(_vm._s(calclist.user_name))]
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch"
+                        },
+                        [
+                          _vm._m(6, true),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("部署")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-rg m-0" }, [
+                            _vm._v(_vm._s(calclist.department_name))
+                          ])
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c("col-attendance", {
+                        attrs: {
+                          attendancetime: calclist.attendance_time_1,
+                          leavingtime: calclist.leaving_time_1,
+                          displaynone: true
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-attendance", {
+                        attrs: {
+                          attendancetime: calclist.attendance_time_2,
+                          leavingtime: calclist.leaving_time_2,
+                          displaynone: false
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-attendance", {
+                        attrs: {
+                          attendancetime: calclist.attendance_time_3,
+                          leavingtime: calclist.leaving_time_3,
+                          displaynone: false
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-attendance", {
+                        attrs: {
+                          attendancetime: calclist.attendance_time_4,
+                          leavingtime: calclist.leaving_time_4,
+                          displaynone: false
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-attendance", {
+                        attrs: {
+                          attendancetime: calclist.attendance_time_5,
+                          leavingtime: calclist.leaving_time_5,
+                          displaynone: false
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-missingmiddle", {
+                        attrs: {
+                          missingmiddletime: calclist.missing_middle_time_1,
+                          missingmiddlereturntime:
+                            calclist.missing_middle_return_time_1,
+                          displaynone: true
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-missingmiddle", {
+                        attrs: {
+                          missingmiddletime: calclist.missing_middle_time_2,
+                          missingmiddlereturntime:
+                            calclist.missing_middle_return_time_2,
+                          displaynone: false
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-missingmiddle", {
+                        attrs: {
+                          missingmiddletime: calclist.missing_middle_time_3,
+                          missingmiddlereturntime:
+                            calclist.missing_middle_return_time_3,
+                          displaynone: false
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-missingmiddle", {
+                        attrs: {
+                          missingmiddletime: calclist.missing_middle_time_4,
+                          missingmiddlereturntime:
+                            calclist.missing_middle_return_time_4,
+                          displaynone: false
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-missingmiddle", {
+                        attrs: {
+                          missingmiddletime: calclist.missing_middle_time_5,
+                          missingmiddlereturntime:
+                            calclist.missing_middle_return_time_5,
+                          displaynone: false
+                        }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _vm._m(7, true)
+                ])
+              }),
+              0
+            )
           ],
           1
         )
       ])
     ]),
     _vm._v(" "),
-    _vm._m(6)
+    _vm._m(8)
   ])
 }
 var staticRenderFns = [
@@ -76049,259 +76441,53 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "card-body mb-3 py-0 pt-4 border-top" }, [
-      _c("div", { staticClass: "row" }, [
-        _c(
-          "div",
-          {
-            staticClass:
-              "col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch"
-          },
-          [
-            _c(
-              "a",
-              {
-                staticClass:
-                  "float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg",
-                attrs: {
-                  "data-toggle": "collapse",
-                  href: "#collapseUser1",
-                  role: "button",
-                  "aria-expanded": "true",
-                  "aria-controls": "collapseUser1"
-                }
-              },
-              [
-                _c("img", {
-                  staticClass: "icon-size-rg",
-                  attrs: { src: "/images/round-search-w.svg", alt: "" }
-                })
-              ]
-            ),
-            _vm._v(" "),
-            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-              _vm._v("氏名")
-            ]),
-            _vm._v(" "),
-            _c("p", { staticClass: "font-size-rg font-weight-bold m-0" }, [
-              _vm._v("三条 丈太郎")
-            ])
-          ]
-        ),
-        _vm._v(" "),
-        _c(
-          "div",
-          {
-            staticClass:
-              "col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch"
-          },
-          [
-            _c(
-              "span",
-              {
-                staticClass:
-                  "float-left mr-2 py-2 px-2 font-size-lg text-white bg-success rounded"
-              },
-              [
-                _c("img", {
-                  staticClass: "icon-size-lg",
-                  attrs: { src: "/images/round-flag-w.svg", alt: "" }
-                })
-              ]
-            ),
-            _vm._v(" "),
-            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-              _vm._v("部署")
-            ]),
-            _vm._v(" "),
-            _c("p", { staticClass: "font-size-rg m-0" }, [_vm._v("情報処理課")])
-          ]
-        ),
-        _vm._v(" "),
-        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
-          _c(
-            "span",
-            {
-              staticClass:
-                "float-left mr-2 py-2 px-2 font-size-lg text-white bg-success rounded"
-            },
-            [
-              _c("img", {
-                staticClass: "icon-size-lg",
-                attrs: {
-                  src: "/images/round-play-circle-filled-w.svg",
-                  alt: ""
-                }
-              })
-            ]
-          ),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v("出勤時間")
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("08:26")])
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
-          _c(
-            "span",
-            {
-              staticClass:
-                "float-left mr-2 py-2 px-2 font-size-lg text-white bg-success rounded"
-            },
-            [
-              _c("img", {
-                staticClass: "icon-size-lg",
-                attrs: {
-                  src: "/images/round-pause-circle-filled-w.svg",
-                  alt: ""
-                }
-              })
-            ]
-          ),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v("退勤時間")
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("18:39")])
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
-          _c(
-            "span",
-            {
-              staticClass:
-                "float-left mr-2 py-2 px-2 font-size-lg text-white bg-warning rounded"
-            },
-            [
-              _c("img", {
-                staticClass: "icon-size-lg",
-                attrs: { src: "/images/round-skip_previous-w.svg", alt: "" }
-              })
-            ]
-          ),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v("中抜開始")
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("08:26")])
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
-          _c(
-            "span",
-            {
-              staticClass:
-                "float-left mr-2 py-2 px-2 font-size-lg text-white bg-warning rounded"
-            },
-            [
-              _c("img", {
-                staticClass: "icon-size-lg",
-                attrs: { src: "/images/round-skip-next-w.svg", alt: "" }
-              })
-            ]
-          ),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v("戻り時間")
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("18:39")])
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
-          _c(
-            "span",
-            {
-              staticClass:
-                "float-left mr-2 py-2 px-2 font-size-lg text-white bg-warning rounded"
-            },
-            [
-              _c("img", {
-                staticClass: "icon-size-lg",
-                attrs: { src: "/images/round-skip_previous-w.svg", alt: "" }
-              })
-            ]
-          ),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v("中抜開始")
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("08:26")])
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
-          _c(
-            "span",
-            {
-              staticClass:
-                "float-left mr-2 py-2 px-2 font-size-lg text-white bg-warning rounded"
-            },
-            [
-              _c("img", {
-                staticClass: "icon-size-lg",
-                attrs: { src: "/images/round-skip-next-w.svg", alt: "" }
-              })
-            ]
-          ),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v("戻り時間")
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("18:39")])
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
-          _c(
-            "span",
-            {
-              staticClass:
-                "float-left mr-2 py-2 px-2 font-size-lg text-white bg-warning rounded"
-            },
-            [
-              _c("img", {
-                staticClass: "icon-size-lg",
-                attrs: { src: "/images/round-skip_previous-w.svg", alt: "" }
-              })
-            ]
-          ),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v("中抜開始")
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("08:26")])
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
-          _c(
-            "span",
-            {
-              staticClass:
-                "float-left mr-2 py-2 px-2 font-size-lg text-white bg-warning rounded"
-            },
-            [
-              _c("img", {
-                staticClass: "icon-size-lg",
-                attrs: { src: "/images/round-skip-next-w.svg", alt: "" }
-              })
-            ]
-          ),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v("戻り時間")
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("18:39")])
-        ])
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "collapse", attrs: { id: "collapseUser1" } }, [
+    return _c(
+      "a",
+      {
+        staticClass:
+          "float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg",
+        attrs: {
+          "data-toggle": "collapse",
+          href: "#collapseUser",
+          role: "button",
+          "aria-expanded": "true",
+          "aria-controls": "collapseUser1"
+        }
+      },
+      [
+        _c("img", {
+          staticClass: "icon-size-rg",
+          attrs: { src: "/images/round-search-w.svg", alt: "" }
+        })
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "span",
+      {
+        staticClass:
+          "float-left mr-2 py-2 px-2 font-size-lg text-white bg-success rounded"
+      },
+      [
+        _c("img", {
+          staticClass: "icon-size-lg",
+          attrs: { src: "/images/round-flag-w.svg", alt: "" }
+        })
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "collapse", attrs: { id: "collapseUser1" } },
+      [
         _c("div", { staticClass: "row mt-2" }, [
           _c(
             "div",
@@ -76692,8 +76878,8 @@ var staticRenderFns = [
             ])
           ])
         ])
-      ])
-    ])
+      ]
+    )
   },
   function() {
     var _vm = this
@@ -93266,7 +93452,9 @@ Vue.component("create-company-information", __webpack_require__(/*! ./components
 Vue.component("setting-calc", __webpack_require__(/*! ./components/SettingCalc.vue */ "./resources/js/components/SettingCalc.vue")["default"]);
 Vue.component("message-data", __webpack_require__(/*! ./components/MessageData.vue */ "./resources/js/components/MessageData.vue")["default"]);
 Vue.component("worktime-day", __webpack_require__(/*! ./components/WorkTimeDateTable.vue */ "./resources/js/components/WorkTimeDateTable.vue")["default"]);
-Vue.component("select-employmentstatus", __webpack_require__(/*! ./components/SelectEmploymentStatus.vue */ "./resources/js/components/SelectEmploymentStatus.vue")["default"]); // CSV ダウンロードボタン
+Vue.component("select-employmentstatus", __webpack_require__(/*! ./components/SelectEmploymentStatus.vue */ "./resources/js/components/SelectEmploymentStatus.vue")["default"]);
+Vue.component("col-attendance", __webpack_require__(/*! ./components/ColAttendance.vue */ "./resources/js/components/ColAttendance.vue")["default"]);
+Vue.component("col-missingmiddle", __webpack_require__(/*! ./components/ColMissingMiddle.vue */ "./resources/js/components/ColMissingMiddle.vue")["default"]); // CSV ダウンロードボタン
 
 Vue.component("btn-csv-download", __webpack_require__(/*! ./components/BtnCsvDownload.vue */ "./resources/js/components/BtnCsvDownload.vue")["default"]);
 /**
@@ -93475,6 +93663,144 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_BtnCsvDownload_vue_vue_type_template_id_1778e2dd___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_BtnCsvDownload_vue_vue_type_template_id_1778e2dd___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/ColAttendance.vue":
+/*!***************************************************!*\
+  !*** ./resources/js/components/ColAttendance.vue ***!
+  \***************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ColAttendance_vue_vue_type_template_id_28c40fae___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ColAttendance.vue?vue&type=template&id=28c40fae& */ "./resources/js/components/ColAttendance.vue?vue&type=template&id=28c40fae&");
+/* harmony import */ var _ColAttendance_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ColAttendance.vue?vue&type=script&lang=js& */ "./resources/js/components/ColAttendance.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _ColAttendance_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _ColAttendance_vue_vue_type_template_id_28c40fae___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _ColAttendance_vue_vue_type_template_id_28c40fae___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/ColAttendance.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/ColAttendance.vue?vue&type=script&lang=js&":
+/*!****************************************************************************!*\
+  !*** ./resources/js/components/ColAttendance.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ColAttendance_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./ColAttendance.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColAttendance.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ColAttendance_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/ColAttendance.vue?vue&type=template&id=28c40fae&":
+/*!**********************************************************************************!*\
+  !*** ./resources/js/components/ColAttendance.vue?vue&type=template&id=28c40fae& ***!
+  \**********************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColAttendance_vue_vue_type_template_id_28c40fae___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./ColAttendance.vue?vue&type=template&id=28c40fae& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColAttendance.vue?vue&type=template&id=28c40fae&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColAttendance_vue_vue_type_template_id_28c40fae___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColAttendance_vue_vue_type_template_id_28c40fae___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/ColMissingMiddle.vue":
+/*!******************************************************!*\
+  !*** ./resources/js/components/ColMissingMiddle.vue ***!
+  \******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ColMissingMiddle_vue_vue_type_template_id_494a4434___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ColMissingMiddle.vue?vue&type=template&id=494a4434& */ "./resources/js/components/ColMissingMiddle.vue?vue&type=template&id=494a4434&");
+/* harmony import */ var _ColMissingMiddle_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ColMissingMiddle.vue?vue&type=script&lang=js& */ "./resources/js/components/ColMissingMiddle.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _ColMissingMiddle_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _ColMissingMiddle_vue_vue_type_template_id_494a4434___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _ColMissingMiddle_vue_vue_type_template_id_494a4434___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/ColMissingMiddle.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/ColMissingMiddle.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************!*\
+  !*** ./resources/js/components/ColMissingMiddle.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ColMissingMiddle_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./ColMissingMiddle.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColMissingMiddle.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ColMissingMiddle_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/ColMissingMiddle.vue?vue&type=template&id=494a4434&":
+/*!*************************************************************************************!*\
+  !*** ./resources/js/components/ColMissingMiddle.vue?vue&type=template&id=494a4434& ***!
+  \*************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColMissingMiddle_vue_vue_type_template_id_494a4434___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./ColMissingMiddle.vue?vue&type=template&id=494a4434& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColMissingMiddle.vue?vue&type=template&id=494a4434&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColMissingMiddle_vue_vue_type_template_id_494a4434___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColMissingMiddle_vue_vue_type_template_id_494a4434___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

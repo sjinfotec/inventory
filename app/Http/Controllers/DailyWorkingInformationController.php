@@ -7,10 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\WorkTime;
 use App\WorkingTimedate;
+use App\TempWorkingTimeDate;
 use App\TempCalcWorkingTime;
 use App\WorkingTimeTable;
 use App\Http\Controllers\ApiCommonController;
@@ -59,7 +59,8 @@ class DailyWorkingInformationController extends Controller
      */
     public function show(Request $request){
 
-        $calc_results = null;
+        $calc_result = true;
+        $add_result = true;
         // reqestクエリーセット
         $datefrom = null;
         if(isset($request->datefrom)){
@@ -83,27 +84,28 @@ class DailyWorkingInformationController extends Controller
         }
         // 打刻時刻を取得
         $work_time = new WorkTime();
-        Log::debug('show datefrom = '.$datefrom);
-        Log::debug('show dateto = '.$dateto);
         $work_time->setParamDatefromAttribute($datefrom);
         $work_time->setParamDatetoAttribute($dateto);
         $work_time->setParamemploymentstatusAttribute($employment_status);
         $work_time->setParamDepartmentcodeAttribute($departmentcode);
         $work_time->setParamUsercodeAttribute($usercode);
+        // パラメータのチェック
         $chk_result = $work_time->chkWorkingTimeData();
+        $temp_working_model = new TempWorkingTimeDate();
         if ($chk_result) {
             $work_time_result = $work_time->getWorkTimes();
             if(isset($work_time_result)){
-                $temp_model = new TempCalcWorkingTime();
+                $temp_calc_model = new TempCalcWorkingTime();
                 try{
                     // temporary削除処理
                     DB::beginTransaction();
-                    $temp_model->delTempCalcWorkingtimes();
+                    $temp_calc_model->delTempCalcWorkingtime();
+                    $temp_working_model->delTempWorkingTimeDate();
                     DB::commit();
                     try{
                         // 日次集計計算登録
-                        $add_result = $this->calcWorkingTimeDates($work_time_result);
-                        if ($add_result) {
+                        $calc_result = $this->calcWorkingTimeDate($work_time_result);
+                        if ($calc_result) {
                             // タイムテーブルを取得
                             $timetable_model = new WorkingTimeTable();
                             $timetable_model->setParamdatefromAttribute($datefrom);
@@ -113,11 +115,11 @@ class DailyWorkingInformationController extends Controller
                             $timetables = $timetable_model->getWorkingTimeTableJoin();
                             if (isset($timetables)) {
                                 // 日次集計
-                                $calc_results = $this->getTempWorkingTimeDates($timetables);
+                                $add_result = $this->calcTempWorkingTimeDate($timetables);
                             } else {
                                 array_push($this->array_massegedata, Config::get('const.MSG_ERROR.not_setting_timetable'));
                                 Log::error(Config::get('const.LOG_MSG.not_setting_timetable'));
-                                $calc_results = null;
+                                $add_result = false;
                             }
                         }
                     }catch(\PDOException $pe){
@@ -125,30 +127,83 @@ class DailyWorkingInformationController extends Controller
                         array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                         Log::error(Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                         Log::error($pe->getMessage());
-                        $calc_results = null;
+                        $add_result = false;
                     }catch(\Exception $e){
                         DB::rollBack();
                         array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_error_dailycalc'));
                         Log::error(Config::get('const.LOG_MSG.data_error_dailycalc'));
                         Log::error($e->getMessage());
-                        $calc_results = null;
+                        $add_result = false;
                     }
                 }catch(\PDOException $pe){
                     DB::rollBack();
                     array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                     Log::error($pe->getMessage());
-                    $calc_results = null;
+                    $add_result = false;
                 }
             } else {
-                $calc_results = null;
+                $add_result = false;
                 array_push($this->array_massegedata, Config::get('const.MSG_ERROR.not_workintime'));
             }
         } else {
-            $calc_results = null;
+            $add_result = false;
             array_push($this->array_massegedata, $work_time->getMassegedataAttribute());
         }
 
-        return response()->json(['calc_results' => $calc_results, 'massegedata' => $this->array_massegedata]);
+        // 出勤・退勤データtempから登録
+        $working_time_dates = null;
+        if ($add_result) {
+            $temp_working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
+            $temp_working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
+            $temp_working_model->setParamEmploymentStatusAttribute($employment_status);
+            $temp_working_model->setParamDepartmentcodeAttribute($departmentcode);
+            $temp_working_model->setParamUsercodeAttribute($usercode);
+            try{
+                Log::debug('getTempWorkingTimeDateUserJoin ');
+                $temp_working_time_dates = $temp_working_model->getTempWorkingTimeDateUserJoin();
+                if (isset($temp_working_time_dates)) {
+                    Log::debug('isset $temp_working_time_dates true ');
+                    $working_model = new WorkingTimedate();
+                    $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
+                    $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
+                    $working_model->setParamEmploymentStatusAttribute($employment_status);
+                    $working_model->setParamDepartmentcodeAttribute($departmentcode);
+                    $working_model->setParamUsercodeAttribute($usercode);
+                    try{
+                        Log::debug(' $insertWorkingTimeDateFromTemp insert ');
+                        DB::beginTransaction();
+                        Log::debug(' $isExistsWorkingTimeDate  ');
+                        if ($working_model->isExistsWorkingTimeDate()) {
+                            Log::debug(' $delWorkingTimeDate  ');
+                            $working_model->delWorkingTimeDate();
+                        };
+                        Log::debug(' $insertWorkingTimeDateFromTemp  ');
+                        $temp_array = array();
+                        foreach($temp_working_time_dates as $working_time_date) {
+                            $temp_collect = collect($working_time_date);
+                            $temp_array[] = $temp_collect->toArray();
+                        } 
+                        $working_model->insertWorkingTimeDateFromTemp($temp_array);
+                        DB::commit();
+                        $working_time_dates = $working_model->getWorkingTimeDateTimeFormat();
+                    }catch(\PDOException $pe){
+                        DB::rollBack();
+                        array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_error_dailycalc'));
+                    }catch(\Exception $e){
+                        DB::rollBack();
+                        array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
+                    }
+                }
+            }catch(\PDOException $pe){
+                array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_error_dailycalc'));
+                Log::error(Config::get('const.LOG_MSG.data_error_dailycalc'));
+                Log::error($e->getMessage());
+            }catch(\Exception $e){
+                array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
+            }
+        }
+
+        return response()->json(['calcresults' => $working_time_dates, 'massegedata' => $this->array_massegedata]);
     }
 
     /**
@@ -170,9 +225,8 @@ class DailyWorkingInformationController extends Controller
      *
      * @return sql取得結果
      */
-    private function calcWorkingTimeDates($worktimes){
+    private function calcWorkingTimeDate($worktimes){
 
-        $working_timedate = new WorkingTimedate();
         $current_date = null;
         $current_department_id = null;
         $current_user_code = null;
@@ -290,7 +344,7 @@ class DailyWorkingInformationController extends Controller
                 } else {
                     $ptn = $chk_result;
                     $this->pushArrayCalc($this->setNoInputTimePtn($ptn));
-                    Log::DEBUG('calcWorkingTimeDates error ptn = '.$ptn.' date = '.$result->record_date.' dapartment = '.$result->department_id.' user = '.$result->user_code);
+                    Log::DEBUG('calcWorkingTimeDate error ptn = '.$ptn.' date = '.$result->record_date.' dapartment = '.$result->department_id.' user = '.$result->user_code);
                     try{
                         // temporaryに登録する
                         $this->insTempCalcItem($result->record_date, $result);
@@ -303,12 +357,12 @@ class DailyWorkingInformationController extends Controller
                 }
             } else {
                 // 日付が特定できないのでスルー
-                //$ptn = 0;
-                //$this->pushArrayCalc($this->setNoInputTimePtn($ptn));
+                /*$ptn = 0;
+                $this->pushArrayCalc($this->setNoInputTimePtn($ptn));
                 // temporaryに登録する
-                //$this->insTempCalcItem($result->record_date, $result);
+                $this->insTempCalcItem($result->record_date, $result);
                 // 次データ計算事前処理
-                //$this->beforeArrayWorkingTime($result);
+                $this->beforeArrayWorkingTime($result); */
                 Log::DEBUG('no input time '.' dapartment = '.$result->department_id.' user = '.$result->user_code);
             }
         }
@@ -753,89 +807,89 @@ class DailyWorkingInformationController extends Controller
      */
     private function setAttendanceCollectPtn($ptn, $record_datetime, $chk_interval)
     {
-        $temp_model = new TempCalcWorkingTime();
+        $temp_calc_model = new TempCalcWorkingTime();
 
         if ($ptn == '1') {
-            $temp_model->setModeAttribute(Config::get('const.C005.attendance_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('0');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('0');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '2') {
-            $temp_model->setModeAttribute(Config::get('const.C005.attendance_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_001'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_001'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '3') {
-            $temp_model->setModeAttribute(Config::get('const.C005.attendance_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
-            $temp_model->setLateAttribute('1');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('0');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
+            $temp_calc_model->setLateAttribute('1');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('0');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '4') {
-            $temp_model->setModeAttribute(Config::get('const.C005.attendance_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_002'));
-            $temp_model->setLateAttribute('1');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_002'));
+            $temp_calc_model->setLateAttribute('1');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '5') {
-            $temp_model->setModeAttribute(Config::get('const.C005.attendance_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_003'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_003'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '6') {
-            $temp_model->setModeAttribute(Config::get('const.C005.attendance_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_001'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_001'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         } else {
             // 不明データとして作成する
-            $temp_model->setModeAttribute(Config::get('const.C005.attendance_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         }
 
-        return $temp_model;
+        return $temp_calc_model;
             
     }
 
@@ -986,9 +1040,9 @@ class DailyWorkingInformationController extends Controller
                                 $record_before_datetime < $timetable_from_date) {           // 出勤1日のはじめ <= １個前の打刻時刻 < タイムテーブルの始業時刻
                         // これより前の出勤打刻履歴を調査
                         if ($cnt > 1) {
-                            for($i=cnt-2;$i<count($array_working_mode);$i--){
-                                if ($array_working_mode[$i] == Config::get('const.C005.attendance_time')) {     // ２個前モードが出勤
-                                    if ($array_working_datetime[$i] < $attendance_from_date) {     // ２個前の出勤時刻 < 出勤1日のはじめ
+                            for($i=$cnt-2;$i<count($this->array_working_mode);$i--){
+                                if ($this->array_working_mode[$i] == Config::get('const.C005.attendance_time')) {     // ２個前モードが出勤
+                                    if ($this->array_working_datetime[$i] < $attendance_from_date) {     // ２個前の出勤時刻 < 出勤1日のはじめ
                                         // パターン１（正常退勤。勤務状態は退勤状態。当日時間計算なし。）
                                         $ptn = '1';
                                     } else {
@@ -1009,9 +1063,9 @@ class DailyWorkingInformationController extends Controller
                                      $record_before_datetime < $timetable_to_date) {        // 出勤1日のはじめ <= １個前の打刻時刻 < タイムテーブルの終業時刻
                         // これより前の出勤打刻履歴を調査
                         if ($cnt > 1) {
-                            for($i=cnt-2;$i<count($array_working_mode);$i--){
-                                if ($array_working_mode[$i] == Config::get('const.C005.attendance_time')) {     // ２個前モードが出勤
-                                    if ($array_working_datetime[$i] < $attendance_from_date) {     // ２個前の出勤時刻 < 出勤1日のはじめ
+                            for($i=$cnt-2;$i<count($this->array_working_mode);$i--){
+                                if ($this->array_working_mode[$i] == Config::get('const.C005.attendance_time')) {     // ２個前モードが出勤
+                                    if ($this->array_working_datetime[$i] < $attendance_from_date) {     // ２個前の出勤時刻 < 出勤1日のはじめ
                                         // パターン２３４
                                         $ptn = '2';
                                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime));
@@ -1047,9 +1101,9 @@ class DailyWorkingInformationController extends Controller
                                     $record_before_datetime < $attendance_to_date) {        // 出勤1日のはじめ <= １個前の打刻時刻 < 出勤1日の終わり
                         // これより前の出勤打刻履歴を調査
                         if ($cnt > 1) {
-                            for($i=cnt-2;$i<count($array_working_mode);$i--){
-                                if ($array_working_mode[$i] == Config::get('const.C005.attendance_time')) {     // ２個前モードが出勤
-                                    if ($array_working_datetime[$i] < $attendance_from_date) {     // ２個前の出勤時刻 < 出勤1日のはじめ
+                            for($i=$cnt-2;$i<count($this->array_working_mode);$i--){
+                                if ($this->array_working_mode[$i] == Config::get('const.C005.attendance_time')) {     // ２個前モードが出勤
+                                    if ($this->array_working_datetime[$i] < $attendance_from_date) {     // ２個前の出勤時刻 < 出勤1日のはじめ
                                         // パターン２３５
                                         $ptn = '2';
                                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime));
@@ -1077,9 +1131,9 @@ class DailyWorkingInformationController extends Controller
                 } elseif ($record_datetime > $attendance_to_date) {
                     // これより前の出勤打刻履歴を調査
                     if ($cnt > 1) {
-                        for($i=cnt-2;$i<count($array_working_mode);$i--){
-                            if ($array_working_mode[$i] == Config::get('const.C005.attendance_time')) {     // ２個前モードが出勤
-                                if ($array_working_datetime[$i] < $attendance_from_date) {     // ２個前の出勤時刻 < 出勤1日のはじめ
+                        for($i=$cnt-2;$i<count($this->array_working_mode);$i--){
+                            if ($this->array_working_mode[$i] == Config::get('const.C005.attendance_time')) {     // ２個前モードが出勤
+                                if ($this->array_working_datetime[$i] < $attendance_from_date) {     // ２個前の出勤時刻 < 出勤1日のはじめ
                                     // パターン２３５
                                     $ptn = '2';
                                     $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime));
@@ -1147,112 +1201,112 @@ class DailyWorkingInformationController extends Controller
      */
     private function setLeavingCollectPtn($ptn, $record_datetime)
     {
-        $temp_model = new TempCalcWorkingTime();
+        $temp_calc_model = new TempCalcWorkingTime();
         $chk_interval = '0';
 
         if ($ptn == '1') {
-            $temp_model->setModeAttribute(Config::get('const.C005.leaving_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_005'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('0');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_005'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('0');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '2') {
-            $temp_model->setModeAttribute(Config::get('const.C005.leaving_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_005'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_005'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '3') {
-            $temp_model->setModeAttribute(Config::get('const.C005.leaving_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_006'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_006'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '4') {
-            $temp_model->setModeAttribute(Config::get('const.C005.leaving_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('1');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('1');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('1');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('1');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '5') {
-            $temp_model->setModeAttribute(Config::get('const.C005.leaving_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('1');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('1');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '6') {
-            $temp_model->setModeAttribute(Config::get('const.C005.leaving_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_002'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_002'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '7') {
-            $temp_model->setModeAttribute(Config::get('const.C005.leaving_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_003'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_003'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '8') {
-            $temp_model->setModeAttribute(Config::get('const.C005.leaving_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('1');
-            $temp_model->setTobeconfirmedAttribute('0');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('1');
+            $temp_calc_model->setTobeconfirmedAttribute('0');
+            $temp_calc_model->setPatternAttribute($ptn);
         } else {
             // 不明データとして作成する
-            $temp_model->setModeAttribute(Config::get('const.C005.leaving_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         }
             
-        return $temp_model;
+        return $temp_calc_model;
     }
 
     /**
@@ -1400,57 +1454,57 @@ class DailyWorkingInformationController extends Controller
      */
     private function setMissingmiddleCollectPtn($ptn, $record_datetime)
     {
-        $temp_model = new TempCalcWorkingTime();
+        $temp_calc_model = new TempCalcWorkingTime();
         $chk_interval = '0';
 
         if ($ptn == '1') {
-            $temp_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.missing_middle'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('0');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.missing_middle'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('0');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '2') {
-            $temp_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_008'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_008'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '3') {
-            $temp_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_003'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_003'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         } else {
             // 不明データとして作成する
-            $temp_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         }
 
-        return $temp_model;
+        return $temp_calc_model;
             
     }
 
@@ -1591,46 +1645,46 @@ class DailyWorkingInformationController extends Controller
      */
     private function setMissingmiddleReturnCollectPtn($ptn, $record_datetime)
     {
-        $temp_model = new TempCalcWorkingTime();
+        $temp_calc_model = new TempCalcWorkingTime();
         $chk_interval = '0';
 
         if ($ptn == '1') {
-            $temp_model->setModeAttribute(Config::get('const.C005.missing_middle_return_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_009'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_return_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_009'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '2') {
-            $temp_model->setModeAttribute(Config::get('const.C005.missing_middle_return_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.missing_middle_return'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('0');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_return_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.missing_middle_return'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('0');
+            $temp_calc_model->setPatternAttribute($ptn);
         } else {
             // 不明データとして作成する
-            $temp_model->setModeAttribute(Config::get('const.C005.missing_middle_return_time'));
-            $temp_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_return_time'));
+            $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         }
 
-        return $temp_model;
+        return $temp_calc_model;
             
     }
 
@@ -1653,90 +1707,90 @@ class DailyWorkingInformationController extends Controller
      */
     private function setNoInputTimePtn($ptn)
     {
-        $temp_model = new TempCalcWorkingTime();
+        $temp_calc_model = new TempCalcWorkingTime();
         $chk_interval = '0';
 
         if ($ptn == '0') {
-            $temp_model->setModeAttribute('');
-            $temp_model->setRecorddatetimeAttribute('');
-            $temp_model->setWorkingstatusAttribute('');
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_008'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute('');
+            $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingstatusAttribute('');
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_008'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('0');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '1') {    // 設定ミス
-            $temp_model->setModeAttribute('');
-            $temp_model->setRecorddatetimeAttribute('');
-            $temp_model->setWorkingstatusAttribute('');
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_010'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('0');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute('');
+            $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingstatusAttribute('');
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_010'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('0');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '2') {    // 設定ミス
-            $temp_model->setModeAttribute('');
-            $temp_model->setRecorddatetimeAttribute('');
-            $temp_model->setWorkingstatusAttribute('');
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_011'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('0');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute('');
+            $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingstatusAttribute('');
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_011'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('0');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '3') {    // 設定ミス
-            $temp_model->setModeAttribute('');
-            $temp_model->setRecorddatetimeAttribute('');
-            $temp_model->setWorkingstatusAttribute('');
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_012'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('0');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute('');
+            $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingstatusAttribute('');
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_012'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('0');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '4') {    // 設定ミス
-            $temp_model->setModeAttribute('');
-            $temp_model->setRecorddatetimeAttribute('');
-            $temp_model->setWorkingstatusAttribute('');
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_013'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('0');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute('');
+            $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingstatusAttribute('');
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_013'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('0');
+            $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '5') {    // 設定ミス
-            $temp_model->setModeAttribute('');
-            $temp_model->setRecorddatetimeAttribute('');
-            $temp_model->setWorkingstatusAttribute('');
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_014'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('0');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute('');
+            $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingstatusAttribute('');
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_014'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('0');
+            $temp_calc_model->setPatternAttribute($ptn);
         } else {
             // 不明データとして作成する
-            $temp_model->setModeAttribute('');
-            $temp_model->setRecorddatetimeAttribute('');
-            $temp_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
-            $temp_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
-            $temp_model->setLateAttribute('0');
-            $temp_model->setLeaveearlyAttribute('0');
-            $temp_model->setWorkingintervalAttribute($chk_interval);
-            $temp_model->setCurrentcalcAttribute('0');
-            $temp_model->setTobeconfirmedAttribute('1');
-            $temp_model->setPatternAttribute($ptn);
+            $temp_calc_model->setModeAttribute('');
+            $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
+            $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
+            $temp_calc_model->setLateAttribute('0');
+            $temp_calc_model->setLeaveearlyAttribute('0');
+            $temp_calc_model->setWorkingintervalAttribute($chk_interval);
+            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setTobeconfirmedAttribute('1');
+            $temp_calc_model->setPatternAttribute($ptn);
         }
 
-        return $temp_model;
+        return $temp_calc_model;
             
     }
 
@@ -1859,19 +1913,19 @@ class DailyWorkingInformationController extends Controller
      *
      * @return void
      */
-    private function pushArrayCalc($temp_model)
+    private function pushArrayCalc($temp_calc_model)
     {
         // 計算用配列配列
-        $this->array_calc_mode[] = $temp_model->getModeAttribute();
-        $this->array_calc_time[] = $temp_model->getRecorddatetimeAttribute();
-        $this->array_calc_status[] = $temp_model->getWorkingstatusAttribute();
-        $this->array_calc_note[] = $temp_model->getNoteAttribute();
-        $this->array_calc_late[] = $temp_model->getLateAttribute();
-        $this->array_calc_leave_early[] = $temp_model->getLeaveearlyAttribute();
-        $this->array_calc_interval[] = $temp_model->getWorkingintervalAttribute();
-        $this->array_calc_calc[] = $temp_model->getCurrentcalcAttribute();
-        $this->array_calc_to_be_confirmed[] = $temp_model->getTobeconfirmedAttribute();
-        $this->array_calc_pattern[] = $temp_model->getPatternAttribute();
+        $this->array_calc_mode[] = $temp_calc_model->getModeAttribute();
+        $this->array_calc_time[] = $temp_calc_model->getRecorddatetimeAttribute();
+        $this->array_calc_status[] = $temp_calc_model->getWorkingstatusAttribute();
+        $this->array_calc_note[] = $temp_calc_model->getNoteAttribute();
+        $this->array_calc_late[] = $temp_calc_model->getLateAttribute();
+        $this->array_calc_leave_early[] = $temp_calc_model->getLeaveearlyAttribute();
+        $this->array_calc_interval[] = $temp_calc_model->getWorkingintervalAttribute();
+        $this->array_calc_calc[] = $temp_calc_model->getCurrentcalcAttribute();
+        $this->array_calc_to_be_confirmed[] = $temp_calc_model->getTobeconfirmedAttribute();
+        $this->array_calc_pattern[] = $temp_calc_model->getPatternAttribute();
     }
 
     /**
@@ -1882,59 +1936,59 @@ class DailyWorkingInformationController extends Controller
     private function insTempCalcItem($target_date, $result)
     {
         Log::DEBUG('insTempCalcItem in ');
-        $temp_model = new TempCalcWorkingTime();
+        $temp_calc_model = new TempCalcWorkingTime();
     
         // 計算用配列からtemporary項目を設定する
-        $temp_model->setWorkingdateAttribute($target_date);
-        $temp_model->setEmploymentstatusAttribute($result->employment_status);
-        $temp_model->setDepartmentidAttribute($result->department_id);
-        $temp_model->setUsercodeAttribute($result->user_code);
-        $temp_model->setEmploymentstatusnameAttribute($result->employment_status_name);
-        $temp_model->setDepartmentnameAttribute($result->department_name);
-        $temp_model->setUsernameAttribute($result->user_name);
-        $temp_model->setWorkingtimetablenoAttribute($result->working_timetable_no);
-        $temp_model->setWorkingtimetablenameAttribute($result->working_timetable_name);
-        $temp_model->setWorkingtimetablefromtimeAttribute($result->working_timetable_from_time);
-        $temp_model->setWorkingtimetabletotimeAttribute($result->working_timetable_to_time);
-        $temp_model->setShiftnoAttribute($result->shift_no);
-        $temp_model->setShiftnameAttribute($result->shift_name);
-        $temp_model->setShiftfromtimeAttribute($result->shift_from_time);
-        $temp_model->setShifttotimeAttribute($result->shift_to_time);
-        $temp_model->setRecordyearAttribute($result->record_year);
-        $temp_model->setRecordmonthAttribute($result->record_month);
-        $temp_model->setRecorddateAttribute($result->record_date);
-        $temp_model->setRecordtimeAttribute($result->record_time);
-        $temp_model->setWeekdaykubunAttribute($result->weekday_kubun);
-        $temp_model->setWeekdaynameAttribute($result->weekday_name);
-        $temp_model->setBusinesskubunAttribute($result->business_kubun);
-        $temp_model->setBusinessnameAttribute($result->business_name);
-        $temp_model->setHolidaykubunAttribute($result->holiday_kubun);
-        $temp_model->setHolidaynameAttribute($result->holiday_name);
-        $temp_model->setClosingAttribute($result->closing);
-        $temp_model->setUplimittimeAttribute($result->uplimit_time);
-        $temp_model->setStatutoryuplimittimeAttribute($result->statutory_uplimit_time);
-        $temp_model->setTimeunitAttribute($result->time_unit);
-        $temp_model->setTimeroundingAttribute($result->time_rounding);
-        $temp_model->setMax3MonthtotalAttribute($result->max_3month_total);
-        $temp_model->setMax6MonthtotalAttribute($result->max_6month_total);
-        $temp_model->setMax12MonthtotalAttribute($result->max_12month_total);
-        $temp_model->setBeginningmonthAttribute($result->beginning_month);
-        $temp_model->setYearAttribute($result->year);
-        $temp_model->setSystemDateAttribute(Carbon::now());
+        $temp_calc_model->setWorkingdateAttribute($target_date);
+        $temp_calc_model->setEmploymentstatusAttribute($result->employment_status);
+        $temp_calc_model->setDepartmentidAttribute($result->department_id);
+        $temp_calc_model->setUsercodeAttribute($result->user_code);
+        $temp_calc_model->setEmploymentstatusnameAttribute($result->employment_status_name);
+        $temp_calc_model->setDepartmentnameAttribute($result->department_name);
+        $temp_calc_model->setUsernameAttribute($result->user_name);
+        $temp_calc_model->setWorkingtimetablenoAttribute($result->working_timetable_no);
+        $temp_calc_model->setWorkingtimetablenameAttribute($result->working_timetable_name);
+        $temp_calc_model->setWorkingtimetablefromtimeAttribute($result->working_timetable_from_time);
+        $temp_calc_model->setWorkingtimetabletotimeAttribute($result->working_timetable_to_time);
+        $temp_calc_model->setShiftnoAttribute($result->shift_no);
+        $temp_calc_model->setShiftnameAttribute($result->shift_name);
+        $temp_calc_model->setShiftfromtimeAttribute($result->shift_from_time);
+        $temp_calc_model->setShifttotimeAttribute($result->shift_to_time);
+        $temp_calc_model->setRecordyearAttribute($result->record_year);
+        $temp_calc_model->setRecordmonthAttribute($result->record_month);
+        $temp_calc_model->setRecorddateAttribute($result->record_date);
+        $temp_calc_model->setRecordtimeAttribute($result->record_time);
+        $temp_calc_model->setWeekdaykubunAttribute($result->weekday_kubun);
+        $temp_calc_model->setWeekdaynameAttribute($result->weekday_name);
+        $temp_calc_model->setBusinesskubunAttribute($result->business_kubun);
+        $temp_calc_model->setBusinessnameAttribute($result->business_name);
+        $temp_calc_model->setHolidaykubunAttribute($result->holiday_kubun);
+        $temp_calc_model->setHolidaynameAttribute($result->holiday_name);
+        $temp_calc_model->setClosingAttribute($result->closing);
+        $temp_calc_model->setUplimittimeAttribute($result->uplimit_time);
+        $temp_calc_model->setStatutoryuplimittimeAttribute($result->statutory_uplimit_time);
+        $temp_calc_model->setTimeunitAttribute($result->time_unit);
+        $temp_calc_model->setTimeroundingAttribute($result->time_rounding);
+        $temp_calc_model->setMax3MonthtotalAttribute($result->max_3month_total);
+        $temp_calc_model->setMax6MonthtotalAttribute($result->max_6month_total);
+        $temp_calc_model->setMax12MonthtotalAttribute($result->max_12month_total);
+        $temp_calc_model->setBeginningmonthAttribute($result->beginning_month);
+        $temp_calc_model->setYearAttribute($result->year);
+        $temp_calc_model->setSystemDateAttribute(Carbon::now());
 
         for($i=0;$i<count($this->array_calc_mode);$i++){
-            $temp_model->setModeAttribute($this->array_calc_mode[$i]);
-            $temp_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
-            $temp_model->setWorkingstatusAttribute($this->array_calc_status[$i]);
-            $temp_model->setNoteAttribute($this->array_calc_note[$i]);
-            $temp_model->setLateAttribute($this->array_calc_late[$i]);
-            $temp_model->setLeaveearlyAttribute($this->array_calc_leave_early[$i]);
-            $temp_model->setCurrentcalcAttribute($this->array_calc_calc[$i]);
-            $temp_model->setTobeconfirmedAttribute($this->array_calc_to_be_confirmed[$i]);
-            $temp_model->setWorkingintervalAttribute($this->array_calc_interval[$i]);
-            $temp_model->setPatternAttribute($this->array_calc_pattern[$i]);
+            $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
+            $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
+            $temp_calc_model->setWorkingstatusAttribute($this->array_calc_status[$i]);
+            $temp_calc_model->setNoteAttribute($this->array_calc_note[$i]);
+            $temp_calc_model->setLateAttribute($this->array_calc_late[$i]);
+            $temp_calc_model->setLeaveearlyAttribute($this->array_calc_leave_early[$i]);
+            $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$i]);
+            $temp_calc_model->setTobeconfirmedAttribute($this->array_calc_to_be_confirmed[$i]);
+            $temp_calc_model->setWorkingintervalAttribute($this->array_calc_interval[$i]);
+            $temp_calc_model->setPatternAttribute($this->array_calc_pattern[$i]);
             try{
-                $temp_model->insertTempCalcWorkingtimes();
+                $temp_calc_model->insertTempCalcWorkingtime();
             }catch(\PDOException $pe){
                 throw $pe;
             }
@@ -1948,9 +2002,9 @@ class DailyWorkingInformationController extends Controller
      *
      * @return 集計結果
      */
-    private function getTempWorkingTimeDates($timetables){
+    private function calcTempWorkingTimeDate($timetables){
 
-        Log::DEBUG('getTempWorkingTimeDates in ');
+        Log::DEBUG('calcTempWorkingTimeDate in ');
         $current_date = null;
         $current_department_id = null;
         $current_user_code = null;
@@ -1970,6 +2024,7 @@ class DailyWorkingInformationController extends Controller
         $leaving_time = '';
         $missing_middle_time = '';
         $missing_middle_return_time = '';
+        $working_status = '';
         $array_working_time_kubun = array(Config::get('const.C004.regular_working_time'),
             '',
             Config::get('const.C004.out_of_regular_working_time'),
@@ -1979,19 +2034,27 @@ class DailyWorkingInformationController extends Controller
             Config::get('const.C004.out_of_statutory_night_working_time'),
             ''
         );
+        // 出勤・退勤の労働時間数配列
         $array_calc_time = array();
         for ($i=0;$i<count($array_working_time_kubun);$i++) {
             $array_calc_time[$i] = 0; 
         }
+        // 中抜け・戻りの時間数配列
         $array_missing_middle_time = array();
         for ($i=0;$i<count($array_working_time_kubun);$i++) {
             $array_missing_middle_time[$i] = 0; 
         }
+        // データ登録用出勤・退勤の労働時刻数配列
+        $array_add_attendance_time = array();
+        $array_add_leaving_time = array();
+        // データ登録用中抜け・戻りの労働時刻数配列
+        $array_add_missing_middle_time = array();
+        $array_add_missing_middle_return_time = array();
 
         // ユーザー単位処理
-        $temp_model = new TempCalcWorkingTime();
-        $worktimes = $temp_model->getTempCalcWorkingtimes();
-        $add_results = true;
+        $temp_calc_model = new TempCalcWorkingTime();
+        $worktimes = $temp_calc_model->getTempCalcWorkingtime();
+        $add_result = true;
         foreach ($worktimes as $result) {
             // 現在の情報保存
             $current_date = $result->working_date;
@@ -2020,9 +2083,20 @@ class DailyWorkingInformationController extends Controller
                 if ($result->leave_early == '1') {$leave_early = '1';}
                 if ($result->to_be_confirmed == '1') {$to_be_confirmed = '1';}
                 $working_timetable_no = $result->working_timetable_no;
-
+                $dtNow = new Carbon();
+                Log::DEBUG('$result->record_datetime < $dtNow '.$result->record_datetime.' '.$dtNow);
+                if ($result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
+                    $working_status = $result->working_status;
+                }
+        
                 // 労働時間の計算
                 // 中抜けは複数ある可能性があるので中抜け計算は戻り時点で計算する。
+                if ($missing_middle_time <> ''){
+                    $array_add_missing_middle_time[] = $missing_middle_time;
+                }
+                if ($missing_middle_return_time <> ''){
+                    $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                }
                 if ($missing_middle_time <> '' && $missing_middle_return_time <> ''){
                     Log::DEBUG('count($array_working_time_kubun) =  '.count($array_working_time_kubun));
                     for ($i=0;$i<count($array_working_time_kubun);$i++) {
@@ -2042,6 +2116,12 @@ class DailyWorkingInformationController extends Controller
                 }
                 // 退勤データで当日計算する場合
                 if ($result->current_calc == '1') {
+                    if ($attendance_time <> ''){
+                        $array_add_attendance_time[] = $attendance_time;
+                    }
+                    if ($leaving_time <> ''){
+                        $array_add_leaving_time[] = $leaving_time;
+                    }
                     for ($i=0;$i<count($array_working_time_kubun);$i++) {
                         if ($array_working_time_kubun[$i] <> '') {
                             $array_calc_time[$i] += 
@@ -2066,13 +2146,18 @@ class DailyWorkingInformationController extends Controller
                 Log::DEBUG('date break ');
                 try{
                     // ユーザー労働時間登録(１個前のユーザーを登録する)
-                    $add_results = $this->addWorkingTimeDate(
+                    $add_result = $this->addTempWorkingTimeDate(
                         $before_date,
                         $before_user_code,
                         $before_department_id,
                         $before_result,
+                        $working_status,
                         $array_calc_time,
-                        $array_missing_middle_time);
+                        $array_missing_middle_time,
+                        $array_add_attendance_time,
+                        $array_add_leaving_time,
+                        $array_add_missing_middle_time,
+                        $array_add_missing_middle_return_time);
                     DB::commit();
                     Log::DEBUG('commit1 ');
                     DB::beginTransaction();
@@ -2088,14 +2173,32 @@ class DailyWorkingInformationController extends Controller
                     if ($result->mode == Config::get('const.C005.leaving_time')) {$leaving_time = $result->record_datetime;}
                     if ($result->mode == Config::get('const.C005.missing_middle_time')) {$missing_middle_time = $result->record_datetime;}
                     if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {$missing_middle_return_time = $result->record_datetime;}
-                        // 日付を同じく設定
+                    $array_add_attendance_time = array();
+                    $array_add_leaving_time = array();
+                    $array_add_missing_middle_time = array();
+                    $array_add_missing_middle_return_time = array();
+                    if ($missing_middle_time <> ''){
+                        $array_add_missing_middle_time[] = $missing_middle_time;
+                    }
+                    if ($missing_middle_return_time <> ''){
+                        $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                    }
+                    if ($result->current_calc == '1') {
+                        if ($attendance_time <> ''){
+                            $array_add_attendance_time[] = $attendance_time;
+                        }
+                        if ($leaving_time <> ''){
+                            $array_add_leaving_time[] = $leaving_time;
+                        }
+                    }
+                    // 日付を同じく設定
                     $before_date = $current_date;
                     $before_result = $result;
                 }catch(\PDOException $pe){
-                    $add_results = false;
+                    $add_result = false;
                     throw $pe;
                 }catch(\Exception $e){
-                    $add_results = false;
+                    $add_result = false;
                     throw $e;
                 }
             } elseif ($current_user_code == $before_user_code)  {
@@ -2103,13 +2206,18 @@ class DailyWorkingInformationController extends Controller
                 Log::DEBUG('department break ');
                 try{
                     // ユーザー労働時間登録(１個前のユーザーを登録する)
-                    $add_results = $this->addWorkingTimeDate(
+                    $add_result = $this->addTempWorkingTimeDate(
                         $before_date,
                         $before_user_code,
                         $before_department_id,
                         $before_result,
+                        $working_status,
                         $array_calc_time,
-                        $array_missing_middle_time);
+                        $array_missing_middle_time,
+                        $array_add_attendance_time,
+                        $array_add_leaving_time,
+                        $array_add_missing_middle_time,
+                        $array_add_missing_middle_return_time);
                     DB::commit();
                     Log::DEBUG('commit2 ');
                     DB::beginTransaction();
@@ -2125,16 +2233,34 @@ class DailyWorkingInformationController extends Controller
                     if ($result->mode == Config::get('const.C005.leaving_time')) {$leaving_time = $result->record_datetime;}
                     if ($result->mode == Config::get('const.C005.missing_middle_time')) {$missing_middle_time = $result->record_datetime;}
                     if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {$missing_middle_return_time = $result->record_datetime;}
+                    $array_add_attendance_time = array();
+                    $array_add_leaving_time = array();
+                    $array_add_missing_middle_time = array();
+                    $array_add_missing_middle_return_time = array();
+                    if ($missing_middle_time <> ''){
+                        $array_add_missing_middle_time[] = $missing_middle_time;
+                    }
+                    if ($missing_middle_return_time <> ''){
+                        $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                    }
+                    if ($result->current_calc == '1') {
+                        if ($attendance_time <> ''){
+                            $array_add_attendance_time[] = $attendance_time;
+                        }
+                        if ($leaving_time <> ''){
+                            $array_add_leaving_time[] = $leaving_time;
+                        }
+                    }
                     // 日付を同じく設定
                     $before_date = $current_date;
                     // 部署を同じく設定
                     $before_department_id = $current_department_id;
                     $before_result = $result;
                 }catch(\PDOException $pe){
-                    $add_results = false;
+                    $add_result = false;
                     throw $pe;
                 }catch(\Exception $e){
-                    $add_results = false;
+                    $add_result = false;
                     throw $e;
                 }
             } else {
@@ -2142,13 +2268,18 @@ class DailyWorkingInformationController extends Controller
                 Log::DEBUG('user break ');
                 try{
                     // ユーザー労働時間登録(１個前のユーザーを登録する)
-                    $add_results = $this->addWorkingTimeDate(
+                    $add_result = $this->addTempWorkingTimeDate(
                         $before_date,
                         $before_user_code,
                         $before_department_id,
                         $before_result,
+                        $working_status,
                         $array_calc_time,
-                        $array_missing_middle_time);
+                        $array_missing_middle_time,
+                        $array_add_attendance_time,
+                        $array_add_leaving_time,
+                        $array_add_missing_middle_time,
+                        $array_add_missing_middle_return_time);
                     DB::commit();
                     Log::DEBUG('commit3 ');
                     DB::beginTransaction();
@@ -2164,6 +2295,24 @@ class DailyWorkingInformationController extends Controller
                     if ($result->mode == Config::get('const.C005.leaving_time')) {$leaving_time = $result->record_datetime;}
                     if ($result->mode == Config::get('const.C005.missing_middle_time')) {$missing_middle_time = $result->record_datetime;}
                     if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {$missing_middle_return_time = $result->record_datetime;}
+                    $array_add_attendance_time = array();
+                    $array_add_leaving_time = array();
+                    $array_add_missing_middle_time = array();
+                    $array_add_missing_middle_return_time = array();
+                    if ($missing_middle_time <> ''){
+                        $array_add_missing_middle_time[] = $missing_middle_time;
+                    }
+                    if ($missing_middle_return_time <> ''){
+                        $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                    }
+                    if ($result->current_calc == '1') {
+                        if ($attendance_time <> ''){
+                            $array_add_attendance_time[] = $attendance_time;
+                        }
+                        if ($leaving_time <> ''){
+                            $array_add_leaving_time[] = $leaving_time;
+                        }
+                    }
                     // 日付を同じく設定
                     $before_date = $current_date;
                     // 部署を同じく設定
@@ -2172,10 +2321,10 @@ class DailyWorkingInformationController extends Controller
                     $before_user_code = $current_user_code; 
                     $before_result = $result;
                 }catch(\PDOException $pe){
-                    $add_results = false;
+                    $add_result = false;
                     throw $pe;
                 }catch(\Exception $e){
-                    $add_results = false;
+                    $add_result = false;
                     throw $e;
                 }
             }
@@ -2183,23 +2332,28 @@ class DailyWorkingInformationController extends Controller
 
         if (count($array_calc_time) > 0) {
             try{
-                $add_results = $this->addWorkingTimeDate(
-                    $current_date,
-                    $current_user_code,
-                    $current_department_id,
-                    $current_result,
+                $add_result = $this->addTempWorkingTimeDate(
+                    $before_date,
+                    $before_user_code,
+                    $before_department_id,
+                    $before_result,
+                    $working_status,
                     $array_calc_time,
-                    $array_missing_middle_time);
-                DB::commit();
+                    $array_missing_middle_time,
+                    $array_add_attendance_time,
+                    $array_add_leaving_time,
+                    $array_add_missing_middle_time,
+                    $array_add_missing_middle_return_time);
+            DB::commit();
                 Log::DEBUG('commit4 ');
             }catch(\PDOException $pe){
-                $add_results = false;
+                $add_result = false;
             }catch(\Exception $e){
-                $add_results = false;
+                $add_result = false;
             }
         }
 
-        return $add_results;
+        return $add_result;
 
     }
 
@@ -2212,7 +2366,6 @@ class DailyWorkingInformationController extends Controller
     private function calcTimes($timetables, $working_timetable_no, $working_time_kubun, $current_date,$target_from_time, $target_to_time)
     {
         Log::DEBUG('calcTimes in ');
-
         $apicommon = new ApiCommonController();
         $working_times = 0;             // 労働時間
         $dt = new Carbon($current_date);
@@ -2284,29 +2437,66 @@ class DailyWorkingInformationController extends Controller
     }
 
     /**
-     * ユーザー労働時間登録
+     * ユーザー労働時間登録（temp）
      *
      * @return 登録結果
      */
-    private function addWorkingTimeDate($target_date, $target_user_code, $target_department_id, $target_result,
-         $array_calc_time, $array_missing_middle_time)
+    private function addTempWorkingTimeDate($target_date, $target_user_code, $target_department_id, $target_result, $working_status,
+        $array_calc_time, $array_missing_middle_time,
+        $array_add_attendance_time, $array_add_leaving_time, $array_add_missing_middle_time, $array_add_missing_middle_return_time)
     {
-        Log::DEBUG('$addWorkingTimeDate in '.$target_date);
-        $working_model = new WorkingTimedate();
+        Log::DEBUG('$addTempWorkingTimeDate in '.$target_date.$target_user_code);
+        $temp_working_model = new TempWorkingTimeDate();
         $apicommon = new ApiCommonController();
         $dt = new Carbon($target_date);
         $nextdt = date_format($dt->addDay(), 'Y/m/d');
         $outside_calc_time = 0;     // 所定外労働時間
 
-        $working_model->setWorkingdateAttribute(date_format(new Carbon($target_date), 'Ymd'));
-        $working_model->setEmploymentstatusAttribute($target_result->employment_status);
-        $working_model->setDepartmentidAttribute($target_department_id);
-        $working_model->setUsercodeAttribute($target_user_code);
-        $working_model->setEmploymentstatusnameAttribute($target_result->employment_status_name);
-        $working_model->setDepartmentnameAttribute($target_result->department_name);
-        $working_model->setUsernameAttribute($target_result->user_name);
-        $working_model->setWorkingtimetablenoAttribute($target_result->working_timetable_no);
-        $working_model->setWorkingtimetablenameAttribute($target_result->working_timetable_name);
+        $temp_working_model->setWorkingdateAttribute(date_format(new Carbon($target_date), 'Ymd'));
+        $temp_working_model->setEmploymentstatusAttribute($target_result->employment_status);
+        $temp_working_model->setDepartmentidAttribute($target_department_id);
+        $temp_working_model->setUsercodeAttribute($target_user_code);
+        $temp_working_model->setEmploymentstatusnameAttribute($target_result->employment_status_name);
+        $temp_working_model->setDepartmentnameAttribute($target_result->department_name);
+        $temp_working_model->setUsernameAttribute($target_result->user_name);
+        $temp_working_model->setWorkingtimetablenoAttribute($target_result->working_timetable_no);
+        $temp_working_model->setWorkingtimetablenameAttribute($target_result->working_timetable_name);
+        $index = (int)(Config::get('const.ARRAY_MAX_INDEX.attendace_time'));
+        Log::DEBUG('$index = '.$index);
+        Log::DEBUG('count($array_add_attendance_time = '.count($array_add_attendance_time));
+        for ($i=0;$i<$index;$i++) {
+            if (count($array_add_attendance_time) > 0 && $i < count($array_add_attendance_time)){
+                Log::DEBUG('$array_add_attendance_time[$i] = '.$array_add_attendance_time[$i].' $i = '.$i);
+                $temp_working_model->setAttendancetimeAttribute($i, $array_add_attendance_time[$i]);
+            } else {
+                Log::DEBUG('$array_add_attendance_time[$i] = null $i = '.$i);
+                $temp_working_model->setAttendancetimeAttribute($i, null);
+            }
+        }
+        $index = (int)(Config::get('const.ARRAY_MAX_INDEX.leaving_time'));
+        for ($i=0;$i<$index;$i++) {
+            if (count($array_add_leaving_time) > 0 && $i < count($array_add_leaving_time)){
+                $temp_working_model->setLeavingtimeAttribute($i, $array_add_leaving_time[$i]);
+            } else {
+                $temp_working_model->setLeavingtimeAttribute($i, null);
+            }
+        }
+        $index = (int)(Config::get('const.ARRAY_MAX_INDEX.missing_middle_time'));
+        for ($i=0;$i<$index;$i++) {
+            if (count($array_add_missing_middle_time) > 0 && $i < count($array_add_missing_middle_time)){
+                $temp_working_model->setMissingmiddletimeAttribute($i, $array_add_missing_middle_time[$i]);
+            } else {
+                $temp_working_model->setMissingmiddletimeAttribute($i, null);
+            }
+        }
+        $index = (int)(Config::get('const.ARRAY_MAX_INDEX.missing_middle_return_time'));
+        for ($i=0;$i<$index;$i++) {
+            if (count($array_add_missing_middle_return_time) > 0 && $i < count($array_add_missing_middle_return_time)){
+                $temp_working_model->setMissingmiddlereturntimeAttribute($i, $array_add_missing_middle_return_time[$i]);
+            } else {
+                $temp_working_model->setMissingmiddlereturntimeAttribute($i, null);
+            }
+        }
         // 合計勤務時間
         $total_time = 0;
         // 残業時間
@@ -2315,7 +2505,7 @@ class DailyWorkingInformationController extends Controller
         $index = (int)(Config::get('const.C004.regular_working_time'))-1;
         $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
         $regular_calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-        $working_model->setRegularworkingtimesAttribute($regular_calc_time);
+        $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);
         $total_time = $total_time + $regular_calc_time;
         Log::DEBUG('$target_user_code = '.$target_user_code.' 所定労働時間 = $total_time + $regular_calc_time '.$total_time.' '.$regular_calc_time);
         // 時間外労働時間
@@ -2323,7 +2513,7 @@ class DailyWorkingInformationController extends Controller
         $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
         Log::DEBUG('$target_user_code = '.$target_user_code.' 時間外労働時間 = $array + $array '.$array_calc_time[$index].' '.$array_missing_middle_time[$index]);
         $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-        $working_model->setOffhoursworkinghoursAttribute($calc_time);
+        $temp_working_model->setOffhoursworkinghoursAttribute($calc_time);
         $total_time = $total_time + $calc_time;
         $overtime_hours = $overtime_hours + $calc_time;
         Log::DEBUG('$target_user_code = '.$target_user_code.' 時間外労働時間 = $overtime_hours + $calc_time '.$overtime_hours.' '.$calc_time);
@@ -2331,14 +2521,14 @@ class DailyWorkingInformationController extends Controller
         $index = (int)(Config::get('const.C004.out_of_regular_night_working_time'))-1;
         $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
         $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-        $working_model->setLatenightovertimehoursAttribute($calc_time);
+        $temp_working_model->setLatenightovertimehoursAttribute($calc_time);
         $total_time = $total_time + $calc_time;
         $overtime_hours = $overtime_hours + $calc_time;
         Log::DEBUG('$target_user_code = '.$target_user_code.' 深夜労働時間 = $overtime_hours + $calc_time '.$overtime_hours.' '.$calc_time);
         // 合計勤務時間
-        $working_model->setTotalworkingtimesAttribute($total_time);
+        $temp_working_model->setTotalworkingtimesAttribute($total_time);
         // 残業時間
-        $working_model->setOvertimehoursAttribute($overtime_hours);
+        $temp_working_model->setOvertimehoursAttribute($overtime_hours);
         // 所定外労働時間
         $outside_calc_time = 0;
         $default_time = (int)(Config::get('const.C002.legal_working_hours_day')) * 60;
@@ -2347,21 +2537,21 @@ class DailyWorkingInformationController extends Controller
         } elseif ($regular_calc_time < $total_time) { 
             $outside_calc_time = $total_time- $regular_calc_time;
         } 
-        $working_model->setOutofregularworkingtimesAttribute($outside_calc_time);
+        $temp_working_model->setOutofregularworkingtimesAttribute($outside_calc_time);
         Log::DEBUG('$target_user_code = '.$target_user_code.' 所定外労働時間 = $outside_calc_time '.$outside_calc_time);
         // 法定労働時間 法定外労働時間
         if ($total_time > $default_time * 60) {      // 合計勤務時間 > 8 の場合
             // 法定労働時間
-            $working_model->setLegalworkingtimesAttribute($default_time);
+            $temp_working_model->setLegalworkingtimesAttribute($default_time);
             // 法定外労働時間
-            $working_model->setOutoflegalworkingtimesAttribute($total_time - $default_time);
+            $temp_working_model->setOutoflegalworkingtimesAttribute($total_time - $default_time);
             Log::DEBUG('$target_user_code = '.$target_user_code.' 法定労働時間 = $default_time '.$default_time);
             Log::DEBUG('$target_user_code = '.$target_user_code.' 法定外労働時間 = $total_time - $default_time '.$total_time.' '.$default_time);
         } else {
             // 法定労働時間
-            $working_model->setLegalworkingtimesAttribute($total_time);
+            $temp_working_model->setLegalworkingtimesAttribute($total_time);
             // 法定外労働時間
-            $working_model->setOutoflegalworkingtimesAttribute(0);
+            $temp_working_model->setOutoflegalworkingtimesAttribute(0);
             Log::DEBUG('$target_user_code = '.$target_user_code.' 法定労働時間 = $total_time '.$total_time);
             Log::DEBUG('$target_user_code = '.$target_user_code.' 法定外労働時間 =0 ');
         }
@@ -2377,51 +2567,47 @@ class DailyWorkingInformationController extends Controller
         }
         $calc_time = round($apicommon->roundTime($calc_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
         Log::DEBUG('$target_user_code = '.$target_user_code.' 未就労時間（休憩時間＋中抜け時間） =  '. $calc_time);
-        $working_model->setNotemploymentworkinghoursAttribute($calc_time);
-        $working_model->setWorkingstatusAttribute($target_result->working_status);
-        $working_model->setNoteAttribute($target_result->note);
-        $working_model->setLateAttribute($target_result->late);
-        $working_model->setLeaveearlyAttribute($target_result->leave_early);
-        $working_model->setCurrentcalcAttribute($target_result->current_calc);
-        $working_model->setTobeconfirmedAttribute($target_result->to_be_confirmed);
-        $working_model->setWeekdaykubunAttribute($target_result->weekday_kubun);
-        $working_model->setWeekdaynameAttribute($target_result->weekday_name);
-        $working_model->setBusinesskubunAttribute($target_result->business_kubun);
-        $working_model->setBusinessnameAttribute($target_result->business_name);
-        $working_model->setHolidaykubunAttribute($target_result->holiday_kubun);
-        $working_model->setHolidaynameAttribute($target_result->holiday_name);
-        $working_model->setClosingAttribute($target_result->closing);
-        $working_model->setUplimittimeAttribute($target_result->uplimit_time);
-        $working_model->setStatutoryuplimittimeAttribute($target_result->statutory_uplimit_time);
-        $working_model->setTimeunitAttribute($target_result->time_unit);
-        $working_model->setTimeroundingAttribute($target_result->time_rounding);
-        $working_model->setMax3MonthtotalAttribute($target_result->max_3month_total);
-        $working_model->setMax6MonthtotalAttribute($target_result->max_6month_total);
-        $working_model->setMax12MonthtotalAttribute($target_result->max_12month_total);
-        $working_model->setBeginningmonthAttribute($target_result->beginning_month);
-        $working_model->setWorkingintervalAttribute($target_result->working_interval);
-        $working_model->setYearAttribute($target_result->year);
-        $working_model->setPatternAttribute($target_result->pattern);
-        $working_model->setFixedtimeAttribute('0');
-        $working_model->setCreateduserAttribute(Auth::user()->id);
-        $working_model->setUpdateduserAttribute(null);
-        $working_model->setSystemDateAttribute(Carbon::now());
+        $temp_working_model->setNotemploymentworkinghoursAttribute($calc_time);
+        $temp_working_model->setWorkingstatusAttribute($working_status);
+        $temp_working_model->setNoteAttribute($target_result->note);
+        $temp_working_model->setLateAttribute($target_result->late);
+        $temp_working_model->setLeaveearlyAttribute($target_result->leave_early);
+        $temp_working_model->setCurrentcalcAttribute($target_result->current_calc);
+        $temp_working_model->setTobeconfirmedAttribute($target_result->to_be_confirmed);
+        $temp_working_model->setWeekdaykubunAttribute($target_result->weekday_kubun);
+        $temp_working_model->setWeekdaynameAttribute($target_result->weekday_name);
+        $temp_working_model->setBusinesskubunAttribute($target_result->business_kubun);
+        $temp_working_model->setBusinessnameAttribute($target_result->business_name);
+        $temp_working_model->setHolidaykubunAttribute($target_result->holiday_kubun);
+        $temp_working_model->setHolidaynameAttribute($target_result->holiday_name);
+        $temp_working_model->setClosingAttribute($target_result->closing);
+        $temp_working_model->setUplimittimeAttribute($target_result->uplimit_time);
+        $temp_working_model->setStatutoryuplimittimeAttribute($target_result->statutory_uplimit_time);
+        $temp_working_model->setTimeunitAttribute($target_result->time_unit);
+        $temp_working_model->setTimeroundingAttribute($target_result->time_rounding);
+        $temp_working_model->setMax3MonthtotalAttribute($target_result->max_3month_total);
+        $temp_working_model->setMax6MonthtotalAttribute($target_result->max_6month_total);
+        $temp_working_model->setMax12MonthtotalAttribute($target_result->max_12month_total);
+        $temp_working_model->setBeginningmonthAttribute($target_result->beginning_month);
+        $temp_working_model->setWorkingintervalAttribute($target_result->working_interval);
+        $temp_working_model->setYearAttribute($target_result->year);
+        $temp_working_model->setPatternAttribute($target_result->pattern);
+        $temp_working_model->setFixedtimeAttribute('0');
+        $temp_working_model->setSystemDateAttribute(Carbon::now());
         // 登録する
         try{
-            $working_model->setParamdatefromAttribute(date_format(new Carbon($target_date), 'Ymd'));
-            $working_model->setParamdatetoAttribute(date_format(new Carbon($target_date), 'Ymd'));
-            $working_model->setParamEmploymentStatusAttribute($target_result->employment_status);
-            $working_model->setParamDepartmentcodeAttribute($target_department_id);
-            $working_model->setParamUsercodeAttribute($target_user_code);
-            if ($working_model->isExistsWorkingTimeDate()) {
-                $working_model->delWorkingTimeDate();
-            }
-            $working_model->insertWorkingTimeDate();
+            $temp_working_model->setParamdatefromAttribute(date_format(new Carbon($target_date), 'Ymd'));
+            $temp_working_model->setParamdatetoAttribute(date_format(new Carbon($target_date), 'Ymd'));
+            $temp_working_model->setParamEmploymentStatusAttribute($target_result->employment_status);
+            $temp_working_model->setParamDepartmentcodeAttribute($target_department_id);
+            $temp_working_model->setParamUsercodeAttribute($target_user_code);
+            // insert
+            $temp_working_model->insertTempWorkingTimeDate();
         }catch(\PDOException $pe){
-            Log::DEBUG('insertWorkingTimeDates PDOException ');
+            Log::ERROR('insertTempWorkingTimeDate PDOException '.$pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::DEBUG('insertWorkingTimeDates Exception ');
+            Log::ERROR('insertTempWorkingTimeDate Exception '.$e->getMessage());
             throw $e;
         }
 
