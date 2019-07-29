@@ -183,6 +183,21 @@ class UserModel extends Model
     }
 
     /**
+     * パスワード変更
+     * 
+     * @return void
+     */
+    public function updatePassWord(){
+        $systemdate = Carbon::now();
+        DB::table($this->table)
+            ->where('code', $this->code)
+            ->update([
+                'password' => $this->password,
+                'updated_at' => $systemdate
+                ]);
+    }
+
+    /**
      * 論理削除
      *
      * @return void

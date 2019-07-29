@@ -181,4 +181,32 @@ class UserAddController extends Controller
         
         return $details;
     }
+
+    /**
+     * パスワード変更
+     *
+     * @return void
+     */
+    public function passChange(Request $request){
+        $code = $request->user_code;
+        $pass_word = bcrypt($request->password);
+        $response = collect();
+
+        // パスワード変更
+        DB::beginTransaction();
+        try{
+            $users = new UserModel();
+            $users->setCodeAttribute($code);
+            $users->setPasswordAttribute($pass_word);
+            $users->updatePassWord();
+            DB::commit();
+            $response->put('result',self::SUCCESS);
+
+        }catch(\PDOException $e){
+            DB::rollBack();
+            $response->put('result',self::FAILED);
+        }
+        return $response;
+
+    }
 }
