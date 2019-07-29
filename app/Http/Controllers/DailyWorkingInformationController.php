@@ -2482,8 +2482,11 @@ class DailyWorkingInformationController extends Controller
             }
         }
         $index = (int)(Config::get('const.ARRAY_MAX_INDEX.missing_middle_time'));
+        Log::DEBUG('$index = '.$index);
+        Log::DEBUG('count($array_add_missing_middle_time = '.count($array_add_missing_middle_time));
         for ($i=0;$i<$index;$i++) {
             if (count($array_add_missing_middle_time) > 0 && $i < count($array_add_missing_middle_time)){
+                Log::DEBUG('$array_add_missing_middle_time[$i] = '.$array_add_missing_middle_time[$i].' $i = '.$i);
                 $temp_working_model->setMissingmiddletimeAttribute($i, $array_add_missing_middle_time[$i]);
             } else {
                 $temp_working_model->setMissingmiddletimeAttribute($i, null);
