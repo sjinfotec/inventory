@@ -6,20 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
-/**
- * テーブル：日次タイムレコード（working_time_date）のモデル
- *      アクセサ定義
- * @author      o.shindo
- * @version     1.00    20190629
-*/
-class WorkingTimedate extends Model
+class TempWorkingTimeDate extends Model
 {
-    protected $table = 'working_time_dates';
-    protected $table_temp_working_time_dates = 'temp_working_time_dates';
-    protected $table_work_times = 'work_times';
+    protected $table = 'temp_working_time_dates';
     protected $table_users = 'users';
     protected $table_departments = 'departments';
+    protected $table_generalcodes = 'generalcodes';
     protected $guarded = array('id');
 
     //--------------- 項目属性 -----------------------------------
@@ -72,9 +66,6 @@ class WorkingTimedate extends Model
     private $year;                          // 年
     private $pattern;                       // 打刻パターン
     private $fixedtime;                     // 確定
-    private $created_user;                  // 作成ユーザー
-    private $updated_user;                  // 修正ユーザー
-    private $is_deleted;                    // 削除フラグ
     private $systemdate;
 
     // 日付
@@ -193,10 +184,7 @@ class WorkingTimedate extends Model
 
     public function setAttendancetimeAttribute($index, $value)
     {
-        Log::DEBUG('$index = '.$index);
-        Log::DEBUG('$value = '.$value);
         $this->array_attendance_time[$index] = $value;
-        Log::DEBUG('$array_attendance_time = '.$this->array_attendance_time[$index]);
     }
 
     // 退勤時刻
@@ -650,45 +638,6 @@ class WorkingTimedate extends Model
         $this->fixedtime = $value;
     }
 
-
-    // 作成ユーザー
-    public function getCreateduserAttribute()
-    {
-        return $this->created_user;
-    }
-
-    public function setCreateduserAttribute($value)
-    {
-        $this->created_user = $value;
-    }
-
-
-    // 修正ユーザー
-    public function getUpdateduserAttribute()
-    {
-        return $this->updated_user;
-    }
-
-    public function setUpdateduserAttribute($value)
-    {
-        $this->updated_user = $value;
-    }
-
-
-
-
-    // 削除フラグ
-    public function getIsdeletedAttribute()
-    {
-        return $this->is_deleted;
-    }
-
-    public function setIsdeletedAttribute($value)
-    {
-        $this->is_deleted = $value;
-    }
-
-
     public function getSystemDateAttribute()
     {
         return $this->systemdate;
@@ -797,7 +746,6 @@ class WorkingTimedate extends Model
 
     // --------------------- メソッド ------------------------------------------------------
 
-
     /**
      * 日次労働時間取得
      *
@@ -810,13 +758,13 @@ class WorkingTimedate extends Model
      *
      * @return sql取得結果
      */
-    public function getWorkingTimeDate(){
+    public function getTempWorkingTimeDateUserJoin(){
 
 
         // 日次労働時間取得SQL作成
         \DB::enableQueryLog();
         try{
-            $mainquery = DB::table($this->table)
+            $subquery1 = DB::table($this->table)
                 ->select(
                     $this->table.'.working_date',
                     $this->table.'.employment_status',
@@ -881,149 +829,117 @@ class WorkingTimedate extends Model
                     $this->table.'.working_interval',
                     $this->table.'.year',
                     $this->table.'.pattern',
-                    $this->table.'.fixedtime',
-                    $this->table.'.created_user',
-                    $this->table.'.updated_user',
-                    $this->table.'.is_deleted');
+                    $this->table.'.fixedtime');
 
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $date = date_create($this->param_date_from);
                 $this->param_date_from = $date->format('Ymd');
                 $date = date_create($this->param_date_to);
                 $this->param_date_to = $date->format('Ymd');
-                $mainquery->where($this->table.'.working_date', '>=', $this->param_date_from);          // 日付範囲指定
-                $mainquery->where($this->table.'.working_date', '<=', $this->param_date_to);            // 日付範囲指定
+                $subquery1->where($this->table.'.working_date', '>=', $this->param_date_from);          // 日付範囲指定
+                $subquery1->where($this->table.'.working_date', '<=', $this->param_date_to);            // 日付範囲指定
             }
-            
+
+            $mainquery = DB::table($this->table_users.' AS t1')
+                ->selectRaw('(case when t2.working_date is not null then t2.working_date else '.$this->param_date_from.' end) as working_date');
+            $mainquery->addselect('t1.employment_status')
+                ->addselect('t1.department_id')
+                ->addselect('t1.code as user_code')
+                ->addselect('t4.code_name as employment_status_name')
+                ->addselect('t3.name as department_name')
+                ->addselect('t1.name as user_name')
+                ->addselect('t2.working_timetable_no')
+                ->addselect('t2.working_timetable_name');
+            $mainquery->addselect('t1.employment_status')
+                ->selectRaw('(case when t2.attendance_time_1 is not null then t2.attendance_time_1 else null end) as attendance_time_1')
+                ->selectRaw('(case when t2.attendance_time_2 is not null then t2.attendance_time_2 else null end) as attendance_time_2')
+                ->selectRaw('(case when t2.attendance_time_3 is not null then t2.attendance_time_3 else null end) as attendance_time_3')
+                ->selectRaw('(case when t2.attendance_time_4 is not null then t2.attendance_time_4 else null end) as attendance_time_4')
+                ->selectRaw('(case when t2.attendance_time_5 is not null then t2.attendance_time_5 else null end) as attendance_time_5')
+                ->selectRaw('(case when t2.leaving_time_1 is not null then t2.leaving_time_1 else null end) as leaving_time_1')
+                ->selectRaw('(case when t2.leaving_time_2 is not null then t2.leaving_time_2 else null end) as leaving_time_2')
+                ->selectRaw('(case when t2.leaving_time_3 is not null then t2.leaving_time_3 else null end) as leaving_time_3')
+                ->selectRaw('(case when t2.leaving_time_4 is not null then t2.leaving_time_4 else null end) as leaving_time_4')
+                ->selectRaw('(case when t2.leaving_time_5 is not null then t2.leaving_time_5 else null end) as leaving_time_5')
+                ->selectRaw('(case when t2.missing_middle_time_1 is not null then t2.missing_middle_time_1 else null end) as missing_middle_time_1')
+                ->selectRaw('(case when t2.missing_middle_time_2 is not null then t2.missing_middle_time_2 else null end) as missing_middle_time_2')
+                ->selectRaw('(case when t2.missing_middle_time_3 is not null then t2.missing_middle_time_3 else null end) as missing_middle_time_3')
+                ->selectRaw('(case when t2.missing_middle_time_4 is not null then t2.missing_middle_time_4 else null end) as missing_middle_time_4')
+                ->selectRaw('(case when t2.missing_middle_time_5 is not null then t2.missing_middle_time_5 else null end) as missing_middle_time_5')
+                ->selectRaw('(case when t2.missing_middle_return_time_1 is not null then t2.missing_middle_return_time_1 else null end) as missing_middle_return_time_1')
+                ->selectRaw('(case when t2.missing_middle_return_time_2 is not null then t2.missing_middle_return_time_2 else null end) as missing_middle_return_time_2')
+                ->selectRaw('(case when t2.missing_middle_return_time_3 is not null then t2.missing_middle_return_time_3 else null end) as missing_middle_return_time_3')
+                ->selectRaw('(case when t2.missing_middle_return_time_4 is not null then t2.missing_middle_return_time_4 else null end) as missing_middle_return_time_4')
+                ->selectRaw('(case when t2.missing_middle_return_time_5 is not null then t2.missing_middle_return_time_5 else null end) as missing_middle_return_time_5');
+            $mainquery->addselect('t2.total_working_times')
+                ->addselect('t2.regular_working_times')
+                ->addselect('t2.out_of_regular_working_times')
+                ->addselect('t2.overtime_hours')
+                ->addselect('t2.late_night_overtime_hours')
+                ->addselect('t2.legal_working_times')
+                ->addselect('t2.out_of_legal_working_times')
+                ->addselect('t2.not_employment_working_hours')
+                ->addselect('t2.off_hours_working_hours')
+                ->addselect('t2.working_status')
+                ->addselect('t5.code_name as working_status_name')
+                ->addselect('t2.note')
+                ->addselect('t2.late')
+                ->addselect('t2.leave_early')
+                ->addselect('t2.current_calc')
+                ->addselect('t2.to_be_confirmed')
+                ->addselect('t2.weekday_kubun')
+                ->addselect('t2.weekday_name')
+                ->addselect('t2.business_kubun')
+                ->addselect('t2.business_name')
+                ->addselect('t2.holiday_kubun')
+                ->addselect('t2.holiday_name')
+                ->addselect('t2.closing')
+                ->addselect('t2.uplimit_time')
+                ->addselect('t2.statutory_uplimit_time')
+                ->addselect('t2.time_unit')
+                ->addselect('t2.time_rounding')
+                ->addselect('t2.max_3month_total')
+                ->addselect('t2.max_6month_total')
+                ->addselect('t2.max_12month_total')
+                ->addselect('t2.beginning_month')
+                ->addselect('t2.working_interval')
+                ->addselect('t2.year')
+                ->addselect('t2.pattern')
+                ->addselect('t2.fixedtime');
+            $mainquery->selectRaw(Auth::user()->id.' as created_user');
+            $mainquery->selectRaw('null as updated_user');
+            $mainquery->leftJoinSub($subquery1, 't2', function ($join) { 
+                    $join->on('t2.user_code', '=', 't1.code');
+                    $join->on('t2.department_id', '=', 't1.department_id');
+                    $join->on('t2.employment_status', '=', 't1.employment_status');
+                })
+                ->leftJoin($this->table_departments.' as t3', function ($join) { 
+                    $join->on('t3.id', '=', 't1.department_id')
+                    ->where('t3.is_deleted', '=', 0);
+                })
+                ->leftJoin($this->table_generalcodes.' as t4', function ($join) { 
+                    $join->on('t4.code', '=', 't1.employment_status')
+                    ->where('t4.identification_id', '=', Config::get('const.C001.value'))
+                    ->where('t4.is_deleted', '=', 0);
+                })
+                ->leftJoin($this->table_generalcodes.' as t5', function ($join) { 
+                    $join->on('t5.code', '=', 't2.working_status')
+                    ->where('t5.identification_id', '=', Config::get('const.C005.value'))
+                    ->where('t5.is_deleted', '=', 0);
+                });
+                        
             if(!empty($this->param_employment_status)){
-                $mainquery->where($this->table.'.employment_status', $this->param_employment_status);   //employment_status指定
+                $mainquery->where('t1.employment_status', $this->param_employment_status);   //employment_status指定
             }
             
             if(!empty($this->param_user_code)){
-                $mainquery->where($this->table.'.user_code', $this->param_user_code);                   //user_code指定
+                $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
             }
             
             if(!empty($this->param_department_id)){
-                $mainquery->where($this->table.'.department_id', $this->param_department_id);           //department_id指定
+                $mainquery->where('t1.department_id', $this->param_department_id);          //department_id指定
             }
             $result = $mainquery->where('t1.is_deleted', '=', 0)->get();
-        }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getWorkTimes' => \DB::getQueryLog()
-            ]
-        );
-        
-        return $result;
-    }
-
-    /**
-     * 日次労働時間取得
-     *
-     *      指定したユーザー、日付範囲内の労働時間計算のもとデータを取得するSQL
-     *
-     *      INPUT：
-     *          ①テーブル：departments　部署範囲内 and 削除=0
-     *          ②テーブル：users　      ユーザー範囲内 and 削除=0
-     *          ③テーブル：work_times　 ユーザーand日付範囲内 and 削除=0
-     *
-     * @return sql取得結果
-     */
-    public function getWorkingTimeDateTimeFormat(){
-
-
-        // 日次労働時間取得SQL作成
-        \DB::enableQueryLog();
-        try{
-
-            $mainquery = DB::table($this->table)
-                ->select(
-                    $this->table.'.working_date',
-                    $this->table.'.employment_status',
-                    $this->table.'.department_id',
-                    $this->table.'.user_code',
-                    $this->table.'.employment_status_name',
-                    $this->table.'.department_name',
-                    $this->table.'.user_name',
-                    $this->table.'.working_timetable_no',
-                    $this->table.'.working_timetable_name',
-                    $this->table.'.employment_status');
-            $mainquery->selectRaw('DATE_FORMAT('.$this->table.'.attendance_time_1,'."'%H:%i'".')  as attendance_time_1')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.attendance_time_2,'."'%H:%i'".')  as attendance_time_2')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.attendance_time_3,'."'%H:%i'".')  as attendance_time_3')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.attendance_time_4,'."'%H:%i'".')  as attendance_time_4')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.attendance_time_5,'."'%H:%i'".')  as attendance_time_5')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.leaving_time_1,'."'%H:%i'".')  as leaving_time_1')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.leaving_time_2,'."'%H:%i'".')  as leaving_time_2')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.leaving_time_3,'."'%H:%i'".')  as leaving_time_3')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.leaving_time_4,'."'%H:%i'".')  as leaving_time_4')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.leaving_time_5,'."'%H:%i'".')  as leaving_time_5')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_time_1,'."'%H:%i'".')  as missing_middle_time_1')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_time_2,'."'%H:%i'".')  as missing_middle_time_2')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_time_3,'."'%H:%i'".')  as missing_middle_time_3')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_time_4,'."'%H:%i'".')  as missing_middle_time_4')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_time_5,'."'%H:%i'".')  as missing_middle_time_5')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_return_time_1,'."'%H:%i'".')  as missing_middle_return_time_1')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_return_time_2,'."'%H:%i'".')  as missing_middle_return_time_2')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_return_time_3,'."'%H:%i'".')  as missing_middle_return_time_3')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_return_time_4,'."'%H:%i'".')  as missing_middle_return_time_4')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_return_time_5,'."'%H:%i'".')  as missing_middle_return_time_5');
-            $mainquery->addselect($this->table.'.total_working_times')
-                ->addselect($this->table.'.regular_working_times')
-                ->addselect($this->table.'.out_of_regular_working_times')
-                ->addselect($this->table.'.overtime_hours')
-                ->addselect($this->table.'.late_night_overtime_hours')
-                ->addselect($this->table.'.legal_working_times')
-                ->addselect($this->table.'.out_of_legal_working_times')
-                ->addselect($this->table.'.not_employment_working_hours')
-                ->addselect($this->table.'.off_hours_working_hours')
-                ->addselect($this->table.'.working_status')
-                ->addselect($this->table.'.working_status_name')
-                ->addselect($this->table.'.note')
-                ->addselect($this->table.'.late')
-                ->addselect($this->table.'.leave_early')
-                ->addselect($this->table.'.current_calc')
-                ->addselect($this->table.'.to_be_confirmed')
-                ->addselect($this->table.'.weekday_kubun')
-                ->addselect($this->table.'.weekday_name')
-                ->addselect($this->table.'.business_kubun')
-                ->addselect($this->table.'.business_name')
-                ->addselect($this->table.'.holiday_kubun')
-                ->addselect($this->table.'.holiday_name')
-                ->addselect($this->table.'.closing')
-                ->addselect($this->table.'.uplimit_time')
-                ->addselect($this->table.'.statutory_uplimit_time')
-                ->addselect($this->table.'.time_unit')
-                ->addselect($this->table.'.time_rounding')
-                ->addselect($this->table.'.max_3month_total')
-                ->addselect($this->table.'.max_6month_total')
-                ->addselect($this->table.'.max_12month_total')
-                ->addselect($this->table.'.beginning_month')
-                ->addselect($this->table.'.working_interval')
-                ->addselect($this->table.'.year')
-                ->addselect($this->table.'.pattern')
-                ->addselect($this->table.'.fixedtime')
-                ->addselect($this->table.'.created_user')
-                ->addselect($this->table.'.updated_user')
-                ->addselect($this->table.'.is_deleted');
-            
-            $mainquery = $this->setWhereSql($mainquery);
-            $result = $mainquery
-                ->orderBy($this->table.'.working_date', 'asc')
-                ->orderBy($this->table.'.employment_status', 'asc')
-                ->orderBy($this->table.'.department_id', 'asc')
-                ->orderBy($this->table.'.user_code', 'asc')
-                ->get();
             
         }catch(\PDOException $pe){
             Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
@@ -1038,7 +954,7 @@ class WorkingTimedate extends Model
         \Log::debug(
             'sql_debug_log',
             [
-                'getWorkingTimeDateUserJoin' => \DB::getQueryLog()
+                'getTempWorkingTimeDateUserJoin' => \DB::getQueryLog()
             ]
         );
         
@@ -1050,9 +966,77 @@ class WorkingTimedate extends Model
      *
      * @return void
      */
-    public function insertWorkingTimeDateFromTemp($array_subquery){
+    public function insertTempWorkingTimeDate(){
         try{
-            DB::table($this->table)->insert($array_subquery);
+            DB::table($this->table)->insert(
+                [
+                    'working_date' => $this->working_date,
+                    'employment_status' => $this->employment_status,
+                    'department_id' => $this->department_id,
+                    'user_code' => $this->user_code,
+                    'employment_status_name' => $this->employment_status_name,
+                    'department_name' => $this->department_name,
+                    'user_name' => $this->user_name,
+                    'working_timetable_no' => $this->working_timetable_no,
+                    'working_timetable_name' => $this->working_timetable_name,
+                    'attendance_time_1' => $this->array_attendance_time[0],
+                    'attendance_time_2' => $this->array_attendance_time[1],
+                    'attendance_time_3' => $this->array_attendance_time[2],
+                    'attendance_time_4' => $this->array_attendance_time[3],
+                    'attendance_time_5' => $this->array_attendance_time[4],
+                    'leaving_time_1' => $this->array_leaving_time[0],
+                    'leaving_time_2' => $this->array_leaving_time[1],
+                    'leaving_time_3' => $this->array_leaving_time[2],
+                    'leaving_time_4' => $this->array_leaving_time[3],
+                    'leaving_time_5' => $this->array_leaving_time[4],
+                    'missing_middle_time_1' => $this->array_missing_middle_time[0],
+                    'missing_middle_time_2' => $this->array_missing_middle_time[1],
+                    'missing_middle_time_3' => $this->array_missing_middle_time[2],
+                    'missing_middle_time_4' => $this->array_missing_middle_time[3],
+                    'missing_middle_time_5' => $this->array_missing_middle_time[4],
+                    'missing_middle_return_time_1' => $this->array_missing_middle_return_time[0],
+                    'missing_middle_return_time_2' => $this->array_missing_middle_return_time[1],
+                    'missing_middle_return_time_3' => $this->array_missing_middle_return_time[2],
+                    'missing_middle_return_time_4' => $this->array_missing_middle_return_time[3],
+                    'missing_middle_return_time_5' => $this->array_missing_middle_return_time[4],
+                    'total_working_times' => $this->total_working_times,
+                    'regular_working_times' => $this->regular_working_times,
+                    'out_of_regular_working_times' => $this->out_of_regular_working_times,
+                    'overtime_hours' => $this->overtime_hours,
+                    'late_night_overtime_hours' => $this->late_night_overtime_hours,
+                    'legal_working_times' => $this->legal_working_times,
+                    'out_of_legal_working_times' => $this->out_of_legal_working_times,
+                    'not_employment_working_hours' => $this->not_employment_working_hours,
+                    'off_hours_working_hours' => $this->off_hours_working_hours,
+                    'working_status' => $this->working_status,
+                    'working_status_name' => $this->working_status_name,
+                    'note' => $this->note,
+                    'late' => $this->late,
+                    'leave_early' => $this->leave_early,
+                    'current_calc' => $this->current_calc,
+                    'to_be_confirmed' => $this->to_be_confirmed,
+                    'weekday_kubun' => $this->weekday_kubun,
+                    'weekday_name' => $this->weekday_name,
+                    'business_kubun' => $this->business_kubun,
+                    'business_name' => $this->business_name,
+                    'holiday_kubun' => $this->holiday_kubun,
+                    'holiday_name' => $this->holiday_name,
+                    'closing' => $this->closing,
+                    'uplimit_time' => $this->uplimit_time,
+                    'statutory_uplimit_time' => $this->statutory_uplimit_time,
+                    'time_unit' => $this->time_unit,
+                    'time_rounding' => $this->time_rounding,
+                    'max_3month_total' => $this->max_3month_total,
+                    'max_6month_total' => $this->max_6month_total,
+                    'max_12month_total' => $this->max_12month_total,
+                    'beginning_month' => $this->beginning_month,
+                    'working_interval' => $this->working_interval,
+                    'year' => $this->year,
+                    'pattern' => $this->pattern,
+                    'fixedtime' => $this->fixedtime,
+                    'created_at'=>$this->systemdate
+                ]
+            );
         }catch(\PDOException $pe){
             Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
             Log::error($pe->getMessage());
@@ -1065,92 +1049,18 @@ class WorkingTimedate extends Model
     }
 
     /**
-     * 存在チェック
-     *
-     * @return boolean
-     */
-    public function isExistsWorkingTimeDate(){
-        try{
-            $mainquery = DB::table($this->table);
-
-            $mainquery = $this->setWhereSql($mainquery);
-
-            return $mainquery->exists();
-
-        }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-
-    }
-
-    /**
      * 削除
      *
      * @return void
      */
-    public function delWorkingTimeDate(){
+    public function delTempWorkingTimeDate(){
         try{
-            $mainquery = DB::table($this->table);
-
-            $mainquery = $this->setWhereSql($mainquery);
-            
-            $mainquery->delete();
-
+            $mainquery = DB::table($this->table)->truncate();
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')));
             Log::error($pe->getMessage());
             throw $pe;
-        }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
         }
-
-    }
-    
-    /**
-     * 条件設定（$this->tableのみ）
-     *
-     * @return query
-     */
-    public function setWhereSql($query){
-        try{
-
-            if(!empty($this->param_date_from) && !empty($this->param_date_to)){
-                $date = date_create($this->param_date_from);
-                $this->param_date_from = $date->format('Ymd');
-                $date = date_create($this->param_date_to);
-                $this->param_date_to = $date->format('Ymd');
-                $query->where($this->table.'.working_date', '>=', $this->param_date_from);          // 日付範囲指定
-                $query->where($this->table.'.working_date', '<=', $this->param_date_to);            // 日付範囲指定
-            }
-            
-            if(!empty($this->param_employment_status)){
-                $query->where($this->table.'.employment_status', $this->param_employment_status);   //employment_status指定
-            }
-            
-            if(!empty($this->param_user_code)){
-                $query->where($this->table.'.user_code', $this->param_user_code);                   //user_code指定
-            }
-            
-            if(!empty($this->param_department_id)){
-                $query->where($this->table.'.department_id', $this->param_department_id);           //department_id指定
-            }
-
-        }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-
-
-        return $query;
 
     }
 

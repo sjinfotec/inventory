@@ -307,6 +307,19 @@ class TempCalcWorkingTime extends Model
         $this->working_status = $value;
     }
 
+    private $working_status_name;               // 勤務状態名称
+
+    // 勤務状態名称
+    public function getWorkingstatusnameAttribute()
+    {
+        return $this->working_status_name;
+    }
+
+    public function setWorkingstatusnameAttribute($value)
+    {
+        $this->working_status_name = $value;
+    }
+
     private $note;                 // メモ
 
     // メモ
@@ -720,7 +733,7 @@ class TempCalcWorkingTime extends Model
      *
      * @return void
      */
-    public function getTempCalcWorkingtimes(){
+    public function getTempCalcWorkingtime(){
         \DB::enableQueryLog();
         $mainquery = DB::table($this->table.' AS t1')
             ->select(
@@ -746,6 +759,7 @@ class TempCalcWorkingTime extends Model
                 't1.record_date as record_date',
                 't1.record_time as record_time',
                 't1.working_status as working_status',
+                't1.working_status_name as working_status_name',
                 't1.note as note',
                 't1.late as late',
                 't1.leave_early as leave_early',
@@ -798,7 +812,7 @@ class TempCalcWorkingTime extends Model
         \Log::debug(
             'sql_debug_log',
             [
-                'getTempCalcWorkingtimes' => \DB::getQueryLog()
+                'getTempCalcWorkingtime' => \DB::getQueryLog()
             ]
         );
     
@@ -810,7 +824,7 @@ class TempCalcWorkingTime extends Model
      *
      * @return void
      */
-    public function insertTempCalcWorkingtimes(){
+    public function insertTempCalcWorkingtime(){
         try{
             DB::table($this->table)->insert(
                 [
@@ -836,6 +850,7 @@ class TempCalcWorkingTime extends Model
                     'record_date' => $this->record_date,
                     'record_time' => $this->record_time,
                     'working_status' => $this->working_status,
+                    'working_status_name' => $this->working_status_name,
                     'note' => $this->note,
                     'late' => $this->late,
                     'leave_early' => $this->leave_early,
@@ -874,29 +889,9 @@ class TempCalcWorkingTime extends Model
      *
      * @return void
      */
-    public function delTempCalcWorkingtimes(){
+    public function delTempCalcWorkingtime(){
         try{
-            $mainquery = DB::table($this->table);
-
-            if(!empty($this->param_date_from) && !empty($this->param_date_to)){
-                $date = date_create($this->param_date_from);
-                $this->param_date_from = $date->format('Ymd');
-                $date = date_create($this->param_date_to);
-                $this->param_date_to = $date->format('Ymd');
-                $mainquery->where($this->table.'.working_date', '>=', $this->param_date_from);          // 日付範囲指定
-                $mainquery->where($this->table.'.working_date', '<=', $this->param_date_to);            // 日付範囲指定
-            }
-            if(!empty($this->param_employment_status)){
-                $mainquery->where($this->table.'.employment_status', $this->param_employment_status);   //　雇用形態指定
-            }
-            if(!empty($this->param_department_id)){
-                $mainquery->where($this->table.'.department_id', $this->param_department_id);           // department_id指定
-            }
-            if(!empty($this->param_user_code)){
-                $mainquery->where($this->table.'.user_code', $this->param_user_code);                   // user_code指定
-            }
-        
-            $mainquery->delete();
+            $mainquery = DB::table($this->table)->truncate();
         }catch(\PDOException $pe){
             Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')));
             Log::error($pe->getMessage());
