@@ -105,7 +105,7 @@
           <div class="row">
             <!-- col -->
             <div class="col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch">
-              <a class="float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg" data-toggle="collapse" href="#collapseUser" role="button" aria-expanded="true" aria-controls="collapseUser1"><img class="icon-size-rg" src="/images/round-search-w.svg" alt=""></a>
+              <a class="float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg" data-toggle="collapse" href="#collapseUser1" role="button" aria-expanded="true" aria-controls="collapseUser1"><img class="icon-size-rg" src="/images/round-search-w.svg" alt=""></a>
               <h1 class="font-size-sm m-0 mb-1">氏名</h1>
               <p class="font-size-rg font-weight-bold m-0">{{ calclist.user_name }}</p>
             </div>
@@ -117,7 +117,7 @@
               <p class="font-size-rg m-0">{{ calclist.department_name }}</p>
             </div>
             <!-- /.col -->
-            <!-- col -->
+            <!-- col 出勤 退勤 -->
             <col-attendance
               v-bind:attendancetime="calclist.attendance_time_1" v-bind:leavingtime="calclist.leaving_time_1" v-bind:displaynone="true">
             </col-attendance>
@@ -134,7 +134,7 @@
               v-bind:attendancetime="calclist.attendance_time_5" v-bind:leavingtime="calclist.leaving_time_5" v-bind:displaynone="false">
             </col-attendance>
             <!-- /.col -->
-            <!-- col -->
+            <!-- col 中抜け 戻り -->
             <col-missingmiddle
               v-bind:missingmiddletime="calclist.missing_middle_time_1" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_1" v-bind:displaynone="true">
             </col-missingmiddle>
@@ -156,45 +156,19 @@
           <div class="collapse" id="collapseUser1">
             <!-- .row -->
             <div class="row mt-2">
-              <!-- col -->
-              <div class="col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch">
-                <div class="card text-white bg-secondary border-0">
-                  <div class="card-body px-3 py-2">
-                    <h1 class="font-size-sm m-0 mb-1">雇用形態</h1>
-                    <p class="font-size-rg m-0">正社員</p>
-                  </div>
-                </div>
-              </div>
-              <!-- /.col -->
-              <!-- col -->
-              <div class="col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch">
-                <div class="card text-white bg-secondary border-0">
-                  <div class="card-body px-3 py-2">
-                    <h1 class="font-size-sm m-0 mb-1">勤務時間</h1>
-                    <p class="font-size-lg m-0">08:13</p>
-                  </div>
-                </div>
-              </div>
-              <!-- /.col -->
-              <!-- col -->
-              <div class="col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch">
-                <div class="card text-white bg-secondary border-0">
-                  <div class="card-body px-3 py-2">
-                    <h1 class="font-size-sm m-0 mb-1">勤務状態</h1>
-                    <p class="font-size-rg m-0">退勤</p>
-                  </div>
-                </div>
-              </div>
-              <!-- /.col -->
-              <!-- col -->
-              <div class="col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch">
-                <div class="card text-white bg-secondary border-0">
-                  <div class="card-body px-3 py-2">
-                    <h1 class="font-size-sm m-0 mb-1">勤務シフト</h1>
-                    <p class="font-size-rg m-0">通常</p>
-                  </div>
-                </div>
-              </div>
+              <!-- col  雇用形態 勤務時間 勤務状態 勤務シフト-->
+              <col-employmentstatus
+                v-bind:item-name="'雇用形態'" v-bind:item-value="calclist.employment_status_name">
+              </col-employmentstatus>
+              <col-employmentstatus
+                v-bind:item-name="'勤務時間'" v-bind:item-value="calclist.total_working_times">
+              </col-employmentstatus>
+              <col-employmentstatus
+                v-bind:item-name="'勤務状態'" v-bind:item-value="calclist.working_status_name">
+              </col-employmentstatus>
+              <col-employmentstatus
+                v-bind:item-name="'勤務シフト'" v-bind:item-value="calclist.working_timetable_name">
+              </col-employmentstatus>
               <!-- /.col -->
               <!-- col -->
               <div class="col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch">
@@ -373,9 +347,17 @@ export default {
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       if(this.valuedepartment == ''){
-        this.$refs.selectuser.getUserList(this.getDo, value);
+        if(this.valueemploymentstatus == ''){
+          this.$refs.selectuser.getUserList(this.getDo);
+        } else {
+          this.$refs.selectuser.getUserListByEmployment(this.getDo, this.valueemploymentstatus);
+        }
       } else {
-        this.$refs.selectuser.getUserListByEmployment(this.getDo, this.valuedepartment, value);
+        if(this.valueemploymentstatus == ''){
+          this.$refs.selectuser.getUserListByDepartment(this.getDo, this.valuedepartment);
+        } else {
+          this.$refs.selectuser.getUserListByDepartmentEmployment(this.getDo, this.valuedepartment, this.valueemploymentstatus);
+        }
       }
     },
     // 部署選択が変更された場合の処理
@@ -384,9 +366,17 @@ export default {
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       if(this.valueemploymentstatus == ''){
-        this.$refs.selectuser.getUserList(this.getDo, value);
+        if(this.valuedepartment == ''){
+          this.$refs.selectuser.getUserList(this.getDo);
+        } else {
+          this.$refs.selectuser.getUserListByDepartment(this.getDo, this.valuedepartment);
+        }
       } else {
-        this.$refs.selectuser.getUserListByEmployment(this.getDo, value, this.valueemploymentstatus);
+        if(this.valuedepartment == ''){
+          this.$refs.selectuser.getUserListByEmployment(this.getDo, this.valueemploymentstatus);
+        } else {
+          this.$refs.selectuser.getUserListByDepartmentEmployment(this.getDo, this.valuedepartment, this.valueemploymentstatus);
+        }
       }
     },
     // ユーザー選択が変更された場合の処理
