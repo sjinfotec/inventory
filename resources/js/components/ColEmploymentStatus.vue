@@ -45,7 +45,11 @@
 <script>
 
 export default {
+<<<<<<< HEAD
+  name: "ColMissingMiddle",
+=======
   name: "ColEmploymentStatus",
+>>>>>>> develop
   props: {
     employmentstatusname: {
         type: String,

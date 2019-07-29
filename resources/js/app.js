@@ -130,6 +130,12 @@ Vue.component(
     require("./components/SelectEmploymentStatus.vue").default
 );
 
+Vue.component("col-attendance", require("./components/ColAttendance.vue").default);
+
+Vue.component("col-missingmiddle", require("./components/ColMissingMiddle.vue").default);
+
+Vue.component("col-missingmiddle", require("./components/ColMissingMiddle.vue").default);
+
 // CSV ダウンロードボタン
 Vue.component(
     "btn-csv-download",

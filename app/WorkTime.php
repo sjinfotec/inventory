@@ -334,9 +334,9 @@ class WorkTime extends Model
 
 
         // 日次労働時間取得SQL作成
-        // sunquery1    work_times
+        // subquery1    work_times
         \DB::enableQueryLog();
-        $sunquery1 = DB::table($this->table)
+        $subquery1 = DB::table($this->table)
             ->select(
                 $this->table.'.user_code as user_code',
                 $this->table.'.department_id as department_id',
@@ -350,23 +350,24 @@ class WorkTime extends Model
 
         $record_time = $this->getArrayrecordtimeAttribute();
         if(!empty($record_time)){
-            $sunquery1->where($this->table.'.record_time', '>=', $this->param_date_from);       //record_time範囲指定
-            $sunquery1->where($this->table.'.record_time', '<=', $this->param_date_to);         //record_time範囲指定
+            $subquery1->where($this->table.'.record_time', '>=', $this->param_date_from);       //record_time範囲指定
+            $subquery1->where($this->table.'.record_time', '<=', $this->param_date_to);         //record_time範囲指定
         }
-        $sunquery1->where($this->table.'.is_deleted', '=', 0);
+        $subquery1->where($this->table.'.is_deleted', '=', 0);
 
-        // sunquery2    shift_informations
-        $sunquery2 = DB::table($this->table_shift_informations)
+        // subquery2    shift_informations
+        $subquery2 = DB::table($this->table_shift_informations)
             ->select(
                 $this->table_shift_informations.'.user_code as user_code',
                 $this->table_shift_informations.'.working_timetable_no as shift_no'
                 )
             ->selectRaw('DATE_FORMAT('.$this->table_shift_informations.'.target_date'.",'%Y%m%d') as target_date");
-        $sunquery2->where($this->table_shift_informations.'.is_deleted', '=', 0);
+        $subquery2->where($this->table_shift_informations.'.is_deleted', '=', 0);
 
         // mainqueryにsunqueryを組み込む
-        // sunquery1    t1:users
-        // sunquery2    t2:work_times
+        // mainquery    users
+        // subquery1    work_times
+        // subquery2    shift_informations
         $mainquery = DB::table($this->table_users.' AS t1')
             ->select(
                 't1.code as user_code',
@@ -407,11 +408,11 @@ class WorkTime extends Model
                 't10.from_time as shift_from_time',
                 't10.to_time as shift_to_time'
                 )
-            ->leftJoinSub($sunquery1, 't2', function ($join) { 
+            ->leftJoinSub($subquery1, 't2', function ($join) { 
                 $join->on('t2.user_code', '=', 't1.code');
                 $join->on('t2.department_id', '=', 't1.department_id');
             })
-            ->leftJoinSub($sunquery2, 't9', function ($join) { 
+            ->leftJoinSub($subquery2, 't9', function ($join) { 
                 $join->on('t9.user_code', '=', 't1.code');
                 $join->on('t9.target_date', '=', 't2.record_date');
             })
