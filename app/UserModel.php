@@ -141,6 +141,7 @@ class UserModel extends Model
      * @return void
      */
     public function updateUser(){
+        $systemdate = Carbon::now();
         DB::table($this->table)
             ->where('id', $this->id)
             ->update([
@@ -150,7 +151,8 @@ class UserModel extends Model
                 'name' => $this->name,
                 'kana' => $this->kana,
                 'working_timetable_no' => $this->working_timetable_no,
-                'email' => $this->email
+                'email' => $this->email,
+                'updated_at' => $systemdate
                 ]
             );
     }
@@ -178,6 +180,21 @@ class UserModel extends Model
             ->get();
 
         return $data;
+    }
+
+    /**
+     * パスワード変更
+     * 
+     * @return void
+     */
+    public function updatePassWord(){
+        $systemdate = Carbon::now();
+        DB::table($this->table)
+            ->where('code', $this->code)
+            ->update([
+                'password' => $this->password,
+                'updated_at' => $systemdate
+                ]);
     }
 
     /**

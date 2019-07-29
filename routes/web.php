@@ -44,6 +44,7 @@ Route::post('/user_add/store', 'UserAddController@store')->middleware('auth');
 Route::get('/user_add/get', 'UserAddController@getUserDetails')->middleware('auth');
 Route::post('/user_add/del', 'UserAddController@del')->middleware('auth');
 Route::post('/user_add/edit', 'UserAddController@edit')->middleware('auth');
+Route::post('/user_add/passchange', 'UserAddController@passChange')->middleware('auth');
 // 部署
 Route::get('/create_department', 'CreateDepartmentController@index')->middleware('auth');
 Route::get('/create_department/get', 'CreateDepartmentController@getDetails')->middleware('auth');

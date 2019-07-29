@@ -35,8 +35,8 @@
           :value.sync="form.password"
           label="パスワード"
           name="password"
-          title="半角英数字4-10文字"
-          pattern="^[a-zA-Z0-9]{4,10}$"
+          title="半角英数字6-12文字"
+          pattern="^[a-zA-Z0-9]{6,12}$"
         />
       </span>
       <fvl-input :value.sync="form.email" label="メールアドレス" name="email" />
@@ -77,6 +77,28 @@
     <span class="padding-set-small margin-set-top-regular" v-if="userCode != ''">
       <button class="btn btn-danger" @click="del">削除</button>
     </span>
+    <span class="padding-set-small margin-set-top-regular" v-if="userCode != ''">
+      <button class="btn btn-info" v-on:click="show">パスワード変更</button>
+    </span>
+    <modal name="password-change" v-model="userCode">
+      
+      <div class="card">
+          <div class="card-header">パスワード変更</div>
+
+          <div class="card-body">
+            <div class="form-group col-md-6">
+              <label for="shift_end" class>新しいパスワード</label>
+              <input class="form-control" v-model="enterPass" maxlength='12' type="password" title="半角英数字12文字以内" pattern="^[a-zA-Z0-9]{6,12}$"></input>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="shift_end" class>新しいパスワード（再入力）</label>
+              <input class="form-control"  v-model="reEnterPass"  maxlength='12' type="password" title="半角英数字12文字以内" pattern="^[a-zA-Z0-9]{6,12}$"></input>
+            </div>
+            <button class="btn btn-success" v-on:click="passChange">確定</button>
+            <button class="btn btn-warning" v-on:click="hide">キャンセル</button>
+          </div>
+      </div>
+    </modal>
   </div>
 </template>
 <script>
@@ -120,6 +142,8 @@ export default {
       userList: [],
       userDetails: [],
       userCode: "",
+      enterPass:"",
+      reEnterPass:"",
       oldCode: ""
     };
   },
@@ -167,6 +191,39 @@ export default {
     }
   },
   methods: {
+    show: function() {
+      this.$modal.show("password-change");
+    },
+    hide: function() {
+      this.$modal.hide("password-change");
+      this.inputPassClear();
+    },
+    passChange: function(){
+      if(this.enterPass == this.reEnterPass){
+        // パスワード変更
+        var confirm = window.confirm("パスワードを変更しますか？");
+        if (confirm) {
+          this.$axios
+            .post("/user_add/passchange", {
+              user_code: this.userCode,
+              password: this.enterPass
+            })
+            .then(response => {
+              var res = response.data;
+              if (res.result == 0) {
+                this.$toasted.show("パスワードを変更しました");
+                this.hide();
+              } else {
+              }
+            })
+            .catch(reason => {});
+        } else {
+        }
+      }else{
+        // 不一致
+        alert("入力したパスワードが不一致です");
+      }
+    },
     getDepartmentList() {
       this.$axios
         .get("/get_departments_list")
@@ -263,7 +320,77 @@ export default {
       this.form.departmentCode = "";
       this.form.status = "";
       this.form.table_no = "";
+    },
+    inputPassClear(){
+      this.enterPass = "";
+      this.reEnterPass = "";
     }
   }
 };
 </script>
+<style scoped>
+.modal-mask {
+  position: fixed;
+  z-index: 9998;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: table;
+  transition: opacity 0.3s ease;
+}
+
+.modal-wrapper {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.modal-container {
+  width: 300px;
+  margin: 0px auto;
+  padding: 20px 30px;
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
+  transition: all 0.3s ease;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.modal-header h3 {
+  margin-top: 0;
+  color: #42b983;
+}
+
+.modal-body {
+  margin: 20px 0;
+}
+
+.modal-default-button {
+  float: right;
+}
+
+/*
+  * The following styles are auto-applied to elements with
+  * transition="modal" when their visibility is toggled
+  * by Vue.js.
+  *
+  * You can easily play with the modal transition by editing
+  * these styles.
+  */
+
+.modal-enter {
+  opacity: 0;
+}
+
+.modal-leave-active {
+  opacity: 0;
+}
+
+.modal-enter .modal-container,
+.modal-leave-active .modal-container {
+  -webkit-transform: scale(1.1);
+  transform: scale(1.1);
+}
+</style>
+
