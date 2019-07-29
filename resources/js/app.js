@@ -112,6 +112,11 @@ Vue.component(
 );
 
 Vue.component(
+    "edit-work_times",
+    require("./components/EditWorkTimes.vue").default
+);
+
+Vue.component(
     "create-company-information",
     require("./components/CreateCompanyInformation.vue").default
 );
