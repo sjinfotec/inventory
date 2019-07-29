@@ -100,6 +100,13 @@ return [
         'sat' => '(土)'
     ],
 
+    'ARRAY_MAX_INDEX' => [
+        'attendace_time' => 5,
+        'leaving_time' => 5,
+        'missing_middle_time' => 5,
+        'missing_middle_return_time' => 5
+    ],
+
     'MEMO_DATA' => [
         'MEMO_DATA_001' => '出勤済',
         'MEMO_DATA_002' => '当日出勤なし',
@@ -118,6 +125,11 @@ return [
         'MEMO_DATA_NON' => ''
     ],
 
+    'MSG_WARNING' => [
+        'past_closing' => '締日を過ぎていますが、集計しますか？',
+        'past_closing_already' => '締日を過ぎていて集計済みですが、再集計しますか？'
+    ],
+
     'MSG_ERROR' => [
         'not_workintime' => '期間内に該当する勤務時間は見つかりませんでした。',
         'not_between_workindate' => '計算開始日付が計算終了日付より未来の日付になっています。',
@@ -128,7 +140,7 @@ return [
         'not_setting_department_id_nouser' => '部署が設定されていない社員がいます。確認してください。',
         'not_setting_closing' => '締日が設定されていません。',
         'not_setting_time_unit' => '時間計算の単位が設定されていません。',
-        'not_setting_time_rounding' => '時間計算の端数処理（丸め）が設定されていません。',
+        'not_setting_time_rounding' => '時間計算の端数処理が設定されていません。',
         'not_setting_beginning_month' => '期首月が設定されていません。',
         'not_setting_timetable' => 'タイムテーブルが設定されていません。',
         'data_eror_dailycalc' => '労働時間計算処理にてエラーのため計算できませんでした。',

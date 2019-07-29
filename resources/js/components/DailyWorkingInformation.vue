@@ -99,79 +99,57 @@
         <!-- /.panel header -->
         <!-- panel body -->
         <div class="card-body mb-3 py-0 pt-4 border-top">
-          <!-- panel contents -->
+          <!-- panel contents --> 
           <!-- .row -->
+          <div v-for="(calclist,index) in calcresults">
           <div class="row">
             <!-- col -->
             <div class="col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch">
-              <a class="float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg" data-toggle="collapse" href="#collapseUser1" role="button" aria-expanded="true" aria-controls="collapseUser1"><img class="icon-size-rg" src="/images/round-search-w.svg" alt=""></a>
+              <a class="float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg" data-toggle="collapse" href="#collapseUser" role="button" aria-expanded="true" aria-controls="collapseUser1"><img class="icon-size-rg" src="/images/round-search-w.svg" alt=""></a>
               <h1 class="font-size-sm m-0 mb-1">氏名</h1>
-              <p class="font-size-rg font-weight-bold m-0">三条 丈太郎</p>
+              <p class="font-size-rg font-weight-bold m-0">{{ calclist.user_name }}</p>
             </div>
             <!-- /.col -->
             <!-- col -->
             <div class="col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch">
               <span class="float-left mr-2 py-2 px-2 font-size-lg text-white bg-success rounded"><img class="icon-size-lg" src="/images/round-flag-w.svg" alt=""></span>
               <h1 class="font-size-sm m-0 mb-1">部署</h1>
-              <p class="font-size-rg m-0">情報処理課</p>
+              <p class="font-size-rg m-0">{{ calclist.department_name }}</p>
             </div>
             <!-- /.col -->
             <!-- col -->
-            <div class="col-6 col-lg-2 pb-2 align-self-stretch">
-              <span class="float-left mr-2 py-2 px-2 font-size-lg text-white bg-success rounded"><img class="icon-size-lg" src="/images/round-play-circle-filled-w.svg" alt=""></span>
-              <h1 class="font-size-sm m-0 mb-1">出勤時間</h1>
-              <p class="font-size-lg m-0">08:26</p>
-            </div>
+            <col-attendance
+              v-bind:attendancetime="calclist.attendance_time_1" v-bind:leavingtime="calclist.leaving_time_1" v-bind:displaynone="true">
+            </col-attendance>
+            <col-attendance
+              v-bind:attendancetime="calclist.attendance_time_2" v-bind:leavingtime="calclist.leaving_time_2" v-bind:displaynone="false">
+            </col-attendance>
+            <col-attendance
+              v-bind:attendancetime="calclist.attendance_time_3" v-bind:leavingtime="calclist.leaving_time_3" v-bind:displaynone="false">
+            </col-attendance>
+            <col-attendance
+              v-bind:attendancetime="calclist.attendance_time_4" v-bind:leavingtime="calclist.leaving_time_4" v-bind:displaynone="false">
+            </col-attendance>
+            <col-attendance 
+              v-bind:attendancetime="calclist.attendance_time_5" v-bind:leavingtime="calclist.leaving_time_5" v-bind:displaynone="false">
+            </col-attendance>
             <!-- /.col -->
             <!-- col -->
-            <div class="col-6 col-lg-2 pb-2 align-self-stretch">
-              <span class="float-left mr-2 py-2 px-2 font-size-lg text-white bg-success rounded"><img class="icon-size-lg" src="/images/round-pause-circle-filled-w.svg" alt=""></span>
-              <h1 class="font-size-sm m-0 mb-1">退勤時間</h1>
-              <p class="font-size-lg m-0">18:39</p>
-            </div>
-            <!-- /.col -->
-            <!-- col -->
-            <div class="col-6 col-lg-2 pb-2 align-self-stretch">
-              <span class="float-left mr-2 py-2 px-2 font-size-lg text-white bg-warning rounded"><img class="icon-size-lg" src="/images/round-skip_previous-w.svg" alt=""></span>
-              <h1 class="font-size-sm m-0 mb-1">中抜開始</h1>
-              <p class="font-size-lg m-0">08:26</p>
-            </div>
-            <!-- /.col -->
-            <!-- col -->
-            <div class="col-6 col-lg-2 pb-2 align-self-stretch">
-              <span class="float-left mr-2 py-2 px-2 font-size-lg text-white bg-warning rounded"><img class="icon-size-lg" src="/images/round-skip-next-w.svg" alt=""></span>
-              <h1 class="font-size-sm m-0 mb-1">戻り時間</h1>
-              <p class="font-size-lg m-0">18:39</p>
-            </div>
-            <!-- /.col -->
-            <!-- col -->
-            <div class="col-6 col-lg-2 pb-2 align-self-stretch">
-              <span class="float-left mr-2 py-2 px-2 font-size-lg text-white bg-warning rounded"><img class="icon-size-lg" src="/images/round-skip_previous-w.svg" alt=""></span>
-              <h1 class="font-size-sm m-0 mb-1">中抜開始</h1>
-              <p class="font-size-lg m-0">08:26</p>
-            </div>
-            <!-- /.col -->
-            <!-- col -->
-            <div class="col-6 col-lg-2 pb-2 align-self-stretch">
-              <span class="float-left mr-2 py-2 px-2 font-size-lg text-white bg-warning rounded"><img class="icon-size-lg" src="/images/round-skip-next-w.svg" alt=""></span>
-              <h1 class="font-size-sm m-0 mb-1">戻り時間</h1>
-              <p class="font-size-lg m-0">18:39</p>
-            </div>
-            <!-- /.col -->
-            <!-- col -->
-            <div class="col-6 col-lg-2 pb-2 align-self-stretch">
-              <span class="float-left mr-2 py-2 px-2 font-size-lg text-white bg-warning rounded"><img class="icon-size-lg" src="/images/round-skip_previous-w.svg" alt=""></span>
-              <h1 class="font-size-sm m-0 mb-1">中抜開始</h1>
-              <p class="font-size-lg m-0">08:26</p>
-            </div>
-            <!-- /.col -->
-            <!-- col -->
-            <div class="col-6 col-lg-2 pb-2 align-self-stretch">
-              <span class="float-left mr-2 py-2 px-2 font-size-lg text-white bg-warning rounded"><img class="icon-size-lg" src="/images/round-skip-next-w.svg" alt=""></span>
-              <h1 class="font-size-sm m-0 mb-1">戻り時間</h1>
-              <p class="font-size-lg m-0">18:39</p>
-            </div>
-            <!-- /.col -->
+            <col-missingmiddle
+              v-bind:missingmiddletime="calclist.missing_middle_time_1" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_1" v-bind:displaynone="true">
+            </col-missingmiddle>
+            <col-missingmiddle
+              v-bind:missingmiddletime="calclist.missing_middle_time_2" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_2" v-bind:displaynone="false">
+            </col-missingmiddle>
+            <col-missingmiddle
+              v-bind:missingmiddletime="calclist.missing_middle_time_3" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_3" v-bind:displaynone="false">
+            </col-missingmiddle>
+            <col-missingmiddle
+              v-bind:missingmiddletime="calclist.missing_middle_time_4" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_4" v-bind:displaynone="false">
+            </col-missingmiddle>
+            <col-missingmiddle
+              v-bind:missingmiddletime="calclist.missing_middle_time_5" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_5" v-bind:displaynone="false">
+            </col-missingmiddle>
           </div>
           <!-- /.row -->
           <!-- collapse -->
@@ -320,6 +298,7 @@
             </div>
             <!-- /.row -->
           </div>
+          </div>
           <!-- /collapse -->
           <!-- /.panel contents -->
         </div>
@@ -361,7 +340,8 @@ export default {
       defaultDate: new Date(),
       stringtext: '',
       datejaFormat: '',
-      results: [],
+      resresults: [],
+      calcresults: [],
       messagedatasserver: [],
       messagedatasfromdate: [],
       messagedatastodate: [],
@@ -439,9 +419,10 @@ export default {
             }
           })
           .then(response => {
-            this.results = response.data;
-            this.dispmessage(this.results.massegedata);
-            console.log("集計時間取得"+Object.keys(this.results).length);
+            this.resresults = response.data;
+            this.calcresults = this.resresults.calcresults;
+            this.dispmessage(this.resresults.massegedata);
+            console.log("集計時間取得"+Object.keys(this.resresults).length);
           })
           .catch(reason => {
             alert("error");
