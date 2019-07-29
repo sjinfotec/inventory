@@ -93400,6 +93400,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var v_calendar__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! v-calendar */ "./node_modules/v-calendar/lib/v-calendar.umd.min.js");
 /* harmony import */ var v_calendar__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(v_calendar__WEBPACK_IMPORTED_MODULE_2__);
+!(function webpackMissingModule() { var e = new Error("Cannot find module 'vue-js-modal'"); e.code = 'MODULE_NOT_FOUND'; throw e; }());
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
@@ -93411,6 +93412,7 @@ window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.
 
 
 
+
 var options = {
   position: "bottom-center",
   duration: 2000,
@@ -93419,6 +93421,7 @@ var options = {
 };
 Vue.use(vue_toasted__WEBPACK_IMPORTED_MODULE_1___default.a, options);
 Vue.use(v_calendar__WEBPACK_IMPORTED_MODULE_2___default.a);
+Vue.use(!(function webpackMissingModule() { var e = new Error("Cannot find module 'vue-js-modal'"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
 Vue.prototype.$axios = axios__WEBPACK_IMPORTED_MODULE_0___default.a; // Vue.prototype.$toasted = toasted;
 
 /**
@@ -93454,6 +93457,7 @@ Vue.component("message-data", __webpack_require__(/*! ./components/MessageData.v
 Vue.component("worktime-day", __webpack_require__(/*! ./components/WorkTimeDateTable.vue */ "./resources/js/components/WorkTimeDateTable.vue")["default"]);
 Vue.component("select-employmentstatus", __webpack_require__(/*! ./components/SelectEmploymentStatus.vue */ "./resources/js/components/SelectEmploymentStatus.vue")["default"]);
 Vue.component("col-attendance", __webpack_require__(/*! ./components/ColAttendance.vue */ "./resources/js/components/ColAttendance.vue")["default"]);
+Vue.component("col-missingmiddle", __webpack_require__(/*! ./components/ColMissingMiddle.vue */ "./resources/js/components/ColMissingMiddle.vue")["default"]);
 Vue.component("col-missingmiddle", __webpack_require__(/*! ./components/ColMissingMiddle.vue */ "./resources/js/components/ColMissingMiddle.vue")["default"]); // CSV ダウンロードボタン
 
 Vue.component("btn-csv-download", __webpack_require__(/*! ./components/BtnCsvDownload.vue */ "./resources/js/components/BtnCsvDownload.vue")["default"]);

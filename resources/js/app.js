@@ -10,6 +10,7 @@ window.Vue = require("vue");
 import axios from "axios";
 import toasted from "vue-toasted";
 import VCalendar from "v-calendar";
+import VModal from "vue-js-modal";
 
 var options = {
     position: "bottom-center",
@@ -19,6 +20,7 @@ var options = {
 };
 Vue.use(toasted, options);
 Vue.use(VCalendar);
+Vue.use(VModal);
 
 Vue.prototype.$axios = axios;
 // Vue.prototype.$toasted = toasted;
@@ -129,6 +131,8 @@ Vue.component(
 );
 
 Vue.component("col-attendance", require("./components/ColAttendance.vue").default);
+
+Vue.component("col-missingmiddle", require("./components/ColMissingMiddle.vue").default);
 
 Vue.component("col-missingmiddle", require("./components/ColMissingMiddle.vue").default);
 
