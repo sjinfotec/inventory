@@ -20,6 +20,8 @@ class WorkingTimedate extends Model
     protected $table_work_times = 'work_times';
     protected $table_users = 'users';
     protected $table_departments = 'departments';
+    protected $table_user_holiday_kubuns = 'user_holiday_kubuns';
+    protected $table_generalcodes = 'generalcodes';
     protected $guarded = array('id');
 
     //--------------- 項目属性 -----------------------------------
@@ -1013,9 +1015,9 @@ class WorkingTimedate extends Model
             $mainquery
                 ->selectRaw('ifnull('.$this->table.".business_name,'　')  as business_name");
             $mainquery
-                ->addselect($this->table.'.holiday_kubun');
+                ->addselect($this->table.'.holiday_kubun as unused_holiday_kubun');
             $mainquery
-                ->selectRaw('ifnull('.$this->table.".holiday_name,'　')  as holiday_name");
+                ->selectRaw('ifnull('.$this->table.".holiday_name,'　') as unused_holiday_name");
             $mainquery
                 ->addselect($this->table.'.closing')
                 ->addselect($this->table.'.uplimit_time')
@@ -1032,9 +1034,25 @@ class WorkingTimedate extends Model
                 ->addselect($this->table.'.fixedtime')
                 ->addselect($this->table.'.created_user')
                 ->addselect($this->table.'.updated_user')
-                ->addselect($this->table.'.is_deleted');
+                ->addselect($this->table.'.is_deleted')
+                ->addselect($this->table_user_holiday_kubuns.'.holiday_kubun')
+                ->addselect($this->table_generalcodes.'.code_name as holiday_name');
             
+            $mainquery
+                ->leftJoin($this->table_user_holiday_kubuns, function ($join) { 
+                    $join->on($this->table.'.working_date', '=', $this->table_user_holiday_kubuns.'.working_date');
+                    $join->on($this->table.'.department_id', '=', $this->table_user_holiday_kubuns.'.department_id');
+                    $join->on($this->table.'.user_code', '=', $this->table_user_holiday_kubuns.'.user_code')
+                    ->where($this->table.'.is_deleted', '=', 0);
+                })
+                ->leftJoin($this->table_generalcodes, function ($join) { 
+                    $join->on($this->table_generalcodes.'.code', '=', $this->table_user_holiday_kubuns.'.holiday_kubun')
+                    ->where($this->table_generalcodes.'.identification_id', '=', Config::get('const.C013.value'))
+                    ->where($this->table_generalcodes.'.is_deleted', '=', 0);
+                });
+
             $mainquery = $this->setWhereSql($mainquery);
+
             $result = $mainquery
                 ->orderBy($this->table.'.working_date', 'asc')
                 ->orderBy($this->table.'.employment_status', 'asc')
