@@ -3467,37 +3467,56 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "EditWorkTimes",
   data: function data() {
     return {
       dates: new Date(),
+      valuedepartment: "",
+      valueemploymentstatus: "",
+      getDo: 0,
+      valueuser: "",
       valueBusinessDay: "",
       valueholiDay: "",
       year: "",
       month: "",
       selectMonth: "",
       baseYear: "",
-      BusinessDayList: [],
-      HoliDayList: [],
-      details: [],
-      business: [{}],
-      holiday: [{}]
+      details: []
     };
   },
   // マウント時
   mounted: function mounted() {
     // this.getTimeTableList();
     var date = new Date();
-    this.baseYear = date.getFullYear();
+    var baseDate = new Date("2018/01/01 8:00:00");
+    this.baseYear = baseDate.getFullYear(); // this.baseYear = baseDate;
   },
   // セレクトボックス変更時
   watch: {
-    valueBusinessDay: function valueBusinessDay(val, oldVal) {// console.log(val + " " + oldVal);
-    },
-    valueholiDay: function valueholiDay(val, oldVal) {// console.log(val + " " + oldVal);
-    },
     details: function details(val, oldVal) {
       var _this = this;
 
@@ -3514,53 +3533,48 @@ __webpack_require__.r(__webpack_exports__);
     getDetail: function getDetail() {
       var _this2 = this;
 
-      this.$axios.get("/edit_calendar/get", {
+      this.$axios.get("/edit_work_times/get", {
         params: {
           year: this.year,
           month: this.month,
-          business_kubun: this.valueBusinessDay,
-          holiday_kubun: this.valueholiDay
+          code: this.valueuser
         }
       }).then(function (response) {
         _this2.details = response.data;
-
-        _this2.getBusinessList();
-
-        _this2.getHoliDayList();
       })["catch"](function (reason) {
         alert("error");
       });
     },
-    getBusinessList: function getBusinessList() {
-      var _this3 = this;
+    // 雇用形態が変更された場合の処理
+    employmentChanges: function employmentChanges(value) {
+      this.valueemploymentstatus = value; // ユーザー選択コンポーネントの取得メソッドを実行
 
-      this.$axios.get("/get_business_day_list").then(function (response) {
-        _this3.BusinessDayList = response.data;
-        console.log("営業区分リスト取得");
-      })["catch"](function (reason) {
-        alert("error");
-      });
-    },
-    getHoliDayList: function getHoliDayList() {
-      var _this4 = this;
+      this.getDo = 1;
 
-      this.$axios.get("/get_holi_day_list", {}).then(function (response) {
-        _this4.HoliDayList = response.data;
-        console.log("休暇区分リスト取得");
-      })["catch"](function (reason) {
-        alert("error");
-      });
+      if (this.valuedepartment == "") {
+        this.$refs.selectuser.getUserList(this.getDo, value);
+      } else {
+        this.$refs.selectuser.getUserListByEmployment(this.getDo, this.valuedepartment, value);
+      }
     },
-    businessDayChanges: function businessDayChanges(value) {
-      console.log("businessDayChanges = " + value);
-      this.valueBusinessDay = value;
+    // 部署選択が変更された場合の処理
+    departmentChanges: function departmentChanges(value) {
+      this.valuedepartment = value; // ユーザー選択コンポーネントの取得メソッドを実行
+
+      this.getDo = 1;
+
+      if (this.valueemploymentstatus == "") {
+        this.$refs.selectuser.getUserList(this.getDo, value);
+      } else {
+        this.$refs.selectuser.getUserListByEmployment(this.getDo, value, this.valueemploymentstatus);
+      }
     },
-    holiDayChanges: function holiDayChanges(value) {
-      console.log("holiDayChanges = " + value);
-      this.valueholiDay = value;
+    // ユーザー選択が変更された場合の処理
+    userChanges: function userChanges(value) {
+      this.valueuser = value;
     },
     store: function store() {
-      var _this5 = this;
+      var _this3 = this;
 
       this.$axios.post("/edit_calendar/store", {
         details: this.details,
@@ -3570,7 +3584,7 @@ __webpack_require__.r(__webpack_exports__);
         var res = response.data;
 
         if (res.result == 0) {
-          _this5.$toasted.show("登録しました");
+          _this3.$toasted.show("登録しました");
         } else {
           var options = {
             position: "bottom-center",
@@ -3579,7 +3593,7 @@ __webpack_require__.r(__webpack_exports__);
             type: "error"
           };
 
-          _this5.$toasted.show("登録に失敗しました", options);
+          _this3.$toasted.show("登録に失敗しました", options);
         }
       })["catch"](function (reason) {});
     },
@@ -9596,7 +9610,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.modal-mask[data-v-fded698a] {\n  position: fixed;\n  z-index: 9998;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, 0.5);\n  display: table;\n  transition: opacity 0.3s ease;\n}\n.modal-wrapper[data-v-fded698a] {\n  display: table-cell;\n  vertical-align: middle;\n}\n.modal-container[data-v-fded698a] {\n  width: 300px;\n  margin: 0px auto;\n  padding: 20px 30px;\n  background-color: #fff;\n  border-radius: 2px;\n  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);\n  transition: all 0.3s ease;\n  font-family: Helvetica, Arial, sans-serif;\n}\n.modal-header h3[data-v-fded698a] {\n  margin-top: 0;\n  color: #42b983;\n}\n.modal-body[data-v-fded698a] {\n  margin: 20px 0;\n}\n.modal-default-button[data-v-fded698a] {\n  float: right;\n}\n\n/*\n  * The following styles are auto-applied to elements with\n  * transition=\"modal\" when their visibility is toggled\n  * by Vue.js.\n  *\n  * You can easily play with the modal transition by editing\n  * these styles.\n  */\n.modal-enter[data-v-fded698a] {\n  opacity: 0;\n}\n.modal-leave-active[data-v-fded698a] {\n  opacity: 0;\n}\n.modal-enter .modal-container[data-v-fded698a],\n.modal-leave-active .modal-container[data-v-fded698a] {\n  transform: scale(1.1);\n}\n", ""]);
+exports.push([module.i, "\n.modal-mask[data-v-fded698a] {\r\n  position: fixed;\r\n  z-index: 9998;\r\n  top: 0;\r\n  left: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  background-color: rgba(0, 0, 0, 0.5);\r\n  display: table;\r\n  transition: opacity 0.3s ease;\n}\n.modal-wrapper[data-v-fded698a] {\r\n  display: table-cell;\r\n  vertical-align: middle;\n}\n.modal-container[data-v-fded698a] {\r\n  width: 300px;\r\n  margin: 0px auto;\r\n  padding: 20px 30px;\r\n  background-color: #fff;\r\n  border-radius: 2px;\r\n  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);\r\n  transition: all 0.3s ease;\r\n  font-family: Helvetica, Arial, sans-serif;\n}\n.modal-header h3[data-v-fded698a] {\r\n  margin-top: 0;\r\n  color: #42b983;\n}\n.modal-body[data-v-fded698a] {\r\n  margin: 20px 0;\n}\n.modal-default-button[data-v-fded698a] {\r\n  float: right;\n}\r\n\r\n/*\r\n  * The following styles are auto-applied to elements with\r\n  * transition=\"modal\" when their visibility is toggled\r\n  * by Vue.js.\r\n  *\r\n  * You can easily play with the modal transition by editing\r\n  * these styles.\r\n  */\n.modal-enter[data-v-fded698a] {\r\n  opacity: 0;\n}\n.modal-leave-active[data-v-fded698a] {\r\n  opacity: 0;\n}\n.modal-enter .modal-container[data-v-fded698a],\r\n.modal-leave-active .modal-container[data-v-fded698a] {\r\n  transform: scale(1.1);\n}\r\n", ""]);
 
 // exports
 
@@ -77608,8 +77622,8 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "panel-body" }, [
     _c("div", { staticClass: "row" }, [
-      _c("div", { staticClass: "form-group col-md-5" }, [
-        _c("label", { attrs: { for: "business_kubun" } }, [_vm._v("年")]),
+      _c("div", { staticClass: "form-group col-md-6" }, [
+        _c("label", { attrs: { for: "business_kubun" } }, [_vm._v("指定年")]),
         _vm._v(" "),
         _c(
           "select",
@@ -77648,8 +77662,8 @@ var render = function() {
         )
       ]),
       _vm._v(" "),
-      _c("div", { staticClass: "form-group col-md-5" }, [
-        _c("label", { attrs: { for: "business_kubun" } }, [_vm._v("月")]),
+      _c("div", { staticClass: "form-group col-md-6" }, [
+        _c("label", { attrs: { for: "business_kubun" } }, [_vm._v("指定月")]),
         _vm._v(" "),
         _c(
           "select",
@@ -77686,27 +77700,82 @@ var render = function() {
           }),
           0
         )
-      ]),
+      ])
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "row" }, [
+      _c(
+        "div",
+        { staticClass: "form-group col-md-6" },
+        [
+          _c("label", { attrs: { for: "business_kubun" } }, [
+            _vm._v("雇用形態")
+          ]),
+          _vm._v(" "),
+          _c("select-employmentstatus", {
+            attrs: { "blank-data": true },
+            on: { "change-event": _vm.employmentChanges }
+          })
+        ],
+        1
+      ),
       _vm._v(" "),
-      _c("div", { staticClass: "form-group col-md-2 margin-set-mid" }, [
+      _c(
+        "div",
+        { staticClass: "form-group col-md-6" },
+        [
+          _c("label", { attrs: { for: "business_kubun" } }, [
+            _vm._v("所属部署")
+          ]),
+          _vm._v(" "),
+          _c("select-department", {
+            attrs: { "blank-data": true },
+            on: { "change-event": _vm.departmentChanges }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "form-group col-md-6" },
+        [
+          _c("label", { attrs: { for: "business_kubun" } }, [_vm._v("氏名")]),
+          _vm._v(" "),
+          _c("select-user", {
+            ref: "selectuser",
+            attrs: { "blank-data": true, "get-Do": _vm.getDo },
+            on: { "change-event": _vm.userChanges }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c("div", { staticClass: "form-group col-md-12" }, [
         _c(
           "button",
           {
             staticClass: "btn btn-primary",
             on: {
               click: function($event) {
-                return _vm.display()
+                return _vm.getDetail()
               }
             }
           },
-          [_vm._v("表示")]
+          [_vm._v("この条件で表示する")]
         )
       ])
     ]),
     _vm._v(" "),
     _vm.details.length
       ? _c("div", { staticClass: "margin-set-mid" }, [
-          _vm._v("\n    設定済みカレンダー一覧\n    "),
+          _vm._v(
+            "\n    " +
+              _vm._s(_vm.year) +
+              "年 " +
+              _vm._s(_vm.month) +
+              " 月 〆日から表示\n    "
+          ),
           _c("table", { staticClass: "table" }, [
             _vm._m(0),
             _vm._v(" "),
@@ -77817,20 +77886,7 @@ var render = function() {
             )
           ])
         ])
-      : _vm._e(),
-    _vm._v(" "),
-    _c(
-      "button",
-      {
-        staticClass: "btn btn-success",
-        on: {
-          click: function($event) {
-            return _vm.store()
-          }
-        }
-      },
-      [_vm._v("編集確定")]
-    )
+      : _vm._e()
   ])
 }
 var staticRenderFns = [
@@ -77842,9 +77898,17 @@ var staticRenderFns = [
       _c("tr", [
         _c("th", [_vm._v("日付")]),
         _vm._v(" "),
-        _c("th", [_vm._v("営業日区分")]),
+        _c("th", [_vm._v("出勤時間")]),
         _vm._v(" "),
-        _c("th", [_vm._v("休暇区分")])
+        _c("th", [_vm._v("退勤時間")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("中抜け開始")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("中抜け終了")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("備考")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("操作")])
       ])
     ])
   }
@@ -94225,7 +94289,7 @@ Vue.component("create-department", __webpack_require__(/*! ./components/CreateDe
 Vue.component("create-time-table", __webpack_require__(/*! ./components/CreateTimeTable.vue */ "./resources/js/components/CreateTimeTable.vue")["default"]);
 Vue.component("create-calendar", __webpack_require__(/*! ./components/CreateCalendar.vue */ "./resources/js/components/CreateCalendar.vue")["default"]);
 Vue.component("edit-calendar", __webpack_require__(/*! ./components/EditCalendar.vue */ "./resources/js/components/EditCalendar.vue")["default"]);
-Vue.component("edit-work_times", __webpack_require__(/*! ./components/EditWorkTimes.vue */ "./resources/js/components/EditWorkTimes.vue")["default"]);
+Vue.component("edit-work-times", __webpack_require__(/*! ./components/EditWorkTimes.vue */ "./resources/js/components/EditWorkTimes.vue")["default"]);
 Vue.component("create-company-information", __webpack_require__(/*! ./components/CreateCompanyInformation.vue */ "./resources/js/components/CreateCompanyInformation.vue")["default"]);
 Vue.component("setting-calc", __webpack_require__(/*! ./components/SettingCalc.vue */ "./resources/js/components/SettingCalc.vue")["default"]);
 Vue.component("message-data", __webpack_require__(/*! ./components/MessageData.vue */ "./resources/js/components/MessageData.vue")["default"]);

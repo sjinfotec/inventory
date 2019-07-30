@@ -27,6 +27,10 @@ Route::get('/daily/calc', 'DailyWorkingInformationController@show')->middleware(
 Route::get('/daily/show', 'DailyWorkingInformationController@show')->middleware('auth');
 
 Route::get('/monthly', 'MonthlyWorkingInformationController@index')->middleware('auth');
+// 勤怠編集
+Route::get('/edit_work_times', 'EditWorkTimesController@index')->middleware('auth');
+Route::get('/edit_work_times/get', 'EditWorkTimesController@get')->middleware('auth');
+
 // シフト
 Route::get('/create_shift_time', 'CreateShiftTimeController@index')->middleware('auth');
 Route::post('/create_shift_time/store', 'CreateShiftTimeController@store')->middleware('auth');

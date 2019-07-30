@@ -2,30 +2,53 @@
   <!-- panel body -->
   <div class="panel-body">
     <div class="row">
-      <div class="form-group col-md-5">
-        <label for="business_kubun" class>年</label>
+      <div class="form-group col-md-6">
+        <label for="business_kubun" class>指定年</label>
         <select class="form-control" v-model="year">
           <option v-for="n in 20" :value="n + baseYear -1">{{ n + baseYear -1 }}年</option>
         </select>
       </div>
-      <div class="form-group col-md-5">
-        <label for="business_kubun" class>月</label>
+      <div class="form-group col-md-6">
+        <label for="business_kubun" class>指定月</label>
         <select class="form-control" v-model="month">
           <option v-for="n in 12" :value="n">{{ n }}月</option>
         </select>
       </div>
-      <div class="form-group col-md-2 margin-set-mid">
-        <button class="btn btn-primary" @click="display()">表示</button>
+    </div>
+    <div class="row">
+      <div class="form-group col-md-6">
+        <label for="business_kubun" class>雇用形態</label>
+        <select-employmentstatus v-bind:blank-data="true" v-on:change-event="employmentChanges"></select-employmentstatus>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="business_kubun" class>所属部署</label>
+        <select-department v-bind:blank-data="true" v-on:change-event="departmentChanges"></select-department>
+      </div>
+      <div class="form-group col-md-6">
+        <label for="business_kubun" class>氏名</label>
+        <select-user
+          ref="selectuser"
+          v-bind:blank-data="true"
+          v-bind:get-Do="getDo"
+          v-on:change-event="userChanges"
+        ></select-user>
+      </div>
+      <div class="form-group col-md-12">
+        <button class="btn btn-primary" @click="getDetail()">この条件で表示する</button>
       </div>
     </div>
     <div class="margin-set-mid" v-if="details.length ">
-      設定済みカレンダー一覧
+      {{ year }}年 {{ month }} 月 〆日から表示
       <table class="table">
         <thead>
           <tr>
             <th>日付</th>
-            <th>営業日区分</th>
-            <th>休暇区分</th>
+            <th>出勤時間</th>
+            <th>退勤時間</th>
+            <th>中抜け開始</th>
+            <th>中抜け終了</th>
+            <th>備考</th>
+            <th>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -47,7 +70,6 @@
         </tbody>
       </table>
     </div>
-    <button class="btn btn-success" @click="store()">編集確定</button>
   </div>
 </template>
 <script>
@@ -58,33 +80,29 @@ export default {
   data() {
     return {
       dates: new Date(),
+      valuedepartment: "",
+      valueemploymentstatus: "",
+      getDo: 0,
+      valueuser: "",
       valueBusinessDay: "",
       valueholiDay: "",
       year: "",
       month: "",
       selectMonth: "",
       baseYear: "",
-      BusinessDayList: [],
-      HoliDayList: [],
-      details: [],
-      business: [{}],
-      holiday: [{}]
+      details: []
     };
   },
   // マウント時
   mounted() {
     // this.getTimeTableList();
     var date = new Date();
-    this.baseYear = date.getFullYear();
+    var baseDate = new Date("2018/01/01 8:00:00");
+    this.baseYear = baseDate.getFullYear();
+    // this.baseYear = baseDate;
   },
   // セレクトボックス変更時
   watch: {
-    valueBusinessDay: function(val, oldVal) {
-      // console.log(val + " " + oldVal);
-    },
-    valueholiDay: function(val, oldVal) {
-      // console.log(val + " " + oldVal);
-    },
     details: function(val, oldVal) {
       this.details.forEach((detail, i) => {
         this.business[i] = detail.business_kubun;
@@ -98,52 +116,53 @@ export default {
   methods: {
     getDetail() {
       this.$axios
-        .get("/edit_calendar/get", {
+        .get("/edit_work_times/get", {
           params: {
             year: this.year,
             month: this.month,
-            business_kubun: this.valueBusinessDay,
-            holiday_kubun: this.valueholiDay
+            code: this.valueuser
           }
         })
         .then(response => {
           this.details = response.data;
-          this.getBusinessList();
-          this.getHoliDayList();
         })
         .catch(reason => {
           alert("error");
         });
     },
-    getBusinessList() {
-      this.$axios
-        .get("/get_business_day_list")
-        .then(response => {
-          this.BusinessDayList = response.data;
-          console.log("営業区分リスト取得");
-        })
-        .catch(reason => {
-          alert("error");
-        });
+    // 雇用形態が変更された場合の処理
+    employmentChanges: function(value) {
+      this.valueemploymentstatus = value;
+      // ユーザー選択コンポーネントの取得メソッドを実行
+      this.getDo = 1;
+      if (this.valuedepartment == "") {
+        this.$refs.selectuser.getUserList(this.getDo, value);
+      } else {
+        this.$refs.selectuser.getUserListByEmployment(
+          this.getDo,
+          this.valuedepartment,
+          value
+        );
+      }
     },
-    getHoliDayList() {
-      this.$axios
-        .get("/get_holi_day_list", {})
-        .then(response => {
-          this.HoliDayList = response.data;
-          console.log("休暇区分リスト取得");
-        })
-        .catch(reason => {
-          alert("error");
-        });
+    // 部署選択が変更された場合の処理
+    departmentChanges: function(value) {
+      this.valuedepartment = value;
+      // ユーザー選択コンポーネントの取得メソッドを実行
+      this.getDo = 1;
+      if (this.valueemploymentstatus == "") {
+        this.$refs.selectuser.getUserList(this.getDo, value);
+      } else {
+        this.$refs.selectuser.getUserListByEmployment(
+          this.getDo,
+          value,
+          this.valueemploymentstatus
+        );
+      }
     },
-    businessDayChanges: function(value) {
-      console.log("businessDayChanges = " + value);
-      this.valueBusinessDay = value;
-    },
-    holiDayChanges: function(value) {
-      console.log("holiDayChanges = " + value);
-      this.valueholiDay = value;
+    // ユーザー選択が変更された場合の処理
+    userChanges: function(value) {
+      this.valueuser = value;
     },
     store() {
       this.$axios

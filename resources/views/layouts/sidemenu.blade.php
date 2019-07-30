@@ -6,6 +6,7 @@
                             <li><a href="{{ url('/daily') }}">日次集計</a></li>
                             <li><a href="{{ url('/monthly') }}">月次集計</a></li>
                             <li><a href="{{ url('/setting_shift_time') }}">シフト割り当て</a></li>
+                            <li><a href="{{ url('/edit_work_times') }}">勤怠編集</a></li>
                         </ul>
                         <h1 class="font-size-regular">マスタメンテナンス</h1>
                         <ul class="list-unstyled">
