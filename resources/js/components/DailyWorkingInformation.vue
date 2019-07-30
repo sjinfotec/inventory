@@ -101,7 +101,7 @@
         <div class="card-body mb-3 py-0 pt-4 border-top">
           <!-- panel contents --> 
           <!-- .row -->
-          <div v-for="(calclist,index) in calcresults">
+          <div v-for="(calclist,index) in calcresults" :key="calclist.user_code">
             <div class="row">
               <!-- col -->
               <div class="col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch">
@@ -164,7 +164,7 @@
                   v-bind:item-name="'勤務時間'" v-bind:item-value="calclist.total_working_times">
                 </col-employmentstatus>
                 <col-employmentstatus
-                  v-bind:item-name="'勤務状態'" v-bind:item-value="calclist.working_status_name">
+                  v-bind:item-name="'勤務状態'" v-bind:item-value="calclist.working_status_name" v-bind:itemsecound-value="calclist.holiday_name">
                 </col-employmentstatus>
                 <col-employmentstatus
                   v-bind:item-name="'勤務シフト'" v-bind:item-value="calclist.working_timetable_name">

@@ -104,7 +104,7 @@ class DailyWorkingInformationController extends Controller
                     DB::commit();
                     try{
                         // 日次集計計算登録
-                        $calc_result = $this->calcWorkingTimeDate($work_time_result);
+                        $calc_result = $this->calcWorkingTimeDate($work_time_result, $work_time->getParamDatefromAttribute());
                         if ($calc_result) {
                             // タイムテーブルを取得
                             $timetable_model = new WorkingTimeTable();
@@ -227,7 +227,7 @@ class DailyWorkingInformationController extends Controller
      *
      * @return sql取得結果
      */
-    private function calcWorkingTimeDate($worktimes){
+    private function calcWorkingTimeDate($worktimes, $target_date){
 
         $current_date = null;
         $current_department_id = null;
@@ -359,13 +359,13 @@ class DailyWorkingInformationController extends Controller
                 }
             } else {
                 // 日付が特定できないのでスルー
-                /*$ptn = 0;
+                $ptn = 0;
                 $this->pushArrayCalc($this->setNoInputTimePtn($ptn));
                 // temporaryに登録する
-                $this->insTempCalcItem($result->record_date, $result);
+                $this->insTempCalcItem($target_date, $result);
                 // 次データ計算事前処理
-                $this->beforeArrayWorkingTime($result); */
-                Log::DEBUG('no input time '.' dapartment = '.$result->department_id.' user = '.$result->user_code);
+                $this->beforeArrayWorkingTime($result);
+                Log::DEBUG('no input time target_date = '.$target_date.' dapartment = '.$result->department_id.' user = '.$result->user_code);
             }
         }
 
@@ -384,6 +384,7 @@ class DailyWorkingInformationController extends Controller
             }catch(\Exception $e){
                 $add_results = false;
             }
+        } else {
         }
 
         return $add_results;
@@ -1713,9 +1714,9 @@ class DailyWorkingInformationController extends Controller
         $chk_interval = '0';
 
         if ($ptn == '0') {
-            $temp_calc_model->setModeAttribute('');
+            $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
-            $temp_calc_model->setWorkingstatusAttribute('');
+            $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_008'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
@@ -1724,9 +1725,9 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '1') {    // 設定ミス
-            $temp_calc_model->setModeAttribute('');
+            $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
-            $temp_calc_model->setWorkingstatusAttribute('');
+            $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_010'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
@@ -1735,9 +1736,9 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '2') {    // 設定ミス
-            $temp_calc_model->setModeAttribute('');
+            $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
-            $temp_calc_model->setWorkingstatusAttribute('');
+            $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_011'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
@@ -1746,9 +1747,9 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '3') {    // 設定ミス
-            $temp_calc_model->setModeAttribute('');
+            $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
-            $temp_calc_model->setWorkingstatusAttribute('');
+            $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_012'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
@@ -1757,9 +1758,9 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '4') {    // 設定ミス
-            $temp_calc_model->setModeAttribute('');
+            $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
-            $temp_calc_model->setWorkingstatusAttribute('');
+            $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_013'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
@@ -1768,9 +1769,9 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
         } elseif ($ptn == '5') {    // 設定ミス
-            $temp_calc_model->setModeAttribute('');
+            $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
-            $temp_calc_model->setWorkingstatusAttribute('');
+            $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_014'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
@@ -1780,7 +1781,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
         } else {
             // 不明データとして作成する
-            $temp_calc_model->setModeAttribute('');
+            $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
@@ -1918,6 +1919,7 @@ class DailyWorkingInformationController extends Controller
     private function pushArrayCalc($temp_calc_model)
     {
         // 計算用配列配列
+        Log::DEBUG('pushArrayCalc getModeAttribute = '.$temp_calc_model->getModeAttribute());
         $this->array_calc_mode[] = $temp_calc_model->getModeAttribute();
         $this->array_calc_time[] = $temp_calc_model->getRecorddatetimeAttribute();
         $this->array_calc_status[] = $temp_calc_model->getWorkingstatusAttribute();
@@ -1978,6 +1980,7 @@ class DailyWorkingInformationController extends Controller
         $temp_calc_model->setYearAttribute($result->year);
         $temp_calc_model->setSystemDateAttribute(Carbon::now());
 
+        Log::DEBUG('count($this->array_calc_mode) = '.count($this->array_calc_mode));
         for($i=0;$i<count($this->array_calc_mode);$i++){
             $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
             $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
@@ -1994,7 +1997,7 @@ class DailyWorkingInformationController extends Controller
             }catch(\PDOException $pe){
                 throw $pe;
             }
-            Log::DEBUG('insTempCalcItem');
+            Log::DEBUG('insTempCalcItem end');
         }
     }
 

@@ -1836,6 +1836,36 @@ __webpack_require__.r(__webpack_exports__);
     itemValue: {
       type: String,
       "default": null
+    },
+    itemsecoundValue: {
+      type: String,
+      "default": null
+    }
+  },
+  data: function data() {
+    return {
+      value: '　',
+      str1: '',
+      str2: ''
+    };
+  },
+  // マウント時
+  mounted: function mounted() {
+    this.edtValue();
+  },
+  methods: {
+    edtValue: function edtValue() {
+      console.log("this.itemName = " + this.itemName);
+
+      if (this.itemValue != null && this.itemValue != '' && this.itemValue != '　') {
+        this.value = this.itemValue;
+      } else {
+        if (this.itemsecoundValue != null && this.itemsecoundValue != '' && this.itemsecoundValue != '　') {
+          this.value = this.itemsecoundValue;
+        }
+      }
+
+      console.log("this.value = " + this.value);
     }
   }
 });
@@ -75303,7 +75333,7 @@ var render = function() {
           ]),
           _vm._v(" "),
           _c("p", { staticClass: "font-size-rg m-0" }, [
-            _vm._v(_vm._s(this.itemValue))
+            _vm._v(_vm._s(this.value))
           ])
         ])
       ])
@@ -76819,7 +76849,7 @@ var render = function() {
               { staticClass: "card-body mb-3 py-0 pt-4 border-top" },
               [
                 _vm._l(_vm.calcresults, function(calclist, index) {
-                  return _c("div", [
+                  return _c("div", { key: calclist.user_code }, [
                     _c(
                       "div",
                       { staticClass: "row" },
@@ -77004,7 +77034,8 @@ var render = function() {
                             _c("col-employmentstatus", {
                               attrs: {
                                 "item-name": "勤務状態",
-                                "item-value": calclist.working_status_name
+                                "item-value": calclist.working_status_name,
+                                "itemsecound-value": calclist.holiday_name
                               }
                             }),
                             _vm._v(" "),
