@@ -102,178 +102,155 @@
           <!-- panel contents --> 
           <!-- .row -->
           <div v-for="(calclist,index) in calcresults">
-          <div class="row">
-            <!-- col -->
-            <div class="col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch">
-              <a class="float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg" data-toggle="collapse" href="#collapseUser1" role="button" aria-expanded="true" aria-controls="collapseUser1"><img class="icon-size-rg" src="/images/round-search-w.svg" alt=""></a>
-              <h1 class="font-size-sm m-0 mb-1">氏名</h1>
-              <p class="font-size-rg font-weight-bold m-0">{{ calclist.user_name }}</p>
-            </div>
-            <!-- /.col -->
-            <!-- col -->
-            <div class="col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch">
-              <span class="float-left mr-2 py-2 px-2 font-size-lg text-white bg-success rounded"><img class="icon-size-lg" src="/images/round-flag-w.svg" alt=""></span>
-              <h1 class="font-size-sm m-0 mb-1">部署</h1>
-              <p class="font-size-rg m-0">{{ calclist.department_name }}</p>
-            </div>
-            <!-- /.col -->
-            <!-- col 出勤 退勤 -->
-            <col-attendance
-              v-bind:attendancetime="calclist.attendance_time_1" v-bind:leavingtime="calclist.leaving_time_1" v-bind:displaynone="true">
-            </col-attendance>
-            <col-attendance
-              v-bind:attendancetime="calclist.attendance_time_2" v-bind:leavingtime="calclist.leaving_time_2" v-bind:displaynone="false">
-            </col-attendance>
-            <col-attendance
-              v-bind:attendancetime="calclist.attendance_time_3" v-bind:leavingtime="calclist.leaving_time_3" v-bind:displaynone="false">
-            </col-attendance>
-            <col-attendance
-              v-bind:attendancetime="calclist.attendance_time_4" v-bind:leavingtime="calclist.leaving_time_4" v-bind:displaynone="false">
-            </col-attendance>
-            <col-attendance 
-              v-bind:attendancetime="calclist.attendance_time_5" v-bind:leavingtime="calclist.leaving_time_5" v-bind:displaynone="false">
-            </col-attendance>
-            <!-- /.col -->
-            <!-- col 中抜け 戻り -->
-            <col-missingmiddle
-              v-bind:missingmiddletime="calclist.missing_middle_time_1" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_1" v-bind:displaynone="true">
-            </col-missingmiddle>
-            <col-missingmiddle
-              v-bind:missingmiddletime="calclist.missing_middle_time_2" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_2" v-bind:displaynone="false">
-            </col-missingmiddle>
-            <col-missingmiddle
-              v-bind:missingmiddletime="calclist.missing_middle_time_3" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_3" v-bind:displaynone="false">
-            </col-missingmiddle>
-            <col-missingmiddle
-              v-bind:missingmiddletime="calclist.missing_middle_time_4" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_4" v-bind:displaynone="false">
-            </col-missingmiddle>
-            <col-missingmiddle
-              v-bind:missingmiddletime="calclist.missing_middle_time_5" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_5" v-bind:displaynone="false">
-            </col-missingmiddle>
-          </div>
-          <!-- /.row -->
-          <!-- collapse -->
-          <div class="collapse" id="collapseUser1">
-            <!-- .row -->
-            <div class="row mt-2">
-              <!-- col  雇用形態 勤務時間 勤務状態 勤務シフト-->
-              <col-employmentstatus
-                v-bind:item-name="'雇用形態'" v-bind:item-value="calclist.employment_status_name">
-              </col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'勤務時間'" v-bind:item-value="calclist.total_working_times">
-              </col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'勤務状態'" v-bind:item-value="calclist.working_status_name">
-              </col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'勤務シフト'" v-bind:item-value="calclist.working_timetable_name">
-              </col-employmentstatus>
-              <!-- /.col -->
+            <div class="row">
               <!-- col -->
-              <div class="col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch">
-                <div class="card text-white bg-primary border-0">
-                  <div class="card-body px-3 py-2">
-                    <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-access-time-w.svg" alt=""></span>
-                    <h1 class="font-size-sm m-0 mb-1">所定労働時間</h1>
-                    <p class="font-size-lg m-0">08:00</p>
-                  </div>
-                </div>
+              <div class="col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch">
+                <a class="float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg" data-toggle="collapse" v-bind:href="'#collapseUser' + index" role="button" aria-expanded="true" v-bind:aria-controls="'collapseUser' + index"><img class="icon-size-rg" src="/images/round-search-w.svg" alt=""></a>
+                <h1 class="font-size-sm m-0 mb-1">氏名</h1>
+                <p class="font-size-rg font-weight-bold m-0">{{ calclist.user_name }}</p>
               </div>
               <!-- /.col -->
               <!-- col -->
-              <div class="col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch">
-                <div class="card text-white bg-primary border-0">
-                  <div class="card-body px-3 py-2">
-                    <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-access-time-w.svg" alt=""></span>
-                    <h1 class="font-size-sm m-0 mb-1">所定外労働時間</h1>
-                    <p class="font-size-lg m-0">08:00</p>
-                  </div>
-                </div>
+              <div class="col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch">
+                <span class="float-left mr-2 py-2 px-2 font-size-lg text-white bg-success rounded"><img class="icon-size-lg" src="/images/round-flag-w.svg" alt=""></span>
+                <h1 class="font-size-sm m-0 mb-1">部署</h1>
+                <p class="font-size-rg m-0">{{ calclist.department_name }}</p>
               </div>
               <!-- /.col -->
-              <!-- col -->
-              <div class="col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch">
-                <div class="card text-white bg-success border-0">
-                  <div class="card-body px-3 py-2">
-                    <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-watch-later-w.svg" alt=""></span>
-                    <h1 class="font-size-sm m-0 mb-1">残業時間</h1>
-                    <p class="font-size-lg m-0">00:13</p>
-                  </div>
-                </div>
-              </div>
+              <!-- col 出勤 退勤 -->
+              <col-attendance
+                v-bind:attendancetime="calclist.attendance_time_1" v-bind:leavingtime="calclist.leaving_time_1" v-bind:displaynone="true">
+              </col-attendance>
+              <col-attendance
+                v-bind:attendancetime="calclist.attendance_time_2" v-bind:leavingtime="calclist.leaving_time_2" v-bind:displaynone="false">
+              </col-attendance>
+              <col-attendance
+                v-bind:attendancetime="calclist.attendance_time_3" v-bind:leavingtime="calclist.leaving_time_3" v-bind:displaynone="false">
+              </col-attendance>
+              <col-attendance
+                v-bind:attendancetime="calclist.attendance_time_4" v-bind:leavingtime="calclist.leaving_time_4" v-bind:displaynone="false">
+              </col-attendance>
+              <col-attendance 
+                v-bind:attendancetime="calclist.attendance_time_5" v-bind:leavingtime="calclist.leaving_time_5" v-bind:displaynone="false">
+              </col-attendance>
               <!-- /.col -->
-              <!-- col -->
-              <div class="col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch">
-                <div class="card text-white bg-success border-0">
-                  <div class="card-body px-3 py-2">
-                    <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-watch-later-w.svg" alt=""></span>
-                    <h1 class="font-size-sm m-0 mb-1">深夜残業時間</h1>
-                    <p class="font-size-lg m-0">00:00</p>
-                  </div>
-                </div>
-              </div>
-              <!-- /.col -->
-              <!-- col -->
-              <div class="col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch">
-                <div class="card text-white bg-success border-0">
-                  <div class="card-body px-3 py-2">
-                    <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-watch-later-w.svg" alt=""></span>
-                    <h1 class="font-size-sm m-0 mb-1">法定労働時間</h1>
-                    <p class="font-size-lg m-0">00:00</p>
-                  </div>
-                </div>
-              </div>
-              <!-- /.col -->
-              <!-- col -->
-              <div class="col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch">
-                <div class="card text-white bg-success border-0">
-                  <div class="card-body px-3 py-2">
-                    <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-watch-later-w.svg" alt=""></span>
-                    <h1 class="font-size-sm m-0 mb-1">法定外労働時間</h1>
-                    <p class="font-size-lg m-0">00:00</p>
-                  </div>
-                </div>
-              </div>
-              <!-- /.col -->
-              <!-- col -->
-              <div class="col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch">
-                <div class="card text-white bg-warning border-0">
-                  <div class="card-body px-3 py-2">
-                    <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-watch-later-w.svg" alt=""></span>
-                    <h1 class="font-size-sm m-0 mb-1">未就労時間</h1>
-                    <p class="font-size-lg m-0">00:00</p>
-                  </div>
-                </div>
-              </div>
-              <!-- /.col -->
-              <!-- col -->
-              <div class="col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch">
-                <div class="card text-white bg-warning border-0">
-                  <div class="card-body px-3 py-2">
-                    <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-watch-later-w.svg" alt=""></span>
-                    <h1 class="font-size-sm m-0 mb-1">時間外労働</h1>
-                    <p class="font-size-lg m-0">00:00</p>
-                  </div>
-                </div>
-              </div>
-              <!-- /.col -->
-              <!-- col -->
-              <div class="col-12 pb-2 align-self-stretch">
-                <div class="card text-white bg-danger border-0">
-                  <div class="card-body px-3 py-2">
-                    <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-error-w.svg" alt=""></span>
-                    <h1 class="font-size-sm m-0">お知らせ</h1>
-                    <p class="font-size-sm my-2">※打刻時間が不正です。</p>
-                  </div>
-                </div>
-              </div>
-              <!-- /.col -->
+              <!-- col 中抜け 戻り -->
+              <col-missingmiddle
+                v-bind:missingmiddletime="calclist.missing_middle_time_1" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_1" v-bind:displaynone="true">
+              </col-missingmiddle>
+              <col-missingmiddle
+                v-bind:missingmiddletime="calclist.missing_middle_time_2" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_2" v-bind:displaynone="false">
+              </col-missingmiddle>
+              <col-missingmiddle
+                v-bind:missingmiddletime="calclist.missing_middle_time_3" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_3" v-bind:displaynone="false">
+              </col-missingmiddle>
+              <col-missingmiddle
+                v-bind:missingmiddletime="calclist.missing_middle_time_4" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_4" v-bind:displaynone="false">
+              </col-missingmiddle>
+              <col-missingmiddle
+                v-bind:missingmiddletime="calclist.missing_middle_time_5" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_5" v-bind:displaynone="false">
+              </col-missingmiddle>
             </div>
             <!-- /.row -->
-          </div>
+            <!-- collapse -->
+            <div class="collapse"  v-bind:id="'collapseUser' + index">
+              <!-- .row -->
+              <div class="row mt-2">
+                <!-- col  雇用形態 勤務時間 勤務状態 勤務シフト-->
+                <col-employmentstatus
+                  v-bind:item-name="'雇用形態'" v-bind:item-value="calclist.employment_status_name">
+                </col-employmentstatus>
+                <col-employmentstatus
+                  v-bind:item-name="'勤務時間'" v-bind:item-value="calclist.total_working_times">
+                </col-employmentstatus>
+                <col-employmentstatus
+                  v-bind:item-name="'勤務状態'" v-bind:item-value="calclist.working_status_name">
+                </col-employmentstatus>
+                <col-employmentstatus
+                  v-bind:item-name="'勤務シフト'" v-bind:item-value="calclist.working_timetable_name">
+                </col-employmentstatus>
+                <!-- col  所定労働時間 所定外労働時間-->
+                <col-regularworking
+                  v-bind:item-name="'所定労働時間'" v-bind:item-value="calclist.regular_working_times">
+                </col-regularworking>
+                <col-regularworking
+                  v-bind:item-name="'所定外労働時間'" v-bind:item-value="calclist.out_of_regular_working_times">
+                </col-regularworking>
+                <!-- /.col -->
+                <!-- col -->
+                <!-- col  残業時間 深夜残業時間 法定労働時間 法定外労働時間-->
+                <col-overtimehours
+                  v-bind:item-name="'残業時間'" v-bind:item-value="calclist.overtime_hours">
+                </col-overtimehours>
+                <col-overtimehours
+                  v-bind:item-name="'深夜残業時間'" v-bind:item-value="calclist.late_night_overtime_hours">
+                </col-overtimehours>
+                <col-overtimehours
+                  v-bind:item-name="'法定労働時間'" v-bind:item-value="calclist.legal_working_times">
+                </col-overtimehours>
+                <col-overtimehours
+                  v-bind:item-name="'法定外労働時間'" v-bind:item-value="calclist.out_of_legal_working_times">
+                </col-overtimehours>
+                <!-- /.col -->
+                <!-- col  未就労時間 時間外労働-->
+                <col-notemploymentworking
+                  v-bind:item-name="'未就労時間'" v-bind:item-value="calclist.not_employment_working_hours">
+                </col-notemploymentworking>
+                <col-notemploymentworking
+                  v-bind:item-name="'時間外労働'" v-bind:item-value="calclist.off_hours_working_hours">
+                </col-notemploymentworking>
+                <!-- /.col -->
+                <!-- col -->
+                <col-note
+                  v-bind:item-name="'備考：'" v-bind:item-value="calclist.note">
+                </col-note>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+            </div>
           </div>
           <!-- /collapse -->
+          <!-- .row 合計 -->
+          <div v-for="sumresult in sumresults">
+            <div class="row">
+              <col-employmentstatus
+                v-bind:item-name="'合　　計'" v-bind:item-value="'　'">
+              </col-employmentstatus>
+              <col-employmentstatus
+                v-bind:item-name="'勤務時間'" v-bind:item-value="sumresult.total_working_times">
+              </col-employmentstatus>
+              <col-employmentstatus
+                v-bind:item-name="'　'" v-bind:item-value="'　'">
+              </col-employmentstatus>
+              <col-employmentstatus
+                v-bind:item-name="'　'" v-bind:item-value="'　'">
+              </col-employmentstatus>
+              <col-regularworking
+                v-bind:item-name="'所定労働時間'" v-bind:item-value="sumresult.regular_working_times">
+              </col-regularworking>
+              <col-regularworking
+                v-bind:item-name="'所定外労働時間'" v-bind:item-value="sumresult.out_of_regular_working_times">
+              </col-regularworking>
+              <col-overtimehours
+                v-bind:item-name="'残業時間'" v-bind:item-value="sumresult.overtime_hours">
+              </col-overtimehours>
+              <col-overtimehours
+                v-bind:item-name="'深夜残業時間'" v-bind:item-value="sumresult.late_night_overtime_hours">
+              </col-overtimehours>
+              <col-overtimehours
+                v-bind:item-name="'法定労働時間'" v-bind:item-value="sumresult.legal_working_times">
+              </col-overtimehours>
+              <col-overtimehours
+                v-bind:item-name="'法定外労働時間'" v-bind:item-value="sumresult.out_of_legal_working_times">
+              </col-overtimehours>
+              <col-notemploymentworking
+                v-bind:item-name="'未就労時間'" v-bind:item-value="sumresult.not_employment_working_hours">
+              </col-notemploymentworking>
+              <col-notemploymentworking
+                v-bind:item-name="'時間外労働'" v-bind:item-value="sumresult.off_hours_working_hours">
+              </col-notemploymentworking>
+            </div>
+          </div>
           <!-- /.panel contents -->
         </div>
         <!-- /panel body -->
@@ -314,8 +291,10 @@ export default {
       defaultDate: new Date(),
       stringtext: '',
       datejaFormat: '',
+      hrefindex: '',
       resresults: [],
       calcresults: [],
+      sumresults: [],
       messagedatasserver: [],
       messagedatasfromdate: [],
       messagedatastodate: [],
@@ -411,8 +390,10 @@ export default {
           .then(response => {
             this.resresults = response.data;
             this.calcresults = this.resresults.calcresults;
+            this.sumresults = this.resresults.sumresults;
             this.dispmessage(this.resresults.massegedata);
             console.log("集計時間取得"+Object.keys(this.resresults).length);
+            console.log("sumresults"+Object.keys(this.sumresults).length);
           })
           .catch(reason => {
             alert("error");

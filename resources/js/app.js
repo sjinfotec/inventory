@@ -154,6 +154,14 @@ Vue.component(
     require("./components/ColEmploymentStatus.vue").default
 );
 
+Vue.component("col-regularworking", require("./components/ColRegularWorking.vue").default);
+
+Vue.component("col-overtimehours", require("./components/ColOvertimeHours.vue").default);
+
+Vue.component("col-notemploymentworking", require("./components/ColNotEmploymentWorking.vue").default);
+
+Vue.component("col-note", require("./components/ColNote.vue").default);
+
 // CSV ダウンロードボタン
 Vue.component(
     "btn-csv-download",

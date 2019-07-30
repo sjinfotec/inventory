@@ -1837,10 +1837,6 @@ __webpack_require__.r(__webpack_exports__);
       type: String,
       "default": null
     }
-  },
-  // マウント時
-  mounted: function mounted() {
-    console.log("colemploymentstatus Component mounted.");
   }
 });
 
@@ -1887,6 +1883,200 @@ __webpack_require__.r(__webpack_exports__);
     displaynone: {
       type: Boolean,
       "default": true
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColNotEmploymentWorking.vue?vue&type=script&lang=js&":
+/*!**********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColNotEmploymentWorking.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "colnotemploymentworking",
+  props: {
+    itemName: {
+      type: String,
+      "default": null
+    },
+    itemValue: {
+      type: String,
+      "default": null
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColNote.vue?vue&type=script&lang=js&":
+/*!******************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColNote.vue?vue&type=script&lang=js& ***!
+  \******************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "colnote",
+  props: {
+    itemName: {
+      type: String,
+      "default": null
+    },
+    itemNote: {
+      type: String,
+      "default": null
+    },
+    itemLate: {
+      type: String,
+      "default": null
+    },
+    itemLeaveearly: {
+      type: String,
+      "default": null
+    }
+  },
+  data: function data() {
+    return {
+      itemValue: ''
+    };
+  },
+  // マウント時
+  mounted: function mounted() {
+    this.edtNote();
+  },
+  methods: {
+    edtNote: function edtNote() {
+      this.itemValue = '';
+
+      if (this.itemNote != null && this.itemNote != '') {
+        this.itemValue = this.itemNote;
+      }
+
+      if (this.itemLate == '1') {
+        if (this.itemValue != '') {
+          this.itemValue += '  ';
+        }
+
+        this.itemValue += '遅刻';
+      }
+
+      if (this.itemLeaveearly == '1') {
+        if (this.itemValue != '') {
+          this.itemValue += '  ';
+        }
+
+        this.itemValue += '早退';
+      }
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColOvertimeHours.vue?vue&type=script&lang=js&":
+/*!***************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColOvertimeHours.vue?vue&type=script&lang=js& ***!
+  \***************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "colovertimehours",
+  props: {
+    itemName: {
+      type: String,
+      "default": null
+    },
+    itemValue: {
+      type: String,
+      "default": null
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColRegularWorking.vue?vue&type=script&lang=js&":
+/*!****************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColRegularWorking.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "colregularworking",
+  props: {
+    itemName: {
+      type: String,
+      "default": null
+    },
+    itemValue: {
+      type: String,
+      "default": null
     }
   }
 });
@@ -3052,29 +3242,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -3089,8 +3256,10 @@ __webpack_require__.r(__webpack_exports__);
       defaultDate: new Date(),
       stringtext: '',
       datejaFormat: '',
+      hrefindex: '',
       resresults: [],
       calcresults: [],
+      sumresults: [],
       messagedatasserver: [],
       messagedatasfromdate: [],
       messagedatastodate: [],
@@ -3192,10 +3361,12 @@ __webpack_require__.r(__webpack_exports__);
         }).then(function (response) {
           _this.resresults = response.data;
           _this.calcresults = _this.resresults.calcresults;
+          _this.sumresults = _this.resresults.sumresults;
 
           _this.dispmessage(_this.resresults.massegedata);
 
           console.log("集計時間取得" + Object.keys(_this.resresults).length);
+          console.log("sumresults" + Object.keys(_this.sumresults).length);
         })["catch"](function (reason) {
           alert("error");
         });
@@ -75543,6 +75714,218 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColNotEmploymentWorking.vue?vue&type=template&id=67ece1d2&":
+/*!**************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColNotEmploymentWorking.vue?vue&type=template&id=67ece1d2& ***!
+  \**************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
+    [
+      _c("div", { staticClass: "card text-white bg-warning border-0" }, [
+        _c("div", { staticClass: "card-body px-3 py-2" }, [
+          _vm._m(0),
+          _vm._v(" "),
+          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+            _vm._v(_vm._s(this.itemName))
+          ]),
+          _vm._v(" "),
+          _c("p", { staticClass: "font-size-lg m-0" }, [
+            _vm._v(_vm._s(this.itemValue))
+          ])
+        ])
+      ])
+    ]
+  )
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("span", { staticClass: "d-md-none float-left" }, [
+      _c("img", {
+        staticClass: "icon-size-ml mr-2",
+        attrs: { src: "/images/round-watch-later-w.svg", alt: "" }
+      })
+    ])
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColNote.vue?vue&type=template&id=46bdf5f7&":
+/*!**********************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColNote.vue?vue&type=template&id=46bdf5f7& ***!
+  \**********************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "col-12 pb-2 align-self-stretch" }, [
+    _c("div", { staticClass: "card text-white bg-danger border-0" }, [
+      _c("div", { staticClass: "card-body px-3 py-2" }, [
+        _vm._m(0),
+        _vm._v(" "),
+        _c("h1", { staticClass: "font-size-sm m-0" }, [
+          _vm._v(_vm._s(this.itemName))
+        ]),
+        _vm._v(" "),
+        _c("p", { staticClass: "font-size-sm my-2" }, [
+          _vm._v(_vm._s(this.itemValue))
+        ])
+      ])
+    ])
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("span", { staticClass: "d-md-none float-left" }, [
+      _c("img", {
+        staticClass: "icon-size-ml mr-2",
+        attrs: { src: "/images/round-error-w.svg", alt: "" }
+      })
+    ])
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColOvertimeHours.vue?vue&type=template&id=ea6ff08e&":
+/*!*******************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColOvertimeHours.vue?vue&type=template&id=ea6ff08e& ***!
+  \*******************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
+    [
+      _c("div", { staticClass: "card text-white bg-success border-0" }, [
+        _c("div", { staticClass: "card-body px-3 py-2" }, [
+          _vm._m(0),
+          _vm._v(" "),
+          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+            _vm._v(_vm._s(this.itemName))
+          ]),
+          _vm._v(" "),
+          _c("p", { staticClass: "font-size-lg m-0" }, [
+            _vm._v(_vm._s(this.itemValue))
+          ])
+        ])
+      ])
+    ]
+  )
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("span", { staticClass: "d-md-none float-left" }, [
+      _c("img", {
+        staticClass: "icon-size-ml mr-2",
+        attrs: { src: "/images/round-watch-later-w.svg", alt: "" }
+      })
+    ])
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColRegularWorking.vue?vue&type=template&id=13e0c43a&":
+/*!********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColRegularWorking.vue?vue&type=template&id=13e0c43a& ***!
+  \********************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
+    [
+      _c("div", { staticClass: "card text-white bg-primary border-0" }, [
+        _c("div", { staticClass: "card-body px-3 py-2" }, [
+          _vm._m(0),
+          _vm._v(" "),
+          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+            _vm._v(_vm._s(this.itemName))
+          ]),
+          _vm._v(" "),
+          _c("p", { staticClass: "font-size-lg m-0" }, [
+            _vm._v(_vm._s(this.itemValue))
+          ])
+        ])
+      ])
+    ]
+  )
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("span", { staticClass: "d-md-none float-left" }, [
+      _c("img", {
+        staticClass: "icon-size-ml mr-2",
+        attrs: { src: "/images/round-access-time-w.svg", alt: "" }
+      })
+    ])
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CreateCalendar.vue?vue&type=template&id=ef521af6&":
 /*!*****************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/CreateCalendar.vue?vue&type=template&id=ef521af6& ***!
@@ -76744,203 +77127,364 @@ var render = function() {
             _c(
               "div",
               { staticClass: "card-body mb-3 py-0 pt-4 border-top" },
-              _vm._l(_vm.calcresults, function(calclist, index) {
-                return _c("div", [
-                  _c(
-                    "div",
-                    { staticClass: "row" },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch"
-                        },
-                        [
-                          _vm._m(5, true),
-                          _vm._v(" "),
-                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                            _vm._v("氏名")
-                          ]),
-                          _vm._v(" "),
-                          _c(
-                            "p",
-                            {
-                              staticClass: "font-size-rg font-weight-bold m-0"
-                            },
-                            [_vm._v(_vm._s(calclist.user_name))]
-                          )
-                        ]
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch"
-                        },
-                        [
-                          _vm._m(6, true),
-                          _vm._v(" "),
-                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                            _vm._v("部署")
-                          ]),
-                          _vm._v(" "),
-                          _c("p", { staticClass: "font-size-rg m-0" }, [
-                            _vm._v(_vm._s(calclist.department_name))
-                          ])
-                        ]
-                      ),
-                      _vm._v(" "),
-                      _c("col-attendance", {
-                        attrs: {
-                          attendancetime: calclist.attendance_time_1,
-                          leavingtime: calclist.leaving_time_1,
-                          displaynone: true
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-attendance", {
-                        attrs: {
-                          attendancetime: calclist.attendance_time_2,
-                          leavingtime: calclist.leaving_time_2,
-                          displaynone: false
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-attendance", {
-                        attrs: {
-                          attendancetime: calclist.attendance_time_3,
-                          leavingtime: calclist.leaving_time_3,
-                          displaynone: false
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-attendance", {
-                        attrs: {
-                          attendancetime: calclist.attendance_time_4,
-                          leavingtime: calclist.leaving_time_4,
-                          displaynone: false
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-attendance", {
-                        attrs: {
-                          attendancetime: calclist.attendance_time_5,
-                          leavingtime: calclist.leaving_time_5,
-                          displaynone: false
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-missingmiddle", {
-                        attrs: {
-                          missingmiddletime: calclist.missing_middle_time_1,
-                          missingmiddlereturntime:
-                            calclist.missing_middle_return_time_1,
-                          displaynone: true
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-missingmiddle", {
-                        attrs: {
-                          missingmiddletime: calclist.missing_middle_time_2,
-                          missingmiddlereturntime:
-                            calclist.missing_middle_return_time_2,
-                          displaynone: false
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-missingmiddle", {
-                        attrs: {
-                          missingmiddletime: calclist.missing_middle_time_3,
-                          missingmiddlereturntime:
-                            calclist.missing_middle_return_time_3,
-                          displaynone: false
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-missingmiddle", {
-                        attrs: {
-                          missingmiddletime: calclist.missing_middle_time_4,
-                          missingmiddlereturntime:
-                            calclist.missing_middle_return_time_4,
-                          displaynone: false
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-missingmiddle", {
-                        attrs: {
-                          missingmiddletime: calclist.missing_middle_time_5,
-                          missingmiddlereturntime:
-                            calclist.missing_middle_return_time_5,
-                          displaynone: false
-                        }
-                      })
-                    ],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    { staticClass: "collapse", attrs: { id: "collapseUser1" } },
-                    [
-                      _c(
-                        "div",
-                        { staticClass: "row mt-2" },
-                        [
-                          _c("col-employmentstatus", {
-                            attrs: {
-                              "item-name": "雇用形態",
-                              "item-value": calclist.employment_status_name
-                            }
-                          }),
-                          _vm._v(" "),
-                          _c("col-employmentstatus", {
-                            attrs: {
-                              "item-name": "勤務時間",
-                              "item-value": calclist.total_working_times
-                            }
-                          }),
-                          _vm._v(" "),
-                          _c("col-employmentstatus", {
-                            attrs: {
-                              "item-name": "勤務状態",
-                              "item-value": calclist.working_status_name
-                            }
-                          }),
-                          _vm._v(" "),
-                          _c("col-employmentstatus", {
-                            attrs: {
-                              "item-name": "勤務シフト",
-                              "item-value": calclist.working_timetable_name
-                            }
-                          }),
-                          _vm._v(" "),
-                          _vm._m(7, true),
-                          _vm._v(" "),
-                          _vm._m(8, true),
-                          _vm._v(" "),
-                          _vm._m(9, true),
-                          _vm._v(" "),
-                          _vm._m(10, true),
-                          _vm._v(" "),
-                          _vm._m(11, true),
-                          _vm._v(" "),
-                          _vm._m(12, true),
-                          _vm._v(" "),
-                          _vm._m(13, true),
-                          _vm._v(" "),
-                          _vm._m(14, true),
-                          _vm._v(" "),
-                          _vm._m(15, true)
-                        ],
-                        1
-                      )
-                    ]
-                  )
-                ])
-              }),
-              0
+              [
+                _vm._l(_vm.calcresults, function(calclist, index) {
+                  return _c("div", [
+                    _c(
+                      "div",
+                      { staticClass: "row" },
+                      [
+                        _c(
+                          "div",
+                          {
+                            staticClass:
+                              "col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch"
+                          },
+                          [
+                            _c(
+                              "a",
+                              {
+                                staticClass:
+                                  "float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg",
+                                attrs: {
+                                  "data-toggle": "collapse",
+                                  href: "#collapseUser" + index,
+                                  role: "button",
+                                  "aria-expanded": "true",
+                                  "aria-controls": "collapseUser" + index
+                                }
+                              },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-rg",
+                                  attrs: {
+                                    src: "/images/round-search-w.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("氏名")
+                            ]),
+                            _vm._v(" "),
+                            _c(
+                              "p",
+                              {
+                                staticClass: "font-size-rg font-weight-bold m-0"
+                              },
+                              [_vm._v(_vm._s(calclist.user_name))]
+                            )
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          {
+                            staticClass:
+                              "col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch"
+                          },
+                          [
+                            _vm._m(5, true),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("部署")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-rg m-0" }, [
+                              _vm._v(_vm._s(calclist.department_name))
+                            ])
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c("col-attendance", {
+                          attrs: {
+                            attendancetime: calclist.attendance_time_1,
+                            leavingtime: calclist.leaving_time_1,
+                            displaynone: true
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-attendance", {
+                          attrs: {
+                            attendancetime: calclist.attendance_time_2,
+                            leavingtime: calclist.leaving_time_2,
+                            displaynone: false
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-attendance", {
+                          attrs: {
+                            attendancetime: calclist.attendance_time_3,
+                            leavingtime: calclist.leaving_time_3,
+                            displaynone: false
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-attendance", {
+                          attrs: {
+                            attendancetime: calclist.attendance_time_4,
+                            leavingtime: calclist.leaving_time_4,
+                            displaynone: false
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-attendance", {
+                          attrs: {
+                            attendancetime: calclist.attendance_time_5,
+                            leavingtime: calclist.leaving_time_5,
+                            displaynone: false
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-missingmiddle", {
+                          attrs: {
+                            missingmiddletime: calclist.missing_middle_time_1,
+                            missingmiddlereturntime:
+                              calclist.missing_middle_return_time_1,
+                            displaynone: true
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-missingmiddle", {
+                          attrs: {
+                            missingmiddletime: calclist.missing_middle_time_2,
+                            missingmiddlereturntime:
+                              calclist.missing_middle_return_time_2,
+                            displaynone: false
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-missingmiddle", {
+                          attrs: {
+                            missingmiddletime: calclist.missing_middle_time_3,
+                            missingmiddlereturntime:
+                              calclist.missing_middle_return_time_3,
+                            displaynone: false
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-missingmiddle", {
+                          attrs: {
+                            missingmiddletime: calclist.missing_middle_time_4,
+                            missingmiddlereturntime:
+                              calclist.missing_middle_return_time_4,
+                            displaynone: false
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-missingmiddle", {
+                          attrs: {
+                            missingmiddletime: calclist.missing_middle_time_5,
+                            missingmiddlereturntime:
+                              calclist.missing_middle_return_time_5,
+                            displaynone: false
+                          }
+                        })
+                      ],
+                      1
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        staticClass: "collapse",
+                        attrs: { id: "collapseUser" + index }
+                      },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "row mt-2" },
+                          [
+                            _c("col-employmentstatus", {
+                              attrs: {
+                                "item-name": "雇用形態",
+                                "item-value": calclist.employment_status_name
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("col-employmentstatus", {
+                              attrs: {
+                                "item-name": "勤務時間",
+                                "item-value": calclist.total_working_times
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("col-employmentstatus", {
+                              attrs: {
+                                "item-name": "勤務状態",
+                                "item-value": calclist.working_status_name
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("col-employmentstatus", {
+                              attrs: {
+                                "item-name": "勤務シフト",
+                                "item-value": calclist.working_timetable_name
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("col-regularworking", {
+                              attrs: {
+                                "item-name": "所定労働時間",
+                                "item-value": calclist.regular_working_times
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("col-regularworking", {
+                              attrs: {
+                                "item-name": "所定外労働時間",
+                                "item-value":
+                                  calclist.out_of_regular_working_times
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("col-overtimehours", {
+                              attrs: {
+                                "item-name": "残業時間",
+                                "item-value": calclist.overtime_hours
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("col-overtimehours", {
+                              attrs: {
+                                "item-name": "深夜残業時間",
+                                "item-value": calclist.late_night_overtime_hours
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("col-overtimehours", {
+                              attrs: {
+                                "item-name": "法定労働時間",
+                                "item-value": calclist.legal_working_times
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("col-overtimehours", {
+                              attrs: {
+                                "item-name": "法定外労働時間",
+                                "item-value":
+                                  calclist.out_of_legal_working_times
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("col-notemploymentworking", {
+                              attrs: {
+                                "item-name": "未就労時間",
+                                "item-value":
+                                  calclist.not_employment_working_hours
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("col-notemploymentworking", {
+                              attrs: {
+                                "item-name": "時間外労働",
+                                "item-value": calclist.off_hours_working_hours
+                              }
+                            }),
+                            _vm._v(" "),
+                            _c("col-note", {
+                              attrs: {
+                                "item-name": "備考：",
+                                "item-value": calclist.note
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]
+                    )
+                  ])
+                }),
+                _vm._v(" "),
+                _vm._l(_vm.sumresults, function(sumresult) {
+                  return _c("div", [
+                    _c(
+                      "div",
+                      { staticClass: "row" },
+                      [
+                        _c("col-employmentstatus", {
+                          attrs: { "item-name": "合　　計", "item-value": "　" }
+                        }),
+                        _vm._v(" "),
+                        _c("col-employmentstatus", {
+                          attrs: {
+                            "item-name": "勤務時間",
+                            "item-value": sumresult.total_working_times
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-employmentstatus", {
+                          attrs: { "item-name": "　", "item-value": "　" }
+                        }),
+                        _vm._v(" "),
+                        _c("col-employmentstatus", {
+                          attrs: { "item-name": "　", "item-value": "　" }
+                        }),
+                        _vm._v(" "),
+                        _c("col-regularworking", {
+                          attrs: {
+                            "item-name": "所定労働時間",
+                            "item-value": sumresult.regular_working_times
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-regularworking", {
+                          attrs: {
+                            "item-name": "所定外労働時間",
+                            "item-value": sumresult.out_of_regular_working_times
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-overtimehours", {
+                          attrs: {
+                            "item-name": "残業時間",
+                            "item-value": sumresult.overtime_hours
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-overtimehours", {
+                          attrs: {
+                            "item-name": "深夜残業時間",
+                            "item-value": sumresult.late_night_overtime_hours
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-overtimehours", {
+                          attrs: {
+                            "item-name": "法定労働時間",
+                            "item-value": sumresult.legal_working_times
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-overtimehours", {
+                          attrs: {
+                            "item-name": "法定外労働時間",
+                            "item-value": sumresult.out_of_legal_working_times
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-notemploymentworking", {
+                          attrs: {
+                            "item-name": "未就労時間",
+                            "item-value": sumresult.not_employment_working_hours
+                          }
+                        }),
+                        _vm._v(" "),
+                        _c("col-notemploymentworking", {
+                          attrs: {
+                            "item-name": "時間外労働",
+                            "item-value": sumresult.off_hours_working_hours
+                          }
+                        })
+                      ],
+                      1
+                    )
+                  ])
+                })
+              ],
+              2
             )
           ],
           1
@@ -76948,7 +77492,7 @@ var render = function() {
       ])
     ]),
     _vm._v(" "),
-    _vm._m(16)
+    _vm._m(6)
   ])
 }
 var staticRenderFns = [
@@ -77058,31 +77602,6 @@ var staticRenderFns = [
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
     return _c(
-      "a",
-      {
-        staticClass:
-          "float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg",
-        attrs: {
-          "data-toggle": "collapse",
-          href: "#collapseUser1",
-          role: "button",
-          "aria-expanded": "true",
-          "aria-controls": "collapseUser1"
-        }
-      },
-      [
-        _c("img", {
-          staticClass: "icon-size-rg",
-          attrs: { src: "/images/round-search-w.svg", alt: "" }
-        })
-      ]
-    )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
       "span",
       {
         staticClass:
@@ -77095,245 +77614,6 @@ var staticRenderFns = [
         })
       ]
     )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
-      [
-        _c("div", { staticClass: "card text-white bg-primary border-0" }, [
-          _c("div", { staticClass: "card-body px-3 py-2" }, [
-            _c("span", { staticClass: "d-md-none float-left" }, [
-              _c("img", {
-                staticClass: "icon-size-ml mr-2",
-                attrs: { src: "/images/round-access-time-w.svg", alt: "" }
-              })
-            ]),
-            _vm._v(" "),
-            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-              _vm._v("所定労働時間")
-            ]),
-            _vm._v(" "),
-            _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("08:00")])
-          ])
-        ])
-      ]
-    )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
-      [
-        _c("div", { staticClass: "card text-white bg-primary border-0" }, [
-          _c("div", { staticClass: "card-body px-3 py-2" }, [
-            _c("span", { staticClass: "d-md-none float-left" }, [
-              _c("img", {
-                staticClass: "icon-size-ml mr-2",
-                attrs: { src: "/images/round-access-time-w.svg", alt: "" }
-              })
-            ]),
-            _vm._v(" "),
-            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-              _vm._v("所定外労働時間")
-            ]),
-            _vm._v(" "),
-            _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("08:00")])
-          ])
-        ])
-      ]
-    )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
-      [
-        _c("div", { staticClass: "card text-white bg-success border-0" }, [
-          _c("div", { staticClass: "card-body px-3 py-2" }, [
-            _c("span", { staticClass: "d-md-none float-left" }, [
-              _c("img", {
-                staticClass: "icon-size-ml mr-2",
-                attrs: { src: "/images/round-watch-later-w.svg", alt: "" }
-              })
-            ]),
-            _vm._v(" "),
-            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-              _vm._v("残業時間")
-            ]),
-            _vm._v(" "),
-            _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("00:13")])
-          ])
-        ])
-      ]
-    )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
-      [
-        _c("div", { staticClass: "card text-white bg-success border-0" }, [
-          _c("div", { staticClass: "card-body px-3 py-2" }, [
-            _c("span", { staticClass: "d-md-none float-left" }, [
-              _c("img", {
-                staticClass: "icon-size-ml mr-2",
-                attrs: { src: "/images/round-watch-later-w.svg", alt: "" }
-              })
-            ]),
-            _vm._v(" "),
-            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-              _vm._v("深夜残業時間")
-            ]),
-            _vm._v(" "),
-            _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("00:00")])
-          ])
-        ])
-      ]
-    )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
-      [
-        _c("div", { staticClass: "card text-white bg-success border-0" }, [
-          _c("div", { staticClass: "card-body px-3 py-2" }, [
-            _c("span", { staticClass: "d-md-none float-left" }, [
-              _c("img", {
-                staticClass: "icon-size-ml mr-2",
-                attrs: { src: "/images/round-watch-later-w.svg", alt: "" }
-              })
-            ]),
-            _vm._v(" "),
-            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-              _vm._v("法定労働時間")
-            ]),
-            _vm._v(" "),
-            _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("00:00")])
-          ])
-        ])
-      ]
-    )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
-      [
-        _c("div", { staticClass: "card text-white bg-success border-0" }, [
-          _c("div", { staticClass: "card-body px-3 py-2" }, [
-            _c("span", { staticClass: "d-md-none float-left" }, [
-              _c("img", {
-                staticClass: "icon-size-ml mr-2",
-                attrs: { src: "/images/round-watch-later-w.svg", alt: "" }
-              })
-            ]),
-            _vm._v(" "),
-            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-              _vm._v("法定外労働時間")
-            ]),
-            _vm._v(" "),
-            _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("00:00")])
-          ])
-        ])
-      ]
-    )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
-      [
-        _c("div", { staticClass: "card text-white bg-warning border-0" }, [
-          _c("div", { staticClass: "card-body px-3 py-2" }, [
-            _c("span", { staticClass: "d-md-none float-left" }, [
-              _c("img", {
-                staticClass: "icon-size-ml mr-2",
-                attrs: { src: "/images/round-watch-later-w.svg", alt: "" }
-              })
-            ]),
-            _vm._v(" "),
-            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-              _vm._v("未就労時間")
-            ]),
-            _vm._v(" "),
-            _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("00:00")])
-          ])
-        ])
-      ]
-    )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
-      [
-        _c("div", { staticClass: "card text-white bg-warning border-0" }, [
-          _c("div", { staticClass: "card-body px-3 py-2" }, [
-            _c("span", { staticClass: "d-md-none float-left" }, [
-              _c("img", {
-                staticClass: "icon-size-ml mr-2",
-                attrs: { src: "/images/round-watch-later-w.svg", alt: "" }
-              })
-            ]),
-            _vm._v(" "),
-            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-              _vm._v("時間外労働")
-            ]),
-            _vm._v(" "),
-            _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("00:00")])
-          ])
-        ])
-      ]
-    )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "col-12 pb-2 align-self-stretch" }, [
-      _c("div", { staticClass: "card text-white bg-danger border-0" }, [
-        _c("div", { staticClass: "card-body px-3 py-2" }, [
-          _c("span", { staticClass: "d-md-none float-left" }, [
-            _c("img", {
-              staticClass: "icon-size-ml mr-2",
-              attrs: { src: "/images/round-error-w.svg", alt: "" }
-            })
-          ]),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0" }, [_vm._v("お知らせ")]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-sm my-2" }, [
-            _vm._v("※打刻時間が不正です。")
-          ])
-        ])
-      ])
-    ])
   },
   function() {
     var _vm = this
@@ -94409,7 +94689,11 @@ Vue.component("select-employmentstatus", __webpack_require__(/*! ./components/Se
 Vue.component("col-attendance", __webpack_require__(/*! ./components/ColAttendance.vue */ "./resources/js/components/ColAttendance.vue")["default"]);
 Vue.component("col-missingmiddle", __webpack_require__(/*! ./components/ColMissingMiddle.vue */ "./resources/js/components/ColMissingMiddle.vue")["default"]);
 Vue.component("col-missingmiddle", __webpack_require__(/*! ./components/ColMissingMiddle.vue */ "./resources/js/components/ColMissingMiddle.vue")["default"]);
-Vue.component("col-employmentstatus", __webpack_require__(/*! ./components/ColEmploymentStatus.vue */ "./resources/js/components/ColEmploymentStatus.vue")["default"]); // CSV ダウンロードボタン
+Vue.component("col-employmentstatus", __webpack_require__(/*! ./components/ColEmploymentStatus.vue */ "./resources/js/components/ColEmploymentStatus.vue")["default"]);
+Vue.component("col-regularworking", __webpack_require__(/*! ./components/ColRegularWorking.vue */ "./resources/js/components/ColRegularWorking.vue")["default"]);
+Vue.component("col-overtimehours", __webpack_require__(/*! ./components/ColOvertimeHours.vue */ "./resources/js/components/ColOvertimeHours.vue")["default"]);
+Vue.component("col-notemploymentworking", __webpack_require__(/*! ./components/ColNotEmploymentWorking.vue */ "./resources/js/components/ColNotEmploymentWorking.vue")["default"]);
+Vue.component("col-note", __webpack_require__(/*! ./components/ColNote.vue */ "./resources/js/components/ColNote.vue")["default"]); // CSV ダウンロードボタン
 
 Vue.component("btn-csv-download", __webpack_require__(/*! ./components/BtnCsvDownload.vue */ "./resources/js/components/BtnCsvDownload.vue")["default"]);
 /**
@@ -94825,6 +95109,282 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColMissingMiddle_vue_vue_type_template_id_494a4434___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColMissingMiddle_vue_vue_type_template_id_494a4434___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/ColNotEmploymentWorking.vue":
+/*!*************************************************************!*\
+  !*** ./resources/js/components/ColNotEmploymentWorking.vue ***!
+  \*************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ColNotEmploymentWorking_vue_vue_type_template_id_67ece1d2___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ColNotEmploymentWorking.vue?vue&type=template&id=67ece1d2& */ "./resources/js/components/ColNotEmploymentWorking.vue?vue&type=template&id=67ece1d2&");
+/* harmony import */ var _ColNotEmploymentWorking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ColNotEmploymentWorking.vue?vue&type=script&lang=js& */ "./resources/js/components/ColNotEmploymentWorking.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _ColNotEmploymentWorking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _ColNotEmploymentWorking_vue_vue_type_template_id_67ece1d2___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _ColNotEmploymentWorking_vue_vue_type_template_id_67ece1d2___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/ColNotEmploymentWorking.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/ColNotEmploymentWorking.vue?vue&type=script&lang=js&":
+/*!**************************************************************************************!*\
+  !*** ./resources/js/components/ColNotEmploymentWorking.vue?vue&type=script&lang=js& ***!
+  \**************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ColNotEmploymentWorking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./ColNotEmploymentWorking.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColNotEmploymentWorking.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ColNotEmploymentWorking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/ColNotEmploymentWorking.vue?vue&type=template&id=67ece1d2&":
+/*!********************************************************************************************!*\
+  !*** ./resources/js/components/ColNotEmploymentWorking.vue?vue&type=template&id=67ece1d2& ***!
+  \********************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColNotEmploymentWorking_vue_vue_type_template_id_67ece1d2___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./ColNotEmploymentWorking.vue?vue&type=template&id=67ece1d2& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColNotEmploymentWorking.vue?vue&type=template&id=67ece1d2&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColNotEmploymentWorking_vue_vue_type_template_id_67ece1d2___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColNotEmploymentWorking_vue_vue_type_template_id_67ece1d2___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/ColNote.vue":
+/*!*********************************************!*\
+  !*** ./resources/js/components/ColNote.vue ***!
+  \*********************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ColNote_vue_vue_type_template_id_46bdf5f7___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ColNote.vue?vue&type=template&id=46bdf5f7& */ "./resources/js/components/ColNote.vue?vue&type=template&id=46bdf5f7&");
+/* harmony import */ var _ColNote_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ColNote.vue?vue&type=script&lang=js& */ "./resources/js/components/ColNote.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _ColNote_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _ColNote_vue_vue_type_template_id_46bdf5f7___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _ColNote_vue_vue_type_template_id_46bdf5f7___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/ColNote.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/ColNote.vue?vue&type=script&lang=js&":
+/*!**********************************************************************!*\
+  !*** ./resources/js/components/ColNote.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ColNote_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./ColNote.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColNote.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ColNote_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/ColNote.vue?vue&type=template&id=46bdf5f7&":
+/*!****************************************************************************!*\
+  !*** ./resources/js/components/ColNote.vue?vue&type=template&id=46bdf5f7& ***!
+  \****************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColNote_vue_vue_type_template_id_46bdf5f7___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./ColNote.vue?vue&type=template&id=46bdf5f7& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColNote.vue?vue&type=template&id=46bdf5f7&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColNote_vue_vue_type_template_id_46bdf5f7___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColNote_vue_vue_type_template_id_46bdf5f7___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/ColOvertimeHours.vue":
+/*!******************************************************!*\
+  !*** ./resources/js/components/ColOvertimeHours.vue ***!
+  \******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ColOvertimeHours_vue_vue_type_template_id_ea6ff08e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ColOvertimeHours.vue?vue&type=template&id=ea6ff08e& */ "./resources/js/components/ColOvertimeHours.vue?vue&type=template&id=ea6ff08e&");
+/* harmony import */ var _ColOvertimeHours_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ColOvertimeHours.vue?vue&type=script&lang=js& */ "./resources/js/components/ColOvertimeHours.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _ColOvertimeHours_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _ColOvertimeHours_vue_vue_type_template_id_ea6ff08e___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _ColOvertimeHours_vue_vue_type_template_id_ea6ff08e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/ColOvertimeHours.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/ColOvertimeHours.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************!*\
+  !*** ./resources/js/components/ColOvertimeHours.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ColOvertimeHours_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./ColOvertimeHours.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColOvertimeHours.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ColOvertimeHours_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/ColOvertimeHours.vue?vue&type=template&id=ea6ff08e&":
+/*!*************************************************************************************!*\
+  !*** ./resources/js/components/ColOvertimeHours.vue?vue&type=template&id=ea6ff08e& ***!
+  \*************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColOvertimeHours_vue_vue_type_template_id_ea6ff08e___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./ColOvertimeHours.vue?vue&type=template&id=ea6ff08e& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColOvertimeHours.vue?vue&type=template&id=ea6ff08e&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColOvertimeHours_vue_vue_type_template_id_ea6ff08e___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColOvertimeHours_vue_vue_type_template_id_ea6ff08e___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/ColRegularWorking.vue":
+/*!*******************************************************!*\
+  !*** ./resources/js/components/ColRegularWorking.vue ***!
+  \*******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ColRegularWorking_vue_vue_type_template_id_13e0c43a___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ColRegularWorking.vue?vue&type=template&id=13e0c43a& */ "./resources/js/components/ColRegularWorking.vue?vue&type=template&id=13e0c43a&");
+/* harmony import */ var _ColRegularWorking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ColRegularWorking.vue?vue&type=script&lang=js& */ "./resources/js/components/ColRegularWorking.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _ColRegularWorking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _ColRegularWorking_vue_vue_type_template_id_13e0c43a___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _ColRegularWorking_vue_vue_type_template_id_13e0c43a___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/ColRegularWorking.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/ColRegularWorking.vue?vue&type=script&lang=js&":
+/*!********************************************************************************!*\
+  !*** ./resources/js/components/ColRegularWorking.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ColRegularWorking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./ColRegularWorking.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColRegularWorking.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ColRegularWorking_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/ColRegularWorking.vue?vue&type=template&id=13e0c43a&":
+/*!**************************************************************************************!*\
+  !*** ./resources/js/components/ColRegularWorking.vue?vue&type=template&id=13e0c43a& ***!
+  \**************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColRegularWorking_vue_vue_type_template_id_13e0c43a___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./ColRegularWorking.vue?vue&type=template&id=13e0c43a& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColRegularWorking.vue?vue&type=template&id=13e0c43a&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColRegularWorking_vue_vue_type_template_id_13e0c43a___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColRegularWorking_vue_vue_type_template_id_13e0c43a___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 
