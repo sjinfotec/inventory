@@ -2091,10 +2091,12 @@ class DailyWorkingInformationController extends Controller
         
                 // 労働時間の計算
                 // 中抜けは複数ある可能性があるので中抜け計算は戻り時点で計算する。
-                if ($missing_middle_time <> ''){
+                Log::DEBUG('$missing_middle_time = '.$missing_middle_time);
+                if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
                     $array_add_missing_middle_time[] = $missing_middle_time;
+                    Log::DEBUG('$array_add_missing_middle_time count = '.count($array_add_missing_middle_time));
                 }
-                if ($missing_middle_return_time <> ''){
+                if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
                     $array_add_missing_middle_return_time[] = $missing_middle_return_time;
                 }
                 if ($missing_middle_time <> '' && $missing_middle_return_time <> ''){
@@ -2116,10 +2118,10 @@ class DailyWorkingInformationController extends Controller
                 }
                 // 退勤データで当日計算する場合
                 if ($result->current_calc == '1') {
-                    if ($attendance_time <> ''){
+                    if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
                         $array_add_attendance_time[] = $attendance_time;
                     }
-                    if ($leaving_time <> ''){
+                    if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                         $array_add_leaving_time[] = $leaving_time;
                     }
                     for ($i=0;$i<count($array_working_time_kubun);$i++) {

@@ -952,12 +952,15 @@ class WorkingTimedate extends Model
                     $this->table.'.employment_status',
                     $this->table.'.department_id',
                     $this->table.'.user_code',
-                    $this->table.'.employment_status_name',
-                    $this->table.'.department_name',
-                    $this->table.'.user_name',
+                    $this->table.'.ifnull(employment_status_name,'') as employment_status_name',
+                    $this->table.'.ifnull(department_name,'') as department_name',
+                    $this->table.'.ifnull(user_name,'') as user_name',
                     $this->table.'.working_timetable_no',
-                    $this->table.'.working_timetable_name',
+                    $this->table.'.ifnull(working_timetable_name,'') as working_timetable_name',
                     $this->table.'.employment_status');
+            $case_where = "CASE ifnull({0},0) WHEN 0 THEN '00:00' ";
+            $case_where .= "ELSE CONCAT(CONCAT(LPAD(TRUNCATE({0}, 0), 2, '0'),':'),LPAD(TRUNCATE((mod({0} * 100, 100) * 60) / 100, 0) , 2, '0')) ";
+            $case_where .= ' END as {1}';
             $mainquery->selectRaw('DATE_FORMAT('.$this->table.'.attendance_time_1,'."'%H:%i'".')  as attendance_time_1')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.attendance_time_2,'."'%H:%i'".')  as attendance_time_2')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.attendance_time_3,'."'%H:%i'".')  as attendance_time_3')
@@ -977,29 +980,30 @@ class WorkingTimedate extends Model
                 ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_return_time_2,'."'%H:%i'".')  as missing_middle_return_time_2')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_return_time_3,'."'%H:%i'".')  as missing_middle_return_time_3')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_return_time_4,'."'%H:%i'".')  as missing_middle_return_time_4')
-                ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_return_time_5,'."'%H:%i'".')  as missing_middle_return_time_5');
-            $mainquery->addselect($this->table.'.total_working_times')
-                ->addselect($this->table.'.regular_working_times')
-                ->addselect($this->table.'.out_of_regular_working_times')
-                ->addselect($this->table.'.overtime_hours')
-                ->addselect($this->table.'.late_night_overtime_hours')
-                ->addselect($this->table.'.legal_working_times')
-                ->addselect($this->table.'.out_of_legal_working_times')
-                ->addselect($this->table.'.not_employment_working_hours')
-                ->addselect($this->table.'.off_hours_working_hours')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_return_time_5,'."'%H:%i'".')  as missing_middle_return_time_5')
+                ->selectRaw(str_replace('{1}', 'total_working_times', str_replace('{0}', $this->table.'.total_working_times', $case_where)))
+                ->selectRaw(str_replace('{1}', 'regular_working_times', str_replace('{0}', $this->table.'.regular_working_times', $case_where)))
+                ->selectRaw(str_replace('{1}', 'out_of_regular_working_times', str_replace('{0}', $this->table.'.out_of_regular_working_times', $case_where)))
+                ->selectRaw(str_replace('{1}', 'overtime_hours', str_replace('{0}', $this->table.'.overtime_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'late_night_overtime_hours', str_replace('{0}', $this->table.'.late_night_overtime_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'legal_working_times', str_replace('{0}', $this->table.'.legal_working_times', $case_where)))
+                ->selectRaw(str_replace('{1}', 'out_of_legal_working_times', str_replace('{0}', $this->table.'.out_of_legal_working_times', $case_where)))
+                ->selectRaw(str_replace('{1}', 'not_employment_working_hours', str_replace('{0}', $this->table.'.not_employment_working_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'off_hours_working_hours', str_replace('{0}', $this->table.'.off_hours_working_hours', $case_where)));
+            $mainquery
                 ->addselect($this->table.'.working_status')
-                ->addselect($this->table.'.working_status_name')
-                ->addselect($this->table.'.note')
+                ->addselect($this->table.'.ifnull(working_status_name,'') as working_status_name')
+                ->addselect($this->table.'.ifnull(note,'') as note')
                 ->addselect($this->table.'.late')
                 ->addselect($this->table.'.leave_early')
                 ->addselect($this->table.'.current_calc')
                 ->addselect($this->table.'.to_be_confirmed')
                 ->addselect($this->table.'.weekday_kubun')
-                ->addselect($this->table.'.weekday_name')
+                ->addselect($this->table.'.ifnull(weekday_name,'') as weekday_name')
                 ->addselect($this->table.'.business_kubun')
-                ->addselect($this->table.'.business_name')
+                ->addselect($this->table.'.ifnull(business_name,'') as business_name')
                 ->addselect($this->table.'.holiday_kubun')
-                ->addselect($this->table.'.holiday_name')
+                ->addselect($this->table.'.ifnull(holiday_name,'') as holiday_name')
                 ->addselect($this->table.'.closing')
                 ->addselect($this->table.'.uplimit_time')
                 ->addselect($this->table.'.statutory_uplimit_time')
