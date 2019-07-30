@@ -945,22 +945,26 @@ class WorkingTimedate extends Model
         // 日次労働時間取得SQL作成
         \DB::enableQueryLog();
         try{
+            $case_where = "CASE ifnull({0},0) WHEN 0 THEN '00:00' ";
+            $case_where .= "ELSE CONCAT(CONCAT(LPAD(TRUNCATE({0}, 0), 2, '0'),':'),LPAD(TRUNCATE((mod({0} * 100, 100) * 60) / 100, 0) , 2, '0')) ";
+            $case_where .= ' END as {1}';
 
             $mainquery = DB::table($this->table)
                 ->select(
                     $this->table.'.working_date',
                     $this->table.'.employment_status',
                     $this->table.'.department_id',
-                    $this->table.'.user_code',
-                    $this->table.'.ifnull(employment_status_name,'') as employment_status_name',
-                    $this->table.'.ifnull(department_name,'') as department_name',
-                    $this->table.'.ifnull(user_name,'') as user_name',
-                    $this->table.'.working_timetable_no',
-                    $this->table.'.ifnull(working_timetable_name,'') as working_timetable_name',
-                    $this->table.'.employment_status');
-            $case_where = "CASE ifnull({0},0) WHEN 0 THEN '00:00' ";
-            $case_where .= "ELSE CONCAT(CONCAT(LPAD(TRUNCATE({0}, 0), 2, '0'),':'),LPAD(TRUNCATE((mod({0} * 100, 100) * 60) / 100, 0) , 2, '0')) ";
-            $case_where .= ' END as {1}';
+                    $this->table.'.user_code');
+            $mainquery
+                ->selectRaw('ifnull('.$this->table.".employment_status_name,'　')  as employment_status_name")
+                ->selectRaw('ifnull('.$this->table.".department_name,'　')  as department_name")
+                ->selectRaw('ifnull('.$this->table.".user_name,'　')  as user_name");
+            $mainquery
+                ->addselect($this->table.'.working_timetable_no');
+            $mainquery
+                ->selectRaw('ifnull('.$this->table.".working_timetable_name,'　')  as working_timetable_name");
+            $mainquery
+                ->addselect($this->table.'.employment_status');
             $mainquery->selectRaw('DATE_FORMAT('.$this->table.'.attendance_time_1,'."'%H:%i'".')  as attendance_time_1')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.attendance_time_2,'."'%H:%i'".')  as attendance_time_2')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.attendance_time_3,'."'%H:%i'".')  as attendance_time_3')
@@ -990,20 +994,29 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'out_of_legal_working_times', str_replace('{0}', $this->table.'.out_of_legal_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'not_employment_working_hours', str_replace('{0}', $this->table.'.not_employment_working_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'off_hours_working_hours', str_replace('{0}', $this->table.'.off_hours_working_hours', $case_where)));
+
             $mainquery
-                ->addselect($this->table.'.working_status')
-                ->addselect($this->table.'.ifnull(working_status_name,'') as working_status_name')
-                ->addselect($this->table.'.ifnull(note,'') as note')
+                ->addselect($this->table.'.working_status');
+            $mainquery
+                ->selectRaw('ifnull('.$this->table.".working_status_name,'　')  as working_status_name")
+                ->selectRaw('ifnull('.$this->table.".note,'') as note");
+            $mainquery
                 ->addselect($this->table.'.late')
                 ->addselect($this->table.'.leave_early')
                 ->addselect($this->table.'.current_calc')
                 ->addselect($this->table.'.to_be_confirmed')
-                ->addselect($this->table.'.weekday_kubun')
-                ->addselect($this->table.'.ifnull(weekday_name,'') as weekday_name')
-                ->addselect($this->table.'.business_kubun')
-                ->addselect($this->table.'.ifnull(business_name,'') as business_name')
-                ->addselect($this->table.'.holiday_kubun')
-                ->addselect($this->table.'.ifnull(holiday_name,'') as holiday_name')
+                ->addselect($this->table.'.weekday_kubun');
+            $mainquery
+                ->selectRaw('ifnull('.$this->table.".weekday_name,'　')  as weekday_name");
+            $mainquery
+                ->addselect($this->table.'.business_kubun');
+            $mainquery
+                ->selectRaw('ifnull('.$this->table.".business_name,'　')  as business_name");
+            $mainquery
+                ->addselect($this->table.'.holiday_kubun');
+            $mainquery
+                ->selectRaw('ifnull('.$this->table.".holiday_name,'　')  as holiday_name");
+            $mainquery
                 ->addselect($this->table.'.closing')
                 ->addselect($this->table.'.uplimit_time')
                 ->addselect($this->table.'.statutory_uplimit_time')
@@ -1028,6 +1041,103 @@ class WorkingTimedate extends Model
                 ->orderBy($this->table.'.department_id', 'asc')
                 ->orderBy($this->table.'.user_code', 'asc')
                 ->get();
+            
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getWorkingTimeDateUserJoin' => \DB::getQueryLog()
+            ]
+        );
+        
+        return $result;
+    }
+
+    /**
+     * 日次労働時間合計取得
+     *
+     *      指定したユーザー、日付範囲内の労働時間計算のもとデータを取得するSQL
+     *
+     *      INPUT：
+     *          ①テーブル：departments　部署範囲内 and 削除=0
+     *          ②テーブル：users　      ユーザー範囲内 and 削除=0
+     *          ③テーブル：work_times　 ユーザーand日付範囲内 and 削除=0
+     *
+     * @return sql取得結果
+     */
+    public function getWorkingTimeDateTimeSum(){
+
+
+        // 日次労働時間合計取得SQL作成
+        \DB::enableQueryLog();
+        try{
+            $case_where = "CASE ifnull({0},0) WHEN 0 THEN '00:00' ";
+            $case_where .= "ELSE CONCAT(CONCAT(LPAD(TRUNCATE({0}, 0), 2, '0'),':'),LPAD(TRUNCATE((mod({0} * 100, 100) * 60) / 100, 0) , 2, '0')) ";
+            $case_where .= ' END as {1}';
+
+            $subquery = DB::table($this->table)
+                ->selectRaw('sum(ifnull('.$this->table.'.total_working_times, 0)) as total_working_times')
+                ->selectRaw('sum(ifnull('.$this->table.'.regular_working_times, 0)) as regular_working_times')
+                ->selectRaw('sum(ifnull('.$this->table.'.out_of_regular_working_times, 0)) as out_of_regular_working_times')
+                ->selectRaw('sum(ifnull('.$this->table.'.overtime_hours, 0)) as overtime_hours')
+                ->selectRaw('sum(ifnull('.$this->table.'.late_night_overtime_hours, 0)) as late_night_overtime_hours')
+                ->selectRaw('sum(ifnull('.$this->table.'.legal_working_times, 0)) as legal_working_times')
+                ->selectRaw('sum(ifnull('.$this->table.'.out_of_legal_working_times, 0)) as out_of_legal_working_times')
+                ->selectRaw('sum(ifnull('.$this->table.'.not_employment_working_hours, 0)) as not_employment_working_hours')
+                ->selectRaw('sum(ifnull('.$this->table.'.off_hours_working_hours, 0)) as off_hours_working_hours')
+                ;
+            $subquery = $this->setWhereSql($subquery)->toSql();
+
+            $mainquery = DB::table(DB::raw('('.$subquery.') AS t1'))
+                ->selectRaw(str_replace('{1}', 'total_working_times', str_replace('{0}', 't1.total_working_times', $case_where)))
+                ->selectRaw(str_replace('{1}', 'regular_working_times', str_replace('{0}', 't1.regular_working_times', $case_where)))
+                ->selectRaw(str_replace('{1}', 'out_of_regular_working_times', str_replace('{0}', 't1.out_of_regular_working_times', $case_where)))
+                ->selectRaw(str_replace('{1}', 'overtime_hours', str_replace('{0}', 't1.overtime_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'late_night_overtime_hours', str_replace('{0}', 't1.late_night_overtime_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'legal_working_times', str_replace('{0}', 't1.legal_working_times', $case_where)))
+                ->selectRaw(str_replace('{1}', 'out_of_legal_working_times', str_replace('{0}', 't1.out_of_legal_working_times', $case_where)))
+                ->selectRaw(str_replace('{1}', 'not_employment_working_hours', str_replace('{0}', 't1.not_employment_working_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'off_hours_working_hours', str_replace('{0}', 't1.off_hours_working_hours', $case_where)))
+                ;
+
+            $array_setBindingsStr = array();
+            $cnt = 0;
+            if(!empty($this->param_date_from) && !empty($this->param_date_to)){
+                $cnt += 1;
+                $array_setBindingsStr = array($cnt=>$this->param_date_from);
+                $cnt += 1;
+                $array_setBindingsStr += array($cnt=>$this->param_date_to);
+            }
+            
+            if(!empty($this->param_employment_status)){
+                $cnt += 1;
+                $array_setBindingsStr += array($cnt=>$this->param_employment_status);
+            }
+            
+            if(!empty($this->param_user_code)){
+                $cnt += 1;
+                $array_setBindingsStr += array($cnt=>$this->param_user_code);
+            }
+            
+            if(!empty($this->param_department_id)){
+                $cnt += 1;
+                $array_setBindingsStr += array($cnt=>$this->param_department_id);
+            }
+
+            if (count($array_setBindingsStr) > 0) {
+                $mainquery->setBindings($array_setBindingsStr);
+            }
+
+            $result = $mainquery->get();
             
         }catch(\PDOException $pe){
             Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
