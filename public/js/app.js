@@ -3520,6 +3520,19 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "EditWorkTimes",
@@ -3536,7 +3549,11 @@ __webpack_require__.r(__webpack_exports__);
       month: "",
       selectMonth: "",
       baseYear: "",
-      details: []
+      userLeaveKbnList: [],
+      details: [],
+      modeList: [],
+      kbn: [{}],
+      mode: [{}]
     };
   },
   // マウント時
@@ -3544,7 +3561,9 @@ __webpack_require__.r(__webpack_exports__);
     // this.getTimeTableList();
     var date = new Date();
     var baseDate = new Date("2018/01/01 8:00:00");
-    this.baseYear = baseDate.getFullYear(); // this.baseYear = baseDate;
+    this.baseYear = baseDate.getFullYear();
+    this.getUserLeaveKbnList();
+    this.getModeList(); // this.baseYear = baseDate;
   },
   // セレクトボックス変更時
   watch: {
@@ -3552,8 +3571,7 @@ __webpack_require__.r(__webpack_exports__);
       var _this = this;
 
       this.details.forEach(function (detail, i) {
-        _this.business[i] = detail.business_kubun;
-        _this.holiday[i] = detail.holiday_kubun;
+        _this.mode[i] = detail.mode;
       });
     },
     month: function month(val, oldVal) {
@@ -3576,6 +3594,26 @@ __webpack_require__.r(__webpack_exports__);
         alert("error");
       });
     },
+    getUserLeaveKbnList: function getUserLeaveKbnList() {
+      var _this3 = this;
+
+      this.$axios.get("/get_user_leave_kbn").then(function (response) {
+        _this3.userLeaveKbnList = response.data;
+        console.log("個人休暇区分取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
+    },
+    getModeList: function getModeList() {
+      var _this4 = this;
+
+      this.$axios.get("/get_mode_list").then(function (response) {
+        _this4.modeList = response.data;
+        console.log("モード取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
+    },
     // 雇用形態が変更された場合の処理
     employmentChanges: function employmentChanges(value) {
       this.valueemploymentstatus = value; // ユーザー選択コンポーネントの取得メソッドを実行
@@ -3583,9 +3621,17 @@ __webpack_require__.r(__webpack_exports__);
       this.getDo = 1;
 
       if (this.valuedepartment == "") {
-        this.$refs.selectuser.getUserList(this.getDo, value);
+        if (this.valueemploymentstatus == "") {
+          this.$refs.selectuser.getUserList(this.getDo);
+        } else {
+          this.$refs.selectuser.getUserListByEmployment(this.getDo, this.valueemploymentstatus);
+        }
       } else {
-        this.$refs.selectuser.getUserListByEmployment(this.getDo, this.valuedepartment, value);
+        if (this.valueemploymentstatus == "") {
+          this.$refs.selectuser.getUserListByDepartment(this.getDo, this.valuedepartment);
+        } else {
+          this.$refs.selectuser.getUserListByDepartmentEmployment(this.getDo, this.valuedepartment, this.valueemploymentstatus);
+        }
       }
     },
     // 部署選択が変更された場合の処理
@@ -3595,17 +3641,27 @@ __webpack_require__.r(__webpack_exports__);
       this.getDo = 1;
 
       if (this.valueemploymentstatus == "") {
-        this.$refs.selectuser.getUserList(this.getDo, value);
+        if (this.valuedepartment == "") {
+          this.$refs.selectuser.getUserList(this.getDo);
+        } else {
+          this.$refs.selectuser.getUserListByDepartment(this.getDo, this.valuedepartment);
+        }
       } else {
-        this.$refs.selectuser.getUserListByEmployment(this.getDo, value, this.valueemploymentstatus);
+        if (this.valuedepartment == "") {
+          this.$refs.selectuser.getUserListByEmployment(this.getDo, this.valueemploymentstatus);
+        } else {
+          this.$refs.selectuser.getUserListByDepartmentEmployment(this.getDo, this.valuedepartment, this.valueemploymentstatus);
+        }
       }
     },
     // ユーザー選択が変更された場合の処理
     userChanges: function userChanges(value) {
       this.valueuser = value;
     },
+    del: function del() {// this.valueuser = value;
+    },
     store: function store() {
-      var _this3 = this;
+      var _this5 = this;
 
       this.$axios.post("/edit_calendar/store", {
         details: this.details,
@@ -3615,7 +3671,7 @@ __webpack_require__.r(__webpack_exports__);
         var res = response.data;
 
         if (res.result == 0) {
-          _this3.$toasted.show("登録しました");
+          _this5.$toasted.show("登録しました");
         } else {
           var options = {
             position: "bottom-center",
@@ -3624,7 +3680,7 @@ __webpack_require__.r(__webpack_exports__);
             type: "error"
           };
 
-          _this3.$toasted.show("登録に失敗しました", options);
+          _this5.$toasted.show("登録に失敗しました", options);
         }
       })["catch"](function (reason) {});
     },
@@ -77769,14 +77825,22 @@ var render = function() {
               _vm._s(_vm.month) +
               " 月 〆日から表示\n    "
           ),
+          _c("div", [
+            _c("span", [_vm._v(_vm._s(_vm.details[0].user_name))]),
+            _vm._v(" "),
+            _c("span", [_vm._v(_vm._s(_vm.details[0].d_name))])
+          ]),
+          _vm._v(" "),
           _c("table", { staticClass: "table" }, [
             _vm._m(0),
             _vm._v(" "),
             _c(
               "tbody",
               _vm._l(_vm.details, function(item, index) {
-                return _c("tr", { key: item.date }, [
+                return _c("tr", { key: item.id }, [
                   _c("td", [_vm._v(_vm._s(item.date))]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v(_vm._s(item.time))]),
                   _vm._v(" "),
                   _c("td", [
                     _c(
@@ -77786,8 +77850,8 @@ var render = function() {
                           {
                             name: "model",
                             rawName: "v-model",
-                            value: _vm.business[index],
-                            expression: "business[index]"
+                            value: _vm.details[index].mode,
+                            expression: "details[index].mode"
                           }
                         ],
                         staticClass: "form-control",
@@ -77802,8 +77866,8 @@ var render = function() {
                                 return val
                               })
                             _vm.$set(
-                              _vm.business,
-                              index,
+                              _vm.details[index],
+                              "mode",
                               $event.target.multiple
                                 ? $$selectedVal
                                 : $$selectedVal[0]
@@ -77814,11 +77878,11 @@ var render = function() {
                       [
                         _c("option", { attrs: { value: "" } }),
                         _vm._v(" "),
-                        _vm._l(_vm.BusinessDayList, function(blist) {
+                        _vm._l(_vm.modeList, function(mode) {
                           return _c(
                             "option",
-                            { domProps: { value: blist.code } },
-                            [_vm._v(_vm._s(blist.code_name))]
+                            { domProps: { value: mode.code } },
+                            [_vm._v(_vm._s(mode.code_name))]
                           )
                         })
                       ],
@@ -77826,51 +77890,109 @@ var render = function() {
                     )
                   ]),
                   _vm._v(" "),
+                  index == 0
+                    ? _c("td", [
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.kbn[index],
+                                expression: "kbn[index]"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.kbn,
+                                  index,
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          [
+                            _c("option", { attrs: { value: "" } }),
+                            _vm._v(" "),
+                            _vm._l(_vm.userLeaveKbnList, function(list) {
+                              return _c(
+                                "option",
+                                { domProps: { value: list.code } },
+                                [_vm._v(_vm._s(list.code_name))]
+                              )
+                            })
+                          ],
+                          2
+                        )
+                      ])
+                    : item.kbn_flag == 1
+                    ? _c("td", [
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.kbn[index],
+                                expression: "kbn[index]"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.kbn,
+                                  index,
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          [
+                            _c("option", { attrs: { value: "" } }),
+                            _vm._v(" "),
+                            _vm._l(_vm.userLeaveKbnList, function(list) {
+                              return _c(
+                                "option",
+                                { domProps: { value: list.code } },
+                                [_vm._v(_vm._s(list.code_name))]
+                              )
+                            })
+                          ],
+                          2
+                        )
+                      ])
+                    : _c("td"),
+                  _vm._v(" "),
                   _c("td", [
                     _c(
-                      "select",
-                      {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.holiday[index],
-                            expression: "holiday[index]"
-                          }
-                        ],
-                        staticClass: "form-control",
-                        on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
-                            _vm.$set(
-                              _vm.holiday,
-                              index,
-                              $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
-                            )
-                          }
-                        }
-                      },
-                      [
-                        _c("option", { attrs: { value: "" } }),
-                        _vm._v(" "),
-                        _vm._l(_vm.HoliDayList, function(hlist) {
-                          return _c(
-                            "option",
-                            { domProps: { value: hlist.code } },
-                            [_vm._v(_vm._s(hlist.code_name))]
-                          )
-                        })
-                      ],
-                      2
+                      "button",
+                      { staticClass: "btn btn-danger", on: { click: _vm.del } },
+                      [_vm._v("削除")]
                     )
                   ])
                 ])
@@ -77891,13 +78013,9 @@ var staticRenderFns = [
       _c("tr", [
         _c("th", [_vm._v("日付")]),
         _vm._v(" "),
-        _c("th", [_vm._v("出勤時間")]),
+        _c("th", [_vm._v("時間")]),
         _vm._v(" "),
-        _c("th", [_vm._v("退勤時間")]),
-        _vm._v(" "),
-        _c("th", [_vm._v("中抜け開始")]),
-        _vm._v(" "),
-        _c("th", [_vm._v("中抜け終了")]),
+        _c("th", [_vm._v("モード")]),
         _vm._v(" "),
         _c("th", [_vm._v("備考")]),
         _vm._v(" "),
@@ -94289,6 +94407,7 @@ Vue.component("message-data", __webpack_require__(/*! ./components/MessageData.v
 Vue.component("worktime-day", __webpack_require__(/*! ./components/WorkTimeDateTable.vue */ "./resources/js/components/WorkTimeDateTable.vue")["default"]);
 Vue.component("select-employmentstatus", __webpack_require__(/*! ./components/SelectEmploymentStatus.vue */ "./resources/js/components/SelectEmploymentStatus.vue")["default"]);
 Vue.component("col-attendance", __webpack_require__(/*! ./components/ColAttendance.vue */ "./resources/js/components/ColAttendance.vue")["default"]);
+Vue.component("col-missingmiddle", __webpack_require__(/*! ./components/ColMissingMiddle.vue */ "./resources/js/components/ColMissingMiddle.vue")["default"]);
 Vue.component("col-missingmiddle", __webpack_require__(/*! ./components/ColMissingMiddle.vue */ "./resources/js/components/ColMissingMiddle.vue")["default"]);
 Vue.component("col-employmentstatus", __webpack_require__(/*! ./components/ColEmploymentStatus.vue */ "./resources/js/components/ColEmploymentStatus.vue")["default"]); // CSV ダウンロードボタン
 

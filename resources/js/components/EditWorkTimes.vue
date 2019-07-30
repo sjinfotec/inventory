@@ -39,32 +39,45 @@
     </div>
     <div class="margin-set-mid" v-if="details.length ">
       {{ year }}年 {{ month }} 月 〆日から表示
+      <div>
+        <span>{{ details[0].user_name }}</span>
+        <span>{{details[0].d_name}}</span>
+      </div>
       <table class="table">
         <thead>
           <tr>
             <th>日付</th>
-            <th>出勤時間</th>
-            <th>退勤時間</th>
-            <th>中抜け開始</th>
-            <th>中抜け終了</th>
+            <th>時間</th>
+            <th>モード</th>
             <th>備考</th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item,index) in details" v-bind:key="item.date">
+          <tr v-for="(item,index) in details" v-bind:key="item.id">
             <td>{{item.date}}</td>
+            <td>{{ item.time}}</td>
             <td>
-              <select class="form-control" v-model="business[index]">
+              <select class="form-control" v-model="details[index].mode">
                 <option value></option>
-                <option v-for="blist in BusinessDayList" :value="blist.code">{{ blist.code_name }}</option>
+                <option v-for="mode in modeList" :value="mode.code">{{ mode.code_name }}</option>
               </select>
             </td>
-            <td>
-              <select class="form-control" v-model="holiday[index]">
+            <td v-if="index==0">
+              <select class="form-control" v-model="kbn[index]">
                 <option value></option>
-                <option v-for=" hlist in HoliDayList" :value="hlist.code">{{ hlist.code_name }}</option>
+                <option v-for="list in userLeaveKbnList" :value="list.code">{{ list.code_name }}</option>
               </select>
+            </td>
+            <td v-else-if="item.kbn_flag == 1">
+              <select class="form-control" v-model="kbn[index]">
+                <option value></option>
+                <option v-for="list in userLeaveKbnList" :value="list.code">{{ list.code_name }}</option>
+              </select>
+            </td>
+            <td v-else></td>
+            <td>
+              <button class="btn btn-danger" @click="del">削除</button>
             </td>
           </tr>
         </tbody>
@@ -90,7 +103,11 @@ export default {
       month: "",
       selectMonth: "",
       baseYear: "",
-      details: []
+      userLeaveKbnList: [],
+      details: [],
+      modeList: [],
+      kbn: [{}],
+      mode: [{}]
     };
   },
   // マウント時
@@ -99,14 +116,15 @@ export default {
     var date = new Date();
     var baseDate = new Date("2018/01/01 8:00:00");
     this.baseYear = baseDate.getFullYear();
+    this.getUserLeaveKbnList();
+    this.getModeList();
     // this.baseYear = baseDate;
   },
   // セレクトボックス変更時
   watch: {
     details: function(val, oldVal) {
       this.details.forEach((detail, i) => {
-        this.business[i] = detail.business_kubun;
-        this.holiday[i] = detail.holiday_kubun;
+        this.mode[i] = detail.mode;
       });
     },
     month: function(val, oldVal) {
@@ -130,19 +148,55 @@ export default {
           alert("error");
         });
     },
+    getUserLeaveKbnList() {
+      this.$axios
+        .get("/get_user_leave_kbn")
+        .then(response => {
+          this.userLeaveKbnList = response.data;
+          console.log("個人休暇区分取得");
+        })
+        .catch(reason => {
+          alert("error");
+        });
+    },
+    getModeList() {
+      this.$axios
+        .get("/get_mode_list")
+        .then(response => {
+          this.modeList = response.data;
+          console.log("モード取得");
+        })
+        .catch(reason => {
+          alert("error");
+        });
+    },
     // 雇用形態が変更された場合の処理
     employmentChanges: function(value) {
       this.valueemploymentstatus = value;
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       if (this.valuedepartment == "") {
-        this.$refs.selectuser.getUserList(this.getDo, value);
+        if (this.valueemploymentstatus == "") {
+          this.$refs.selectuser.getUserList(this.getDo);
+        } else {
+          this.$refs.selectuser.getUserListByEmployment(
+            this.getDo,
+            this.valueemploymentstatus
+          );
+        }
       } else {
-        this.$refs.selectuser.getUserListByEmployment(
-          this.getDo,
-          this.valuedepartment,
-          value
-        );
+        if (this.valueemploymentstatus == "") {
+          this.$refs.selectuser.getUserListByDepartment(
+            this.getDo,
+            this.valuedepartment
+          );
+        } else {
+          this.$refs.selectuser.getUserListByDepartmentEmployment(
+            this.getDo,
+            this.valuedepartment,
+            this.valueemploymentstatus
+          );
+        }
       }
     },
     // 部署選択が変更された場合の処理
@@ -151,18 +205,35 @@ export default {
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       if (this.valueemploymentstatus == "") {
-        this.$refs.selectuser.getUserList(this.getDo, value);
+        if (this.valuedepartment == "") {
+          this.$refs.selectuser.getUserList(this.getDo);
+        } else {
+          this.$refs.selectuser.getUserListByDepartment(
+            this.getDo,
+            this.valuedepartment
+          );
+        }
       } else {
-        this.$refs.selectuser.getUserListByEmployment(
-          this.getDo,
-          value,
-          this.valueemploymentstatus
-        );
+        if (this.valuedepartment == "") {
+          this.$refs.selectuser.getUserListByEmployment(
+            this.getDo,
+            this.valueemploymentstatus
+          );
+        } else {
+          this.$refs.selectuser.getUserListByDepartmentEmployment(
+            this.getDo,
+            this.valuedepartment,
+            this.valueemploymentstatus
+          );
+        }
       }
     },
     // ユーザー選択が変更された場合の処理
     userChanges: function(value) {
       this.valueuser = value;
+    },
+    del: function() {
+      // this.valueuser = value;
     },
     store() {
       this.$axios

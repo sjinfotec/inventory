@@ -83,4 +83,6 @@ Route::get('/get_business_day_list', 'ApiCommonController@getBusinessDayList')->
 Route::get('/get_holi_day_list', 'ApiCommonController@getHoliDayList')->middleware('auth');
 Route::get('/get_time_unit_list', 'ApiCommonController@getTimeUnitList')->middleware('auth');
 Route::get('/get_time_rounding_list', 'ApiCommonController@getTimeRoundingList')->middleware('auth');
+Route::get('/get_user_leave_kbn', 'ApiCommonController@getUserLeaveKbnList')->middleware('auth');
+Route::get('/get_mode_list', 'ApiCommonController@getModeList')->middleware('auth');
 

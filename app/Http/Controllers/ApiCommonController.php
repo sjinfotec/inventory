@@ -149,6 +149,27 @@ class ApiCommonController extends Controller
     }
 
     /**
+     * 個人休暇リスト取得
+     *
+     * @return list
+     */
+    public function getUserLeaveKbnList(){
+        $userLeaveKbnList = DB::table('generalcodes')->where('identification_id', 'C013')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        return $userLeaveKbnList;
+    }
+
+    /**
+     * モードリスト取得
+     *
+     * @return list
+     */
+    public function getModeList(){
+        $modeList = DB::table('generalcodes')->where('identification_id', 'C005')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        return $modeList;
+    }
+    
+
+    /**
      * 曜日取得
      *
      * @param [type] $dt
