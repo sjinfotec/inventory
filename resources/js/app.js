@@ -149,6 +149,10 @@ Vue.component(
     "col-missingmiddle",
     require("./components/ColMissingMiddle.vue").default
 );
+Vue.component(
+    "col-employmentstatus",
+    require("./components/ColEmploymentStatus.vue").default
+);
 
 // CSV ダウンロードボタン
 Vue.component(

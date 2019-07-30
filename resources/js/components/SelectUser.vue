@@ -17,7 +17,7 @@ export default {
     },
     getDo: {
         type: Number,
-        default: 0
+        default: 1
     }
   },
   data() {
@@ -31,7 +31,21 @@ export default {
     this.getUserList(this.getDo, '');
   },
   methods: {
-    getUserList(getdovalue, value){
+    getUserList(getdovalue){
+      this.$axios
+        .get("/get_user_list", {
+          params: {
+            getdo: getdovalue
+          }
+        })
+        .then(response => {
+          this.userList = response.data;
+        })
+        .catch(reason => {
+          alert("社員選択リスト作成エラー");
+        });
+    },
+    getUserListByDepartment(getdovalue, value){
       this.$axios
         .get("/get_user_list", {
           params: {
@@ -46,12 +60,27 @@ export default {
           alert("社員選択リスト作成エラー");
         });
     },
-    getUserListByEmployment(getdovalue, depvalue, empvalue){
+    getUserListByEmployment(getdovalue, empvalue){
       this.$axios
         .get("/get_user_list", {
           params: {
             getdo: getdovalue,
-            code: depvalue,
+            employment: empvalue
+          }
+        })
+        .then(response => {
+          this.userList = response.data;
+        })
+        .catch(reason => {
+          alert("社員選択リスト作成エラー");
+        });
+    },
+    getUserListByDepartmentEmployment(getdovalue, value, empvalue){
+      this.$axios
+        .get("/get_user_list", {
+          params: {
+            getdo: getdovalue,
+            code: value,
             employment: empvalue
           }
         })
