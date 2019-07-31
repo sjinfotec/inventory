@@ -11107,6 +11107,38 @@ body {
   border-top: 1px solid #231815;
 }
 
+/* border variation */
+
+/* border primary */
+
+.border-primary {
+  border: 1px solid #3fa9f5 !important;
+}
+
+/* border success */
+
+.border-success {
+  border: 1px solid #00a68f !important;
+}
+
+/* border warning */
+
+.border-warning {
+  border: 1px solid #ff931e !important;
+}
+
+/* border danger */
+
+.border-danger {
+  border: 1px solid #ed1e79 !important;
+}
+
+/* border secondary */
+
+.border-secondary {
+  border: 1px solid #19436f !important;
+}
+
 /* background variation */
 
 /* background primary */
@@ -11137,6 +11169,38 @@ body {
 
 .bg-secondary {
   background-color: #19436f !important;
+}
+
+/* color variation */
+
+/* color primary */
+
+.text-primary {
+  color: #3fa9f5 !important;
+}
+
+/* text success */
+
+.text-success {
+  color: #00a68f !important;
+}
+
+/* text warning */
+
+.text-warning {
+  color: #ff931e !important;
+}
+
+/* text danger */
+
+.text-danger {
+  color: #ed1e79 !important;
+}
+
+/* text secondary */
+
+.text-secondary {
+  color: #19436f !important;
 }
 
 /* input label variation */
@@ -11179,6 +11243,40 @@ body {
 /* vue setting */
 
 .fvl-search-select {
+  height: 36px;
+  border: 1px solid #ced4da;
+  line-height: 0.75;
+}
+
+/* vue datepicker */
+
+.vdp-datepicker {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.vdp-datepicker div:first-child {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.vdp-datepicker div input {
+  display: flex;
+  flex: 1 1 auto;
+  padding-left: 12px;
+  padding-top: 4px;
+  padding-bottom: 5px;
+  border-radius: 0.25rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border: 1px solid #ced4da;
+  color: #495057;
+}
+
+.vdp-datepicker div .vdp-datepicker__clear-button {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
   height: 36px;
   border: 1px solid #ced4da;
   line-height: 0.75;

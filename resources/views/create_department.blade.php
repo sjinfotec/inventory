@@ -20,11 +20,11 @@
 						<!-- /.panel -->
 					</div>
 					<!-- /main contentns row -->
+					@if (session('status'))
 					<!-- main contentns row -->
 					<div class="row justify-content-between">
 						<!-- .panel -->
 						<div class="col-md pt-3">
-							@if (session('status'))
 							<div class="card shadow-pl">
 								<div class="card-body pt-2">
 									<div class="alert alert-success" role="alert">
@@ -32,10 +32,10 @@
 									</div>
 								</div>
 							</div>
-							@endif
-							<create-department></create-department>
 						</div>
 						<!-- /.panel -->
 					</div>
 					<!-- /main contentns row -->
+					@endif
+					<create-department></create-department>
 @endsection
