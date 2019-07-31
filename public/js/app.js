@@ -4732,6 +4732,111 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -5199,6 +5304,117 @@ var _components;
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -79505,377 +79721,782 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    { staticClass: "panel-body" },
-    [
-      _c(
-        "fvl-form",
-        {
-          attrs: { method: "post", data: _vm.form, url: "/setting_calc/store" },
-          on: {
-            success: function($event) {
-              return _vm.addSuccess()
-            },
-            error: function($event) {
-              return _vm.error()
-            }
-          }
-        },
-        [
-          _c("div", { staticClass: "row" }, [
-            _c(
-              "div",
-              { staticClass: "form-group col-md-6" },
-              [
-                _c("fvl-search-select", {
-                  attrs: {
-                    selected: _vm.year,
-                    label: "年度",
-                    name: "year",
-                    options: _vm.yearList,
-                    placeholder: "年度を選択してください",
-                    allowEmpty: true,
-                    "search-keys": ["name"],
-                    "option-key": "name",
-                    "option-value": "name"
-                  },
-                  on: {
-                    "update:selected": function($event) {
-                      _vm.year = $event
-                    }
-                  }
-                })
-              ],
-              1
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              { staticClass: "form-group col-md-6" },
-              [
-                _c("fvl-search-select", {
-                  attrs: {
-                    selected: _vm.form.biginningMonth,
-                    label: "期首月",
-                    name: "biginningMonth",
-                    options: _vm.monthList,
-                    placeholder: "期首月を選択してください",
-                    allowEmpty: true,
-                    "search-keys": ["name"],
-                    "option-key": "name",
-                    "option-value": "name"
-                  },
-                  on: {
-                    "update:selected": function($event) {
-                      return _vm.$set(_vm.form, "biginningMonth", $event)
-                    }
-                  }
-                })
-              ],
-              1
-            )
-          ]),
-          _vm._v(" "),
-          _c("fvl-input", {
+  return _c("div", [
+    _c(
+      "div",
+      { staticClass: "row justify-content-between" },
+      [
+        _c(
+          "fvl-form",
+          {
             attrs: {
-              value: _vm.form.threeMonthTotal,
-              label: "３ヶ月累計",
-              name: "threeMonthTotal",
-              type: "number",
-              max: 99999.99,
-              step: 0.01
+              method: "post",
+              data: _vm.form,
+              url: "/setting_calc/store"
             },
             on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "threeMonthTotal", $event)
+              success: function($event) {
+                return _vm.addSuccess()
+              },
+              error: function($event) {
+                return _vm.error()
               }
             }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.sixMonthTotal,
-              label: "６ヶ月累計",
-              name: "sixMonthTotal",
-              type: "number",
-              max: 99999.99,
-              step: 0.01
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "sixMonthTotal", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.yaerTotal,
-              label: "１２ヶ月累計",
-              name: "yaerTotal",
-              type: "number",
-              max: 99999.99,
-              step: 0.01
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "yaerTotal", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.interval,
-              label: "勤務間インターバル",
-              name: "interval",
-              type: "number",
-              max: 99.99,
-              step: 0.01
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "interval", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("table", { staticClass: "table" }, [
-            _c("thead", [
-              _c("tr", [
-                _c("th", { staticClass: "width15" }, [_vm._v("月")]),
+          },
+          [
+            _c("div", { staticClass: "col-md pt-3" }, [
+              _c("div", { staticClass: "card shadow-pl" }, [
+                _c(
+                  "div",
+                  { staticClass: "card-header bg-transparent pb-0 border-0" },
+                  [
+                    _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+                      _vm._v("年度指定")
+                    ]),
+                    _vm._v(" "),
+                    _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+                      _vm._v("設定する年度を指定できます")
+                    ])
+                  ]
+                ),
                 _vm._v(" "),
-                _c("th", { staticClass: "width15" }, [_vm._v("締日")]),
-                _vm._v(" "),
-                _c("th", { staticClass: "width15" }, [_vm._v("上限残業")]),
-                _vm._v(" "),
-                _c("th", [_vm._v("時間単位")]),
-                _vm._v(" "),
-                _c("th", [_vm._v("時間の丸め")]),
-                _vm._v(" "),
-                _c("th")
-              ])
-            ]),
-            _vm._v(" "),
-            _c(
-              "tbody",
-              _vm._l(12, function(n, index) {
-                return _c("tr", { key: index }, [
-                  _c("input", { attrs: { type: "hidden" } }),
-                  _vm._v(" "),
-                  _c("td", [_vm._v(_vm._s(n) + "月")]),
-                  _vm._v(" "),
-                  _c("td", [
-                    _c(
-                      "select",
-                      {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.form.closingDate[index],
-                            expression: "form.closingDate[index]"
-                          }
-                        ],
-                        staticClass: "form-control",
-                        on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
-                            _vm.$set(
-                              _vm.form.closingDate,
-                              index,
-                              $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
+                _c("div", { staticClass: "card-body pt-2" }, [
+                  _c("div", { staticClass: "row justify-content-between" }, [
+                    _c("div", { staticClass: "col-12 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-150",
+                                attrs: { id: "basic-addon1" }
+                              },
+                              [_vm._v("年度指定")]
                             )
-                          }
-                        }
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-search-select", {
+                            staticClass: "p-0",
+                            attrs: {
+                              selected: _vm.year,
+                              name: "year",
+                              options: _vm.yearList,
+                              placeholder: "年度を選択してください",
+                              allowEmpty: true,
+                              "search-keys": ["name"],
+                              "option-key": "name",
+                              "option-value": "name"
+                            },
+                            on: {
+                              "update:selected": function($event) {
+                                _vm.year = $event
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "row justify-content-between" }, [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card-header col-12 bg-transparent pb-2 border-0"
                       },
-                      _vm._l(_vm.days_max[index], function(n) {
-                        return _c(
-                          "option",
-                          { key: n, domProps: { value: n } },
-                          [_vm._v(_vm._s(n) + " 日")]
+                      [
+                        _c(
+                          "h1",
+                          { staticClass: "float-sm-left font-size-rg" },
+                          [_vm._v("基本設定")]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "span",
+                          { staticClass: "float-sm-right font-size-sm" },
+                          [
+                            _vm._v(
+                              "決算月と次の勤務と見なすまでの時間インターバルを設定できます"
+                            )
+                          ]
                         )
-                      }),
-                      0
+                      ]
                     )
                   ]),
                   _vm._v(" "),
-                  _c("td", [
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.form.upTime[index],
-                          expression: "form.upTime[index]"
-                        }
-                      ],
-                      staticClass: "form-control",
-                      attrs: {
-                        title: "整数４桁少数２桁まで",
-                        type: "number",
-                        max: "9999.99",
-                        step: "0.01"
-                      },
-                      domProps: { value: _vm.form.upTime[index] },
-                      on: {
-                        input: function($event) {
-                          if ($event.target.composing) {
-                            return
+                  _c("div", { staticClass: "row justify-content-between" }, [
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-150",
+                                attrs: { id: "basic-addon1" }
+                              },
+                              [_vm._v("期首月")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-search-select", {
+                            staticClass: "p-0",
+                            attrs: {
+                              selected: _vm.form.biginningMonth,
+                              name: "biginningMonth",
+                              options: _vm.monthList,
+                              placeholder: "期首月を選択してください",
+                              allowEmpty: true,
+                              "search-keys": ["name"],
+                              "option-key": "name",
+                              "option-value": "name"
+                            },
+                            on: {
+                              "update:selected": function($event) {
+                                return _vm.$set(
+                                  _vm.form,
+                                  "biginningMonth",
+                                  $event
+                                )
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c("div", { staticClass: "input-group" }, [
+                        _c("div", { staticClass: "input-group-prepend" }, [
+                          _c(
+                            "span",
+                            {
+                              staticClass:
+                                "input-group-text font-size-sm line-height-xs label-width-150",
+                              attrs: { id: "basic-addon1" }
+                            },
+                            [_vm._v("勤務間インターバル")]
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          staticClass: "form-control",
+                          attrs: {
+                            label: "勤務間インターバル",
+                            name: "interval",
+                            type: "number",
+                            max: 99.99,
+                            step: 0.01
+                          },
+                          domProps: { value: _vm.form.interval },
+                          on: {
+                            "update:value": function($event) {
+                              return _vm.$set(_vm.form, "interval", $event)
+                            }
                           }
-                          _vm.$set(_vm.form.upTime, index, $event.target.value)
-                        }
-                      }
-                    })
+                        })
+                      ])
+                    ])
                   ]),
                   _vm._v(" "),
-                  _c("td", [
+                  _c("div", { staticClass: "row justify-content-between" }, [
                     _c(
-                      "select",
+                      "div",
                       {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.form.timeunit[index],
-                            expression: "form.timeunit[index]"
-                          }
-                        ],
-                        staticClass: "form-control",
-                        on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
-                            _vm.$set(
-                              _vm.form.timeunit,
-                              index,
-                              $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
-                            )
-                          }
-                        }
+                        staticClass:
+                          "card-header col-12 bg-transparent pb-2 border-0"
                       },
                       [
-                        _c("option", { attrs: { value: "" } }),
+                        _c(
+                          "h1",
+                          { staticClass: "float-sm-left font-size-rg" },
+                          [_vm._v("累計設定")]
+                        ),
                         _vm._v(" "),
-                        _vm._l(_vm.TimeUnitList, function(tulist) {
-                          return _c(
-                            "option",
-                            {
-                              key: tulist.code,
-                              domProps: { value: tulist.code }
-                            },
-                            [_vm._v(_vm._s(tulist.code_name))]
-                          )
-                        })
-                      ],
-                      2
+                        _c(
+                          "span",
+                          { staticClass: "float-sm-right font-size-sm" },
+                          [_vm._v("アラートを表示する累計時間を設定できます")]
+                        )
+                      ]
                     )
                   ]),
                   _vm._v(" "),
-                  _c("td", [
-                    _c(
-                      "select",
-                      {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.form.timeround[index],
-                            expression: "form.timeround[index]"
-                          }
-                        ],
-                        staticClass: "form-control",
-                        on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
-                            _vm.$set(
-                              _vm.form.timeround,
-                              index,
-                              $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
-                            )
-                          }
-                        }
-                      },
-                      [
-                        _c("option", { attrs: { value: "" } }),
-                        _vm._v(" "),
-                        _vm._l(_vm.TimeRoundingList, function(trlist) {
-                          return _c(
-                            "option",
+                  _c("div", { staticClass: "row justify-content-between" }, [
+                    _c("div", { staticClass: "col-12 pb-2" }, [
+                      _c("div", { staticClass: "input-group" }, [
+                        _c("div", { staticClass: "input-group-prepend" }, [
+                          _c(
+                            "span",
                             {
-                              key: trlist.code,
-                              domProps: { value: trlist.code }
+                              staticClass:
+                                "input-group-text font-size-sm line-height-xs label-width-150",
+                              attrs: { id: "basic-addon1" }
                             },
-                            [_vm._v(_vm._s(trlist.code_name))]
+                            [_vm._v("３ヶ月累計")]
                           )
-                        })
-                      ],
-                      2
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("td", [
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.hidden,
-                          expression: "hidden"
-                        }
-                      ],
-                      attrs: { type: "hidden", value: "" },
-                      domProps: { value: _vm.hidden },
-                      on: {
-                        input: function($event) {
-                          if ($event.target.composing) {
-                            return
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          staticClass: "form-control",
+                          attrs: {
+                            label: "３ヶ月累計",
+                            name: "threeMonthTotal",
+                            type: "number",
+                            max: 99999.99,
+                            step: 0.01
+                          },
+                          domProps: { value: _vm.form.threeMonthTotal },
+                          on: {
+                            "update:value": function($event) {
+                              return _vm.$set(
+                                _vm.form,
+                                "threeMonthTotal",
+                                $event
+                              )
+                            }
                           }
-                          _vm.hidden = $event.target.value
-                        }
-                      }
-                    })
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-12 pb-2" }, [
+                      _c("div", { staticClass: "input-group" }, [
+                        _c("div", { staticClass: "input-group-prepend" }, [
+                          _c(
+                            "span",
+                            {
+                              staticClass:
+                                "input-group-text font-size-sm line-height-xs label-width-150",
+                              attrs: { id: "basic-addon1" }
+                            },
+                            [_vm._v("６ヶ月累計")]
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          staticClass: "form-control",
+                          attrs: {
+                            label: "６ヶ月累計",
+                            name: "sixMonthTotal",
+                            type: "number",
+                            max: 99999.99,
+                            step: 0.01
+                          },
+                          domProps: { value: _vm.form.sixMonthTotal },
+                          on: {
+                            "update:value": function($event) {
+                              return _vm.$set(_vm.form, "sixMonthTotal", $event)
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-12 pb-2" }, [
+                      _c("div", { staticClass: "input-group" }, [
+                        _c("div", { staticClass: "input-group-prepend" }, [
+                          _c(
+                            "span",
+                            {
+                              staticClass:
+                                "input-group-text font-size-sm line-height-xs label-width-150",
+                              attrs: { id: "basic-addon1" }
+                            },
+                            [_vm._v("１２ヶ月累計")]
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          staticClass: "form-control",
+                          attrs: {
+                            label: "１２ヶ月累計",
+                            name: "yaerTotal",
+                            type: "number",
+                            max: 99999.99,
+                            step: 0.01
+                          },
+                          domProps: { value: _vm.form.yaerTotal },
+                          on: {
+                            "update:value": function($event) {
+                              return _vm.$set(_vm.form, "yaerTotal", $event)
+                            }
+                          }
+                        })
+                      ])
+                    ])
                   ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "card-body mb-3 p-0 border-top" }, [
+                  _c(
+                    "div",
+                    { staticClass: "row justify-content-between px-3" },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card-header col-12 bg-transparent pb-2 border-0"
+                        },
+                        [
+                          _c(
+                            "h1",
+                            { staticClass: "float-sm-left font-size-rg" },
+                            [_vm._v("月別設定")]
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "span",
+                            { staticClass: "float-sm-right font-size-sm" },
+                            [_vm._v("月ごとに締日と時間に関する設定ができます")]
+                          )
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "row" }, [
+                    _c("div", { staticClass: "col-12" }, [
+                      _c("div", { staticClass: "table-responsive" }, [
+                        _c("div", { staticClass: "col-12 p-0" }, [
+                          _c(
+                            "table",
+                            {
+                              staticClass:
+                                "table table-striped border-bottom font-size-sm text-nowrap"
+                            },
+                            [
+                              _c("thead", [
+                                _c("tr", [
+                                  _c(
+                                    "td",
+                                    {
+                                      staticClass:
+                                        "text-center align-middle w-10"
+                                    },
+                                    [_vm._v("月")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "td",
+                                    {
+                                      staticClass:
+                                        "text-center align-middle w-20 mw-rem-10"
+                                    },
+                                    [_vm._v("締日")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "td",
+                                    {
+                                      staticClass:
+                                        "text-center align-middle w-20 mw-rem-10"
+                                    },
+                                    [_vm._v("上限残業時間")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "td",
+                                    {
+                                      staticClass:
+                                        "text-center align-middle w-20 mw-rem-15"
+                                    },
+                                    [_vm._v("時間単位")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "td",
+                                    {
+                                      staticClass:
+                                        "text-center align-middle w-20 mw-rem-15"
+                                    },
+                                    [_vm._v("時間の丸め")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c("td", {
+                                    staticClass: "text-center align-middle"
+                                  })
+                                ])
+                              ]),
+                              _vm._v(" "),
+                              _c(
+                                "tbody",
+                                _vm._l(12, function(n, index) {
+                                  return _c("tr", { key: index }, [
+                                    _c(
+                                      "td",
+                                      {
+                                        staticClass: "text-center align-middle"
+                                      },
+                                      [_vm._v(_vm._s(n) + "月")]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        staticClass: "text-center align-middle"
+                                      },
+                                      [
+                                        _c(
+                                          "div",
+                                          { staticClass: "input-group" },
+                                          [
+                                            _c(
+                                              "select",
+                                              {
+                                                directives: [
+                                                  {
+                                                    name: "model",
+                                                    rawName: "v-model",
+                                                    value:
+                                                      _vm.form.closingDate[
+                                                        index
+                                                      ],
+                                                    expression:
+                                                      "form.closingDate[index]"
+                                                  }
+                                                ],
+                                                staticClass: "custom-select",
+                                                on: {
+                                                  change: function($event) {
+                                                    var $$selectedVal = Array.prototype.filter
+                                                      .call(
+                                                        $event.target.options,
+                                                        function(o) {
+                                                          return o.selected
+                                                        }
+                                                      )
+                                                      .map(function(o) {
+                                                        var val =
+                                                          "_value" in o
+                                                            ? o._value
+                                                            : o.value
+                                                        return val
+                                                      })
+                                                    _vm.$set(
+                                                      _vm.form.closingDate,
+                                                      index,
+                                                      $event.target.multiple
+                                                        ? $$selectedVal
+                                                        : $$selectedVal[0]
+                                                    )
+                                                  }
+                                                }
+                                              },
+                                              _vm._l(
+                                                _vm.days_max[index],
+                                                function(n) {
+                                                  return _c(
+                                                    "option",
+                                                    {
+                                                      key: n,
+                                                      domProps: { value: n }
+                                                    },
+                                                    [_vm._v(_vm._s(n) + " 日")]
+                                                  )
+                                                }
+                                              ),
+                                              0
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        staticClass: "text-center align-middle"
+                                      },
+                                      [
+                                        _c(
+                                          "div",
+                                          { staticClass: "input-group" },
+                                          [
+                                            _c("input", {
+                                              directives: [
+                                                {
+                                                  name: "model",
+                                                  rawName: "v-model",
+                                                  value: _vm.form.upTime[index],
+                                                  expression:
+                                                    "form.upTime[index]"
+                                                }
+                                              ],
+                                              staticClass: "form-control",
+                                              attrs: {
+                                                title: "整数４桁少数２桁まで",
+                                                type: "number",
+                                                max: "9999.99",
+                                                step: "0.01"
+                                              },
+                                              domProps: {
+                                                value: _vm.form.upTime[index]
+                                              },
+                                              on: {
+                                                input: function($event) {
+                                                  if ($event.target.composing) {
+                                                    return
+                                                  }
+                                                  _vm.$set(
+                                                    _vm.form.upTime,
+                                                    index,
+                                                    $event.target.value
+                                                  )
+                                                }
+                                              }
+                                            })
+                                          ]
+                                        )
+                                      ]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        staticClass: "text-center align-middle"
+                                      },
+                                      [
+                                        _c(
+                                          "div",
+                                          { staticClass: "input-group" },
+                                          [
+                                            _c(
+                                              "select",
+                                              {
+                                                directives: [
+                                                  {
+                                                    name: "model",
+                                                    rawName: "v-model",
+                                                    value:
+                                                      _vm.form.timeunit[index],
+                                                    expression:
+                                                      "form.timeunit[index]"
+                                                  }
+                                                ],
+                                                staticClass: "custom-select",
+                                                on: {
+                                                  change: function($event) {
+                                                    var $$selectedVal = Array.prototype.filter
+                                                      .call(
+                                                        $event.target.options,
+                                                        function(o) {
+                                                          return o.selected
+                                                        }
+                                                      )
+                                                      .map(function(o) {
+                                                        var val =
+                                                          "_value" in o
+                                                            ? o._value
+                                                            : o.value
+                                                        return val
+                                                      })
+                                                    _vm.$set(
+                                                      _vm.form.timeunit,
+                                                      index,
+                                                      $event.target.multiple
+                                                        ? $$selectedVal
+                                                        : $$selectedVal[0]
+                                                    )
+                                                  }
+                                                }
+                                              },
+                                              [
+                                                _c("option", {
+                                                  attrs: { value: "" }
+                                                }),
+                                                _vm._v(" "),
+                                                _vm._l(
+                                                  _vm.TimeUnitList,
+                                                  function(tulist) {
+                                                    return _c(
+                                                      "option",
+                                                      {
+                                                        key: tulist.code,
+                                                        domProps: {
+                                                          value: tulist.code
+                                                        }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            tulist.code_name
+                                                          )
+                                                        )
+                                                      ]
+                                                    )
+                                                  }
+                                                )
+                                              ],
+                                              2
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        staticClass: "text-center align-middle"
+                                      },
+                                      [
+                                        _c(
+                                          "div",
+                                          { staticClass: "btn-group d-flex" },
+                                          [
+                                            _c(
+                                              "select",
+                                              {
+                                                directives: [
+                                                  {
+                                                    name: "model",
+                                                    rawName: "v-model",
+                                                    value:
+                                                      _vm.form.timeround[index],
+                                                    expression:
+                                                      "form.timeround[index]"
+                                                  }
+                                                ],
+                                                staticClass: "custom-select",
+                                                on: {
+                                                  change: function($event) {
+                                                    var $$selectedVal = Array.prototype.filter
+                                                      .call(
+                                                        $event.target.options,
+                                                        function(o) {
+                                                          return o.selected
+                                                        }
+                                                      )
+                                                      .map(function(o) {
+                                                        var val =
+                                                          "_value" in o
+                                                            ? o._value
+                                                            : o.value
+                                                        return val
+                                                      })
+                                                    _vm.$set(
+                                                      _vm.form.timeround,
+                                                      index,
+                                                      $event.target.multiple
+                                                        ? $$selectedVal
+                                                        : $$selectedVal[0]
+                                                    )
+                                                  }
+                                                }
+                                              },
+                                              [
+                                                _c("option", {
+                                                  attrs: { value: "" }
+                                                }),
+                                                _vm._v(" "),
+                                                _vm._l(
+                                                  _vm.TimeRoundingList,
+                                                  function(trlist) {
+                                                    return _c(
+                                                      "option",
+                                                      {
+                                                        key: trlist.code,
+                                                        domProps: {
+                                                          value: trlist.code
+                                                        }
+                                                      },
+                                                      [
+                                                        _vm._v(
+                                                          _vm._s(
+                                                            trlist.code_name
+                                                          )
+                                                        )
+                                                      ]
+                                                    )
+                                                  }
+                                                )
+                                              ],
+                                              2
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        staticClass: "text-center align-middle"
+                                      },
+                                      [
+                                        _c("input", {
+                                          directives: [
+                                            {
+                                              name: "model",
+                                              rawName: "v-model",
+                                              value: _vm.hidden,
+                                              expression: "hidden"
+                                            }
+                                          ],
+                                          attrs: { type: "hidden", value: "" },
+                                          domProps: { value: _vm.hidden },
+                                          on: {
+                                            input: function($event) {
+                                              if ($event.target.composing) {
+                                                return
+                                              }
+                                              _vm.hidden = $event.target.value
+                                            }
+                                          }
+                                        })
+                                      ]
+                                    )
+                                  ])
+                                }),
+                                0
+                              )
+                            ]
+                          )
+                        ])
+                      ])
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "row justify-content-between px-3" },
+                    [
+                      _c("div", { staticClass: "col-md-12 pb-2" }, [
+                        _c("div", { staticClass: "btn-group d-flex" }, [
+                          _c(
+                            "button",
+                            {
+                              staticClass:
+                                "btn btn-success btn-lg font-size-rg w-100",
+                              attrs: { type: "submit" }
+                            },
+                            [_vm._v("この内容で入力する")]
+                          )
+                        ])
+                      ])
+                    ]
+                  )
                 ])
-              }),
-              0
-            )
-          ]),
-          _vm._v(" "),
-          _c("fvl-submit", [_vm._v("登録")])
-        ],
-        1
-      )
-    ],
-    1
-  )
+              ])
+            ])
+          ]
+        )
+      ],
+      1
+    )
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -80144,334 +80765,577 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    { staticClass: "panel-body" },
-    [
-      _c(
-        "fvl-form",
-        {
-          attrs: { method: "post", data: _vm.form, url: "/user_add/store" },
-          on: {
-            success: function($event) {
-              return _vm.addSuccess()
-            },
-            error: function($event) {
-              return _vm.error()
-            }
-          }
-        },
-        [
-          _c("fvl-search-select", {
-            attrs: {
-              selected: _vm.userCode,
-              label: "ユーザー",
-              name: "userCode",
-              options: _vm.userList,
-              placeholder: "ユーザーを選択すると編集モードになります",
-              allowEmpty: true,
-              "search-keys": ["code"],
-              "option-key": "code",
-              "option-value": "name"
-            },
-            on: {
-              "update:selected": function($event) {
-                _vm.userCode = $event
-              }
-            }
-          }),
+  return _c("div", [
+    _c("div", { staticClass: "row justify-content-between" }, [
+      _c("div", { staticClass: "col-md pt-3" }, [
+        _c("div", { staticClass: "card shadow-pl" }, [
+          _vm._m(0),
           _vm._v(" "),
-          _c("fvl-input", {
-            attrs: { value: _vm.form.name, label: "社員名", name: "name" },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "name", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: { value: _vm.form.kana, label: "ふりがな", name: "kana" },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "kana", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.code,
-              label: "ログインID",
-              name: "code",
-              title: "半角英数字4-10文字",
-              pattern: "^[a-zA-Z0-9]{4,10}$"
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "code", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _vm.userCode == "" || _vm.userCode == null
-            ? _c(
-                "span",
-                [
-                  _c("fvl-input", {
-                    attrs: {
-                      value: _vm.form.password,
-                      label: "パスワード",
-                      name: "password",
-                      title: "半角英数字6-12文字",
-                      pattern: "^[a-zA-Z0-9]{6,12}$"
-                    },
-                    on: {
-                      "update:value": function($event) {
-                        return _vm.$set(_vm.form, "password", $event)
-                      }
-                    }
-                  })
-                ],
-                1
-              )
-            : _vm._e(),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.email,
-              label: "メールアドレス",
-              name: "email"
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "email", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-search-select", {
-            attrs: {
-              selected: _vm.form.departmentCode,
-              label: "部署",
-              name: "departmentCode",
-              options: _vm.departmentList,
-              "search-keys": ["name"],
-              "option-key": "id",
-              "option-value": "name"
-            },
-            on: {
-              "update:selected": function($event) {
-                return _vm.$set(_vm.form, "departmentCode", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-search-select", {
-            attrs: {
-              selected: _vm.form.status,
-              label: "雇用形態",
-              name: "status",
-              options: _vm.employStatusList,
-              "search-keys": ["code"],
-              "option-key": "code",
-              "option-value": "code_name"
-            },
-            on: {
-              "update:selected": function($event) {
-                return _vm.$set(_vm.form, "status", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-search-select", {
-            attrs: {
-              selected: _vm.form.table_no,
-              label: "タイムテーブル",
-              name: "timetable_no",
-              options: _vm.timeTableList,
-              "search-keys": ["name"],
-              "option-key": "no",
-              "option-value": "name"
-            },
-            on: {
-              "update:selected": function($event) {
-                return _vm.$set(_vm.form, "table_no", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _vm.userCode == "" || _vm.userCode == null
-            ? _c("fvl-submit", [_vm._v("追加")])
-            : _vm._e(),
-          _vm._v(" "),
-          _vm.userCode != ""
-            ? _c("fvl-submit", { attrs: { id: "edit" } }, [_vm._v("編集")])
-            : _vm._e()
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _vm.userCode != ""
-        ? _c(
-            "span",
-            { staticClass: "padding-set-small margin-set-top-regular" },
+          _c(
+            "div",
+            { staticClass: "card-body pt-2" },
             [
               _c(
-                "button",
+                "fvl-form",
                 {
-                  staticClass: "btn btn-danger",
+                  attrs: {
+                    method: "post",
+                    data: _vm.form,
+                    url: "/user_add/store"
+                  },
                   on: {
-                    click: function($event) {
-                      return _vm.alertDelConf("warning")
+                    success: function($event) {
+                      return _vm.addSuccess()
+                    },
+                    error: function($event) {
+                      return _vm.error()
                     }
                   }
                 },
-                [_vm._v("削除")]
-              )
-            ]
-          )
-        : _vm._e(),
-      _vm._v(" "),
-      _vm.userCode != ""
-        ? _c(
-            "span",
-            { staticClass: "padding-set-small margin-set-top-regular" },
-            [
-              _c(
-                "button",
-                { staticClass: "btn btn-info", on: { click: _vm.show } },
-                [_vm._v("パスワード変更")]
-              )
-            ]
-          )
-        : _vm._e(),
-      _vm._v(" "),
-      _c(
-        "modal",
-        {
-          attrs: { name: "password-change", width: 800, height: 600 },
-          model: {
-            value: _vm.userCode,
-            callback: function($$v) {
-              _vm.userCode = $$v
-            },
-            expression: "userCode"
-          }
-        },
-        [
-          _c("div", { staticClass: "card" }, [
-            _c("div", { staticClass: "card-header" }, [
-              _vm._v("パスワード変更")
-            ]),
-            _vm._v(" "),
-            _c("div", { staticClass: "card-body" }, [
-              _vm.errors.length
-                ? _c("div", [
-                    _c(
-                      "ul",
-                      { staticClass: "error-red color-red" },
-                      _vm._l(_vm.errors, function(error, index) {
-                        return _c("li", { key: index }, [_vm._v(_vm._s(error))])
-                      }),
-                      0
-                    )
+                [
+                  _c("div", { staticClass: "row justify-content-between" }, [
+                    _c("div", { staticClass: "col-12 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-120",
+                                attrs: { id: "basic-addon1" }
+                              },
+                              [_vm._v("ユーザー")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-search-select", {
+                            staticClass: "p-0",
+                            attrs: {
+                              selected: _vm.userCode,
+                              name: "userCode",
+                              options: _vm.userList,
+                              placeholder:
+                                "ユーザーを選択すると編集モードになります",
+                              allowEmpty: true,
+                              "search-keys": ["code"],
+                              "option-key": "code",
+                              "option-value": "name"
+                            },
+                            on: {
+                              "update:selected": function($event) {
+                                _vm.userCode = $event
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c("div", { staticClass: "input-group" }, [
+                        _c("div", { staticClass: "input-group-prepend" }, [
+                          _c(
+                            "span",
+                            {
+                              staticClass:
+                                "input-group-text font-size-sm line-height-xs label-width-120",
+                              attrs: { id: "basic-addon1" }
+                            },
+                            [_vm._v("社員名")]
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            label: "社員名",
+                            name: "name"
+                          },
+                          domProps: { value: _vm.form.name },
+                          on: {
+                            "update:value": function($event) {
+                              return _vm.$set(_vm.form, "name", $event)
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c("div", { staticClass: "input-group" }, [
+                        _c("div", { staticClass: "input-group-prepend" }, [
+                          _c(
+                            "span",
+                            {
+                              staticClass:
+                                "input-group-text font-size-sm line-height-xs label-width-120",
+                              attrs: { id: "basic-addon1" }
+                            },
+                            [_vm._v("ふりがな")]
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            label: "ふりがな",
+                            name: "kana"
+                          },
+                          domProps: { value: _vm.form.kana },
+                          on: {
+                            "update:value": function($event) {
+                              return _vm.$set(_vm.form, "kana", $event)
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c("div", { staticClass: "input-group" }, [
+                        _c("div", { staticClass: "input-group-prepend" }, [
+                          _c(
+                            "span",
+                            {
+                              staticClass:
+                                "input-group-text font-size-sm line-height-xs label-width-120",
+                              attrs: { id: "basic-addon1" }
+                            },
+                            [_vm._v("ログインID")]
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            label: "ログインID",
+                            name: "code",
+                            title: "半角英数字4-10文字",
+                            pattern: "^[a-zA-Z0-9]{4,10}$"
+                          },
+                          domProps: { value: _vm.form.code },
+                          on: {
+                            "update:value": function($event) {
+                              return _vm.$set(_vm.form, "code", $event)
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _vm.userCode == "" || _vm.userCode == null
+                      ? _c("div", { staticClass: "col-md-6 pb-2" }, [
+                          _c("div", { staticClass: "input-group" }, [
+                            _c("div", { staticClass: "input-group-prepend" }, [
+                              _c(
+                                "span",
+                                {
+                                  staticClass:
+                                    "input-group-text font-size-sm line-height-xs label-width-120",
+                                  attrs: { id: "basic-addon1" }
+                                },
+                                [_vm._v("パスワード")]
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("input", {
+                              staticClass: "form-control",
+                              attrs: {
+                                type: "text",
+                                label: "パスワード",
+                                name: "password",
+                                title: "半角英数字6-12文字",
+                                pattern: "^[a-zA-Z0-9]{6,12}$"
+                              },
+                              domProps: { value: _vm.form.password },
+                              on: {
+                                "update:value": function($event) {
+                                  return _vm.$set(_vm.form, "password", $event)
+                                }
+                              }
+                            })
+                          ])
+                        ])
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c("div", { staticClass: "input-group" }, [
+                        _c("div", { staticClass: "input-group-prepend" }, [
+                          _c(
+                            "span",
+                            {
+                              staticClass:
+                                "input-group-text font-size-sm line-height-xs label-width-120",
+                              attrs: { id: "basic-addon1" }
+                            },
+                            [_vm._v("メールアドレス")]
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          staticClass: "form-control",
+                          attrs: {
+                            type: "text",
+                            label: "メールアドレス",
+                            name: "email"
+                          },
+                          domProps: { value: _vm.form.email },
+                          on: {
+                            "update:value": function($event) {
+                              return _vm.$set(_vm.form, "email", $event)
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-120",
+                                attrs: { id: "basic-addon1" }
+                              },
+                              [_vm._v("所属部署")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-search-select", {
+                            staticClass: "p-0",
+                            attrs: {
+                              selected: _vm.form.departmentCode,
+                              name: "departmentCode",
+                              options: _vm.departmentList,
+                              "search-keys": ["name"],
+                              "option-key": "id",
+                              "option-value": "name"
+                            },
+                            on: {
+                              "update:selected": function($event) {
+                                return _vm.$set(
+                                  _vm.form,
+                                  "departmentCode",
+                                  $event
+                                )
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-120",
+                                attrs: { id: "basic-addon1" }
+                              },
+                              [_vm._v("雇用形態")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-search-select", {
+                            staticClass: "p-0",
+                            attrs: {
+                              selected: _vm.form.status,
+                              name: "status",
+                              options: _vm.employStatusList,
+                              "search-keys": ["code"],
+                              "option-key": "code",
+                              "option-value": "code_name"
+                            },
+                            on: {
+                              "update:selected": function($event) {
+                                return _vm.$set(_vm.form, "status", $event)
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-120",
+                                attrs: { id: "basic-addon1" }
+                              },
+                              [_vm._v("通常勤務時間")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-search-select", {
+                            staticClass: "p-0",
+                            attrs: {
+                              selected: _vm.form.table_no,
+                              name: "timetable_no",
+                              options: _vm.timeTableList,
+                              "search-keys": ["name"],
+                              "option-key": "no",
+                              "option-value": "name"
+                            },
+                            on: {
+                              "update:selected": function($event) {
+                                return _vm.$set(_vm.form, "table_no", $event)
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "row justify-content-between" }, [
+                    _c("div", { staticClass: "col-md-12 pb-2" }, [
+                      _c("div", { staticClass: "btn-group d-flex" }, [
+                        _vm.userCode == "" || _vm.userCode == null
+                          ? _c(
+                              "button",
+                              {
+                                staticClass: "btn btn-success",
+                                attrs: { type: "submit" }
+                              },
+                              [_vm._v("追加")]
+                            )
+                          : _vm._e(),
+                        _vm._v(" "),
+                        _vm.userCode != ""
+                          ? _c(
+                              "button",
+                              {
+                                staticClass: "btn btn-success",
+                                attrs: { type: "submit", id: "edit" }
+                              },
+                              [_vm._v("編集")]
+                            )
+                          : _vm._e()
+                      ])
+                    ])
+                  ])
+                ]
+              ),
+              _vm._v(" "),
+              _vm.userCode != ""
+                ? _c("div", { staticClass: "row justify-content-between" }, [
+                    _c("div", { staticClass: "col-md-12 pb-2" }, [
+                      _c("div", { staticClass: "btn-group d-flex" }, [
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-danger",
+                            on: {
+                              click: function($event) {
+                                return _vm.alertDelConf("warning")
+                              }
+                            }
+                          },
+                          [_vm._v("削除")]
+                        )
+                      ])
+                    ])
                   ])
                 : _vm._e(),
               _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-6" }, [
-                _c("label", { attrs: { for: "shift_end" } }, [
-                  _vm._v("新しいパスワード")
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.enterPass,
-                      expression: "enterPass"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: {
-                    maxlength: "12",
-                    type: "password",
-                    title: "半角英数字12文字以内",
-                    pattern: "^[a-zA-Z0-9]{6,12}$"
-                  },
-                  domProps: { value: _vm.enterPass },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.enterPass = $event.target.value
-                    }
-                  }
-                })
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "form-group col-md-6" }, [
-                _c("label", { attrs: { for: "shift_end" } }, [
-                  _vm._v("新しいパスワード（再入力）")
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.reEnterPass,
-                      expression: "reEnterPass"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: {
-                    maxlength: "12",
-                    type: "password",
-                    title: "半角英数字12文字以内",
-                    pattern: "^[a-zA-Z0-9]{6,12}$"
-                  },
-                  domProps: { value: _vm.reEnterPass },
-                  on: {
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.reEnterPass = $event.target.value
-                    }
-                  }
-                })
-              ]),
+              _vm.userCode != ""
+                ? _c("div", { staticClass: "row justify-content-between" }, [
+                    _c("div", { staticClass: "col-md-12 pb-2" }, [
+                      _c("div", { staticClass: "btn-group d-flex" }, [
+                        _c(
+                          "button",
+                          {
+                            staticClass: "btn btn-success",
+                            on: { click: _vm.show }
+                          },
+                          [_vm._v("パスワード変更")]
+                        )
+                      ])
+                    ])
+                  ])
+                : _vm._e(),
               _vm._v(" "),
               _c(
-                "button",
+                "modal",
                 {
-                  staticClass: "btn btn-success",
-                  on: {
-                    click: function($event) {
-                      return _vm.alertPassConf("warning")
-                    }
+                  attrs: { name: "password-change", width: 800, height: 600 },
+                  model: {
+                    value: _vm.userCode,
+                    callback: function($$v) {
+                      _vm.userCode = $$v
+                    },
+                    expression: "userCode"
                   }
                 },
-                [_vm._v("確定")]
-              ),
-              _vm._v(" "),
-              _c(
-                "button",
-                { staticClass: "btn btn-warning", on: { click: _vm.hide } },
-                [_vm._v("キャンセル")]
+                [
+                  _c("div", { staticClass: "card" }, [
+                    _c("div", { staticClass: "card-header" }, [
+                      _vm._v("パスワード変更")
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "card-body" }, [
+                      _vm.errors.length
+                        ? _c("div", [
+                            _c(
+                              "ul",
+                              { staticClass: "error-red color-red" },
+                              _vm._l(_vm.errors, function(error, index) {
+                                return _c("li", { key: index }, [
+                                  _vm._v(_vm._s(error))
+                                ])
+                              }),
+                              0
+                            )
+                          ])
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "form-group col-md-6" }, [
+                        _c("label", { attrs: { for: "shift_end" } }, [
+                          _vm._v("新しいパスワード")
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.enterPass,
+                              expression: "enterPass"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            maxlength: "12",
+                            type: "password",
+                            title: "半角英数字12文字以内",
+                            pattern: "^[a-zA-Z0-9]{6,12}$"
+                          },
+                          domProps: { value: _vm.enterPass },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.enterPass = $event.target.value
+                            }
+                          }
+                        })
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "form-group col-md-6" }, [
+                        _c("label", { attrs: { for: "shift_end" } }, [
+                          _vm._v("新しいパスワード（再入力）")
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.reEnterPass,
+                              expression: "reEnterPass"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            maxlength: "12",
+                            type: "password",
+                            title: "半角英数字12文字以内",
+                            pattern: "^[a-zA-Z0-9]{6,12}$"
+                          },
+                          domProps: { value: _vm.reEnterPass },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.reEnterPass = $event.target.value
+                            }
+                          }
+                        })
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "button",
+                        {
+                          staticClass: "btn btn-success",
+                          on: {
+                            click: function($event) {
+                              return _vm.alertPassConf("warning")
+                            }
+                          }
+                        },
+                        [_vm._v("確定")]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "button",
+                        {
+                          staticClass: "btn btn-warning",
+                          on: { click: _vm.hide }
+                        },
+                        [_vm._v("キャンセル")]
+                      )
+                    ])
+                  ])
+                ]
               )
-            ])
-          ])
-        ]
-      )
-    ],
-    1
-  )
+            ],
+            1
+          )
+        ])
+      ])
+    ])
+  ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "card-header bg-transparent pb-0 border-0" },
+      [
+        _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+          _vm._v("ユーザー登録および編集")
+        ]),
+        _vm._v(" "),
+        _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+          _vm._v("ユーザーを選択すると登録済みのユーザー情報を編集できます")
+        ])
+      ]
+    )
+  }
+]
 render._withStripped = true
 
 
