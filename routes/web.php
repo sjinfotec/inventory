@@ -27,6 +27,13 @@ Route::get('/daily/calc', 'DailyWorkingInformationController@show')->middleware(
 Route::get('/daily/show', 'DailyWorkingInformationController@show')->middleware('auth');
 
 Route::get('/monthly', 'MonthlyWorkingInformationController@index')->middleware('auth');
+// 勤怠編集
+Route::get('/edit_work_times', 'EditWorkTimesController@index')->middleware('auth');
+Route::get('/edit_work_times/get', 'EditWorkTimesController@get')->middleware('auth');
+Route::post('/edit_work_times/store', 'EditWorkTimesController@store')->middleware('auth');
+Route::post('/edit_work_times/del', 'EditWorkTimesController@del')->middleware('auth');
+Route::post('/edit_work_times/add', 'EditWorkTimesController@add')->middleware('auth');
+
 // シフト
 Route::get('/create_shift_time', 'CreateShiftTimeController@index')->middleware('auth');
 Route::post('/create_shift_time/store', 'CreateShiftTimeController@store')->middleware('auth');
@@ -79,4 +86,6 @@ Route::get('/get_business_day_list', 'ApiCommonController@getBusinessDayList')->
 Route::get('/get_holi_day_list', 'ApiCommonController@getHoliDayList')->middleware('auth');
 Route::get('/get_time_unit_list', 'ApiCommonController@getTimeUnitList')->middleware('auth');
 Route::get('/get_time_rounding_list', 'ApiCommonController@getTimeRoundingList')->middleware('auth');
+Route::get('/get_user_leave_kbn', 'ApiCommonController@getUserLeaveKbnList')->middleware('auth');
+Route::get('/get_mode_list', 'ApiCommonController@getModeList')->middleware('auth');
 

@@ -10,17 +10,17 @@
     >
       <div class="row">
         <div class="form-group col-md-6">
-        <fvl-search-select
-          :selected.sync="year"
-          label="年度"
-          name="year"
-          :options="yearList"
-          placeholder="年度を選択してください"
-          :allowEmpty="true"
-          :search-keys="['name']"
-          option-key="name"
-          option-value="name"
-        />
+          <fvl-search-select
+            :selected.sync="year"
+            label="年度"
+            name="year"
+            :options="yearList"
+            placeholder="年度を選択してください"
+            :allowEmpty="true"
+            :search-keys="['name']"
+            option-key="name"
+            option-value="name"
+          />
         </div>
         <div class="form-group col-md-6">
           <fvl-search-select
@@ -36,10 +36,38 @@
           />
         </div>
       </div>
-      <fvl-input :value.sync="form.threeMonthTotal" label="３ヶ月累計" name="threeMonthTotal" type="number" :max="99999.99" :step="0.01" />
-      <fvl-input :value.sync="form.sixMonthTotal" label="６ヶ月累計" name="sixMonthTotal" type="number" :max="99999.99" :step="0.01" />
-      <fvl-input :value.sync="form.yaerTotal" label="１２ヶ月累計" name="yaerTotal" type="number" :max="99999.99" :step="0.01" />
-      <fvl-input :value.sync="form.interval" label="勤務間インターバル" name="interval" type="number" :max="99.99" :step="0.01" />
+      <fvl-input
+        :value.sync="form.threeMonthTotal"
+        label="３ヶ月累計"
+        name="threeMonthTotal"
+        type="number"
+        :max="99999.99"
+        :step="0.01"
+      />
+      <fvl-input
+        :value.sync="form.sixMonthTotal"
+        label="６ヶ月累計"
+        name="sixMonthTotal"
+        type="number"
+        :max="99999.99"
+        :step="0.01"
+      />
+      <fvl-input
+        :value.sync="form.yaerTotal"
+        label="１２ヶ月累計"
+        name="yaerTotal"
+        type="number"
+        :max="99999.99"
+        :step="0.01"
+      />
+      <fvl-input
+        :value.sync="form.interval"
+        label="勤務間インターバル"
+        name="interval"
+        type="number"
+        :max="99.99"
+        :step="0.01"
+      />
       <table class="table">
         <thead>
           <tr>
@@ -53,32 +81,47 @@
         </thead>
         <tbody>
           <tr v-for="(n,index) in 12" :key="index">
-            <input type="hidden" ></input>
+            <input type="hidden" />
             <td>{{ n }}月</td>
             <td>
               <!-- <input class="form-control" v-model="closingDate[index]"></input> -->
               <select class="form-control" v-model="form.closingDate[index]">
-                <option v-for="n in days_max[index]" :value="n" v-bind:key="n">
-                  {{ n }} 日
-                </option>
+                <option v-for="n in days_max[index]" :value="n" v-bind:key="n">{{ n }} 日</option>
               </select>
             </td>
             <td>
-              <input title="整数４桁少数２桁まで" type="number" max="9999.99" step="0.01" class="form-control" v-model="form.upTime[index]"></input>
+              <input
+                title="整数４桁少数２桁まで"
+                type="number"
+                max="9999.99"
+                step="0.01"
+                class="form-control"
+                v-model="form.upTime[index]"
+              />
             </td>
             <td>
               <select class="form-control" v-model="form.timeunit[index]">
-                  <option value></option>
-                  <option v-for="tulist in TimeUnitList" :value="tulist.code" v-bind:key="tulist.code">{{ tulist.code_name }}</option>
-                </select>
+                <option value></option>
+                <option
+                  v-for="tulist in TimeUnitList"
+                  :value="tulist.code"
+                  v-bind:key="tulist.code"
+                >{{ tulist.code_name }}</option>
+              </select>
             </td>
             <td>
               <select class="form-control" v-model="form.timeround[index]">
-                  <option value></option>
-                  <option v-for="trlist in TimeRoundingList" :value="trlist.code" v-bind:key="trlist.code">{{ trlist.code_name }}</option>
-                </select>
+                <option value></option>
+                <option
+                  v-for="trlist in TimeRoundingList"
+                  :value="trlist.code"
+                  v-bind:key="trlist.code"
+                >{{ trlist.code_name }}</option>
+              </select>
             </td>
-            <td><input type="hidden" v-model="hidden" value=""></input></td>
+            <td>
+              <input type="hidden" v-model="hidden" value />
+            </td>
           </tr>
         </tbody>
       </table>
@@ -88,7 +131,13 @@
 </template>
 <script>
 import toasted from "vue-toasted";
-import { FvlForm, FvlInput, FvlSearchSelect,FvlSelect,FvlSubmit } from "formvuelar";
+import {
+  FvlForm,
+  FvlInput,
+  FvlSearchSelect,
+  FvlSelect,
+  FvlSubmit
+} from "formvuelar";
 
 export default {
   name: "SettingCalc",
@@ -101,9 +150,9 @@ export default {
   },
   data() {
     return {
-      year:"",
+      year: "",
       form: {
-        year:"",
+        year: "",
         threeMonthTotal: "",
         sixMonthTotal: "",
         yaerTotal: "",
@@ -111,16 +160,16 @@ export default {
         closingDate: [{}],
         upTime: [{}],
         timeunit: [{}],
-        timeround: [{}],
+        timeround: [{}]
       },
       TimeUnitList: [],
       TimeRoundingList: [],
       days_max: [{}],
       yearList: [{}],
       monthList: [{}],
-      baseYear:"",
+      baseYear: "",
       details: [],
-      hidden:"",
+      hidden: "",
       testList: []
     };
   },
@@ -146,56 +195,56 @@ export default {
     },
     details: function(val, oldVal) {
       this.details.forEach((detail, i) => {
-        if(detail.closing != null){
+        if (detail.closing != null) {
           this.form.closingDate[i] = detail.closing.toString();
-        }else{
+        } else {
           this.form.closingDate[i] = "";
         }
-        if(detail.uplimit_time != null){
+        if (detail.uplimit_time != null) {
           this.form.upTime[i] = detail.uplimit_time.toString();
-        }else{
+        } else {
           this.form.upTime[i] = "";
         }
-        if(detail.time_unit != null){
+        if (detail.time_unit != null) {
           this.form.timeunit[i] = detail.time_unit.toString();
-        }else{
+        } else {
           this.form.timeunit[i] = "";
         }
-        if(detail.time_rounding != null){
+        if (detail.time_rounding != null) {
           this.form.timeround[i] = detail.time_rounding.toString();
-        }else{
+        } else {
           this.form.timeround[i] = "";
         }
       });
       this.hidden = "GET";
-    },
+    }
   },
   methods: {
-    get_days: function () {
+    get_days: function() {
       for (let index = 0; index < 12; index++) {
         var month = index + 1;
         this.days_max[index] = new Date(this.form.year, month, 0).getDate();
       }
     },
-    get_month: function () {
+    get_month: function() {
       for (let index = 0; index < 12; index++) {
-        var code = index +1;
-        var target_month = index+1;
+        var code = index + 1;
+        var target_month = index + 1;
         this.monthList[index] = { code: code, name: target_month };
       }
       console.log("年度更新");
     },
-    get_years: function () {
+    get_years: function() {
       for (let index = 0; index < 30; index++) {
-        var code = index +1;
+        var code = index + 1;
         var target_year = this.baseYear + index;
         this.yearList[index] = { code: code, name: target_year };
       }
       console.log("年度更新");
     },
-    getDetail(){
-        this.$axios
-        .get("/setting_calc/get",{
+    getDetail() {
+      this.$axios
+        .get("/setting_calc/get", {
           params: {
             year: this.year
           }
@@ -203,7 +252,7 @@ export default {
         .then(response => {
           this.details = response.data;
           // this.form.year = this.details[0].year;
-          if(this.details.length > 0){
+          if (this.details.length > 0) {
             this.form.biginningMonth = this.details[0].beginning_month;
             this.form.threeMonthTotal = this.details[0].max_3month_total.toString();
             this.form.sixMonthTotal = this.details[0].max_6month_total.toString();
@@ -215,6 +264,9 @@ export default {
         .catch(reason => {
           alert("error");
         });
+    },
+    alert: function(state, message, title) {
+      this.$swal(title, message, state);
     },
     addSuccess() {
       // ここで会社情報呼び出す
@@ -243,20 +295,14 @@ export default {
         });
     },
     error() {
-      var options = {
-        position: "bottom-center",
-        duration: 2000,
-        fullWidth: false,
-        type: "error"
-      };
-      this.$toasted.show("登録に失敗しました", options);
+      this.alert("error", "登録に失敗しました", "エラー");
     },
     inputClear() {}
   }
 };
 </script>
 <style scoped>
-.width15{
+.width15 {
   width: 15%;
 }
 </style>

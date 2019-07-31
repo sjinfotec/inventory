@@ -180,7 +180,7 @@
       <fvl-submit id="edit" v-if="selectId != ''">編集</fvl-submit>
     </fvl-form>
     <span class="padding-set-small margin-set-top-regular" v-if="selectId != ''">
-      <button class="btn btn-danger" @click="del">削除</button>
+      <button class="btn btn-danger" @click="alertDelConf('info')">削除</button>
     </span>
   </div>
 </template>
@@ -248,6 +248,23 @@ export default {
     }
   },
   methods: {
+    alert: function(state, message, title) {
+      this.$swal(title, message, state);
+    },
+    alertDelConf: function(state) {
+      this.$swal({
+        title: "確認",
+        text: "削除してもよろしいですか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(willDelete => {
+        if (willDelete) {
+          this.del();
+        } else {
+        }
+      });
+    },
     getDetail() {
       this.$axios
         .get("/create_time_table/get", {
@@ -297,41 +314,36 @@ export default {
         });
     },
     addSuccess() {
-      this.$toasted.show("登録しました");
+      this.alert("success", "登録しました", "登録成功");
+      this.selectId = this.form.no;
       this.getTimeTableList();
       this.getDetail();
     },
     error() {
-      var options = {
-        position: "bottom-center",
-        duration: 2000,
-        fullWidth: false,
-        type: "error"
-      };
-      this.$toasted.show("登録に失敗しました", options);
+      this.alert("error", "登録に失敗しました", "エラー");
     },
     // 削除
     del: function() {
-      var confirm = window.confirm("選択したタイムテーブルを削除しますか？");
-      if (confirm) {
-        this.$axios
-          .post("/create_time_table/del", {
-            no: this.selectId
-          })
-          .then(response => {
-            var res = response.data;
-            if (res.result == 0) {
-              this.$toasted.show("選択したタイムテーブルを削除しました");
-              this.inputClear();
-              this.getTimeTableList();
-            } else {
-            }
-          })
-          .catch(reason => {
-            alert("削除でエラーが発生しました");
-          });
-      } else {
-      }
+      this.$axios
+        .post("/create_time_table/del", {
+          no: this.selectId
+        })
+        .then(response => {
+          var res = response.data;
+          if (res.result == 0) {
+            this.alert(
+              "success",
+              "選択したタイムテーブルを削除しました",
+              "削除"
+            );
+            this.inputClear();
+            this.getTimeTableList();
+          } else {
+          }
+        })
+        .catch(reason => {
+          this.alert("error", "削除でエラーが発生しました", "エラー");
+        });
     },
     inputClear() {
       this.form.name = "";

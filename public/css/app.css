@@ -11013,17 +11013,17 @@ body {
 .btn-primary {
   padding-top: 5px;
   padding-bottom: 4px;
-  background-color: #65BAF7;
-  border: 1px solid #3FA9F5;
-  border-bottom: 4px solid #3FA9F5;
+  background-color: #65baf7;
+  border: 1px solid #3fa9f5;
+  border-bottom: 4px solid #3fa9f5;
 }
 
 .input-group-append .btn-primary {
   padding-top: 4px;
   padding-bottom: 4px;
-  background-color: #65BAF7;
-  border: 1px solid #3FA9F5;
-  border-bottom: 3px solid #3FA9F5;
+  background-color: #65baf7;
+  border: 1px solid #3fa9f5;
+  border-bottom: 3px solid #3fa9f5;
 }
 
 /* button success */
@@ -11031,17 +11031,17 @@ body {
 .btn-success {
   padding-top: 5px;
   padding-bottom: 4px;
-  background-color: #33BDAB;
-  border: 1px solid #00A68F;
-  border-bottom: 4px solid #00A68F;
+  background-color: #33bdab;
+  border: 1px solid #00a68f;
+  border-bottom: 4px solid #00a68f;
 }
 
 .input-group-append .btn-success {
   padding-top: 4px;
   padding-bottom: 4px;
-  background-color: #33BDAB;
-  border: 1px solid #00A68F;
-  border-bottom: 3px solid #00A68F;
+  background-color: #33bdab;
+  border: 1px solid #00a68f;
+  border-bottom: 3px solid #00a68f;
 }
 
 /* button warning */
@@ -11049,18 +11049,18 @@ body {
 .btn-warning {
   padding-top: 5px;
   padding-bottom: 4px;
-  background-color: #FFA94B;
-  border: 1px solid #FF931E;
-  border-bottom: 4px solid #FF931E;
-  color: #FFFFFF;
+  background-color: #ffa94b;
+  border: 1px solid #ff931e;
+  border-bottom: 4px solid #ff931e;
+  color: #ffffff;
 }
 
 .input-group-append .btn-warning {
   padding-top: 4px;
   padding-bottom: 4px;
-  background-color: #FFA94B;
-  border: 1px solid #FF931E;
-  border-bottom: 3px solid #FF931E;
+  background-color: #ffa94b;
+  border: 1px solid #ff931e;
+  border-bottom: 3px solid #ff931e;
 }
 
 /* button danger */
@@ -11068,17 +11068,17 @@ body {
 .btn-danger {
   padding-top: 5px;
   padding-bottom: 4px;
-  background-color: #F14B94;
-  border: 1px solid #ED1E79;
-  border-bottom: 4px solid #ED1E79;
+  background-color: #f14b94;
+  border: 1px solid #ed1e79;
+  border-bottom: 4px solid #ed1e79;
 }
 
 .input-group-append .btn-danger {
   padding-top: 4px;
   padding-bottom: 4px;
-  background-color: #F14B94;
-  border: 1px solid #ED1E79;
-  border-bottom: 3px solid #ED1E79;
+  background-color: #f14b94;
+  border: 1px solid #ed1e79;
+  border-bottom: 3px solid #ed1e79;
 }
 
 /* button secondary */
@@ -11086,7 +11086,7 @@ body {
 .btn-secondary {
   padding-top: 5px;
   padding-bottom: 4px;
-  background-color: #392F2C;
+  background-color: #392f2c;
   border: 1px solid #231815;
   border-bottom: 4px solid #231815;
 }
@@ -11094,7 +11094,7 @@ body {
 .input-group-append .btn-secondary {
   padding-top: 4px;
   padding-bottom: 4px;
-  background-color: #19436F;
+  background-color: #19436f;
   border: 1px solid #000000;
   border-bottom: 3px solid #000000;
 }
@@ -11102,7 +11102,7 @@ body {
 [data-toggle].btn-secondary {
   padding-top: 4px;
   padding-bottom: 6px;
-  background-color: #19436F;
+  background-color: #19436f;
   border: none;
   border-top: 1px solid #231815;
 }
@@ -11112,31 +11112,31 @@ body {
 /* border primary */
 
 .border-primary {
-  border: 1px solid #3FA9F5 !important;
+  border: 1px solid #3fa9f5 !important;
 }
 
 /* border success */
 
 .border-success {
-  border: 1px solid #00A68F !important;
+  border: 1px solid #00a68f !important;
 }
 
 /* border warning */
 
 .border-warning {
-  border: 1px solid #FF931E !important;
+  border: 1px solid #ff931e !important;
 }
 
 /* border danger */
 
 .border-danger {
-  border: 1px solid #ED1E79 !important;
+  border: 1px solid #ed1e79 !important;
 }
 
 /* border secondary */
 
 .border-secondary {
-  border: 1px solid #19436F !important;
+  border: 1px solid #19436f !important;
 }
 
 /* background variation */
@@ -11144,31 +11144,31 @@ body {
 /* background primary */
 
 .bg-primary {
-  background-color: #65BAF7 !important;
+  background-color: #65baf7 !important;
 }
 
 /* background success */
 
 .bg-success {
-  background-color: #33BDAB !important;
+  background-color: #33bdab !important;
 }
 
 /* background warning */
 
 .bg-warning {
-  background-color: #FFA94B !important;
+  background-color: #ffa94b !important;
 }
 
 /* background danger */
 
 .bg-danger {
-  background-color: #F14B94 !important;
+  background-color: #f14b94 !important;
 }
 
 /* background secondary */
 
 .bg-secondary {
-  background-color: #19436F !important;
+  background-color: #19436f !important;
 }
 
 /* color variation */
@@ -11176,31 +11176,31 @@ body {
 /* color primary */
 
 .text-primary {
-  color: #3FA9F5 !important;
+  color: #3fa9f5 !important;
 }
 
 /* text success */
 
 .text-success {
-  color: #00A68F !important;
+  color: #00a68f !important;
 }
 
 /* text warning */
 
 .text-warning {
-  color: #FF931E !important;
+  color: #ff931e !important;
 }
 
 /* text danger */
 
 .text-danger {
-  color: #ED1E79 !important;
+  color: #ed1e79 !important;
 }
 
 /* text secondary */
 
 .text-secondary {
-  color: #19436F !important;
+  color: #19436f !important;
 }
 
 /* input label variation */
@@ -11232,11 +11232,11 @@ body {
 /* side nav */
 
 .side-base {
-  background: #19436F;
+  background: #19436f;
 }
 
 .side-head {
-  background: #0D3867;
+  background: #0d3867;
   border-bottom: solid 1px #000;
 }
 
@@ -11277,5 +11277,12 @@ body {
   position: absolute;
   right: 8px;
   bottom: 6px;
+  height: 36px;
+  border: 1px solid #ced4da;
+  line-height: 0.75;
+}
+
+.color-red {
+  color: red;
 }
 

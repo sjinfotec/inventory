@@ -75,28 +75,45 @@
       <fvl-submit id="edit" v-if="userCode != ''">編集</fvl-submit>
     </fvl-form>
     <span class="padding-set-small margin-set-top-regular" v-if="userCode != ''">
-      <button class="btn btn-danger" @click="del">削除</button>
+      <button class="btn btn-danger" @click="alertDelConf('warning')">削除</button>
     </span>
     <span class="padding-set-small margin-set-top-regular" v-if="userCode != ''">
       <button class="btn btn-info" v-on:click="show">パスワード変更</button>
     </span>
-    <modal name="password-change" v-model="userCode">
-      
+    <modal name="password-change" :width="800" :height="600" v-model="userCode">
       <div class="card">
-          <div class="card-header">パスワード変更</div>
-
-          <div class="card-body">
-            <div class="form-group col-md-6">
-              <label for="shift_end" class>新しいパスワード</label>
-              <input class="form-control" v-model="enterPass" maxlength='12' type="password" title="半角英数字12文字以内" pattern="^[a-zA-Z0-9]{6,12}$"></input>
-            </div>
-            <div class="form-group col-md-6">
-              <label for="shift_end" class>新しいパスワード（再入力）</label>
-              <input class="form-control"  v-model="reEnterPass"  maxlength='12' type="password" title="半角英数字12文字以内" pattern="^[a-zA-Z0-9]{6,12}$"></input>
-            </div>
-            <button class="btn btn-success" v-on:click="passChange">確定</button>
-            <button class="btn btn-warning" v-on:click="hide">キャンセル</button>
+        <div class="card-header">パスワード変更</div>
+        <div class="card-body">
+          <div v-if="errors.length">
+            <ul class="error-red color-red">
+              <li v-for="(error,index) in errors" v-bind:key="index">{{ error }}</li>
+            </ul>
           </div>
+          <div class="form-group col-md-6">
+            <label for="shift_end" class>新しいパスワード</label>
+            <input
+              class="form-control"
+              v-model="enterPass"
+              maxlength="12"
+              type="password"
+              title="半角英数字12文字以内"
+              pattern="^[a-zA-Z0-9]{6,12}$"
+            />
+          </div>
+          <div class="form-group col-md-6">
+            <label for="shift_end" class>新しいパスワード（再入力）</label>
+            <input
+              class="form-control"
+              v-model="reEnterPass"
+              maxlength="12"
+              type="password"
+              title="半角英数字12文字以内"
+              pattern="^[a-zA-Z0-9]{6,12}$"
+            />
+          </div>
+          <button class="btn btn-success" v-on:click="alertPassConf('warning')">確定</button>
+          <button class="btn btn-warning" v-on:click="hide">キャンセル</button>
+        </div>
       </div>
     </modal>
   </div>
@@ -142,8 +159,10 @@ export default {
       userList: [],
       userDetails: [],
       userCode: "",
-      enterPass:"",
-      reEnterPass:"",
+      enterPass: "",
+      reEnterPass: "",
+      validate: false,
+      errors: [],
       oldCode: ""
     };
   },
@@ -191,6 +210,9 @@ export default {
     }
   },
   methods: {
+    alert: function(state, message, title) {
+      this.$swal(title, message, state);
+    },
     show: function() {
       this.$modal.show("password-change");
     },
@@ -198,30 +220,65 @@ export default {
       this.$modal.hide("password-change");
       this.inputPassClear();
     },
-    passChange: function(){
-      if(this.enterPass == this.reEnterPass){
-        // パスワード変更
-        var confirm = window.confirm("パスワードを変更しますか？");
-        if (confirm) {
-          this.$axios
-            .post("/user_add/passchange", {
-              user_code: this.userCode,
-              password: this.enterPass
-            })
-            .then(response => {
-              var res = response.data;
-              if (res.result == 0) {
-                this.$toasted.show("パスワードを変更しました");
-                this.hide();
-              } else {
-              }
-            })
-            .catch(reason => {});
+    alertPassConf: function(state) {
+      this.$swal({
+        title: "確認",
+        text: "パスワードを変更しますか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(willDelete => {
+        if (willDelete) {
+          this.passChange();
         } else {
         }
-      }else{
-        // 不一致
-        alert("入力したパスワードが不一致です");
+      });
+    },
+    // バリデーション
+    checkForm: function() {
+      var flag = false;
+      this.errors = [];
+
+      if (this.reEnterPass && this.enterPass) {
+        if (this.reEnterPass != this.enterPass) {
+          flag = false;
+          this.errors.push("入力したパスワードが一致していません");
+        } else {
+          flag = true;
+        }
+        return flag;
+      } else {
+        if (!this.enterPass) {
+          flag = false;
+          this.errors.push("新しいパスワードを入力してください");
+        }
+        if (!this.reEnterPass) {
+          flag = false;
+          this.errors.push("新しいパスワード（再入力）を入力してください");
+        }
+        return flag;
+      }
+    },
+    passChange: function() {
+      this.validate = this.checkForm();
+      if (this.validate) {
+        this.$axios
+          .post("/user_add/passchange", {
+            user_code: this.userCode,
+            password: this.enterPass
+          })
+          .then(response => {
+            var res = response.data;
+            if (res.result == 0) {
+              this.alert("success", "パスワードを変更しました", "変更完了");
+              this.hide();
+            } else {
+            }
+          })
+          .catch(reason => {
+            this.alert("error", "パスワード変更に失敗しました", "エラー");
+          });
+      } else {
       }
     },
     getDepartmentList() {
@@ -281,34 +338,41 @@ export default {
         });
     },
     error() {
-      var options = {
-        position: "bottom-center",
-        duration: 2000,
-        fullWidth: false,
-        type: "error"
-      };
-      this.$toasted.show("ユーザー追加に失敗しました", options);
+      this.alert("error", "登録に失敗しました", "エラー");
+    },
+    alertDelConf: function(state) {
+      this.$swal({
+        title: "確認",
+        text: "削除してもよろしいですか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(willDelete => {
+        if (willDelete) {
+          this.del();
+        } else {
+        }
+      });
     },
     // 削除
     del: function() {
-      var confirm = window.confirm("選択したユーザーを削除しますか？");
-      if (confirm) {
-        this.$axios
-          .post("/user_add/del", {
-            user_code: this.userCode
-          })
-          .then(response => {
-            var res = response.data;
-            if (res.result == 0) {
-              this.$toasted.show("選択したユーザーを削除しました");
-              this.inputClear();
-              this.getUserList(1, null);
-            } else {
-            }
-          })
-          .catch(reason => {});
-      } else {
-      }
+      this.$axios
+        .post("/user_add/del", {
+          user_code: this.userCode
+        })
+        .then(response => {
+          var res = response.data;
+          if (res.result == 0) {
+            this.alert("success", "ユーザーを削除しました", "削除成功");
+            this.inputClear();
+            this.getUserList(1, null);
+          } else {
+            this.alert("error", "削除に失敗しました", "エラー");
+          }
+        })
+        .catch(reason => {
+          this.alert("error", "削除に失敗しました", "エラー");
+        });
     },
     inputClear() {
       this.form.id = "";
@@ -321,7 +385,7 @@ export default {
       this.form.status = "";
       this.form.table_no = "";
     },
-    inputPassClear(){
+    inputPassClear() {
       this.enterPass = "";
       this.reEnterPass = "";
     }
