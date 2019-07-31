@@ -3293,26 +3293,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -75327,29 +75307,37 @@ var render = function() {
   var _c = _vm._self._c || _h
   return this.attendancetime !== null || this.displaynone
     ? _c("div", [
-        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
-          _vm._m(0),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v("出勤時間")
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [
-            _vm._v(_vm._s(this.attendancetime))
-          ])
-        ]),
+        _c(
+          "div",
+          { staticClass: "col-6 pb-2 clearfix align-self-stretch float-left" },
+          [
+            _vm._m(0),
+            _vm._v(" "),
+            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+              _vm._v("出勤時間")
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "font-size-lg m-0" }, [
+              _vm._v(_vm._s(this.attendancetime))
+            ])
+          ]
+        ),
         _vm._v(" "),
-        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
-          _vm._m(1),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v("退勤時間")
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [
-            _vm._v(_vm._s(this.leavingtime))
-          ])
-        ])
+        _c(
+          "div",
+          { staticClass: "col-6 pb-2 clearfix align-self-stretch float-left" },
+          [
+            _vm._m(1),
+            _vm._v(" "),
+            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+              _vm._v("退勤時間")
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "font-size-lg m-0" }, [
+              _vm._v(_vm._s(this.leavingtime))
+            ])
+          ]
+        )
       ])
     : _vm._e()
 }
@@ -75416,17 +75404,21 @@ var render = function() {
     "div",
     { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
     [
-      _c("div", { staticClass: "card text-white bg-secondary border-0" }, [
-        _c("div", { staticClass: "card-body px-3 py-2" }, [
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v(_vm._s(this.itemName))
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-rg m-0" }, [
-            _vm._v(_vm._s(this.value))
+      _c(
+        "div",
+        { staticClass: "card text-secondary border border-secondary" },
+        [
+          _c("div", { staticClass: "card-body px-3 py-2" }, [
+            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+              _vm._v(_vm._s(this.itemName))
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "font-size-rg m-0" }, [
+              _vm._v(_vm._s(this.value))
+            ])
           ])
-        ])
-      ])
+        ]
+      )
     ]
   )
 }
@@ -75454,29 +75446,37 @@ var render = function() {
   var _c = _vm._self._c || _h
   return this.missingmiddletime !== null || this.displaynone
     ? _c("div", [
-        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
-          _vm._m(0),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v("中抜開始")
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [
-            _vm._v(_vm._s(this.missingmiddletime))
-          ])
-        ]),
+        _c(
+          "div",
+          { staticClass: "col-6 pb-2 clearfix align-self-stretch float-left" },
+          [
+            _vm._m(0),
+            _vm._v(" "),
+            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+              _vm._v("中抜開始")
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "font-size-lg m-0" }, [
+              _vm._v(_vm._s(this.missingmiddletime))
+            ])
+          ]
+        ),
         _vm._v(" "),
-        _c("div", { staticClass: "col-6 col-lg-2 pb-2 align-self-stretch" }, [
-          _vm._m(1),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v("戻り時間")
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [
-            _vm._v(_vm._s(this.missingmiddlereturntime))
-          ])
-        ])
+        _c(
+          "div",
+          { staticClass: "col-6 pb-2 clearfix align-self-stretch float-left" },
+          [
+            _vm._m(1),
+            _vm._v(" "),
+            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+              _vm._v("戻り時間")
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "font-size-lg m-0" }, [
+              _vm._v(_vm._s(this.missingmiddlereturntime))
+            ])
+          ]
+        )
       ])
     : _vm._e()
 }
@@ -75543,19 +75543,23 @@ var render = function() {
     "div",
     { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
     [
-      _c("div", { staticClass: "card text-white bg-warning border-0" }, [
-        _c("div", { staticClass: "card-body px-3 py-2" }, [
-          _vm._m(0),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v(_vm._s(this.itemName))
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [
-            _vm._v(_vm._s(this.itemValue))
+      _c(
+        "div",
+        { staticClass: "card text-secondary border border-secondary" },
+        [
+          _c("div", { staticClass: "card-body px-3 py-2" }, [
+            _vm._m(0),
+            _vm._v(" "),
+            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+              _vm._v(_vm._s(this.itemName))
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "font-size-lg m-0" }, [
+              _vm._v(_vm._s(this.itemValue))
+            ])
           ])
-        ])
-      ])
+        ]
+      )
     ]
   )
 }
@@ -75594,7 +75598,7 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "col-12 pb-2 align-self-stretch" }, [
-    _c("div", { staticClass: "card text-white bg-danger border-0" }, [
+    _c("div", { staticClass: "card text-danger border border-danger" }, [
       _c("div", { staticClass: "card-body px-3 py-2" }, [
         _vm._m(0),
         _vm._v(" "),
@@ -75647,19 +75651,23 @@ var render = function() {
     "div",
     { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
     [
-      _c("div", { staticClass: "card text-white bg-success border-0" }, [
-        _c("div", { staticClass: "card-body px-3 py-2" }, [
-          _vm._m(0),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v(_vm._s(this.itemName))
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [
-            _vm._v(_vm._s(this.itemValue))
+      _c(
+        "div",
+        { staticClass: "card text-secondary border border-secondary" },
+        [
+          _c("div", { staticClass: "card-body px-3 py-2" }, [
+            _vm._m(0),
+            _vm._v(" "),
+            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+              _vm._v(_vm._s(this.itemName))
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "font-size-lg m-0" }, [
+              _vm._v(_vm._s(this.itemValue))
+            ])
           ])
-        ])
-      ])
+        ]
+      )
     ]
   )
 }
@@ -75701,19 +75709,23 @@ var render = function() {
     "div",
     { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
     [
-      _c("div", { staticClass: "card text-white bg-primary border-0" }, [
-        _c("div", { staticClass: "card-body px-3 py-2" }, [
-          _vm._m(0),
-          _vm._v(" "),
-          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-            _vm._v(_vm._s(this.itemName))
-          ]),
-          _vm._v(" "),
-          _c("p", { staticClass: "font-size-lg m-0" }, [
-            _vm._v(_vm._s(this.itemValue))
+      _c(
+        "div",
+        { staticClass: "card text-secondary border border-secondary" },
+        [
+          _c("div", { staticClass: "card-body px-3 py-2" }, [
+            _vm._m(0),
+            _vm._v(" "),
+            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+              _vm._v(_vm._s(this.itemName))
+            ]),
+            _vm._v(" "),
+            _c("p", { staticClass: "font-size-lg m-0" }, [
+              _vm._v(_vm._s(this.itemValue))
+            ])
           ])
-        ])
-      ])
+        ]
+      )
     ]
   )
 }
@@ -76872,143 +76884,145 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
-    _vm._m(0),
-    _vm._v(" "),
-    _c("div", { staticClass: "row justify-content-between" }, [
-      _c("div", { staticClass: "col-md pt-3" }, [
-        _c(
-          "div",
-          { staticClass: "card shadow-pl" },
-          [
-            _c("daily-working-information-panel-header", {
-              attrs: {
-                headertext1: "日付を指定して集計を表示する",
-                headertext2:
-                  "雇用形態や所属部署でフィルタリングして表示できます"
-              }
-            }),
-            _vm._v(" "),
-            _c("div", { staticClass: "card-body pt-2" }, [
-              _c(
-                "div",
-                { staticClass: "row justify-content-between" },
-                [
-                  _c("message-data", {
-                    attrs: { messagedatas: _vm.messagedatasserver }
-                  }),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-6 pb-2" }, [
-                    _c(
-                      "div",
-                      { staticClass: "input-group" },
-                      [
-                        _vm._m(1),
-                        _vm._v(" "),
-                        _c("input-datepicker", {
-                          attrs: { "default-Date": _vm.defaultDate },
-                          on: { "change-event": _vm.fromdateChanges }
-                        }),
-                        _vm._v(" "),
-                        _c("message-data", {
-                          attrs: { messagedatas: _vm.messagedatasfromdate }
-                        })
-                      ],
-                      1
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-6 pb-2" }, [
-                    _c(
-                      "div",
-                      { staticClass: "input-group" },
-                      [
-                        _vm._m(2),
-                        _vm._v(" "),
-                        _c("select-employmentstatus", {
-                          attrs: { "blank-data": true },
-                          on: { "change-event": _vm.employmentChanges }
-                        })
-                      ],
-                      1
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-6 pb-2" }, [
-                    _c(
-                      "div",
-                      { staticClass: "input-group" },
-                      [
-                        _vm._m(3),
-                        _vm._v(" "),
-                        _c("select-department", {
-                          attrs: { "blank-data": true },
-                          on: { "change-event": _vm.departmentChanges }
-                        })
-                      ],
-                      1
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-md-6 pb-2" }, [
-                    _c(
-                      "div",
-                      { staticClass: "input-group" },
-                      [
-                        _vm._m(4),
-                        _vm._v(" "),
-                        _c("select-user", {
-                          ref: "selectuser",
-                          attrs: { "blank-data": true, "get-Do": _vm.getDo },
-                          on: { "change-event": _vm.userChanges }
-                        })
-                      ],
-                      1
-                    )
-                  ])
-                ],
-                1
-              ),
+  return _c(
+    "div",
+    [
+      _c("div", { staticClass: "row justify-content-between" }, [
+        _c("div", { staticClass: "col-md pt-3" }, [
+          _c(
+            "div",
+            { staticClass: "card shadow-pl" },
+            [
+              _c("daily-working-information-panel-header", {
+                attrs: {
+                  headertext1: "日付を指定して集計を表示する",
+                  headertext2:
+                    "雇用形態や所属部署でフィルタリングして表示できます"
+                }
+              }),
               _vm._v(" "),
-              _c("div", { staticClass: "row justify-content-between" }, [
+              _c("div", { staticClass: "card-body pt-2" }, [
                 _c(
                   "div",
-                  { staticClass: "col-md-12 pb-2" },
+                  { staticClass: "row justify-content-between" },
                   [
-                    _c("search-workingtimebutton", {
-                      on: { "searchclick-event": _vm.searchclick }
-                    })
+                    _c("message-data", {
+                      attrs: { messagedatas: _vm.messagedatasserver }
+                    }),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _vm._m(0),
+                          _vm._v(" "),
+                          _c("input-datepicker", {
+                            attrs: { "default-Date": _vm.defaultDate },
+                            on: { "change-event": _vm.fromdateChanges }
+                          }),
+                          _vm._v(" "),
+                          _c("message-data", {
+                            attrs: { messagedatas: _vm.messagedatasfromdate }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _vm._m(1),
+                          _vm._v(" "),
+                          _c("select-employmentstatus", {
+                            attrs: { "blank-data": true },
+                            on: { "change-event": _vm.employmentChanges }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _vm._m(2),
+                          _vm._v(" "),
+                          _c("select-department", {
+                            attrs: { "blank-data": true },
+                            on: { "change-event": _vm.departmentChanges }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _vm._m(3),
+                          _vm._v(" "),
+                          _c("select-user", {
+                            ref: "selectuser",
+                            attrs: { "blank-data": true, "get-Do": _vm.getDo },
+                            on: { "change-event": _vm.userChanges }
+                          })
+                        ],
+                        1
+                      )
+                    ])
                   ],
                   1
-                )
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "row justify-content-between" }, [
+                  _c(
+                    "div",
+                    { staticClass: "col-md-12 pb-2" },
+                    [
+                      _c("search-workingtimebutton", {
+                        on: { "searchclick-event": _vm.searchclick }
+                      })
+                    ],
+                    1
+                  )
+                ])
               ])
-            ])
-          ],
-          1
-        )
-      ])
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "row justify-content-between" }, [
-      _c("div", { staticClass: "col-md pt-3 align-self-stretch" }, [
-        _c(
-          "div",
-          { staticClass: "card shadow-pl" },
-          [
-            _c("daily-working-information-panel-header", {
-              attrs: {
-                headertext1: _vm.stringtext,
-                headertext2:
-                  "虫眼鏡アイコンをクリックすると集計結果が表示されます"
-              }
-            }),
-            _vm._v(" "),
-            _c(
-              "div",
-              { staticClass: "card-body mb-3 py-0 pt-4 border-top" },
-              [
-                _vm._l(_vm.calcresults, function(calclist, index) {
-                  return _c("div", { key: calclist.user_code }, [
+            ],
+            1
+          )
+        ])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "row justify-content-between" }, [
+        _c("div", { staticClass: "col-md pt-3 align-self-stretch" }, [
+          _c(
+            "div",
+            { staticClass: "card shadow-pl" },
+            [
+              _c("daily-working-information-panel-header", {
+                attrs: {
+                  headertext1: _vm.stringtext,
+                  headertext2:
+                    "虫眼鏡アイコンをクリックすると集計結果が表示されます"
+                }
+              }),
+              _vm._v(" "),
+              _vm._l(_vm.calcresults, function(calclist, index) {
+                return _c(
+                  "div",
+                  {
+                    key: calclist.user_code,
+                    staticClass: "card-body mb-3 py-0 pt-4 border-top"
+                  },
+                  [
                     _c(
                       "div",
                       { staticClass: "row" },
@@ -77017,7 +77031,7 @@ var render = function() {
                           "div",
                           {
                             staticClass:
-                              "col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch"
+                              "col-sm-6 col-md-6 col-sm-6 col-lg-4 pb-2 align-self-stretch"
                           },
                           [
                             _c(
@@ -77062,10 +77076,10 @@ var render = function() {
                           "div",
                           {
                             staticClass:
-                              "col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch"
+                              "col-sm-6 col-md-6 col-sm-6 col-lg-4 pb-2 align-self-stretch"
                           },
                           [
-                            _vm._m(5, true),
+                            _vm._m(4, true),
                             _vm._v(" "),
                             _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
                               _vm._v("部署")
@@ -77078,6 +77092,7 @@ var render = function() {
                         ),
                         _vm._v(" "),
                         _c("col-attendance", {
+                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
                           attrs: {
                             attendancetime: calclist.attendance_time_1,
                             leavingtime: calclist.leaving_time_1,
@@ -77086,6 +77101,7 @@ var render = function() {
                         }),
                         _vm._v(" "),
                         _c("col-attendance", {
+                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
                           attrs: {
                             attendancetime: calclist.attendance_time_2,
                             leavingtime: calclist.leaving_time_2,
@@ -77094,6 +77110,7 @@ var render = function() {
                         }),
                         _vm._v(" "),
                         _c("col-attendance", {
+                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
                           attrs: {
                             attendancetime: calclist.attendance_time_3,
                             leavingtime: calclist.leaving_time_3,
@@ -77102,6 +77119,7 @@ var render = function() {
                         }),
                         _vm._v(" "),
                         _c("col-attendance", {
+                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
                           attrs: {
                             attendancetime: calclist.attendance_time_4,
                             leavingtime: calclist.leaving_time_4,
@@ -77110,6 +77128,7 @@ var render = function() {
                         }),
                         _vm._v(" "),
                         _c("col-attendance", {
+                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
                           attrs: {
                             attendancetime: calclist.attendance_time_5,
                             leavingtime: calclist.leaving_time_5,
@@ -77118,15 +77137,17 @@ var render = function() {
                         }),
                         _vm._v(" "),
                         _c("col-missingmiddle", {
+                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
                           attrs: {
                             missingmiddletime: calclist.missing_middle_time_1,
                             missingmiddlereturntime:
                               calclist.missing_middle_return_time_1,
-                            displaynone: true
+                            displaynone: false
                           }
                         }),
                         _vm._v(" "),
                         _c("col-missingmiddle", {
+                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
                           attrs: {
                             missingmiddletime: calclist.missing_middle_time_2,
                             missingmiddlereturntime:
@@ -77136,6 +77157,7 @@ var render = function() {
                         }),
                         _vm._v(" "),
                         _c("col-missingmiddle", {
+                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
                           attrs: {
                             missingmiddletime: calclist.missing_middle_time_3,
                             missingmiddlereturntime:
@@ -77145,6 +77167,7 @@ var render = function() {
                         }),
                         _vm._v(" "),
                         _c("col-missingmiddle", {
+                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
                           attrs: {
                             missingmiddletime: calclist.missing_middle_time_4,
                             missingmiddlereturntime:
@@ -77154,6 +77177,7 @@ var render = function() {
                         }),
                         _vm._v(" "),
                         _c("col-missingmiddle", {
+                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
                           attrs: {
                             missingmiddletime: calclist.missing_middle_time_5,
                             missingmiddlereturntime:
@@ -77275,144 +77299,111 @@ var render = function() {
                         )
                       ]
                     )
-                  ])
-                }),
-                _vm._v(" "),
-                _vm._l(_vm.sumresults, function(sumresult) {
-                  return _c("div", [
-                    _c(
-                      "div",
-                      { staticClass: "row" },
-                      [
-                        _c("col-employmentstatus", {
-                          attrs: { "item-name": "合　　計", "item-value": "　" }
-                        }),
-                        _vm._v(" "),
-                        _c("col-employmentstatus", {
-                          attrs: {
-                            "item-name": "勤務時間",
-                            "item-value": sumresult.total_working_times
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-employmentstatus", {
-                          attrs: { "item-name": "　", "item-value": "　" }
-                        }),
-                        _vm._v(" "),
-                        _c("col-employmentstatus", {
-                          attrs: { "item-name": "　", "item-value": "　" }
-                        }),
-                        _vm._v(" "),
-                        _c("col-regularworking", {
-                          attrs: {
-                            "item-name": "所定労働時間",
-                            "item-value": sumresult.regular_working_times
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-regularworking", {
-                          attrs: {
-                            "item-name": "所定外労働時間",
-                            "item-value": sumresult.out_of_regular_working_times
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-overtimehours", {
-                          attrs: {
-                            "item-name": "残業時間",
-                            "item-value": sumresult.overtime_hours
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-overtimehours", {
-                          attrs: {
-                            "item-name": "深夜残業時間",
-                            "item-value": sumresult.late_night_overtime_hours
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-overtimehours", {
-                          attrs: {
-                            "item-name": "法定労働時間",
-                            "item-value": sumresult.legal_working_times
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-overtimehours", {
-                          attrs: {
-                            "item-name": "法定外労働時間",
-                            "item-value": sumresult.out_of_legal_working_times
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-notemploymentworking", {
-                          attrs: {
-                            "item-name": "未就労時間",
-                            "item-value": sumresult.not_employment_working_hours
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-notemploymentworking", {
-                          attrs: {
-                            "item-name": "時間外労働",
-                            "item-value": sumresult.off_hours_working_hours
-                          }
-                        })
-                      ],
-                      1
-                    )
-                  ])
-                })
-              ],
-              2
-            )
-          ],
-          1
-        )
-      ])
-    ]),
-    _vm._v(" "),
-    _vm._m(6)
-  ])
-}
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "row justify-content-between" }, [
-      _c("div", { staticClass: "col-md pt-3" }, [
-        _c(
-          "div",
-          {
-            staticClass: "card bg-secondary text-white pt-2 border-0 shadow-pl"
-          },
-          [
-            _c(
-              "div",
-              { staticClass: "card-header bg-transparent pt-2 border-0" },
-              [
-                _c(
-                  "h1",
-                  { staticClass: "float-left font-size-xl line-height-rg" },
-                  [
-                    _c("img", {
-                      staticClass: "icon-size-rg mr-3",
-                      attrs: {
-                        src: "/images/round-notifications-none-w.svg",
-                        alt: ""
-                      }
-                    }),
-                    _vm._v("日次集計")
                   ]
                 )
-              ]
+              })
+            ],
+            2
+          )
+        ])
+      ]),
+      _vm._v(" "),
+      _vm._l(_vm.sumresults, function(sumresult) {
+        return _c("div", { staticClass: "row justify-content-between" }, [
+          _c("div", { staticClass: "col-md pt-3" }, [
+            _c(
+              "div",
+              { staticClass: "card shadow-pl" },
+              [
+                _c("daily-working-information-panel-header", {
+                  attrs: {
+                    headertext1: "合計",
+                    headertext2: "集計日の合計が表示されます"
+                  }
+                }),
+                _vm._v(" "),
+                _c("div", { staticClass: "card-body pt-2" }, [
+                  _c(
+                    "div",
+                    { staticClass: "row" },
+                    [
+                      _c("col-employmentstatus", {
+                        attrs: {
+                          "item-name": "勤務時間",
+                          "item-value": sumresult.total_working_times
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-regularworking", {
+                        attrs: {
+                          "item-name": "所定労働時間",
+                          "item-value": sumresult.regular_working_times
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-regularworking", {
+                        attrs: {
+                          "item-name": "所定外労働時間",
+                          "item-value": sumresult.out_of_regular_working_times
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-overtimehours", {
+                        attrs: {
+                          "item-name": "残業時間",
+                          "item-value": sumresult.overtime_hours
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-overtimehours", {
+                        attrs: {
+                          "item-name": "深夜残業時間",
+                          "item-value": sumresult.late_night_overtime_hours
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-overtimehours", {
+                        attrs: {
+                          "item-name": "法定労働時間",
+                          "item-value": sumresult.legal_working_times
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-overtimehours", {
+                        attrs: {
+                          "item-name": "法定外労働時間",
+                          "item-value": sumresult.out_of_legal_working_times
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-notemploymentworking", {
+                        attrs: {
+                          "item-name": "未就労時間",
+                          "item-value": sumresult.not_employment_working_hours
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-notemploymentworking", {
+                        attrs: {
+                          "item-name": "時間外労働",
+                          "item-value": sumresult.off_hours_working_hours
+                        }
+                      })
+                    ],
+                    1
+                  )
+                ])
+              ],
+              1
             )
-          ]
-        )
-      ])
-    ])
-  },
+          ])
+        ])
+      })
+    ],
+    2
+  )
+}
+var staticRenderFns = [
   function() {
     var _vm = this
     var _h = _vm.$createElement
@@ -77494,18 +77485,6 @@ var staticRenderFns = [
         })
       ]
     )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "row justify-content-between" }, [
-      _c("div", { staticClass: "col-md p-3" }, [
-        _c("div", { staticClass: "text-center" }, [
-          _c("small", [_vm._v("© 2019 One Door")])
-        ])
-      ])
-    ])
   }
 ]
 render._withStripped = true
@@ -77537,7 +77516,7 @@ var render = function() {
         _vm._v(_vm._s(this.headertext1))
       ]),
       _vm._v(" "),
-      _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+      _c("span", { staticClass: "float-sm-right font-size-sm mb-2" }, [
         _vm._v(_vm._s(this.headertext2))
       ])
     ]
