@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddUseridToUsersTable1022 extends Migration
+class DropColumnWorkingTimeDateTable0947 extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,10 @@ class AddUseridToUsersTable1022 extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('userid');
-            $table->dropColumn('user_id');
+        //
+        Schema::table('working_time_date', function (Blueprint $table) {
+            //カラム削除    char型に変更するためいったんdrop
+            $table->dropColumn('user_code');
         });
     }
 
@@ -26,7 +27,6 @@ class AddUseridToUsersTable1022 extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-        });
+        //
     }
 }

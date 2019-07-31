@@ -25,6 +25,12 @@ class CreateShiftTimeController extends Controller
         return view('create_shift_time');
     }
 
+    /**
+     * シフト時間作成
+     *
+     * @param Request $request
+     * @return void
+     */
     public function store(Request $request){
         $shift_start_time = $request->start;
         $shift_end_time = $request->end;
@@ -49,10 +55,10 @@ class CreateShiftTimeController extends Controller
     }
 
     /**
-     * DB書き込み(新規)
+     * DB書き込み(INSERT)
      *
-     * @param [type] $user_id
-     * @param [type] $mode
+     * @param [type] $shift_start_time
+     * @param [type] $shift_end_time
      * @return void
      */
     private function dbConnectInsert($shift_start_time,$shift_end_time){
@@ -65,6 +71,52 @@ class CreateShiftTimeController extends Controller
             $shift_time->setSystemDateAttribute($systemdate);
             $shift_time->insertShiftTime();
 
+            DB::commit();
+            return true;
+
+        }catch(\PDOException $e){
+            DB::rollBack();
+            return false;
+        }
+    }
+
+    /**
+     * 登録済シフト時間表示
+     *
+     * @return void
+     */
+    public function get(){
+        $shift_times = DB::table('shift_times')->where('is_deleted', 0)->orderby('shift_start_time','asc')->get();
+        return $shift_times;
+    }
+
+    /**
+     * 削除
+     *
+     * @return void
+     */
+    public function del(Request $request){
+        $id = $request->id;
+        $response = collect();
+        $result = $this->dbConnectUpdate($id);
+        if($result){
+            $response->put('result',self::SUCCESS);
+        }else{
+            $response->put('result',self::FAILED);
+        }
+        return $response;
+    }
+
+    /**
+     * DB書き込み（UPDATE）
+     *
+     * @param [type] $id
+     * @return void
+     */
+    private function dbConnectUpdate($id){
+        DB::beginTransaction();
+        try{
+            DB::table('shift_times')->where('id', $id)->update(['is_deleted' => 1]);
             DB::commit();
             return true;
 

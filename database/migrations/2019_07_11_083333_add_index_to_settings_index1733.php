@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddDepartmentCodeToUsersTable1711 extends Migration
+class AddIndexToSettingsIndex1733 extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,9 @@ class AddDepartmentCodeToUsersTable1711 extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('userid');
+        Schema::table('settings', function (Blueprint $table) {
+            //
+            $table->index(['fiscal_year','fiscal_month'],'settings_fiscal_year_fiscal_month_index');
         });
     }
 
@@ -25,7 +26,7 @@ class AddDepartmentCodeToUsersTable1711 extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('settings', function (Blueprint $table) {
             //
         });
     }
