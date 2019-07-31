@@ -77510,13 +77510,13 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
-    { staticClass: "card-header bg-transparent pb-0 border-0" },
+    { staticClass: "card-header bg-transparent pb-2 border-0" },
     [
-      _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+      _c("h1", { staticClass: "float-sm-left font-size-rg mb-0" }, [
         _vm._v(_vm._s(this.headertext1))
       ]),
       _vm._v(" "),
-      _c("span", { staticClass: "float-sm-right font-size-sm mb-2" }, [
+      _c("span", { staticClass: "float-sm-right font-size-sm mb-0" }, [
         _vm._v(_vm._s(this.headertext2))
       ])
     ]
