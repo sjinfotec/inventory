@@ -11288,6 +11288,27 @@ body {
   line-height: 0.75;
 }
 
+/* vue search select */
+
+.fvl-search-select-wrapper {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.fvl-search-select-input-wrapper {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.fvl-search-select {
+  background-color: #FFFFFF;
+  border-radius: 0.25rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border: 1px solid #ced4da;
+  color: #495057;
+}
+
 .color-red {
   color: red;
 }
