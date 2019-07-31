@@ -4981,12 +4981,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
 
 
 
@@ -4995,8 +4989,8 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       ja: vuejs_datepicker_dist_locale__WEBPACK_IMPORTED_MODULE_2__["ja"],
-      "default": '2019/10/24',
-      DatePickerFormat: 'yyyy/MM/dd',
+      "default": "2019/10/24",
+      DatePickerFormat: "yyyy/MM/dd",
       from: "",
       to: "",
       shiftTimes: [],
@@ -5033,30 +5027,63 @@ __webpack_require__.r(__webpack_exports__);
 
         if (!this.selectedUser) {
           flag = false;
-          this.errors.push('ユーザーを選択してください');
+          this.errors.push("ユーザーを選択してください");
         }
 
         if (!this.no) {
           flag = false;
-          this.errors.push('タイムテーブル選択をしてください');
+          this.errors.push("タイムテーブル選択をしてください");
         }
 
         if (!this.from) {
           flag = false;
-          this.errors.push('開始日を入力してください');
+          this.errors.push("開始日を入力してください");
         }
 
         if (!this.to) {
           flag = false;
-          this.errors.push('終了日を入力してください');
+          this.errors.push("終了日を入力してください");
         }
 
         return flag;
       }
     },
+    alert: function alert(state, message, title) {
+      this.$swal(title, message, state);
+    },
+    alertRangeDelConf: function alertRangeDelConf(state) {
+      var _this = this;
+
+      this.$swal({
+        title: "確認",
+        text: "選択した日付範囲のシフトを削除しますか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(function (willDelete) {
+        if (willDelete) {
+          _this.rangeDell();
+        } else {}
+      });
+    },
+    alertDelConf: function alertDelConf(state, id) {
+      var _this2 = this;
+
+      this.$swal({
+        title: "確認",
+        text: "シフトを削除しますか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(function (willDelete) {
+        if (willDelete) {
+          _this2.delShiftTimes(id);
+        } else {}
+      });
+    },
     // 登録ボタン押下
     StoreShiftTime: function StoreShiftTime() {
-      var _this = this;
+      var _this3 = this;
 
       this.validate = this.checkForm();
 
@@ -5071,28 +5098,14 @@ __webpack_require__.r(__webpack_exports__);
           console.log(res.result);
 
           if (res.result == 0) {
-            _this.$toasted.show("シフトを登録しました");
+            _this3.$toasted.show("シフトを登録しました");
 
-            _this.getUserShift(_this.selectedUser);
+            _this3.getUserShift(_this3.selectedUser);
           } else {
-            var options = {
-              position: "bottom-center",
-              duration: 2000,
-              fullWidth: false,
-              type: "error"
-            };
-
-            _this.$toasted.show("シフトの登録に失敗しました", options);
+            _this3.alert("error", "シフトの登録に失敗しました", "エラー");
           }
         })["catch"](function (reason) {
-          var options = {
-            position: "bottom-center",
-            duration: 2000,
-            fullWidth: false,
-            type: "error"
-          };
-
-          _this.$toasted.show("シフト時間の登録に失敗しました", options);
+          _this3.alert("error", "シフト登録に失敗しました", "エラー");
         });
       } else {}
     },
@@ -5101,10 +5114,10 @@ __webpack_require__.r(__webpack_exports__);
       this.$refs.selectuser.getUserList(this.getDo, "");
     },
     getTimeTableList: function getTimeTableList() {
-      var _this2 = this;
+      var _this4 = this;
 
       this.$axios.get("/get_time_table_list").then(function (response) {
-        _this2.timeTableList = response.data;
+        _this4.timeTableList = response.data;
         console.log("タイムテーブルリスト取得");
       })["catch"](function (reason) {
         alert("error");
@@ -5112,18 +5125,18 @@ __webpack_require__.r(__webpack_exports__);
     },
     // ユーザーリスト変更時
     getUserShift: function getUserShift(code) {
-      var _this3 = this;
+      var _this5 = this;
 
       console.log(code);
       this.$axios.post("/get_user_shift", {
         code: code
       }).then(function (response) {
-        _this3.shiftInfo = response.data;
+        _this5.shiftInfo = response.data;
       })["catch"](function (reason) {});
     },
     // 削除
     delShiftTimes: function delShiftTimes(itemid) {
-      var _this4 = this;
+      var _this6 = this;
 
       console.log(itemid);
       this.$axios.post("/setting_shift_time/del", {
@@ -5132,36 +5145,31 @@ __webpack_require__.r(__webpack_exports__);
         var res = response.data;
 
         if (res.result == 0) {
-          _this4.$toasted.show("シフトを削除しました");
+          _this6.$toasted.show("シフトを削除しました");
 
-          _this4.getUserShift(_this4.selectedUser);
+          _this6.getUserShift(_this6.selectedUser);
         } else {}
       })["catch"](function (reason) {});
     },
     // 範囲削除
     rangeDell: function rangeDell() {
-      var _this5 = this;
+      var _this7 = this;
 
-      var confirm = window.confirm("選択した日付のシフトを削除しますか？");
+      this.$axios.post("/setting_shift_time/range_del", {
+        user_code: this.selectedUser,
+        from: this.from,
+        to: this.to
+      }).then(function (response) {
+        var res = response.data;
 
-      if (confirm) {
-        console.log(confirm);
-        this.$axios.post("/setting_shift_time/range_del", {
-          user_code: this.selectedUser,
-          from: this.from,
-          to: this.to
-        }).then(function (response) {
-          var res = response.data;
+        if (res.result == 0) {
+          _this7.alert("success", "選択した日付のシフトを削除しました", "削除成功");
 
-          if (res.result == 0) {
-            _this5.$toasted.show("選択した日付のシフトを削除しました");
-
-            _this5.getUserShift(_this5.selectedUser);
-          } else {}
-        })["catch"](function (reason) {});
-      } else {
-        console.log(confirm);
-      }
+          _this7.getUserShift(_this7.selectedUser);
+        } else {
+          _this7.alert("error", "削除に失敗しました", "エラー");
+        }
+      })["catch"](function (reason) {});
     },
     // ユーザー選択が変更された場合の処理
     userChanges: function userChanges(value) {
@@ -79898,12 +79906,12 @@ var render = function() {
         { staticClass: "form-group col-md-6" },
         [
           _vm.errors.length
-            ? _c("p", [
+            ? _c("div", [
                 _c(
                   "ul",
                   { staticClass: "error-red" },
-                  _vm._l(_vm.errors, function(error) {
-                    return _c("li", [_vm._v(_vm._s(error))])
+                  _vm._l(_vm.errors, function(error, index) {
+                    return _c("li", { key: index }, [_vm._v(_vm._s(error))])
                   }),
                   0
                 )
@@ -79959,7 +79967,7 @@ var render = function() {
           },
           _vm._l(_vm.timeTableList, function(option) {
             return _c("option", { domProps: { value: option.no } }, [
-              _vm._v("\n        " + _vm._s(option.name) + "\n      ")
+              _vm._v(_vm._s(option.name))
             ])
           }),
           0
@@ -80033,7 +80041,7 @@ var render = function() {
           staticClass: "btn btn-danger",
           on: {
             click: function($event) {
-              return _vm.rangeDell()
+              return _vm.alertRangeDelConf("info")
             }
           }
         },
@@ -80050,7 +80058,7 @@ var render = function() {
             _c(
               "tbody",
               _vm._l(_vm.shiftInfo, function(item) {
-                return _c("tr", [
+                return _c("tr", { key: item.id }, [
                   _c("input", {
                     directives: [
                       {
@@ -80083,7 +80091,7 @@ var render = function() {
                         staticClass: "btn btn-danger",
                         on: {
                           click: function($event) {
-                            return _vm.delShiftTimes(item.id)
+                            return _vm.alertDelConf("info", item.id)
                           }
                         }
                       },

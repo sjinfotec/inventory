@@ -56,7 +56,7 @@ class EditWorkTimesController extends Controller
             $detail->user_holiday_kbn="";
             if(isset($detail->record_time)){
                 $carbon = new Carbon($detail->record_time);
-                $detail->date = $carbon->copy()->format('Y年m月d日');
+                $detail->date = $carbon->copy()->format('Y/m/d');
                 $search_date = $carbon->copy()->format('Ymd');
                 // 個人休暇区分取得
                 $holiday_kbn = DB::table('user_holiday_kubuns')->where('working_date', $search_date)->where('user_code', $code)->where('is_deleted', 0)->value('holiday_kubun');
@@ -168,10 +168,11 @@ class EditWorkTimesController extends Controller
                 $work_time->setIdAttribute($detail['id']);
                 $work_time->delWorkTime();
                 // 新規登録
+                $record_time = $detail['date']." ".$detail['time'];
                 $work_time->setUsercodeAttribute($detail['user_code']);
                 $work_time->setDepartmentcodeAttribute($detail['department_id']);
-                $work_time->setRecordtimeAttribute($detail['record_time']);
                 $work_time->setModeAttribute($detail['mode']);
+                $work_time->setRecordtimeAttribute($record_time);
 
                 $work_time->insertWorkTime();
                 if($detail['kbn_flag'] == 1){         // 個人休暇が入っているものはuser_holiday_kubunsへ登録
