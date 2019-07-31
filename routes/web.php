@@ -30,6 +30,9 @@ Route::get('/monthly', 'MonthlyWorkingInformationController@index')->middleware(
 // 勤怠編集
 Route::get('/edit_work_times', 'EditWorkTimesController@index')->middleware('auth');
 Route::get('/edit_work_times/get', 'EditWorkTimesController@get')->middleware('auth');
+Route::post('/edit_work_times/store', 'EditWorkTimesController@store')->middleware('auth');
+Route::post('/edit_work_times/del', 'EditWorkTimesController@del')->middleware('auth');
+Route::post('/edit_work_times/add', 'EditWorkTimesController@add')->middleware('auth');
 
 // シフト
 Route::get('/create_shift_time', 'CreateShiftTimeController@index')->middleware('auth');

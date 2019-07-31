@@ -6,12 +6,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use App\Http\Requests\StoreUserPost;
+use Illuminate\Support\Facades\Auth;
 use App\WorkTime;
+use App\UserHolidayKubun;
 use Carbon\Carbon;
 
 
 class EditWorkTimesController extends Controller
 {
+    const SUCCESS = 0;
+    const FAILED = 1;
+
     /**
      * 初期処理
      *
@@ -48,10 +53,17 @@ class EditWorkTimesController extends Controller
         $before_date = "";
         foreach ($details as $detail) {
             $detail->kbn_flag = 0;
+            $detail->user_holiday_kbn="";
             if(isset($detail->record_time)){
                 $carbon = new Carbon($detail->record_time);
                 $detail->date = $carbon->copy()->format('Y年m月d日');
-                $detail->time = $carbon->copy()->format('H:i:s');
+                $search_date = $carbon->copy()->format('Ymd');
+                // 個人休暇区分取得
+                $holiday_kbn = DB::table('user_holiday_kubuns')->where('working_date', $search_date)->where('user_code', $code)->where('is_deleted', 0)->value('holiday_kubun');
+                if(isset($holiday_kbn)){
+                    $detail->user_holiday_kbn = $holiday_kbn;
+                }
+                $detail->time = $carbon->copy()->format('H:i');
                 if($detail->date != $before_date){
                     $detail->kbn_flag = 1;
                 }
@@ -60,5 +72,125 @@ class EditWorkTimesController extends Controller
         }
         
         return $details;
+    }
+
+    public function add(Request $request){
+        // request
+        $date = $request->date;
+        $user_code = $request->user_code;
+        $mode = $request->mode;
+        $holiday_kbn = $request->holiday_kbn;
+        
+    }
+
+    /**
+     * 編集登録
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function store(Request $request){
+       // request
+        $details = $request->details;
+        $converts = array();
+        $response = collect();
+        // foreach ($details as $index => $detail) {
+        // }
+
+        $result = $this->insertWorkTime($details);
+        if($result){
+            $response->put('result',self::SUCCESS);
+        }else{
+            $response->put('result',self::FAILED);
+        }
+        return $response;
+    }
+
+    /**
+     * 登録
+     *
+     * @param [type] $details
+     * @return void
+     */
+    private function insertWorkTime($details){
+        $work_time = new WorkTime();
+        $user_holiday = new UserHolidayKubun();
+        $systemdate = Carbon::now();
+        $user = Auth::user();
+        $converts = array();
+        $converts = $details;       // 個人休暇登録用
+        $user_code = $user->code;
+        DB::beginTransaction();
+            $work_time->setCreateduserAttribute($user_code);
+            $work_time->setSystemDateAttribute($systemdate);
+        try{
+            foreach ($details as $detail) {
+                // 論理削除新規
+                $work_time->setIdAttribute($detail['id']);
+                $work_time->delWorkTime();
+                // 新規登録
+                $work_time->setUsercodeAttribute($detail['user_code']);
+                $work_time->setDepartmentcodeAttribute($detail['department_id']);
+                $work_time->setRecordtimeAttribute($detail['record_time']);
+                $work_time->setModeAttribute($detail['mode']);
+
+                $work_time->insertWorkTime();
+                if($detail['user_holiday_kbn'] != ""){         // 個人休暇が入っているものはuser_holiday_kubunsへ登録
+                    $date = new Carbon($detail['record_time']);
+                    $working_date = $date->copy()->format('Ymd');
+                    $user_holiday->setUsercodeAttribute($detail['user_code']);
+                    $user_holiday->setWorkingdateAttribute($working_date);
+                    $user_holiday->setSystemDateAttribute($systemdate);
+                    // 既に存在する場合は論理削除する
+                    $is_exists = $user_holiday->isExistsKbn();
+                    if($is_exists){
+                        $user_holiday->delKbn();
+                    }
+                    $user_holiday->setDepartmentidAttribute($detail['department_id']);
+                    $user_holiday->setHolidaykubunAttribute($detail['user_holiday_kbn']);
+                    $user_holiday->setCreateduserAttribute($user_code);
+                    $user_holiday->insertKbn();
+                }
+            }
+            
+            DB::commit();
+            return true;
+
+        }catch(\PDOException $e){
+            DB::rollBack();
+            return false;
+        }
+    }
+
+    /**
+     * レコード削除
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function del(Request $request){
+        $id = $request->id;
+        $work_time = new WorkTime();
+        $systemdate = Carbon::now();
+        $response = collect();
+        
+        DB::beginTransaction();
+        try{
+            $work_time->setIdAttribute($id);
+            $work_time->setSystemDateAttribute($systemdate);
+            $result = $work_time->delWorkTime();
+            DB::commit();
+            $result = true;
+
+        }catch(\PDOException $e){
+            DB::rollBack();
+            $result = true;
+        }
+        if($result){
+            $response->put('result',self::SUCCESS);
+        }else{
+            $response->put('result',self::FAILED);
+        }
+        return $response;
     }
 }

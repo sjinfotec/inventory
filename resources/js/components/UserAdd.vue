@@ -81,10 +81,8 @@
       <button class="btn btn-info" v-on:click="show">パスワード変更</button>
     </span>
     <modal name="password-change" v-model="userCode">
-      
       <div class="card">
           <div class="card-header">パスワード変更</div>
-
           <div class="card-body">
             <div class="form-group col-md-6">
               <label for="shift_end" class>新しいパスワード</label>

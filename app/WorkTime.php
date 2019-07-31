@@ -12,10 +12,11 @@ class WorkTime extends Model
     protected $table = 'work_times';
     protected $table_users = 'users';
     protected $table_shift_informations = 'shift_informations';
-    protected $guarded = array('id');
+    // protected $guarded = array('id');
 
     //--------------- メンバー属性 -----------------------------------
 
+    private $id;
     private $user_code;                     // ユーザーコード
     private $department_id;                 // 部署コード
     private $record_time;                   // 打刻時間
@@ -24,6 +25,17 @@ class WorkTime extends Model
     private $updated_user;                  // 修正ユーザー
     private $is_deleted;                    // 削除フラグ
     private $systemdate;
+
+    // ユーザーコード
+    public function getIdAttribute()
+    {
+        return $this->id;
+    }
+
+    public function setIdAttribute($value)
+    {
+        $this->id = $value;
+    }
 
     // ユーザーコード
     public function getUsercodeAttribute()
@@ -263,11 +275,13 @@ class WorkTime extends Model
      * @return void
      */
     public function insertWorkTime(){
-        DB::table($table)->insert(
+        DB::table($this->table)->insert(
             [
                 'user_code' => $this->user_code,
-                'record_time' => $this->systemdate,
+                'department_id' => $this->department_id,
+                'record_time' => $this->record_time,
                 'mode' => $this->mode,
+                'created_user' => $this->created_user,
                 'created_at'=>$this->systemdate
             ]
         );
@@ -633,4 +647,20 @@ class WorkTime extends Model
 
         return $data;
     }
+
+    /**
+     * 論理削除
+     *
+     * @return void
+     */
+    public function delWorkTime(){
+        DB::table($this->table)
+            ->where('id', $this->id)
+            ->update([
+                'is_deleted' => 1,
+                'updated_at' => $this->systemdate
+                ]);
+    }
+
+    
 }

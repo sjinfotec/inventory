@@ -11,6 +11,8 @@ import axios from "axios";
 import toasted from "vue-toasted";
 import VCalendar from "v-calendar";
 import VModal from "vue-js-modal";
+import Vue from "vue";
+import VueSwal from "vue-swal";
 
 var options = {
     position: "bottom-center",
@@ -21,6 +23,7 @@ var options = {
 Vue.use(toasted, options);
 Vue.use(VCalendar);
 Vue.use(VModal);
+Vue.use(VueSwal);
 
 Vue.prototype.$axios = axios;
 // Vue.prototype.$toasted = toasted;
@@ -154,11 +157,20 @@ Vue.component(
     require("./components/ColEmploymentStatus.vue").default
 );
 
-Vue.component("col-regularworking", require("./components/ColRegularWorking.vue").default);
+Vue.component(
+    "col-regularworking",
+    require("./components/ColRegularWorking.vue").default
+);
 
-Vue.component("col-overtimehours", require("./components/ColOvertimeHours.vue").default);
+Vue.component(
+    "col-overtimehours",
+    require("./components/ColOvertimeHours.vue").default
+);
 
-Vue.component("col-notemploymentworking", require("./components/ColNotEmploymentWorking.vue").default);
+Vue.component(
+    "col-notemploymentworking",
+    require("./components/ColNotEmploymentWorking.vue").default
+);
 
 Vue.component("col-note", require("./components/ColNote.vue").default);
 
