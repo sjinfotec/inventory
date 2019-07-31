@@ -1,6 +1,7 @@
 <template>
-  <!-- panel body -->
-  <div class="panel-body">
+<div>
+  <!-- main contentns row -->
+  <div class="row justify-content-between">
     <fvl-form
       method="post"
       :data="form"
@@ -8,126 +9,230 @@
       @success="addSuccess()"
       @error="error()"
     >
-      <div class="row">
-        <div class="form-group col-md-6">
-          <fvl-search-select
-            :selected.sync="year"
-            label="年度"
-            name="year"
-            :options="yearList"
-            placeholder="年度を選択してください"
-            :allowEmpty="true"
-            :search-keys="['name']"
-            option-key="name"
-            option-value="name"
-          />
+    <!-- .panel -->
+    <div class="col-md pt-3">
+      <div class="card shadow-pl">
+        <!-- panel header -->
+        <div class="card-header bg-transparent pb-0 border-0">
+          <h1 class="float-sm-left font-size-rg">年度指定</h1>
+          <span class="float-sm-right font-size-sm">設定する年度を指定できます</span>
         </div>
-        <div class="form-group col-md-6">
-          <fvl-search-select
-            :selected.sync="form.biginningMonth"
-            label="期首月"
-            name="biginningMonth"
-            :options="monthList"
-            placeholder="期首月を選択してください"
-            :allowEmpty="true"
-            :search-keys="['name']"
-            option-key="name"
-            option-value="name"
-          />
+        <!-- /.panel header -->
+        <div class="card-body pt-2">
+          <!-- panel contents -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- .col -->
+            <div class="col-12 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">年度指定</span>
+                </div>
+                <fvl-search-select
+                  :selected.sync="year"
+                  class="p-0"
+                  name="year"
+                  :options="yearList"
+                  placeholder="年度を選択してください"
+                  :allowEmpty="true"
+                  :search-keys="['name']"
+                  option-key="name"
+                  option-value="name"
+                />
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- panel header -->
+            <div class="card-header col-12 bg-transparent pb-2 border-0">
+              <h1 class="float-sm-left font-size-rg">基本設定</h1>
+              <span class="float-sm-right font-size-sm">決算月と次の勤務と見なすまでの時間インターバルを設定できます</span>
+            </div>
+            <!-- /.panel header -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">期首月</span>
+                </div>
+                <fvl-search-select
+                  :selected.sync="form.biginningMonth"
+                  class="p-0"
+                  name="biginningMonth"
+                  :options="monthList"
+                  placeholder="期首月を選択してください"
+                  :allowEmpty="true"
+                  :search-keys="['name']"
+                  option-key="name"
+                  option-value="name"
+                />
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">勤務間インターバル</span>
+                </div>
+                <input class="form-control" :value.sync="form.interval" label="勤務間インターバル" name="interval" type="number" :max="99.99" :step="0.01">
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- panel header -->
+            <div class="card-header col-12 bg-transparent pb-2 border-0">
+              <h1 class="float-sm-left font-size-rg">累計設定</h1>
+              <span class="float-sm-right font-size-sm">アラートを表示する累計時間を設定できます</span>
+            </div>
+            <!-- /.panel header -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- .col -->
+            <div class="col-12 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">３ヶ月累計</span>
+                </div>
+                <input class="form-control" :value.sync="form.threeMonthTotal" label="３ヶ月累計" name="threeMonthTotal" type="number" :max="99999.99" :step="0.01">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-12 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">６ヶ月累計</span>
+                </div>
+                <input class="form-control" :value.sync="form.sixMonthTotal" label="６ヶ月累計" name="sixMonthTotal" type="number" :max="99999.99" :step="0.01">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-12 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">１２ヶ月累計</span>
+                </div>
+                <input class="form-control" :value.sync="form.yaerTotal" label="１２ヶ月累計" name="yaerTotal" type="number" :max="99999.99" :step="0.01">
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- /.panel contents -->
         </div>
+        <div class="card-body mb-3 p-0 border-top">
+          <!-- panel contents -->
+          <!-- .row -->
+          <div class="row justify-content-between px-3">
+            <!-- panel header -->
+            <div class="card-header col-12 bg-transparent pb-2 border-0">
+              <h1 class="float-sm-left font-size-rg">月別設定</h1>
+              <span class="float-sm-right font-size-sm">月ごとに締日と時間に関する設定ができます</span>
+            </div>
+            <!-- /.panel header -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row">
+            <div class="col-12">
+              <div class="table-responsive">
+                <div class="col-12 p-0">
+                  <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                    <thead>
+                      <tr>
+                        <td class="text-center align-middle w-10">月</td>
+                        <td class="text-center align-middle w-20 mw-rem-10">締日</td>
+                        <td class="text-center align-middle w-20 mw-rem-10">上限残業時間</td>
+                        <td class="text-center align-middle w-20 mw-rem-15">時間単位</td>
+                        <td class="text-center align-middle w-20 mw-rem-15">時間の丸め</td>
+                        <td class="text-center align-middle"></td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(n,index) in 12" :key="index">
+                        <td class="text-center align-middle">{{ n }}月</td>
+                        <td class="text-center align-middle">
+                          <div class="input-group">
+                            <select class="custom-select" v-model="form.closingDate[index]">
+                              <option v-for="n in days_max[index]" :value="n" v-bind:key="n">{{ n }} 日</option>
+                            </select>
+                          </div>
+                        </td>
+                        <td class="text-center align-middle">
+                          <div class="input-group">
+                            <input title="整数４桁少数２桁まで" type="number" max="9999.99" step="0.01" class="form-control" v-model="form.upTime[index]">
+                          </div>
+                        </td>
+                        <td class="text-center align-middle">
+                          <div class="input-group">
+                            <select class="custom-select" v-model="form.timeunit[index]">
+                              <option value></option>
+                              <option
+                                v-for="tulist in TimeUnitList"
+                                :value="tulist.code"
+                                v-bind:key="tulist.code"
+                              >{{ tulist.code_name }}</option>
+                            </select>
+                          </div>
+                        </td>
+                        <td class="text-center align-middle">
+                          <div class="btn-group d-flex">
+                            <select class="custom-select" v-model="form.timeround[index]">
+                              <option value></option>
+                              <option
+                                v-for="trlist in TimeRoundingList"
+                                :value="trlist.code"
+                                v-bind:key="trlist.code"
+                              >{{ trlist.code_name }}</option>
+                            </select>
+                          </div>
+                        </td>
+                        <td class="text-center align-middle">
+                          <input type="hidden" v-model="hidden" value />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between px-3">
+            <!-- col -->
+            <div class="col-md-12 pb-2">
+              <div class="btn-group d-flex">
+                <button type="submit" class="btn btn-success btn-lg font-size-rg w-100">この内容で入力する</button>
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- /.panel contents -->
+        </div>
+        <!-- /panel body -->
       </div>
-      <fvl-input
-        :value.sync="form.threeMonthTotal"
-        label="３ヶ月累計"
-        name="threeMonthTotal"
-        type="number"
-        :max="99999.99"
-        :step="0.01"
-      />
-      <fvl-input
-        :value.sync="form.sixMonthTotal"
-        label="６ヶ月累計"
-        name="sixMonthTotal"
-        type="number"
-        :max="99999.99"
-        :step="0.01"
-      />
-      <fvl-input
-        :value.sync="form.yaerTotal"
-        label="１２ヶ月累計"
-        name="yaerTotal"
-        type="number"
-        :max="99999.99"
-        :step="0.01"
-      />
-      <fvl-input
-        :value.sync="form.interval"
-        label="勤務間インターバル"
-        name="interval"
-        type="number"
-        :max="99.99"
-        :step="0.01"
-      />
-      <table class="table">
-        <thead>
-          <tr>
-            <th class="width15">月</th>
-            <th class="width15">締日</th>
-            <th class="width15">上限残業</th>
-            <th>時間単位</th>
-            <th>時間の丸め</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(n,index) in 12" :key="index">
-            <input type="hidden" />
-            <td>{{ n }}月</td>
-            <td>
-              <!-- <input class="form-control" v-model="closingDate[index]"></input> -->
-              <select class="form-control" v-model="form.closingDate[index]">
-                <option v-for="n in days_max[index]" :value="n" v-bind:key="n">{{ n }} 日</option>
-              </select>
-            </td>
-            <td>
-              <input
-                title="整数４桁少数２桁まで"
-                type="number"
-                max="9999.99"
-                step="0.01"
-                class="form-control"
-                v-model="form.upTime[index]"
-              />
-            </td>
-            <td>
-              <select class="form-control" v-model="form.timeunit[index]">
-                <option value></option>
-                <option
-                  v-for="tulist in TimeUnitList"
-                  :value="tulist.code"
-                  v-bind:key="tulist.code"
-                >{{ tulist.code_name }}</option>
-              </select>
-            </td>
-            <td>
-              <select class="form-control" v-model="form.timeround[index]">
-                <option value></option>
-                <option
-                  v-for="trlist in TimeRoundingList"
-                  :value="trlist.code"
-                  v-bind:key="trlist.code"
-                >{{ trlist.code_name }}</option>
-              </select>
-            </td>
-            <td>
-              <input type="hidden" v-model="hidden" value />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <fvl-submit>登録</fvl-submit>
+    </div>
+    <!-- /.panel -->
     </fvl-form>
   </div>
+  <!-- /main contentns row -->
+</div>
 </template>
 <script>
 import toasted from "vue-toasted";
