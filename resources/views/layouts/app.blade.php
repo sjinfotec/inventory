@@ -20,6 +20,7 @@
 </head>
 <body class="pb-0">
     <div id="app" class="min-height-full">
+    @if(Auth::check())
         <!-- header -->
         <header>
             <!-- header nav -->
@@ -33,6 +34,19 @@
                 <a class="navbar-brand mr-auto mr-lg-0" href="{{ url('/') }}">{{ config('app.name', 'Laravel') }}</a>
                 <!-- /editable title -->
                 <div class="form-inline my-lg-0 ml-auto">
+                    @if(Auth::check())
+                    <span class="pr-2 d-none d-md-inline">三条印刷株式会社</span>
+                    @else
+                    <span class="pr-2">
+                        <a href="{{ route('login') }}">{{ __('Login') }}</a>
+                    </span>
+                    @if (Route::has('register'))
+                    <span class="pr-2">
+                        <a href="{{ route('register') }}">{{ __('Register') }}</a>
+                    </span>
+                    @endif
+                    </ul>
+                    @endif
                     <!-- Right Side Of Navbar -->
                     <!--
                     <ul class="navbar-nav ml-auto">
@@ -66,7 +80,9 @@
                     -->
                     <!-- /Right Side Of Navbar -->
                     <!-- group name -->
+                    <!--
                     <span class="pr-2 d-none d-md-inline">三条印刷株式会社</span>
+                    -->
                     <!-- /group name -->
                     <!-- offcanvas-right toggle button -->
                     <!--
@@ -80,6 +96,7 @@
             <!-- /header nav -->
         </header>
         <!-- /header -->
+        @endif
 
 		<!-- .container-fluid -->
 		<div class="container-fluid min-height-full">
@@ -87,6 +104,7 @@
 			<div class="row min-height-full">
                 @include('layouts.sidemenu')
                 @yield('content')
+                @if(Auth::check())
                 <!-- main contentns row -->
                 <div class="row justify-content-between">
                     <!-- .panel -->
@@ -104,6 +122,7 @@
 					</aside>
 				</div>
 				<!-- /offcanvas-right -->
+                @endif
 			</div>
 			<!-- /.row -->
 		</div>

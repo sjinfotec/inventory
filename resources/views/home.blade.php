@@ -6,7 +6,7 @@
 					<!-- main contentns row -->
 					<div class="row justify-content-between">
 						<!-- .panel -->
-						<div class="col-md pt-3">
+						<div class="col-md">
 							<div class="card bg-secondary text-white pt-2 border-0 shadow-pl">
 								<!-- panel header -->
 								<div class="card-header bg-transparent pt-2 border-0">

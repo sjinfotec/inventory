@@ -1,3 +1,4 @@
+                    @if(Auth::check())
                     <!-- offcanvas-left -->
                     <div class="col-xl-2 px-0 offcanvas-collapse offcanvas-collapse-from-left side-base">
                         <nav class="text-white">
@@ -8,9 +9,7 @@
                             <ul class="float-left list-unstyled">
                                 <li class="pr-3 py-1 text-white font-size-sm d-block">情報処理課</li>
                                 <li class="pr-3 py-1 text-white font-size-sm d-block">
-                                @if(Auth::check())
                                     {{ Auth::user()->name }}
-                                @endif
                                 </li>
                             </ul>
                             <div class="clearfix"></div>
@@ -45,3 +44,4 @@
                         </nav>
                     </div>
                     <!-- /offcanvas-left -->
+                    @endif

@@ -1,23 +1,41 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-    @include('layouts.sidemenu')
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">月次集計画面</div>
-
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-                    
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+				<!-- main contents -->
+				<div class="col-xl-10">
+					<!-- main contentns row -->
+					<div class="row justify-content-between">
+						<!-- .panel -->
+						<div class="col-md">
+							<div class="card bg-secondary text-white pt-2 border-0 shadow-pl">
+								<!-- panel header -->
+								<div class="card-header bg-transparent pt-2 border-0">
+									<h1 class="float-left font-size-xl">
+                                        <img class="icon-size-rg mr-3" src="{{ asset('images/round-restore-w.svg') }}" alt="">日次集計
+                                    </h1>
+								</div>
+								<!-- /.panel header -->
+							</div>
+						</div>
+						<!-- /.panel -->
+					</div>
+					<!-- /main contentns row -->
+					<!-- main contentns row -->
+					<div class="row justify-content-between">
+						<!-- .panel -->
+						<div class="col-md pt-3">
+							<div class="card shadow-pl">
+                                @if (session('status'))
+								<div class="card-body pt-2">
+                                    <div class="alert alert-success" role="alert">
+                                        {{ session('status') }}
+                                    </div>
+                                </div>
+                                @endif
+                                <daily-working-information></daily-working-information>
+							</div>
+						</div>
+						<!-- /.panel -->
+					</div>
+					<!-- /main contentns row -->
 @endsection
