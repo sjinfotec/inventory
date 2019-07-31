@@ -826,6 +826,9 @@ class TempCalcWorkingTime extends Model
      */
     public function insertTempCalcWorkingtime(){
         try{
+            // ''をnullにする
+            $retValue = (strlen($this->record_datetime) > 0) ? $this->record_datetime : null;
+
             DB::table($this->table)->insert(
                 [
                     'working_date' => $this->working_date,
@@ -844,7 +847,7 @@ class TempCalcWorkingTime extends Model
                     'shift_from_time' => $this->shift_from_time,
                     'shift_to_time' => $this->shift_to_time,
                     'mode' => $this->mode,
-                    'record_datetime' => $this->record_datetime,
+                    'record_datetime' => $retValue,
                     'record_year' => $this->record_year,
                     'record_month' => $this->record_month,
                     'record_date' => $this->record_date,

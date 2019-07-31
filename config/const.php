@@ -85,6 +85,24 @@ return [
         'unknown' => 99
     ],
 
+    'C013' => [
+        'value' => 'C013',
+        'paid_leave' => 1,
+        'morning_off' => 2,
+        'afternoon_off' => 3,
+        'substitute_holiday' => 4,
+        'compensation_holiday' => 5,
+        'summer_leave' => 6,
+        'year_end_and_new_year_leave' => 7,
+        'organization_anniversary' => 8,
+        'prenatal_postnatal' => 9,
+        'physiology_days_leave' => 10,
+        'childcare_care_leave' => 11,
+        'nursing_care_leave' => 12,
+        'congratulatory_or_consolatory_leave' => 13,
+        'refresh_leave' => 14
+    ],
+
     'C014' => [
         'value' => 'C014',
         'fixed' => 1
