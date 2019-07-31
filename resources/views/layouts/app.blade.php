@@ -31,7 +31,9 @@
                 </button>
                 <!-- /offcanvas-left toggle button -->
                 <!-- editable title -->
-                <a class="navbar-brand mr-auto mr-lg-0" href="{{ url('/') }}">{{ config('app.name', 'Laravel') }}</a>
+                <a class="navbar-brand mr-auto mr-lg-0" href="{{ url('/') }}">
+                    <img class="logo-height" src="{{ asset('images/onedawn-logo-long.svg') }}" alt="One Dawn">
+                </a>
                 <!-- /editable title -->
                 <div class="form-inline my-lg-0 ml-auto">
                     @if(Auth::check())

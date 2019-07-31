@@ -42,6 +42,16 @@
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/create_calendar') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-flag-w.svg') }}" alt="">カレンダー設定</a></li>
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/user_add') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-assignment-ind-w.svg') }}" alt="">ユーザ情報設定</a></li>
                             </ul>
+                            <h3 class="side-head p-3 font-size-rg">
+                                <span>操作</span>
+                                <a class="float-right mb-1 font-size-sm line-height-xs btn btn-secondary btn-sm" data-toggle="collapse" href="#collapseLogout" role="button" aria-expanded="true" aria-controls="collapseLogout"><img class="icon-size-xs" src="{{ asset('images/round-expand-less-w.svg') }}" alt=""></a>
+                            </h3>
+                            <ul class="collapse show list-unstyled" id="collapseLogout">
+                                <li><a class="px-3 py-1 text-white d-block" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img class="icon-size-sm mr-3" src="{{ asset('images/round-lock-w.svg') }}" alt="">ログアウト</a></li>
+                            </ul>
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                @csrf
+                            </form>
                         </nav>
                     </div>
                     <!-- /offcanvas-left -->
