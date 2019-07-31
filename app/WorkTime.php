@@ -643,6 +643,7 @@ class WorkTime extends Model
             ->where($this->table.'.user_code', $this->user_code)
             ->whereBetween('record_time', [$this->param_start_date,$this->param_end_date])
             ->where($this->table.'.is_deleted', 0)
+            ->orderBy($this->table.'.record_time', 'asc')
             ->get();
 
         return $data;
@@ -656,6 +657,7 @@ class WorkTime extends Model
     public function delWorkTime(){
         DB::table($this->table)
             ->where('id', $this->id)
+            ->where('is_deleted', 0)
             ->update([
                 'is_deleted' => 1,
                 'updated_at' => $this->systemdate

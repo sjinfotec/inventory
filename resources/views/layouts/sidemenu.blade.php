@@ -28,6 +28,7 @@
                             <ul class="collapse show list-unstyled" id="collapseEdit">
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_calendar') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-outlined-flag-w.svg') }}" alt="">カレンダー編集</a></li>
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/setting_shift_time') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-access-time-w.svg') }}" alt="">シフト編集</a></li>
+                                <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_work_times') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-access-time-w.svg') }}" alt="">勤怠編集</a></li>
                             </ul>
                             <h3 class="side-head p-3 font-size-rg">
                                 <span>設定</span>

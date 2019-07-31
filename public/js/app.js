@@ -3827,6 +3827,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 
 
@@ -3854,6 +3859,8 @@ __webpack_require__.r(__webpack_exports__);
       ja: vuejs_datepicker_dist_locale__WEBPACK_IMPORTED_MODULE_2__["ja"],
       "default": "2019/10/24",
       DatePickerFormat: "yyyy/MM/dd",
+      validate: false,
+      errors: [],
       modeList: []
     };
   },
@@ -3876,6 +3883,34 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   methods: {
+    // バリデーション
+    checkForm: function checkForm() {
+      var flag = false;
+
+      if (this.addDate && this.addTime && this.addMode) {
+        flag = true;
+        return flag;
+      } else {
+        this.errors = [];
+
+        if (!this.addDate) {
+          flag = false;
+          this.errors.push("登録する日付を選択してください");
+        }
+
+        if (!this.addTime) {
+          flag = false;
+          this.errors.push("時間を入力してください");
+        }
+
+        if (!this.addMode) {
+          flag = false;
+          this.errors.push("モードを選択してください");
+        }
+
+        return flag;
+      }
+    },
     alert: function alert(state, message, title) {
       this.$swal(title, message, state);
     },
@@ -3897,15 +3932,34 @@ __webpack_require__.r(__webpack_exports__);
     alertAddConf: function alertAddConf(state) {
       var _this2 = this;
 
+      this.validate = this.checkForm();
+
+      if (this.validate) {
+        this.$swal({
+          title: "確認",
+          text: "登録してもよろしいですか？",
+          icon: state,
+          buttons: true,
+          dangerMode: true
+        }).then(function (willDelete) {
+          if (willDelete) {
+            _this2.addWorkTime();
+          } else {}
+        });
+      } else {}
+    },
+    alertDelConf: function alertDelConf(state, value) {
+      var _this3 = this;
+
       this.$swal({
         title: "確認",
-        text: "登録してもよろしいですか？",
+        text: "削除してもよろしいですか？",
         icon: state,
         buttons: true,
         dangerMode: true
       }).then(function (willDelete) {
         if (willDelete) {
-          _this2.addWorkTime();
+          _this3.del(value);
         } else {}
       });
     },
@@ -3916,12 +3970,13 @@ __webpack_require__.r(__webpack_exports__);
       this.$modal.hide("add-work_time");
     },
     addWorkTime: function addWorkTime() {
-      var _this3 = this;
+      var _this4 = this;
 
       // パスワード変更
       this.$axios.post("/edit_work_times/add", {
         date: this.addDate,
         user_code: this.valueuser,
+        time: this.addTime,
         mode: this.addMode,
         holiday_kbn: this.addKbn
       }).then(function (response) {
@@ -3929,16 +3984,16 @@ __webpack_require__.r(__webpack_exports__);
 
         if (res.result == 0) {
           // this.$toasted.show("勤怠情報を登録しました");
-          _this3.alert("success", "登録しました", "登録成功");
+          _this4.alert("success", "登録しました", "登録成功");
 
-          _this3.hide();
+          _this4.hide();
         } else {
-          _this3.alert("error", "登録に失敗しました", "エラー");
+          _this4.alert("error", "登録に失敗しました", "エラー");
         }
       })["catch"](function (reason) {});
     },
     getDetail: function getDetail() {
-      var _this4 = this;
+      var _this5 = this;
 
       this.$axios.get("/edit_work_times/get", {
         params: {
@@ -3947,26 +4002,26 @@ __webpack_require__.r(__webpack_exports__);
           code: this.valueuser
         }
       }).then(function (response) {
-        _this4.details = response.data;
+        _this5.details = response.data;
       })["catch"](function (reason) {
         alert("error");
       });
     },
     getUserLeaveKbnList: function getUserLeaveKbnList() {
-      var _this5 = this;
+      var _this6 = this;
 
       this.$axios.get("/get_user_leave_kbn").then(function (response) {
-        _this5.userLeaveKbnList = response.data;
+        _this6.userLeaveKbnList = response.data;
         console.log("個人休暇区分取得");
       })["catch"](function (reason) {
         alert("error");
       });
     },
     getModeList: function getModeList() {
-      var _this6 = this;
+      var _this7 = this;
 
       this.$axios.get("/get_mode_list").then(function (response) {
-        _this6.modeList = response.data;
+        _this7.modeList = response.data;
         console.log("モード取得");
       })["catch"](function (reason) {
         alert("error");
@@ -4018,28 +4073,24 @@ __webpack_require__.r(__webpack_exports__);
     },
     // 削除
     del: function del(value) {
-      var _this7 = this;
+      var _this8 = this;
 
-      var confirm = window.confirm("選択したレコードを削除しますか？");
+      this.$axios.post("/edit_work_times/del", {
+        id: value
+      }).then(function (response) {
+        var res = response.data;
 
-      if (confirm) {
-        this.$axios.post("/edit_work_times/del", {
-          id: value
-        }).then(function (response) {
-          var res = response.data;
+        if (res.result == 0) {
+          _this8.$toasted.show("選択したレコードを削除しました");
 
-          if (res.result == 0) {
-            _this7.$toasted.show("選択したレコードを削除しました");
-
-            _this7.getDetail();
-          } else {}
-        })["catch"](function (reason) {
-          alert("削除でエラーが発生しました");
-        });
-      } else {}
+          _this8.getDetail();
+        } else {}
+      })["catch"](function (reason) {
+        alert("error", "削除でエラーが発生しました", "エラー");
+      });
     },
     store: function store() {
-      var _this8 = this;
+      var _this9 = this;
 
       this.$axios.post("/edit_work_times/store", {
         details: this.details
@@ -4047,19 +4098,17 @@ __webpack_require__.r(__webpack_exports__);
         var res = response.data;
 
         if (res.result == 0) {
-          _this8.alert("success", "登録しました", "登録成功");
+          _this9.alert("success", "登録しました", "登録成功");
 
-          _this8.getDetail();
+          _this9.getDetail();
         } else {
-          _this8.alert("error", "登録に失敗しました", "エラー");
+          _this9.alert("error", "登録に失敗しました", "エラー");
         }
       })["catch"](function (reason) {});
     },
     display: function display() {
       this.getDetail();
     },
-    // レコード新規追加
-    addRecord: function addRecord() {},
     // ゼロ埋め
     zeroPadding: function zeroPadding(num, length) {
       return ("0000000000" + num).slice(-length);
@@ -78639,7 +78688,7 @@ var render = function() {
                           staticClass: "btn btn-danger",
                           on: {
                             click: function($event) {
-                              return _vm.del(item.id)
+                              return _vm.alertDelConf("warning", item.id)
                             }
                           }
                         },
@@ -78670,7 +78719,7 @@ var render = function() {
       _c(
         "modal",
         {
-          attrs: { name: "add-work_time" },
+          attrs: { name: "add-work_time", width: 800, height: 600 },
           model: {
             value: _vm.valueuser,
             callback: function($$v) {
@@ -78684,6 +78733,19 @@ var render = function() {
             _c("div", { staticClass: "card-header" }, [_vm._v("勤怠情報追加")]),
             _vm._v(" "),
             _c("div", { staticClass: "card-body" }, [
+              _vm.errors.length
+                ? _c("div", [
+                    _c(
+                      "ul",
+                      { staticClass: "error-red color-red" },
+                      _vm._l(_vm.errors, function(error) {
+                        return _c("li", [_vm._v(_vm._s(error))])
+                      }),
+                      0
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
               _c("div", { staticClass: "row" }, [
                 _c(
                   "div",
@@ -78787,54 +78849,6 @@ var render = function() {
                     ],
                     2
                   )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "form-group col-md-6" }, [
-                  _c("label", { attrs: { for: "shift_end" } }, [
-                    _vm._v("休暇区分")
-                  ]),
-                  _vm._v(" "),
-                  _c(
-                    "select",
-                    {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.addKbn,
-                          expression: "addKbn"
-                        }
-                      ],
-                      staticClass: "form-control",
-                      on: {
-                        change: function($event) {
-                          var $$selectedVal = Array.prototype.filter
-                            .call($event.target.options, function(o) {
-                              return o.selected
-                            })
-                            .map(function(o) {
-                              var val = "_value" in o ? o._value : o.value
-                              return val
-                            })
-                          _vm.addKbn = $event.target.multiple
-                            ? $$selectedVal
-                            : $$selectedVal[0]
-                        }
-                      }
-                    },
-                    [
-                      _c("option", { attrs: { value: "" } }),
-                      _vm._v(" "),
-                      _vm._l(_vm.userLeaveKbnList, function(list) {
-                        return _c(
-                          "option",
-                          { domProps: { value: list.code } },
-                          [_vm._v(_vm._s(list.code_name))]
-                        )
-                      })
-                    ],
-                    2
-                  )
                 ])
               ]),
               _vm._v(" "),
@@ -78842,7 +78856,11 @@ var render = function() {
                 "button",
                 {
                   staticClass: "btn btn-success",
-                  on: { click: _vm.addWorkTime }
+                  on: {
+                    click: function($event) {
+                      return _vm.alertAddConf("info")
+                    }
+                  }
                 },
                 [_vm._v("登録")]
               ),

@@ -209,6 +209,7 @@ class UserHolidayKubun extends Model
         DB::table($this->table)
         ->where('working_date', $this->working_date)
         ->where('user_code', $this->user_code)
+        ->where('is_deleted', 0)
         ->update([
             'is_deleted' => 1,
             'updated_at' => $this->systemdate

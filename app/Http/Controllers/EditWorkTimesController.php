@@ -74,12 +74,51 @@ class EditWorkTimesController extends Controller
         return $details;
     }
 
+    /**
+     * 勤怠新規登録
+     *
+     * @param Request $request
+     * @return response
+     */
     public function add(Request $request){
         // request
         $date = $request->date;
-        $user_code = $request->user_code;
+        $time = $request->time;
+        $carbon = new Carbon($date);
+        $date = $carbon->format("Y/m/d");
+        $record_time = $date." ".$time;     // DB用
+        $code = $request->user_code;
         $mode = $request->mode;
         $holiday_kbn = $request->holiday_kbn;
+        $work_time = new WorkTime();
+        $systemdate = Carbon::now();
+        $department_id = DB::table('users')->where('code', $code)->where('is_deleted', 0)->value('department_id');
+        $user = Auth::user();
+        $user_code = $user->code;
+        $response = collect();
+
+        DB::beginTransaction();
+        try{
+            $work_time->setUsercodeAttribute($code);
+            $work_time->setDepartmentcodeAttribute($department_id);
+            $work_time->setRecordtimeAttribute($record_time);
+            $work_time->setModeAttribute($mode);
+            $work_time->setCreateduserAttribute($user_code);
+            $work_time->setSystemDateAttribute($systemdate);
+            $result = $work_time->insertWorkTime();
+            DB::commit();
+            $result = true;
+
+        }catch(\PDOException $e){
+            DB::rollBack();
+            $result = false;
+        }
+        if($result){
+            $response->put('result',self::SUCCESS);
+        }else{
+            $response->put('result',self::FAILED);
+        }
+        return $response;
         
     }
 
@@ -135,7 +174,7 @@ class EditWorkTimesController extends Controller
                 $work_time->setModeAttribute($detail['mode']);
 
                 $work_time->insertWorkTime();
-                if($detail['user_holiday_kbn'] != ""){         // 個人休暇が入っているものはuser_holiday_kubunsへ登録
+                if($detail['kbn_flag'] == 1){         // 個人休暇が入っているものはuser_holiday_kubunsへ登録
                     $date = new Carbon($detail['record_time']);
                     $working_date = $date->copy()->format('Ymd');
                     $user_holiday->setUsercodeAttribute($detail['user_code']);
@@ -184,7 +223,7 @@ class EditWorkTimesController extends Controller
 
         }catch(\PDOException $e){
             DB::rollBack();
-            $result = true;
+            $result = false;
         }
         if($result){
             $response->put('result',self::SUCCESS);

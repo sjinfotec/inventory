@@ -84,7 +84,7 @@
             </td>
             <td v-else></td>
             <td>
-              <button class="btn btn-danger" @click="del(item.id)">削除</button>
+              <button class="btn btn-danger" @click="alertDelConf('warning',item.id)">削除</button>
             </td>
           </tr>
         </tbody>
@@ -92,10 +92,15 @@
     </div>
     <button class="btn btn-success" @click="alertStoreConf('info')">編集確定</button>
     <!-- modal -->
-    <modal name="add-work_time" v-model="valueuser">
+    <modal name="add-work_time" :width="800" :height="600" v-model="valueuser">
       <div class="card">
         <div class="card-header">勤怠情報追加</div>
         <div class="card-body">
+          <div v-if="errors.length">
+            <ul class="error-red color-red">
+              <li v-for="error in errors">{{ error }}</li>
+            </ul>
+          </div>
           <div class="row">
             <div class="form-group col-md-6">
               <label for="shift_end" class>日付</label>
@@ -119,15 +124,15 @@
                 <option v-for="mode in modeList" :value="mode.code">{{ mode.code_name }}</option>
               </select>
             </div>
-            <div class="form-group col-md-6">
+            <!-- <div class="form-group col-md-6">
               <label for="shift_end" class>休暇区分</label>
               <select class="form-control" v-model="addKbn">
                 <option value></option>
                 <option v-for="list in userLeaveKbnList" :value="list.code">{{ list.code_name }}</option>
               </select>
-            </div>
+            </div>-->
           </div>
-          <button class="btn btn-success" v-on:click="addWorkTime">登録</button>
+          <button class="btn btn-success" v-on:click="alertAddConf('info')">登録</button>
           <button class="btn btn-warning" v-on:click="hide">キャンセル</button>
         </div>
       </div>
@@ -163,6 +168,8 @@ export default {
       ja: ja,
       default: "2019/10/24",
       DatePickerFormat: "yyyy/MM/dd",
+      validate: false,
+      errors: [],
       modeList: []
     };
   },
@@ -186,6 +193,31 @@ export default {
     }
   },
   methods: {
+    // バリデーション
+    checkForm: function() {
+      var flag = false;
+      if (this.addDate && this.addTime && this.addMode) {
+        flag = true;
+        return flag;
+      } else {
+        this.errors = [];
+
+        if (!this.addDate) {
+          flag = false;
+          this.errors.push("登録する日付を選択してください");
+        }
+        if (!this.addTime) {
+          flag = false;
+          this.errors.push("時間を入力してください");
+        }
+        if (!this.addMode) {
+          flag = false;
+          this.errors.push("モードを選択してください");
+        }
+
+        return flag;
+      }
+    },
     alert: function(state, message, title) {
       this.$swal(title, message, state);
     },
@@ -204,15 +236,33 @@ export default {
       });
     },
     alertAddConf: function(state) {
+      this.validate = this.checkForm();
+      if (this.validate) {
+        this.$swal({
+          title: "確認",
+          text: "登録してもよろしいですか？",
+          icon: state,
+          buttons: true,
+          dangerMode: true
+        }).then(willDelete => {
+          if (willDelete) {
+            this.addWorkTime();
+          } else {
+          }
+        });
+      } else {
+      }
+    },
+    alertDelConf: function(state, value) {
       this.$swal({
         title: "確認",
-        text: "登録してもよろしいですか？",
+        text: "削除してもよろしいですか？",
         icon: state,
         buttons: true,
         dangerMode: true
       }).then(willDelete => {
         if (willDelete) {
-          this.addWorkTime();
+          this.del(value);
         } else {
         }
       });
@@ -229,6 +279,7 @@ export default {
         .post("/edit_work_times/add", {
           date: this.addDate,
           user_code: this.valueuser,
+          time: this.addTime,
           mode: this.addMode,
           holiday_kbn: this.addKbn
         })
@@ -346,25 +397,21 @@ export default {
     },
     // 削除
     del: function(value) {
-      var confirm = window.confirm("選択したレコードを削除しますか？");
-      if (confirm) {
-        this.$axios
-          .post("/edit_work_times/del", {
-            id: value
-          })
-          .then(response => {
-            var res = response.data;
-            if (res.result == 0) {
-              this.$toasted.show("選択したレコードを削除しました");
-              this.getDetail();
-            } else {
-            }
-          })
-          .catch(reason => {
-            alert("削除でエラーが発生しました");
-          });
-      } else {
-      }
+      this.$axios
+        .post("/edit_work_times/del", {
+          id: value
+        })
+        .then(response => {
+          var res = response.data;
+          if (res.result == 0) {
+            this.$toasted.show("選択したレコードを削除しました");
+            this.getDetail();
+          } else {
+          }
+        })
+        .catch(reason => {
+          alert("error", "削除でエラーが発生しました", "エラー");
+        });
     },
     store() {
       this.$axios
@@ -385,8 +432,6 @@ export default {
     display() {
       this.getDetail();
     },
-    // レコード新規追加
-    addRecord() {},
     // ゼロ埋め
     zeroPadding(num, length) {
       return ("0000000000" + num).slice(-length);
