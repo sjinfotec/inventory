@@ -20,7 +20,7 @@ Auth::routes();
 //     return view('app');
 // })->where('any', '.*');
 
-Route::get('/', 'HomeController@index')->name('home');
+Route::get('/', 'DailyWorkingInformationController@index')->middleware('auth');
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/daily', 'DailyWorkingInformationController@index')->middleware('auth');
 Route::get('/daily/calc', 'DailyWorkingInformationController@show')->middleware('auth');

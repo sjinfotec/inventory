@@ -3300,21 +3300,112 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "dailyworkingtime",
   data: function data() {
     return {
-      valuedepartment: '',
-      valueemploymentstatus: '',
+      valuedepartment: "",
+      valueemploymentstatus: "",
       getDo: 0,
-      valueuser: '',
-      valuefromdate: '',
+      valueuser: "",
+      valuefromdate: "",
       defaultDate: new Date(),
-      stringtext: '',
-      datejaFormat: '',
-      hrefindex: '',
+      stringtext: "",
+      datejaFormat: "",
+      hrefindex: "",
       resresults: [],
       calcresults: [],
       sumresults: [],
@@ -3351,14 +3442,14 @@ __webpack_require__.r(__webpack_exports__);
 
       this.getDo = 1;
 
-      if (this.valuedepartment == '') {
-        if (this.valueemploymentstatus == '') {
+      if (this.valuedepartment == "") {
+        if (this.valueemploymentstatus == "") {
           this.$refs.selectuser.getUserList(this.getDo);
         } else {
           this.$refs.selectuser.getUserListByEmployment(this.getDo, this.valueemploymentstatus);
         }
       } else {
-        if (this.valueemploymentstatus == '') {
+        if (this.valueemploymentstatus == "") {
           this.$refs.selectuser.getUserListByDepartment(this.getDo, this.valuedepartment);
         } else {
           this.$refs.selectuser.getUserListByDepartmentEmployment(this.getDo, this.valuedepartment, this.valueemploymentstatus);
@@ -3371,14 +3462,14 @@ __webpack_require__.r(__webpack_exports__);
 
       this.getDo = 1;
 
-      if (this.valueemploymentstatus == '') {
-        if (this.valuedepartment == '') {
+      if (this.valueemploymentstatus == "") {
+        if (this.valuedepartment == "") {
           this.$refs.selectuser.getUserList(this.getDo);
         } else {
           this.$refs.selectuser.getUserListByDepartment(this.getDo, this.valuedepartment);
         }
       } else {
-        if (this.valuedepartment == '') {
+        if (this.valuedepartment == "") {
           this.$refs.selectuser.getUserListByEmployment(this.getDo, this.valueemploymentstatus);
         } else {
           this.$refs.selectuser.getUserListByDepartmentEmployment(this.getDo, this.valuedepartment, this.valueemploymentstatus);
@@ -3394,10 +3485,10 @@ __webpack_require__.r(__webpack_exports__);
       moment__WEBPACK_IMPORTED_MODULE_1___default.a.locale("ja");
       this.valuefromdate = value;
 
-      if (this.valuefromdate == null || this.valuefromdate == '') {
+      if (this.valuefromdate == null || this.valuefromdate == "") {
         this.stringtext = "";
       } else {
-        this.datejaFormat = moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format('YYYY年MM月DD日 (ddd)');
+        this.datejaFormat = moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYY年MM月DD日 (ddd)");
         this.stringtext = "日次集計 " + this.datejaFormat;
       }
     },
@@ -3410,8 +3501,8 @@ __webpack_require__.r(__webpack_exports__);
       if (this.validate) {
         this.$axios.get("/daily/calc", {
           params: {
-            datefrom: moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format('YYYYMMDD'),
-            dateto: moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format('YYYYMMDD'),
+            datefrom: moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYYMMDD"),
+            dateto: moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYYMMDD"),
             employmentstatus: this.valueemploymentstatus,
             departmentcode: this.valuedepartment,
             usercode: this.valueuser
@@ -78038,7 +78129,7 @@ var staticRenderFns = [
             "input-group-text font-size-sm line-height-xs label-width-90",
           attrs: { for: "target_fromdate" }
         },
-        [_vm._v("指定日付")]
+        [_vm._v("指定日付a")]
       )
     ])
   },
@@ -78086,7 +78177,7 @@ var staticRenderFns = [
             "input-group-text font-size-sm line-height-xs label-width-90",
           attrs: { for: "target_users" }
         },
-        [_vm._v("氏　　名")]
+        [_vm._v("氏 名")]
       )
     ])
   },
