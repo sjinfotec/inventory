@@ -5,13 +5,13 @@
       <div class="form-group col-md-6">
         <label for="business_kubun" class>指定年</label>
         <select class="form-control" v-model="year">
-          <option v-for="n in 20" :value="n + baseYear -1">{{ n + baseYear -1 }}年</option>
+          <option v-for="n in 20" :value="n + baseYear -1" v-bind:key="n">{{ n + baseYear -1 }}年</option>
         </select>
       </div>
       <div class="form-group col-md-6">
         <label for="business_kubun" class>指定月</label>
         <select class="form-control" v-model="month">
-          <option v-for="n in 12" :value="n">{{ n }}月</option>
+          <option v-for="n in 12" :value="n" v-bind:key="n">{{ n }}月</option>
         </select>
       </div>
     </div>

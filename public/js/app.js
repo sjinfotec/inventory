@@ -2161,6 +2161,9 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   methods: {
+    alert: function alert(state, message, title) {
+      this.$swal(title, message, state);
+    },
     businessDayChanges: function businessDayChanges(value) {
       console.log("businessDayChanges = " + value);
       this.valueBusinessDay = value; // this.getDo = 1;
@@ -2186,16 +2189,11 @@ __webpack_require__.r(__webpack_exports__);
 
           _this.inputClear();
         } else {
-          var options = {
-            position: "bottom-center",
-            duration: 2000,
-            fullWidth: false,
-            type: "error"
-          };
-
-          _this.$toasted.show("登録に失敗しました", options);
+          _this.alert("error", "登録に失敗しました", "エラー");
         }
-      })["catch"](function (reason) {});
+      })["catch"](function (reason) {
+        _this.alert("error", "登録に失敗しました", "エラー");
+      });
     },
     inputClear: function inputClear() {
       // this.dates.length = 0;
@@ -2919,85 +2917,94 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     }
   },
   methods: {
-    getDetail: function getDetail() {
+    alert: function alert(state, message, title) {
+      this.$swal(title, message, state);
+    },
+    alertDelConf: function alertDelConf(state) {
       var _this = this;
+
+      this.$swal({
+        title: "確認",
+        text: "削除してもよろしいですか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(function (willDelete) {
+        if (willDelete) {
+          _this.del();
+        } else {}
+      });
+    },
+    getDetail: function getDetail() {
+      var _this2 = this;
 
       this.$axios.get("/create_time_table/get", {
         params: {
           no: this.selectId
         }
       }).then(function (response) {
-        _this.details = response.data;
-        _this.form.id = _this.details[0].id;
-        _this.form.no = _this.details[0].no;
-        _this.form.name = _this.details[0].name;
-        _this.form.regularFrom = _this.details[0].from_time;
-        _this.form.regularTo = _this.details[0].to_time;
-        _this.form.regularRestFrom1 = _this.details[1].from_time;
-        _this.form.regularRestTo1 = _this.details[1].to_time;
-        _this.form.regularRestFrom2 = _this.details[2].from_time;
-        _this.form.regularRestTo2 = _this.details[2].to_time;
-        _this.form.irregularFrom1 = _this.details[3].from_time;
-        _this.form.irregularTo1 = _this.details[3].to_time;
-        _this.form.irregularFrom2 = _this.details[4].from_time;
-        _this.form.irregularTo2 = _this.details[4].to_time;
-        _this.form.irregularFrom3 = _this.details[5].from_time;
-        _this.form.irregularTo3 = _this.details[5].to_time;
-        _this.form.irregularMidNightFrom = _this.details[6].from_time;
-        _this.form.irregularMidNightTo = _this.details[6].to_time; // hidden
+        _this2.details = response.data;
+        _this2.form.id = _this2.details[0].id;
+        _this2.form.no = _this2.details[0].no;
+        _this2.form.name = _this2.details[0].name;
+        _this2.form.regularFrom = _this2.details[0].from_time;
+        _this2.form.regularTo = _this2.details[0].to_time;
+        _this2.form.regularRestFrom1 = _this2.details[1].from_time;
+        _this2.form.regularRestTo1 = _this2.details[1].to_time;
+        _this2.form.regularRestFrom2 = _this2.details[2].from_time;
+        _this2.form.regularRestTo2 = _this2.details[2].to_time;
+        _this2.form.irregularFrom1 = _this2.details[3].from_time;
+        _this2.form.irregularTo1 = _this2.details[3].to_time;
+        _this2.form.irregularFrom2 = _this2.details[4].from_time;
+        _this2.form.irregularTo2 = _this2.details[4].to_time;
+        _this2.form.irregularFrom3 = _this2.details[5].from_time;
+        _this2.form.irregularTo3 = _this2.details[5].to_time;
+        _this2.form.irregularMidNightFrom = _this2.details[6].from_time;
+        _this2.form.irregularMidNightTo = _this2.details[6].to_time; // hidden
 
-        _this.oldId = _this.details[0].id;
+        _this2.oldId = _this2.details[0].id;
       })["catch"](function (reason) {
         alert("詳細取得でエラーが発生しました");
       });
     },
     getTimeTableList: function getTimeTableList() {
-      var _this2 = this;
+      var _this3 = this;
 
       this.$axios.get("/get_time_table_list").then(function (response) {
-        _this2.timeTableList = response.data;
+        _this3.timeTableList = response.data;
         console.log("タイムテーブルリスト取得");
       })["catch"](function (reason) {
         alert("リスト取得エラー");
       });
     },
     addSuccess: function addSuccess() {
-      this.$toasted.show("登録しました");
+      this.alert("success", "登録しました", "登録成功");
+      this.selectId = this.form.no;
       this.getTimeTableList();
       this.getDetail();
     },
     error: function error() {
-      var options = {
-        position: "bottom-center",
-        duration: 2000,
-        fullWidth: false,
-        type: "error"
-      };
-      this.$toasted.show("登録に失敗しました", options);
+      this.alert("error", "登録に失敗しました", "エラー");
     },
     // 削除
     del: function del() {
-      var _this3 = this;
+      var _this4 = this;
 
-      var confirm = window.confirm("選択したタイムテーブルを削除しますか？");
+      this.$axios.post("/create_time_table/del", {
+        no: this.selectId
+      }).then(function (response) {
+        var res = response.data;
 
-      if (confirm) {
-        this.$axios.post("/create_time_table/del", {
-          no: this.selectId
-        }).then(function (response) {
-          var res = response.data;
+        if (res.result == 0) {
+          _this4.alert("success", "選択したタイムテーブルを削除しました", "削除");
 
-          if (res.result == 0) {
-            _this3.$toasted.show("選択したタイムテーブルを削除しました");
+          _this4.inputClear();
 
-            _this3.inputClear();
-
-            _this3.getTimeTableList();
-          } else {}
-        })["catch"](function (reason) {
-          alert("削除でエラーが発生しました");
-        });
-      } else {}
+          _this4.getTimeTableList();
+        } else {}
+      })["catch"](function (reason) {
+        _this4.alert("error", "削除でエラーが発生しました", "エラー");
+      });
     },
     inputClear: function inputClear() {
       this.form.name = "";
@@ -4702,6 +4709,49 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -4843,6 +4893,9 @@ __webpack_require__.r(__webpack_exports__);
         alert("error");
       });
     },
+    alert: function alert(state, message, title) {
+      this.$swal(title, message, state);
+    },
     addSuccess: function addSuccess() {
       // ここで会社情報呼び出す
       this.$toasted.show("登録しました");
@@ -4868,13 +4921,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     error: function error() {
-      var options = {
-        position: "bottom-center",
-        duration: 2000,
-        fullWidth: false,
-        type: "error"
-      };
-      this.$toasted.show("登録に失敗しました", options);
+      this.alert("error", "登録に失敗しました", "エラー");
     },
     inputClear: function inputClear() {}
   }
@@ -5265,6 +5312,25 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -5298,6 +5364,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       userCode: "",
       enterPass: "",
       reEnterPass: "",
+      validate: false,
+      errors: [],
       oldCode: ""
     };
   },
@@ -5344,6 +5412,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     }
   },
   methods: {
+    alert: function alert(state, message, title) {
+      this.$swal(title, message, state);
+    },
     show: function show() {
       this.$modal.show("password-change");
     },
@@ -5351,57 +5422,96 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.$modal.hide("password-change");
       this.inputPassClear();
     },
-    passChange: function passChange() {
+    alertPassConf: function alertPassConf(state) {
       var _this2 = this;
 
-      if (this.enterPass == this.reEnterPass) {
-        // パスワード変更
-        var confirm = window.confirm("パスワードを変更しますか？");
-
-        if (confirm) {
-          this.$axios.post("/user_add/passchange", {
-            user_code: this.userCode,
-            password: this.enterPass
-          }).then(function (response) {
-            var res = response.data;
-
-            if (res.result == 0) {
-              _this2.$toasted.show("パスワードを変更しました");
-
-              _this2.hide();
-            } else {}
-          })["catch"](function (reason) {});
+      this.$swal({
+        title: "確認",
+        text: "パスワードを変更しますか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(function (willDelete) {
+        if (willDelete) {
+          _this2.passChange();
         } else {}
+      });
+    },
+    // バリデーション
+    checkForm: function checkForm() {
+      var flag = false;
+      this.errors = [];
+
+      if (this.reEnterPass && this.enterPass) {
+        if (this.reEnterPass != this.enterPass) {
+          flag = false;
+          this.errors.push("入力したパスワードが一致していません");
+        } else {
+          flag = true;
+        }
+
+        return flag;
       } else {
-        // 不一致
-        alert("入力したパスワードが不一致です");
+        if (!this.enterPass) {
+          flag = false;
+          this.errors.push("新しいパスワードを入力してください");
+        }
+
+        if (!this.reEnterPass) {
+          flag = false;
+          this.errors.push("新しいパスワード（再入力）を入力してください");
+        }
+
+        return flag;
       }
     },
-    getDepartmentList: function getDepartmentList() {
+    passChange: function passChange() {
       var _this3 = this;
 
+      this.validate = this.checkForm();
+
+      if (this.validate) {
+        this.$axios.post("/user_add/passchange", {
+          user_code: this.userCode,
+          password: this.enterPass
+        }).then(function (response) {
+          var res = response.data;
+
+          if (res.result == 0) {
+            _this3.alert("success", "パスワードを変更しました", "変更完了");
+
+            _this3.hide();
+          } else {}
+        })["catch"](function (reason) {
+          _this3.alert("error", "パスワード変更に失敗しました", "エラー");
+        });
+      } else {}
+    },
+    getDepartmentList: function getDepartmentList() {
+      var _this4 = this;
+
       this.$axios.get("/get_departments_list").then(function (response) {
-        _this3.departmentList = response.data;
+        _this4.departmentList = response.data;
         console.log("部署リスト取得");
       })["catch"](function (reason) {
         alert("error");
       });
     },
     getEmploymentStatusList: function getEmploymentStatusList() {
-      var _this4 = this;
+      var _this5 = this;
 
       this.$axios.get("/get_employment_status_list").then(function (response) {
-        _this4.employStatusList = response.data;
+        _this5.employStatusList = response.data;
         console.log("雇用形態リスト取得");
       })["catch"](function (reason) {
         alert("error");
       });
     },
     getTimeTableList: function getTimeTableList() {
-      var _this5 = this;
+      var _this6 = this;
 
       this.$axios.get("/get_time_table_list").then(function (response) {
-        _this5.timeTableList = response.data;
+        _this6.timeTableList = response.data;
         console.log("タイムテーブルリスト取得");
       })["catch"](function (reason) {
         alert("error");
@@ -5412,7 +5522,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.$toasted.show("登録しました");
     },
     getUserList: function getUserList(getdovalue, value) {
-      var _this6 = this;
+      var _this7 = this;
 
       console.log("getdovalue = " + getdovalue);
       this.$axios.get("/get_user_list", {
@@ -5421,13 +5531,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           code: value
         }
       }).then(function (response) {
-        _this6.userList = response.data;
-        _this6.object = {
+        _this7.userList = response.data;
+        _this7.object = {
           code: "",
           name: "新規登録"
         };
 
-        _this6.userList.unshift(_this6.object);
+        _this7.userList.unshift(_this7.object);
 
         console.log("ユーザーリスト取得");
       })["catch"](function (reason) {
@@ -5435,35 +5545,44 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
     },
     error: function error() {
-      var options = {
-        position: "bottom-center",
-        duration: 2000,
-        fullWidth: false,
-        type: "error"
-      };
-      this.$toasted.show("ユーザー追加に失敗しました", options);
+      this.alert("error", "登録に失敗しました", "エラー");
+    },
+    alertDelConf: function alertDelConf(state) {
+      var _this8 = this;
+
+      this.$swal({
+        title: "確認",
+        text: "削除してもよろしいですか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(function (willDelete) {
+        if (willDelete) {
+          _this8.del();
+        } else {}
+      });
     },
     // 削除
     del: function del() {
-      var _this7 = this;
+      var _this9 = this;
 
-      var confirm = window.confirm("選択したユーザーを削除しますか？");
+      this.$axios.post("/user_add/del", {
+        user_code: this.userCode
+      }).then(function (response) {
+        var res = response.data;
 
-      if (confirm) {
-        this.$axios.post("/user_add/del", {
-          user_code: this.userCode
-        }).then(function (response) {
-          var res = response.data;
+        if (res.result == 0) {
+          _this9.alert("success", "ユーザーを削除しました", "削除成功");
 
-          if (res.result == 0) {
-            _this7.$toasted.show("選択したユーザーを削除しました");
+          _this9.inputClear();
 
-            _this7.inputClear();
-
-            _this7.getUserList(1, null);
-          } else {}
-        })["catch"](function (reason) {});
-      } else {}
+          _this9.getUserList(1, null);
+        } else {
+          _this9.alert("error", "削除に失敗しました", "エラー");
+        }
+      })["catch"](function (reason) {
+        _this9.alert("error", "削除に失敗しました", "エラー");
+      });
     },
     inputClear: function inputClear() {
       this.form.id = "";
@@ -10144,7 +10263,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.width15[data-v-c2ff35ac]{\n  width: 15%;\n}\n", ""]);
+exports.push([module.i, "\n.width15[data-v-c2ff35ac] {\n  width: 15%;\n}\n", ""]);
 
 // exports
 
@@ -77328,7 +77447,14 @@ var render = function() {
             [
               _c(
                 "button",
-                { staticClass: "btn btn-danger", on: { click: _vm.del } },
+                {
+                  staticClass: "btn btn-danger",
+                  on: {
+                    click: function($event) {
+                      return _vm.alertDelConf("info")
+                    }
+                  }
+                },
                 [_vm._v("削除")]
               )
             ]
@@ -78356,7 +78482,7 @@ var render = function() {
             _vm._l(20, function(n) {
               return _c(
                 "option",
-                { domProps: { value: n + _vm.baseYear - 1 } },
+                { key: n, domProps: { value: n + _vm.baseYear - 1 } },
                 [_vm._v(_vm._s(n + _vm.baseYear - 1) + "年")]
               )
             }),
@@ -78396,7 +78522,7 @@ var render = function() {
               }
             },
             _vm._l(12, function(n) {
-              return _c("option", { domProps: { value: n } }, [
+              return _c("option", { key: n, domProps: { value: n } }, [
                 _vm._v(_vm._s(n) + "月")
               ])
             }),
@@ -79590,13 +79716,7 @@ var render = function() {
                         return _c(
                           "option",
                           { key: n, domProps: { value: n } },
-                          [
-                            _vm._v(
-                              "\n                " +
-                                _vm._s(n) +
-                                " 日\n              "
-                            )
-                          ]
+                          [_vm._v(_vm._s(n) + " 日")]
                         )
                       }),
                       0
@@ -80212,7 +80332,14 @@ var render = function() {
             [
               _c(
                 "button",
-                { staticClass: "btn btn-danger", on: { click: _vm.del } },
+                {
+                  staticClass: "btn btn-danger",
+                  on: {
+                    click: function($event) {
+                      return _vm.alertDelConf("warning")
+                    }
+                  }
+                },
                 [_vm._v("削除")]
               )
             ]
@@ -80236,7 +80363,7 @@ var render = function() {
       _c(
         "modal",
         {
-          attrs: { name: "password-change" },
+          attrs: { name: "password-change", width: 800, height: 600 },
           model: {
             value: _vm.userCode,
             callback: function($$v) {
@@ -80252,6 +80379,19 @@ var render = function() {
             ]),
             _vm._v(" "),
             _c("div", { staticClass: "card-body" }, [
+              _vm.errors.length
+                ? _c("div", [
+                    _c(
+                      "ul",
+                      { staticClass: "error-red color-red" },
+                      _vm._l(_vm.errors, function(error, index) {
+                        return _c("li", { key: index }, [_vm._v(_vm._s(error))])
+                      }),
+                      0
+                    )
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
               _c("div", { staticClass: "form-group col-md-6" }, [
                 _c("label", { attrs: { for: "shift_end" } }, [
                   _vm._v("新しいパスワード")
@@ -80322,7 +80462,11 @@ var render = function() {
                 "button",
                 {
                   staticClass: "btn btn-success",
-                  on: { click: _vm.passChange }
+                  on: {
+                    click: function($event) {
+                      return _vm.alertPassConf("warning")
+                    }
+                  }
                 },
                 [_vm._v("確定")]
               ),
