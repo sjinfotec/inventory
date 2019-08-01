@@ -242,42 +242,43 @@
               </div>
               <!-- /.col -->
             </div>
-            <!-- /.row -->
-            <!-- modal -->
-            <modal name="password-change" :width="800" :height="600" v-model="userCode">
-              <div class="card">
-                <div class="card-header">パスワード変更</div>
-                <div class="card-body">
-                  <div v-if="errors.length">
-                    <ul class="error-red color-red">
-                      <li v-for="(error,index) in errors" v-bind:key="index">{{ error }}</li>
-                    </ul>
-                  </div>
-                  <div class="form-group col-md-6">
-                    <label for="shift_end" class>新しいパスワード</label>
-                    <fvl-input
-                      class="form-control"
-                      v-model="enterPass"
-                      maxlength="12"
-                      type="password"
-                      title="半角英数字12文字以内"
-                      pattern="^[a-zA-Z0-9]{6,12}$"
-                    />
-                  </div>
-                  <div class="form-group col-md-6">
-                    <label for="shift_end" class>新しいパスワード（再入力）</label>
-                    <fvl-input
-                      class="form-control"
-                      v-model="reEnterPass"
-                      maxlength="12"
-                      type="password"
-                      title="半角英数字12文字以内"
-                      pattern="^[a-zA-Z0-9]{6,12}$"
-                    />
-                  </div>
-                  <button class="btn btn-success" v-on:click="alertPassConf('warning')">確定</button>
-                  <button class="btn btn-warning" v-on:click="hide">キャンセル</button>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- modal -->
+          <modal name="password-change" :width="800" :height="600" v-model="userCode">
+            <div class="card">
+              <div class="card-header">パスワード変更</div>
+              <div class="card-body">
+                <div v-if="errors.length">
+                  <ul class="error-red color-red">
+                    <li v-for="(error,index) in errors" v-bind:key="index">{{ error }}</li>
+                  </ul>
                 </div>
+                <div class="form-group col-md-6">
+                  <label for="shift_end" class>新しいパスワード</label>
+                  <input
+                    class="form-control"
+                    v-model="enterPass"
+                    maxlength="12"
+                    type="password"
+                    title="半角英数字12文字以内"
+                    pattern="^[a-zA-Z0-9]{6,12}$"
+                  />
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="shift_end" class>新しいパスワード（再入力）</label>
+                  <input
+                    class="form-control"
+                    v-model="reEnterPass"
+                    maxlength="12"
+                    type="password"
+                    title="半角英数字12文字以内"
+                    pattern="^[a-zA-Z0-9]{6,12}$"
+                  />
+                </div>
+                <button class="btn btn-success" v-on:click="alertPassConf('warning')">確定</button>
+                <button class="btn btn-warning" v-on:click="hide">キャンセル</button>
               </div>
             </modal>
             <!-- /modal -->
