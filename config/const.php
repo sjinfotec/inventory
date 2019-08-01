@@ -142,6 +142,33 @@ return [
         'MEMO_DATA_014' => '期首月設定ミス',
         'MEMO_DATA_NON' => ''
     ],
+ 
+    'POST_ITEM' => [
+        'card_id' => 'card_id',
+        'mode' => 'mode'
+    ],
+ 
+    'PUT_ITEM' => [
+        'result' => 'result',
+        'listresult' => 'listresult',
+        'user_code' => 'user_code',
+        'user_name' => 'user_name',
+        'department_id' => 'department_id',
+        'department_name' => 'department_name',
+        'record_time' => 'record_time',
+        'source_mode' => 'source_mode'
+    ],
+ 
+    'RESULT_CODE' => [
+        'normal' => 0,
+        'success' => 0,
+        'failed' => 1,
+        'user_not_exsits' => 2,
+        'card_not_exsits' => 3,
+        'mode_illegal' => 4,
+        'insert_error' => 5,
+        'other' => 99
+    ],
 
     'MSG_WARNING' => [
         'past_closing' => '締日を過ぎていますが、集計しますか？',

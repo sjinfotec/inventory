@@ -410,5 +410,40 @@ class ApiCommonController extends Controller
 
         return $result_round_time;
     }
+    
+    /**
+     * モードのチェック
+     *
+     * @return チェック結果
+     */
+    public function chkMode($target_mode, $source_mode){
+
+        if ($target_mode == Config::get('const.C005.attendance_time')) {
+            if ($source_mode == Config::get('const.C005.leaving_time')) {
+                return true;
+            }
+        } elseif ($target_mode == Config::get('const.C005.leaving_time')) {
+            if ($source_mode == Config::get('const.C005.attendance_time')) {
+                return true;
+            }
+            if ($source_mode == Config::get('const.C005.missing_middle_return_time')) {
+                return true;
+            }
+        } elseif ($target_mode == Config::get('const.C005.missing_middle_time')) {
+            if ($source_mode == Config::get('const.C005.attendance_time')) {
+                return true;
+            }
+            if ($source_mode == Config::get('const.C005.missing_middle_return_time')) {
+                return true;
+            }
+        } elseif ($target_mode == Config::get('const.C005.missing_middle_return_time')) {
+            if ($source_mode == Config::get('const.C005.missing_middle_time')) {
+                return true;
+            }
+        } else {
+            return false;
+        }
+        return false;
+    }
 
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use App\User;
 use App\CardInformation;
 use Carbon\Carbon;
@@ -12,9 +14,6 @@ use Carbon\Carbon;
 
 class ApiCardRegisterController extends Controller
 {
-    const REGISTRATION_SUCCESS = 11;
-    const REGISTRATION_FAILED = 12;
-    const REGISTRATION_ERROR = 13;
 
     /**
      * ユーザー取得(ListView表示用)
@@ -24,15 +23,16 @@ class ApiCardRegisterController extends Controller
      */
     public function index(){
         $user = new User();
+        $result = '';
+        $response = collect();              // 端末の戻り値
         $lists = $user->getNotRegistUser();
-        $collections = collect();
-        foreach ($lists as $list) {
-            // カードIDが紐づいていないユーザーのみ格納
-            if(!isset($list->card_idm)){
-                $collections->push($list);
-            }
-        }
-        return $collections;
+        if(isset($lists)){
+            $result = Config::get('const.RESULT_CODE.success');
+        } else {         // 該当ユーザーがいない
+            $result = Config::get('const.RESULT_CODE.user_not_exsits');
+        } 
+
+        return response()->json([Config::get('const.PUT_ITEM.result') => $result, Config::get('const.PUT_ITEM.listresult') => $lists]);
     }
 
     /**

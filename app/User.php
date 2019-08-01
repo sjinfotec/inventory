@@ -51,12 +51,13 @@ class User extends Authenticatable
             ->join('card_informations','users.code','=','card_informations.user_code')
             ->select(
                 'users.id',
-                'users.department_code as department_code',
+                'users.department_id as department_id',
                 'users.name',
                 'users.code',
                 'card_informations.card_idm'
             )
             ->where('card_informations.card_idm',$card_id)
+            ->where('card_informations.is_deleted',0)
             ->where('users.is_deleted',0)
             ->get();
 
@@ -69,16 +70,45 @@ class User extends Authenticatable
      * @return void
      */
     public function getNotRegistUser(){
-        $data = DB::table('users')
-            ->leftjoin('card_informations','users.code','=','card_informations.user_code')
+        \DB::enableQueryLog();
+
+        $sunquery1 = DB::table('users as t1')
             ->select(
-                'users.id',
-                'users.name',
-                'users.code',
-                'card_informations.card_idm'
+                't1.code as user_code',
+                't1.department_id as department_id',
+                't2.card_idm'
             )
-            ->where('users.is_deleted',0)
-            ->get();
+            ->leftJoin('card_informations as t2', function ($join) { 
+                $join->on('t2.user_code', '=', 't1.code');
+                $join->on('t2.department_id', '=', 't1.department_id');
+            })
+            ->where('t1.is_deleted',0)
+            ->where('t2.is_deleted',0);
+
+        $mainquery = DB::table('users as t3')
+            ->select(
+                't3.code as user_code',
+                't3.name as user_name',
+                't3.department_id as department_id',
+                't5.name as department_name'
+                )
+            ->leftJoinSub($sunquery1, 't4', function ($join) { 
+                $join->on('t4.user_code', '=', 't3.code');
+                $join->on('t4.department_id', '=', 't3.department_id');
+            })
+            ->leftJoin('departments as t5', function ($join) { 
+                $join->on('t5.id', '=', 't3.department_id')
+                ->where('t5.is_deleted',0);
+            })
+            ->whereNotNull('t4.card_idm');      // whereNull 
+
+        $data = $mainquery->get();
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getNotRegistUser' => \DB::getQueryLog()
+            ]
+        );
 
         return $data;
     }
