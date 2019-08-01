@@ -1,60 +1,153 @@
 <template>
-  <!-- panel body -->
-  <div class="panel-body">
-    <div class="col-md-12 padding-dis-left padding-dis-right">
-      <div class="form-group col-md-6">
-        <div v-if="errors.length">
-          <ul class="error-red">
-            <li v-for="(error,index) in errors" v-bind:key="index">{{ error }}</li>
-          </ul>
+<div>
+  <!-- main contentns row -->
+  <div class="row justify-content-between">
+    <!-- .panel -->
+    <div class="col-md pt-3">
+      <div class="card shadow-pl">
+        <!-- panel header -->
+        <div class="card-header bg-transparent pb-0 border-0">
+          <h1 class="float-sm-left font-size-rg">シフトを割り当てを編集する</h1>
+          <span class="float-sm-right font-size-sm">勤務時間設定で登録したタイムテーブルを割り当てることができます</span>
         </div>
-        <label for="shift_start" class>シフトを設定する社員</label>
-        <select-user ref="selectuser" v-bind:get-do="getDo" v-on:change-event="userChanges"></select-user>&nbsp;
+        <!-- /.panel header -->
+        <div class="card-body pt-2" v-if="errors.length">
+          <!-- panel contents -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- .col -->
+            <div class="col-12 pb-2">
+              <ul class="error-red">
+                <li v-for="(error,index) in errors" v-bind:key="index">{{ error }}</li>
+              </ul>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+        </div>
+        <div class="card-body pt-2">
+          <!-- panel contents -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1" for="shift_start">社員名</span>
+                </div>
+                <select-user ref="selectuser" class="p-0" v-bind:get-do="getDo" v-on:change-event="userChanges"></select-user>
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1" for="shift_start">シフト選択</span>
+                </div>
+                <select class="form-control" v-model="no">
+                  <option v-for="option in timeTableList" v-bind:value="option.no">{{ option.name }}</option>
+                </select>
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1" for="shift_end">開始日付</span>
+                </div>
+                <datepicker :language="ja" :value="this.default" :format="DatePickerFormat" v-model="from"></datepicker>
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1" for="shift_end">終了日付</span>
+                </div>
+                <datepicker :language="ja" :value="this.default" :format="DatePickerFormat" v-model="to"></datepicker>
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- col -->
+            <div class="col-md-12 pb-2">
+              <div class="btn-group d-flex">
+                <button type="button" class="btn btn-success btn-lg font-size-rg w-100" @click="StoreShiftTime()">この条件で登録する</button>
+              </div>
+            </div>
+            <div class="col-md-12 pb-2">
+              <div class="btn-group d-flex">
+                <button type="button" class="btn btn-danger btn-lg font-size-rg w-100" @click="alertRangeDelConf('info')">指定した期間を削除する</button>
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- /.panel contents -->
+        </div>
       </div>
-      <div class="form-group col-md-6">
-        <label for="shift_end" class>タイムテーブル選択</label>
-        <select class="form-control" v-model="no">
-          <option v-for="option in timeTableList" v-bind:value="option.no">{{ option.name }}</option>
-        </select>
-      </div>
     </div>
-    <div class="form-group col-md-6">
-      <datepicker :language="ja" :value="this.default" :format="DatePickerFormat" v-model="from"></datepicker>
-    </div>
-    <div class="form-group col-md-6">
-      <datepicker :language="ja" :value="this.default" :format="DatePickerFormat" v-model="to"></datepicker>
-    </div>
-    <!-- <btn-csv-download :csvData="shiftInfo" v-model="shiftInfo"></btn-csv-download> -->
-    <div>
-      <button class="btn btn-success" @click="StoreShiftTime()">登録</button>
-    </div>
-    <div>
-      <button class="btn btn-danger" @click="alertRangeDelConf('info')">選択した日付のシフトを削除</button>
-    </div>
-    <!-- /panel body -->
-    <div v-if="shiftInfo.length ">
-      登録済みシフト
-      <table class="table">
-        <thead>
-          <tr>
-            <th>日付</th>
-            <th>タイムテーブル</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in shiftInfo" v-bind:key="item.id">
-            <input type="hidden" v-model="item.id" />
-            <td>{{item.target_date}}</td>
-            <td>{{item.name}}</td>
-            <td>
-              <button class="btn btn-danger" @click="alertDelConf('info',item.id)">削除</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- /.panel -->
   </div>
+  <!-- /main contentns row -->
+  <!-- main contentns row -->
+  <div class="row justify-content-between" v-if="shiftInfo.length ">
+    <!-- .panel -->
+    <div class="col-md pt-3 align-self-stretch">
+      <div class="card shadow-pl">
+        <!-- panel header -->
+        <div class="card-header bg-transparent pt-3 border-0">
+          <h1 class="float-sm-left font-size-rg">登録済みシフト</h1>
+          <span class="float-sm-right font-size-sm">シフト割り当てされたタイムテーブルの一覧です</span>
+        </div>
+        <!-- /.panel header -->
+        <!-- panel body -->
+        <div class="card-body mb-3 p-0 border-top">
+          <!-- panel contents -->
+          <!-- .row -->
+          <div class="row">
+            <div class="col-12">
+              <div class="table-responsive">
+                <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                  <thead>
+                    <tr>
+                      <td class="text-center align-middle">日付</td>
+                      <td class="text-center align-middle">タイムテーブル</td>
+                      <td class="text-center align-middle">操作</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="item in shiftInfo" v-bind:key="item.id">
+                      <input type="hidden" v-model="item.id" />
+                      <td class="text-center align-middle">{{item.target_date}}</td>
+                      <td class="text-center align-middle">{{item.name}}</td>
+                      <td class="text-center align-middle">
+                        <div class="btn-group d-flex">
+                          <button class="font-size-sm btn btn-danger btn-sm w-100" @click="alertDelConf('info',item.id)">削除</button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- /.row -->
+          <!-- /panel contents -->
+        </div>
+        <!-- /panel body -->
+      </div>
+      <!-- .panel -->
+  </div>
+  <!-- /main contentns row -->
+  </div>
+</div>
 </template>
 <script>
 import toasted from "vue-toasted";
