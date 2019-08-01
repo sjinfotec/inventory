@@ -2,18 +2,18 @@
 <div>
   <!-- main contentns row -->
   <div class="row justify-content-between">
-    <fvl-form
-      method="post"
-      :data="form"
-      url="/setting_calc/store"
-      @success="addSuccess()"
-      @error="error()"
-    >
     <!-- .panel -->
     <div class="col-md pt-3">
       <div class="card shadow-pl">
+        <fvl-form
+          method="post"
+          :data="form"
+          url="/setting_calc/store"
+          @success="addSuccess()"
+          @error="error()"
+        >
         <!-- panel header -->
-        <div class="card-header bg-transparent pb-0 border-0">
+        <div class="card-header clearfix bg-transparent pb-0 border-0">
           <h1 class="float-sm-left font-size-rg">年度指定</h1>
           <span class="float-sm-right font-size-sm">設定する年度を指定できます</span>
         </div>
@@ -225,11 +225,11 @@
           <!-- /.row -->
           <!-- /.panel contents -->
         </div>
+        </fvl-form>
         <!-- /panel body -->
       </div>
     </div>
     <!-- /.panel -->
-    </fvl-form>
   </div>
   <!-- /main contentns row -->
 </div>
