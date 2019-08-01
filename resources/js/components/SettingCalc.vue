@@ -82,7 +82,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">勤務間インターバル</span>
                 </div>
-                <input class="form-control" :value.sync="form.interval" label="勤務間インターバル" name="interval" type="number" :max="99.99" :step="0.01">
+                <fvl-input class="form-control p-0" :value.sync="form.interval" name="interval" type="number" :max="99.99" :step="0.01"/>
               </div>
             </div>
             <!-- /.col -->
@@ -106,7 +106,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">３ヶ月累計</span>
                 </div>
-                <input class="form-control" :value.sync="form.threeMonthTotal" label="３ヶ月累計" name="threeMonthTotal" type="number" :max="99999.99" :step="0.01">
+                <fvl-input class="form-control p-0" :value.sync="form.threeMonthTotal" name="threeMonthTotal" type="number" :max="99999.99" :step="0.01"/>
               </div>
             </div>
             <!-- /.col -->
@@ -116,7 +116,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">６ヶ月累計</span>
                 </div>
-                <input class="form-control" :value.sync="form.sixMonthTotal" label="６ヶ月累計" name="sixMonthTotal" type="number" :max="99999.99" :step="0.01">
+                <fvl-input class="form-control p-0" :value.sync="form.sixMonthTotal" name="sixMonthTotal" type="number" :max="99999.99" :step="0.01"/>
               </div>
             </div>
             <!-- /.col -->
@@ -126,7 +126,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">１２ヶ月累計</span>
                 </div>
-                <input class="form-control" :value.sync="form.yaerTotal" label="１２ヶ月累計" name="yaerTotal" type="number" :max="99999.99" :step="0.01">
+                <fvl-input class="form-control p-0" :value.sync="form.yaerTotal" name="yaerTotal" type="number" :max="99999.99" :step="0.01"/>
               </div>
             </div>
             <!-- /.col -->
@@ -174,7 +174,7 @@
                         </td>
                         <td class="text-center align-middle">
                           <div class="input-group">
-                            <input title="整数４桁少数２桁まで" type="number" max="9999.99" step="0.01" class="form-control" v-model="form.upTime[index]">
+                            <input title="整数４桁少数２桁まで" type="number" max="9999.99" step="0.01" class="form-control" v-model="form.upTime[index]"/>
                           </div>
                         </td>
                         <td class="text-center align-middle">
