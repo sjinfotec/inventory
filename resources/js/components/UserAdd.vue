@@ -48,7 +48,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">社員名</span>
                 </div>
-                <input type="text" class="form-control" :value.sync="form.name" label="社員名" name="name">
+                <fvl-input type="text" class="form-control p-0" :value.sync="form.name" name="name"/>
               </div>
             </div>
             <!-- /.col -->
@@ -58,7 +58,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">ふりがな</span>
                 </div>
-                <input type="text" class="form-control" :value.sync="form.kana" label="ふりがな" name="kana">
+                <fvl-input type="text" class="form-control p-0" :value.sync="form.kana" name="kana"/>
               </div>
             </div>
             <!-- /.col -->
@@ -68,7 +68,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">ログインID</span>
                 </div>
-                <input type="text" class="form-control" :value.sync="form.code" label="ログインID" name="code" title="半角英数字4-10文字" pattern="^[a-zA-Z0-9]{4,10}$">
+                <fvl-input type="text" class="form-control p-0" :value.sync="form.code" name="code" title="半角英数字4-10文字" pattern="^[a-zA-Z0-9]{4,10}$"/>
               </div>
             </div>
             <!-- /.col -->
@@ -78,7 +78,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">パスワード</span>
                 </div>
-                <input type="text" class="form-control" :value.sync="form.password" label="パスワード" name="password" title="半角英数字6-12文字" pattern="^[a-zA-Z0-9]{6,12}$">
+                <fvl-input type="text" class="form-control p-0" :value.sync="form.password" name="password" title="半角英数字6-12文字" pattern="^[a-zA-Z0-9]{6,12}$"/>
               </div>
             </div>
             <!-- /.col -->
@@ -88,7 +88,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">メールアドレス</span>
                 </div>
-                <input type="text" class="form-control" :value.sync="form.email" label="メールアドレス" name="email">
+                <fvl-input type="text" class="form-control p-0" :value.sync="form.email" name="email"/>
               </div>
             </div>
             <!-- /.col -->
@@ -195,7 +195,7 @@
                 </div>
                 <div class="form-group col-md-6">
                   <label for="shift_end" class>新しいパスワード</label>
-                  <input
+                  <fvl-input
                     class="form-control"
                     v-model="enterPass"
                     maxlength="12"
@@ -206,7 +206,7 @@
                 </div>
                 <div class="form-group col-md-6">
                   <label for="shift_end" class>新しいパスワード（再入力）</label>
-                  <input
+                  <fvl-input
                     class="form-control"
                     v-model="reEnterPass"
                     maxlength="12"
