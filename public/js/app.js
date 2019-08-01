@@ -2137,6 +2137,62 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "CreateCalendar",
@@ -4468,6 +4524,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "selectedBusinessDay",
   props: {
@@ -4631,6 +4689,8 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
 //
 //
 //
@@ -76893,50 +76953,132 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    { staticClass: "panel-body" },
-    [
-      _c("v-date-picker", {
-        attrs: { mode: "multiple", "is-inline": "", "is-expanded": "" },
-        model: {
-          value: _vm.dates,
-          callback: function($$v) {
-            _vm.dates = $$v
-          },
-          expression: "dates"
-        }
-      }),
-      _vm._v(" "),
-      _c("select-business-day", {
-        attrs: { "blank-data": true },
-        on: { "change-event": _vm.businessDayChanges }
-      }),
-      _vm._v(" "),
-      _vm.valueBusinessDay == 2
-        ? _c("select-holi-day", {
-            attrs: { "blank-data": true },
-            on: { "change-event": _vm.holiDayChanges }
-          })
-        : _vm._e(),
-      _vm._v(" "),
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-success",
-          on: {
-            click: function($event) {
-              return _vm.store()
-            }
-          }
-        },
-        [_vm._v("登録")]
-      )
-    ],
-    1
-  )
+  return _c("div", [
+    _c("div", { staticClass: "row justify-content-between" }, [
+      _c("div", { staticClass: "col-md pt-3" }, [
+        _c("div", { staticClass: "card shadow-pl" }, [
+          _vm._m(0),
+          _vm._v(" "),
+          _c("div", { staticClass: "card-body pt-2" }, [
+            _c("div", { staticClass: "row justify-content-between" }, [
+              _c(
+                "div",
+                { staticClass: "col-12 pb-2" },
+                [
+                  _c("v-date-picker", {
+                    attrs: {
+                      mode: "multiple",
+                      "is-inline": "",
+                      "is-expanded": ""
+                    },
+                    model: {
+                      value: _vm.dates,
+                      callback: function($$v) {
+                        _vm.dates = $$v
+                      },
+                      expression: "dates"
+                    }
+                  })
+                ],
+                1
+              )
+            ]),
+            _vm._v(" "),
+            _vm._m(1),
+            _vm._v(" "),
+            _c("div", { staticClass: "row justify-content-between" }, [
+              _c(
+                "div",
+                { staticClass: "col-12 pb-2" },
+                [
+                  _c("select-business-day", {
+                    attrs: { "blank-data": true },
+                    on: { "change-event": _vm.businessDayChanges }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _vm.valueBusinessDay == 2
+                ? _c(
+                    "div",
+                    { staticClass: "col-12 pb-2" },
+                    [
+                      _c("select-holi-day", {
+                        attrs: { "blank-data": true },
+                        on: { "change-event": _vm.holiDayChanges }
+                      })
+                    ],
+                    1
+                  )
+                : _vm._e()
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "row justify-content-between" }, [
+              _c("div", { staticClass: "col-md-12 pb-2" }, [
+                _c("div", { staticClass: "btn-group d-flex" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-success btn-lg font-size-rg w-100",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.store()
+                        }
+                      }
+                    },
+                    [_vm._v("この条件で登録する")]
+                  )
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
+    ])
+  ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "card-header bg-transparent pb-0 border-0" },
+      [
+        _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+          _vm._v("日付選択")
+        ]),
+        _vm._v(" "),
+        _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+          _vm._v("複数の日付を選択できます")
+        ])
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "row justify-content-between px-3" }, [
+      _c(
+        "div",
+        { staticClass: "card-header col-12 bg-transparent pb-2 border-0 px-0" },
+        [
+          _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+            _vm._v("区分選択")
+          ]),
+          _vm._v(" "),
+          _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+            _vm._v("会社の定めた休日や出勤日を設定できます")
+          ])
+        ]
+      )
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -80028,8 +80170,8 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "form-group" }, [
-    _c("label", { attrs: { for: "business_kubun" } }, [_vm._v("営業日区分")]),
+  return _c("div", { staticClass: "input-group" }, [
+    _vm._m(0),
     _vm._v(" "),
     _c(
       "select",
@@ -80078,7 +80220,23 @@ var render = function() {
     )
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-120"
+        },
+        [_vm._v("営業日区分")]
+      )
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -80236,8 +80394,8 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "form-group" }, [
-    _c("label", { attrs: { for: "business_kubun" } }, [_vm._v("休暇区分")]),
+  return _c("div", { staticClass: "input-group" }, [
+    _vm._m(0),
     _vm._v(" "),
     _c(
       "select",
@@ -80286,7 +80444,23 @@ var render = function() {
     )
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-120"
+        },
+        [_vm._v("休暇区分")]
+      )
+    ])
+  }
+]
 render._withStripped = true
 
 
