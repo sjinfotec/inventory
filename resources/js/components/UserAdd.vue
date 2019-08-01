@@ -195,7 +195,7 @@
                 </div>
                 <div class="form-group col-md-6">
                   <label for="shift_end" class>新しいパスワード</label>
-                  <fvl-input
+                  <input
                     class="form-control"
                     v-model="enterPass"
                     maxlength="12"
@@ -206,7 +206,7 @@
                 </div>
                 <div class="form-group col-md-6">
                   <label for="shift_end" class>新しいパスワード（再入力）</label>
-                  <fvl-input
+                  <input
                     class="form-control"
                     v-model="reEnterPass"
                     maxlength="12"
