@@ -81830,61 +81830,71 @@ var render = function() {
                           ])
                         : _vm._e(),
                       _vm._v(" "),
-                      _c(
-                        "div",
-                        { staticClass: "form-group col-md-6" },
-                        [
-                          _c("label", { attrs: { for: "shift_end" } }, [
-                            _vm._v("新しいパスワード")
-                          ]),
-                          _vm._v(" "),
-                          _c("fvl-input", {
-                            staticClass: "form-control",
-                            attrs: {
-                              maxlength: "12",
-                              type: "password",
-                              title: "半角英数字12文字以内",
-                              pattern: "^[a-zA-Z0-9]{6,12}$"
-                            },
-                            model: {
+                      _c("div", { staticClass: "form-group col-md-6" }, [
+                        _c("label", { attrs: { for: "shift_end" } }, [
+                          _vm._v("新しいパスワード")
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
                               value: _vm.enterPass,
-                              callback: function($$v) {
-                                _vm.enterPass = $$v
-                              },
                               expression: "enterPass"
                             }
-                          })
-                        ],
-                        1
-                      ),
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            maxlength: "12",
+                            type: "password",
+                            title: "半角英数字12文字以内",
+                            pattern: "^[a-zA-Z0-9]{6,12}$"
+                          },
+                          domProps: { value: _vm.enterPass },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.enterPass = $event.target.value
+                            }
+                          }
+                        })
+                      ]),
                       _vm._v(" "),
-                      _c(
-                        "div",
-                        { staticClass: "form-group col-md-6" },
-                        [
-                          _c("label", { attrs: { for: "shift_end" } }, [
-                            _vm._v("新しいパスワード（再入力）")
-                          ]),
-                          _vm._v(" "),
-                          _c("fvl-input", {
-                            staticClass: "form-control",
-                            attrs: {
-                              maxlength: "12",
-                              type: "password",
-                              title: "半角英数字12文字以内",
-                              pattern: "^[a-zA-Z0-9]{6,12}$"
-                            },
-                            model: {
+                      _c("div", { staticClass: "form-group col-md-6" }, [
+                        _c("label", { attrs: { for: "shift_end" } }, [
+                          _vm._v("新しいパスワード（再入力）")
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
                               value: _vm.reEnterPass,
-                              callback: function($$v) {
-                                _vm.reEnterPass = $$v
-                              },
                               expression: "reEnterPass"
                             }
-                          })
-                        ],
-                        1
-                      ),
+                          ],
+                          staticClass: "form-control",
+                          attrs: {
+                            maxlength: "12",
+                            type: "password",
+                            title: "半角英数字12文字以内",
+                            pattern: "^[a-zA-Z0-9]{6,12}$"
+                          },
+                          domProps: { value: _vm.reEnterPass },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.reEnterPass = $event.target.value
+                            }
+                          }
+                        })
+                      ]),
                       _vm._v(" "),
                       _c(
                         "button",
