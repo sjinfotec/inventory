@@ -1,188 +1,293 @@
 <template>
-  <!-- panel body -->
-  <div class="panel-body">
-    <!-- form wrapper -->
-    <fvl-form
-      method="post"
-      :data="form"
-      url="/create_time_table/store"
-      @success="addSuccess()"
-      @error="error()"
-    >
-      <fvl-search-select
-        :selected.sync="selectId"
-        label="タイムテーブル"
-        name="selectId"
-        :options="timeTableList"
-        placeholder="タイムテーブルを選択すると編集モードになります"
-        :allowEmpty="true"
-        :search-keys="['no']"
-        option-key="no"
-        option-value="name"
-      />
-      <!-- Text input component -->
-      <fvl-input
-        v-if="selectId=='' || selectId==null "
-        :value.sync="form.no"
-        label="タイムテーブルNo"
-        name="no"
-      />
-      <fvl-input
-        v-if="selectId != ''"
-        :value.sync="form.no"
-        label="タイムテーブルNo (編集不可)"
-        name="no"
-        readonly="true"
-      />
-      <fvl-input :value.sync="form.name" label="タイムテーブル名称" name="name" />
-      <!-- 所定労働時間 -->
-      <div class="row">
-        <div class="col-sm-4">
-          <div class="inner-box">
-            <fvl-input type="time" :value.sync="form.regularFrom" label="所定労働時間" name="syoteifrom" />
-          </div>
+<div>
+  <!-- main contentns row -->
+  <div class="row justify-content-between">
+    <!-- .panel -->
+    <div class="col-md pt-3">
+      <div class="card shadow-pl">
+        <!-- panel header -->
+        <div class="card-header clearfix bg-transparent pb-0 border-0">
+          <h1 class="float-sm-left font-size-rg">タイムテーブルを設定する</h1>
+          <span class="float-sm-right font-size-sm">複数の勤務時間を設定することでシフト登録ができます</span>
         </div>
-        <div class="col-sm-1 padding-top-l padding-left-l">
-          <div class="inner-box">
-            <label>～</label>
+        <!-- /.panel header -->
+        <div class="card-body pt-2">
+          <!-- panel contents -->
+          <fvl-form
+            method="post"
+            :data="form"
+            url="/create_time_table/store"
+            @success="addSuccess()"
+            @error="error()"
+          >
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- .col -->
+            <div class="col-12 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">タイムテーブル</span>
+                </div>
+                <fvl-search-select
+                  :selected.sync="selectId"
+                  class="p-0"
+                  name="selectId"
+                  :options="timeTableList"
+                  placeholder="タイムテーブルを選択すると編集モードになります"
+                  :allowEmpty="true"
+                  :search-keys="['no']"
+                  option-key="no"
+                  option-value="name"
+                />
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">タイムテーブルNO</span>
+                </div>
+                <input type="text" class="form-control" :value.sync="form.no" label="タイムテーブルNo" name="no">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2" v-if="selectId != ''">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">タイムテーブルNO</span>
+                </div>
+                <input type="text" class="form-control" :value.sync="form.no" label="タイムテーブルNo (編集不可)" name="no" readonly="true">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">タイムテーブル名</span>
+                </div>
+                <input type="text" class="form-control" :value.sync="form.name" label="タイムテーブル名称" name="name">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">所定労働開始時間</span>
+                </div>
+                <input type="time" class="form-control" :value.sync="form.regularFrom" label="所定労働時間" name="syoteifrom">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">所定労働終了時間</span>
+                </div>
+                <input type="time" class="form-control" :value.sync="form.regularTo" label=" " name="syoteito">
+              </div>
+            </div>
+            <!-- /.col -->
           </div>
-        </div>
-        <div class="col-sm-4 padding-top-m">
-          <div class="inner-box">
-            <fvl-input type="time" :value.sync="form.regularTo" label=" " name="syoteito" />
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- panel header -->
+            <div class="card-header col-12 bg-transparent pb-2 border-0">
+              <h1 class="float-sm-left font-size-rg">休憩時間設定</h1>
+              <span class="float-sm-right font-size-sm">2パターンまで設定できます</span>
+            </div>
+            <!-- /.panel header -->
           </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">休憩開始時間 A</span>
+                </div>
+                <input class="form-control" type="time" :value.sync="form.regularRestFrom1" label="所定労働時間内休憩　２パターンまで" name="syoteifrom">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">休憩終了時間 A</span>
+                </div>
+                <input class="form-control" :value.sync="form.regularRestTo1" label=" " name="syoteito">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">休憩開始時間 B</span>
+                </div>
+                <input type="time" class="form-control" :value.sync="form.regularRestFrom2" label="　" name="syoteifrom">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">休憩終了時間 B</span>
+                </div>
+                <input type="time" class="form-control" :value.sync="form.regularRestTo2" label=" " name="syoteito">
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- panel header -->
+            <div class="card-header col-12 bg-transparent pb-2 border-0">
+              <h1 class="float-sm-left font-size-rg">残業時間設定</h1>
+              <span class="float-sm-right font-size-sm">3パターンまで設定できます</span>
+            </div>
+            <!-- /.panel header -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">残業開始時間 A</span>
+                </div>
+                <input type="time" class="form-control" :value.sync="form.irregularFrom1" label="所定外労働時間　３パターンまで" name="syoteifrom">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">残業終了時間 A</span>
+                </div>
+                <input type="time" class="form-control" :value.sync="form.irregularTo1" label=" " name="syoteito">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">残業開始時間 B</span>
+                </div>
+                <input type="time" class="form-control" :value.sync="form.irregularFrom2" label="　" name="syoteifrom">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">残業終了時間 B</span>
+                </div>
+                <input type="time" class="form-control" :value.sync="form.irregularTo2" label=" " name="syoteito">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">残業開始時間 C</span>
+                </div>
+                <input type="time" class="form-control" :value.sync="form.irregularFrom3" label="　" name="syoteifrom">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">残業終了時間 C</span>
+                </div>
+                <input type="time" class="form-control" :value.sync="form.irregularTo3" label=" " name="syoteito">
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- panel header -->
+            <div class="card-header bg-transparent pb-2 border-0">
+              <h1 class="float-sm-left font-size-rg">深夜残業時間設定</h1>
+            </div>
+            <!-- /.panel header -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">深夜残業開始時間</span>
+                </div>
+                <input type="time" class="form-control" :value.sync="form.irregularMidNightFrom"　label="所定外深夜労働時間"　name="syoteifrom">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">深夜残業終了時間</span>
+                </div>
+                <input type="time" class="form-control" :value.sync="form.irregularMidNightTo"　label=" "　name="syoteito">
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- col -->
+            <div class="col-md-12 pb-2">
+              <div class="btn-group d-flex">
+                <button type="submit" class="btn btn-success" v-if="selectId=='' || selectId==null ">追加</button>
+                <button type="submit" class="btn btn-success" id="edit" v-if="selectId != ''">編集</button>
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          </fvl-form>
+          <!-- .row -->
+          <div class="row justify-content-between" v-if="selectId != ''">
+            <!-- col -->
+            <div class="col-md-12 pb-2">
+              <div class="btn-group d-flex">
+                <button class="btn btn-danger" @click="alertDelConf('info')">削除</button>
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- /.panel contents -->
         </div>
       </div>
-      <!-- /所定労働時間 -->
-      <!-- 所定労働時間休憩 -->
-      <div class="row">
-        <div class="col-sm-4">
-          <div class="inner-box">
-            <fvl-input
-              type="time"
-              :value.sync="form.regularRestFrom1"
-              label="所定労働時間内休憩　２パターンまで"
-              name="syoteifrom"
-            />
-          </div>
-        </div>
-        <div class="col-sm-1 padding-top-l padding-left-l">
-          <div class="inner-box">
-            <label>～</label>
-          </div>
-        </div>
-        <div class="col-sm-4 padding-top-m">
-          <div class="inner-box">
-            <fvl-input type="time" :value.sync="form.regularRestTo1" label=" " name="syoteito" />
-          </div>
-        </div>
-        <div class="col-sm-4">
-          <div class="inner-box">
-            <fvl-input type="time" :value.sync="form.regularRestFrom2" label="　" name="syoteifrom" />
-          </div>
-        </div>
-        <div class="col-sm-1 padding-top-l padding-left-l">
-          <div class="inner-box">
-            <label>～</label>
-          </div>
-        </div>
-        <div class="col-sm-4 padding-top-m">
-          <div class="inner-box">
-            <fvl-input type="time" :value.sync="form.regularRestTo2" label=" " name="syoteito" />
-          </div>
-        </div>
-      </div>
-      <!-- /所定労働時間休憩 -->
-      <!-- 所定外労働時間 -->
-      <div class="row">
-        <div class="col-sm-4">
-          <div class="inner-box">
-            <fvl-input
-              type="time"
-              :value.sync="form.irregularFrom1"
-              label="所定外労働時間　３パターンまで"
-              name="syoteifrom"
-            />
-          </div>
-        </div>
-        <div class="col-sm-1 padding-top-l padding-left-l">
-          <div class="inner-box">
-            <label>～</label>
-          </div>
-        </div>
-        <div class="col-sm-4 padding-top-m">
-          <div class="inner-box">
-            <fvl-input type="time" :value.sync="form.irregularTo1" label=" " name="syoteito" />
-          </div>
-        </div>
-        <div class="col-sm-4">
-          <div class="inner-box">
-            <fvl-input type="time" :value.sync="form.irregularFrom2" label="　" name="syoteifrom" />
-          </div>
-        </div>
-        <div class="col-sm-1 padding-top-l padding-left-l">
-          <div class="inner-box">
-            <label>～</label>
-          </div>
-        </div>
-        <div class="col-sm-4 padding-top-m">
-          <div class="inner-box">
-            <fvl-input type="time" :value.sync="form.irregularTo2" label=" " name="syoteito" />
-          </div>
-        </div>
-        <div class="col-sm-4">
-          <div class="inner-box">
-            <fvl-input type="time" :value.sync="form.irregularFrom3" label="　" name="syoteifrom" />
-          </div>
-        </div>
-        <div class="col-sm-1 padding-top-l padding-left-l">
-          <div class="inner-box">
-            <label>～</label>
-          </div>
-        </div>
-        <div class="col-sm-4 padding-top-m">
-          <div class="inner-box">
-            <fvl-input type="time" :value.sync="form.irregularTo3" label=" " name="syoteito" />
-          </div>
-        </div>
-      </div>
-      <!-- /所定外労働時間 -->
-      <!-- 所定外深夜労働時間 -->
-      <div class="row">
-        <div class="col-sm-4">
-          <div class="inner-box">
-            <fvl-input
-              type="time"
-              :value.sync="form.irregularMidNightFrom"
-              label="所定外深夜労働時間"
-              name="syoteifrom"
-            />
-          </div>
-        </div>
-        <div class="col-sm-1 padding-top-l padding-left-l">
-          <div class="inner-box">
-            <label>～</label>
-          </div>
-        </div>
-        <div class="col-sm-4 padding-top-m">
-          <div class="inner-box">
-            <fvl-input
-              type="time"
-              :value.sync="form.irregularMidNightTo"
-              label=" "
-              name="syoteito"
-            />
-          </div>
-        </div>
-      </div>
-      <!-- /所定外深夜労働時間 -->
-      <fvl-submit v-if="selectId=='' || selectId==null ">追加</fvl-submit>
-      <fvl-submit id="edit" v-if="selectId != ''">編集</fvl-submit>
-    </fvl-form>
-    <span class="padding-set-small margin-set-top-regular" v-if="selectId != ''">
-      <button class="btn btn-danger" @click="alertDelConf('info')">削除</button>
-    </span>
+    </div>
+    <!-- /.panel -->
+    </div>
+  <!-- /main contentns row -->
   </div>
+</div>
 </template>
 <script>
 import toasted from "vue-toasted";
