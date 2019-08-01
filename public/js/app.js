@@ -81408,8 +81408,615 @@ render._withStripped = true
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
-var render = function () {}
-var staticRenderFns = []
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", [
+    _c("div", { staticClass: "row justify-content-between" }, [
+      _c("div", { staticClass: "col-md pt-3" }, [
+        _c(
+          "div",
+          { staticClass: "card shadow-pl" },
+          [
+            _vm._m(0),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "card-body pt-2" },
+              [
+                _c(
+                  "fvl-form",
+                  {
+                    attrs: {
+                      method: "post",
+                      data: _vm.form,
+                      url: "/user_add/store"
+                    },
+                    on: {
+                      success: function($event) {
+                        return _vm.addSuccess()
+                      },
+                      error: function($event) {
+                        return _vm.error()
+                      }
+                    }
+                  },
+                  [
+                    _c("div", { staticClass: "row justify-content-between" }, [
+                      _c("div", { staticClass: "col-12 pb-2" }, [
+                        _c(
+                          "div",
+                          { staticClass: "input-group" },
+                          [
+                            _c("div", { staticClass: "input-group-prepend" }, [
+                              _c(
+                                "span",
+                                {
+                                  staticClass:
+                                    "input-group-text font-size-sm line-height-xs label-width-120",
+                                  attrs: { id: "basic-addon1" }
+                                },
+                                [_vm._v("ユーザー")]
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("fvl-search-select", {
+                              staticClass: "p-0",
+                              attrs: {
+                                selected: _vm.userCode,
+                                name: "userCode",
+                                options: _vm.userList,
+                                placeholder:
+                                  "ユーザーを選択すると編集モードになります",
+                                allowEmpty: true,
+                                "search-keys": ["code"],
+                                "option-key": "code",
+                                "option-value": "name"
+                              },
+                              on: {
+                                "update:selected": function($event) {
+                                  _vm.userCode = $event
+                                }
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-6 pb-2" }, [
+                        _c(
+                          "div",
+                          { staticClass: "input-group" },
+                          [
+                            _c("div", { staticClass: "input-group-prepend" }, [
+                              _c(
+                                "span",
+                                {
+                                  staticClass:
+                                    "input-group-text font-size-sm line-height-xs label-width-120",
+                                  attrs: { id: "basic-addon1" }
+                                },
+                                [_vm._v("社員名")]
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("fvl-input", {
+                              staticClass: "form-control p-0",
+                              attrs: {
+                                type: "text",
+                                value: _vm.form.name,
+                                name: "name"
+                              },
+                              on: {
+                                "update:value": function($event) {
+                                  return _vm.$set(_vm.form, "name", $event)
+                                }
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-6 pb-2" }, [
+                        _c(
+                          "div",
+                          { staticClass: "input-group" },
+                          [
+                            _c("div", { staticClass: "input-group-prepend" }, [
+                              _c(
+                                "span",
+                                {
+                                  staticClass:
+                                    "input-group-text font-size-sm line-height-xs label-width-120",
+                                  attrs: { id: "basic-addon1" }
+                                },
+                                [_vm._v("ふりがな")]
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("fvl-input", {
+                              staticClass: "form-control p-0",
+                              attrs: {
+                                type: "text",
+                                value: _vm.form.kana,
+                                name: "kana"
+                              },
+                              on: {
+                                "update:value": function($event) {
+                                  return _vm.$set(_vm.form, "kana", $event)
+                                }
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-6 pb-2" }, [
+                        _c(
+                          "div",
+                          { staticClass: "input-group" },
+                          [
+                            _c("div", { staticClass: "input-group-prepend" }, [
+                              _c(
+                                "span",
+                                {
+                                  staticClass:
+                                    "input-group-text font-size-sm line-height-xs label-width-120",
+                                  attrs: { id: "basic-addon1" }
+                                },
+                                [_vm._v("ログインID")]
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("fvl-input", {
+                              staticClass: "form-control p-0",
+                              attrs: {
+                                type: "text",
+                                value: _vm.form.code,
+                                name: "code",
+                                title: "半角英数字4-10文字",
+                                pattern: "^[a-zA-Z0-9]{4,10}$"
+                              },
+                              on: {
+                                "update:value": function($event) {
+                                  return _vm.$set(_vm.form, "code", $event)
+                                }
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _vm.userCode == "" || _vm.userCode == null
+                        ? _c("div", { staticClass: "col-md-6 pb-2" }, [
+                            _c(
+                              "div",
+                              { staticClass: "input-group" },
+                              [
+                                _c(
+                                  "div",
+                                  { staticClass: "input-group-prepend" },
+                                  [
+                                    _c(
+                                      "span",
+                                      {
+                                        staticClass:
+                                          "input-group-text font-size-sm line-height-xs label-width-120",
+                                        attrs: { id: "basic-addon1" }
+                                      },
+                                      [_vm._v("パスワード")]
+                                    )
+                                  ]
+                                ),
+                                _vm._v(" "),
+                                _c("fvl-input", {
+                                  staticClass: "form-control p-0",
+                                  attrs: {
+                                    type: "text",
+                                    value: _vm.form.password,
+                                    name: "password",
+                                    title: "半角英数字6-12文字",
+                                    pattern: "^[a-zA-Z0-9]{6,12}$"
+                                  },
+                                  on: {
+                                    "update:value": function($event) {
+                                      return _vm.$set(
+                                        _vm.form,
+                                        "password",
+                                        $event
+                                      )
+                                    }
+                                  }
+                                })
+                              ],
+                              1
+                            )
+                          ])
+                        : _vm._e(),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-6 pb-2" }, [
+                        _c(
+                          "div",
+                          { staticClass: "input-group" },
+                          [
+                            _c("div", { staticClass: "input-group-prepend" }, [
+                              _c(
+                                "span",
+                                {
+                                  staticClass:
+                                    "input-group-text font-size-sm line-height-xs label-width-120",
+                                  attrs: { id: "basic-addon1" }
+                                },
+                                [_vm._v("メールアドレス")]
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("fvl-input", {
+                              staticClass: "form-control p-0",
+                              attrs: {
+                                type: "text",
+                                value: _vm.form.email,
+                                name: "email"
+                              },
+                              on: {
+                                "update:value": function($event) {
+                                  return _vm.$set(_vm.form, "email", $event)
+                                }
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-6 pb-2" }, [
+                        _c(
+                          "div",
+                          { staticClass: "input-group" },
+                          [
+                            _c("div", { staticClass: "input-group-prepend" }, [
+                              _c(
+                                "span",
+                                {
+                                  staticClass:
+                                    "input-group-text font-size-sm line-height-xs label-width-120",
+                                  attrs: { id: "basic-addon1" }
+                                },
+                                [_vm._v("所属部署")]
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("fvl-search-select", {
+                              staticClass: "p-0",
+                              attrs: {
+                                selected: _vm.form.departmentCode,
+                                name: "departmentCode",
+                                options: _vm.departmentList,
+                                "search-keys": ["name"],
+                                "option-key": "id",
+                                "option-value": "name"
+                              },
+                              on: {
+                                "update:selected": function($event) {
+                                  return _vm.$set(
+                                    _vm.form,
+                                    "departmentCode",
+                                    $event
+                                  )
+                                }
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-6 pb-2" }, [
+                        _c(
+                          "div",
+                          { staticClass: "input-group" },
+                          [
+                            _c("div", { staticClass: "input-group-prepend" }, [
+                              _c(
+                                "span",
+                                {
+                                  staticClass:
+                                    "input-group-text font-size-sm line-height-xs label-width-120",
+                                  attrs: { id: "basic-addon1" }
+                                },
+                                [_vm._v("雇用形態")]
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("fvl-search-select", {
+                              staticClass: "p-0",
+                              attrs: {
+                                selected: _vm.form.status,
+                                name: "status",
+                                options: _vm.employStatusList,
+                                "search-keys": ["code"],
+                                "option-key": "code",
+                                "option-value": "code_name"
+                              },
+                              on: {
+                                "update:selected": function($event) {
+                                  return _vm.$set(_vm.form, "status", $event)
+                                }
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-6 pb-2" }, [
+                        _c(
+                          "div",
+                          { staticClass: "input-group" },
+                          [
+                            _c("div", { staticClass: "input-group-prepend" }, [
+                              _c(
+                                "span",
+                                {
+                                  staticClass:
+                                    "input-group-text font-size-sm line-height-xs label-width-120",
+                                  attrs: { id: "basic-addon1" }
+                                },
+                                [_vm._v("通常勤務時間")]
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("fvl-search-select", {
+                              staticClass: "p-0",
+                              attrs: {
+                                selected: _vm.form.table_no,
+                                name: "timetable_no",
+                                options: _vm.timeTableList,
+                                "search-keys": ["name"],
+                                "option-key": "no",
+                                "option-value": "name"
+                              },
+                              on: {
+                                "update:selected": function($event) {
+                                  return _vm.$set(_vm.form, "table_no", $event)
+                                }
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "row justify-content-between" }, [
+                      _c("div", { staticClass: "col-md-12 pb-2" }, [
+                        _c("div", { staticClass: "btn-group d-flex" }, [
+                          _vm.userCode == "" || _vm.userCode == null
+                            ? _c(
+                                "button",
+                                {
+                                  staticClass: "btn btn-success",
+                                  attrs: { type: "submit" }
+                                },
+                                [_vm._v("追加")]
+                              )
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm.userCode != ""
+                            ? _c(
+                                "button",
+                                {
+                                  staticClass: "btn btn-success",
+                                  attrs: { type: "submit", id: "edit" }
+                                },
+                                [_vm._v("編集")]
+                              )
+                            : _vm._e()
+                        ])
+                      ])
+                    ])
+                  ]
+                ),
+                _vm._v(" "),
+                _vm.userCode != ""
+                  ? _c("div", { staticClass: "row justify-content-between" }, [
+                      _c("div", { staticClass: "col-md-12 pb-2" }, [
+                        _c("div", { staticClass: "btn-group d-flex" }, [
+                          _c(
+                            "button",
+                            {
+                              staticClass: "btn btn-danger",
+                              on: {
+                                click: function($event) {
+                                  return _vm.alertDelConf("warning")
+                                }
+                              }
+                            },
+                            [_vm._v("削除")]
+                          )
+                        ])
+                      ])
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.userCode != ""
+                  ? _c("div", { staticClass: "row justify-content-between" }, [
+                      _c("div", { staticClass: "col-md-12 pb-2" }, [
+                        _c("div", { staticClass: "btn-group d-flex" }, [
+                          _c(
+                            "button",
+                            {
+                              staticClass: "btn btn-success",
+                              on: { click: _vm.show }
+                            },
+                            [_vm._v("パスワード変更")]
+                          )
+                        ])
+                      ])
+                    ])
+                  : _vm._e()
+              ],
+              1
+            ),
+            _vm._v(" "),
+            _c(
+              "modal",
+              {
+                attrs: { name: "password-change", width: 800, height: 600 },
+                model: {
+                  value: _vm.userCode,
+                  callback: function($$v) {
+                    _vm.userCode = $$v
+                  },
+                  expression: "userCode"
+                }
+              },
+              [
+                _c("div", { staticClass: "card" }, [
+                  _c("div", { staticClass: "card-header" }, [
+                    _vm._v("パスワード変更")
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "card-body" }, [
+                    _vm.errors.length
+                      ? _c("div", [
+                          _c(
+                            "ul",
+                            { staticClass: "error-red color-red" },
+                            _vm._l(_vm.errors, function(error, index) {
+                              return _c("li", { key: index }, [
+                                _vm._v(_vm._s(error))
+                              ])
+                            }),
+                            0
+                          )
+                        ])
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group col-md-6" }, [
+                      _c("label", { attrs: { for: "shift_end" } }, [
+                        _vm._v("新しいパスワード")
+                      ]),
+                      _vm._v(" "),
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.enterPass,
+                            expression: "enterPass"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: {
+                          maxlength: "12",
+                          type: "password",
+                          title: "半角英数字12文字以内",
+                          pattern: "^[a-zA-Z0-9]{6,12}$"
+                        },
+                        domProps: { value: _vm.enterPass },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.enterPass = $event.target.value
+                          }
+                        }
+                      })
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group col-md-6" }, [
+                      _c("label", { attrs: { for: "shift_end" } }, [
+                        _vm._v("新しいパスワード（再入力）")
+                      ]),
+                      _vm._v(" "),
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.reEnterPass,
+                            expression: "reEnterPass"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: {
+                          maxlength: "12",
+                          type: "password",
+                          title: "半角英数字12文字以内",
+                          pattern: "^[a-zA-Z0-9]{6,12}$"
+                        },
+                        domProps: { value: _vm.reEnterPass },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.reEnterPass = $event.target.value
+                          }
+                        }
+                      })
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-success",
+                        on: {
+                          click: function($event) {
+                            return _vm.alertPassConf("warning")
+                          }
+                        }
+                      },
+                      [_vm._v("確定")]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-warning",
+                        on: { click: _vm.hide }
+                      },
+                      [_vm._v("キャンセル")]
+                    )
+                  ])
+                ])
+              ]
+            )
+          ],
+          1
+        )
+      ])
+    ])
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "card-header bg-transparent pb-0 border-0" },
+      [
+        _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+          _vm._v("ユーザー登録および編集")
+        ]),
+        _vm._v(" "),
+        _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+          _vm._v("ユーザーを選択すると登録済みのユーザー情報を編集できます")
+        ])
+      ]
+    )
+  }
+]
+render._withStripped = true
 
 
 

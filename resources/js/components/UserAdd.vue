@@ -280,15 +280,15 @@
                 <button class="btn btn-success" v-on:click="alertPassConf('warning')">確定</button>
                 <button class="btn btn-warning" v-on:click="hide">キャンセル</button>
               </div>
-            </modal>
-            <!-- /modal -->
-          </div>
+            </div>
+          </modal>
+          <!-- /modal -->
         </div>
       </div>
-      <!-- /.panel -->
     </div>
-    <!-- main contentns row -->
+    <!-- /.panel -->
   </div>
+  <!-- main contentns row -->
 </template>
 <script>
 import toasted from "vue-toasted";
