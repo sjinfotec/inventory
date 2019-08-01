@@ -78682,7 +78682,7 @@ var staticRenderFns = [
             "input-group-text font-size-sm line-height-xs label-width-90",
           attrs: { for: "target_fromdate" }
         },
-        [_vm._v("指定日付a")]
+        [_vm._v("指定日付")]
       )
     ])
   },
