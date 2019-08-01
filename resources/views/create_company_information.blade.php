@@ -20,22 +20,22 @@
 						<!-- /.panel -->
 					</div>
 					<!-- /main contentns row -->
+					@if (session('status'))
 					<!-- main contentns row -->
 					<div class="row justify-content-between">
 						<!-- .panel -->
 						<div class="col-md pt-3">
 							<div class="card shadow-pl">
-                                @if (session('status'))
 								<div class="card-body pt-2">
-                                    <div class="alert alert-success" role="alert">
-                                        {{ session('status') }}
-                                    </div>
-                                </div>
-                                @endif
-                                <create-company-information></create-company-information>
+									<div class="alert alert-success" role="alert">
+										{{ session('status') }}
+									</div>
+								</div>
 							</div>
 						</div>
 						<!-- /.panel -->
 					</div>
 					<!-- /main contentns row -->
+					@endif
+					<create-company-information></create-company-information>
 @endsection
