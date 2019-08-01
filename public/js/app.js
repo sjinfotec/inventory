@@ -5292,6 +5292,99 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -81167,209 +81260,281 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "panel-body" }, [
-    _c("div", { staticClass: "col-md-12 padding-dis-left padding-dis-right" }, [
-      _c(
-        "div",
-        { staticClass: "form-group col-md-6" },
-        [
+  return _c("div", [
+    _c("div", { staticClass: "row justify-content-between" }, [
+      _c("div", { staticClass: "col-md pt-3" }, [
+        _c("div", { staticClass: "card shadow-pl" }, [
+          _vm._m(0),
+          _vm._v(" "),
           _vm.errors.length
-            ? _c("div", [
-                _c(
-                  "ul",
-                  { staticClass: "error-red" },
-                  _vm._l(_vm.errors, function(error, index) {
-                    return _c("li", { key: index }, [_vm._v(_vm._s(error))])
-                  }),
-                  0
-                )
-              ])
-            : _vm._e(),
-          _vm._v(" "),
-          _c("label", { attrs: { for: "shift_start" } }, [
-            _vm._v("シフトを設定する社員")
-          ]),
-          _vm._v(" "),
-          _c("select-user", {
-            ref: "selectuser",
-            attrs: { "get-do": _vm.getDo },
-            on: { "change-event": _vm.userChanges }
-          }),
-          _vm._v(" \n    ")
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _c("div", { staticClass: "form-group col-md-6" }, [
-        _c("label", { attrs: { for: "shift_end" } }, [
-          _vm._v("タイムテーブル選択")
-        ]),
-        _vm._v(" "),
-        _c(
-          "select",
-          {
-            directives: [
-              {
-                name: "model",
-                rawName: "v-model",
-                value: _vm.no,
-                expression: "no"
-              }
-            ],
-            staticClass: "form-control",
-            on: {
-              change: function($event) {
-                var $$selectedVal = Array.prototype.filter
-                  .call($event.target.options, function(o) {
-                    return o.selected
-                  })
-                  .map(function(o) {
-                    var val = "_value" in o ? o._value : o.value
-                    return val
-                  })
-                _vm.no = $event.target.multiple
-                  ? $$selectedVal
-                  : $$selectedVal[0]
-              }
-            }
-          },
-          _vm._l(_vm.timeTableList, function(option) {
-            return _c("option", { domProps: { value: option.no } }, [
-              _vm._v(_vm._s(option.name))
-            ])
-          }),
-          0
-        )
-      ])
-    ]),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "form-group col-md-6" },
-      [
-        _c("datepicker", {
-          attrs: {
-            language: _vm.ja,
-            value: this.default,
-            format: _vm.DatePickerFormat
-          },
-          model: {
-            value: _vm.from,
-            callback: function($$v) {
-              _vm.from = $$v
-            },
-            expression: "from"
-          }
-        })
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "form-group col-md-6" },
-      [
-        _c("datepicker", {
-          attrs: {
-            language: _vm.ja,
-            value: this.default,
-            format: _vm.DatePickerFormat
-          },
-          model: {
-            value: _vm.to,
-            callback: function($$v) {
-              _vm.to = $$v
-            },
-            expression: "to"
-          }
-        })
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c("div", [
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-success",
-          on: {
-            click: function($event) {
-              return _vm.StoreShiftTime()
-            }
-          }
-        },
-        [_vm._v("登録")]
-      )
-    ]),
-    _vm._v(" "),
-    _c("div", [
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-danger",
-          on: {
-            click: function($event) {
-              return _vm.alertRangeDelConf("info")
-            }
-          }
-        },
-        [_vm._v("選択した日付のシフトを削除")]
-      )
-    ]),
-    _vm._v(" "),
-    _vm.shiftInfo.length
-      ? _c("div", [
-          _vm._v("\n    登録済みシフト\n    "),
-          _c("table", { staticClass: "table" }, [
-            _vm._m(0),
-            _vm._v(" "),
-            _c(
-              "tbody",
-              _vm._l(_vm.shiftInfo, function(item) {
-                return _c("tr", { key: item.id }, [
-                  _c("input", {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: item.id,
-                        expression: "item.id"
-                      }
-                    ],
-                    attrs: { type: "hidden" },
-                    domProps: { value: item.id },
-                    on: {
-                      input: function($event) {
-                        if ($event.target.composing) {
-                          return
-                        }
-                        _vm.$set(item, "id", $event.target.value)
-                      }
-                    }
-                  }),
-                  _vm._v(" "),
-                  _c("td", [_vm._v(_vm._s(item.target_date))]),
-                  _vm._v(" "),
-                  _c("td", [_vm._v(_vm._s(item.name))]),
-                  _vm._v(" "),
-                  _c("td", [
+            ? _c("div", { staticClass: "card-body pt-2" }, [
+                _c("div", { staticClass: "row justify-content-between" }, [
+                  _c("div", { staticClass: "col-12 pb-2" }, [
                     _c(
-                      "button",
-                      {
-                        staticClass: "btn btn-danger",
-                        on: {
-                          click: function($event) {
-                            return _vm.alertDelConf("info", item.id)
-                          }
-                        }
-                      },
-                      [_vm._v("削除")]
+                      "ul",
+                      { staticClass: "error-red" },
+                      _vm._l(_vm.errors, function(error, index) {
+                        return _c("li", { key: index }, [_vm._v(_vm._s(error))])
+                      }),
+                      0
                     )
                   ])
                 ])
-              }),
-              0
-            )
+              ])
+            : _vm._e(),
+          _vm._v(" "),
+          _c("div", { staticClass: "card-body pt-2" }, [
+            _c("div", { staticClass: "row justify-content-between" }, [
+              _c("div", { staticClass: "col-md-6 pb-2" }, [
+                _c(
+                  "div",
+                  { staticClass: "input-group" },
+                  [
+                    _vm._m(1),
+                    _vm._v(" "),
+                    _c("select-user", {
+                      ref: "selectuser",
+                      staticClass: "p-0",
+                      attrs: { "get-do": _vm.getDo },
+                      on: { "change-event": _vm.userChanges }
+                    })
+                  ],
+                  1
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "col-md-6 pb-2" }, [
+                _c("div", { staticClass: "input-group" }, [
+                  _vm._m(2),
+                  _vm._v(" "),
+                  _c(
+                    "select",
+                    {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.no,
+                          expression: "no"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      on: {
+                        change: function($event) {
+                          var $$selectedVal = Array.prototype.filter
+                            .call($event.target.options, function(o) {
+                              return o.selected
+                            })
+                            .map(function(o) {
+                              var val = "_value" in o ? o._value : o.value
+                              return val
+                            })
+                          _vm.no = $event.target.multiple
+                            ? $$selectedVal
+                            : $$selectedVal[0]
+                        }
+                      }
+                    },
+                    _vm._l(_vm.timeTableList, function(option) {
+                      return _c("option", { domProps: { value: option.no } }, [
+                        _vm._v(_vm._s(option.name))
+                      ])
+                    }),
+                    0
+                  )
+                ])
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "col-md-6 pb-2" }, [
+                _c(
+                  "div",
+                  { staticClass: "input-group" },
+                  [
+                    _vm._m(3),
+                    _vm._v(" "),
+                    _c("datepicker", {
+                      attrs: {
+                        language: _vm.ja,
+                        value: this.default,
+                        format: _vm.DatePickerFormat
+                      },
+                      model: {
+                        value: _vm.from,
+                        callback: function($$v) {
+                          _vm.from = $$v
+                        },
+                        expression: "from"
+                      }
+                    })
+                  ],
+                  1
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "col-md-6 pb-2" }, [
+                _c(
+                  "div",
+                  { staticClass: "input-group" },
+                  [
+                    _vm._m(4),
+                    _vm._v(" "),
+                    _c("datepicker", {
+                      attrs: {
+                        language: _vm.ja,
+                        value: this.default,
+                        format: _vm.DatePickerFormat
+                      },
+                      model: {
+                        value: _vm.to,
+                        callback: function($$v) {
+                          _vm.to = $$v
+                        },
+                        expression: "to"
+                      }
+                    })
+                  ],
+                  1
+                )
+              ])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "row justify-content-between" }, [
+              _c("div", { staticClass: "col-md-12 pb-2" }, [
+                _c("div", { staticClass: "btn-group d-flex" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-success btn-lg font-size-rg w-100",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.StoreShiftTime()
+                        }
+                      }
+                    },
+                    [_vm._v("この条件で登録する")]
+                  )
+                ])
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "col-md-12 pb-2" }, [
+                _c("div", { staticClass: "btn-group d-flex" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-danger btn-lg font-size-rg w-100",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.alertRangeDelConf("info")
+                        }
+                      }
+                    },
+                    [_vm._v("指定した期間を削除する")]
+                  )
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
+    ]),
+    _vm._v(" "),
+    _vm.shiftInfo.length
+      ? _c("div", { staticClass: "row justify-content-between" }, [
+          _c("div", { staticClass: "col-md pt-3 align-self-stretch" }, [
+            _c("div", { staticClass: "card shadow-pl" }, [
+              _vm._m(5),
+              _vm._v(" "),
+              _c("div", { staticClass: "card-body mb-3 p-0 border-top" }, [
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-12" }, [
+                    _c("div", { staticClass: "table-responsive" }, [
+                      _c(
+                        "table",
+                        {
+                          staticClass:
+                            "table table-striped border-bottom font-size-sm text-nowrap"
+                        },
+                        [
+                          _vm._m(6),
+                          _vm._v(" "),
+                          _c(
+                            "tbody",
+                            _vm._l(_vm.shiftInfo, function(item) {
+                              return _c("tr", { key: item.id }, [
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: item.id,
+                                      expression: "item.id"
+                                    }
+                                  ],
+                                  attrs: { type: "hidden" },
+                                  domProps: { value: item.id },
+                                  on: {
+                                    input: function($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(item, "id", $event.target.value)
+                                    }
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c(
+                                  "td",
+                                  { staticClass: "text-center align-middle" },
+                                  [_vm._v(_vm._s(item.target_date))]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "td",
+                                  { staticClass: "text-center align-middle" },
+                                  [_vm._v(_vm._s(item.name))]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "td",
+                                  { staticClass: "text-center align-middle" },
+                                  [
+                                    _c(
+                                      "div",
+                                      { staticClass: "btn-group d-flex" },
+                                      [
+                                        _c(
+                                          "button",
+                                          {
+                                            staticClass:
+                                              "font-size-sm btn btn-danger btn-sm w-100",
+                                            on: {
+                                              click: function($event) {
+                                                return _vm.alertDelConf(
+                                                  "info",
+                                                  item.id
+                                                )
+                                              }
+                                            }
+                                          },
+                                          [_vm._v("削除")]
+                                        )
+                                      ]
+                                    )
+                                  ]
+                                )
+                              ])
+                            }),
+                            0
+                          )
+                        ]
+                      )
+                    ])
+                  ])
+                ])
+              ])
+            ])
           ])
         ])
       : _vm._e()
@@ -81380,13 +81545,117 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "card-header bg-transparent pb-0 border-0" },
+      [
+        _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+          _vm._v("シフトを割り当てを編集する")
+        ]),
+        _vm._v(" "),
+        _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+          _vm._v(
+            "勤務時間設定で登録したタイムテーブルを割り当てることができます"
+          )
+        ])
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-120",
+          attrs: { id: "basic-addon1", for: "shift_start" }
+        },
+        [_vm._v("社員名")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-120",
+          attrs: { id: "basic-addon1", for: "shift_start" }
+        },
+        [_vm._v("シフト選択")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-120",
+          attrs: { id: "basic-addon1", for: "shift_end" }
+        },
+        [_vm._v("開始日付")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-120",
+          attrs: { id: "basic-addon1", for: "shift_end" }
+        },
+        [_vm._v("終了日付")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "card-header bg-transparent pt-3 border-0" },
+      [
+        _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+          _vm._v("登録済みシフト")
+        ]),
+        _vm._v(" "),
+        _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+          _vm._v("シフト割り当てされたタイムテーブルの一覧です")
+        ])
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
     return _c("thead", [
       _c("tr", [
-        _c("th", [_vm._v("日付")]),
+        _c("td", { staticClass: "text-center align-middle" }, [_vm._v("日付")]),
         _vm._v(" "),
-        _c("th", [_vm._v("タイムテーブル")]),
+        _c("td", { staticClass: "text-center align-middle" }, [
+          _vm._v("タイムテーブル")
+        ]),
         _vm._v(" "),
-        _c("th")
+        _c("td", { staticClass: "text-center align-middle" }, [_vm._v("操作")])
       ])
     ])
   }
