@@ -1,105 +1,233 @@
 <template>
-  <!-- panel body -->
-  <div class="panel-body">
-    <!-- form wrapper -->
-    <fvl-form
-      method="post"
-      :data="form"
-      url="/user_add/store"
-      @success="addSuccess()"
-      @error="error()"
-    >
-      <fvl-search-select
-        :selected.sync="userCode"
-        label="ユーザー"
-        name="userCode"
-        :options="userList"
-        placeholder="ユーザーを選択すると編集モードになります"
-        :allowEmpty="true"
-        :search-keys="['code']"
-        option-key="code"
-        option-value="name"
-      />
-      <!-- Text input component -->
-      <fvl-input :value.sync="form.name" label="社員名" name="name" />
-      <fvl-input :value.sync="form.kana" label="ふりがな" name="kana" />
-      <fvl-input
-        :value.sync="form.code"
-        label="ログインID"
-        name="code"
-        title="半角英数字4-10文字"
-        pattern="^[a-zA-Z0-9]{4,10}$"
-      />
-      <span v-if="userCode=='' || userCode == null ">
-        <fvl-input
-          :value.sync="form.password"
-          label="パスワード"
-          name="password"
-          title="半角英数字6-12文字"
-          pattern="^[a-zA-Z0-9]{6,12}$"
-        />
-      </span>
-      <fvl-input :value.sync="form.email" label="メールアドレス" name="email" />
-      <!-- Textarea component -->
-      <fvl-search-select
-        :selected.sync="form.departmentCode"
-        label="部署"
-        name="departmentCode"
-        :options="departmentList"
-        :search-keys="['name']"
-        option-key="id"
-        option-value="name"
-      />
-
-      <fvl-search-select
-        :selected.sync="form.status"
-        label="雇用形態"
-        name="status"
-        :options="employStatusList"
-        :search-keys="['code']"
-        option-key="code"
-        option-value="code_name"
-      />
-
-      <fvl-search-select
-        :selected.sync="form.table_no"
-        label="タイムテーブル"
-        name="timetable_no"
-        :options="timeTableList"
-        :search-keys="['name']"
-        option-key="no"
-        option-value="name"
-      />
-      <!-- Submit button -->
-      <fvl-submit v-if="userCode=='' || userCode==null ">追加</fvl-submit>
-      <fvl-submit id="edit" v-if="userCode != ''">編集</fvl-submit>
-    </fvl-form>
-    <span class="padding-set-small margin-set-top-regular" v-if="userCode != ''">
-      <button class="btn btn-danger" @click="del">削除</button>
-    </span>
-    <span class="padding-set-small margin-set-top-regular" v-if="userCode != ''">
-      <button class="btn btn-info" v-on:click="show">パスワード変更</button>
-    </span>
-    <modal name="password-change" v-model="userCode">
-      
-      <div class="card">
-          <div class="card-header">パスワード変更</div>
-
-          <div class="card-body">
-            <div class="form-group col-md-6">
-              <label for="shift_end" class>新しいパスワード</label>
-              <input class="form-control" v-model="enterPass" maxlength='12' type="password" title="半角英数字12文字以内" pattern="^[a-zA-Z0-9]{6,12}$"></input>
+<div>
+  <!-- main contentns row -->
+  <div class="row justify-content-between">
+    <!-- .panel -->
+    <div class="col-md pt-3">
+      <div class="card shadow-pl">
+        <!-- panel header -->
+        <div class="card-header bg-transparent pb-0 border-0">
+          <h1 class="float-sm-left font-size-rg">ユーザー登録および編集</h1>
+          <span class="float-sm-right font-size-sm">ユーザーを選択すると登録済みのユーザー情報を編集できます</span>
+        </div>
+        <!-- /.panel header -->
+        <div class="card-body pt-2">
+          <!-- panel contents -->
+          <fvl-form
+            method="post"
+            :data="form"
+            url="/user_add/store"
+            @success="addSuccess()"
+            @error="error()"
+          >
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- .col -->
+            <div class="col-12 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">ユーザー</span>
+                </div>
+                <fvl-search-select
+                  :selected.sync="userCode"
+                  class="p-0"
+                  name="userCode"
+                  :options="userList"
+                  placeholder="ユーザーを選択すると編集モードになります"
+                  :allowEmpty="true"
+                  :search-keys="['code']"
+                  option-key="code"
+                  option-value="name"
+                />
+              </div>
             </div>
-            <div class="form-group col-md-6">
-              <label for="shift_end" class>新しいパスワード（再入力）</label>
-              <input class="form-control"  v-model="reEnterPass"  maxlength='12' type="password" title="半角英数字12文字以内" pattern="^[a-zA-Z0-9]{6,12}$"></input>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">社員名</span>
+                </div>
+                <input type="text" class="form-control" :value.sync="form.name" label="社員名" name="name">
+              </div>
             </div>
-            <button class="btn btn-success" v-on:click="passChange">確定</button>
-            <button class="btn btn-warning" v-on:click="hide">キャンセル</button>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">ふりがな</span>
+                </div>
+                <input type="text" class="form-control" :value.sync="form.kana" label="ふりがな" name="kana">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">ログインID</span>
+                </div>
+                <input type="text" class="form-control" :value.sync="form.code" label="ログインID" name="code" title="半角英数字4-10文字" pattern="^[a-zA-Z0-9]{4,10}$">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2" v-if="userCode=='' || userCode == null ">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">パスワード</span>
+                </div>
+                <input type="text" class="form-control" :value.sync="form.password" label="パスワード" name="password" title="半角英数字6-12文字" pattern="^[a-zA-Z0-9]{6,12}$">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">メールアドレス</span>
+                </div>
+                <input type="text" class="form-control" :value.sync="form.email" label="メールアドレス" name="email">
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">所属部署</span>
+                </div>
+                <fvl-search-select
+                  :selected.sync="form.departmentCode"
+                  class="p-0"
+                  name="departmentCode"
+                  :options="departmentList"
+                  :search-keys="['name']"
+                  option-key="id"
+                  option-value="name"
+                />
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">雇用形態</span>
+                </div>
+                <fvl-search-select
+                  :selected.sync="form.status"
+                  class="p-0"
+                  name="status"
+                  :options="employStatusList"
+                  :search-keys="['code']"
+                  option-key="code"
+                  option-value="code_name"
+                />
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">通常勤務時間</span>
+                </div>
+                <fvl-search-select
+                  :selected.sync="form.table_no"
+                  class="p-0"
+                  name="timetable_no"
+                  :options="timeTableList"
+                  :search-keys="['name']"
+                  option-key="no"
+                  option-value="name"
+                />
+              </div>
+            </div>
+            <!-- /.col -->
           </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- col -->
+            <div class="col-md-12 pb-2">
+              <div class="btn-group d-flex">
+                <button type="submit" class="btn btn-success" v-if="userCode=='' || userCode==null ">追加</button>
+                <button type="submit" class="btn btn-success" id="edit" v-if="userCode != ''">編集</button>
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          </fvl-form>
+          <!-- .row -->
+          <div class="row justify-content-between" v-if="userCode != ''">
+            <!-- col -->
+            <div class="col-md-12 pb-2">
+              <div class="btn-group d-flex">
+                <button class="btn btn-danger" @click="alertDelConf('warning')">削除</button>
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between" v-if="userCode != ''">
+            <!-- col -->
+            <div class="col-md-12 pb-2">
+              <div class="btn-group d-flex">
+                <button class="btn btn-success" v-on:click="show">パスワード変更</button>
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- modal -->
+          <modal name="password-change" :width="800" :height="600" v-model="userCode">
+            <div class="card">
+              <div class="card-header">パスワード変更</div>
+              <div class="card-body">
+                <div v-if="errors.length">
+                  <ul class="error-red color-red">
+                    <li v-for="(error,index) in errors" v-bind:key="index">{{ error }}</li>
+                  </ul>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="shift_end" class>新しいパスワード</label>
+                  <input
+                    class="form-control"
+                    v-model="enterPass"
+                    maxlength="12"
+                    type="password"
+                    title="半角英数字12文字以内"
+                    pattern="^[a-zA-Z0-9]{6,12}$"
+                  />
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="shift_end" class>新しいパスワード（再入力）</label>
+                  <input
+                    class="form-control"
+                    v-model="reEnterPass"
+                    maxlength="12"
+                    type="password"
+                    title="半角英数字12文字以内"
+                    pattern="^[a-zA-Z0-9]{6,12}$"
+                  />
+                </div>
+                <button class="btn btn-success" v-on:click="alertPassConf('warning')">確定</button>
+                <button class="btn btn-warning" v-on:click="hide">キャンセル</button>
+              </div>
+            </div>
+          </modal>
+          <!-- /modal -->
+        </div>
       </div>
-    </modal>
+    </div>
+    <!-- /.panel -->
   </div>
+  <!-- main contentns row -->
+</div>
 </template>
 <script>
 import toasted from "vue-toasted";
@@ -142,8 +270,10 @@ export default {
       userList: [],
       userDetails: [],
       userCode: "",
-      enterPass:"",
-      reEnterPass:"",
+      enterPass: "",
+      reEnterPass: "",
+      validate: false,
+      errors: [],
       oldCode: ""
     };
   },
@@ -191,6 +321,9 @@ export default {
     }
   },
   methods: {
+    alert: function(state, message, title) {
+      this.$swal(title, message, state);
+    },
     show: function() {
       this.$modal.show("password-change");
     },
@@ -198,30 +331,65 @@ export default {
       this.$modal.hide("password-change");
       this.inputPassClear();
     },
-    passChange: function(){
-      if(this.enterPass == this.reEnterPass){
-        // パスワード変更
-        var confirm = window.confirm("パスワードを変更しますか？");
-        if (confirm) {
-          this.$axios
-            .post("/user_add/passchange", {
-              user_code: this.userCode,
-              password: this.enterPass
-            })
-            .then(response => {
-              var res = response.data;
-              if (res.result == 0) {
-                this.$toasted.show("パスワードを変更しました");
-                this.hide();
-              } else {
-              }
-            })
-            .catch(reason => {});
+    alertPassConf: function(state) {
+      this.$swal({
+        title: "確認",
+        text: "パスワードを変更しますか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(willDelete => {
+        if (willDelete) {
+          this.passChange();
         } else {
         }
-      }else{
-        // 不一致
-        alert("入力したパスワードが不一致です");
+      });
+    },
+    // バリデーション
+    checkForm: function() {
+      var flag = false;
+      this.errors = [];
+
+      if (this.reEnterPass && this.enterPass) {
+        if (this.reEnterPass != this.enterPass) {
+          flag = false;
+          this.errors.push("入力したパスワードが一致していません");
+        } else {
+          flag = true;
+        }
+        return flag;
+      } else {
+        if (!this.enterPass) {
+          flag = false;
+          this.errors.push("新しいパスワードを入力してください");
+        }
+        if (!this.reEnterPass) {
+          flag = false;
+          this.errors.push("新しいパスワード（再入力）を入力してください");
+        }
+        return flag;
+      }
+    },
+    passChange: function() {
+      this.validate = this.checkForm();
+      if (this.validate) {
+        this.$axios
+          .post("/user_add/passchange", {
+            user_code: this.userCode,
+            password: this.enterPass
+          })
+          .then(response => {
+            var res = response.data;
+            if (res.result == 0) {
+              this.alert("success", "パスワードを変更しました", "変更完了");
+              this.hide();
+            } else {
+            }
+          })
+          .catch(reason => {
+            this.alert("error", "パスワード変更に失敗しました", "エラー");
+          });
+      } else {
       }
     },
     getDepartmentList() {
@@ -281,34 +449,41 @@ export default {
         });
     },
     error() {
-      var options = {
-        position: "bottom-center",
-        duration: 2000,
-        fullWidth: false,
-        type: "error"
-      };
-      this.$toasted.show("ユーザー追加に失敗しました", options);
+      this.alert("error", "登録に失敗しました", "エラー");
+    },
+    alertDelConf: function(state) {
+      this.$swal({
+        title: "確認",
+        text: "削除してもよろしいですか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(willDelete => {
+        if (willDelete) {
+          this.del();
+        } else {
+        }
+      });
     },
     // 削除
     del: function() {
-      var confirm = window.confirm("選択したユーザーを削除しますか？");
-      if (confirm) {
-        this.$axios
-          .post("/user_add/del", {
-            user_code: this.userCode
-          })
-          .then(response => {
-            var res = response.data;
-            if (res.result == 0) {
-              this.$toasted.show("選択したユーザーを削除しました");
-              this.inputClear();
-              this.getUserList(1, null);
-            } else {
-            }
-          })
-          .catch(reason => {});
-      } else {
-      }
+      this.$axios
+        .post("/user_add/del", {
+          user_code: this.userCode
+        })
+        .then(response => {
+          var res = response.data;
+          if (res.result == 0) {
+            this.alert("success", "ユーザーを削除しました", "削除成功");
+            this.inputClear();
+            this.getUserList(1, null);
+          } else {
+            this.alert("error", "削除に失敗しました", "エラー");
+          }
+        })
+        .catch(reason => {
+          this.alert("error", "削除に失敗しました", "エラー");
+        });
     },
     inputClear() {
       this.form.id = "";
@@ -321,7 +496,7 @@ export default {
       this.form.status = "";
       this.form.table_no = "";
     },
-    inputPassClear(){
+    inputPassClear() {
       this.enterPass = "";
       this.reEnterPass = "";
     }

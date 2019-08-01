@@ -1,19 +1,5 @@
 <template>
-  <!-- main contentns row -->
-  <div>
-  <div class="row justify-content-between">
-      <!-- .panel -->
-      <div class="col-md pt-3">
-          <div class="card bg-secondary text-white pt-2 border-0 shadow-pl">
-              <!-- panel header -->
-              <div class="card-header bg-transparent pt-2 border-0">
-                  <h1 class="float-left font-size-xl line-height-rg"><img class="icon-size-rg mr-3" src="/images/round-notifications-none-w.svg" alt="">日次集計</h1>
-              </div>
-              <!-- /.panel header -->
-          </div>
-      </div>
-      <!-- /.panel -->
-  </div>
+<div>
   <!-- main contentns row -->
   <div class="row justify-content-between">
     <!-- .panel -->
@@ -98,160 +84,116 @@
         </daily-working-information-panel-header>
         <!-- /.panel header -->
         <!-- panel body -->
-        <div class="card-body mb-3 py-0 pt-4 border-top">
+        <div v-for="(calclist,index) in calcresults" :key="calclist.user_code" class="card-body mb-3 py-0 pt-4 border-top">
           <!-- panel contents --> 
           <!-- .row -->
-          <div v-for="(calclist,index) in calcresults" :key="calclist.user_code">
-            <div class="row">
-              <!-- col -->
-              <div class="col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch">
-                <a class="float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg" data-toggle="collapse" v-bind:href="'#collapseUser' + index" role="button" aria-expanded="true" v-bind:aria-controls="'collapseUser' + index"><img class="icon-size-rg" src="/images/round-search-w.svg" alt=""></a>
-                <h1 class="font-size-sm m-0 mb-1">氏名</h1>
-                <p class="font-size-rg font-weight-bold m-0">{{ calclist.user_name }}</p>
-              </div>
+          <div class="row">
+            <!-- col -->
+            <div class="col-sm-6 col-md-6 col-sm-6 col-lg-4 pb-2 align-self-stretch">
+              <a class="float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg" data-toggle="collapse" v-bind:href="'#collapseUser' + index" role="button" aria-expanded="true" v-bind:aria-controls="'collapseUser' + index"><img class="icon-size-rg" src="/images/round-search-w.svg" alt=""></a>
+              <h1 class="font-size-sm m-0 mb-1">氏名</h1>
+              <p class="font-size-rg font-weight-bold m-0">{{ calclist.user_name }}</p>
+            </div>
+            <!-- /.col -->
+            <!-- col -->
+            <div class="col-sm-6 col-md-6 col-sm-6 col-lg-4 pb-2 align-self-stretch">
+              <span class="float-left mr-2 py-2 px-2 font-size-lg text-white bg-success rounded"><img class="icon-size-lg" src="/images/round-flag-w.svg" alt=""></span>
+              <h1 class="font-size-sm m-0 mb-1">部署</h1>
+              <p class="font-size-rg m-0">{{ calclist.department_name }}</p>
+            </div>
+            <!-- /.col -->
+            <!-- col 出勤 退勤 -->
+            <col-attendance
+              v-bind:attendancetime="calclist.attendance_time_1" v-bind:leavingtime="calclist.leaving_time_1" v-bind:displaynone="true" class="col-12 col-lg-4 p-0 align-self-stretch">
+            </col-attendance>
+            <col-attendance
+              v-bind:attendancetime="calclist.attendance_time_2" v-bind:leavingtime="calclist.leaving_time_2" v-bind:displaynone="false" class="col-12 col-lg-4 p-0 align-self-stretch">
+            </col-attendance>
+            <col-attendance
+              v-bind:attendancetime="calclist.attendance_time_3" v-bind:leavingtime="calclist.leaving_time_3" v-bind:displaynone="false" class="col-12 col-lg-4 p-0 align-self-stretch">
+            </col-attendance>
+            <col-attendance
+              v-bind:attendancetime="calclist.attendance_time_4" v-bind:leavingtime="calclist.leaving_time_4" v-bind:displaynone="false" class="col-12 col-lg-4 p-0 align-self-stretch">
+            </col-attendance>
+            <col-attendance 
+              v-bind:attendancetime="calclist.attendance_time_5" v-bind:leavingtime="calclist.leaving_time_5" v-bind:displaynone="false" class="col-12 col-lg-4 p-0 align-self-stretch">
+            </col-attendance>
+            <!-- /.col -->
+            <!-- col 中抜け 戻り -->
+            <col-missingmiddle
+              v-bind:missingmiddletime="calclist.missing_middle_time_1" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_1" v-bind:displaynone="false" class="col-12 col-lg-4 p-0 align-self-stretch">
+            </col-missingmiddle>
+            <col-missingmiddle
+              v-bind:missingmiddletime="calclist.missing_middle_time_2" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_2" v-bind:displaynone="false" class="col-12 col-lg-4 p-0 align-self-stretch">
+            </col-missingmiddle>
+            <col-missingmiddle
+              v-bind:missingmiddletime="calclist.missing_middle_time_3" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_3" v-bind:displaynone="false" class="col-12 col-lg-4 p-0 align-self-stretch">
+            </col-missingmiddle>
+            <col-missingmiddle
+              v-bind:missingmiddletime="calclist.missing_middle_time_4" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_4" v-bind:displaynone="false" class="col-12 col-lg-4 p-0 align-self-stretch">
+            </col-missingmiddle>
+            <col-missingmiddle
+              v-bind:missingmiddletime="calclist.missing_middle_time_5" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_5" v-bind:displaynone="false" class="col-12 col-lg-4 p-0 align-self-stretch">
+            </col-missingmiddle>
+          </div>
+          <!-- /.row -->
+          <!-- collapse -->
+          <div class="collapse"  v-bind:id="'collapseUser' + index">
+            <!-- .row -->
+            <div class="row mt-2">
+              <!-- col  雇用形態 勤務時間 勤務状態 勤務シフト-->
+              <col-employmentstatus
+                v-bind:item-name="'雇用形態'" v-bind:item-value="calclist.employment_status_name">
+              </col-employmentstatus>
+              <col-employmentstatus
+                v-bind:item-name="'勤務時間'" v-bind:item-value="calclist.total_working_times">
+              </col-employmentstatus>
+              <col-employmentstatus
+                v-bind:item-name="'勤務状態'" v-bind:item-value="calclist.working_status_name" v-bind:itemsecound-value="calclist.holiday_name">
+              </col-employmentstatus>
+              <col-employmentstatus
+                v-bind:item-name="'勤務シフト'" v-bind:item-value="calclist.working_timetable_name">
+              </col-employmentstatus>
+              <!-- col  所定労働時間 所定外労働時間-->
+              <col-regularworking
+                v-bind:item-name="'所定労働時間'" v-bind:item-value="calclist.regular_working_times">
+              </col-regularworking>
+              <col-regularworking
+                v-bind:item-name="'所定外労働時間'" v-bind:item-value="calclist.out_of_regular_working_times">
+              </col-regularworking>
               <!-- /.col -->
               <!-- col -->
-              <div class="col-sm-12 col-md-12 col-sm-6 col-lg-4 pb-2 align-self-stretch">
-                <span class="float-left mr-2 py-2 px-2 font-size-lg text-white bg-success rounded"><img class="icon-size-lg" src="/images/round-flag-w.svg" alt=""></span>
-                <h1 class="font-size-sm m-0 mb-1">部署</h1>
-                <p class="font-size-rg m-0">{{ calclist.department_name }}</p>
-              </div>
+              <!-- col  残業時間 深夜残業時間 法定労働時間 法定外労働時間-->
+              <col-overtimehours
+                v-bind:item-name="'残業時間'" v-bind:item-value="calclist.overtime_hours">
+              </col-overtimehours>
+              <col-overtimehours
+                v-bind:item-name="'深夜残業時間'" v-bind:item-value="calclist.late_night_overtime_hours">
+              </col-overtimehours>
+              <col-overtimehours
+                v-bind:item-name="'法定労働時間'" v-bind:item-value="calclist.legal_working_times">
+              </col-overtimehours>
+              <col-overtimehours
+                v-bind:item-name="'法定外労働時間'" v-bind:item-value="calclist.out_of_legal_working_times">
+              </col-overtimehours>
               <!-- /.col -->
-              <!-- col 出勤 退勤 -->
-              <col-attendance
-                v-bind:attendancetime="calclist.attendance_time_1" v-bind:leavingtime="calclist.leaving_time_1" v-bind:displaynone="true">
-              </col-attendance>
-              <col-attendance
-                v-bind:attendancetime="calclist.attendance_time_2" v-bind:leavingtime="calclist.leaving_time_2" v-bind:displaynone="false">
-              </col-attendance>
-              <col-attendance
-                v-bind:attendancetime="calclist.attendance_time_3" v-bind:leavingtime="calclist.leaving_time_3" v-bind:displaynone="false">
-              </col-attendance>
-              <col-attendance
-                v-bind:attendancetime="calclist.attendance_time_4" v-bind:leavingtime="calclist.leaving_time_4" v-bind:displaynone="false">
-              </col-attendance>
-              <col-attendance 
-                v-bind:attendancetime="calclist.attendance_time_5" v-bind:leavingtime="calclist.leaving_time_5" v-bind:displaynone="false">
-              </col-attendance>
+              <!-- col  未就労時間 時間外労働-->
+              <col-notemploymentworking
+                v-bind:item-name="'未就労時間'" v-bind:item-value="calclist.not_employment_working_hours">
+              </col-notemploymentworking>
+              <col-notemploymentworking
+                v-bind:item-name="'時間外労働'" v-bind:item-value="calclist.off_hours_working_hours">
+              </col-notemploymentworking>
               <!-- /.col -->
-              <!-- col 中抜け 戻り -->
-              <col-missingmiddle
-                v-bind:missingmiddletime="calclist.missing_middle_time_1" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_1" v-bind:displaynone="true">
-              </col-missingmiddle>
-              <col-missingmiddle
-                v-bind:missingmiddletime="calclist.missing_middle_time_2" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_2" v-bind:displaynone="false">
-              </col-missingmiddle>
-              <col-missingmiddle
-                v-bind:missingmiddletime="calclist.missing_middle_time_3" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_3" v-bind:displaynone="false">
-              </col-missingmiddle>
-              <col-missingmiddle
-                v-bind:missingmiddletime="calclist.missing_middle_time_4" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_4" v-bind:displaynone="false">
-              </col-missingmiddle>
-              <col-missingmiddle
-                v-bind:missingmiddletime="calclist.missing_middle_time_5" v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_5" v-bind:displaynone="false">
-              </col-missingmiddle>
+              <!-- col -->
+              <col-note
+                v-bind:item-name="'備考：'" v-bind:item-value="calclist.note">
+              </col-note>
+              <!-- /.col -->
             </div>
             <!-- /.row -->
-            <!-- collapse -->
-            <div class="collapse"  v-bind:id="'collapseUser' + index">
-              <!-- .row -->
-              <div class="row mt-2">
-                <!-- col  雇用形態 勤務時間 勤務状態 勤務シフト-->
-                <col-employmentstatus
-                  v-bind:item-name="'雇用形態'" v-bind:item-value="calclist.employment_status_name">
-                </col-employmentstatus>
-                <col-employmentstatus
-                  v-bind:item-name="'勤務時間'" v-bind:item-value="calclist.total_working_times">
-                </col-employmentstatus>
-                <col-employmentstatus
-                  v-bind:item-name="'勤務状態'" v-bind:item-value="calclist.working_status_name" v-bind:itemsecound-value="calclist.holiday_name">
-                </col-employmentstatus>
-                <col-employmentstatus
-                  v-bind:item-name="'勤務シフト'" v-bind:item-value="calclist.working_timetable_name">
-                </col-employmentstatus>
-                <!-- col  所定労働時間 所定外労働時間-->
-                <col-regularworking
-                  v-bind:item-name="'所定労働時間'" v-bind:item-value="calclist.regular_working_times">
-                </col-regularworking>
-                <col-regularworking
-                  v-bind:item-name="'所定外労働時間'" v-bind:item-value="calclist.out_of_regular_working_times">
-                </col-regularworking>
-                <!-- /.col -->
-                <!-- col -->
-                <!-- col  残業時間 深夜残業時間 法定労働時間 法定外労働時間-->
-                <col-overtimehours
-                  v-bind:item-name="'残業時間'" v-bind:item-value="calclist.overtime_hours">
-                </col-overtimehours>
-                <col-overtimehours
-                  v-bind:item-name="'深夜残業時間'" v-bind:item-value="calclist.late_night_overtime_hours">
-                </col-overtimehours>
-                <col-overtimehours
-                  v-bind:item-name="'法定労働時間'" v-bind:item-value="calclist.legal_working_times">
-                </col-overtimehours>
-                <col-overtimehours
-                  v-bind:item-name="'法定外労働時間'" v-bind:item-value="calclist.out_of_legal_working_times">
-                </col-overtimehours>
-                <!-- /.col -->
-                <!-- col  未就労時間 時間外労働-->
-                <col-notemploymentworking
-                  v-bind:item-name="'未就労時間'" v-bind:item-value="calclist.not_employment_working_hours">
-                </col-notemploymentworking>
-                <col-notemploymentworking
-                  v-bind:item-name="'時間外労働'" v-bind:item-value="calclist.off_hours_working_hours">
-                </col-notemploymentworking>
-                <!-- /.col -->
-                <!-- col -->
-                <col-note
-                  v-bind:item-name="'備考：'" v-bind:item-value="calclist.note">
-                </col-note>
-                <!-- /.col -->
-              </div>
-              <!-- /.row -->
-            </div>
           </div>
           <!-- /collapse -->
-          <!-- .row 合計 -->
-          <div v-for="sumresult in sumresults">
-            <div class="row">
-              <col-employmentstatus
-                v-bind:item-name="'合　　計'" v-bind:item-value="'　'">
-              </col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'勤務時間'" v-bind:item-value="sumresult.total_working_times">
-              </col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'　'" v-bind:item-value="'　'">
-              </col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'　'" v-bind:item-value="'　'">
-              </col-employmentstatus>
-              <col-regularworking
-                v-bind:item-name="'所定労働時間'" v-bind:item-value="sumresult.regular_working_times">
-              </col-regularworking>
-              <col-regularworking
-                v-bind:item-name="'所定外労働時間'" v-bind:item-value="sumresult.out_of_regular_working_times">
-              </col-regularworking>
-              <col-overtimehours
-                v-bind:item-name="'残業時間'" v-bind:item-value="sumresult.overtime_hours">
-              </col-overtimehours>
-              <col-overtimehours
-                v-bind:item-name="'深夜残業時間'" v-bind:item-value="sumresult.late_night_overtime_hours">
-              </col-overtimehours>
-              <col-overtimehours
-                v-bind:item-name="'法定労働時間'" v-bind:item-value="sumresult.legal_working_times">
-              </col-overtimehours>
-              <col-overtimehours
-                v-bind:item-name="'法定外労働時間'" v-bind:item-value="sumresult.out_of_legal_working_times">
-              </col-overtimehours>
-              <col-notemploymentworking
-                v-bind:item-name="'未就労時間'" v-bind:item-value="sumresult.not_employment_working_hours">
-              </col-notemploymentworking>
-              <col-notemploymentworking
-                v-bind:item-name="'時間外労働'" v-bind:item-value="sumresult.off_hours_working_hours">
-              </col-notemploymentworking>
-            </div>
-          </div>
-          <!-- /.panel contents -->
         </div>
         <!-- /panel body -->
       </div>
@@ -260,18 +202,56 @@
   </div>
   <!-- /main contentns row -->
   <!-- main contentns row -->
-  <div class="row justify-content-between">
+  <div v-for="sumresult in sumresults" class="row justify-content-between">
     <!-- .panel -->
-    <div class="col-md p-3">
-      <div class="text-center">
-        <small>© 2019 One Door</small>
+    <div class="col-md pt-3">
+      <div class="card shadow-pl">
+        <!-- panel header -->
+        <daily-working-information-panel-header
+          v-bind:headertext1="'合計'" v-bind:headertext2="'集計日の合計が表示されます'">
+        </daily-working-information-panel-header>
+        <!-- /.panel header -->
+        <div class="card-body pt-2">
+          <!-- panel contents -->
+          <!-- .row -->
+          <div class="row">
+            <col-employmentstatus
+              v-bind:item-name="'勤務時間'" v-bind:item-value="sumresult.total_working_times">
+            </col-employmentstatus>
+            <col-regularworking
+              v-bind:item-name="'所定労働時間'" v-bind:item-value="sumresult.regular_working_times">
+            </col-regularworking>
+            <col-regularworking
+              v-bind:item-name="'所定外労働時間'" v-bind:item-value="sumresult.out_of_regular_working_times">
+            </col-regularworking>
+            <col-overtimehours
+              v-bind:item-name="'残業時間'" v-bind:item-value="sumresult.overtime_hours">
+            </col-overtimehours>
+            <col-overtimehours
+              v-bind:item-name="'深夜残業時間'" v-bind:item-value="sumresult.late_night_overtime_hours">
+            </col-overtimehours>
+            <col-overtimehours
+              v-bind:item-name="'法定労働時間'" v-bind:item-value="sumresult.legal_working_times">
+            </col-overtimehours>
+            <col-overtimehours
+              v-bind:item-name="'法定外労働時間'" v-bind:item-value="sumresult.out_of_legal_working_times">
+            </col-overtimehours>
+            <col-notemploymentworking
+              v-bind:item-name="'未就労時間'" v-bind:item-value="sumresult.not_employment_working_hours">
+            </col-notemploymentworking>
+            <col-notemploymentworking
+              v-bind:item-name="'時間外労働'" v-bind:item-value="sumresult.off_hours_working_hours">
+            </col-notemploymentworking>
+          </div>
+          <!-- /.row -->
+          <!-- /panel contents -->
+        </div>
       </div>
+      <!-- /panel -->
     </div>
-    <!-- /.panel -->
+    <!-- /main contentns row -->
   </div>
-  <!-- /main contentns row -->
-  <!-- main contentns row -->
-  </div>
+</div>
 </template>
 
 <script>

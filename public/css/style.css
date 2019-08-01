@@ -1,12 +1,20 @@
 /* global setteing */
 
+html {
+	min-height: 100%;
+	min-height: 100vh;
+}
+
 body {
 	padding-top: 56px;
 	padding-bottom: 0px;
+	min-height: 100%;
+	min-height: 100vh;
 }
 
 .min-height-full {
 	min-height: 100%;
+	min-height: 100vh;
 }
 
 /* width */

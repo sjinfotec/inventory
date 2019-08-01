@@ -1,7 +1,7 @@
 <template>
-  <div class="card-header bg-transparent pb-0 border-0">
-    <h1 class="float-sm-left font-size-rg">{{ this.headertext1 }}</h1>
-    <span class="float-sm-right font-size-sm">{{ this.headertext2 }}</span>
+  <div class="card-header bg-transparent pb-2 border-0">
+    <h1 class="float-sm-left font-size-rg mb-0">{{ this.headertext1 }}</h1>
+    <span class="float-sm-right font-size-sm mb-0">{{ this.headertext2 }}</span>
   </div>
 </template>
 

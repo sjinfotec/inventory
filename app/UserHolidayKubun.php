@@ -182,7 +182,53 @@ class UserHolidayKubun extends Model
     
     // --------------------- メソッド ------------------------------------------------------
 
+    /**
+     * 登録
+     *
+     * @return void
+     */
+    public function insertKbn(){
+        DB::table($this->table)->insert(
+            [
+                'working_date' => $this->working_date,
+                'department_id' => $this->department_id,
+                'user_code' => $this->user_code,
+                'holiday_kubun' => $this->holiday_kubun,
+                'created_user' => $this->created_user,
+                'created_at'=>$this->systemdate
+            ]
+        );
+    }
 
+    /**
+     * 論理削除
+     *
+     * @return void
+     */
+    public function delKbn(){
+        DB::table($this->table)
+        ->where('working_date', $this->working_date)
+        ->where('user_code', $this->user_code)
+        ->where('is_deleted', 0)
+        ->update([
+            'is_deleted' => 1,
+            'updated_at' => $this->systemdate
+            ]);
+    }
+
+    /**
+     * 存在チェック
+     *
+     * @return boolean
+     */
+    public function isExistsKbn(){
+        $is_exists = DB::table($this->table)
+            ->where('working_date', $this->working_date)
+            ->where('user_code', $this->user_code)
+            ->exists();
+
+        return $is_exists;
+    }
 
 
 }

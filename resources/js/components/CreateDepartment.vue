@@ -1,35 +1,76 @@
 <template>
-  <!-- panel body -->
-  <div class="panel-body">
-    <!-- form wrapper -->
-    <fvl-form
-      method="post"
-      :data="form"
-      url="/create_department/store"
-      @success="addSuccess()"
-      @error="error()"
-    >
-      <fvl-search-select
-        :selected.sync="selectId"
-        label="部署"
-        name="selectId"
-        :options="departmentList"
-        placeholder="部署を選択すると編集モードになります"
-        :allowEmpty="true"
-        :search-keys="['id']"
-        option-key="id"
-        option-value="name"
-      />
-      <!-- Text input component -->
-      <fvl-input :value.sync="form.name" label="部署名" name="name" />
-
-      <fvl-submit v-if="selectId=='' || selectId==null ">追加</fvl-submit>
-      <fvl-submit id="edit" v-if="selectId != ''">編集</fvl-submit>
-    </fvl-form>
-    <span class="padding-set-small margin-set-top-regular" v-if="selectId != ''">
-      <button class="btn btn-danger" @click="del">削除</button>
-    </span>
-  </div>
+							<div class="card shadow-pl">
+								<!-- panel header -->
+								<div class="card-header bg-transparent pb-0 border-0">
+									<h1 class="float-sm-left font-size-rg">部署を設定する</h1>
+									<span class="float-sm-right font-size-sm">部署の登録や変更ができます</span>
+								</div>
+								<!-- /.panel header -->
+                <div class="card-body pt-2">
+									<!-- panel contents -->
+                  <fvl-form
+                    method="post"
+                    :data="form"
+                    url="/create_department/store"
+                    @success="addSuccess()"
+                    @error="error()"
+                  >
+									<!-- .row -->
+									<div class="row justify-content-between">
+										<!-- .col -->
+										<div class="col-md-6 pb-2">
+                      <fvl-search-select
+                        :selected.sync="selectId"
+                        class="p-0"
+                        name="selectId"
+                        :options="departmentList"
+                        placeholder="部署を選択すると編集モードになります"
+                        :allowEmpty="true"
+                        :search-keys="['id']"
+                        option-key="id"
+                        option-value="name"
+                      />
+										</div>
+										<!-- /.col -->
+										<!-- .col -->
+										<div class="col-md-6 pb-2">
+											<div class="input-group">
+												<div class="input-group-prepend">
+													<span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">部署名</span>
+												</div>
+												<input type="text" class="form-control" :value.sync="form.name" label="部署名" name="name">
+											</div>
+										</div>
+										<!-- /.col -->
+									</div>
+									<!-- /.row -->
+									<!-- .row -->
+									<div class="row justify-content-between">
+										<!-- col -->
+										<div class="col-md-12 pb-2">
+											<div class="btn-group d-flex">
+                        <button type="submit" class="btn btn-success" v-if="selectId=='' || selectId==null ">追加</button>
+                        <button type="submit" class="btn btn-success" id="edit" v-if="selectId != ''">編集</button>
+											</div>
+										</div>
+										<!-- /.col -->
+									</div>
+									<!-- /.row -->
+                  </fvl-form>
+									<!-- .row -->
+									<div class="row justify-content-between" v-if="selectId != ''">
+										<!-- col -->
+										<div class="col-md-12 pb-2">
+											<div class="btn-group d-flex">
+                        <button class="btn btn-danger" @click="del">削除</button>
+											</div>
+										</div>
+										<!-- /.col -->
+									</div>
+									<!-- /.row -->
+									<!-- /.panel contents -->
+                </div>
+              </div>
 </template>
 <script>
 import toasted from "vue-toasted";
@@ -150,3 +191,9 @@ export default {
   }
 };
 </script>
+<style scoped>
+.fvl-search-select{
+  height: 36px!important;
+  border: 1px solid #ced4da!important;
+}
+</style>

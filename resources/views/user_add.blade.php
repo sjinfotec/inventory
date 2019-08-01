@@ -1,22 +1,43 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-    @include('layouts.sidemenu')
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">ユーザー追加</div>
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-                    <user-add></user-add>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+				<!-- main contents -->
+				<div class="col-xl-10">
+					<!-- main contentns row -->
+					<div class="row justify-content-between">
+						<!-- .panel -->
+						<div class="col-md">
+							<div class="card bg-secondary text-white pt-2 border-0 shadow-pl">
+								<!-- panel header -->
+								<div class="card-header bg-transparent pt-2 border-0">
+									<h1 class="float-left font-size-xl">
+                                        <img class="icon-size-rg mr-3" src="{{ asset('images/round-restore-w.svg') }}" alt="">ユーザー情報設定
+                                    </h1>
+								</div>
+								<!-- /.panel header -->
+							</div>
+						</div>
+						<!-- /.panel -->
+					</div>
+					<!-- /main contentns row -->
+					<!-- main contentns row -->
+					@if (session('status'))
+					<!-- main contentns row -->
+					<div class="row justify-content-between">
+						<!-- .panel -->
+						<div class="col-md pt-3">
+							<div class="card shadow-pl">
+								<div class="card-body pt-2">
+									<div class="alert alert-success" role="alert">
+										{{ session('status') }}
+									</div>
+								</div>
+							</div>
+						</div>
+						<!-- /.panel -->
+					</div>
+					<!-- /main contentns row -->
+					@endif
+					<user-add></user-add>
+					<!-- /main contentns row -->
 @endsection

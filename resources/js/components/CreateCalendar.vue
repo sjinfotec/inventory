@@ -38,6 +38,9 @@ export default {
     }
   },
   methods: {
+    alert: function(state, message, title) {
+      this.$swal(title, message, state);
+    },
     businessDayChanges: function(value) {
       console.log("businessDayChanges = " + value);
       this.valueBusinessDay = value;
@@ -63,16 +66,12 @@ export default {
             this.$toasted.show("登録しました");
             this.inputClear();
           } else {
-            var options = {
-              position: "bottom-center",
-              duration: 2000,
-              fullWidth: false,
-              type: "error"
-            };
-            this.$toasted.show("登録に失敗しました", options);
+            this.alert("error", "登録に失敗しました", "エラー");
           }
         })
-        .catch(reason => {});
+        .catch(reason => {
+          this.alert("error", "登録に失敗しました", "エラー");
+        });
     },
     inputClear() {
       // this.dates.length = 0;
