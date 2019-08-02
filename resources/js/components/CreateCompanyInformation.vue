@@ -1,31 +1,160 @@
 <template>
-  <!-- panel body -->
-  <div class="panel-body">
-    <!-- form wrapper -->
-    <fvl-form
-      method="post"
-      :data="form"
-      url="/create_company_information/store"
-      @success="addSuccess()"
-      @error="error()"
-    >
-      <!-- Text input component -->
-      <fvl-input :value.sync="form.companyName" label="会社名" name="companyName" />
-      <fvl-input :value.sync="form.companyKana" label="会社カナ" name="companyKana" />
-      <fvl-input :value.sync="form.postCode" label="郵便番号" name="postCode" />
-      <fvl-input :value.sync="form.address1" label="住所１" name="address1" />
-      <fvl-input :value.sync="form.address2" label="住所２" name="address2" />
-      <fvl-input :value.sync="form.addressKana" label="住所カナ" name="addressKana" />
-      <fvl-input :value.sync="form.tell" label="電話番号" name="tell" />
-      <fvl-input :value.sync="form.fax" label="FAX" name="fax" />
-      <fvl-input :value.sync="form.representativeName" label="代表者氏名" name="representativeName" />
-      <fvl-input :value.sync="form.representativeKana" label="代表者カナ" name="representativeKana" />
-      <fvl-input :value.sync="form.email" label="e-mail" name="email" />
-
-      <!-- Submit button -->
-      <fvl-submit>登録</fvl-submit>
-    </fvl-form>
+<div>
+  <!-- main contentns row -->
+  <div class="row justify-content-between">
+    <!-- .panel -->
+    <div class="col-md pt-3">
+      <div class="card shadow-pl">
+      <fvl-form
+        method="post"
+        :data="form"
+        url="/create_company_information/store"
+        @success="addSuccess()"
+        @error="error()"
+      >
+        <!-- panel header -->
+        <div class="card-header clearfix bg-transparent pb-0 border-0">
+          <h1 class="float-sm-left font-size-rg">会社情報</h1>
+          <span class="float-sm-right font-size-sm">会社所在地や連絡先を設定できます</span>
+        </div>
+        <!-- /.panel header -->
+        <div class="card-body pt-2">
+          <!-- panel contents -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">会社名</span>
+                </div>
+                <fvl-input class="form-control p-0" :value.sync="form.companyName" name="companyName" />
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">会社カナ</span>
+                </div>
+                <fvl-input class="form-control p-0" :value.sync="form.companyKana" name="companyKana" />
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">郵便番号</span>
+                </div>
+                <fvl-input class="form-control p-0" :value.sync="form.postCode" name="postCode" />
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">住所１</span>
+                </div>
+                <fvl-input class="form-control p-0" :value.sync="form.address1" name="address1" />
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">住所２</span>
+                </div>
+                <fvl-input class="form-control p-0" :value.sync="form.address2" name="address2" />
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">住所カナ</span>
+                </div>
+                <fvl-input class="form-control p-0" :value.sync="form.addressKana" name="addressKana" />
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">電話番号</span>
+                </div>
+                <fvl-input class="form-control p-0" :value.sync="form.tell" name="tell" />
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">FAX</span>
+                </div>
+                <fvl-input class="form-control p-0" :value.sync="form.fax" name="fax" />
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">代表者氏名</span>
+                </div>
+                <fvl-input class="form-control p-0" :value.sync="form.representativeName" name="representativeName" />
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">代表者カナ</span>
+                </div>
+                <fvl-input class="form-control p-0" :value.sync="form.representativeKana" name="representativeKana" />
+              </div>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-md-6 pb-2">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">E-mail</span>
+                </div>
+                <fvl-input class="form-control p-0" :value.sync="form.email" name="email" />
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- col -->
+            <div class="col-md-12 pb-2">
+              <div class="btn-group d-flex">
+                <button type="submit" class="btn btn-success btn-lg font-size-rg w-100">この内容で入力する</button>
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- /.panel contents -->
+        </div>
+        </fvl-form>
+        <!-- /panel body -->
+      </div>
+    </div>
+    <!-- /.panel -->
   </div>
+  <!-- /main contentns row -->
+</div>
 </template>
 <script>
 import toasted from "vue-toasted";

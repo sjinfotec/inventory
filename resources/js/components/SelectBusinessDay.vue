@@ -1,6 +1,8 @@
 <template>
-  <div class="form-group">
-    <label for="business_kubun" class>営業日区分</label>
+  <div class="input-group">
+    <div class="input-group-prepend">
+      <span class="input-group-text font-size-sm line-height-xs label-width-120">営業日区分</span>
+    </div>
     <select
       class="form-control"
       v-model="selectedBusinessDay"
