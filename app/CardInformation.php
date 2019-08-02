@@ -11,7 +11,10 @@ class CardInformation extends Model
     protected $guarded = array('id');
 
     private $user_code;
+    private $department_id;
     private $card_idm;
+    private $created_user;
+    private $updated_user;
     private $systemdate;
 
     public function getUserCodeAttribute()
@@ -24,6 +27,16 @@ class CardInformation extends Model
         $this->user_code = $value;
     }
 
+    public function getDepartmentIdAttribute()
+    {
+        return $this->department_id;
+    }
+
+    public function setDepartmentIdAttribute($value)
+    {
+        $this->department_id = $value;
+    }
+
     public function getCardIdmAttribute()
     {
         return $this->card_idm;
@@ -32,6 +45,26 @@ class CardInformation extends Model
     public function setCardIdmAttribute($value)
     {
         $this->card_idm = $value;
+    }
+
+    public function getCreatedUserAttribute()
+    {
+        return $this->created_user;
+    }
+
+    public function setCreatedUserAttribute($value)
+    {
+        $this->created_user = $value;
+    }
+
+    public function getUpdatedUserAttribute()
+    {
+        return $this->updated_user;
+    }
+
+    public function setUpdatedUserAttribute($value)
+    {
+        $this->updated_user = $value;
     }
 
     public function getSystemDateAttribute()
@@ -51,11 +84,15 @@ class CardInformation extends Model
      * @param [type] $card_idm
      * @return boolean
      */
-    public function isCardInfoExists($card_idm){
+    public function isCardInfoExists(){
         $data = DB::table('card_informations')
-            ->join('users','users.code','=','card_informations.user_code')
-            ->where('card_informations.card_idm',$card_idm)
+            ->join('users', function ($join) {
+                $join->on('users.code', '=', 'card_informations.user_code');
+                $join->on('users.department_id', '=', 'card_informations.department_id');
+            })
+            ->where('card_informations.card_idm',$this->card_idm)
             ->where('users.is_deleted',0)
+            ->where('card_informations.is_deleted',0)
             ->exists();
 
         return $data;
@@ -65,7 +102,9 @@ class CardInformation extends Model
         DB::table('card_informations')->insert(
             [
                 'user_code' => $this->user_code,
+                'department_id' => $this->department_id,
                 'card_idm' => $this->card_idm,
+                'created_user'=>$this->created_user,
                 'created_at'=>$this->systemdate
             ]
         );

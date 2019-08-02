@@ -167,6 +167,8 @@ return [
         'card_not_exsits' => 3,
         'mode_illegal' => 4,
         'insert_error' => 5,
+        'already_data' => 6,
+        'select_error' => 7,
         'other' => 99
     ],
 

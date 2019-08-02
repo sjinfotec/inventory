@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use App\Http\Requests\StoreDepartmentPost;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class CreateDepartmentController extends Controller
@@ -77,6 +78,7 @@ class CreateDepartmentController extends Controller
             return true;
 
         }catch(\PDOException $e){
+            Log::error($e->getMessage());
             DB::rollBack();
             return false;
         }
