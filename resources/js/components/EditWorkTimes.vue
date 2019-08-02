@@ -224,47 +224,104 @@
     <div class="card">
       <div class="card-header">勤怠情報追加</div>
       <div class="card-body">
-        <div v-if="errors.length">
-          <ul class="error-red color-red">
-            <li v-for="error in errors">{{ error }}</li>
-          </ul>
-        </div>
-        <div class="row">
-          <div class="form-group col-md-6">
-            <label for="shift_end" class>日付</label>
-            <datepicker
-              :language="ja"
-              :value="this.default"
-              :format="DatePickerFormat"
-              v-model="addDate"
-            ></datepicker>
+        <!-- .row -->
+        <div class="row justify-content-between" v-if="errors.length">
+          <!-- col -->
+          <div class="col-md-12 pb-2">
+            <ul class="error-red color-red">
+              <li v-for="(error,index) in errors" v-bind:key="index">{{ error }}</li>
+            </ul>
           </div>
-          <div class="form-group col-md-6">
-            <label for="shift_end" class>時間</label>
-            <input type="time" class="form-control" v-model="addTime" />
-          </div>
+          <!-- /.col -->
         </div>
-        <div class="row">
-          <div class="form-group col-md-6">
-            <label for="shift_end" class>モード</label>
-            <select class="form-control" v-model="addMode">
-              <option value></option>
-              <option v-for="mode in modeList" :value="mode.code">{{ mode.code_name }}</option>
-            </select>
+        <!-- /.row -->
+        <!-- .row -->
+        <div class="row justify-content-between">
+          <!-- col -->
+          <div class="col-md-12 pb-2">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text font-size-sm line-height-xs label-width-120" for="shift_end">日付</span>
+              </div>
+              <datepicker
+                :language="ja"
+                :value="this.default"
+                :format="DatePickerFormat"
+                v-model="addDate"
+              ></datepicker>
+            </div>
           </div>
-          <!-- <div class="form-group col-md-6">
-            <label for="shift_end" class>休暇区分</label>
-            <select class="form-control" v-model="addKbn">
-              <option value></option>
-              <option v-for="list in userLeaveKbnList" :value="list.code">{{ list.code_name }}</option>
-            </select>
-          </div>-->
+          <!-- /.col -->
+          <!-- col -->
+          <div class="col-md-12 pb-2">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text font-size-sm line-height-xs label-width-120" for="shift_end">時間</span>
+              </div>
+              <input type="time" class="form-control" v-model="addTime" />
+            </div>
+          </div>
+          <!-- /.col -->
+          <!-- col -->
+          <div class="col-md-12 pb-2">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text font-size-sm line-height-xs label-width-120" for="shift_end">区分</span>
+              </div>
+              <select class="form-control" v-model="addMode">
+                <option value></option>
+                <option v-for="mode in modeList" :value="mode.code">{{ mode.code_name }}</option>
+              </select>
+            </div>
+          </div>
+          <!-- /.col -->
+          <!-- col -->
+          <!--
+          <div class="col-md-12 pb-2">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text font-size-xs line-height-xs label-width-150" for="shift_end">区分</span>
+              </div>
+              <select class="form-control" v-model="addKbn">
+                <option value></option>
+                <option v-for="list in userLeaveKbnList" :value="list.code">{{ list.code_name }}</option>
+              </select>
+            </div>
+          </div>
+          -->
+          <!-- /.col -->
         </div>
-        <button class="btn btn-success" v-on:click="alertAddConf('info')">登録</button>
-        <button class="btn btn-warning" v-on:click="hide">キャンセル</button>
+        <!-- /.row -->
+        <!-- .row -->
+        <div class="row justify-content-between">
+          <!-- col -->
+          <div class="col-md-12 py-4">
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+        <!-- .row -->
+        <div class="row justify-content-between">
+          <!-- col -->
+          <div class="col-md-12 pb-2">
+            <div class="btn-group d-flex">
+              <button type="button" class="btn btn-success btn-lg font-size-rg w-100" v-on:click="alertAddConf('info')">この条件で登録</button>
+            </div>
+          </div>
+          <!-- /.col -->
+          <!-- col -->
+          <div class="col-md-12 pb-2">
+            <div class="btn-group d-flex">
+              <button type="button" class="btn btn-warning btn-lg font-size-rg w-100" v-on:click="hide">キャンセル</button>
+            </div>
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
       </div>
     </div>
   </modal>
+  <!-- /modal -->
 </div>
 </template>
 <script>
