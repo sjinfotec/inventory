@@ -6,6 +6,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 
@@ -47,8 +48,8 @@ class User extends Authenticatable
      * @return void
      */
     public function getUserCardData($card_id){
+        \DB::enableQueryLog();
         $data = DB::table('users')
-            ->join('card_informations','users.code','=','card_informations.user_code')
             ->select(
                 'users.id',
                 'users.department_id as department_id',
@@ -56,11 +57,21 @@ class User extends Authenticatable
                 'users.code',
                 'card_informations.card_idm'
             )
+            ->Join('card_informations', function ($join) { 
+                $join->on('card_informations.user_code', '=', 'users.code');
+                $join->on('card_informations.department_id', '=', 'users.department_id');
+            })
             ->where('card_informations.card_idm',$card_id)
             ->where('card_informations.is_deleted',0)
             ->where('users.is_deleted',0)
             ->get();
-
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getUserCardData' => \DB::getQueryLog()
+            ]
+            );
+        
         return $data;
     }
 
@@ -100,7 +111,8 @@ class User extends Authenticatable
                 $join->on('t5.id', '=', 't3.department_id')
                 ->where('t5.is_deleted',0);
             })
-            ->whereNotNull('t4.card_idm');      // whereNull 
+            ->where('t3.is_deleted',0)
+            ->whereNull('t4.card_idm');      // whereNull 
 
         $data = $mainquery->get();
         \Log::debug(

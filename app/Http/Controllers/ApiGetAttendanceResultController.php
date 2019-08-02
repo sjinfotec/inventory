@@ -42,7 +42,6 @@ class ApiGetAttendanceResultController extends Controller
         // カード情報存在チェック
         $is_exists = DB::table('card_informations')->where('card_idm', $card_id)->exists();
         if($is_exists){
-            Log::debug('is_exists = true ? '.$is_exists);
             $user_datas = $user->getUserCardData($card_id);
             if (isset($user_datas)) {
                 foreach($user_datas as $user_data) {
@@ -166,8 +165,7 @@ class ApiGetAttendanceResultController extends Controller
             return true;
 
         }catch(\PDOException $pe){
-            DB::rollBack();
-            Log::error(str_replace('{0}', 'work_times', Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error(str_replace('{0}', 'work_times', Config::get('const.LOG_MSG.data_insert_erorr')));
             Log::error($pe->getMessage());
         }
     }
