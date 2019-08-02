@@ -5155,287 +5155,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-<<<<<<< HEAD
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-/* harmony default export */ __webpack_exports__["default"] = ({
-  name: "SettingCalc",
-  components: {
-    FvlForm: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlForm"],
-    FvlInput: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlInput"],
-    FvlSearchSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSearchSelect"],
-    FvlSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"],
-    FvlSubmit: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSubmit"]
-  },
-  data: function data() {
-    return {
-      year: "",
-      form: {
-        year: "",
-        threeMonthTotal: "",
-        sixMonthTotal: "",
-        yaerTotal: "",
-        interval: "",
-        closingDate: [{}],
-        upTime: [{}],
-        timeunit: [{}],
-        timeround: [{}]
-      },
-      TimeUnitList: [],
-      TimeRoundingList: [],
-      days_max: [{}],
-      yearList: [{}],
-      monthList: [{}],
-      baseYear: "",
-      details: [],
-      hidden: "",
-      testList: []
-    };
-  },
-  // マウント時
-  mounted: function mounted() {
-    var date = new Date();
-    this.baseYear = date.getFullYear();
-    this.getTimeUnitList();
-    this.getTimeRoundingList();
-    this.form.closingDate[0] = "";
-    this.form.upTime[0] = "";
-    this.form.timeround[0] = "";
-    this.form.timeunit[0] = "";
-    this.get_days();
-    this.get_month();
-    this.get_years();
-  },
-  watch: {
-    year: function year(val, oldVal) {
-      this.form.year = val;
-      this.getDetail();
-      console.log(val + " " + oldVal);
-    },
-    details: function details(val, oldVal) {
-      var _this = this;
-
-      console.log("各配列振り分け　開始");
-      this.details.forEach(function (detail, i) {
-        if (detail.closing != null) {
-          _this.form.closingDate[i] = detail.closing.toString();
-        } else {
-          _this.form.closingDate[i] = "";
-        }
-
-        if (detail.uplimit_time != null) {
-          _this.form.upTime[i] = detail.uplimit_time.toString();
-        } else {
-          _this.form.upTime[i] = "";
-        }
-
-        if (detail.time_unit != null) {
-          _this.form.timeunit[i] = detail.time_unit.toString();
-        } else {
-          _this.form.timeunit[i] = "";
-        }
-
-        if (detail.time_rounding != null) {
-          _this.form.timeround[i] = detail.time_rounding.toString();
-        } else {
-          _this.form.timeround[i] = "";
-        }
-      });
-      this.hidden = "GET";
-      console.log("各配列振り分け 終了");
-    }
-  },
-  methods: {
-    get_days: function get_days() {
-      for (var index = 0; index < 12; index++) {
-        var month = index + 1;
-        this.days_max[index] = new Date(this.form.year, month, 0).getDate();
-      }
-    },
-    get_month: function get_month() {
-      for (var index = 0; index < 12; index++) {
-        var code = index + 1;
-        var target_month = index + 1;
-        this.monthList[index] = {
-          code: code,
-          name: target_month
-        };
-      }
-
-      console.log("年度更新");
-    },
-    get_years: function get_years() {
-      for (var index = 0; index < 30; index++) {
-        var code = index + 1;
-        var target_year = this.baseYear + index;
-        this.yearList[index] = {
-          code: code,
-          name: target_year
-        };
-      }
-
-      console.log("年度更新");
-    },
-    getDetail: function getDetail() {
-      var _this2 = this;
-
-      this.$axios.get("/setting_calc/get", {
-        params: {
-          year: this.year
-        }
-      }).then(function (response) {
-        if (response.data.length > 0) {
-          _this2.details = response.data;
-          _this2.form.year = _this2.details[0].year;
-          _this2.form.biginningMonth = _this2.details[0].beginning_month;
-
-          if (_this2.details[0].max_3month_total != null) {
-            _this2.form.threeMonthTotal = _this2.details[0].max_3month_total.toString();
-          }
-
-          if (_this2.details[0].max_6month_total != null) {
-            _this2.form.sixMonthTotal = _this2.details[0].max_6month_total.toString();
-          }
-
-          if (_this2.details[0].max_12month_total != null) {
-            _this2.form.yaerTotal = _this2.details[0].max_12month_total.toString();
-          }
-
-          _this2.form.interval = _this2.details[0].interval.toString();
-        } else {
-          _this2.inputClear();
-        }
-
-        console.log("詳細取得");
-      })["catch"](function (reason) {
-        alert("詳細取得エラー");
-      });
-    },
-    alert: function alert(state, message, title) {
-      this.$swal(title, message, state);
-    },
-    addSuccess: function addSuccess() {
-      // ここで会社情報呼び出す
-      this.$toasted.show("登録しました");
-    },
-    getTimeUnitList: function getTimeUnitList() {
-      var _this3 = this;
-
-      this.$axios.get("/get_time_unit_list").then(function (response) {
-        _this3.TimeUnitList = response.data;
-        console.log("時間単位リスト取得");
-      })["catch"](function (reason) {
-        alert("error");
-      });
-    },
-    getTimeRoundingList: function getTimeRoundingList() {
-      var _this4 = this;
-
-      this.$axios.get("/get_time_rounding_list", {}).then(function (response) {
-        _this4.TimeRoundingList = response.data;
-        console.log("時間の丸めリスト取得");
-      })["catch"](function (reason) {
-        alert("error");
-      });
-    },
-    error: function error() {
-      this.alert("error", "登録に失敗しました", "エラー");
-    },
-    inputClear: function inputClear() {
-      // alert("clear");
-      this.form.threeMonthTotal = "";
-      this.form.sixMonthTotal = "";
-      this.form.yaerTotal = "";
-      this.form.interval = "";
-      this.form.biginningMonth = "";
-      this.form.closingDate = [];
-      this.form.upTime = [];
-      this.form.timeunit = [];
-      this.form.timeround = [];
-    }
-  }
-});
-
-/***/ }),
-
-/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/SettingShiftTime.vue?vue&type=script&lang=js&":
-/*!***************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/SettingShiftTime.vue?vue&type=script&lang=js& ***!
-  \***************************************************************************************************************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
-/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var vuejs_datepicker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuejs-datepicker */ "./node_modules/vuejs-datepicker/dist/vuejs-datepicker.esm.js");
-/* harmony import */ var vuejs_datepicker_dist_locale__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vuejs-datepicker/dist/locale */ "./node_modules/vuejs-datepicker/dist/locale/index.js");
-/* harmony import */ var vuejs_datepicker_dist_locale__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(vuejs_datepicker_dist_locale__WEBPACK_IMPORTED_MODULE_2__);
-//
-//
-=======
->>>>>>> 148aac451ff27caf61e7f7b113a24ea70672df57
 //
 //
 //
@@ -6179,7 +5898,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-<<<<<<< HEAD
 //
 //
 //
@@ -6240,44 +5958,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-
-
-/* harmony default export */ __webpack_exports__["default"] = ({
-  name: "UserAdd",
-  components: (_components = {
-    FvlForm: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlForm"],
-    FvlInput: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlInput"],
-    FvlSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"],
-    FvlSearchSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSearchSelect"],
-    FvlSubmit: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSubmit"]
-  }, _defineProperty(_components, "FvlSelect", formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"]), _defineProperty(_components, "getDo", 1), _components),
-  data: function data() {
-    return {
-      form: {
-        id: "",
-        name: "",
-        kana: "",
-        email: "",
-        code: "",
-        password: "",
-        status: "",
-        table_no: "",
-        departmentCode: ""
-      },
-      valuedepartment: "",
-      departmentList: [],
-      employStatusList: [],
-      timeTableList: [],
-      userList: [],
-      userDetails: [],
-      userCode: "",
-      enterPass: "",
-      reEnterPass: "",
-      validate: false,
-      errors: [],
-      oldCode: ""
-=======
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -6312,155 +5992,10 @@ __webpack_require__.r(__webpack_exports__);
       details: [],
       hidden: "",
       testList: []
->>>>>>> 148aac451ff27caf61e7f7b113a24ea70672df57
     };
   },
   // マウント時
   mounted: function mounted() {
-<<<<<<< HEAD
-    console.log("UserAdd Component mounted.");
-    this.getDepartmentList();
-    this.getEmploymentStatusList();
-    this.getTimeTableList();
-    this.getUserList(1, null);
-  },
-  watch: {
-    userCode: function userCode(val, oldVal) {
-      var _this = this;
-
-      console.log(this.userCode);
-      console.log(val + " " + oldVal);
-
-      if (this.userCode != "") {
-        this.$axios.get("/user_add/get", {
-          params: {
-            code: this.userCode
-          }
-        }).then(function (response) {
-          _this.userDetails = response.data;
-          _this.form.id = _this.userDetails[0].id;
-          _this.form.name = _this.userDetails[0].name;
-          _this.form.kana = _this.userDetails[0].kana;
-          _this.form.code = _this.userDetails[0].code;
-          _this.form.password = _this.userDetails[0].password;
-          _this.form.email = _this.userDetails[0].email;
-          _this.form.departmentCode = _this.userDetails[0].department_id;
-          _this.form.status = "" + _this.userDetails[0].employment_status + "";
-          _this.form.table_no = "" + _this.userDetails[0].working_timetable_no + ""; // hidden
-
-          _this.oldCode = _this.userDetails[0].code;
-          console.log("ユーザー詳細情報取得");
-        })["catch"](function (reason) {
-          alert("error");
-        });
-      } else {
-        this.inputClear();
-      }
-    }
-  },
-  methods: {
-    alert: function alert(state, message, title) {
-      this.$swal(title, message, state);
-    },
-    show: function show() {
-      this.$modal.show("password-change");
-    },
-    hide: function hide() {
-      this.$modal.hide("password-change");
-      this.inputPassClear();
-    },
-    alertPassConf: function alertPassConf(state) {
-      var _this2 = this;
-
-      this.$swal({
-        title: "確認",
-        text: "パスワードを変更しますか？",
-        icon: state,
-        buttons: true,
-        dangerMode: true
-      }).then(function (willDelete) {
-        if (willDelete) {
-          _this2.passChange();
-        } else {}
-      });
-    },
-    // バリデーション
-    checkForm: function checkForm() {
-      var flag = false;
-      this.errors = [];
-
-      if (this.reEnterPass && this.enterPass) {
-        if (this.reEnterPass != this.enterPass) {
-          flag = false;
-          this.errors.push("入力したパスワードが一致していません");
-        } else {
-          flag = true;
-        }
-
-        return flag;
-      } else {
-        if (!this.enterPass) {
-          flag = false;
-          this.errors.push("新しいパスワードを入力してください");
-        }
-
-        if (!this.reEnterPass) {
-          flag = false;
-          this.errors.push("新しいパスワード（再入力）を入力してください");
-        }
-
-        return flag;
-      }
-    },
-    passChange: function passChange() {
-      var _this3 = this;
-
-      this.validate = this.checkForm();
-
-      if (this.validate) {
-        this.$axios.post("/user_add/passchange", {
-          user_code: this.userCode,
-          password: this.enterPass
-        }).then(function (response) {
-          var res = response.data;
-
-          if (res.result == 0) {
-            _this3.alert("success", "パスワードを変更しました", "変更完了");
-
-            _this3.hide();
-          } else {}
-        })["catch"](function (reason) {
-          _this3.alert("error", "パスワード変更に失敗しました", "エラー");
-        });
-      } else {}
-    },
-    getDepartmentList: function getDepartmentList() {
-      var _this4 = this;
-
-      this.$axios.get("/get_departments_list").then(function (response) {
-        _this4.departmentList = response.data;
-        console.log("部署リスト取得");
-      })["catch"](function (reason) {
-        alert("error");
-      });
-    },
-    getEmploymentStatusList: function getEmploymentStatusList() {
-      var _this5 = this;
-
-      this.$axios.get("/get_employment_status_list").then(function (response) {
-        _this5.employStatusList = response.data;
-        console.log("雇用形態リスト取得");
-      })["catch"](function (reason) {
-        alert("error");
-      });
-    },
-    getTimeTableList: function getTimeTableList() {
-      var _this6 = this;
-
-      this.$axios.get("/get_time_table_list").then(function (response) {
-        _this6.timeTableList = response.data;
-        console.log("タイムテーブルリスト取得");
-=======
     var date = new Date();
     this.baseYear = date.getFullYear();
     this.getTimeUnitList();
@@ -6482,6 +6017,7 @@ __webpack_require__.r(__webpack_exports__);
     details: function details(val, oldVal) {
       var _this = this;
 
+      console.log("各配列振り分け　開始");
       this.details.forEach(function (detail, i) {
         if (detail.closing != null) {
           _this.form.closingDate[i] = detail.closing.toString();
@@ -6508,6 +6044,7 @@ __webpack_require__.r(__webpack_exports__);
         }
       });
       this.hidden = "GET";
+      console.log("各配列振り分け 終了");
     }
   },
   methods: {
@@ -6549,47 +6086,33 @@ __webpack_require__.r(__webpack_exports__);
           year: this.year
         }
       }).then(function (response) {
-        _this2.details = response.data; // this.form.year = this.details[0].year;
-
-        if (_this2.details.length > 0) {
+        if (response.data.length > 0) {
+          _this2.details = response.data;
+          _this2.form.year = _this2.details[0].year;
           _this2.form.biginningMonth = _this2.details[0].beginning_month;
-          _this2.form.threeMonthTotal = _this2.details[0].max_3month_total.toString();
-          _this2.form.sixMonthTotal = _this2.details[0].max_6month_total.toString();
-          _this2.form.yaerTotal = _this2.details[0].max_12month_total.toString();
+
+          if (_this2.details[0].max_3month_total != null) {
+            _this2.form.threeMonthTotal = _this2.details[0].max_3month_total.toString();
+          }
+
+          if (_this2.details[0].max_6month_total != null) {
+            _this2.form.sixMonthTotal = _this2.details[0].max_6month_total.toString();
+          }
+
+          if (_this2.details[0].max_12month_total != null) {
+            _this2.form.yaerTotal = _this2.details[0].max_12month_total.toString();
+          }
+
           _this2.form.interval = _this2.details[0].interval.toString();
+        } else {
+          _this2.inputClear();
         }
 
         console.log("詳細取得");
->>>>>>> 148aac451ff27caf61e7f7b113a24ea70672df57
       })["catch"](function (reason) {
-        alert("error");
+        alert("詳細取得エラー");
       });
     },
-<<<<<<< HEAD
-    addSuccess: function addSuccess() {
-      this.getUserList(1, null);
-      this.$toasted.show("登録しました");
-    },
-    getUserList: function getUserList(getdovalue, value) {
-      var _this7 = this;
-
-      console.log("getdovalue = " + getdovalue);
-      this.$axios.get("/get_user_list", {
-        params: {
-          getdo: getdovalue,
-          code: value
-        }
-      }).then(function (response) {
-        _this7.userList = response.data;
-        _this7.object = {
-          code: "",
-          name: "新規登録"
-        };
-
-        _this7.userList.unshift(_this7.object);
-
-        console.log("ユーザーリスト取得");
-=======
     alert: function alert(state, message, title) {
       this.$swal(title, message, state);
     },
@@ -6603,69 +6126,10 @@ __webpack_require__.r(__webpack_exports__);
       this.$axios.get("/get_time_unit_list").then(function (response) {
         _this3.TimeUnitList = response.data;
         console.log("時間単位リスト取得");
->>>>>>> 148aac451ff27caf61e7f7b113a24ea70672df57
       })["catch"](function (reason) {
         alert("error");
       });
     },
-<<<<<<< HEAD
-    error: function error() {
-      this.alert("error", "登録に失敗しました", "エラー");
-    },
-    alertDelConf: function alertDelConf(state) {
-      var _this8 = this;
-
-      this.$swal({
-        title: "確認",
-        text: "削除してもよろしいですか？",
-        icon: state,
-        buttons: true,
-        dangerMode: true
-      }).then(function (willDelete) {
-        if (willDelete) {
-          _this8.del();
-        } else {}
-      });
-    },
-    // 削除
-    del: function del() {
-      var _this9 = this;
-
-      this.$axios.post("/user_add/del", {
-        user_code: this.userCode
-      }).then(function (response) {
-        var res = response.data;
-
-        if (res.result == 0) {
-          _this9.alert("success", "ユーザーを削除しました", "削除成功");
-
-          _this9.inputClear();
-
-          _this9.getUserList(1, null);
-        } else {
-          _this9.alert("error", "削除に失敗しました", "エラー");
-        }
-      })["catch"](function (reason) {
-        _this9.alert("error", "削除に失敗しました", "エラー");
-      });
-    },
-    inputClear: function inputClear() {
-      this.form.id = "";
-      this.form.name = "";
-      this.form.kana = "";
-      this.form.code = "";
-      this.form.password = "";
-      this.form.email = "";
-      this.form.departmentCode = "";
-      this.form.status = "";
-      this.form.table_no = "";
-      this.userCode = "";
-    },
-    inputPassClear: function inputPassClear() {
-      this.enterPass = "";
-      this.reEnterPass = "";
-    }
-=======
     getTimeRoundingList: function getTimeRoundingList() {
       var _this4 = this;
 
@@ -6679,31 +6143,32 @@ __webpack_require__.r(__webpack_exports__);
     error: function error() {
       this.alert("error", "登録に失敗しました", "エラー");
     },
-    inputClear: function inputClear() {}
->>>>>>> 148aac451ff27caf61e7f7b113a24ea70672df57
+    inputClear: function inputClear() {
+      // alert("clear");
+      this.form.threeMonthTotal = "";
+      this.form.sixMonthTotal = "";
+      this.form.yaerTotal = "";
+      this.form.interval = "";
+      this.form.biginningMonth = "";
+      this.form.closingDate = [];
+      this.form.upTime = [];
+      this.form.timeunit = [];
+      this.form.timeround = [];
+    }
   }
 });
 
 /***/ }),
 
-<<<<<<< HEAD
-/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkTimeDateTable.vue?vue&type=script&lang=js&":
-/*!****************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkTimeDateTable.vue?vue&type=script&lang=js& ***!
-  \****************************************************************************************************************************************************************************/
-=======
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/SettingShiftTime.vue?vue&type=script&lang=js&":
 /*!***************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/SettingShiftTime.vue?vue&type=script&lang=js& ***!
   \***************************************************************************************************************************************************************************/
->>>>>>> 148aac451ff27caf61e7f7b113a24ea70672df57
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-<<<<<<< HEAD
-=======
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var vuejs_datepicker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuejs-datepicker */ "./node_modules/vuejs-datepicker/dist/vuejs-datepicker.esm.js");
@@ -6750,7 +6215,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
->>>>>>> 148aac451ff27caf61e7f7b113a24ea70672df57
 //
 //
 //
@@ -7310,6 +6774,67 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -7573,6 +7098,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.form.departmentCode = "";
       this.form.status = "";
       this.form.table_no = "";
+      this.userCode = "";
     },
     inputPassClear: function inputPassClear() {
       this.enterPass = "";
