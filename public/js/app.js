@@ -4323,6 +4323,134 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -4718,6 +4846,712 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+<<<<<<< HEAD
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "SettingCalc",
+  components: {
+    FvlForm: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlForm"],
+    FvlInput: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlInput"],
+    FvlSearchSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSearchSelect"],
+    FvlSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"],
+    FvlSubmit: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSubmit"]
+  },
+  data: function data() {
+    return {
+      year: "",
+      form: {
+        year: "",
+        threeMonthTotal: "",
+        sixMonthTotal: "",
+        yaerTotal: "",
+        interval: "",
+        closingDate: [{}],
+        upTime: [{}],
+        timeunit: [{}],
+        timeround: [{}]
+      },
+      TimeUnitList: [],
+      TimeRoundingList: [],
+      days_max: [{}],
+      yearList: [{}],
+      monthList: [{}],
+      baseYear: "",
+      details: [],
+      hidden: "",
+      testList: []
+    };
+  },
+  // マウント時
+  mounted: function mounted() {
+    var date = new Date();
+    this.baseYear = date.getFullYear();
+    this.getTimeUnitList();
+    this.getTimeRoundingList();
+    this.form.closingDate[0] = "";
+    this.form.upTime[0] = "";
+    this.form.timeround[0] = "";
+    this.form.timeunit[0] = "";
+    this.get_days();
+    this.get_month();
+    this.get_years();
+  },
+  watch: {
+    year: function year(val, oldVal) {
+      this.form.year = val;
+      this.getDetail();
+      console.log(val + " " + oldVal);
+    },
+    details: function details(val, oldVal) {
+      var _this = this;
+
+      console.log("各配列振り分け　開始");
+      this.details.forEach(function (detail, i) {
+        if (detail.closing != null) {
+          _this.form.closingDate[i] = detail.closing.toString();
+        } else {
+          _this.form.closingDate[i] = "";
+        }
+
+        if (detail.uplimit_time != null) {
+          _this.form.upTime[i] = detail.uplimit_time.toString();
+        } else {
+          _this.form.upTime[i] = "";
+        }
+
+        if (detail.time_unit != null) {
+          _this.form.timeunit[i] = detail.time_unit.toString();
+        } else {
+          _this.form.timeunit[i] = "";
+        }
+
+        if (detail.time_rounding != null) {
+          _this.form.timeround[i] = detail.time_rounding.toString();
+        } else {
+          _this.form.timeround[i] = "";
+        }
+      });
+      this.hidden = "GET";
+      console.log("各配列振り分け 終了");
+    }
+  },
+  methods: {
+    get_days: function get_days() {
+      for (var index = 0; index < 12; index++) {
+        var month = index + 1;
+        this.days_max[index] = new Date(this.form.year, month, 0).getDate();
+      }
+    },
+    get_month: function get_month() {
+      for (var index = 0; index < 12; index++) {
+        var code = index + 1;
+        var target_month = index + 1;
+        this.monthList[index] = {
+          code: code,
+          name: target_month
+        };
+      }
+
+      console.log("年度更新");
+    },
+    get_years: function get_years() {
+      for (var index = 0; index < 30; index++) {
+        var code = index + 1;
+        var target_year = this.baseYear + index;
+        this.yearList[index] = {
+          code: code,
+          name: target_year
+        };
+      }
+
+      console.log("年度更新");
+    },
+    getDetail: function getDetail() {
+      var _this2 = this;
+
+      this.$axios.get("/setting_calc/get", {
+        params: {
+          year: this.year
+        }
+      }).then(function (response) {
+        if (response.data.length > 0) {
+          _this2.details = response.data;
+          _this2.form.year = _this2.details[0].year;
+          _this2.form.biginningMonth = _this2.details[0].beginning_month;
+
+          if (_this2.details[0].max_3month_total != null) {
+            _this2.form.threeMonthTotal = _this2.details[0].max_3month_total.toString();
+          }
+
+          if (_this2.details[0].max_6month_total != null) {
+            _this2.form.sixMonthTotal = _this2.details[0].max_6month_total.toString();
+          }
+
+          if (_this2.details[0].max_12month_total != null) {
+            _this2.form.yaerTotal = _this2.details[0].max_12month_total.toString();
+          }
+
+          _this2.form.interval = _this2.details[0].interval.toString();
+        } else {
+          _this2.inputClear();
+        }
+
+        console.log("詳細取得");
+      })["catch"](function (reason) {
+        alert("詳細取得エラー");
+      });
+    },
+    alert: function alert(state, message, title) {
+      this.$swal(title, message, state);
+    },
+    addSuccess: function addSuccess() {
+      // ここで会社情報呼び出す
+      this.$toasted.show("登録しました");
+    },
+    getTimeUnitList: function getTimeUnitList() {
+      var _this3 = this;
+
+      this.$axios.get("/get_time_unit_list").then(function (response) {
+        _this3.TimeUnitList = response.data;
+        console.log("時間単位リスト取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
+    },
+    getTimeRoundingList: function getTimeRoundingList() {
+      var _this4 = this;
+
+      this.$axios.get("/get_time_rounding_list", {}).then(function (response) {
+        _this4.TimeRoundingList = response.data;
+        console.log("時間の丸めリスト取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
+    },
+    error: function error() {
+      this.alert("error", "登録に失敗しました", "エラー");
+    },
+    inputClear: function inputClear() {
+      // alert("clear");
+      this.form.threeMonthTotal = "";
+      this.form.sixMonthTotal = "";
+      this.form.yaerTotal = "";
+      this.form.interval = "";
+      this.form.biginningMonth = "";
+      this.form.closingDate = [];
+      this.form.upTime = [];
+      this.form.timeunit = [];
+      this.form.timeround = [];
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/SettingShiftTime.vue?vue&type=script&lang=js&":
+/*!***************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/SettingShiftTime.vue?vue&type=script&lang=js& ***!
+  \***************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var vuejs_datepicker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuejs-datepicker */ "./node_modules/vuejs-datepicker/dist/vuejs-datepicker.esm.js");
+/* harmony import */ var vuejs_datepicker_dist_locale__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vuejs-datepicker/dist/locale */ "./node_modules/vuejs-datepicker/dist/locale/index.js");
+/* harmony import */ var vuejs_datepicker_dist_locale__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(vuejs_datepicker_dist_locale__WEBPACK_IMPORTED_MODULE_2__);
+//
+//
+=======
+>>>>>>> 148aac451ff27caf61e7f7b113a24ea70672df57
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -5345,6 +6179,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+<<<<<<< HEAD
+//
 //
 //
 //
@@ -5408,6 +6244,43 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
+  name: "UserAdd",
+  components: (_components = {
+    FvlForm: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlForm"],
+    FvlInput: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlInput"],
+    FvlSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"],
+    FvlSearchSelect: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSearchSelect"],
+    FvlSubmit: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSubmit"]
+  }, _defineProperty(_components, "FvlSelect", formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlSelect"]), _defineProperty(_components, "getDo", 1), _components),
+  data: function data() {
+    return {
+      form: {
+        id: "",
+        name: "",
+        kana: "",
+        email: "",
+        code: "",
+        password: "",
+        status: "",
+        table_no: "",
+        departmentCode: ""
+      },
+      valuedepartment: "",
+      departmentList: [],
+      employStatusList: [],
+      timeTableList: [],
+      userList: [],
+      userDetails: [],
+      userCode: "",
+      enterPass: "",
+      reEnterPass: "",
+      validate: false,
+      errors: [],
+      oldCode: ""
+=======
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
   name: "SettingCalc",
   components: {
     FvlForm: formvuelar__WEBPACK_IMPORTED_MODULE_1__["FvlForm"],
@@ -5439,10 +6312,155 @@ __webpack_require__.r(__webpack_exports__);
       details: [],
       hidden: "",
       testList: []
+>>>>>>> 148aac451ff27caf61e7f7b113a24ea70672df57
     };
   },
   // マウント時
   mounted: function mounted() {
+<<<<<<< HEAD
+    console.log("UserAdd Component mounted.");
+    this.getDepartmentList();
+    this.getEmploymentStatusList();
+    this.getTimeTableList();
+    this.getUserList(1, null);
+  },
+  watch: {
+    userCode: function userCode(val, oldVal) {
+      var _this = this;
+
+      console.log(this.userCode);
+      console.log(val + " " + oldVal);
+
+      if (this.userCode != "") {
+        this.$axios.get("/user_add/get", {
+          params: {
+            code: this.userCode
+          }
+        }).then(function (response) {
+          _this.userDetails = response.data;
+          _this.form.id = _this.userDetails[0].id;
+          _this.form.name = _this.userDetails[0].name;
+          _this.form.kana = _this.userDetails[0].kana;
+          _this.form.code = _this.userDetails[0].code;
+          _this.form.password = _this.userDetails[0].password;
+          _this.form.email = _this.userDetails[0].email;
+          _this.form.departmentCode = _this.userDetails[0].department_id;
+          _this.form.status = "" + _this.userDetails[0].employment_status + "";
+          _this.form.table_no = "" + _this.userDetails[0].working_timetable_no + ""; // hidden
+
+          _this.oldCode = _this.userDetails[0].code;
+          console.log("ユーザー詳細情報取得");
+        })["catch"](function (reason) {
+          alert("error");
+        });
+      } else {
+        this.inputClear();
+      }
+    }
+  },
+  methods: {
+    alert: function alert(state, message, title) {
+      this.$swal(title, message, state);
+    },
+    show: function show() {
+      this.$modal.show("password-change");
+    },
+    hide: function hide() {
+      this.$modal.hide("password-change");
+      this.inputPassClear();
+    },
+    alertPassConf: function alertPassConf(state) {
+      var _this2 = this;
+
+      this.$swal({
+        title: "確認",
+        text: "パスワードを変更しますか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(function (willDelete) {
+        if (willDelete) {
+          _this2.passChange();
+        } else {}
+      });
+    },
+    // バリデーション
+    checkForm: function checkForm() {
+      var flag = false;
+      this.errors = [];
+
+      if (this.reEnterPass && this.enterPass) {
+        if (this.reEnterPass != this.enterPass) {
+          flag = false;
+          this.errors.push("入力したパスワードが一致していません");
+        } else {
+          flag = true;
+        }
+
+        return flag;
+      } else {
+        if (!this.enterPass) {
+          flag = false;
+          this.errors.push("新しいパスワードを入力してください");
+        }
+
+        if (!this.reEnterPass) {
+          flag = false;
+          this.errors.push("新しいパスワード（再入力）を入力してください");
+        }
+
+        return flag;
+      }
+    },
+    passChange: function passChange() {
+      var _this3 = this;
+
+      this.validate = this.checkForm();
+
+      if (this.validate) {
+        this.$axios.post("/user_add/passchange", {
+          user_code: this.userCode,
+          password: this.enterPass
+        }).then(function (response) {
+          var res = response.data;
+
+          if (res.result == 0) {
+            _this3.alert("success", "パスワードを変更しました", "変更完了");
+
+            _this3.hide();
+          } else {}
+        })["catch"](function (reason) {
+          _this3.alert("error", "パスワード変更に失敗しました", "エラー");
+        });
+      } else {}
+    },
+    getDepartmentList: function getDepartmentList() {
+      var _this4 = this;
+
+      this.$axios.get("/get_departments_list").then(function (response) {
+        _this4.departmentList = response.data;
+        console.log("部署リスト取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
+    },
+    getEmploymentStatusList: function getEmploymentStatusList() {
+      var _this5 = this;
+
+      this.$axios.get("/get_employment_status_list").then(function (response) {
+        _this5.employStatusList = response.data;
+        console.log("雇用形態リスト取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
+    },
+    getTimeTableList: function getTimeTableList() {
+      var _this6 = this;
+
+      this.$axios.get("/get_time_table_list").then(function (response) {
+        _this6.timeTableList = response.data;
+        console.log("タイムテーブルリスト取得");
+=======
     var date = new Date();
     this.baseYear = date.getFullYear();
     this.getTimeUnitList();
@@ -5464,7 +6482,6 @@ __webpack_require__.r(__webpack_exports__);
     details: function details(val, oldVal) {
       var _this = this;
 
-      console.log("各配列振り分け　開始");
       this.details.forEach(function (detail, i) {
         if (detail.closing != null) {
           _this.form.closingDate[i] = detail.closing.toString();
@@ -5491,7 +6508,6 @@ __webpack_require__.r(__webpack_exports__);
         }
       });
       this.hidden = "GET";
-      console.log("各配列振り分け 終了");
     }
   },
   methods: {
@@ -5533,33 +6549,47 @@ __webpack_require__.r(__webpack_exports__);
           year: this.year
         }
       }).then(function (response) {
-        if (response.data.length > 0) {
-          _this2.details = response.data;
-          _this2.form.year = _this2.details[0].year;
+        _this2.details = response.data; // this.form.year = this.details[0].year;
+
+        if (_this2.details.length > 0) {
           _this2.form.biginningMonth = _this2.details[0].beginning_month;
-
-          if (_this2.details[0].max_3month_total != null) {
-            _this2.form.threeMonthTotal = _this2.details[0].max_3month_total.toString();
-          }
-
-          if (_this2.details[0].max_6month_total != null) {
-            _this2.form.sixMonthTotal = _this2.details[0].max_6month_total.toString();
-          }
-
-          if (_this2.details[0].max_12month_total != null) {
-            _this2.form.yaerTotal = _this2.details[0].max_12month_total.toString();
-          }
-
+          _this2.form.threeMonthTotal = _this2.details[0].max_3month_total.toString();
+          _this2.form.sixMonthTotal = _this2.details[0].max_6month_total.toString();
+          _this2.form.yaerTotal = _this2.details[0].max_12month_total.toString();
           _this2.form.interval = _this2.details[0].interval.toString();
-        } else {
-          _this2.inputClear();
         }
 
         console.log("詳細取得");
+>>>>>>> 148aac451ff27caf61e7f7b113a24ea70672df57
       })["catch"](function (reason) {
-        alert("詳細取得エラー");
+        alert("error");
       });
     },
+<<<<<<< HEAD
+    addSuccess: function addSuccess() {
+      this.getUserList(1, null);
+      this.$toasted.show("登録しました");
+    },
+    getUserList: function getUserList(getdovalue, value) {
+      var _this7 = this;
+
+      console.log("getdovalue = " + getdovalue);
+      this.$axios.get("/get_user_list", {
+        params: {
+          getdo: getdovalue,
+          code: value
+        }
+      }).then(function (response) {
+        _this7.userList = response.data;
+        _this7.object = {
+          code: "",
+          name: "新規登録"
+        };
+
+        _this7.userList.unshift(_this7.object);
+
+        console.log("ユーザーリスト取得");
+=======
     alert: function alert(state, message, title) {
       this.$swal(title, message, state);
     },
@@ -5573,10 +6603,69 @@ __webpack_require__.r(__webpack_exports__);
       this.$axios.get("/get_time_unit_list").then(function (response) {
         _this3.TimeUnitList = response.data;
         console.log("時間単位リスト取得");
+>>>>>>> 148aac451ff27caf61e7f7b113a24ea70672df57
       })["catch"](function (reason) {
         alert("error");
       });
     },
+<<<<<<< HEAD
+    error: function error() {
+      this.alert("error", "登録に失敗しました", "エラー");
+    },
+    alertDelConf: function alertDelConf(state) {
+      var _this8 = this;
+
+      this.$swal({
+        title: "確認",
+        text: "削除してもよろしいですか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(function (willDelete) {
+        if (willDelete) {
+          _this8.del();
+        } else {}
+      });
+    },
+    // 削除
+    del: function del() {
+      var _this9 = this;
+
+      this.$axios.post("/user_add/del", {
+        user_code: this.userCode
+      }).then(function (response) {
+        var res = response.data;
+
+        if (res.result == 0) {
+          _this9.alert("success", "ユーザーを削除しました", "削除成功");
+
+          _this9.inputClear();
+
+          _this9.getUserList(1, null);
+        } else {
+          _this9.alert("error", "削除に失敗しました", "エラー");
+        }
+      })["catch"](function (reason) {
+        _this9.alert("error", "削除に失敗しました", "エラー");
+      });
+    },
+    inputClear: function inputClear() {
+      this.form.id = "";
+      this.form.name = "";
+      this.form.kana = "";
+      this.form.code = "";
+      this.form.password = "";
+      this.form.email = "";
+      this.form.departmentCode = "";
+      this.form.status = "";
+      this.form.table_no = "";
+      this.userCode = "";
+    },
+    inputPassClear: function inputPassClear() {
+      this.enterPass = "";
+      this.reEnterPass = "";
+    }
+=======
     getTimeRoundingList: function getTimeRoundingList() {
       var _this4 = this;
 
@@ -5590,32 +6679,31 @@ __webpack_require__.r(__webpack_exports__);
     error: function error() {
       this.alert("error", "登録に失敗しました", "エラー");
     },
-    inputClear: function inputClear() {
-      // alert("clear");
-      this.form.threeMonthTotal = "";
-      this.form.sixMonthTotal = "";
-      this.form.yaerTotal = "";
-      this.form.interval = "";
-      this.form.biginningMonth = "";
-      this.form.closingDate = [];
-      this.form.upTime = [];
-      this.form.timeunit = [];
-      this.form.timeround = [];
-    }
+    inputClear: function inputClear() {}
+>>>>>>> 148aac451ff27caf61e7f7b113a24ea70672df57
   }
 });
 
 /***/ }),
 
+<<<<<<< HEAD
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkTimeDateTable.vue?vue&type=script&lang=js&":
+/*!****************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkTimeDateTable.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************************************************************************************************************/
+=======
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/SettingShiftTime.vue?vue&type=script&lang=js&":
 /*!***************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/SettingShiftTime.vue?vue&type=script&lang=js& ***!
   \***************************************************************************************************************************************************************************/
+>>>>>>> 148aac451ff27caf61e7f7b113a24ea70672df57
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+<<<<<<< HEAD
+=======
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var vuejs_datepicker__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuejs-datepicker */ "./node_modules/vuejs-datepicker/dist/vuejs-datepicker.esm.js");
@@ -5662,6 +6750,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+>>>>>>> 148aac451ff27caf61e7f7b113a24ea70672df57
 //
 //
 //
@@ -6221,67 +7310,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -6545,7 +7573,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.form.departmentCode = "";
       this.form.status = "";
       this.form.table_no = "";
-      this.userCode = "";
     },
     inputPassClear: function inputPassClear() {
       this.enterPass = "";
@@ -77150,7 +78177,7 @@ var staticRenderFns = [
     return _c("span", { staticClass: "d-md-none float-left" }, [
       _c("img", {
         staticClass: "icon-size-ml mr-2",
-        attrs: { src: "/images/round-watch-later-w.svg", alt: "" }
+        attrs: { src: "/images/round-watch-later-b.svg", alt: "" }
       })
     ])
   }
@@ -77200,7 +78227,7 @@ var staticRenderFns = [
     return _c("span", { staticClass: "d-md-none float-left" }, [
       _c("img", {
         staticClass: "icon-size-ml mr-2",
-        attrs: { src: "/images/round-error-w.svg", alt: "" }
+        attrs: { src: "/images/round-error-b.svg", alt: "" }
       })
     ])
   }
@@ -77258,7 +78285,7 @@ var staticRenderFns = [
     return _c("span", { staticClass: "d-md-none float-left" }, [
       _c("img", {
         staticClass: "icon-size-ml mr-2",
-        attrs: { src: "/images/round-watch-later-w.svg", alt: "" }
+        attrs: { src: "/images/round-watch-later-b.svg", alt: "" }
       })
     ])
   }
@@ -77316,7 +78343,7 @@ var staticRenderFns = [
     return _c("span", { staticClass: "d-md-none float-left" }, [
       _c("img", {
         staticClass: "icon-size-ml mr-2",
-        attrs: { src: "/images/round-access-time-w.svg", alt: "" }
+        attrs: { src: "/images/round-access-time-b.svg", alt: "" }
       })
     ])
   }
@@ -80275,402 +81302,687 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
-    { staticClass: "panel-body" },
     [
-      _c("div", { staticClass: "row" }, [
-        _c("div", { staticClass: "form-group col-md-6" }, [
-          _c("label", { attrs: { for: "business_kubun" } }, [_vm._v("指定年")]),
-          _vm._v(" "),
-          _c(
-            "select",
-            {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.year,
-                  expression: "year"
-                }
-              ],
-              staticClass: "form-control",
-              on: {
-                change: function($event) {
-                  var $$selectedVal = Array.prototype.filter
-                    .call($event.target.options, function(o) {
-                      return o.selected
-                    })
-                    .map(function(o) {
-                      var val = "_value" in o ? o._value : o.value
-                      return val
-                    })
-                  _vm.year = $event.target.multiple
-                    ? $$selectedVal
-                    : $$selectedVal[0]
-                }
-              }
-            },
-            _vm._l(20, function(n) {
-              return _c(
-                "option",
-                { key: n, domProps: { value: n + _vm.baseYear - 1 } },
-                [_vm._v(_vm._s(n + _vm.baseYear - 1) + "年")]
-              )
-            }),
-            0
-          )
-        ]),
-        _vm._v(" "),
-        _c("div", { staticClass: "form-group col-md-6" }, [
-          _c("label", { attrs: { for: "business_kubun" } }, [_vm._v("指定月")]),
-          _vm._v(" "),
-          _c(
-            "select",
-            {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.month,
-                  expression: "month"
-                }
-              ],
-              staticClass: "form-control",
-              on: {
-                change: function($event) {
-                  var $$selectedVal = Array.prototype.filter
-                    .call($event.target.options, function(o) {
-                      return o.selected
-                    })
-                    .map(function(o) {
-                      var val = "_value" in o ? o._value : o.value
-                      return val
-                    })
-                  _vm.month = $event.target.multiple
-                    ? $$selectedVal
-                    : $$selectedVal[0]
-                }
-              }
-            },
-            _vm._l(12, function(n) {
-              return _c("option", { key: n, domProps: { value: n } }, [
-                _vm._v(_vm._s(n) + "月")
-              ])
-            }),
-            0
-          )
-        ])
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "row" }, [
-        _c(
-          "div",
-          { staticClass: "form-group col-md-6" },
-          [
-            _c("label", { attrs: { for: "business_kubun" } }, [
-              _vm._v("雇用形態")
-            ]),
+      _c("div", { staticClass: "row justify-content-between print-none" }, [
+        _c("div", { staticClass: "col-md pt-3" }, [
+          _c("div", { staticClass: "card shadow-pl" }, [
+            _vm._m(0),
             _vm._v(" "),
-            _c("select-employmentstatus", {
-              attrs: { "blank-data": true },
-              on: { "change-event": _vm.employmentChanges }
-            })
-          ],
-          1
-        ),
-        _vm._v(" "),
-        _c(
-          "div",
-          { staticClass: "form-group col-md-6" },
-          [
-            _c("label", { attrs: { for: "business_kubun" } }, [
-              _vm._v("所属部署")
-            ]),
-            _vm._v(" "),
-            _c("select-department", {
-              attrs: { "blank-data": true },
-              on: { "change-event": _vm.departmentChanges }
-            })
-          ],
-          1
-        ),
-        _vm._v(" "),
-        _c(
-          "div",
-          { staticClass: "form-group col-md-6" },
-          [
-            _c("label", { attrs: { for: "business_kubun" } }, [_vm._v("氏名")]),
-            _vm._v(" "),
-            _c("select-user", {
-              ref: "selectuser",
-              attrs: { "blank-data": true, "get-Do": _vm.getDo },
-              on: { "change-event": _vm.userChanges }
-            })
-          ],
-          1
-        )
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "row" }, [
-        _c("div", { staticClass: "form-group col-md-6" }, [
-          _c(
-            "button",
-            {
-              staticClass: "btn btn-primary",
-              on: {
-                click: function($event) {
-                  return _vm.getDetail()
-                }
-              }
-            },
-            [_vm._v("この条件で表示する")]
-          )
-        ]),
-        _vm._v(" "),
-        _vm.valueuser != ""
-          ? _c("div", { staticClass: "form-group col-md-6" }, [
-              _c(
-                "button",
-                { staticClass: "btn btn-info", on: { click: _vm.show } },
-                [_vm._v("+ 勤務時間を追加")]
-              )
-            ])
-          : _vm._e()
-      ]),
-      _vm._v(" "),
-      _vm.details.length
-        ? _c("div", { staticClass: "margin-set-mid" }, [
-            _vm._v(
-              "\n    " +
-                _vm._s(_vm.year) +
-                "年 " +
-                _vm._s(_vm.month) +
-                " 月 〆日から表示\n    "
-            ),
-            _c("div", [
-              _c("span", [_vm._v(_vm._s(_vm.details[0].user_name))]),
-              _vm._v(" "),
-              _c("span", [_vm._v(_vm._s(_vm.details[0].d_name))])
-            ]),
-            _vm._v(" "),
-            _c("table", { staticClass: "table" }, [
-              _vm._m(0),
-              _vm._v(" "),
-              _c(
-                "tbody",
-                _vm._l(_vm.details, function(item, index) {
-                  return _c("tr", { key: item.id }, [
-                    _c("td", [_vm._v(_vm._s(item.date))]),
+            _c("div", { staticClass: "card-body pt-2" }, [
+              _c("div", { staticClass: "row justify-content-between" }, [
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c("div", { staticClass: "input-group" }, [
+                    _vm._m(1),
                     _vm._v(" "),
-                    _c("td", [
-                      _c("input", {
+                    _c(
+                      "select",
+                      {
                         directives: [
                           {
                             name: "model",
                             rawName: "v-model",
-                            value: _vm.details[index].time,
-                            expression: "details[index].time"
+                            value: _vm.year,
+                            expression: "year"
                           }
                         ],
                         staticClass: "form-control",
-                        attrs: { type: "time" },
-                        domProps: { value: _vm.details[index].time },
                         on: {
-                          input: function($event) {
-                            if ($event.target.composing) {
-                              return
-                            }
-                            _vm.$set(
-                              _vm.details[index],
-                              "time",
-                              $event.target.value
-                            )
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.year = $event.target.multiple
+                              ? $$selectedVal
+                              : $$selectedVal[0]
                           }
                         }
+                      },
+                      _vm._l(20, function(n) {
+                        return _c(
+                          "option",
+                          { key: n, domProps: { value: n + _vm.baseYear - 1 } },
+                          [_vm._v(_vm._s(n + _vm.baseYear - 1) + "年")]
+                        )
+                      }),
+                      0
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c("div", { staticClass: "input-group" }, [
+                    _vm._m(2),
+                    _vm._v(" "),
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.month,
+                            expression: "month"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        on: {
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.month = $event.target.multiple
+                              ? $$selectedVal
+                              : $$selectedVal[0]
+                          }
+                        }
+                      },
+                      _vm._l(12, function(n) {
+                        return _c(
+                          "option",
+                          { key: n, domProps: { value: n } },
+                          [_vm._v(_vm._s(n) + "月")]
+                        )
+                      }),
+                      0
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group" },
+                    [
+                      _vm._m(3),
+                      _vm._v(" "),
+                      _c("select-employmentstatus", {
+                        attrs: { "blank-data": true },
+                        on: { "change-event": _vm.employmentChanges }
                       })
+                    ],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group" },
+                    [
+                      _vm._m(4),
+                      _vm._v(" "),
+                      _c("select-department", {
+                        attrs: { "blank-data": true },
+                        on: { "change-event": _vm.departmentChanges }
+                      })
+                    ],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group" },
+                    [
+                      _vm._m(5),
+                      _vm._v(" "),
+                      _c("select-user", {
+                        ref: "selectuser",
+                        attrs: { "blank-data": true, "get-Do": _vm.getDo },
+                        on: { "change-event": _vm.userChanges }
+                      })
+                    ],
+                    1
+                  )
+                ])
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "row justify-content-between" }, [
+                _c("div", { staticClass: "col-md-12 pb-2" }, [
+                  _c("div", { staticClass: "btn-group d-flex" }, [
+                    _c(
+                      "button",
+                      {
+                        staticClass:
+                          "btn btn-primary btn-lg font-size-rg w-100",
+                        on: {
+                          click: function($event) {
+                            return _vm.getDetail()
+                          }
+                        }
+                      },
+                      [
+                        _c("img", {
+                          staticClass: "icon-size-sm mr-2 pb-1",
+                          attrs: { src: "/images/round-search-w.svg", alt: "" }
+                        }),
+                        _vm._v("この条件で表示する")
+                      ]
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _vm.valueuser != ""
+                  ? _c("div", { staticClass: "col-md-12 pb-2" }, [
+                      _c("div", { staticClass: "btn-group d-flex" }, [
+                        _c(
+                          "button",
+                          {
+                            staticClass:
+                              "btn btn-success btn-lg font-size-rg w-100",
+                            on: { click: _vm.show }
+                          },
+                          [
+                            _c("img", {
+                              staticClass: "icon-size-sm mr-2 pb-1",
+                              attrs: {
+                                src: "/images/round-search-w.svg",
+                                alt: ""
+                              }
+                            }),
+                            _vm._v("勤務時間を追加")
+                          ]
+                        )
+                      ])
+                    ])
+                  : _vm._e()
+              ])
+            ])
+          ])
+        ])
+      ]),
+      _vm._v(" "),
+      _vm.details.length
+        ? _c("div", { staticClass: "row justify-content-between" }, [
+            _c("div", { staticClass: "col-md pt-3 align-self-stretch" }, [
+              _c("div", { staticClass: "card shadow-pl" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "card-header bg-transparent pt-3 border-0 print-none"
+                  },
+                  [
+                    _c("h1", { staticClass: "float-md-left font-size-rg" }, [
+                      _vm._v(
+                        _vm._s(_vm.year) +
+                          "年 " +
+                          _vm._s(_vm.month) +
+                          " 月 〆日から表示"
+                      )
                     ]),
                     _vm._v(" "),
-                    _c("td", [
+                    _c("span", { staticClass: "float-md-right font-size-sm" }, [
+                      _vm._v("勤務時間や休暇区分などを変更できます")
+                    ])
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "card-body mb-3 py-0 pt-4 border-top print-space"
+                  },
+                  [
+                    _c("div", { staticClass: "row" }, [
                       _c(
-                        "select",
+                        "div",
                         {
-                          directives: [
-                            {
-                              name: "model",
-                              rawName: "v-model",
-                              value: _vm.details[index].mode,
-                              expression: "details[index].mode"
-                            }
-                          ],
-                          staticClass: "form-control",
-                          on: {
-                            change: function($event) {
-                              var $$selectedVal = Array.prototype.filter
-                                .call($event.target.options, function(o) {
-                                  return o.selected
-                                })
-                                .map(function(o) {
-                                  var val = "_value" in o ? o._value : o.value
-                                  return val
-                                })
-                              _vm.$set(
-                                _vm.details[index],
-                                "mode",
-                                $event.target.multiple
-                                  ? $$selectedVal
-                                  : $$selectedVal[0]
-                              )
-                            }
-                          }
+                          staticClass:
+                            "col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch"
                         },
                         [
-                          _c("option", { attrs: { value: "" } }),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("氏名")
+                          ]),
                           _vm._v(" "),
-                          _vm._l(_vm.modeList, function(mode) {
-                            return _c(
-                              "option",
-                              { domProps: { value: mode.code } },
-                              [_vm._v(_vm._s(mode.code_name))]
-                            )
-                          })
-                        ],
-                        2
-                      )
-                    ]),
-                    _vm._v(" "),
-                    index == 0
-                      ? _c("td", [
                           _c(
-                            "select",
+                            "p",
                             {
-                              directives: [
-                                {
-                                  name: "model",
-                                  rawName: "v-model",
-                                  value: _vm.details[index].user_holiday_kbn,
-                                  expression: "details[index].user_holiday_kbn"
-                                }
-                              ],
-                              staticClass: "form-control",
-                              on: {
-                                change: function($event) {
-                                  var $$selectedVal = Array.prototype.filter
-                                    .call($event.target.options, function(o) {
-                                      return o.selected
-                                    })
-                                    .map(function(o) {
-                                      var val =
-                                        "_value" in o ? o._value : o.value
-                                      return val
-                                    })
-                                  _vm.$set(
-                                    _vm.details[index],
-                                    "user_holiday_kbn",
-                                    $event.target.multiple
-                                      ? $$selectedVal
-                                      : $$selectedVal[0]
-                                  )
-                                }
-                              }
+                              staticClass: "font-size-rg font-weight-bold m-0"
                             },
-                            [
-                              _c("option", { attrs: { value: "" } }),
-                              _vm._v(" "),
-                              _vm._l(_vm.userLeaveKbnList, function(list) {
-                                return _c(
-                                  "option",
-                                  { domProps: { value: list.code } },
-                                  [_vm._v(_vm._s(list.code_name))]
-                                )
-                              })
-                            ],
-                            2
+                            [_vm._v(_vm._s(_vm.details[0].user_name))]
                           )
-                        ])
-                      : item.kbn_flag == 1
-                      ? _c("td", [
-                          _c(
-                            "select",
-                            {
-                              directives: [
-                                {
-                                  name: "model",
-                                  rawName: "v-model",
-                                  value: _vm.details[index].user_holiday_kbn,
-                                  expression: "details[index].user_holiday_kbn"
-                                }
-                              ],
-                              staticClass: "form-control",
-                              on: {
-                                change: function($event) {
-                                  var $$selectedVal = Array.prototype.filter
-                                    .call($event.target.options, function(o) {
-                                      return o.selected
-                                    })
-                                    .map(function(o) {
-                                      var val =
-                                        "_value" in o ? o._value : o.value
-                                      return val
-                                    })
-                                  _vm.$set(
-                                    _vm.details[index],
-                                    "user_holiday_kbn",
-                                    $event.target.multiple
-                                      ? $$selectedVal
-                                      : $$selectedVal[0]
-                                  )
-                                }
-                              }
-                            },
-                            [
-                              _c("option", { attrs: { value: "" } }),
-                              _vm._v(" "),
-                              _vm._l(_vm.userLeaveKbnList, function(list) {
-                                return _c(
-                                  "option",
-                                  { domProps: { value: list.code } },
-                                  [_vm._v(_vm._s(list.code_name))]
-                                )
-                              })
-                            ],
-                            2
-                          )
-                        ])
-                      : _c("td"),
-                    _vm._v(" "),
-                    _c("td", [
+                        ]
+                      ),
+                      _vm._v(" "),
                       _c(
-                        "button",
+                        "div",
                         {
-                          staticClass: "btn btn-danger",
-                          on: {
-                            click: function($event) {
-                              return _vm.alertDelConf("warning", item.id)
-                            }
-                          }
+                          staticClass:
+                            "col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch"
                         },
-                        [_vm._v("削除")]
+                        [
+                          _c(
+                            "h1",
+                            {
+                              staticClass: "font-size-sm m-0 mb-1 text-sm-right"
+                            },
+                            [_vm._v("所属部署")]
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "p",
+                            { staticClass: "font-size-rg m-0 text-sm-right" },
+                            [_vm._v(_vm._s(_vm.details[0].d_name))]
+                          )
+                        ]
                       )
                     ])
-                  ])
-                }),
-                0
-              )
+                  ]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "card-body mb-3 p-0 border-top" }, [
+                  _c("div", { staticClass: "row" }, [
+                    _c("div", { staticClass: "col-12" }, [
+                      _c("div", { staticClass: "table-responsive" }, [
+                        _c("div", { staticClass: "col-12 p-0" }, [
+                          _c(
+                            "table",
+                            {
+                              staticClass:
+                                "table table-striped border-bottom font-size-sm text-nowrap"
+                            },
+                            [
+                              _vm._m(6),
+                              _vm._v(" "),
+                              _c(
+                                "tbody",
+                                _vm._l(_vm.details, function(item, index) {
+                                  return _c("tr", { key: item.id }, [
+                                    _c(
+                                      "td",
+                                      {
+                                        staticClass: "text-center align-middle"
+                                      },
+                                      [_vm._v(_vm._s(item.date))]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        staticClass: "text-center align-middle"
+                                      },
+                                      [
+                                        _c(
+                                          "div",
+                                          { staticClass: "input-group" },
+                                          [
+                                            _c("input", {
+                                              directives: [
+                                                {
+                                                  name: "model",
+                                                  rawName: "v-model",
+                                                  value:
+                                                    _vm.details[index].time,
+                                                  expression:
+                                                    "details[index].time"
+                                                }
+                                              ],
+                                              staticClass: "form-control",
+                                              attrs: { type: "time" },
+                                              domProps: {
+                                                value: _vm.details[index].time
+                                              },
+                                              on: {
+                                                input: function($event) {
+                                                  if ($event.target.composing) {
+                                                    return
+                                                  }
+                                                  _vm.$set(
+                                                    _vm.details[index],
+                                                    "time",
+                                                    $event.target.value
+                                                  )
+                                                }
+                                              }
+                                            })
+                                          ]
+                                        )
+                                      ]
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        staticClass: "text-center align-middle"
+                                      },
+                                      [
+                                        _c(
+                                          "div",
+                                          { staticClass: "input-group" },
+                                          [
+                                            _c(
+                                              "select",
+                                              {
+                                                directives: [
+                                                  {
+                                                    name: "model",
+                                                    rawName: "v-model",
+                                                    value:
+                                                      _vm.details[index].mode,
+                                                    expression:
+                                                      "details[index].mode"
+                                                  }
+                                                ],
+                                                staticClass: "form-control",
+                                                on: {
+                                                  change: function($event) {
+                                                    var $$selectedVal = Array.prototype.filter
+                                                      .call(
+                                                        $event.target.options,
+                                                        function(o) {
+                                                          return o.selected
+                                                        }
+                                                      )
+                                                      .map(function(o) {
+                                                        var val =
+                                                          "_value" in o
+                                                            ? o._value
+                                                            : o.value
+                                                        return val
+                                                      })
+                                                    _vm.$set(
+                                                      _vm.details[index],
+                                                      "mode",
+                                                      $event.target.multiple
+                                                        ? $$selectedVal
+                                                        : $$selectedVal[0]
+                                                    )
+                                                  }
+                                                }
+                                              },
+                                              [
+                                                _c("option", {
+                                                  attrs: { value: "" }
+                                                }),
+                                                _vm._v(" "),
+                                                _vm._l(_vm.modeList, function(
+                                                  mode
+                                                ) {
+                                                  return _c(
+                                                    "option",
+                                                    {
+                                                      domProps: {
+                                                        value: mode.code
+                                                      }
+                                                    },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(mode.code_name)
+                                                      )
+                                                    ]
+                                                  )
+                                                })
+                                              ],
+                                              2
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    ),
+                                    _vm._v(" "),
+                                    index == 0
+                                      ? _c(
+                                          "td",
+                                          {
+                                            staticClass:
+                                              "text-center align-middle"
+                                          },
+                                          [
+                                            _c(
+                                              "div",
+                                              { staticClass: "input-group" },
+                                              [
+                                                _vm._m(7, true),
+                                                _vm._v(" "),
+                                                _c(
+                                                  "select",
+                                                  {
+                                                    directives: [
+                                                      {
+                                                        name: "model",
+                                                        rawName: "v-model",
+                                                        value:
+                                                          _vm.details[index]
+                                                            .user_holiday_kbn,
+                                                        expression:
+                                                          "details[index].user_holiday_kbn"
+                                                      }
+                                                    ],
+                                                    staticClass: "form-control",
+                                                    on: {
+                                                      change: function($event) {
+                                                        var $$selectedVal = Array.prototype.filter
+                                                          .call(
+                                                            $event.target
+                                                              .options,
+                                                            function(o) {
+                                                              return o.selected
+                                                            }
+                                                          )
+                                                          .map(function(o) {
+                                                            var val =
+                                                              "_value" in o
+                                                                ? o._value
+                                                                : o.value
+                                                            return val
+                                                          })
+                                                        _vm.$set(
+                                                          _vm.details[index],
+                                                          "user_holiday_kbn",
+                                                          $event.target.multiple
+                                                            ? $$selectedVal
+                                                            : $$selectedVal[0]
+                                                        )
+                                                      }
+                                                    }
+                                                  },
+                                                  [
+                                                    _c("option", {
+                                                      attrs: { value: "" }
+                                                    }),
+                                                    _vm._v(" "),
+                                                    _vm._l(
+                                                      _vm.userLeaveKbnList,
+                                                      function(list) {
+                                                        return _c(
+                                                          "option",
+                                                          {
+                                                            domProps: {
+                                                              value: list.code
+                                                            }
+                                                          },
+                                                          [
+                                                            _vm._v(
+                                                              _vm._s(
+                                                                list.code_name
+                                                              )
+                                                            )
+                                                          ]
+                                                        )
+                                                      }
+                                                    )
+                                                  ],
+                                                  2
+                                                )
+                                              ]
+                                            )
+                                          ]
+                                        )
+                                      : item.kbn_flag == 1
+                                      ? _c(
+                                          "td",
+                                          {
+                                            staticClass:
+                                              "text-center align-middle"
+                                          },
+                                          [
+                                            _c(
+                                              "div",
+                                              { staticClass: "input-group" },
+                                              [
+                                                _vm._m(8, true),
+                                                _vm._v(" "),
+                                                _c(
+                                                  "select",
+                                                  {
+                                                    directives: [
+                                                      {
+                                                        name: "model",
+                                                        rawName: "v-model",
+                                                        value:
+                                                          _vm.details[index]
+                                                            .user_holiday_kbn,
+                                                        expression:
+                                                          "details[index].user_holiday_kbn"
+                                                      }
+                                                    ],
+                                                    staticClass: "form-control",
+                                                    on: {
+                                                      change: function($event) {
+                                                        var $$selectedVal = Array.prototype.filter
+                                                          .call(
+                                                            $event.target
+                                                              .options,
+                                                            function(o) {
+                                                              return o.selected
+                                                            }
+                                                          )
+                                                          .map(function(o) {
+                                                            var val =
+                                                              "_value" in o
+                                                                ? o._value
+                                                                : o.value
+                                                            return val
+                                                          })
+                                                        _vm.$set(
+                                                          _vm.details[index],
+                                                          "user_holiday_kbn",
+                                                          $event.target.multiple
+                                                            ? $$selectedVal
+                                                            : $$selectedVal[0]
+                                                        )
+                                                      }
+                                                    }
+                                                  },
+                                                  [
+                                                    _c("option", {
+                                                      attrs: { value: "" }
+                                                    }),
+                                                    _vm._v(" "),
+                                                    _vm._l(
+                                                      _vm.userLeaveKbnList,
+                                                      function(list) {
+                                                        return _c(
+                                                          "option",
+                                                          {
+                                                            domProps: {
+                                                              value: list.code
+                                                            }
+                                                          },
+                                                          [
+                                                            _vm._v(
+                                                              _vm._s(
+                                                                list.code_name
+                                                              )
+                                                            )
+                                                          ]
+                                                        )
+                                                      }
+                                                    )
+                                                  ],
+                                                  2
+                                                )
+                                              ]
+                                            )
+                                          ]
+                                        )
+                                      : _c("td"),
+                                    _vm._v(" "),
+                                    _c(
+                                      "td",
+                                      {
+                                        staticClass: "text-center align-middle"
+                                      },
+                                      [
+                                        _c(
+                                          "div",
+                                          { staticClass: "btn-group d-flex" },
+                                          [
+                                            _c(
+                                              "button",
+                                              {
+                                                staticClass:
+                                                  "btn btn-danger btn-lg font-size-rg w-100",
+                                                attrs: { type: "button" },
+                                                on: {
+                                                  click: function($event) {
+                                                    return _vm.alertDelConf(
+                                                      "warning",
+                                                      item.id
+                                                    )
+                                                  }
+                                                }
+                                              },
+                                              [_vm._v("削除")]
+                                            )
+                                          ]
+                                        )
+                                      ]
+                                    )
+                                  ])
+                                }),
+                                0
+                              )
+                            ]
+                          )
+                        ])
+                      ])
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "row justify-content-between px-3" },
+                    [
+                      _c("div", { staticClass: "col-md-12 pb-2" }, [
+                        _c("div", { staticClass: "btn-group d-flex" }, [
+                          _c(
+                            "button",
+                            {
+                              staticClass:
+                                "btn btn-success btn-lg font-size-rg w-100",
+                              attrs: { type: "button" },
+                              on: {
+                                click: function($event) {
+                                  return _vm.alertStoreConf("info")
+                                }
+                              }
+                            },
+                            [_vm._v("この内容で編集を確定する")]
+                          )
+                        ])
+                      ])
+                    ]
+                  )
+                ])
+              ])
             ])
           ])
         : _vm._e(),
-      _vm._v(" "),
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-success",
-          on: {
-            click: function($event) {
-              return _vm.alertStoreConf("info")
-            }
-          }
-        },
-        [_vm._v("編集確定")]
-      ),
       _vm._v(" "),
       _c(
         "modal",
@@ -80839,18 +82151,158 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "card-header bg-transparent pb-0 border-0" },
+      [
+        _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+          _vm._v("年月を指定して集計を表示する")
+        ]),
+        _vm._v(" "),
+        _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+          _vm._v("雇用形態や所属部署でフィルタリングして表示できます")
+        ])
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { id: "basic-addon1" }
+        },
+        [_vm._v("指定年")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { id: "basic-addon1" }
+        },
+        [_vm._v("指定月")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "label",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { for: "inputGroupSelect01" }
+        },
+        [_vm._v("雇用形態")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "label",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { for: "inputGroupSelect01" }
+        },
+        [_vm._v("所属部署")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "label",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { for: "inputGroupSelect01" }
+        },
+        [_vm._v("氏名")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
     return _c("thead", [
       _c("tr", [
-        _c("th", [_vm._v("日付")]),
+        _c("td", { staticClass: "text-center align-middle w-15" }, [
+          _vm._v("日付")
+        ]),
         _vm._v(" "),
-        _c("th", [_vm._v("時間")]),
+        _c("td", { staticClass: "text-center align-middle w-15" }, [
+          _vm._v("時間")
+        ]),
         _vm._v(" "),
-        _c("th", [_vm._v("モード")]),
+        _c("td", { staticClass: "text-center align-middle w-15" }, [
+          _vm._v("区分")
+        ]),
         _vm._v(" "),
-        _c("th", [_vm._v("備考")]),
+        _c("td", { staticClass: "text-center align-middle w-35 mw-rem-20" }, [
+          _vm._v("備考")
+        ]),
         _vm._v(" "),
-        _c("th", [_vm._v("操作")])
+        _c("td", { staticClass: "text-center align-middle mw-rem-15" }, [
+          _vm._v("操作")
+        ])
       ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "label",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { for: "inputGroupSelect01" }
+        },
+        [_vm._v("休暇区分")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "label",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { for: "inputGroupSelect01" }
+        },
+        [_vm._v("休暇区分")]
+      )
     ])
   }
 ]
@@ -80966,13 +82418,1174 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "container" }, [
-      _c("div", { staticClass: "row justify-content-center" }, [
-        _c("div", { staticClass: "col-md-8" }, [
-          _c("div", { staticClass: "card" }, [
-            _c("div", { staticClass: "card-header" }, [_vm._v("月次集計画面")]),
+    return _c("div", [
+      _c("div", { staticClass: "row justify-content-between print-none" }, [
+        _c("div", { staticClass: "col-md pt-3" }, [
+          _c("div", { staticClass: "card shadow-pl" }, [
+            _c(
+              "div",
+              { staticClass: "card-header bg-transparent pb-0 border-0" },
+              [
+                _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+                  _vm._v("年月を指定して集計を表示する")
+                ]),
+                _vm._v(" "),
+                _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+                  _vm._v("雇用形態や所属部署でフィルタリングして表示できます")
+                ])
+              ]
+            ),
             _vm._v(" "),
-            _c("div", { staticClass: "card-body" }, [_vm._v("test")])
+            _c("div", { staticClass: "card-body pt-2" }, [
+              _c("div", { staticClass: "row justify-content-between" }, [
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c("div", { staticClass: "input-group" }, [
+                    _c("div", { staticClass: "input-group-prepend" }, [
+                      _c(
+                        "span",
+                        {
+                          staticClass:
+                            "input-group-text font-size-sm line-height-xs label-width-90",
+                          attrs: { id: "basic-addon1" }
+                        },
+                        [_vm._v("指定年")]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("select", { staticClass: "custom-select" }, [
+                      _c("option", { attrs: { selected: "" } }),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
+                    ])
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c("div", { staticClass: "input-group" }, [
+                    _c("div", { staticClass: "input-group-prepend" }, [
+                      _c(
+                        "span",
+                        {
+                          staticClass:
+                            "input-group-text font-size-sm line-height-xs label-width-90",
+                          attrs: { id: "basic-addon1" }
+                        },
+                        [_vm._v("指定月")]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("select", { staticClass: "custom-select" }, [
+                      _c("option", { attrs: { selected: "" } }),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
+                    ])
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c("div", { staticClass: "input-group" }, [
+                    _c("div", { staticClass: "input-group-prepend" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass:
+                            "input-group-text font-size-sm line-height-xs label-width-90",
+                          attrs: { for: "inputGroupSelect01" }
+                        },
+                        [_vm._v("表示区分")]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("select", { staticClass: "custom-select" }, [
+                      _c("option", { attrs: { selected: "" } }),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
+                    ])
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c("div", { staticClass: "input-group" }, [
+                    _c("div", { staticClass: "input-group-prepend" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass:
+                            "input-group-text font-size-sm line-height-xs label-width-90",
+                          attrs: { for: "inputGroupSelect01" }
+                        },
+                        [_vm._v("雇用形態")]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("select", { staticClass: "custom-select" }, [
+                      _c("option", { attrs: { selected: "" } }),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
+                    ])
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c("div", { staticClass: "input-group" }, [
+                    _c("div", { staticClass: "input-group-prepend" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass:
+                            "input-group-text font-size-sm line-height-xs label-width-90",
+                          attrs: { for: "inputGroupSelect01" }
+                        },
+                        [_vm._v("所属部署")]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("select", { staticClass: "custom-select" }, [
+                      _c("option", { attrs: { selected: "" } }),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
+                    ])
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c("div", { staticClass: "input-group" }, [
+                    _c("div", { staticClass: "input-group-prepend" }, [
+                      _c(
+                        "label",
+                        {
+                          staticClass:
+                            "input-group-text font-size-sm line-height-xs label-width-90",
+                          attrs: { for: "inputGroupSelect01" }
+                        },
+                        [_vm._v("氏　　名")]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("select", { staticClass: "custom-select" }, [
+                      _c("option", { attrs: { selected: "" } }),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
+                      _vm._v(" "),
+                      _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
+                    ])
+                  ])
+                ])
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "row justify-content-between" }, [
+                _c("div", { staticClass: "col-md-12 pb-2" }, [
+                  _c("div", { staticClass: "btn-group d-flex" }, [
+                    _c(
+                      "button",
+                      {
+                        staticClass:
+                          "btn btn-primary btn-lg font-size-rg w-100",
+                        attrs: { type: "button" }
+                      },
+                      [_vm._v("この条件で表示する")]
+                    )
+                  ])
+                ])
+              ])
+            ])
+          ])
+        ])
+      ]),
+      _vm._v(" "),
+      _c("div", { staticClass: "row justify-content-between" }, [
+        _c("div", { staticClass: "col-md pt-3 align-self-stretch" }, [
+          _c("div", { staticClass: "card shadow-pl" }, [
+            _c(
+              "div",
+              {
+                staticClass:
+                  "card-header bg-transparent pt-3 border-0 print-none"
+              },
+              [
+                _c("h1", { staticClass: "float-md-left font-size-rg" }, [
+                  _vm._v("月次集計 2019年07月 〆日から集計")
+                ]),
+                _vm._v(" "),
+                _c("span", { staticClass: "float-md-right font-size-sm" }, [
+                  _vm._v(
+                    "虫眼鏡アイコンをクリックするとタイムカードが表示されます"
+                  )
+                ])
+              ]
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "card-body mb-3 py-0 pt-4 border-top print-none" },
+              [
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-md-12 pb-2" }, [
+                    _c("div", { staticClass: "btn-group d-flex" }, [
+                      _c(
+                        "button",
+                        {
+                          staticClass:
+                            "btn btn-success btn-lg font-size-rg w-100",
+                          attrs: { type: "button" }
+                        },
+                        [
+                          _c("img", {
+                            staticClass: "icon-size-sm mr-2 pb-1",
+                            attrs: {
+                              src: "/images/round-get-app-w.svg",
+                              alt: ""
+                            }
+                          }),
+                          _vm._v("集計結果をCSVファイルに出力する")
+                        ]
+                      )
+                    ])
+                  ])
+                ])
+              ]
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              {
+                staticClass:
+                  "card-body mb-3 py-0 pt-4 border-top print-only print-space"
+              },
+              [
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-md-12 pb-2" }, [
+                    _c("h1", { staticClass: "float-md-left font-size-rg" }, [
+                      _vm._v("三条印刷株式会社")
+                    ]),
+                    _vm._v(" "),
+                    _c("span", { staticClass: "float-md-right font-size-sm" }, [
+                      _vm._v("2019年07月")
+                    ])
+                  ])
+                ])
+              ]
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              {
+                staticClass: "card-body mb-3 py-0 pt-4 border-top print-space"
+              },
+              [
+                _c("div", { staticClass: "row" }, [
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "a",
+                        {
+                          staticClass:
+                            "float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg print-none",
+                          attrs: {
+                            "data-toggle": "collapse",
+                            href: "#collapseUser1",
+                            role: "button",
+                            "aria-expanded": "true",
+                            "aria-controls": "collapseUser1"
+                          }
+                        },
+                        [
+                          _c("img", {
+                            staticClass: "icon-size-rg",
+                            attrs: {
+                              src: "/images/round-search-w.svg",
+                              alt: ""
+                            }
+                          })
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                        _vm._v("氏名")
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "p",
+                        { staticClass: "font-size-rg font-weight-bold m-0" },
+                        [_vm._v("三条 丈太郎")]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "h1",
+                        { staticClass: "font-size-sm m-0 mb-1 text-sm-right" },
+                        [_vm._v("所属部署")]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "p",
+                        { staticClass: "font-size-rg m-0 text-sm-right" },
+                        [_vm._v("情報処理課")]
+                      )
+                    ]
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "row mt-2 print-none" }, [
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("雇用形態")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-rg m-0" }, [
+                              _vm._v("正社員")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("勤務時間")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("08:13")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-access-time-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("所定労働時間")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("08:00")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-access-time-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("所定外労働時間")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("08:00")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-watch-later-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("残業時間")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("00:13")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-watch-later-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("深夜残業時間")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("00:00")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-watch-later-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("法定労働時間")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("00:00")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-watch-later-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("法定外労働時間")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("00:00")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-watch-later-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("未就労時間")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("00:00")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-watch-later-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("時間外労働")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("00:00")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-watch-later-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("遅刻日数")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("00日")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-watch-later-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("早退日数")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("00日")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-watch-later-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("休暇日数")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("00日")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-watch-later-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("有給休暇日数")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("00日")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-error-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("時間外労働3ヵ月")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("00:00")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-error-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("時間外労働6ヵ月")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("00:00")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-error-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("時間外労働1年")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("00:00")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    {
+                      staticClass:
+                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                    },
+                    [
+                      _c(
+                        "div",
+                        {
+                          staticClass:
+                            "card text-secondary border border-secondary"
+                        },
+                        [
+                          _c("div", { staticClass: "card-body px-3 py-2" }, [
+                            _c(
+                              "span",
+                              { staticClass: "d-md-none float-left" },
+                              [
+                                _c("img", {
+                                  staticClass: "icon-size-ml mr-2",
+                                  attrs: {
+                                    src: "/images/round-error-b.svg",
+                                    alt: ""
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                              _vm._v("6ヵ月連続45時間")
+                            ]),
+                            _vm._v(" "),
+                            _c("p", { staticClass: "font-size-lg m-0" }, [
+                              _vm._v("超過")
+                            ])
+                          ])
+                        ]
+                      )
+                    ]
+                  )
+                ])
+              ]
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              {
+                staticClass: "collapse page-break-after",
+                attrs: { id: "collapseUser1" }
+              },
+              [
+                _c("div", { staticClass: "card-body mb-3 p-0 border-top" }, [
+                  _c("div", { staticClass: "row" }, [
+                    _c("div", { staticClass: "col-12" }, [
+                      _c("div", { staticClass: "table-responsive" }, [
+                        _c("div", { staticClass: "col-12 p-0" }, [
+                          _c(
+                            "table",
+                            {
+                              staticClass:
+                                "table table-striped border-bottom font-size-sm text-nowrap"
+                            },
+                            [
+                              _c("thead", [
+                                _c("tr", [
+                                  _c(
+                                    "td",
+                                    {
+                                      staticClass:
+                                        "text-center align-middle w-20"
+                                    },
+                                    [_vm._v("日付")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "td",
+                                    {
+                                      staticClass:
+                                        "text-center align-middle w-20"
+                                    },
+                                    [_vm._v("出勤時間")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "td",
+                                    {
+                                      staticClass:
+                                        "text-center align-middle w-20"
+                                    },
+                                    [_vm._v("退勤時間")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "td",
+                                    {
+                                      staticClass:
+                                        "text-center align-middle mw-rem-20"
+                                    },
+                                    [_vm._v("備考")]
+                                  )
+                                ])
+                              ]),
+                              _vm._v(" "),
+                              _c("tbody", [
+                                _c("tr", [
+                                  _c(
+                                    "td",
+                                    { staticClass: "text-center align-middle" },
+                                    [_vm._v("2019年07月01日（日）")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "td",
+                                    { staticClass: "text-center align-middle" },
+                                    [_vm._v("08:30")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "td",
+                                    { staticClass: "text-center align-middle" },
+                                    [_vm._v("18:00")]
+                                  ),
+                                  _vm._v(" "),
+                                  _c("td", {
+                                    staticClass: "text-center align-middle"
+                                  })
+                                ])
+                              ])
+                            ]
+                          )
+                        ])
+                      ])
+                    ])
+                  ])
+                ])
+              ]
+            )
           ])
         ])
       ])

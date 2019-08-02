@@ -3,7 +3,7 @@
   <div class="col-12 pb-2 align-self-stretch">
     <div class="card text-danger border border-danger">
       <div class="card-body px-3 py-2">
-        <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-error-w.svg" alt=""></span>
+        <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-error-b.svg" alt=""></span>
         <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>
         <p class="font-size-sm my-2">{{ this.itemValue }}</p>
       </div>
