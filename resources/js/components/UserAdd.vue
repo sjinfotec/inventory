@@ -184,39 +184,77 @@
           </div>
           <!-- /.row -->
           <!-- modal -->
-          <modal name="password-change" :width="800" :height="600" v-model="userCode">
+          <modal name="password-change" :width="800" v-model="userCode">
             <div class="card">
               <div class="card-header">パスワード変更</div>
               <div class="card-body">
-                <div v-if="errors.length">
-                  <ul class="error-red color-red">
-                    <li v-for="(error,index) in errors" v-bind:key="index">{{ error }}</li>
-                  </ul>
+                <!-- .row -->
+                <div class="row justify-content-between" v-if="errors.length">
+                  <!-- col -->
+                  <div class="col-md-12 pb-2">
+                    <ul class="error-red color-red">
+                      <li v-for="(error,index) in errors" v-bind:key="index">{{ error }}</li>
+                    </ul>
+                  </div>
+                  <!-- /.col -->
                 </div>
-                <div class="form-group col-md-6">
-                  <label for="shift_end" class>新しいパスワード</label>
-                  <input
-                    class="form-control"
-                    v-model="enterPass"
-                    maxlength="12"
-                    type="password"
-                    title="半角英数字12文字以内"
-                    pattern="^[a-zA-Z0-9]{6,12}$"
-                  />
+                <!-- /.row -->
+                <!-- .row -->
+                <div class="row justify-content-between">
+                  <!-- col -->
+                  <div class="col-md-12 pb-2">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text font-size-xs line-height-xs label-width-150">新しいパスワード</span>
+                      </div>
+                      <input
+                        class="form-control"
+                        v-model="enterPass"
+                        maxlength="12"
+                        type="password"
+                        title="半角英数字12文字以内"
+                        pattern="^[a-zA-Z0-9]{6,12}$"
+                      />
+                    </div>
+                  </div>
+                  <!-- /.col -->
+                  <!-- col -->
+                  <div class="col-md-12 pb-2">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text font-size-xs line-height-xs label-width-150">新しいパスワード（再入力）</span>
+                      </div>
+                      <input
+                        class="form-control"
+                        v-model="reEnterPass"
+                        maxlength="12"
+                        type="password"
+                        title="半角英数字12文字以内"
+                        pattern="^[a-zA-Z0-9]{6,12}$"
+                      />
+                    </div>
+                  </div>
+                  <!-- /.col -->
                 </div>
-                <div class="form-group col-md-6">
-                  <label for="shift_end" class>新しいパスワード（再入力）</label>
-                  <input
-                    class="form-control"
-                    v-model="reEnterPass"
-                    maxlength="12"
-                    type="password"
-                    title="半角英数字12文字以内"
-                    pattern="^[a-zA-Z0-9]{6,12}$"
-                  />
+                <!-- /.row -->
+                <!-- .row -->
+                <div class="row justify-content-between">
+                  <!-- col -->
+                  <div class="col-md-12 pb-2">
+                    <div class="btn-group d-flex">
+                      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" v-on:click="alertPassConf('warning')">パスワードを変更</button>
+                    </div>
+                  </div>
+                  <!-- /.col -->
+                  <!-- col -->
+                  <div class="col-md-12 pb-2">
+                    <div class="btn-group d-flex">
+                      <button type="button" class="btn btn-warning btn-lg font-size-rg w-100" v-on:click="hide">キャンセル</button>
+                    </div>
+                  </div>
+                  <!-- /.col -->
                 </div>
-                <button class="btn btn-success" v-on:click="alertPassConf('warning')">確定</button>
-                <button class="btn btn-warning" v-on:click="hide">キャンセル</button>
+                <!-- /.row -->
               </div>
             </div>
           </modal>
