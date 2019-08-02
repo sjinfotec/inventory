@@ -1,184 +1,246 @@
 <template>
-<div>
-  <!-- main contentns row -->
-  <div class="row justify-content-between">
-    <!-- .panel -->
-    <div class="col-md pt-3">
-      <div class="card shadow-pl">
-        <!-- panel header -->
-        <div class="card-header bg-transparent pb-0 border-0">
-          <h1 class="float-sm-left font-size-rg">ユーザー登録および編集</h1>
-          <span class="float-sm-right font-size-sm">ユーザーを選択すると登録済みのユーザー情報を編集できます</span>
-        </div>
-        <!-- /.panel header -->
-        <div class="card-body pt-2">
-          <!-- panel contents -->
-          <fvl-form
-            method="post"
-            :data="form"
-            url="/user_add/store"
-            @success="addSuccess()"
-            @error="error()"
-          >
-          <!-- .row -->
-          <div class="row justify-content-between">
-            <!-- .col -->
-            <div class="col-12 pb-2">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">ユーザー</span>
-                </div>
-                <fvl-search-select
-                  :selected.sync="userCode"
-                  class="p-0"
-                  name="userCode"
-                  :options="userList"
-                  placeholder="ユーザーを選択すると編集モードになります"
-                  :allowEmpty="true"
-                  :search-keys="['code']"
-                  option-key="code"
-                  option-value="name"
-                />
-              </div>
-            </div>
-            <!-- /.col -->
-            <!-- .col -->
-            <div class="col-md-6 pb-2">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">社員名</span>
-                </div>
-                <input type="text" class="form-control" :value.sync="form.name" label="社員名" name="name">
-              </div>
-            </div>
-            <!-- /.col -->
-            <!-- .col -->
-            <div class="col-md-6 pb-2">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">ふりがな</span>
-                </div>
-                <input type="text" class="form-control" :value.sync="form.kana" label="ふりがな" name="kana">
-              </div>
-            </div>
-            <!-- /.col -->
-            <!-- .col -->
-            <div class="col-md-6 pb-2">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">ログインID</span>
-                </div>
-                <input type="text" class="form-control" :value.sync="form.code" label="ログインID" name="code" title="半角英数字4-10文字" pattern="^[a-zA-Z0-9]{4,10}$">
-              </div>
-            </div>
-            <!-- /.col -->
-            <!-- .col -->
-            <div class="col-md-6 pb-2" v-if="userCode=='' || userCode == null ">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">パスワード</span>
-                </div>
-                <input type="text" class="form-control" :value.sync="form.password" label="パスワード" name="password" title="半角英数字6-12文字" pattern="^[a-zA-Z0-9]{6,12}$">
-              </div>
-            </div>
-            <!-- /.col -->
-            <!-- .col -->
-            <div class="col-md-6 pb-2">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">メールアドレス</span>
-                </div>
-                <input type="text" class="form-control" :value.sync="form.email" label="メールアドレス" name="email">
-              </div>
-            </div>
-            <!-- /.col -->
-            <!-- .col -->
-            <div class="col-md-6 pb-2">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">所属部署</span>
-                </div>
-                <fvl-search-select
-                  :selected.sync="form.departmentCode"
-                  class="p-0"
-                  name="departmentCode"
-                  :options="departmentList"
-                  :search-keys="['name']"
-                  option-key="id"
-                  option-value="name"
-                />
-              </div>
-            </div>
-            <!-- /.col -->
-            <!-- .col -->
-            <div class="col-md-6 pb-2">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">雇用形態</span>
-                </div>
-                <fvl-search-select
-                  :selected.sync="form.status"
-                  class="p-0"
-                  name="status"
-                  :options="employStatusList"
-                  :search-keys="['code']"
-                  option-key="code"
-                  option-value="code_name"
-                />
-              </div>
-            </div>
-            <!-- /.col -->
-            <!-- .col -->
-            <div class="col-md-6 pb-2">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">通常勤務時間</span>
-                </div>
-                <fvl-search-select
-                  :selected.sync="form.table_no"
-                  class="p-0"
-                  name="timetable_no"
-                  :options="timeTableList"
-                  :search-keys="['name']"
-                  option-key="no"
-                  option-value="name"
-                />
-              </div>
-            </div>
-            <!-- /.col -->
+  <div>
+    <!-- main contentns row -->
+    <div class="row justify-content-between">
+      <!-- .panel -->
+      <div class="col-md pt-3">
+        <div class="card shadow-pl">
+          <!-- panel header -->
+          <div class="card-header bg-transparent pb-0 border-0">
+            <h1 class="float-sm-left font-size-rg">ユーザー登録および編集</h1>
+            <span class="float-sm-right font-size-sm">ユーザーを選択すると登録済みのユーザー情報を編集できます</span>
           </div>
-          <!-- /.row -->
-          <!-- .row -->
-          <div class="row justify-content-between">
-            <!-- col -->
-            <div class="col-md-12 pb-2">
-              <div class="btn-group d-flex">
-                <button type="submit" class="btn btn-success" v-if="userCode=='' || userCode==null ">追加</button>
-                <button type="submit" class="btn btn-success" id="edit" v-if="userCode != ''">編集</button>
+          <!-- /.panel header -->
+          <div class="card-body pt-2">
+            <!-- panel contents -->
+            <fvl-form
+              method="post"
+              :data="form"
+              url="/user_add/store"
+              @success="addSuccess()"
+              @error="error()"
+            >
+              <!-- .row -->
+              <div class="row justify-content-between">
+                <!-- .col -->
+                <div class="col-12 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        id="basic-addon1"
+                      >ユーザー</span>
+                    </div>
+                    <fvl-search-select
+                      :selected.sync="userCode"
+                      class="p-0"
+                      name="userCode"
+                      :options="userList"
+                      placeholder="ユーザーを選択すると編集モードになります"
+                      :allowEmpty="true"
+                      :search-keys="['code']"
+                      option-key="code"
+                      option-value="name"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        id="basic-addon1"
+                      >社員名</span>
+                    </div>
+                    <fvl-input
+                      type="text"
+                      class="form-control p-0"
+                      :value.sync="form.name"
+                      name="name"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        id="basic-addon1"
+                      >ふりがな</span>
+                    </div>
+                    <fvl-input
+                      type="text"
+                      class="form-control p-0"
+                      :value.sync="form.kana"
+                      name="kana"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        id="basic-addon1"
+                      >ログインID</span>
+                    </div>
+                    <fvl-input
+                      type="text"
+                      class="form-control p-0"
+                      :value.sync="form.code"
+                      name="code"
+                      title="半角英数字4-10文字"
+                      pattern="^[a-zA-Z0-9]{4,10}$"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2" v-if="userCode=='' || userCode == null ">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        id="basic-addon1"
+                      >パスワード</span>
+                    </div>
+                    <fvl-input
+                      type="text"
+                      class="form-control p-0"
+                      :value.sync="form.password"
+                      name="password"
+                      title="半角英数字6-12文字"
+                      pattern="^[a-zA-Z0-9]{6,12}$"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        id="basic-addon1"
+                      >メールアドレス</span>
+                    </div>
+                    <fvl-input
+                      type="text"
+                      class="form-control p-0"
+                      :value.sync="form.email"
+                      name="email"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        id="basic-addon1"
+                      >所属部署</span>
+                    </div>
+                    <fvl-search-select
+                      :selected.sync="form.departmentCode"
+                      class="p-0"
+                      name="departmentCode"
+                      :options="departmentList"
+                      :search-keys="['name']"
+                      option-key="id"
+                      option-value="name"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        id="basic-addon1"
+                      >雇用形態</span>
+                    </div>
+                    <fvl-search-select
+                      :selected.sync="form.status"
+                      class="p-0"
+                      name="status"
+                      :options="employStatusList"
+                      :search-keys="['code']"
+                      option-key="code"
+                      option-value="code_name"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        id="basic-addon1"
+                      >通常勤務時間</span>
+                    </div>
+                    <fvl-search-select
+                      :selected.sync="form.table_no"
+                      class="p-0"
+                      name="timetable_no"
+                      :options="timeTableList"
+                      :search-keys="['name']"
+                      option-key="no"
+                      option-value="name"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
               </div>
+              <!-- /.row -->
+              <!-- .row -->
+              <div class="row justify-content-between">
+                <!-- col -->
+                <div class="col-md-12 pb-2">
+                  <div class="btn-group d-flex">
+                    <button
+                      type="submit"
+                      class="btn btn-success"
+                      v-if="userCode=='' || userCode==null "
+                    >追加</button>
+                    <button type="submit" class="btn btn-success" id="edit" v-if="userCode != ''">編集</button>
+                  </div>
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+            </fvl-form>
+            <!-- .row -->
+            <div class="row justify-content-between" v-if="userCode != ''">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <div class="btn-group d-flex">
+                  <button class="btn btn-danger" @click="alertDelConf('warning')">削除</button>
+                </div>
+              </div>
+              <!-- /.col -->
             </div>
-            <!-- /.col -->
-          </div>
-          <!-- /.row -->
-          </fvl-form>
-          <!-- .row -->
-          <div class="row justify-content-between" v-if="userCode != ''">
-            <!-- col -->
-            <div class="col-md-12 pb-2">
-              <div class="btn-group d-flex">
-                <button class="btn btn-danger" @click="alertDelConf('warning')">削除</button>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between" v-if="userCode != ''">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <div class="btn-group d-flex">
+                  <button class="btn btn-success" v-on:click="show">パスワード変更</button>
+                </div>
               </div>
-            </div>
-            <!-- /.col -->
-          </div>
-          <!-- /.row -->
-          <!-- .row -->
-          <div class="row justify-content-between" v-if="userCode != ''">
-            <!-- col -->
-            <div class="col-md-12 pb-2">
-              <div class="btn-group d-flex">
-                <button class="btn btn-success" v-on:click="show">パスワード変更</button>
-              </div>
+              <!-- /.col -->
             </div>
             <!-- /.col -->
           </div>
@@ -227,7 +289,6 @@
     <!-- /.panel -->
   </div>
   <!-- main contentns row -->
-</div>
 </template>
 <script>
 import toasted from "vue-toasted";
@@ -495,6 +556,7 @@ export default {
       this.form.departmentCode = "";
       this.form.status = "";
       this.form.table_no = "";
+      this.userCode = "";
     },
     inputPassClear() {
       this.enterPass = "";

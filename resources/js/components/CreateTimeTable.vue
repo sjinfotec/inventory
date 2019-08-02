@@ -48,7 +48,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">タイムテーブルNO</span>
                 </div>
-                <input type="text" class="form-control" :value.sync="form.no" label="タイムテーブルNo" name="no">
+                <fvl-input type="text" class="form-control p-0" :value.sync="form.no" name="no"/>
               </div>
             </div>
             <!-- /.col -->
@@ -58,7 +58,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">タイムテーブルNO</span>
                 </div>
-                <input type="text" class="form-control" :value.sync="form.no" label="タイムテーブルNo (編集不可)" name="no" readonly="true">
+                <input type="text" class="form-control" :value.sync="form.no" name="no" readonly="true"/>
               </div>
             </div>
             <!-- /.col -->
@@ -68,7 +68,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">タイムテーブル名</span>
                 </div>
-                <input type="text" class="form-control" :value.sync="form.name" label="タイムテーブル名称" name="name">
+                <fvl-input type="text" class="form-control p-0" :value.sync="form.name" name="name"/>
               </div>
             </div>
             <!-- /.col -->
@@ -78,7 +78,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">所定労働開始時間</span>
                 </div>
-                <input type="time" class="form-control" :value.sync="form.regularFrom" label="所定労働時間" name="syoteifrom">
+                <fvl-input type="time" class="form-control p-0" :value.sync="form.regularFrom" name="syoteifrom"/>
               </div>
             </div>
             <!-- /.col -->
@@ -88,7 +88,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">所定労働終了時間</span>
                 </div>
-                <input type="time" class="form-control" :value.sync="form.regularTo" label=" " name="syoteito">
+                <fvl-input type="time" class="form-control p-0" :value.sync="form.regularTo" name="syoteito"/>
               </div>
             </div>
             <!-- /.col -->
@@ -112,7 +112,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">休憩開始時間 A</span>
                 </div>
-                <input class="form-control" type="time" :value.sync="form.regularRestFrom1" label="所定労働時間内休憩　２パターンまで" name="syoteifrom">
+                <fvl-input class="form-control p-0" type="time" :value.sync="form.regularRestFrom1" name="syoteifrom"/>
               </div>
             </div>
             <!-- /.col -->
@@ -122,7 +122,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">休憩終了時間 A</span>
                 </div>
-                <input class="form-control" :value.sync="form.regularRestTo1" label=" " name="syoteito">
+                <fvl-input class="form-control p-0" type="time" :value.sync="form.regularRestTo1" name="syoteito"/>
               </div>
             </div>
             <!-- /.col -->
@@ -132,7 +132,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">休憩開始時間 B</span>
                 </div>
-                <input type="time" class="form-control" :value.sync="form.regularRestFrom2" label="　" name="syoteifrom">
+                <fvl-input type="time" class="form-control p-0" :value.sync="form.regularRestFrom2" name="syoteifrom"/>
               </div>
             </div>
             <!-- /.col -->
@@ -142,7 +142,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">休憩終了時間 B</span>
                 </div>
-                <input type="time" class="form-control" :value.sync="form.regularRestTo2" label=" " name="syoteito">
+                <fvl-input type="time" class="form-control p-0" :value.sync="form.regularRestTo2" name="syoteito"/>
               </div>
             </div>
             <!-- /.col -->
@@ -166,7 +166,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">残業開始時間 A</span>
                 </div>
-                <input type="time" class="form-control" :value.sync="form.irregularFrom1" label="所定外労働時間　３パターンまで" name="syoteifrom">
+                <fvl-input type="time" class="form-control p-0" :value.sync="form.irregularFrom1" name="syoteifrom"/>
               </div>
             </div>
             <!-- /.col -->
@@ -176,7 +176,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">残業終了時間 A</span>
                 </div>
-                <input type="time" class="form-control" :value.sync="form.irregularTo1" label=" " name="syoteito">
+                <fvl-input type="time" class="form-control p-0" :value.sync="form.irregularTo1" name="syoteito"/>
               </div>
             </div>
             <!-- /.col -->
@@ -186,7 +186,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">残業開始時間 B</span>
                 </div>
-                <input type="time" class="form-control" :value.sync="form.irregularFrom2" label="　" name="syoteifrom">
+                <fvl-input type="time" class="form-control p-0" :value.sync="form.irregularFrom2" name="syoteifrom"/>
               </div>
             </div>
             <!-- /.col -->
@@ -196,7 +196,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">残業終了時間 B</span>
                 </div>
-                <input type="time" class="form-control" :value.sync="form.irregularTo2" label=" " name="syoteito">
+                <fvl-input type="time" class="form-control p-0" :value.sync="form.irregularTo2" name="syoteito"/>
               </div>
             </div>
             <!-- /.col -->
@@ -206,7 +206,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">残業開始時間 C</span>
                 </div>
-                <input type="time" class="form-control" :value.sync="form.irregularFrom3" label="　" name="syoteifrom">
+                <fvl-input type="time" class="form-control p-0" :value.sync="form.irregularFrom3" name="syoteifrom"/>
               </div>
             </div>
             <!-- /.col -->
@@ -216,7 +216,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">残業終了時間 C</span>
                 </div>
-                <input type="time" class="form-control" :value.sync="form.irregularTo3" label=" " name="syoteito">
+                <fvl-input type="time" class="form-control p-0" :value.sync="form.irregularTo3" name="syoteito"/>
               </div>
             </div>
             <!-- /.col -->
@@ -239,7 +239,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">深夜残業開始時間</span>
                 </div>
-                <input type="time" class="form-control" :value.sync="form.irregularMidNightFrom"　label="所定外深夜労働時間"　name="syoteifrom">
+                <fvl-input type="time" class="form-control p-0" :value.sync="form.irregularMidNightFrom" name="syoteifrom"/>
               </div>
             </div>
             <!-- /.col -->
@@ -249,7 +249,7 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">深夜残業終了時間</span>
                 </div>
-                <input type="time" class="form-control" :value.sync="form.irregularMidNightTo"　label=" "　name="syoteito">
+                <fvl-input type="time" class="form-control p-0" :value.sync="form.irregularMidNightTo" name="syoteito"/>
               </div>
             </div>
             <!-- /.col -->

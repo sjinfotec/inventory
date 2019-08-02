@@ -11254,6 +11254,39 @@ body {
   line-height: 0.75;
 }
 
+.fvl-input-wrapper {
+  padding: 0;
+}
+
+.fvl-input {
+  padding: 0.55rem 0.75rem;
+  background-color: #FFFFFF;
+  border: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.fvl-input[type=time] {
+  padding: 0.4rem 0.75rem;
+}
+
+.radius .fvl-input {
+  border-radius: 0.25rem;
+}
+
+.input-group-text {
+  height: 2.29rem !important;
+}
+
+.fvl-has-error {
+  margin-bottom: 1.4rem !important;
+  display: block !important;
+}
+
+.fvl-checkbox-error-message {
+  text-align: right !important;
+}
+
 /* vue datepicker */
 
 .vdp-datepicker {
@@ -11282,9 +11315,8 @@ body {
 .vdp-datepicker div .vdp-datepicker__clear-button {
   position: absolute;
   right: 8px;
-  bottom: 6px;
+  top: 10px;
   height: 36px;
-  border: 1px solid #ced4da;
   line-height: 0.75;
 }
 
