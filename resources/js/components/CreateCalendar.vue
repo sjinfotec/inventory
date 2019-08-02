@@ -1,15 +1,71 @@
 <template>
-  <!-- panel body -->
-  <div class="panel-body">
-    <v-date-picker v-model="dates" mode="multiple" is-inline is-expanded />
-    <select-business-day v-bind:blank-data="true" v-on:change-event="businessDayChanges"></select-business-day>
-    <select-holi-day
-      v-if="valueBusinessDay==2"
-      v-bind:blank-data="true"
-      v-on:change-event="holiDayChanges"
-    ></select-holi-day>
-    <button class="btn btn-success" @click="store()">登録</button>
+<div>
+  <!-- main contentns row -->
+  <div class="row justify-content-between">
+    <!-- .panel -->
+    <div class="col-md pt-3">
+      <div class="card shadow-pl">
+        <!-- panel header -->
+        <div class="card-header bg-transparent pb-0 border-0">
+          <h1 class="float-sm-left font-size-rg">日付選択</h1>
+          <span class="float-sm-right font-size-sm">複数の日付を選択できます</span>
+        </div>
+        <!-- /.panel header -->
+        <div class="card-body pt-2">
+          <!-- panel contents -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- .col -->
+            <div class="col-12 pb-2">
+              <v-date-picker v-model="dates" mode="multiple" is-inline is-expanded />
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between px-3">
+            <!-- panel header -->
+            <div class="card-header col-12 bg-transparent pb-2 border-0 px-0">
+              <h1 class="float-sm-left font-size-rg">区分選択</h1>
+              <span class="float-sm-right font-size-sm">会社の定めた休日や出勤日を設定できます</span>
+            </div>
+            <!-- /.panel header -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- .col -->
+            <div class="col-12 pb-2">
+              <select-business-day v-bind:blank-data="true" v-on:change-event="businessDayChanges"></select-business-day>
+            </div>
+            <!-- /.col -->
+            <!-- .col -->
+            <div class="col-12 pb-2" v-if="valueBusinessDay==2">
+              <select-holi-day v-bind:blank-data="true" v-on:change-event="holiDayChanges" ></select-holi-day>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="row justify-content-between">
+            <!-- col -->
+            <div class="col-md-12 pb-2">
+              <div class="btn-group d-flex">
+                <button type="button" class="btn btn-success btn-lg font-size-rg w-100" @click="store()">この条件で登録する</button>
+              </div>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+        </div>
+          <!-- /.panel contents -->
+        </div>
+      </div>
+    </div>
+    <!-- /.panel -->
   </div>
+  <!-- /main contentns row -->
+</div>
 </template>
 <script>
 import toasted from "vue-toasted";

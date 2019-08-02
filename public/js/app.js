@@ -2137,6 +2137,62 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "CreateCalendar",
@@ -2217,6 +2273,135 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var formvuelar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! formvuelar */ "./node_modules/formvuelar/dist/formvuelar.common.js");
 /* harmony import */ var formvuelar__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(formvuelar__WEBPACK_IMPORTED_MODULE_1__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2336,6 +2521,11 @@ var _components;
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+//
+//
+//
+//
+//
 //
 //
 //
@@ -3742,6 +3932,85 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "EditCalendar",
@@ -4468,6 +4737,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "selectedBusinessDay",
   props: {
@@ -4631,6 +4902,8 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
 //
 //
 //
@@ -76955,50 +77228,132 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    { staticClass: "panel-body" },
-    [
-      _c("v-date-picker", {
-        attrs: { mode: "multiple", "is-inline": "", "is-expanded": "" },
-        model: {
-          value: _vm.dates,
-          callback: function($$v) {
-            _vm.dates = $$v
-          },
-          expression: "dates"
-        }
-      }),
-      _vm._v(" "),
-      _c("select-business-day", {
-        attrs: { "blank-data": true },
-        on: { "change-event": _vm.businessDayChanges }
-      }),
-      _vm._v(" "),
-      _vm.valueBusinessDay == 2
-        ? _c("select-holi-day", {
-            attrs: { "blank-data": true },
-            on: { "change-event": _vm.holiDayChanges }
-          })
-        : _vm._e(),
-      _vm._v(" "),
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-success",
-          on: {
-            click: function($event) {
-              return _vm.store()
-            }
-          }
-        },
-        [_vm._v("登録")]
-      )
-    ],
-    1
-  )
+  return _c("div", [
+    _c("div", { staticClass: "row justify-content-between" }, [
+      _c("div", { staticClass: "col-md pt-3" }, [
+        _c("div", { staticClass: "card shadow-pl" }, [
+          _vm._m(0),
+          _vm._v(" "),
+          _c("div", { staticClass: "card-body pt-2" }, [
+            _c("div", { staticClass: "row justify-content-between" }, [
+              _c(
+                "div",
+                { staticClass: "col-12 pb-2" },
+                [
+                  _c("v-date-picker", {
+                    attrs: {
+                      mode: "multiple",
+                      "is-inline": "",
+                      "is-expanded": ""
+                    },
+                    model: {
+                      value: _vm.dates,
+                      callback: function($$v) {
+                        _vm.dates = $$v
+                      },
+                      expression: "dates"
+                    }
+                  })
+                ],
+                1
+              )
+            ]),
+            _vm._v(" "),
+            _vm._m(1),
+            _vm._v(" "),
+            _c("div", { staticClass: "row justify-content-between" }, [
+              _c(
+                "div",
+                { staticClass: "col-12 pb-2" },
+                [
+                  _c("select-business-day", {
+                    attrs: { "blank-data": true },
+                    on: { "change-event": _vm.businessDayChanges }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _vm.valueBusinessDay == 2
+                ? _c(
+                    "div",
+                    { staticClass: "col-12 pb-2" },
+                    [
+                      _c("select-holi-day", {
+                        attrs: { "blank-data": true },
+                        on: { "change-event": _vm.holiDayChanges }
+                      })
+                    ],
+                    1
+                  )
+                : _vm._e()
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "row justify-content-between" }, [
+              _c("div", { staticClass: "col-md-12 pb-2" }, [
+                _c("div", { staticClass: "btn-group d-flex" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-success btn-lg font-size-rg w-100",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.store()
+                        }
+                      }
+                    },
+                    [_vm._v("この条件で登録する")]
+                  )
+                ])
+              ])
+            ])
+          ])
+        ])
+      ])
+    ])
+  ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "card-header bg-transparent pb-0 border-0" },
+      [
+        _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+          _vm._v("日付選択")
+        ]),
+        _vm._v(" "),
+        _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+          _vm._v("複数の日付を選択できます")
+        ])
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "row justify-content-between px-3" }, [
+      _c(
+        "div",
+        { staticClass: "card-header col-12 bg-transparent pb-2 border-0 px-0" },
+        [
+          _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+            _vm._v("区分選択")
+          ]),
+          _vm._v(" "),
+          _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+            _vm._v("会社の定めた休日や出勤日を設定できます")
+          ])
+        ]
+      )
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -77020,166 +77375,437 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    { staticClass: "panel-body" },
-    [
-      _c(
-        "fvl-form",
-        {
-          attrs: {
-            method: "post",
-            data: _vm.form,
-            url: "/create_company_information/store"
-          },
-          on: {
-            success: function($event) {
-              return _vm.addSuccess()
-            },
-            error: function($event) {
-              return _vm.error()
-            }
-          }
-        },
-        [
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.companyName,
-              label: "会社名",
-              name: "companyName"
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "companyName", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.companyKana,
-              label: "会社カナ",
-              name: "companyKana"
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "companyKana", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.postCode,
-              label: "郵便番号",
-              name: "postCode"
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "postCode", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.address1,
-              label: "住所１",
-              name: "address1"
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "address1", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.address2,
-              label: "住所２",
-              name: "address2"
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "address2", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.addressKana,
-              label: "住所カナ",
-              name: "addressKana"
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "addressKana", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: { value: _vm.form.tell, label: "電話番号", name: "tell" },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "tell", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: { value: _vm.form.fax, label: "FAX", name: "fax" },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "fax", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.representativeName,
-              label: "代表者氏名",
-              name: "representativeName"
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "representativeName", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: {
-              value: _vm.form.representativeKana,
-              label: "代表者カナ",
-              name: "representativeKana"
-            },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "representativeKana", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-input", {
-            attrs: { value: _vm.form.email, label: "e-mail", name: "email" },
-            on: {
-              "update:value": function($event) {
-                return _vm.$set(_vm.form, "email", $event)
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c("fvl-submit", [_vm._v("登録")])
-        ],
-        1
-      )
-    ],
-    1
-  )
+  return _c("div", [
+    _c("div", { staticClass: "row justify-content-between" }, [
+      _c("div", { staticClass: "col-md pt-3" }, [
+        _c(
+          "div",
+          { staticClass: "card shadow-pl" },
+          [
+            _c(
+              "fvl-form",
+              {
+                attrs: {
+                  method: "post",
+                  data: _vm.form,
+                  url: "/create_company_information/store"
+                },
+                on: {
+                  success: function($event) {
+                    return _vm.addSuccess()
+                  },
+                  error: function($event) {
+                    return _vm.error()
+                  }
+                }
+              },
+              [
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "card-header clearfix bg-transparent pb-0 border-0"
+                  },
+                  [
+                    _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+                      _vm._v("会社情報")
+                    ]),
+                    _vm._v(" "),
+                    _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+                      _vm._v("会社所在地や連絡先を設定できます")
+                    ])
+                  ]
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "card-body pt-2" }, [
+                  _c("div", { staticClass: "row justify-content-between" }, [
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-150"
+                              },
+                              [_vm._v("会社名")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-input", {
+                            staticClass: "form-control p-0",
+                            attrs: {
+                              value: _vm.form.companyName,
+                              name: "companyName"
+                            },
+                            on: {
+                              "update:value": function($event) {
+                                return _vm.$set(_vm.form, "companyName", $event)
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-150"
+                              },
+                              [_vm._v("会社カナ")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-input", {
+                            staticClass: "form-control p-0",
+                            attrs: {
+                              value: _vm.form.companyKana,
+                              name: "companyKana"
+                            },
+                            on: {
+                              "update:value": function($event) {
+                                return _vm.$set(_vm.form, "companyKana", $event)
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-150"
+                              },
+                              [_vm._v("郵便番号")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-input", {
+                            staticClass: "form-control p-0",
+                            attrs: {
+                              value: _vm.form.postCode,
+                              name: "postCode"
+                            },
+                            on: {
+                              "update:value": function($event) {
+                                return _vm.$set(_vm.form, "postCode", $event)
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-150"
+                              },
+                              [_vm._v("住所１")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-input", {
+                            staticClass: "form-control p-0",
+                            attrs: {
+                              value: _vm.form.address1,
+                              name: "address1"
+                            },
+                            on: {
+                              "update:value": function($event) {
+                                return _vm.$set(_vm.form, "address1", $event)
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-150"
+                              },
+                              [_vm._v("住所２")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-input", {
+                            staticClass: "form-control p-0",
+                            attrs: {
+                              value: _vm.form.address2,
+                              name: "address2"
+                            },
+                            on: {
+                              "update:value": function($event) {
+                                return _vm.$set(_vm.form, "address2", $event)
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-150"
+                              },
+                              [_vm._v("住所カナ")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-input", {
+                            staticClass: "form-control p-0",
+                            attrs: {
+                              value: _vm.form.addressKana,
+                              name: "addressKana"
+                            },
+                            on: {
+                              "update:value": function($event) {
+                                return _vm.$set(_vm.form, "addressKana", $event)
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-150"
+                              },
+                              [_vm._v("電話番号")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-input", {
+                            staticClass: "form-control p-0",
+                            attrs: { value: _vm.form.tell, name: "tell" },
+                            on: {
+                              "update:value": function($event) {
+                                return _vm.$set(_vm.form, "tell", $event)
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-150"
+                              },
+                              [_vm._v("FAX")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-input", {
+                            staticClass: "form-control p-0",
+                            attrs: { value: _vm.form.fax, name: "fax" },
+                            on: {
+                              "update:value": function($event) {
+                                return _vm.$set(_vm.form, "fax", $event)
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-150"
+                              },
+                              [_vm._v("代表者氏名")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-input", {
+                            staticClass: "form-control p-0",
+                            attrs: {
+                              value: _vm.form.representativeName,
+                              name: "representativeName"
+                            },
+                            on: {
+                              "update:value": function($event) {
+                                return _vm.$set(
+                                  _vm.form,
+                                  "representativeName",
+                                  $event
+                                )
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-150"
+                              },
+                              [_vm._v("代表者カナ")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-input", {
+                            staticClass: "form-control p-0",
+                            attrs: {
+                              value: _vm.form.representativeKana,
+                              name: "representativeKana"
+                            },
+                            on: {
+                              "update:value": function($event) {
+                                return _vm.$set(
+                                  _vm.form,
+                                  "representativeKana",
+                                  $event
+                                )
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-150"
+                              },
+                              [_vm._v("E-mail")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-input", {
+                            staticClass: "form-control p-0",
+                            attrs: { value: _vm.form.email, name: "email" },
+                            on: {
+                              "update:value": function($event) {
+                                return _vm.$set(_vm.form, "email", $event)
+                              }
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "row justify-content-between" }, [
+                    _c("div", { staticClass: "col-md-12 pb-2" }, [
+                      _c("div", { staticClass: "btn-group d-flex" }, [
+                        _c(
+                          "button",
+                          {
+                            staticClass:
+                              "btn btn-success btn-lg font-size-rg w-100",
+                            attrs: { type: "submit" }
+                          },
+                          [_vm._v("この内容で入力する")]
+                        )
+                      ])
+                    ])
+                  ])
+                ])
+              ]
+            )
+          ],
+          1
+        )
+      ])
+    ])
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -77232,31 +77858,46 @@ var render = function() {
                 },
                 [
                   _c("div", { staticClass: "row justify-content-between" }, [
-                    _c(
-                      "div",
-                      { staticClass: "col-md-6 pb-2" },
-                      [
-                        _c("fvl-search-select", {
-                          staticClass: "p-0",
-                          attrs: {
-                            selected: _vm.selectId,
-                            name: "selectId",
-                            options: _vm.departmentList,
-                            placeholder: "部署を選択すると編集モードになります",
-                            allowEmpty: true,
-                            "search-keys": ["id"],
-                            "option-key": "id",
-                            "option-value": "name"
-                          },
-                          on: {
-                            "update:selected": function($event) {
-                              _vm.selectId = $event
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-sm line-height-xs label-width-150",
+                                attrs: { id: "basic-addon1" }
+                              },
+                              [_vm._v("期首月")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("fvl-search-select", {
+                            staticClass: "p-0",
+                            attrs: {
+                              selected: _vm.selectId,
+                              name: "selectId",
+                              options: _vm.departmentList,
+                              placeholder:
+                                "部署を選択すると編集モードになります",
+                              allowEmpty: true,
+                              "search-keys": ["id"],
+                              "option-key": "id",
+                              "option-value": "name"
+                            },
+                            on: {
+                              "update:selected": function($event) {
+                                _vm.selectId = $event
+                              }
                             }
-                          }
-                        })
-                      ],
-                      1
-                    ),
+                          })
+                        ],
+                        1
+                      )
+                    ]),
                     _vm._v(" "),
                     _c("div", { staticClass: "col-md-6 pb-2" }, [
                       _c(
@@ -79099,231 +79740,308 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "panel-body" }, [
-    _c("div", { staticClass: "row" }, [
-      _c("div", { staticClass: "form-group col-md-5" }, [
-        _c("label", { attrs: { for: "business_kubun" } }, [_vm._v("年")]),
-        _vm._v(" "),
-        _c(
-          "select",
-          {
-            directives: [
-              {
-                name: "model",
-                rawName: "v-model",
-                value: _vm.year,
-                expression: "year"
-              }
-            ],
-            staticClass: "form-control",
-            on: {
-              change: function($event) {
-                var $$selectedVal = Array.prototype.filter
-                  .call($event.target.options, function(o) {
-                    return o.selected
-                  })
-                  .map(function(o) {
-                    var val = "_value" in o ? o._value : o.value
-                    return val
-                  })
-                _vm.year = $event.target.multiple
-                  ? $$selectedVal
-                  : $$selectedVal[0]
-              }
-            }
-          },
-          _vm._l(20, function(n) {
-            return _c("option", { domProps: { value: n + _vm.baseYear - 1 } }, [
-              _vm._v(_vm._s(n + _vm.baseYear - 1) + "年")
+  return _c("div", [
+    _c("div", { staticClass: "row justify-content-between" }, [
+      _c("div", { staticClass: "col-md pt-3" }, [
+        _c("div", { staticClass: "card shadow-pl" }, [
+          _vm._m(0),
+          _vm._v(" "),
+          _c("div", { staticClass: "card-body pt-2" }, [
+            _c("div", { staticClass: "row justify-content-between" }, [
+              _c("div", { staticClass: "col-md-6 pb-2" }, [
+                _c("div", { staticClass: "input-group" }, [
+                  _vm._m(1),
+                  _vm._v(" "),
+                  _c(
+                    "select",
+                    {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.year,
+                          expression: "year"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      on: {
+                        change: function($event) {
+                          var $$selectedVal = Array.prototype.filter
+                            .call($event.target.options, function(o) {
+                              return o.selected
+                            })
+                            .map(function(o) {
+                              var val = "_value" in o ? o._value : o.value
+                              return val
+                            })
+                          _vm.year = $event.target.multiple
+                            ? $$selectedVal
+                            : $$selectedVal[0]
+                        }
+                      }
+                    },
+                    _vm._l(20, function(n) {
+                      return _c(
+                        "option",
+                        { domProps: { value: n + _vm.baseYear - 1 } },
+                        [_vm._v(_vm._s(n + _vm.baseYear - 1) + "年")]
+                      )
+                    }),
+                    0
+                  )
+                ])
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "col-md-6 pb-2" }, [
+                _c("div", { staticClass: "input-group" }, [
+                  _vm._m(2),
+                  _vm._v(" "),
+                  _c(
+                    "select",
+                    {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.month,
+                          expression: "month"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      on: {
+                        change: function($event) {
+                          var $$selectedVal = Array.prototype.filter
+                            .call($event.target.options, function(o) {
+                              return o.selected
+                            })
+                            .map(function(o) {
+                              var val = "_value" in o ? o._value : o.value
+                              return val
+                            })
+                          _vm.month = $event.target.multiple
+                            ? $$selectedVal
+                            : $$selectedVal[0]
+                        }
+                      }
+                    },
+                    _vm._l(12, function(n) {
+                      return _c("option", { domProps: { value: n } }, [
+                        _vm._v(_vm._s(n) + "月")
+                      ])
+                    }),
+                    0
+                  )
+                ])
+              ])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "row justify-content-between" }, [
+              _c("div", { staticClass: "col-md-12 pb-2" }, [
+                _c("div", { staticClass: "btn-group d-flex" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-primary btn-lg font-size-rg w-100",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.display()
+                        }
+                      }
+                    },
+                    [_vm._v("この条件で表示する")]
+                  )
+                ])
+              ])
             ])
-          }),
-          0
-        )
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "form-group col-md-5" }, [
-        _c("label", { attrs: { for: "business_kubun" } }, [_vm._v("月")]),
-        _vm._v(" "),
-        _c(
-          "select",
-          {
-            directives: [
-              {
-                name: "model",
-                rawName: "v-model",
-                value: _vm.month,
-                expression: "month"
-              }
-            ],
-            staticClass: "form-control",
-            on: {
-              change: function($event) {
-                var $$selectedVal = Array.prototype.filter
-                  .call($event.target.options, function(o) {
-                    return o.selected
-                  })
-                  .map(function(o) {
-                    var val = "_value" in o ? o._value : o.value
-                    return val
-                  })
-                _vm.month = $event.target.multiple
-                  ? $$selectedVal
-                  : $$selectedVal[0]
-              }
-            }
-          },
-          _vm._l(12, function(n) {
-            return _c("option", { domProps: { value: n } }, [
-              _vm._v(_vm._s(n) + "月")
-            ])
-          }),
-          0
-        )
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "form-group col-md-2 margin-set-mid" }, [
-        _c(
-          "button",
-          {
-            staticClass: "btn btn-primary",
-            on: {
-              click: function($event) {
-                return _vm.display()
-              }
-            }
-          },
-          [_vm._v("表示")]
-        )
+          ])
+        ])
       ])
     ]),
     _vm._v(" "),
     _vm.details.length
-      ? _c("div", { staticClass: "margin-set-mid" }, [
-          _vm._v("\n    設定済みカレンダー一覧\n    "),
-          _c("table", { staticClass: "table" }, [
-            _vm._m(0),
-            _vm._v(" "),
-            _c(
-              "tbody",
-              _vm._l(_vm.details, function(item, index) {
-                return _c("tr", { key: item.date }, [
-                  _c("td", [_vm._v(_vm._s(item.date))]),
-                  _vm._v(" "),
-                  _c("td", [
-                    _c(
-                      "select",
-                      {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.business[index],
-                            expression: "business[index]"
-                          }
-                        ],
-                        staticClass: "form-control",
-                        on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
-                            _vm.$set(
-                              _vm.business,
-                              index,
-                              $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
-                            )
-                          }
-                        }
-                      },
-                      [
-                        _c("option", { attrs: { value: "" } }),
-                        _vm._v(" "),
-                        _vm._l(_vm.BusinessDayList, function(blist) {
-                          return _c(
-                            "option",
-                            { domProps: { value: blist.code } },
-                            [_vm._v(_vm._s(blist.code_name))]
+      ? _c("div", { staticClass: "row justify-content-between" }, [
+          _c("div", { staticClass: "col-md pt-3 align-self-stretch" }, [
+            _c("div", { staticClass: "card shadow-pl" }, [
+              _vm._m(3),
+              _vm._v(" "),
+              _c("div", { staticClass: "card-body mb-3 p-0 border-top" }, [
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-12" }, [
+                    _c("div", { staticClass: "table-responsive" }, [
+                      _c(
+                        "table",
+                        {
+                          staticClass:
+                            "table table-striped border-bottom font-size-sm text-nowrap"
+                        },
+                        [
+                          _vm._m(4),
+                          _vm._v(" "),
+                          _c(
+                            "tbody",
+                            _vm._l(_vm.details, function(item, index) {
+                              return _c("tr", { key: item.date }, [
+                                _c(
+                                  "td",
+                                  { staticClass: "text-center align-middle" },
+                                  [_vm._v(_vm._s(item.date))]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "td",
+                                  { staticClass: "text-center align-middle" },
+                                  [
+                                    _c(
+                                      "select",
+                                      {
+                                        directives: [
+                                          {
+                                            name: "model",
+                                            rawName: "v-model",
+                                            value: _vm.business[index],
+                                            expression: "business[index]"
+                                          }
+                                        ],
+                                        staticClass: "custom-select",
+                                        on: {
+                                          change: function($event) {
+                                            var $$selectedVal = Array.prototype.filter
+                                              .call(
+                                                $event.target.options,
+                                                function(o) {
+                                                  return o.selected
+                                                }
+                                              )
+                                              .map(function(o) {
+                                                var val =
+                                                  "_value" in o
+                                                    ? o._value
+                                                    : o.value
+                                                return val
+                                              })
+                                            _vm.$set(
+                                              _vm.business,
+                                              index,
+                                              $event.target.multiple
+                                                ? $$selectedVal
+                                                : $$selectedVal[0]
+                                            )
+                                          }
+                                        }
+                                      },
+                                      [
+                                        _c("option", { attrs: { value: "" } }),
+                                        _vm._v(" "),
+                                        _vm._l(_vm.BusinessDayList, function(
+                                          blist
+                                        ) {
+                                          return _c(
+                                            "option",
+                                            { domProps: { value: blist.code } },
+                                            [_vm._v(_vm._s(blist.code_name))]
+                                          )
+                                        })
+                                      ],
+                                      2
+                                    )
+                                  ]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "td",
+                                  { staticClass: "text-center align-middle" },
+                                  [
+                                    _c(
+                                      "select",
+                                      {
+                                        directives: [
+                                          {
+                                            name: "model",
+                                            rawName: "v-model",
+                                            value: _vm.holiday[index],
+                                            expression: "holiday[index]"
+                                          }
+                                        ],
+                                        staticClass: "custom-select",
+                                        on: {
+                                          change: function($event) {
+                                            var $$selectedVal = Array.prototype.filter
+                                              .call(
+                                                $event.target.options,
+                                                function(o) {
+                                                  return o.selected
+                                                }
+                                              )
+                                              .map(function(o) {
+                                                var val =
+                                                  "_value" in o
+                                                    ? o._value
+                                                    : o.value
+                                                return val
+                                              })
+                                            _vm.$set(
+                                              _vm.holiday,
+                                              index,
+                                              $event.target.multiple
+                                                ? $$selectedVal
+                                                : $$selectedVal[0]
+                                            )
+                                          }
+                                        }
+                                      },
+                                      [
+                                        _c("option", { attrs: { value: "" } }),
+                                        _vm._v(" "),
+                                        _vm._l(_vm.HoliDayList, function(
+                                          hlist
+                                        ) {
+                                          return _c(
+                                            "option",
+                                            { domProps: { value: hlist.code } },
+                                            [_vm._v(_vm._s(hlist.code_name))]
+                                          )
+                                        })
+                                      ],
+                                      2
+                                    )
+                                  ]
+                                )
+                              ])
+                            }),
+                            0
                           )
-                        })
-                      ],
-                      2
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("td", [
-                    _c(
-                      "select",
-                      {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.holiday[index],
-                            expression: "holiday[index]"
+                        ]
+                      )
+                    ])
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "row justify-content-between px-3" }, [
+                  _c("div", { staticClass: "col-md-12 pb-2" }, [
+                    _c("div", { staticClass: "btn-group d-flex" }, [
+                      _c(
+                        "button",
+                        {
+                          staticClass:
+                            "btn btn-success btn-lg font-size-rg w-100",
+                          attrs: { type: "button" },
+                          on: {
+                            click: function($event) {
+                              return _vm.store()
+                            }
                           }
-                        ],
-                        staticClass: "form-control",
-                        on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
-                            _vm.$set(
-                              _vm.holiday,
-                              index,
-                              $event.target.multiple
-                                ? $$selectedVal
-                                : $$selectedVal[0]
-                            )
-                          }
-                        }
-                      },
-                      [
-                        _c("option", { attrs: { value: "" } }),
-                        _vm._v(" "),
-                        _vm._l(_vm.HoliDayList, function(hlist) {
-                          return _c(
-                            "option",
-                            { domProps: { value: hlist.code } },
-                            [_vm._v(_vm._s(hlist.code_name))]
-                          )
-                        })
-                      ],
-                      2
-                    )
+                        },
+                        [_vm._v("この内容で入力する")]
+                      )
+                    ])
                   ])
                 ])
-              }),
-              0
-            )
+              ])
+            ])
           ])
         ])
-      : _vm._e(),
-    _vm._v(" "),
-    _c(
-      "button",
-      {
-        staticClass: "btn btn-success",
-        on: {
-          click: function($event) {
-            return _vm.store()
-          }
-        }
-      },
-      [_vm._v("編集確定")]
-    )
+      : _vm._e()
   ])
 }
 var staticRenderFns = [
@@ -79331,13 +80049,87 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "card-header bg-transparent pb-0 border-0" },
+      [
+        _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+          _vm._v("年月を指定してカレンダーを表示する")
+        ]),
+        _vm._v(" "),
+        _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+          _vm._v("カレンダー設定で登録したスケジュールを表示できます")
+        ])
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { id: "basic-addon1" }
+        },
+        [_vm._v("年")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { id: "basic-addon1" }
+        },
+        [_vm._v("月")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      { staticClass: "card-header bg-transparent pt-3 border-0" },
+      [
+        _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+          _vm._v("設定済みカレンダー一覧")
+        ]),
+        _vm._v(" "),
+        _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+          _vm._v("登録済みのスケジュールを編集できます")
+        ])
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
     return _c("thead", [
       _c("tr", [
-        _c("th", [_vm._v("日付")]),
+        _c("td", { staticClass: "text-center align-middle w-30" }, [
+          _vm._v("日付")
+        ]),
         _vm._v(" "),
-        _c("th", [_vm._v("営業日区分")]),
+        _c("td", { staticClass: "text-center align-middle w-35 mw-rem-10" }, [
+          _vm._v("営業日区分")
+        ]),
         _vm._v(" "),
-        _c("th", [_vm._v("休暇区分")])
+        _c("td", { staticClass: "text-center align-middle w-35 mw-rem-10" }, [
+          _vm._v("休暇区分")
+        ])
       ])
     ])
   }
@@ -80090,8 +80882,8 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "form-group" }, [
-    _c("label", { attrs: { for: "business_kubun" } }, [_vm._v("営業日区分")]),
+  return _c("div", { staticClass: "input-group" }, [
+    _vm._m(0),
     _vm._v(" "),
     _c(
       "select",
@@ -80140,7 +80932,23 @@ var render = function() {
     )
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-120"
+        },
+        [_vm._v("営業日区分")]
+      )
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -80298,8 +81106,8 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "form-group" }, [
-    _c("label", { attrs: { for: "business_kubun" } }, [_vm._v("休暇区分")]),
+  return _c("div", { staticClass: "input-group" }, [
+    _vm._m(0),
     _vm._v(" "),
     _c(
       "select",
@@ -80348,7 +81156,23 @@ var render = function() {
     )
   ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-120"
+        },
+        [_vm._v("休暇区分")]
+      )
+    ])
+  }
+]
 render._withStripped = true
 
 
