@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use App\User;
 use App\CardInformation;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 
 class ApiCardRegisterController extends Controller
@@ -42,26 +43,52 @@ class ApiCardRegisterController extends Controller
      * @return void
      */
     public function store(Request $request) { 
-        $card_id = $request->card_id;       // カードID
-        $user_code = $request->user_code;   // ユーザーコード
+        $card_id = $request->card_id;               // カードID
+        $user_code = $request->user_code;           // ユーザーコード
+        $department_id = $request->department_id;   // 部署ID
+        Log::debug('department_id = '.$department_id );
         $user = new User();
+        $card_info = new CardInformation();
         $systemdate = Carbon::now();
+        $result = '';
         $response = collect();              // 端末の戻り値
         // 存在チェック
-        $is_card_exists = DB::table('card_informations')->where('card_idm', $card_id)->exists();
+        $card_info->setCardIdmAttribute($card_id);
+        $is_card_exists = $card_info->isCardInfoExists();
         if($is_card_exists){
             // 既にcard_idと紐づいたユーザーが存在する
-            $response->put('result',self::REGISTRATION_FAILED);
+            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.already_data'));
+            Log::debug('already_data'.Config::get('const.LOG_MSG.already_data'));
         }else{
             // 新規登録
-            $result = $this->dbConnectInsert($user_code,$card_id);
-            if($result){
-                $user_name = DB::table('users')->where('code', $user_code)->value('name');
-                $response->put('result',self::REGISTRATION_SUCCESS);
-                $response->put('user_code',$user_code);
-                $response->put('user_name',$user_name);
-            }else{
-                $response->put('result',self::REGISTRATION_ERROR);
+            DB::beginTransaction();
+            try{
+                $result = $this->insCardInfo($user_code,$card_id,$department_id);
+                $user_datas = $user->getUserCardData($card_id);
+                if (isset($user_datas)) {
+                    Log::debug('isset($user_datas)');
+                    Log::debug('countisset($user_datas)'.count($user_datas));
+                    DB::commit();
+                    $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
+                    foreach ($user_datas as $user_data) {
+                        $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
+                        $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
+                        break;
+                    }
+                } else {
+                    DB::rollBack();
+                    $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.data_select_erorr'));
+                    Log::error(str_replace('{0}', 'users', Config::get('const.LOG_MSG.data_select_erorr')));
+                }
+            }catch(\PDOException $pe){
+                DB::rollBack();
+                $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.insert_error'));
+
+            }catch(\Exception $e){
+                DB::rollBack();
+                $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.insert_error'));
+                Log::error(str_replace('{0}', 'card_informations', Config::get('const.LOG_MSG.data_insert_erorr')));
+                Log::error($e->getMessage());
             }
         }
     
@@ -100,22 +127,27 @@ class ApiCardRegisterController extends Controller
      * @param [type] $mode
      * @return void
      */
-    private function dbConnectInsert($user_code,$card_id){
+    private function insCardInfo($user_code,$card_id,$department_id){
         $card_info = new CardInformation();
         $systemdate = Carbon::now();
-        DB::beginTransaction();
+        $login_user = Auth::user();
         try{
             $card_info->setUserCodeAttribute($user_code);
+            $card_info->setDepartmentIdAttribute($department_id);
             $card_info->setCardIdmAttribute($card_id);
+            $card_info->setCreatedUserAttribute($login_user);
             $card_info->setSystemDateAttribute($systemdate);
             $card_info->insertCardInfo();
 
-            DB::commit();
             return true;
 
-        }catch(\PDOException $e){
-            DB::rollBack();
-            return false;
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', 'card_informations', Config::get('const.LOG_MSG.data_insert_erorr')));
+            Log::error($pe->getMessage());
+
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', 'card_informations', Config::get('const.LOG_MSG.data_insert_erorr')));
+            Log::error($e->getMessage());
         }
     }
 
