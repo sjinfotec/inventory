@@ -1,91 +1,106 @@
 <template>
-<div>
-  <!-- main contentns row -->
-  <div class="row justify-content-between">
-    <!-- .panel -->
-    <div class="col-md pt-3">
-      <div class="card shadow-pl">
-        <!-- panel header -->
-        <div class="card-header bg-transparent pb-0 border-0">
-          <h1 class="float-sm-left font-size-rg">部署を設定する</h1>
-          <span class="float-sm-right font-size-sm">部署の登録や変更ができます</span>
-        </div>
-        <!-- /.panel header -->
-        <div class="card-body pt-2">
-          <!-- panel contents -->
-          <fvl-form
-            method="post"
-            :data="form"
-            url="/create_department/store"
-            @success="addSuccess()"
-            @error="error()"
-          >
-          <!-- .row -->
-          <div class="row justify-content-between">
-            <!-- .col -->
-            <div class="col-md-6 pb-2">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-150" id="basic-addon1">期首月</span>
+  <div>
+    <!-- main contentns row -->
+    <div class="row justify-content-between">
+      <!-- .panel -->
+      <div class="col-md pt-3">
+        <div class="card shadow-pl">
+          <!-- panel header -->
+          <div class="card-header bg-transparent pb-0 border-0">
+            <h1 class="float-sm-left font-size-rg">部署を設定する</h1>
+            <span class="float-sm-right font-size-sm">部署の登録や変更ができます</span>
+          </div>
+          <!-- /.panel header -->
+          <div class="card-body pt-2">
+            <!-- panel contents -->
+            <fvl-form
+              method="post"
+              :data="form"
+              url="/create_department/store"
+              @success="addSuccess()"
+              @error="error()"
+            >
+              <!-- .row -->
+              <div class="row justify-content-between">
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
+                        id="basic-addon1"
+                      >期首月</span>
+                    </div>
+                    <fvl-search-select
+                      :selected.sync="selectId"
+                      class="p-0"
+                      name="selectId"
+                      :options="departmentList"
+                      placeholder="部署を選択すると編集モードになります"
+                      :allowEmpty="true"
+                      :search-keys="['id']"
+                      option-key="id"
+                      option-value="name"
+                    />
+                  </div>
                 </div>
-                <fvl-search-select
-                  :selected.sync="selectId"
-                  class="p-0"
-                  name="selectId"
-                  :options="departmentList"
-                  placeholder="部署を選択すると編集モードになります"
-                  :allowEmpty="true"
-                  :search-keys="['id']"
-                  option-key="id"
-                  option-value="name"
-                />
-              </div>
-            </div>
-            <!-- /.col -->
-            <!-- .col -->
-            <div class="col-md-6 pb-2">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">部署名</span>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        id="basic-addon1"
+                      >部署名</span>
+                    </div>
+                    <fvl-input
+                      type="text"
+                      class="form-control"
+                      :value.sync="form.name"
+                      name="name"
+                    />
+                  </div>
                 </div>
-                <fvl-input type="text" class="form-control" :value.sync="form.name" name="name"/>
+                <!-- /.col -->
               </div>
-            </div>
-            <!-- /.col -->
-          </div>
-          <!-- /.row -->
-          <!-- .row -->
-          <div class="row justify-content-between">
-            <!-- col -->
-            <div class="col-md-12 pb-2">
-              <div class="btn-group d-flex">
-                <button type="submit" class="btn btn-success" v-if="selectId=='' || selectId==null ">追加</button>
-                <button type="submit" class="btn btn-success" id="edit" v-if="selectId != ''">編集</button>
+              <!-- /.row -->
+              <!-- .row -->
+              <div class="row justify-content-between">
+                <!-- col -->
+                <div class="col-md-12 pb-2">
+                  <div class="btn-group d-flex">
+                    <button
+                      type="submit"
+                      class="btn btn-success"
+                      v-if="selectId=='' || selectId==null "
+                    >追加</button>
+                    <button type="submit" class="btn btn-success" id="edit" v-if="selectId != ''">編集</button>
+                  </div>
+                </div>
+                <!-- /.col -->
               </div>
-            </div>
-            <!-- /.col -->
-          </div>
-          <!-- /.row -->
-          </fvl-form>
-          <!-- .row -->
-          <div class="row justify-content-between" v-if="selectId != ''">
-            <!-- col -->
-            <div class="col-md-12 pb-2">
-              <div class="btn-group d-flex">
-                <button class="btn btn-danger" @click="del">削除</button>
+              <!-- /.row -->
+            </fvl-form>
+            <!-- .row -->
+            <div class="row justify-content-between" v-if="selectId != ''">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <div class="btn-group d-flex">
+                  <button class="btn btn-danger" @click="alertDelConf('info')">削除</button>
+                </div>
               </div>
+              <!-- /.col -->
             </div>
-            <!-- /.col -->
+            <!-- /.row -->
+            <!-- /.panel contents -->
           </div>
-          <!-- /.row -->
-          <!-- /.panel contents -->
         </div>
       </div>
+      <!-- /.panel -->
     </div>
-    <!-- /.panel -->
+    <!-- /main contentns row -->
   </div>
-  <!-- /main contentns row -->
-</div>
 </template>
 <script>
 import toasted from "vue-toasted";
@@ -153,6 +168,23 @@ export default {
     }
   },
   methods: {
+    alert: function(state, message, title) {
+      this.$swal(title, message, state);
+    },
+    alertDelConf: function(state) {
+      this.$swal({
+        title: "確認",
+        text: this.form.name + " を削除しますか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(willDelete => {
+        if (willDelete) {
+          this.del();
+        } else {
+        }
+      });
+    },
     getDepartmentList() {
       this.$axios
         .get("/get_departments_list")
@@ -179,24 +211,24 @@ export default {
     },
     // 削除
     del: function() {
-      var confirm = window.confirm("選択した部署を削除しますか？");
-      if (confirm) {
-        this.$axios
-          .post("/create_department/del", {
-            id: this.selectId
-          })
-          .then(response => {
-            var res = response.data;
-            if (res.result == 0) {
-              this.$toasted.show("選択した部署を削除しました");
-              this.inputClear();
-              this.getDepartmentList();
-            } else {
-            }
-          })
-          .catch(reason => {});
-      } else {
-      }
+      this.$axios
+        .post("/create_department/del", {
+          id: this.selectId
+        })
+        .then(response => {
+          var res = response.data;
+          if (res.result == 0) {
+            this.alert(
+              "success",
+              this.form.name + " を削除しました",
+              "削除成功"
+            );
+            this.inputClear();
+            this.getDepartmentList();
+          } else {
+          }
+        })
+        .catch(reason => {});
     },
     inputClear() {
       this.form.name = "";
@@ -207,8 +239,8 @@ export default {
 };
 </script>
 <style scoped>
-.fvl-search-select{
-  height: 36px!important;
-  border: 1px solid #ced4da!important;
+.fvl-search-select {
+  height: 36px !important;
+  border: 1px solid #ced4da !important;
 }
 </style>

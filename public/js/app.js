@@ -2610,6 +2610,21 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2665,17 +2680,35 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     }
   },
   methods: {
-    getDepartmentList: function getDepartmentList() {
+    alert: function alert(state, message, title) {
+      this.$swal(title, message, state);
+    },
+    alertDelConf: function alertDelConf(state) {
       var _this2 = this;
 
+      this.$swal({
+        title: "確認",
+        text: this.form.name + " を削除しますか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(function (willDelete) {
+        if (willDelete) {
+          _this2.del();
+        } else {}
+      });
+    },
+    getDepartmentList: function getDepartmentList() {
+      var _this3 = this;
+
       this.$axios.get("/get_departments_list").then(function (response) {
-        _this2.departmentList = response.data;
-        _this2.object = {
+        _this3.departmentList = response.data;
+        _this3.object = {
           id: "",
           name: "新規登録"
         };
 
-        _this2.departmentList.unshift(_this2.object);
+        _this3.departmentList.unshift(_this3.object);
 
         console.log("部署リスト取得");
       })["catch"](function (reason) {});
@@ -2695,25 +2728,21 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     // 削除
     del: function del() {
-      var _this3 = this;
+      var _this4 = this;
 
-      var confirm = window.confirm("選択した部署を削除しますか？");
+      this.$axios.post("/create_department/del", {
+        id: this.selectId
+      }).then(function (response) {
+        var res = response.data;
 
-      if (confirm) {
-        this.$axios.post("/create_department/del", {
-          id: this.selectId
-        }).then(function (response) {
-          var res = response.data;
+        if (res.result == 0) {
+          _this4.alert("success", _this4.form.name + " を削除しました", "削除成功");
 
-          if (res.result == 0) {
-            _this3.$toasted.show("選択した部署を削除しました");
+          _this4.inputClear();
 
-            _this3.inputClear();
-
-            _this3.getDepartmentList();
-          } else {}
-        })["catch"](function (reason) {});
-      } else {}
+          _this4.getDepartmentList();
+        } else {}
+      })["catch"](function (reason) {});
     },
     inputClear: function inputClear() {
       this.form.name = "";
@@ -5316,6 +5345,66 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -5375,6 +5464,7 @@ __webpack_require__.r(__webpack_exports__);
     details: function details(val, oldVal) {
       var _this = this;
 
+      console.log("各配列振り分け　開始");
       this.details.forEach(function (detail, i) {
         if (detail.closing != null) {
           _this.form.closingDate[i] = detail.closing.toString();
@@ -5401,6 +5491,7 @@ __webpack_require__.r(__webpack_exports__);
         }
       });
       this.hidden = "GET";
+      console.log("各配列振り分け 終了");
     }
   },
   methods: {
@@ -5442,19 +5533,31 @@ __webpack_require__.r(__webpack_exports__);
           year: this.year
         }
       }).then(function (response) {
-        _this2.details = response.data; // this.form.year = this.details[0].year;
-
-        if (_this2.details.length > 0) {
+        if (response.data.length > 0) {
+          _this2.details = response.data;
+          _this2.form.year = _this2.details[0].year;
           _this2.form.biginningMonth = _this2.details[0].beginning_month;
-          _this2.form.threeMonthTotal = _this2.details[0].max_3month_total.toString();
-          _this2.form.sixMonthTotal = _this2.details[0].max_6month_total.toString();
-          _this2.form.yaerTotal = _this2.details[0].max_12month_total.toString();
+
+          if (_this2.details[0].max_3month_total != null) {
+            _this2.form.threeMonthTotal = _this2.details[0].max_3month_total.toString();
+          }
+
+          if (_this2.details[0].max_6month_total != null) {
+            _this2.form.sixMonthTotal = _this2.details[0].max_6month_total.toString();
+          }
+
+          if (_this2.details[0].max_12month_total != null) {
+            _this2.form.yaerTotal = _this2.details[0].max_12month_total.toString();
+          }
+
           _this2.form.interval = _this2.details[0].interval.toString();
+        } else {
+          _this2.inputClear();
         }
 
         console.log("詳細取得");
       })["catch"](function (reason) {
-        alert("error");
+        alert("詳細取得エラー");
       });
     },
     alert: function alert(state, message, title) {
@@ -5487,7 +5590,18 @@ __webpack_require__.r(__webpack_exports__);
     error: function error() {
       this.alert("error", "登録に失敗しました", "エラー");
     },
-    inputClear: function inputClear() {}
+    inputClear: function inputClear() {
+      // alert("clear");
+      this.form.threeMonthTotal = "";
+      this.form.sixMonthTotal = "";
+      this.form.yaerTotal = "";
+      this.form.interval = "";
+      this.form.biginningMonth = "";
+      this.form.closingDate = [];
+      this.form.upTime = [];
+      this.form.timeunit = [];
+      this.form.timeround = [];
+    }
   }
 });
 
@@ -11025,7 +11139,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.fvl-search-select[data-v-32743e4e]{\n  height: 36px!important;\n  border: 1px solid #ced4da!important;\n}\n", ""]);
+exports.push([module.i, "\n.fvl-search-select[data-v-32743e4e] {\n  height: 36px !important;\n  border: 1px solid #ced4da !important;\n}\n", ""]);
 
 // exports
 
@@ -77973,7 +78087,11 @@ var render = function() {
                           "button",
                           {
                             staticClass: "btn btn-danger",
-                            on: { click: _vm.del }
+                            on: {
+                              click: function($event) {
+                                return _vm.alertDelConf("info")
+                              }
+                            }
                           },
                           [_vm._v("削除")]
                         )
