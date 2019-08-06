@@ -113,6 +113,7 @@ class User extends Authenticatable
                 $join->on('t5.id', '=', 't3.department_id')
                 ->where('t5.is_deleted',0);
             })
+            ->where('t3.role',"<>",10)
             ->where('t3.is_deleted',0)
             ->whereNull('t4.card_idm');      // whereNull 
 
