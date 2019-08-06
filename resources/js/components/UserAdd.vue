@@ -193,7 +193,7 @@
                     <fvl-search-select
                       :selected.sync="form.table_no"
                       class="p-0"
-                      name="timetable_no"
+                      name="table_no"
                       :options="timeTableList"
                       :search-keys="['name']"
                       option-key="no"
@@ -267,7 +267,9 @@
                   <div class="col-md-12 pb-2">
                     <div class="input-group">
                       <div class="input-group-prepend">
-                        <span class="input-group-text font-size-xs line-height-xs label-width-150">新しいパスワード</span>
+                        <span
+                          class="input-group-text font-size-xs line-height-xs label-width-150"
+                        >新しいパスワード</span>
                       </div>
                       <input
                         class="form-control"
@@ -284,7 +286,9 @@
                   <div class="col-md-12 pb-2">
                     <div class="input-group">
                       <div class="input-group-prepend">
-                        <span class="input-group-text font-size-xs line-height-xs label-width-150">新しいパスワード（再入力）</span>
+                        <span
+                          class="input-group-text font-size-xs line-height-xs label-width-150"
+                        >新しいパスワード（再入力）</span>
                       </div>
                       <input
                         class="form-control"
@@ -304,14 +308,22 @@
                   <!-- col -->
                   <div class="col-md-12 pb-2">
                     <div class="btn-group d-flex">
-                      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" v-on:click="alertPassConf('warning')">パスワードを変更</button>
+                      <button
+                        type="button"
+                        class="btn btn-success btn-lg font-size-rg w-100"
+                        v-on:click="alertPassConf('warning')"
+                      >パスワードを変更</button>
                     </div>
                   </div>
                   <!-- /.col -->
                   <!-- col -->
                   <div class="col-md-12 pb-2">
                     <div class="btn-group d-flex">
-                      <button type="button" class="btn btn-warning btn-lg font-size-rg w-100" v-on:click="hide">キャンセル</button>
+                      <button
+                        type="button"
+                        class="btn btn-warning btn-lg font-size-rg w-100"
+                        v-on:click="hide"
+                      >キャンセル</button>
                     </div>
                   </div>
                   <!-- /.col -->
