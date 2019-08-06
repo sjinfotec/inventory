@@ -28,6 +28,7 @@ class StoreUserPost extends FormRequest
         return [
             'name' => 'required|string|max:30',
             'kana' => 'required|max:30',
+            'timetable_no' => 'required',
             'email' => 'required|email|max:191',
             'status' => 'required',
             'code' => ['required',Rule::unique('users')->ignore($this->id),'max:10'],
@@ -45,6 +46,7 @@ class StoreUserPost extends FormRequest
             'name.max'  => '社員名の最大文字数は 30 です',
             'kana.required'  => 'ふりがなを入力してください',
             'kana.max'  => 'ふりがなの最大文字数は 30 です',
+            'timetable_no.required'  => '通常勤務時間を選択してください',
             'email.required'  => 'メールアドレスを入力してください',
             'email.email'  => 'メールアドレスの入力形式で入力してください (例: sanjyo-tarou@ssjjoo.com)',
             'email.max'  => 'メールアドレスの最大文字数は 191 です',
