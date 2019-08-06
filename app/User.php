@@ -60,9 +60,9 @@ class User extends Authenticatable
             ->Join('card_informations', function ($join) { 
                 $join->on('card_informations.user_code', '=', 'users.code');
                 $join->on('card_informations.department_id', '=', 'users.department_id')
-                ->where('card_informations.card_idm',$card_id)
                 ->where('card_informations.is_deleted',0);
             })
+            ->where('card_informations.card_idm',$card_id)
             ->where('users.role',"<>",10)
             ->where('users.is_deleted',0)
             ->get();

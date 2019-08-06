@@ -67,6 +67,7 @@ class ApiCardRegisterController extends Controller
                 $user_datas = $user->getUserCardData($card_id);
                 if (isset($user_datas)) {
                     DB::commit();
+                    $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
                     foreach ($user_datas as $user_data) {
                         $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
                         $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
@@ -125,6 +126,7 @@ class ApiCardRegisterController extends Controller
      * @return void
      */
     private function insCardInfo($user_code,$card_id,$department_id){
+        Log::error("insCardInfo".$card_id);
         $card_info = new CardInformation();
         $systemdate = Carbon::now();
         $login_user = Auth::user();
