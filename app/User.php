@@ -59,10 +59,11 @@ class User extends Authenticatable
             )
             ->Join('card_informations', function ($join) { 
                 $join->on('card_informations.user_code', '=', 'users.code');
-                $join->on('card_informations.department_id', '=', 'users.department_id');
+                $join->on('card_informations.department_id', '=', 'users.department_id')
+                ->where('card_informations.card_idm',$card_id)
+                ->where('card_informations.is_deleted',0);
             })
-            ->where('card_informations.card_idm',$card_id)
-            ->where('card_informations.is_deleted',0)
+            ->where('users.role',"<>",10)
             ->where('users.is_deleted',0)
             ->get();
         \Log::debug(
@@ -91,10 +92,11 @@ class User extends Authenticatable
             )
             ->leftJoin('card_informations as t2', function ($join) { 
                 $join->on('t2.user_code', '=', 't1.code');
-                $join->on('t2.department_id', '=', 't1.department_id');
+                $join->on('t2.department_id', '=', 't1.department_id')
+                ->where('t2.is_deleted',0);
             })
-            ->where('t1.is_deleted',0)
-            ->where('t2.is_deleted',0);
+            ->where('t1.role',"<>",10)
+            ->where('t1.is_deleted',0);
 
         $mainquery = DB::table('users as t3')
             ->select(

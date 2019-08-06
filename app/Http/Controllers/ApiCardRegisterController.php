@@ -66,10 +66,7 @@ class ApiCardRegisterController extends Controller
                 $result = $this->insCardInfo($user_code,$card_id,$department_id);
                 $user_datas = $user->getUserCardData($card_id);
                 if (isset($user_datas)) {
-                    Log::debug('isset($user_datas)');
-                    Log::debug('countisset($user_datas)'.count($user_datas));
                     DB::commit();
-                    $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
                     foreach ($user_datas as $user_data) {
                         $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
                         $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
