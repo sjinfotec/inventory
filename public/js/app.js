@@ -4451,6 +4451,63 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -6543,6 +6600,56 @@ var _components;
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -81528,142 +81635,195 @@ var render = function() {
             _vm._v(" "),
             _c("div", { staticClass: "card-body" }, [
               _vm.errors.length
-                ? _c("div", [
-                    _c(
-                      "ul",
-                      { staticClass: "error-red color-red" },
-                      _vm._l(_vm.errors, function(error) {
-                        return _c("li", [_vm._v(_vm._s(error))])
-                      }),
-                      0
-                    )
+                ? _c("div", { staticClass: "row justify-content-between" }, [
+                    _c("div", { staticClass: "col-md-12 pb-2" }, [
+                      _c(
+                        "ul",
+                        { staticClass: "error-red color-red" },
+                        _vm._l(_vm.errors, function(error, index) {
+                          return _c("li", { key: index }, [
+                            _vm._v(_vm._s(error))
+                          ])
+                        }),
+                        0
+                      )
+                    ])
                   ])
                 : _vm._e(),
               _vm._v(" "),
-              _c("div", { staticClass: "row" }, [
-                _c(
-                  "div",
-                  { staticClass: "form-group col-md-6" },
-                  [
-                    _c("label", { attrs: { for: "shift_end" } }, [
-                      _vm._v("日付")
+              _c("div", { staticClass: "row justify-content-between" }, [
+                _c("div", { staticClass: "col-md-12 pb-2" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group" },
+                    [
+                      _c("div", { staticClass: "input-group-prepend" }, [
+                        _c(
+                          "span",
+                          {
+                            staticClass:
+                              "input-group-text font-size-sm line-height-xs label-width-120",
+                            attrs: { for: "shift_end" }
+                          },
+                          [_vm._v("日付")]
+                        )
+                      ]),
+                      _vm._v(" "),
+                      _c("datepicker", {
+                        attrs: {
+                          language: _vm.ja,
+                          value: this.default,
+                          format: _vm.DatePickerFormat
+                        },
+                        model: {
+                          value: _vm.addDate,
+                          callback: function($$v) {
+                            _vm.addDate = $$v
+                          },
+                          expression: "addDate"
+                        }
+                      })
+                    ],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-12 pb-2" }, [
+                  _c("div", { staticClass: "input-group" }, [
+                    _c("div", { staticClass: "input-group-prepend" }, [
+                      _c(
+                        "span",
+                        {
+                          staticClass:
+                            "input-group-text font-size-sm line-height-xs label-width-120",
+                          attrs: { for: "shift_end" }
+                        },
+                        [_vm._v("時間")]
+                      )
                     ]),
                     _vm._v(" "),
-                    _c("datepicker", {
-                      attrs: {
-                        language: _vm.ja,
-                        value: this.default,
-                        format: _vm.DatePickerFormat
-                      },
-                      model: {
-                        value: _vm.addDate,
-                        callback: function($$v) {
-                          _vm.addDate = $$v
-                        },
-                        expression: "addDate"
-                      }
-                    })
-                  ],
-                  1
-                ),
-                _vm._v(" "),
-                _c("div", { staticClass: "form-group col-md-6" }, [
-                  _c("label", { attrs: { for: "shift_end" } }, [
-                    _vm._v("時間")
-                  ]),
-                  _vm._v(" "),
-                  _c("input", {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: _vm.addTime,
-                        expression: "addTime"
-                      }
-                    ],
-                    staticClass: "form-control",
-                    attrs: { type: "time" },
-                    domProps: { value: _vm.addTime },
-                    on: {
-                      input: function($event) {
-                        if ($event.target.composing) {
-                          return
-                        }
-                        _vm.addTime = $event.target.value
-                      }
-                    }
-                  })
-                ])
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "row" }, [
-                _c("div", { staticClass: "form-group col-md-6" }, [
-                  _c("label", { attrs: { for: "shift_end" } }, [
-                    _vm._v("モード")
-                  ]),
-                  _vm._v(" "),
-                  _c(
-                    "select",
-                    {
+                    _c("input", {
                       directives: [
                         {
                           name: "model",
                           rawName: "v-model",
-                          value: _vm.addMode,
-                          expression: "addMode"
+                          value: _vm.addTime,
+                          expression: "addTime"
                         }
                       ],
                       staticClass: "form-control",
+                      attrs: { type: "time" },
+                      domProps: { value: _vm.addTime },
                       on: {
-                        change: function($event) {
-                          var $$selectedVal = Array.prototype.filter
-                            .call($event.target.options, function(o) {
-                              return o.selected
-                            })
-                            .map(function(o) {
-                              var val = "_value" in o ? o._value : o.value
-                              return val
-                            })
-                          _vm.addMode = $event.target.multiple
-                            ? $$selectedVal
-                            : $$selectedVal[0]
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.addTime = $event.target.value
                         }
                       }
-                    },
-                    [
-                      _c("option", { attrs: { value: "" } }),
-                      _vm._v(" "),
-                      _vm._l(_vm.modeList, function(mode) {
-                        return _c(
-                          "option",
-                          { domProps: { value: mode.code } },
-                          [_vm._v(_vm._s(mode.code_name))]
-                        )
-                      })
-                    ],
-                    2
-                  )
+                    })
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-12 pb-2" }, [
+                  _c("div", { staticClass: "input-group" }, [
+                    _c("div", { staticClass: "input-group-prepend" }, [
+                      _c(
+                        "span",
+                        {
+                          staticClass:
+                            "input-group-text font-size-sm line-height-xs label-width-120",
+                          attrs: { for: "shift_end" }
+                        },
+                        [_vm._v("区分")]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.addMode,
+                            expression: "addMode"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        on: {
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.addMode = $event.target.multiple
+                              ? $$selectedVal
+                              : $$selectedVal[0]
+                          }
+                        }
+                      },
+                      [
+                        _c("option", { attrs: { value: "" } }),
+                        _vm._v(" "),
+                        _vm._l(_vm.modeList, function(mode) {
+                          return _c(
+                            "option",
+                            { domProps: { value: mode.code } },
+                            [_vm._v(_vm._s(mode.code_name))]
+                          )
+                        })
+                      ],
+                      2
+                    )
+                  ])
                 ])
               ]),
               _vm._v(" "),
-              _c(
-                "button",
-                {
-                  staticClass: "btn btn-success",
-                  on: {
-                    click: function($event) {
-                      return _vm.alertAddConf("info")
-                    }
-                  }
-                },
-                [_vm._v("登録")]
-              ),
+              _c("div", { staticClass: "row justify-content-between" }, [
+                _c("div", { staticClass: "col-md-12 py-4" })
+              ]),
               _vm._v(" "),
-              _c(
-                "button",
-                { staticClass: "btn btn-warning", on: { click: _vm.hide } },
-                [_vm._v("キャンセル")]
-              )
+              _c("div", { staticClass: "row justify-content-between" }, [
+                _c("div", { staticClass: "col-md-12 pb-2" }, [
+                  _c("div", { staticClass: "btn-group d-flex" }, [
+                    _c(
+                      "button",
+                      {
+                        staticClass:
+                          "btn btn-success btn-lg font-size-rg w-100",
+                        attrs: { type: "button" },
+                        on: {
+                          click: function($event) {
+                            return _vm.alertAddConf("info")
+                          }
+                        }
+                      },
+                      [_vm._v("この条件で登録")]
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-12 pb-2" }, [
+                  _c("div", { staticClass: "btn-group d-flex" }, [
+                    _c(
+                      "button",
+                      {
+                        staticClass:
+                          "btn btn-warning btn-lg font-size-rg w-100",
+                        attrs: { type: "button" },
+                        on: { click: _vm.hide }
+                      },
+                      [_vm._v("キャンセル")]
+                    )
+                  ])
+                ])
+              ])
             ])
           ])
         ]
@@ -85125,7 +85285,7 @@ var render = function() {
                               staticClass: "p-0",
                               attrs: {
                                 selected: _vm.form.table_no,
-                                name: "timetable_no",
+                                name: "table_no",
                                 options: _vm.timeTableList,
                                 "search-keys": ["name"],
                                 "option-key": "no",
@@ -85217,7 +85377,7 @@ var render = function() {
             _c(
               "modal",
               {
-                attrs: { name: "password-change", width: 800, height: 600 },
+                attrs: { name: "password-change", width: 800 },
                 model: {
                   value: _vm.userCode,
                   callback: function($$v) {
@@ -85234,107 +85394,147 @@ var render = function() {
                   _vm._v(" "),
                   _c("div", { staticClass: "card-body" }, [
                     _vm.errors.length
-                      ? _c("div", [
-                          _c(
-                            "ul",
-                            { staticClass: "error-red color-red" },
-                            _vm._l(_vm.errors, function(error, index) {
-                              return _c("li", { key: index }, [
-                                _vm._v(_vm._s(error))
-                              ])
-                            }),
-                            0
-                          )
-                        ])
+                      ? _c(
+                          "div",
+                          { staticClass: "row justify-content-between" },
+                          [
+                            _c("div", { staticClass: "col-md-12 pb-2" }, [
+                              _c(
+                                "ul",
+                                { staticClass: "error-red color-red" },
+                                _vm._l(_vm.errors, function(error, index) {
+                                  return _c("li", { key: index }, [
+                                    _vm._v(_vm._s(error))
+                                  ])
+                                }),
+                                0
+                              )
+                            ])
+                          ]
+                        )
                       : _vm._e(),
                     _vm._v(" "),
-                    _c("div", { staticClass: "form-group col-md-6" }, [
-                      _c("label", { attrs: { for: "shift_end" } }, [
-                        _vm._v("新しいパスワード")
+                    _c("div", { staticClass: "row justify-content-between" }, [
+                      _c("div", { staticClass: "col-md-12 pb-2" }, [
+                        _c("div", { staticClass: "input-group" }, [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-xs line-height-xs label-width-150"
+                              },
+                              [_vm._v("新しいパスワード")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.enterPass,
+                                expression: "enterPass"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            attrs: {
+                              maxlength: "12",
+                              type: "password",
+                              title: "半角英数字12文字以内",
+                              pattern: "^[a-zA-Z0-9]{6,12}$"
+                            },
+                            domProps: { value: _vm.enterPass },
+                            on: {
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.enterPass = $event.target.value
+                              }
+                            }
+                          })
+                        ])
                       ]),
                       _vm._v(" "),
-                      _c("input", {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.enterPass,
-                            expression: "enterPass"
-                          }
-                        ],
-                        staticClass: "form-control",
-                        attrs: {
-                          maxlength: "12",
-                          type: "password",
-                          title: "半角英数字12文字以内",
-                          pattern: "^[a-zA-Z0-9]{6,12}$"
-                        },
-                        domProps: { value: _vm.enterPass },
-                        on: {
-                          input: function($event) {
-                            if ($event.target.composing) {
-                              return
+                      _c("div", { staticClass: "col-md-12 pb-2" }, [
+                        _c("div", { staticClass: "input-group" }, [
+                          _c("div", { staticClass: "input-group-prepend" }, [
+                            _c(
+                              "span",
+                              {
+                                staticClass:
+                                  "input-group-text font-size-xs line-height-xs label-width-150"
+                              },
+                              [_vm._v("新しいパスワード（再入力）")]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("input", {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.reEnterPass,
+                                expression: "reEnterPass"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            attrs: {
+                              maxlength: "12",
+                              type: "password",
+                              title: "半角英数字12文字以内",
+                              pattern: "^[a-zA-Z0-9]{6,12}$"
+                            },
+                            domProps: { value: _vm.reEnterPass },
+                            on: {
+                              input: function($event) {
+                                if ($event.target.composing) {
+                                  return
+                                }
+                                _vm.reEnterPass = $event.target.value
+                              }
                             }
-                            _vm.enterPass = $event.target.value
-                          }
-                        }
-                      })
+                          })
+                        ])
+                      ])
                     ]),
                     _vm._v(" "),
-                    _c("div", { staticClass: "form-group col-md-6" }, [
-                      _c("label", { attrs: { for: "shift_end" } }, [
-                        _vm._v("新しいパスワード（再入力）")
+                    _c("div", { staticClass: "row justify-content-between" }, [
+                      _c("div", { staticClass: "col-md-12 pb-2" }, [
+                        _c("div", { staticClass: "btn-group d-flex" }, [
+                          _c(
+                            "button",
+                            {
+                              staticClass:
+                                "btn btn-success btn-lg font-size-rg w-100",
+                              attrs: { type: "button" },
+                              on: {
+                                click: function($event) {
+                                  return _vm.alertPassConf("warning")
+                                }
+                              }
+                            },
+                            [_vm._v("パスワードを変更")]
+                          )
+                        ])
                       ]),
                       _vm._v(" "),
-                      _c("input", {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.reEnterPass,
-                            expression: "reEnterPass"
-                          }
-                        ],
-                        staticClass: "form-control",
-                        attrs: {
-                          maxlength: "12",
-                          type: "password",
-                          title: "半角英数字12文字以内",
-                          pattern: "^[a-zA-Z0-9]{6,12}$"
-                        },
-                        domProps: { value: _vm.reEnterPass },
-                        on: {
-                          input: function($event) {
-                            if ($event.target.composing) {
-                              return
-                            }
-                            _vm.reEnterPass = $event.target.value
-                          }
-                        }
-                      })
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "button",
-                      {
-                        staticClass: "btn btn-success",
-                        on: {
-                          click: function($event) {
-                            return _vm.alertPassConf("warning")
-                          }
-                        }
-                      },
-                      [_vm._v("確定")]
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "button",
-                      {
-                        staticClass: "btn btn-warning",
-                        on: { click: _vm.hide }
-                      },
-                      [_vm._v("キャンセル")]
-                    )
+                      _c("div", { staticClass: "col-md-12 pb-2" }, [
+                        _c("div", { staticClass: "btn-group d-flex" }, [
+                          _c(
+                            "button",
+                            {
+                              staticClass:
+                                "btn btn-warning btn-lg font-size-rg w-100",
+                              attrs: { type: "button" },
+                              on: { click: _vm.hide }
+                            },
+                            [_vm._v("キャンセル")]
+                          )
+                        ])
+                      ])
+                    ])
                   ])
                 ])
               ]
