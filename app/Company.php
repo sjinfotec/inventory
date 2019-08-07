@@ -8,9 +8,51 @@ use Illuminate\Support\Facades\DB;
 class Company extends Model
 {
     protected $table = 'companies';
+
+    private $apply_term_from;                   // 適用期間開始
+    private $apply_term_to;                     // 適用期間終了
+    private $name;                              // 会社名
+    private $kana;                              // 会社カナ
+    private $post_code;                         // 郵便番号
+    private $address1;                          // 住所１
+    private $address2;                          // 住所２
+    private $address_kana;                      // 住所カナ
+    private $tel_no;                            // 電話番号
+    private $fax_no;                            // FAX番号
+    private $represent_name;                    // 代表者氏名
+    private $represent_kana;                    // 代表者カナ
+    private $email;                             // e-mail
+    private $month_sm;                          // 月締め
+    private $created_user;                      // 作成ユーザー
+    private $updated_user;                      // 修正ユーザー
+    private $created_at;                        // 作成日時
+    private $updated_at;                        // 修正日時
+
+    // 適用期間開始
+    public function getApplytermfromAttribute()
+    {
+        return $this->apply_term_from;
+    }
+
+    public function setApplytermfromAttribute($value)
+    {
+        $this->apply_term_from = $value;
+    }
+
+
+    // 適用期間終了
+    public function getApplytermtoAttribute()
+    {
+        return $this->apply_term_to;
+    }
+
+    public function setApplytermtoAttribute($value)
+    {
+        $this->apply_term_to = $value;
+    }
     
-    private $name;                  
      
+    // 会社名
     public function getNameAttribute()
     {
         return $this->name;
@@ -21,9 +63,8 @@ class Company extends Model
         $this->name = $value;
     }
 
-    private $kana;                  
 
-     
+    // 会社カナ 
     public function getKanaAttribute()
     {
         return $this->kana;
@@ -34,9 +75,8 @@ class Company extends Model
         $this->kana = $value;
     }
 
-    private $post_code;                  
 
-     
+    // 郵便番号 
     public function getPostcodeAttribute()
     {
         return $this->post_code;
@@ -47,9 +87,8 @@ class Company extends Model
         $this->post_code = $value;
     }
 
-    private $address1;                  
 
-     
+    // 住所１ 
     public function getAddress1Attribute()
     {
         return $this->address1;
@@ -60,9 +99,8 @@ class Company extends Model
         $this->address1 = $value;
     }
 
-    private $address2;                  
 
-     
+    // 住所２ 
     public function getAddress2Attribute()
     {
         return $this->address2;
@@ -73,9 +111,8 @@ class Company extends Model
         $this->address2 = $value;
     }
 
-    private $address_kana;                  
 
-     
+    // 住所カナ 
     public function getAddresskanaAttribute()
     {
         return $this->address_kana;
@@ -86,9 +123,8 @@ class Company extends Model
         $this->address_kana = $value;
     }
 
-    private $tel_no;                  
 
-     
+    // 電話番号 
     public function getTelnoAttribute()
     {
         return $this->tel_no;
@@ -99,9 +135,8 @@ class Company extends Model
         $this->tel_no = $value;
     }
 
-    private $fax_no;                  
 
-     
+    // FAX番号 
     public function getFaxnoAttribute()
     {
         return $this->fax_no;
@@ -112,9 +147,8 @@ class Company extends Model
         $this->fax_no = $value;
     }
 
-    private $represent_name;                  
 
-     
+    // 代表者氏名 
     public function getRepresentnameAttribute()
     {
         return $this->represent_name;
@@ -125,9 +159,8 @@ class Company extends Model
         $this->represent_name = $value;
     }
 
-    private $represent_kana;                  
 
-     
+    // 代表者カナ 
     public function getRepresentkanaAttribute()
     {
         return $this->represent_kana;
@@ -138,9 +171,8 @@ class Company extends Model
         $this->represent_kana = $value;
     }
 
-    private $email;                  
 
-     
+    // e-mail 
     public function getEmailAttribute()
     {
         return $this->email;
@@ -151,9 +183,8 @@ class Company extends Model
         $this->email = $value;
     }
 
-    private $month_sm;                  
 
-     
+    // 月締め 
     public function getMonthsmAttribute()
     {
         return $this->month_sm;
@@ -164,7 +195,6 @@ class Company extends Model
         $this->month_sm = $value;
     }
 
-    private $created_user;                  
 
      
     public function getCreateduserAttribute()
@@ -177,9 +207,8 @@ class Company extends Model
         $this->created_user = $value;
     }
 
-    private $updated_user;                  
 
-     
+    // 修正ユーザー 
     public function getUpdateduserAttribute()
     {
         return $this->updated_user;
@@ -190,9 +219,8 @@ class Company extends Model
         $this->updated_user = $value;
     }
 
-    private $created_at;                  
 
-     
+    // 作成日時 
     public function getCreatedatAttribute()
     {
         return $this->created_at;
@@ -203,9 +231,8 @@ class Company extends Model
         $this->created_at = $value;
     }
 
-    private $updated_at;                  
 
-     
+    // 修正日時 
     public function getUpdatedatAttribute()
     {
         return $this->updated_at;
@@ -224,6 +251,8 @@ class Company extends Model
     public function insertCompany(){
         DB::table($this->table)->insert(
             [
+                'apply_term_from' => $this->apply_term_from,
+                'apply_term_to' => $this->apply_term_to,
                 'name' => $this->name,
                 'kana' => $this->kana,
                 'post_code' => $this->post_code,
@@ -249,6 +278,8 @@ class Company extends Model
     public function getCompanyInfo(){
         $data = DB::table($this->table)
         ->select(
+                'apply_term_from',
+                'apply_term_to',
                 'name',
                 'kana',
                 'post_code',
