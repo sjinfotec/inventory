@@ -683,6 +683,7 @@ class WorkTime extends Model
      * @return $data
      */
     public function getUserDetails(){
+        \DB::enableQueryLog();
         $data = DB::table($this->table)
             ->join('users','users.code','=',$this->table.'.user_code')
             ->join('departments','departments.id','users.department_id')
@@ -705,7 +706,13 @@ class WorkTime extends Model
             ->where($this->table.'.is_deleted', 0)
             ->orderBy($this->table.'.record_time', 'asc')
             ->get();
-
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getUserDetails' => \DB::getQueryLog()
+            ]
+            );
+        
         return $data;
     }
 

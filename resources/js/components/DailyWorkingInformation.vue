@@ -59,6 +59,7 @@
                     >所属部署</label>
                   </div>
                   <select-department v-bind:blank-data="true" v-on:change-event="departmentChanges"></select-department>
+                  <message-data v-bind:messagedatas="messagedatadepartment"></message-data>
                 </div>
               </div>
               <!-- /.col -->
@@ -77,6 +78,7 @@
                     v-bind:get-Do="getDo"
                     v-on:change-event="userChanges"
                   ></select-user>
+                  <message-data v-bind:messagedatas="messagedatauser"></message-data>
                 </div>
               </div>
               <!-- /.col -->
@@ -216,10 +218,10 @@
                   v-bind:item-name="'雇用形態'"
                   v-bind:item-value="calclist.employment_status_name"
                 ></col-employmentstatus>
-                <col-employmentstatus
+                <col-regularworking
                   v-bind:item-name="'勤務時間'"
                   v-bind:item-value="calclist.total_working_times"
-                ></col-employmentstatus>
+                ></col-regularworking>
                 <col-employmentstatus
                   v-bind:item-name="'勤務状態'"
                   v-bind:item-value="calclist.working_status_name"
@@ -297,10 +299,10 @@
             <!-- panel contents -->
             <!-- .row -->
             <div class="row">
-              <col-employmentstatus
+              <col-regularworking
                 v-bind:item-name="'勤務時間'"
                 v-bind:item-value="sumresult.total_working_times"
-              ></col-employmentstatus>
+              ></col-regularworking>
               <col-regularworking
                 v-bind:item-name="'所定労働時間'"
                 v-bind:item-value="sumresult.regular_working_times"
@@ -358,6 +360,7 @@ export default {
       getDo: 0,
       valueuser: "",
       valuefromdate: "",
+      userrole: "",
       defaultDate: new Date(),
       stringtext: "",
       datejaFormat: "",
@@ -368,9 +371,15 @@ export default {
       messagedatasserver: [],
       messagedatasfromdate: [],
       messagedatastodate: [],
-      validate: false,
+      messagedatadepartment: [],
+      messagedatauser: [],
+       validate: false,
       initialized: false
     };
+  },
+  // マウント時
+  mounted() {
+    this.getUserRole();
   },
   methods: {
     // バリデーション
@@ -380,16 +389,42 @@ export default {
       this.messagedatasserver = [];
       this.messagedatasfromdate = [];
       this.messagedatastodate = [];
+      this.messagedatadepartment = [];
+      this.messagedatauser = [];
       if (!this.valuefromdate) {
         this.messagedatasfromdate.push("指定日付は必ず入力してください。");
         this.validate = false;
       }
+      if (this.userrole < "8") {
+        if (!this.valuedepartment) {
+          this.messagedatadepartment.push("所属部署は必ず入力してください。");
+          this.validate = false;
+        }
+        if (!this.valueuser) {
+          this.messagedatauser.push("氏名は必ず入力してください。");
+          this.validate = false;
+        }
+      }
+      console.log("validate = true");
 
       if (this.validate) {
         return this.validate;
       }
 
       e.preventDefault();
+    },
+    // ログインユーザーの権限を取得
+    getUserRole: function() {
+      this.$axios
+        .get("/get_login_user_role", {
+        })
+        .then(response => {
+          this.userrole = response.data;
+          console.log("this.userrole = " + this.userrole);
+        })
+        .catch(reason => {
+          alert("ログインユーザー権限取得エラー");
+        });
     },
     // 雇用形態が変更された場合の処理
     employmentChanges: function(value) {
@@ -485,7 +520,7 @@ export default {
             this.calcresults = this.resresults.calcresults;
             this.sumresults = this.resresults.sumresults;
             this.dispmessage(this.resresults.massegedata);
-            console.log("集計時間取得" + Object.keys(this.resresults).length);
+            console.log("集計時間取得4" + Object.keys(this.resresults).length);
             console.log("sumresults" + Object.keys(this.sumresults).length);
           })
           .catch(reason => {
@@ -497,6 +532,13 @@ export default {
     dispmessage: function(items) {
       items.forEach(function(value) {
         this.messagedatasserver.push(value);
+      });
+    },
+    // メッセージ処理
+    dispmessage1: function(items) {
+      console.log("dispmessage1 " + Object.keys(items).length);
+      Object.keys(items).forEach(function (value) {
+        console.log(value.messagedata + "はと鳴いた！");
       });
     }
   }

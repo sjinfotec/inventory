@@ -74,8 +74,8 @@
                       type="submit"
                       class="btn btn-success"
                       v-if="selectId=='' || selectId==null "
-                    >追加</button>
-                    <button type="submit" class="btn btn-success" id="edit" v-if="selectId != ''">編集</button>
+                    >追加する</button>
+                    <button type="submit" class="btn btn-success" id="edit" v-if="selectId != ''">修正する</button>
                   </div>
                 </div>
                 <!-- /.col -->
@@ -87,7 +87,7 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <div class="btn-group d-flex">
-                  <button class="btn btn-danger" @click="alertDelConf('info')">削除</button>
+                  <button class="btn btn-danger" @click="alertDelConf('info')">削除する</button>
                 </div>
               </div>
               <!-- /.col -->

@@ -60,10 +60,11 @@ return [
     'C009' => [
         'value' => 'C009',
         'round1' => 1,
-        'round10' => 2,
-        'round15' => 3,
-        'round30' => 4,
-        'round60' => 5
+        'round5' => 2,
+        'round10' => 3,
+        'round15' => 4,
+        'round30' => 5,
+        'round60' => 6
     ],
 
     'C010' => [
@@ -170,6 +171,10 @@ return [
         'already_data' => 6,
         'select_error' => 7,
         'other' => 99
+    ],
+ 
+    'RESPONCE_ITEM' => [
+        'messagedata' => 'messagedata'
     ],
 
     'MSG_WARNING' => [

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\ShiftInformation;
 use App\WorkingTimeTable;
@@ -14,6 +15,7 @@ use App\WorkingTimeTable;
 
 class ApiCommonController extends Controller
 {
+
     /**
      * ユーザーリスト取得
      *
@@ -22,39 +24,75 @@ class ApiCommonController extends Controller
      */
     public function getUserList(Request $request){
 
+        // パラメータチェック　getdoは必須
+        if (!isset($request->getdo)) { return null; }
         $getdo = $request->getdo;
         if (!isset($getdo)) { return null; }
+        // ログインユーザの権限取得
+        $chk_user_id = Auth::user()->id;
+        $role = $this->getUserRole($chk_user_id);
+        if(!isset($role)) { return null; }
+        // 適用期間日付の取得
+        $dt = null;
+        if (isset($request->targetdate)) {
+            $dt = new Carbon($request->targetdate);
+        } else {
+            $dt = new Carbon();
+        }
+        $target_date = $dt->format('Ymd');
 
         if ($getdo == 1) {
             if (isset($request->code)) {
                 if (isset($request->employment)) {
-                    $users = DB::table('users')
+                    $mainQuery = DB::table('users')
                         ->where('department_id', $request->code)
                         ->where('employment_status', $request->employment)
-                        ->where('is_deleted', 0)
-                        ->orderby('name','asc')
+                        ->where('apply_term_from', '<=',$target_date)
+                        ->where('apply_term_to', '>=',$target_date);
+                    if($role < 8){
+                        $mainQuery->where('id','=',$chk_user_id);
+                    }
+                    $users = $mainQuery->where('is_deleted', 0)
+                        ->orderby('code','asc')
                         ->get();
                 } else {
-                    $users = DB::table('users')
+                    $mainQuery = DB::table('users')
                         ->where('department_id', $request->code)
-                        ->where('is_deleted', 0)
-                        ->orderby('name','asc')
+                        ->where('apply_term_from', '<=',$target_date)
+                        ->where('apply_term_to', '>=',$target_date);
+                    if($role < 8){
+                        $mainQuery->where('id','=',$chk_user_id);
+                    }
+                    $users = $mainQuery->where('is_deleted', 0)
+                        ->orderby('code','asc')
                         ->get();
                 }
             } else {
                 if (isset($request->employment)) {
-                    $users = DB::table('users')
+                    $mainQuery = DB::table('users')
                         ->where('employment_status', $request->employment)
-                        ->where('is_deleted', 0)
-                        ->orderby('name','asc')
+                        ->where('apply_term_from', '<=',$target_date)
+                        ->where('apply_term_to', '>=',$target_date);
+                    if($role < 8){
+                        $mainQuery->where('id','=',$chk_user_id);
+                    }
+                    $users = $mainQuery->where('is_deleted', 0)
+                        ->orderby('code','asc')
                         ->get();
                 } else {
-                    $users = DB::table('users')->where('is_deleted', 0)->orderby('name','asc')->get();
+                    $mainQuery = DB::table('users')
+                        ->where('apply_term_from', '<=',$target_date)
+                        ->where('apply_term_to', '>=',$target_date);
+                    if($role < 8){
+                        $mainQuery->where('id','=',$chk_user_id);
+                    }
+                    $users = $mainQuery->where('is_deleted', 0)->get();
                 }
             }
         } else {
             return null;
         }
+
         return $users;
     }
 
@@ -83,9 +121,64 @@ class ApiCommonController extends Controller
      *
      * @return list departments
      */
-    public function getDepartmentList(){
-        $departments = DB::table('departments')->select('id','name')->where('is_deleted', 0)->orderby('id','asc')->get();
+    public function getDepartmentList(Request $request){
+        // ログインユーザの権限取得
+        $chk_user_id = Auth::user()->id;
+        $role = $this->getUserRole($chk_user_id);
+        if(!isset($role)) { return null; }
+        // 適用期間日付の取得
+        $dt = null;
+        if (isset($request->targetdate)) {
+            $dt = new Carbon($request->targetdate);
+        } else {
+            $dt = new Carbon();
+        }
+        $target_date = $dt->format('Ymd');
+        if($role < 8){
+            $departments = DB::table('departments')
+                ->Join('users', function ($join) { 
+                    $join->on('users.department_id', '=', 'departments.id')
+                    ->where('users.is_deleted', '=', 0);
+                })
+                ->select('departments.id','departments.name')
+                ->where('departments.apply_term_from', '<=',$target_date)
+                ->where('departments.apply_term_to', '>=',$target_date)
+                ->where('users.id','=',$chk_user_id)
+                ->where('departments.is_deleted', 0)
+                ->orderby('departments.id','asc')
+                ->get();
+        } else {
+            $departments = DB::table('departments')
+                ->select('id','name')
+                ->where('apply_term_from', '<=',$target_date)
+                ->where('apply_term_to', '>=',$target_date)
+                ->where('is_deleted', 0)
+                ->orderby('id','asc')
+                ->get();
+        }
         return $departments;
+    }
+        
+    /** ユーザー権限取得（画面から）
+     *
+     * @return list departments
+     */
+    public function getLoginUserRole(){
+        // ログインユーザの権限取得
+        $chk_user_id = Auth::user()->id;
+        $role = $this->getUserRole($chk_user_id);
+        return $role;
+    }
+        
+    /** ユーザー権限取得
+     *
+     * @return list departments
+     */
+    public function getUserRole($user_id){
+        // ユーザの権限取得
+        $role = DB::table('users')->where('id','=',''.$user_id)->where('is_deleted', 0)->value('role');     
+        if(!isset($role)) { return null; }
+        return $role;
     }
 
     /** 雇用形態リスト取得
@@ -225,12 +318,14 @@ class ApiCommonController extends Controller
      * @return 時間差
      */
     public function diffTimeTime($time_from, $time_to){
-        $from = new Carbon($time_from);
-        $to   = new Carbon($time_to); 
+        $from = strtotime(date('Y/m/d H:i:00',strtotime($time_from)));
+        $to   = strtotime(date('Y/m/d H:i:00',strtotime($time_to))); 
+        $from = new Carbon($from);
+        $to   = new Carbon($to); 
         $interval = $from->diff($to);
+        Log::DEBUG('diffTimeTime interval = '.$interval);
         // 時間単位の差
         $dif_time = $interval->format('%H:%I:%S');
-        Log::DEBUG('dif_time = '.$dif_time);
         return $dif_time;
     }
     
@@ -240,8 +335,8 @@ class ApiCommonController extends Controller
      * @return 時間差
      */
     public function diffTimeSerial($time_from, $time_to){
-        $from = strtotime($time_from);
-        $to   = strtotime($time_to); 
+        $from = strtotime(date('Y/m/d H:i:00',strtotime($time_from)));
+        $to   = strtotime(date('Y/m/d H:i:00',strtotime($time_to))); 
         $interval = $to - $from;
         Log::DEBUG('interval = '.$interval);
         return $interval;
@@ -255,14 +350,48 @@ class ApiCommonController extends Controller
     public function roundTime($round_time, $time_unit, $time_rounding){
 
         if ($time_rounding == Config::get('const.C010.round_half_up')) {
+            // 四捨五入
             if ($time_rounding == Config::get('const.C009.round1')) {
                 // 分求める
                 $result_round_time = round($round_time / 60);
+            } elseif ($time_rounding == Config::get('const.C009.round5')) {
+                // 切り捨てて時間求める
+                $w_time1 = floor($round_time / 60 / 60);
+                $w_time2 = $w_time1 * 60;
+                // 分の差を求める
+                $w_time3 = ($round_time / 60) - $w_time2;
+                if ($w_time3 < 3) {
+                    $result_round_time = $w_time2;
+                } elseif ($w_time3 < 8) {
+                    $result_round_time = $w_time2 + 5;
+                } elseif ($w_time3 < 13) {
+                    $result_round_time = $w_time2 + 10;
+                } elseif ($w_time3 < 18) {
+                    $result_round_time = $w_time2 + 15;
+                } elseif ($w_time3 < 23) {
+                    $result_round_time = $w_time2 + 20;
+                } elseif ($w_time3 < 28) {
+                    $result_round_time = $w_time2 + 25;
+                } elseif ($w_time3 < 33) {
+                    $result_round_time = $w_time2 + 30;
+                } elseif ($w_time3 < 38) {
+                    $result_round_time = $w_time2 + 35;
+                } elseif ($w_time3 < 43) {
+                    $result_round_time = $w_time2 + 40;
+                } elseif ($w_time3 < 48) {
+                    $result_round_time = $w_time2 + 45;
+                } elseif ($w_time3 < 53) {
+                    $result_round_time = $w_time2 + 50;
+                } elseif ($w_time3 < 58) {
+                    $result_round_time = $w_time2 + 55;
+                } else {
+                    $result_round_time = $w_time2 + 60;
+                }
             } elseif ($time_rounding == Config::get('const.C009.round10')) {
                 // 分求める
                 $result_round_time = round($round_time / 60 / 10) * 10;
             } elseif ($time_rounding == Config::get('const.C009.round15')) {
-                // 時間求める（切り捨て）
+                // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
                 // 分の差を求める
@@ -279,7 +408,7 @@ class ApiCommonController extends Controller
                     $result_round_time = $w_time2 + 60;
                 }
             } elseif ($time_rounding == Config::get('const.C009.round30')) {
-                // 時間求める（切り捨て）
+                // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
                 // 分の差を求める
@@ -292,7 +421,7 @@ class ApiCommonController extends Controller
                     $result_round_time = $w_time2 + 60;
                 }
             } elseif ($time_rounding == Config::get('const.C009.round60')) {
-                // 時間求める（切り捨て）
+                // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
                 // 分の差を求める
@@ -304,14 +433,48 @@ class ApiCommonController extends Controller
                 }
             }
         } elseif ($time_rounding == Config::get('const.C010.round_down')) {
+            // 切り捨て
             if ($time_rounding == Config::get('const.C009.round1')) {
                 // 分求める
                 $result_round_time = floor($round_time / 60);
+            } elseif ($time_rounding == Config::get('const.C009.round5')) {
+                // 切り捨てて時間求める
+                $w_time1 = floor($round_time / 60 / 60);
+                $w_time2 = $w_time1 * 60;
+                // 分の差を求める
+                $w_time3 = ($round_time / 60) - $w_time2;
+                if ($w_time3 < 5) {
+                    $result_round_time = $w_time2;
+                } elseif ($w_time3 < 10) {
+                    $result_round_time = $w_time2 + 5;
+                } elseif ($w_time3 < 15) {
+                    $result_round_time = $w_time2 + 10;
+                } elseif ($w_time3 < 20) {
+                    $result_round_time = $w_time2 + 15;
+                } elseif ($w_time3 < 25) {
+                    $result_round_time = $w_time2 + 20;
+                } elseif ($w_time3 < 30) {
+                    $result_round_time = $w_time2 + 25;
+                } elseif ($w_time3 < 35) {
+                    $result_round_time = $w_time2 + 30;
+                } elseif ($w_time3 < 40) {
+                    $result_round_time = $w_time2 + 35;
+                } elseif ($w_time3 < 45) {
+                    $result_round_time = $w_time2 + 40;
+                } elseif ($w_time3 < 50) {
+                    $result_round_time = $w_time2 + 45;
+                } elseif ($w_time3 < 55) {
+                    $result_round_time = $w_time2 + 50;
+                } elseif ($w_time3 < 60) {
+                    $result_round_time = $w_time2 + 55;
+                } else {
+                    $result_round_time = $w_time2 + 60;
+                }
             } elseif ($time_rounding == Config::get('const.C009.round10')) {
                 // 分求める
                 $result_round_time = floor($round_time / 60 / 10) * 10;
             } elseif ($time_rounding == Config::get('const.C009.round15')) {
-                // 時間求める（切り捨て）
+                // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
                 // 分の差を求める
@@ -328,7 +491,7 @@ class ApiCommonController extends Controller
                     $result_round_time = $w_time2 + 60;
                 }
             } elseif ($time_rounding == Config::get('const.C009.round30')) {
-                // 時間求める（切り捨て）
+                // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
                 // 分の差を求める
@@ -341,7 +504,7 @@ class ApiCommonController extends Controller
                     $result_round_time = $w_time2 + 60;
                 }
             } elseif ($time_rounding == Config::get('const.C009.round60')) {
-                // 時間求める（切り捨て）
+                // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
                 // 分の差を求める
@@ -353,14 +516,48 @@ class ApiCommonController extends Controller
                 }
             }
         } elseif ($time_rounding == Config::get('const.C010.round_up')) {
+            // 切り上げ
             if ($time_rounding == Config::get('const.C009.round1')) {
                 // 分求める
                 $result_round_time = ceil($round_time / 60);
+            } elseif ($time_rounding == Config::get('const.C009.round5')) {
+                // 切り捨てて時間求める
+                $w_time1 = floor($round_time / 60 / 60);
+                $w_time2 = $w_time1 * 60;
+                // 分の差を求める
+                $w_time3 = ($round_time / 60) - $w_time2;
+                if ($w_time3 < 5) {
+                    $result_round_time = $w_time2 + 5;
+                } elseif ($w_time3 < 10) {
+                    $result_round_time = $w_time2 + 10;
+                } elseif ($w_time3 < 15) {
+                    $result_round_time = $w_time2 + 15;
+                } elseif ($w_time3 < 20) {
+                    $result_round_time = $w_time2 + 20;
+                } elseif ($w_time3 < 25) {
+                    $result_round_time = $w_time2 + 25;
+                } elseif ($w_time3 < 30) {
+                    $result_round_time = $w_time2 + 30;
+                } elseif ($w_time3 < 35) {
+                    $result_round_time = $w_time2 + 35;
+                } elseif ($w_time3 < 40) {
+                    $result_round_time = $w_time2 + 40;
+                } elseif ($w_time3 < 45) {
+                    $result_round_time = $w_time2 + 45;
+                } elseif ($w_time3 < 50) {
+                    $result_round_time = $w_time2 + 50;
+                } elseif ($w_time3 < 55) {
+                    $result_round_time = $w_time2 + 55;
+                } elseif ($w_time3 < 60) {
+                    $result_round_time = $w_time2 + 60;
+                } else {
+                    $result_round_time = $w_time2 + 60;
+                }
             } elseif ($time_rounding == Config::get('const.C009.round10')) {
                 // 分求める
                 $result_round_time = ceil($round_time / 60 / 10) * 10;
             } elseif ($time_rounding == Config::get('const.C009.round15')) {
-                // 時間求める（切り捨て）
+                // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
                 // 分の差を求める
@@ -377,7 +574,7 @@ class ApiCommonController extends Controller
                     $result_round_time = $w_time2 + 60;
                 }
             } elseif ($time_rounding == Config::get('const.C009.round30')) {
-                // 時間求める（切り捨て）
+                // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
                 // 分の差を求める
@@ -390,7 +587,7 @@ class ApiCommonController extends Controller
                     $result_round_time = $w_time2 + 60;
                 }
             } elseif ($time_rounding == Config::get('const.C009.round60')) {
-                // 時間求める（切り捨て）
+                // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
                 // 分の差を求める
@@ -402,7 +599,10 @@ class ApiCommonController extends Controller
                 }
             }
         } elseif ($time_rounding == Config::get('const.C010.non')) {
+            // なし
             $result_round_time = $round_time / 60;
+            Log::DEBUG('$round_time'.$round_time);
+            Log::DEBUG('$result_round_time'.$result_round_time);
         } else {
             $result_round_time = $round_time / 60;
             Log::DEBUG(Config::get('const.LOG_MSG.not_set_time_rounding'));

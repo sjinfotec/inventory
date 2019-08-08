@@ -1855,8 +1855,6 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     edtValue: function edtValue() {
-      console.log("this.itemName = " + this.itemName);
-
       if (this.itemValue != null && this.itemValue != '' && this.itemValue != '　') {
         this.value = this.itemValue;
       } else {
@@ -1864,8 +1862,6 @@ __webpack_require__.r(__webpack_exports__);
           this.value = this.itemsecoundValue;
         }
       }
-
-      console.log("this.value = " + this.value);
     }
   }
 });
@@ -3725,6 +3721,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -3736,6 +3734,7 @@ __webpack_require__.r(__webpack_exports__);
       getDo: 0,
       valueuser: "",
       valuefromdate: "",
+      userrole: "",
       defaultDate: new Date(),
       stringtext: "",
       datejaFormat: "",
@@ -3746,9 +3745,15 @@ __webpack_require__.r(__webpack_exports__);
       messagedatasserver: [],
       messagedatasfromdate: [],
       messagedatastodate: [],
+      messagedatadepartment: [],
+      messagedatauser: [],
       validate: false,
       initialized: false
     };
+  },
+  // マウント時
+  mounted: function mounted() {
+    this.getUserRole();
   },
   methods: {
     // バリデーション
@@ -3758,17 +3763,44 @@ __webpack_require__.r(__webpack_exports__);
       this.messagedatasserver = [];
       this.messagedatasfromdate = [];
       this.messagedatastodate = [];
+      this.messagedatadepartment = [];
+      this.messagedatauser = [];
 
       if (!this.valuefromdate) {
         this.messagedatasfromdate.push("指定日付は必ず入力してください。");
         this.validate = false;
       }
 
+      if (this.userrole < "8") {
+        if (!this.valuedepartment) {
+          this.messagedatadepartment.push("所属部署は必ず入力してください。");
+          this.validate = false;
+        }
+
+        if (!this.valueuser) {
+          this.messagedatauser.push("氏名は必ず入力してください。");
+          this.validate = false;
+        }
+      }
+
+      console.log("validate = true");
+
       if (this.validate) {
         return this.validate;
       }
 
       e.preventDefault();
+    },
+    // ログインユーザーの権限を取得
+    getUserRole: function getUserRole() {
+      var _this = this;
+
+      this.$axios.get("/get_login_user_role", {}).then(function (response) {
+        _this.userrole = response.data;
+        console.log("this.userrole = " + _this.userrole);
+      })["catch"](function (reason) {
+        alert("ログインユーザー権限取得エラー");
+      });
     },
     // 雇用形態が変更された場合の処理
     employmentChanges: function employmentChanges(value) {
@@ -3828,7 +3860,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     // 集計開始ボタンがクリックされた場合の処理
     searchclick: function searchclick(e) {
-      var _this = this;
+      var _this2 = this;
 
       this.validate = this.checkForm(e);
 
@@ -3842,14 +3874,14 @@ __webpack_require__.r(__webpack_exports__);
             usercode: this.valueuser
           }
         }).then(function (response) {
-          _this.resresults = response.data;
-          _this.calcresults = _this.resresults.calcresults;
-          _this.sumresults = _this.resresults.sumresults;
+          _this2.resresults = response.data;
+          _this2.calcresults = _this2.resresults.calcresults;
+          _this2.sumresults = _this2.resresults.sumresults;
 
-          _this.dispmessage(_this.resresults.massegedata);
+          _this2.dispmessage(_this2.resresults.massegedata);
 
-          console.log("集計時間取得" + Object.keys(_this.resresults).length);
-          console.log("sumresults" + Object.keys(_this.sumresults).length);
+          console.log("集計時間取得4" + Object.keys(_this2.resresults).length);
+          console.log("sumresults" + Object.keys(_this2.sumresults).length);
         })["catch"](function (reason) {
           alert("error");
         });
@@ -3859,6 +3891,13 @@ __webpack_require__.r(__webpack_exports__);
     dispmessage: function dispmessage(items) {
       items.forEach(function (value) {
         this.messagedatasserver.push(value);
+      });
+    },
+    // メッセージ処理
+    dispmessage1: function dispmessage1(items) {
+      console.log("dispmessage1 " + Object.keys(items).length);
+      Object.keys(items).forEach(function (value) {
+        console.log(value.messagedata + "はと鳴いた！");
       });
     }
   }
@@ -78719,7 +78758,7 @@ var render = function() {
                                 staticClass: "btn btn-success",
                                 attrs: { type: "submit" }
                               },
-                              [_vm._v("追加")]
+                              [_vm._v("追加する")]
                             )
                           : _vm._e(),
                         _vm._v(" "),
@@ -78730,7 +78769,7 @@ var render = function() {
                                 staticClass: "btn btn-success",
                                 attrs: { type: "submit", id: "edit" }
                               },
-                              [_vm._v("編集")]
+                              [_vm._v("修正する")]
                             )
                           : _vm._e()
                       ])
@@ -78753,7 +78792,7 @@ var render = function() {
                               }
                             }
                           },
-                          [_vm._v("削除")]
+                          [_vm._v("削除する")]
                         )
                       ])
                     ])
@@ -79769,7 +79808,7 @@ var render = function() {
                                 staticClass: "btn btn-success",
                                 attrs: { type: "submit" }
                               },
-                              [_vm._v("追加")]
+                              [_vm._v("追加する")]
                             )
                           : _vm._e(),
                         _vm._v(" "),
@@ -79780,7 +79819,7 @@ var render = function() {
                                 staticClass: "btn btn-success",
                                 attrs: { type: "submit", id: "edit" }
                               },
-                              [_vm._v("編集")]
+                              [_vm._v("修正する")]
                             )
                           : _vm._e()
                       ])
@@ -79803,7 +79842,7 @@ var render = function() {
                               }
                             }
                           },
-                          [_vm._v("削除")]
+                          [_vm._v("削除する")]
                         )
                       ])
                     ])
@@ -79930,6 +79969,10 @@ var render = function() {
                           _c("select-department", {
                             attrs: { "blank-data": true },
                             on: { "change-event": _vm.departmentChanges }
+                          }),
+                          _vm._v(" "),
+                          _c("message-data", {
+                            attrs: { messagedatas: _vm.messagedatadepartment }
                           })
                         ],
                         1
@@ -79947,6 +79990,10 @@ var render = function() {
                             ref: "selectuser",
                             attrs: { "blank-data": true, "get-Do": _vm.getDo },
                             on: { "change-event": _vm.userChanges }
+                          }),
+                          _vm._v(" "),
+                          _c("message-data", {
+                            attrs: { messagedatas: _vm.messagedatauser }
                           })
                         ],
                         1
@@ -80181,7 +80228,7 @@ var render = function() {
                               }
                             }),
                             _vm._v(" "),
-                            _c("col-employmentstatus", {
+                            _c("col-regularworking", {
                               attrs: {
                                 "item-name": "勤務時間",
                                 "item-value": calclist.total_working_times
@@ -80301,7 +80348,7 @@ var render = function() {
                     "div",
                     { staticClass: "row" },
                     [
-                      _c("col-employmentstatus", {
+                      _c("col-regularworking", {
                         attrs: {
                           "item-name": "勤務時間",
                           "item-value": sumresult.total_working_times
@@ -85313,7 +85360,7 @@ var render = function() {
                                   staticClass: "btn btn-success",
                                   attrs: { type: "submit" }
                                 },
-                                [_vm._v("追加")]
+                                [_vm._v("追加する")]
                               )
                             : _vm._e(),
                           _vm._v(" "),
@@ -85324,7 +85371,7 @@ var render = function() {
                                   staticClass: "btn btn-success",
                                   attrs: { type: "submit", id: "edit" }
                                 },
-                                [_vm._v("編集")]
+                                [_vm._v("修正する")]
                               )
                             : _vm._e()
                         ])
@@ -85347,7 +85394,7 @@ var render = function() {
                                 }
                               }
                             },
-                            [_vm._v("削除")]
+                            [_vm._v("削除する")]
                           )
                         ])
                       ])
