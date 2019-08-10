@@ -37,5 +37,7 @@
 					</div>
 					<!-- /main contentns row -->
 					@endif
-					<setting-shift-time></setting-shift-time>
+					@can('admin-higher')
+						<setting-shift-time></setting-shift-time>
+					@can('admin-higher')
 @endsection
