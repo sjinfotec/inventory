@@ -1,7 +1,7 @@
 <template>
   <select class="form-control" v-model="selectedDepartment" v-on:change="selChanges(selectedDepartment)" placeholder="部署を選択してください">
     <option v-if="this.blankData" value=""></option>
-    <option v-for="departments in departmentList" v-bind:value="departments.id">
+    <option v-for="departments in departmentList" v-bind:value="departments.code">
       {{ departments.name }}
     </option>
   </select>
@@ -31,8 +31,9 @@ export default {
       this.$axios
         .get("/get_departments_list")
         .then(response => {
+          console.log("部署リスト取得 1");
           this.departmentList = response.data;
-          console.log("部署リスト取得");
+          console.log("部署リスト取得 2");
         })
         .catch(reason => {
           alert("error");

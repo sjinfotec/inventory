@@ -20,7 +20,7 @@ class TempWorkingTimeDate extends Model
 
     private $working_date;                  // 日付
     private $employment_status;             // 雇用形態
-    private $department_id;                 // 部署ID
+    private $department_code;                 // 部署ID
     private $user_code;                     // ユーザー
     private $employment_status_name;        // 雇用形態名称
     private $department_name;               // 部署名称
@@ -95,12 +95,12 @@ class TempWorkingTimeDate extends Model
     // 部署ID
     public function getDepartmentidAttribute()
     {
-        return $this->department_id;
+        return $this->department_code;
     }
 
     public function setDepartmentidAttribute($value)
     {
-        $this->department_id = $value;
+        $this->department_code = $value;
     }
 
 
@@ -653,7 +653,7 @@ class TempWorkingTimeDate extends Model
 
     private $param_employment_status;           // 雇用形態
     private $param_user_code;                   // ユーザー
-    private $param_department_id;               // 部署
+    private $param_department_code;               // 部署
     private $param_date_from;                   // 開始日付
     private $param_date_to;                     // 終了日付
 
@@ -686,12 +686,12 @@ class TempWorkingTimeDate extends Model
     // 部署
     public function getParamDepartmentcodeAttribute()
     {
-        return $this->param_department_id;
+        return $this->param_department_code;
     }
 
     public function setParamDepartmentcodeAttribute($value)
     {
-        $this->param_department_id = $value;
+        $this->param_department_code = $value;
     }
 
 
@@ -768,7 +768,7 @@ class TempWorkingTimeDate extends Model
                 ->select(
                     $this->table.'.working_date',
                     $this->table.'.employment_status',
-                    $this->table.'.department_id',
+                    $this->table.'.department_code',
                     $this->table.'.user_code',
                     $this->table.'.employment_status_name',
                     $this->table.'.department_name',
@@ -843,7 +843,7 @@ class TempWorkingTimeDate extends Model
             $mainquery = DB::table($this->table_users.' AS t1')
                 ->selectRaw('(case when t2.working_date is not null then t2.working_date else '.$this->param_date_from.' end) as working_date');
             $mainquery->addselect('t1.employment_status')
-                ->addselect('t1.department_id')
+                ->addselect('t1.department_code')
                 ->addselect('t1.code as user_code')
                 ->addselect('t4.code_name as employment_status_name')
                 ->addselect('t3.name as department_name')
@@ -910,11 +910,11 @@ class TempWorkingTimeDate extends Model
             $mainquery->selectRaw('null as updated_user');
             $mainquery->leftJoinSub($subquery1, 't2', function ($join) { 
                     $join->on('t2.user_code', '=', 't1.code');
-                    $join->on('t2.department_id', '=', 't1.department_id');
+                    $join->on('t2.department_code', '=', 't1.department_code');
                     $join->on('t2.employment_status', '=', 't1.employment_status');
                 })
                 ->leftJoin($this->table_departments.' as t3', function ($join) { 
-                    $join->on('t3.id', '=', 't1.department_id')
+                    $join->on('t3.id', '=', 't1.department_code')
                     ->where('t3.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_generalcodes.' as t4', function ($join) { 
@@ -936,8 +936,8 @@ class TempWorkingTimeDate extends Model
                 $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
             }
             
-            if(!empty($this->param_department_id)){
-                $mainquery->where('t1.department_id', $this->param_department_id);          //department_id指定
+            if(!empty($this->param_department_code)){
+                $mainquery->where('t1.department_code', $this->param_department_code);          //department_code指定
             }
             $result = $mainquery->where('t1.is_deleted', '=', 0)->get();
             
@@ -972,7 +972,7 @@ class TempWorkingTimeDate extends Model
                 [
                     'working_date' => $this->working_date,
                     'employment_status' => $this->employment_status,
-                    'department_id' => $this->department_id,
+                    'department_code' => $this->department_code,
                     'user_code' => $this->user_code,
                     'employment_status_name' => $this->employment_status_name,
                     'department_name' => $this->department_name,

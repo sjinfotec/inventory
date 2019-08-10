@@ -40,15 +40,16 @@ class ApiCommonController extends Controller
             $dt = new Carbon();
         }
         $target_date = $dt->format('Ymd');
+        $max_date = DB::table('users')->where('apply_term_from', '<=',$target_date)->max('apply_term_from');
+        if (!isset($max_date)) { return null; }
 
         if ($getdo == 1) {
             if (isset($request->code)) {
                 if (isset($request->employment)) {
                     $mainQuery = DB::table('users')
-                        ->where('department_id', $request->code)
+                        ->where('department_code', $request->code)
                         ->where('employment_status', $request->employment)
-                        ->where('apply_term_from', '<=',$target_date)
-                        ->where('apply_term_to', '>=',$target_date);
+                        ->where('apply_term_from', '=',$max_date);
                     if($role < 8){
                         $mainQuery->where('id','=',$chk_user_id);
                     }
@@ -56,10 +57,10 @@ class ApiCommonController extends Controller
                         ->orderby('code','asc')
                         ->get();
                 } else {
+                    Log::DEBUG('$max_date2= '.$max_date);
                     $mainQuery = DB::table('users')
-                        ->where('department_id', $request->code)
-                        ->where('apply_term_from', '<=',$target_date)
-                        ->where('apply_term_to', '>=',$target_date);
+                        ->where('department_code', $request->code)
+                        ->where('apply_term_from', '=',$max_date);
                     if($role < 8){
                         $mainQuery->where('id','=',$chk_user_id);
                     }
@@ -68,11 +69,11 @@ class ApiCommonController extends Controller
                         ->get();
                 }
             } else {
+                Log::DEBUG('$max_date3 = '.$max_date);
                 if (isset($request->employment)) {
                     $mainQuery = DB::table('users')
                         ->where('employment_status', $request->employment)
-                        ->where('apply_term_from', '<=',$target_date)
-                        ->where('apply_term_to', '>=',$target_date);
+                        ->where('apply_term_from', '=',$max_date);
                     if($role < 8){
                         $mainQuery->where('id','=',$chk_user_id);
                     }
@@ -80,9 +81,9 @@ class ApiCommonController extends Controller
                         ->orderby('code','asc')
                         ->get();
                 } else {
+                    Log::DEBUG('$max_date4 = '.$max_date);
                     $mainQuery = DB::table('users')
-                        ->where('apply_term_from', '<=',$target_date)
-                        ->where('apply_term_to', '>=',$target_date);
+                        ->where('apply_term_from', '=',$max_date);
                     if($role < 8){
                         $mainQuery->where('id','=',$chk_user_id);
                     }
@@ -93,6 +94,7 @@ class ApiCommonController extends Controller
             return null;
         }
 
+        Log::DEBUG('$max_date5 = '.$max_date);
         return $users;
     }
 
@@ -134,26 +136,27 @@ class ApiCommonController extends Controller
             $dt = new Carbon();
         }
         $target_date = $dt->format('Ymd');
+        $max_date = DB::table('users')->where('apply_term_from', '<=',$target_date)->max('apply_term_from');
+        if (!isset($max_date)) { return null; }
+
         if($role < 8){
             $departments = DB::table('departments')
                 ->Join('users', function ($join) { 
-                    $join->on('users.department_id', '=', 'departments.id')
+                    $join->on('users.department_code', '=', 'departments.id')
                     ->where('users.is_deleted', '=', 0);
                 })
                 ->select('departments.id','departments.name')
-                ->where('departments.apply_term_from', '<=',$target_date)
-                ->where('departments.apply_term_to', '>=',$target_date)
+                ->where('apply_term_from', '=',$max_date)
                 ->where('users.id','=',$chk_user_id)
                 ->where('departments.is_deleted', 0)
                 ->orderby('departments.id','asc')
                 ->get();
         } else {
             $departments = DB::table('departments')
-                ->select('id','name')
-                ->where('apply_term_from', '<=',$target_date)
-                ->where('apply_term_to', '>=',$target_date)
+                ->select('code','name')
+                ->where('apply_term_from', '=',$max_date)
                 ->where('is_deleted', 0)
-                ->orderby('id','asc')
+                ->orderby('code','asc')
                 ->get();
         }
         return $departments;
@@ -165,8 +168,10 @@ class ApiCommonController extends Controller
      */
     public function getLoginUserRole(){
         // ログインユーザの権限取得
+        Log::DEBUG('$getLoginUserRole in ');
         $chk_user_id = Auth::user()->id;
         $role = $this->getUserRole($chk_user_id);
+        Log::DEBUG('$getLoginUserRole end ');
         return $role;
     }
         
@@ -176,8 +181,10 @@ class ApiCommonController extends Controller
      */
     public function getUserRole($user_id){
         // ユーザの権限取得
+        Log::DEBUG('$getUserRole in ');
         $role = DB::table('users')->where('id','=',''.$user_id)->where('is_deleted', 0)->value('role');     
         if(!isset($role)) { return null; }
+        Log::DEBUG('$getUserRole end ');
         return $role;
     }
 
@@ -186,7 +193,9 @@ class ApiCommonController extends Controller
      * @return list statuses
      */
     public function getEmploymentStatusList(){
+        Log::DEBUG('$getEmploymentStatusList in ');
         $statuses = DB::table('generalcodes')->where('identification_id', Config::get('const.C001.value'))->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        Log::DEBUG('$getEmploymentStatusList end ');
         return $statuses;
     }
 
@@ -312,14 +321,45 @@ class ApiCommonController extends Controller
         return $what_weekday;
     }
     
+
+    /**
+     * 翌日を求める
+     *
+     * @return 翌日
+     */
+    public function getNextDay($target_date, $str_format){
+        $dt = new Carbon($target_date);
+        return date_format($dt->addDay(), $str_format);
+    }
+
+    /**
+     * 時刻日付変換
+     *      target_time <= basic_time の場合は basic_dateの翌日+target_time に変換
+     *      target_time >  basic_time の場合は basic_date +target_time に変換
+     * @return 日付時刻
+     */
+    public function convTimeToDate($target_time, $basic_time, $basic_date){
+        // 日付付与
+        $convDateTime = null;
+        $dt = new Carbon($basic_time);
+        if ($target_time <= date_format($dt, 'H:i:s')) {
+            $dt = new Carbon($target_time);
+            $convDateTime = $this->getNextDay($basic_date, 'Y-m-d').' '.date_format($dt, 'H:i:s');
+        } else {
+            $convDateTime = $basic_date.' '.$target_time;
+        }
+
+        return $convDateTime;
+    }
+
     /**
      * 時間差を求める（時間）
      *
      * @return 時間差
      */
     public function diffTimeTime($time_from, $time_to){
-        $from = strtotime(date('Y/m/d H:i:00',strtotime($time_from)));
-        $to   = strtotime(date('Y/m/d H:i:00',strtotime($time_to))); 
+        $from = strtotime(date('Y-m-d H:i:00',strtotime($time_from)));
+        $to   = strtotime(date('Y-m-d H:i:00',strtotime($time_to))); 
         $from = new Carbon($from);
         $to   = new Carbon($to); 
         $interval = $from->diff($to);
@@ -335,8 +375,10 @@ class ApiCommonController extends Controller
      * @return 時間差
      */
     public function diffTimeSerial($time_from, $time_to){
-        $from = strtotime(date('Y/m/d H:i:00',strtotime($time_from)));
-        $to   = strtotime(date('Y/m/d H:i:00',strtotime($time_to))); 
+        $from = strtotime(date('Y-m-d H:i:00',strtotime($time_from)));
+        $to   = strtotime(date('Y-m-d H:i:00',strtotime($time_to))); 
+        Log::DEBUG('diffTimeSerial from = '.$from);
+        Log::DEBUG('diffTimeSerial to = '.$to);
         $interval = $to - $from;
         Log::DEBUG('interval = '.$interval);
         return $interval;

@@ -109,6 +109,12 @@ return [
         'fixed' => 1
     ],
 
+    'C015' => [
+        'value' => 'C015',
+        'night_from' => '22:00:00',
+        'night_to' => '05:00:00',
+    ],
+
     'WEEK_KANJI' => [
         'sun' => '(日)',
         'mon' => '(月)',
@@ -124,6 +130,10 @@ return [
         'leaving_time' => 5,
         'missing_middle_time' => 5,
         'missing_middle_return_time' => 5
+    ],
+
+    'TIME_TABLE_NO' => [
+        'basic_no' => 1
     ],
 
     'MEMO_DATA' => [
@@ -154,7 +164,7 @@ return [
         'listresult' => 'listresult',
         'user_code' => 'user_code',
         'user_name' => 'user_name',
-        'department_id' => 'department_id',
+        'department_code' => 'department_code',
         'department_name' => 'department_name',
         'record_time' => 'record_time',
         'source_mode' => 'source_mode'
@@ -188,8 +198,8 @@ return [
         'not_input_workindatefrom' => '計算開始日付は必ず入力してください。',
         'not_input_workindateto' => '計算終了日付は必ず入力してください。',
         'not_input_workindatefromto' => '計算開始日付と計算終了日付は必ず入力してください。',
-        'not_setting_department_id' => 'さんの部署が設定されていません。',
-        'not_setting_department_id_nouser' => '部署が設定されていない社員がいます。確認してください。',
+        'not_setting_department_code' => 'さんの部署が設定されていません。',
+        'not_setting_department_code_nouser' => '部署が設定されていない社員がいます。確認してください。',
         'not_setting_closing' => '締日が設定されていません。',
         'not_setting_time_unit' => '時間計算の単位が設定されていません。',
         'not_setting_time_rounding' => '時間計算の端数処理が設定されていません。',

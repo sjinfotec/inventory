@@ -18,7 +18,7 @@ class WorkTime extends Model
 
     private $id;
     private $user_code;                     // ユーザーコード
-    private $department_id;                 // 部署コード
+    private $department_code;                 // 部署コード
     private $record_time;                   // 打刻時間
     private $mode;                          // 打刻モード
     private $created_user;                  // 作成ユーザー
@@ -51,12 +51,12 @@ class WorkTime extends Model
     // 部署コード
     public function getDepartmentcodeAttribute()
     {
-        return $this->department_id;
+        return $this->department_code;
     }
 
     public function setDepartmentcodeAttribute($value)
     {
-        $this->department_id = $value;
+        $this->department_code = $value;
     }
 
 
@@ -151,7 +151,7 @@ class WorkTime extends Model
     private $param_date_from;                   // 開始日付（00:00:00から）
     private $param_date_to;                     // 終了日付（23:59:59まで）
     private $param_employment_status;           // 雇用形態
-    private $param_department_id;               // 部署
+    private $param_department_code;               // 部署
     private $param_user_code;                   // ユーザー
 
     private $array_record_time;                 // 日付範囲配列
@@ -202,12 +202,12 @@ class WorkTime extends Model
     // 部署
     public function getParamDepartmentcodeAttribute()
     {
-        return $this->param_department_id;
+        return $this->param_department_code;
     }
 
     public function setParamDepartmentcodeAttribute($value)
     {
-        $this->param_department_id = $value;
+        $this->param_department_code = $value;
     }
 
     // ユーザー
@@ -278,7 +278,7 @@ class WorkTime extends Model
         DB::table($this->table)->insert(
             [
                 'user_code' => $this->user_code,
-                'department_id' => $this->department_id,
+                'department_code' => $this->department_code,
                 'record_time' => $this->record_time,
                 'mode' => $this->mode,
                 'created_user' => $this->created_user,
@@ -301,7 +301,7 @@ class WorkTime extends Model
                     'work_times.',
                     'work_times.end_date'
                     )
-            // ->where('tasks.department_id',$department_id)
+            // ->where('tasks.department_code',$department_code)
             ->limit(1)
             ->get();
 
@@ -363,7 +363,7 @@ class WorkTime extends Model
      *          ④①と②と③の結合          ①.ユーザー = ②.ユーザー and ②.ユーザー = ③.ユーザー
      *
      *      使用方法：
-     *          ①department_id指定プロパティを事前設定（未設定有効）
+     *          ①department_code指定プロパティを事前設定（未設定有効）
      *          ②user_code指定プロパティを事前設定（未設定有効）
      *          ③日付範囲指定プロパティを事前設定（未設定無効）
      *          ④メソッド：calcWorkingTimeDateを実行
@@ -379,7 +379,7 @@ class WorkTime extends Model
         $subquery1 = DB::table($this->table)
             ->select(
                 $this->table.'.user_code as user_code',
-                $this->table.'.department_id as department_id',
+                $this->table.'.department_code as department_code',
                 $this->table.'.record_time as record_datetime',
                 $this->table.'.mode as mode',
                 $this->table.'.is_deleted as is_deleted'
@@ -414,7 +414,7 @@ class WorkTime extends Model
             ->select(
                 't1.code as user_code',
                 't1.name as user_name',
-                't1.department_id as department_id',
+                't1.department_code as department_code',
                 't5.name as department_name',
                 't2.record_datetime as record_datetime',
                 't2.record_year as record_year',
@@ -440,19 +440,20 @@ class WorkTime extends Model
                 't4.max_12month_total as max_12month_total',
                 't4.beginning_month as beginning_month',
                 't4.interval as interval',
-                't4.year as year',
-                't6.no as working_timetable_no',
-                't6.name as working_timetable_name',
-                't6.from_time as working_timetable_from_time',
-                't6.to_time as working_timetable_to_time',
-                't9.shift_no as shift_no',
-                't10.name as shift_name',
-                't10.from_time as shift_from_time',
-                't10.to_time as shift_to_time'
-                )
+                't4.year as year'
+            );
+        $mainquery
+            ->selectRaw('ifnull(t9.shift_no, t6.no) as working_timetable_no ')
+            ->selectRaw('CASE ifnull(t9.shift_no, 0) WHEN 0 THEN t6.name else t10.name end as working_timetable_name ')
+            ->selectRaw('CASE ifnull(t9.shift_no, 0) WHEN 0 THEN t6.from_time else t10.from_time end as working_timetable_from_time ')
+            ->selectRaw('CASE ifnull(t9.shift_no, 0) WHEN 0 THEN t6.to_time else t10.to_time end as working_timetable_to_time ')
+            ->selectRaw("ifnull(t9.shift_no, 0) as shift_no ")
+            ->selectRaw("ifnull(t10.name, '') as shift_name ")
+            ->selectRaw("ifnull(t10.from_time, '') as shift_from_time ")
+            ->selectRaw("ifnull(t10.to_time, '') as shift_to_time ")
             ->leftJoinSub($subquery1, 't2', function ($join) { 
                 $join->on('t2.user_code', '=', 't1.code');
-                $join->on('t2.department_id', '=', 't1.department_id')
+                $join->on('t2.department_code', '=', 't1.department_code')
                 ->where('t2.is_deleted', '=', 0);
             })
             ->leftJoinSub($subquery2, 't9', function ($join) { 
@@ -470,7 +471,7 @@ class WorkTime extends Model
                 ->where('t4.is_deleted', '=', 0);
             })
             ->leftJoin('departments as t5', function ($join) { 
-                $join->on('t5.id', '=', 't1.department_id')
+                $join->on('t5.id', '=', 't1.department_code')
                 ->where('t5.is_deleted', '=', 0);
             })
             ->leftJoin('working_timetables as t6', function ($join) { 
@@ -490,6 +491,7 @@ class WorkTime extends Model
             })
             ->leftJoin('working_timetables as t10', function ($join) { 
                 $join->on('t10.no', '=', 't9.shift_no')
+                ->where('t10.working_time_kubun', '=', Config::get('const.C004.regular_working_time'))
                 ->where('t10.is_deleted', '=', 0);
             })
             ->leftJoin('generalcodes as t11', function ($join) { 
@@ -508,18 +510,18 @@ class WorkTime extends Model
         if(!empty($this->param_employment_status)){
             $mainquery->where('t1.employment_status', $this->param_employment_status);  //　雇用形態指定
         }
-        if(!empty($this->param_department_id)){
-            $mainquery->where('t1.department_id', $this->param_department_id);      //department_id指定
+        if(!empty($this->param_department_code)){
+            $mainquery->where('t1.department_code', $this->param_department_code);      //department_code指定
         }
         if(!empty($this->param_user_code)){
             $mainquery->where('t1.code', $this->param_user_code);                   //user_code指定
         }
         $result = $mainquery
             ->where('t1.is_deleted', '=', 0)
-            ->orderBy('t2.record_date', 'asc')
+            ->orderBy('t1.department_code', 'asc')
             ->orderBy('t1.employment_status', 'asc')
-            ->orderBy('t1.department_id', 'asc')
-            ->orderBy('t1.code', 'asc')
+            ->orderBy('t1.name', 'asc')
+            ->orderBy('t2.record_date', 'asc')
             ->orderBy('t2.record_datetime', 'asc')
             ->get();
         \Log::debug(
@@ -541,18 +543,17 @@ class WorkTime extends Model
     public function getBeforeDailyMaxData(){
         // 開始日付直前の打刻時刻を取得
         // sunquery1    work_times
-        \DB::enableQueryLog();
         $sunquery1 = DB::table($this->table)
             ->select(
                 $this->table.'.user_code',
-                $this->table.'.department_id',
+                $this->table.'.department_code',
                 $this->table.'.is_deleted',
                 DB::raw('MAX('.$this->table.'.record_time) as max_record_time')
                 )
             ->where($this->table.'.user_code', '=', $this->param_user_code)
-            ->where($this->table.'.department_id', '=', $this->param_department_id)
+            ->where($this->table.'.department_code', '=', $this->param_department_code)
             ->where($this->table.'.record_time', '<', $this->param_date_from)
-            ->groupBy($this->table.'.user_code', $this->table.'.department_id', $this->table.'.is_deleted');
+            ->groupBy($this->table.'.user_code', $this->table.'.department_code', $this->table.'.is_deleted');
 
         // mainqueryにsunqueryを組み込む
         // sunquery1    t1:work_times
@@ -563,19 +564,13 @@ class WorkTime extends Model
                 )
             ->JoinSub($sunquery1, 't2', function ($join) { 
                 $join->on('t2.user_code', '=', 't1.user_code');
-                $join->on('t2.department_id', '=', 't1.department_id');
+                $join->on('t2.department_code', '=', 't1.department_code');
                 $join->on('t2.max_record_time', '=', 't1.record_time')
                 ->where('t2.is_deleted', '=', 0);
             })
             ->where('t1.is_deleted', '=', 0)
             ->get();
 
-        \Log::debug(
-        'sql_debug_log',
-        [
-            'getBeforeDailyData' => \DB::getQueryLog()
-        ]
-        );
 
         return $mainquery;
     }
@@ -589,18 +584,17 @@ class WorkTime extends Model
     public function getAfterDailyMinData(){
         // 開始日付直前の打刻時刻を取得
         // sunquery1    work_times
-        \DB::enableQueryLog();
         $sunquery1 = DB::table($this->table)
             ->select(
                 $this->table.'.user_code',
-                $this->table.'.department_id',
+                $this->table.'.department_code',
                 $this->table.'.is_deleted',
                 DB::raw('MIN('.$this->table.'.record_time) as min_record_time')
                 )
             ->where($this->table.'.user_code', '=', $this->param_user_code)
-            ->where($this->table.'.department_id', '=', $this->param_department_id)
+            ->where($this->table.'.department_code', '=', $this->param_department_code)
             ->where($this->table.'.record_time', '>', $this->param_date_from)
-            ->groupBy($this->table.'.user_code', $this->table.'.department_id', $this->table.'.is_deleted');
+            ->groupBy($this->table.'.user_code', $this->table.'.department_code', $this->table.'.is_deleted');
 
         // mainqueryにsunqueryを組み込む
         // sunquery1    t1:work_times
@@ -611,19 +605,12 @@ class WorkTime extends Model
                 )
             ->JoinSub($sunquery1, 't2', function ($join) { 
                 $join->on('t2.user_code', '=', 't1.user_code');
-                $join->on('t2.department_id', '=', 't1.department_id');
+                $join->on('t2.department_code', '=', 't1.department_code');
                 $join->on('t2.min_record_time', '=', 't1.record_time')
                 ->where('t2.is_deleted', '=', 0);
             })
             ->where('t1.is_deleted', '=', 0)
             ->get();
-
-        \Log::debug(
-        'sql_debug_log',
-        [
-            'getAfterDailyMinData' => \DB::getQueryLog()
-        ]
-        );
 
         return $mainquery;
     }
@@ -641,15 +628,15 @@ class WorkTime extends Model
         $sunquery1 = DB::table($this->table)
             ->select(
                 $this->table.'.user_code',
-                $this->table.'.department_id',
+                $this->table.'.department_code',
                 $this->table.'.is_deleted',
                 DB::raw('MAX('.$this->table.'.record_time) as min_record_time')
                 )
             ->where($this->table.'.user_code', '=', $this->param_user_code)
-            ->where($this->table.'.department_id', '=', $this->param_department_id)
+            ->where($this->table.'.department_code', '=', $this->param_department_code)
             ->where($this->table.'.record_time', '>=', $this->param_date_from)
             ->where($this->table.'.record_time', '<=', $this->param_date_to)
-            ->groupBy($this->table.'.user_code', $this->table.'.department_id', $this->table.'.is_deleted');
+            ->groupBy($this->table.'.user_code', $this->table.'.department_code', $this->table.'.is_deleted');
 
         // mainqueryにsunqueryを組み込む
         // sunquery1    t1:work_times
@@ -660,7 +647,7 @@ class WorkTime extends Model
                 )
             ->JoinSub($sunquery1, 't2', function ($join) { 
                 $join->on('t2.user_code', '=', 't1.user_code');
-                $join->on('t2.department_id', '=', 't1.department_id');
+                $join->on('t2.department_code', '=', 't1.department_code');
                 $join->on('t2.min_record_time', '=', 't1.record_time')
                 ->where('t2.is_deleted', '=', 0);
             })
@@ -686,7 +673,7 @@ class WorkTime extends Model
         \DB::enableQueryLog();
         $data = DB::table($this->table)
             ->join('users','users.code','=',$this->table.'.user_code')
-            ->join('departments','departments.id','users.department_id')
+            ->join('departments','departments.id','users.department_code')
             ->leftJoin('generalcodes as g', function ($join) { 
                 $join->on('g.code', '=', $this->table.'.mode')
                 ->where('g.identification_id', '=', Config::get('const.C005.value'));
@@ -694,7 +681,7 @@ class WorkTime extends Model
             ->select(
                 $this->table.'.id',
                 $this->table.'.user_code',
-                $this->table.'.department_id',
+                $this->table.'.department_code',
                 $this->table.'.record_time',
                 $this->table.'.mode',
                 'users.name as user_name',

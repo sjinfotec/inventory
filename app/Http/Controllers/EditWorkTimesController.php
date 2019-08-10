@@ -92,7 +92,7 @@ class EditWorkTimesController extends Controller
         $holiday_kbn = $request->holiday_kbn;
         $work_time = new WorkTime();
         $systemdate = Carbon::now();
-        $department_id = DB::table('users')->where('code', $code)->where('is_deleted', 0)->value('department_id');
+        $department_code = DB::table('users')->where('code', $code)->where('is_deleted', 0)->value('department_code');
         $user = Auth::user();
         $user_code = $user->code;
         $response = collect();
@@ -100,7 +100,7 @@ class EditWorkTimesController extends Controller
         DB::beginTransaction();
         try{
             $work_time->setUsercodeAttribute($code);
-            $work_time->setDepartmentcodeAttribute($department_id);
+            $work_time->setDepartmentcodeAttribute($department_code);
             $work_time->setRecordtimeAttribute($record_time);
             $work_time->setModeAttribute($mode);
             $work_time->setCreateduserAttribute($user_code);
@@ -170,7 +170,7 @@ class EditWorkTimesController extends Controller
                 // 新規登録
                 $record_time = $detail['date']." ".$detail['time'];
                 $work_time->setUsercodeAttribute($detail['user_code']);
-                $work_time->setDepartmentcodeAttribute($detail['department_id']);
+                $work_time->setDepartmentcodeAttribute($detail['department_code']);
                 $work_time->setModeAttribute($detail['mode']);
                 $work_time->setRecordtimeAttribute($record_time);
 
@@ -186,7 +186,7 @@ class EditWorkTimesController extends Controller
                     if($is_exists){
                         $user_holiday->delKbn();
                     }
-                    $user_holiday->setDepartmentidAttribute($detail['department_id']);
+                    $user_holiday->setDepartmentidAttribute($detail['department_code']);
                     $user_holiday->setHolidaykubunAttribute($detail['user_holiday_kbn']);
                     $user_holiday->setCreateduserAttribute($user_code);
                     $user_holiday->insertKbn();

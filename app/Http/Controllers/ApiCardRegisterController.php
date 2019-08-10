@@ -45,8 +45,8 @@ class ApiCardRegisterController extends Controller
     public function store(Request $request) { 
         $card_id = $request->card_id;               // カードID
         $user_code = $request->user_code;           // ユーザーコード
-        $department_id = $request->department_id;   // 部署ID
-        Log::debug('department_id = '.$department_id );
+        $department_code = $request->department_code;   // 部署ID
+        Log::debug('department_code = '.$department_code );
         $user = new User();
         $card_info = new CardInformation();
         $systemdate = Carbon::now();
@@ -63,7 +63,7 @@ class ApiCardRegisterController extends Controller
             // 新規登録
             DB::beginTransaction();
             try{
-                $result = $this->insCardInfo($user_code,$card_id,$department_id);
+                $result = $this->insCardInfo($user_code,$card_id,$department_code);
                 $user_datas = $user->getUserCardData($card_id);
                 if (isset($user_datas)) {
                     DB::commit();
@@ -125,14 +125,14 @@ class ApiCardRegisterController extends Controller
      * @param [type] $mode
      * @return void
      */
-    private function insCardInfo($user_code,$card_id,$department_id){
+    private function insCardInfo($user_code,$card_id,$department_code){
         Log::error("insCardInfo".$card_id);
         $card_info = new CardInformation();
         $systemdate = Carbon::now();
         $login_user = Auth::user();
         try{
             $card_info->setUserCodeAttribute($user_code);
-            $card_info->setDepartmentIdAttribute($department_id);
+            $card_info->setDepartmentIdAttribute($department_code);
             $card_info->setCardIdmAttribute($card_id);
             $card_info->setCreatedUserAttribute($login_user);
             $card_info->setSystemDateAttribute($systemdate);

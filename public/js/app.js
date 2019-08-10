@@ -2014,7 +2014,7 @@ __webpack_require__.r(__webpack_exports__);
 
       if (this.itemLate == '1') {
         if (this.itemValue != '') {
-          this.itemValue += '  ';
+          this.itemValue += '、';
         }
 
         this.itemValue += '遅刻';
@@ -2022,7 +2022,7 @@ __webpack_require__.r(__webpack_exports__);
 
       if (this.itemLeaveearly == '1') {
         if (this.itemValue != '') {
-          this.itemValue += '  ';
+          this.itemValue += '、';
         }
 
         this.itemValue += '早退';
@@ -3723,6 +3723,18 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -4942,6 +4954,8 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 //
 //
 //
@@ -5378,14 +5392,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-/* harmony default export */ __webpack_exports__["default"] = ({
+/* harmony default export */ __webpack_exports__["default"] = (_defineProperty({
   mounted: function mounted() {
     console.log("Component mounted.");
   }
-});
+}, "mounted", function mounted() {
+  // this.getTimeTableList();
+  var date = new Date();
+  this.baseYear = date.getFullYear();
+}));
 
 /***/ }),
 
@@ -5497,8 +5512,9 @@ __webpack_require__.r(__webpack_exports__);
       var _this = this;
 
       this.$axios.get("/get_departments_list").then(function (response) {
+        console.log("部署リスト取得 1");
         _this.departmentList = response.data;
-        console.log("部署リスト取得");
+        console.log("部署リスト取得 2");
       })["catch"](function (reason) {
         alert("error");
       });
@@ -7047,7 +7063,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           _this.form.code = _this.userDetails[0].code;
           _this.form.password = _this.userDetails[0].password;
           _this.form.email = _this.userDetails[0].email;
-          _this.form.departmentCode = _this.userDetails[0].department_id;
+          _this.form.departmentCode = _this.userDetails[0].department_code;
           _this.form.status = "" + _this.userDetails[0].employment_status + "";
           _this.form.table_no = "" + _this.userDetails[0].working_timetable_no + ""; // hidden
 
@@ -80312,7 +80328,9 @@ var render = function() {
                             _c("col-note", {
                               attrs: {
                                 "item-name": "備考：",
-                                "item-value": calclist.note
+                                "item-note": calclist.note,
+                                "item-late": calclist.late,
+                                "item-leaveearly": calclist.leave_early
                               }
                             })
                           ],
@@ -80407,6 +80425,27 @@ var render = function() {
                       _c("col-notemploymentworking", {
                         attrs: {
                           "item-name": "時間外労働",
+                          "item-value": sumresult.off_hours_working_hours
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-notemploymentworking", {
+                        attrs: {
+                          "item-name": "出勤者数",
+                          "item-value": sumresult.off_hours_working_hours
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-notemploymentworking", {
+                        attrs: {
+                          "item-name": "外出者数",
+                          "item-value": sumresult.off_hours_working_hours
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("col-notemploymentworking", {
+                        attrs: {
+                          "item-name": "休暇者数",
                           "item-value": sumresult.off_hours_working_hours
                         }
                       })
@@ -82144,1182 +82183,1179 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm._m(0)
+  return _c("div", [
+    _c("div", { staticClass: "row justify-content-between print-none" }, [
+      _c("div", { staticClass: "col-md pt-3" }, [
+        _c("div", { staticClass: "card shadow-pl" }, [
+          _vm._m(0),
+          _vm._v(" "),
+          _c("div", { staticClass: "card-body pt-2" }, [
+            _c("div", { staticClass: "row justify-content-between" }, [
+              _c("div", { staticClass: "col-md-6 pb-2" }, [
+                _c("div", { staticClass: "input-group" }, [
+                  _vm._m(1),
+                  _vm._v(" "),
+                  _c(
+                    "select",
+                    {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.year,
+                          expression: "year"
+                        }
+                      ],
+                      staticClass: "form-control",
+                      on: {
+                        change: function($event) {
+                          var $$selectedVal = Array.prototype.filter
+                            .call($event.target.options, function(o) {
+                              return o.selected
+                            })
+                            .map(function(o) {
+                              var val = "_value" in o ? o._value : o.value
+                              return val
+                            })
+                          _vm.year = $event.target.multiple
+                            ? $$selectedVal
+                            : $$selectedVal[0]
+                        }
+                      }
+                    },
+                    _vm._l(20, function(n) {
+                      return _c(
+                        "option",
+                        { domProps: { value: n + _vm.baseYear - 1 } },
+                        [_vm._v(_vm._s(n + _vm.baseYear - 1) + "年")]
+                      )
+                    }),
+                    0
+                  )
+                ])
+              ]),
+              _vm._v(" "),
+              _vm._m(2),
+              _vm._v(" "),
+              _vm._m(3),
+              _vm._v(" "),
+              _vm._m(4),
+              _vm._v(" "),
+              _vm._m(5),
+              _vm._v(" "),
+              _vm._m(6)
+            ]),
+            _vm._v(" "),
+            _vm._m(7)
+          ])
+        ])
+      ])
+    ]),
+    _vm._v(" "),
+    _vm._m(8)
+  ])
 }
 var staticRenderFns = [
   function() {
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", [
-      _c("div", { staticClass: "row justify-content-between print-none" }, [
-        _c("div", { staticClass: "col-md pt-3" }, [
-          _c("div", { staticClass: "card shadow-pl" }, [
-            _c(
-              "div",
-              { staticClass: "card-header bg-transparent pb-0 border-0" },
-              [
-                _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
-                  _vm._v("年月を指定して集計を表示する")
-                ]),
-                _vm._v(" "),
-                _c("span", { staticClass: "float-sm-right font-size-sm" }, [
-                  _vm._v("雇用形態や所属部署でフィルタリングして表示できます")
-                ])
-              ]
-            ),
-            _vm._v(" "),
-            _c("div", { staticClass: "card-body pt-2" }, [
-              _c("div", { staticClass: "row justify-content-between" }, [
-                _c("div", { staticClass: "col-md-6 pb-2" }, [
-                  _c("div", { staticClass: "input-group" }, [
-                    _c("div", { staticClass: "input-group-prepend" }, [
-                      _c(
-                        "span",
-                        {
-                          staticClass:
-                            "input-group-text font-size-sm line-height-xs label-width-90",
-                          attrs: { id: "basic-addon1" }
-                        },
-                        [_vm._v("指定年")]
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("select", { staticClass: "custom-select" }, [
-                      _c("option", { attrs: { selected: "" } }),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
-                    ])
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "col-md-6 pb-2" }, [
-                  _c("div", { staticClass: "input-group" }, [
-                    _c("div", { staticClass: "input-group-prepend" }, [
-                      _c(
-                        "span",
-                        {
-                          staticClass:
-                            "input-group-text font-size-sm line-height-xs label-width-90",
-                          attrs: { id: "basic-addon1" }
-                        },
-                        [_vm._v("指定月")]
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("select", { staticClass: "custom-select" }, [
-                      _c("option", { attrs: { selected: "" } }),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
-                    ])
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "col-md-6 pb-2" }, [
-                  _c("div", { staticClass: "input-group" }, [
-                    _c("div", { staticClass: "input-group-prepend" }, [
-                      _c(
-                        "label",
-                        {
-                          staticClass:
-                            "input-group-text font-size-sm line-height-xs label-width-90",
-                          attrs: { for: "inputGroupSelect01" }
-                        },
-                        [_vm._v("表示区分")]
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("select", { staticClass: "custom-select" }, [
-                      _c("option", { attrs: { selected: "" } }),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
-                    ])
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "col-md-6 pb-2" }, [
-                  _c("div", { staticClass: "input-group" }, [
-                    _c("div", { staticClass: "input-group-prepend" }, [
-                      _c(
-                        "label",
-                        {
-                          staticClass:
-                            "input-group-text font-size-sm line-height-xs label-width-90",
-                          attrs: { for: "inputGroupSelect01" }
-                        },
-                        [_vm._v("雇用形態")]
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("select", { staticClass: "custom-select" }, [
-                      _c("option", { attrs: { selected: "" } }),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
-                    ])
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "col-md-6 pb-2" }, [
-                  _c("div", { staticClass: "input-group" }, [
-                    _c("div", { staticClass: "input-group-prepend" }, [
-                      _c(
-                        "label",
-                        {
-                          staticClass:
-                            "input-group-text font-size-sm line-height-xs label-width-90",
-                          attrs: { for: "inputGroupSelect01" }
-                        },
-                        [_vm._v("所属部署")]
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("select", { staticClass: "custom-select" }, [
-                      _c("option", { attrs: { selected: "" } }),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
-                    ])
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "col-md-6 pb-2" }, [
-                  _c("div", { staticClass: "input-group" }, [
-                    _c("div", { staticClass: "input-group-prepend" }, [
-                      _c(
-                        "label",
-                        {
-                          staticClass:
-                            "input-group-text font-size-sm line-height-xs label-width-90",
-                          attrs: { for: "inputGroupSelect01" }
-                        },
-                        [_vm._v("氏　　名")]
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("select", { staticClass: "custom-select" }, [
-                      _c("option", { attrs: { selected: "" } }),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
-                      _vm._v(" "),
-                      _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
-                    ])
-                  ])
-                ])
+    return _c(
+      "div",
+      { staticClass: "card-header bg-transparent pb-0 border-0" },
+      [
+        _c("h1", { staticClass: "float-sm-left font-size-rg" }, [
+          _vm._v("年月を指定して集計を表示する")
+        ]),
+        _vm._v(" "),
+        _c("span", { staticClass: "float-sm-right font-size-sm" }, [
+          _vm._v("雇用形態や所属部署でフィルタリングして表示できます")
+        ])
+      ]
+    )
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { id: "basic-addon1" }
+        },
+        [_vm._v("指定年")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "col-md-6 pb-2" }, [
+      _c("div", { staticClass: "input-group" }, [
+        _c("div", { staticClass: "input-group-prepend" }, [
+          _c(
+            "span",
+            {
+              staticClass:
+                "input-group-text font-size-sm line-height-xs label-width-90",
+              attrs: { id: "basic-addon1" }
+            },
+            [_vm._v("指定月")]
+          )
+        ]),
+        _vm._v(" "),
+        _c("select", { staticClass: "custom-select" }, [
+          _c("option", { attrs: { selected: "" } }),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
+        ])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "col-md-6 pb-2" }, [
+      _c("div", { staticClass: "input-group" }, [
+        _c("div", { staticClass: "input-group-prepend" }, [
+          _c(
+            "label",
+            {
+              staticClass:
+                "input-group-text font-size-sm line-height-xs label-width-90",
+              attrs: { for: "inputGroupSelect01" }
+            },
+            [_vm._v("表示区分")]
+          )
+        ]),
+        _vm._v(" "),
+        _c("select", { staticClass: "custom-select" }, [
+          _c("option", { attrs: { selected: "" } }),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
+        ])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "col-md-6 pb-2" }, [
+      _c("div", { staticClass: "input-group" }, [
+        _c("div", { staticClass: "input-group-prepend" }, [
+          _c(
+            "label",
+            {
+              staticClass:
+                "input-group-text font-size-sm line-height-xs label-width-90",
+              attrs: { for: "inputGroupSelect01" }
+            },
+            [_vm._v("雇用形態")]
+          )
+        ]),
+        _vm._v(" "),
+        _c("select", { staticClass: "custom-select" }, [
+          _c("option", { attrs: { selected: "" } }),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
+        ])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "col-md-6 pb-2" }, [
+      _c("div", { staticClass: "input-group" }, [
+        _c("div", { staticClass: "input-group-prepend" }, [
+          _c(
+            "label",
+            {
+              staticClass:
+                "input-group-text font-size-sm line-height-xs label-width-90",
+              attrs: { for: "inputGroupSelect01" }
+            },
+            [_vm._v("所属部署")]
+          )
+        ]),
+        _vm._v(" "),
+        _c("select", { staticClass: "custom-select" }, [
+          _c("option", { attrs: { selected: "" } }),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
+        ])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "col-md-6 pb-2" }, [
+      _c("div", { staticClass: "input-group" }, [
+        _c("div", { staticClass: "input-group-prepend" }, [
+          _c(
+            "label",
+            {
+              staticClass:
+                "input-group-text font-size-sm line-height-xs label-width-90",
+              attrs: { for: "inputGroupSelect01" }
+            },
+            [_vm._v("氏　　名")]
+          )
+        ]),
+        _vm._v(" "),
+        _c("select", { staticClass: "custom-select" }, [
+          _c("option", { attrs: { selected: "" } }),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "1" } }, [_vm._v("One")]),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "2" } }, [_vm._v("Two")]),
+          _vm._v(" "),
+          _c("option", { attrs: { value: "3" } }, [_vm._v("Three")])
+        ])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "row justify-content-between" }, [
+      _c("div", { staticClass: "col-md-12 pb-2" }, [
+        _c("div", { staticClass: "btn-group d-flex" }, [
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-primary btn-lg font-size-rg w-100",
+              attrs: { type: "button" }
+            },
+            [_vm._v("この条件で表示する")]
+          )
+        ])
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "row justify-content-between" }, [
+      _c("div", { staticClass: "col-md pt-3 align-self-stretch" }, [
+        _c("div", { staticClass: "card shadow-pl" }, [
+          _c(
+            "div",
+            {
+              staticClass: "card-header bg-transparent pt-3 border-0 print-none"
+            },
+            [
+              _c("h1", { staticClass: "float-md-left font-size-rg" }, [
+                _vm._v("月次集計 2019年07月 〆日から集計")
               ]),
               _vm._v(" "),
-              _c("div", { staticClass: "row justify-content-between" }, [
+              _c("span", { staticClass: "float-md-right font-size-sm" }, [
+                _vm._v(
+                  "虫眼鏡アイコンをクリックするとタイムカードが表示されます"
+                )
+              ])
+            ]
+          ),
+          _vm._v(" "),
+          _c(
+            "div",
+            { staticClass: "card-body mb-3 py-0 pt-4 border-top print-none" },
+            [
+              _c("div", { staticClass: "row" }, [
                 _c("div", { staticClass: "col-md-12 pb-2" }, [
                   _c("div", { staticClass: "btn-group d-flex" }, [
                     _c(
                       "button",
                       {
                         staticClass:
-                          "btn btn-primary btn-lg font-size-rg w-100",
+                          "btn btn-success btn-lg font-size-rg w-100",
                         attrs: { type: "button" }
                       },
-                      [_vm._v("この条件で表示する")]
+                      [
+                        _c("img", {
+                          staticClass: "icon-size-sm mr-2 pb-1",
+                          attrs: { src: "/images/round-get-app-w.svg", alt: "" }
+                        }),
+                        _vm._v("集計結果をCSVファイルに出力する")
+                      ]
                     )
                   ])
                 ])
               ])
-            ])
-          ])
-        ])
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "row justify-content-between" }, [
-        _c("div", { staticClass: "col-md pt-3 align-self-stretch" }, [
-          _c("div", { staticClass: "card shadow-pl" }, [
-            _c(
-              "div",
-              {
-                staticClass:
-                  "card-header bg-transparent pt-3 border-0 print-none"
-              },
-              [
-                _c("h1", { staticClass: "float-md-left font-size-rg" }, [
-                  _vm._v("月次集計 2019年07月 〆日から集計")
-                ]),
-                _vm._v(" "),
-                _c("span", { staticClass: "float-md-right font-size-sm" }, [
-                  _vm._v(
-                    "虫眼鏡アイコンをクリックするとタイムカードが表示されます"
-                  )
-                ])
-              ]
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              { staticClass: "card-body mb-3 py-0 pt-4 border-top print-none" },
-              [
-                _c("div", { staticClass: "row" }, [
-                  _c("div", { staticClass: "col-md-12 pb-2" }, [
-                    _c("div", { staticClass: "btn-group d-flex" }, [
-                      _c(
-                        "button",
-                        {
-                          staticClass:
-                            "btn btn-success btn-lg font-size-rg w-100",
-                          attrs: { type: "button" }
-                        },
-                        [
-                          _c("img", {
-                            staticClass: "icon-size-sm mr-2 pb-1",
-                            attrs: {
-                              src: "/images/round-get-app-w.svg",
-                              alt: ""
-                            }
-                          }),
-                          _vm._v("集計結果をCSVファイルに出力する")
-                        ]
-                      )
-                    ])
+            ]
+          ),
+          _vm._v(" "),
+          _c(
+            "div",
+            {
+              staticClass:
+                "card-body mb-3 py-0 pt-4 border-top print-only print-space"
+            },
+            [
+              _c("div", { staticClass: "row" }, [
+                _c("div", { staticClass: "col-md-12 pb-2" }, [
+                  _c("h1", { staticClass: "float-md-left font-size-rg" }, [
+                    _vm._v("三条印刷株式会社")
+                  ]),
+                  _vm._v(" "),
+                  _c("span", { staticClass: "float-md-right font-size-sm" }, [
+                    _vm._v("2019年07月")
                   ])
                 ])
-              ]
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass:
-                  "card-body mb-3 py-0 pt-4 border-top print-only print-space"
-              },
-              [
-                _c("div", { staticClass: "row" }, [
-                  _c("div", { staticClass: "col-md-12 pb-2" }, [
-                    _c("h1", { staticClass: "float-md-left font-size-rg" }, [
-                      _vm._v("三条印刷株式会社")
+              ])
+            ]
+          ),
+          _vm._v(" "),
+          _c(
+            "div",
+            { staticClass: "card-body mb-3 py-0 pt-4 border-top print-space" },
+            [
+              _c("div", { staticClass: "row" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "a",
+                      {
+                        staticClass:
+                          "float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg print-none",
+                        attrs: {
+                          "data-toggle": "collapse",
+                          href: "#collapseUser1",
+                          role: "button",
+                          "aria-expanded": "true",
+                          "aria-controls": "collapseUser1"
+                        }
+                      },
+                      [
+                        _c("img", {
+                          staticClass: "icon-size-rg",
+                          attrs: { src: "/images/round-search-w.svg", alt: "" }
+                        })
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                      _vm._v("氏名")
                     ]),
                     _vm._v(" "),
-                    _c("span", { staticClass: "float-md-right font-size-sm" }, [
-                      _vm._v("2019年07月")
-                    ])
-                  ])
-                ])
-              ]
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass: "card-body mb-3 py-0 pt-4 border-top print-space"
-              },
-              [
-                _c("div", { staticClass: "row" }, [
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "a",
-                        {
-                          staticClass:
-                            "float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg print-none",
-                          attrs: {
-                            "data-toggle": "collapse",
-                            href: "#collapseUser1",
-                            role: "button",
-                            "aria-expanded": "true",
-                            "aria-controls": "collapseUser1"
-                          }
-                        },
-                        [
-                          _c("img", {
-                            staticClass: "icon-size-rg",
-                            attrs: {
-                              src: "/images/round-search-w.svg",
-                              alt: ""
-                            }
-                          })
-                        ]
-                      ),
-                      _vm._v(" "),
-                      _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                        _vm._v("氏名")
-                      ]),
-                      _vm._v(" "),
-                      _c(
-                        "p",
-                        { staticClass: "font-size-rg font-weight-bold m-0" },
-                        [_vm._v("三条 丈太郎")]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "h1",
-                        { staticClass: "font-size-sm m-0 mb-1 text-sm-right" },
-                        [_vm._v("所属部署")]
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "p",
-                        { staticClass: "font-size-rg m-0 text-sm-right" },
-                        [_vm._v("情報処理課")]
-                      )
-                    ]
-                  )
-                ]),
+                    _c(
+                      "p",
+                      { staticClass: "font-size-rg font-weight-bold m-0" },
+                      [_vm._v("三条 丈太郎")]
+                    )
+                  ]
+                ),
                 _vm._v(" "),
-                _c("div", { staticClass: "row mt-2 print-none" }, [
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("雇用形態")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-rg m-0" }, [
-                              _vm._v("正社員")
-                            ])
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "h1",
+                      { staticClass: "font-size-sm m-0 mb-1 text-sm-right" },
+                      [_vm._v("所属部署")]
+                    ),
+                    _vm._v(" "),
+                    _c("p", { staticClass: "font-size-rg m-0 text-sm-right" }, [
+                      _vm._v("情報処理課")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "row mt-2 print-none" }, [
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("雇用形態")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-rg m-0" }, [
+                            _vm._v("正社員")
                           ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("勤務時間")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("08:13")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-access-time-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("所定労働時間")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("08:00")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-access-time-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("所定外労働時間")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("08:00")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-watch-later-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("残業時間")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("00:13")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-watch-later-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("深夜残業時間")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("00:00")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-watch-later-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("法定労働時間")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("00:00")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-watch-later-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("法定外労働時間")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("00:00")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-watch-later-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("未就労時間")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("00:00")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-watch-later-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("時間外労働")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("00:00")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-watch-later-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("遅刻日数")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("00日")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-watch-later-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("早退日数")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("00日")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-watch-later-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("休暇日数")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("00日")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-watch-later-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("有給休暇日数")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("00日")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-error-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("時間外労働3ヵ月")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("00:00")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-error-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("時間外労働6ヵ月")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("00:00")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-error-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("時間外労働1年")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("00:00")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      staticClass:
-                        "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
-                    },
-                    [
-                      _c(
-                        "div",
-                        {
-                          staticClass:
-                            "card text-secondary border border-secondary"
-                        },
-                        [
-                          _c("div", { staticClass: "card-body px-3 py-2" }, [
-                            _c(
-                              "span",
-                              { staticClass: "d-md-none float-left" },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-ml mr-2",
-                                  attrs: {
-                                    src: "/images/round-error-b.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("6ヵ月連続45時間")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-lg m-0" }, [
-                              _vm._v("超過")
-                            ])
-                          ])
-                        ]
-                      )
-                    ]
-                  )
-                ])
-              ]
-            ),
-            _vm._v(" "),
-            _c(
-              "div",
-              {
-                staticClass: "collapse page-break-after",
-                attrs: { id: "collapseUser1" }
-              },
-              [
-                _c("div", { staticClass: "card-body mb-3 p-0 border-top" }, [
-                  _c("div", { staticClass: "row" }, [
-                    _c("div", { staticClass: "col-12" }, [
-                      _c("div", { staticClass: "table-responsive" }, [
-                        _c("div", { staticClass: "col-12 p-0" }, [
-                          _c(
-                            "table",
-                            {
-                              staticClass:
-                                "table table-striped border-bottom font-size-sm text-nowrap"
-                            },
-                            [
-                              _c("thead", [
-                                _c("tr", [
-                                  _c(
-                                    "td",
-                                    {
-                                      staticClass:
-                                        "text-center align-middle w-20"
-                                    },
-                                    [_vm._v("日付")]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      staticClass:
-                                        "text-center align-middle w-20"
-                                    },
-                                    [_vm._v("出勤時間")]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      staticClass:
-                                        "text-center align-middle w-20"
-                                    },
-                                    [_vm._v("退勤時間")]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    {
-                                      staticClass:
-                                        "text-center align-middle mw-rem-20"
-                                    },
-                                    [_vm._v("備考")]
-                                  )
-                                ])
-                              ]),
-                              _vm._v(" "),
-                              _c("tbody", [
-                                _c("tr", [
-                                  _c(
-                                    "td",
-                                    { staticClass: "text-center align-middle" },
-                                    [_vm._v("2019年07月01日（日）")]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    { staticClass: "text-center align-middle" },
-                                    [_vm._v("08:30")]
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "td",
-                                    { staticClass: "text-center align-middle" },
-                                    [_vm._v("18:00")]
-                                  ),
-                                  _vm._v(" "),
-                                  _c("td", {
-                                    staticClass: "text-center align-middle"
-                                  })
-                                ])
-                              ])
-                            ]
-                          )
                         ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("勤務時間")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("08:13")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-access-time-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("所定労働時間")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("08:00")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-access-time-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("所定外労働時間")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("08:00")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-watch-later-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("残業時間")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("00:13")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-watch-later-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("深夜残業時間")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("00:00")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-watch-later-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("法定労働時間")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("00:00")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-watch-later-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("法定外労働時間")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("00:00")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-watch-later-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("未就労時間")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("00:00")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-watch-later-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("時間外労働")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("00:00")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-watch-later-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("遅刻日数")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("00日")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-watch-later-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("早退日数")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("00日")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-watch-later-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("休暇日数")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("00日")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-watch-later-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("有給休暇日数")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("00日")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-error-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("時間外労働3ヵ月")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("00:00")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-error-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("時間外労働6ヵ月")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("00:00")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-error-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("時間外労働1年")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("00:00")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch"
+                  },
+                  [
+                    _c(
+                      "div",
+                      {
+                        staticClass:
+                          "card text-secondary border border-secondary"
+                      },
+                      [
+                        _c("div", { staticClass: "card-body px-3 py-2" }, [
+                          _c("span", { staticClass: "d-md-none float-left" }, [
+                            _c("img", {
+                              staticClass: "icon-size-ml mr-2",
+                              attrs: {
+                                src: "/images/round-error-b.svg",
+                                alt: ""
+                              }
+                            })
+                          ]),
+                          _vm._v(" "),
+                          _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
+                            _vm._v("6ヵ月連続45時間")
+                          ]),
+                          _vm._v(" "),
+                          _c("p", { staticClass: "font-size-lg m-0" }, [
+                            _vm._v("超過")
+                          ])
+                        ])
+                      ]
+                    )
+                  ]
+                )
+              ])
+            ]
+          ),
+          _vm._v(" "),
+          _c(
+            "div",
+            {
+              staticClass: "collapse page-break-after",
+              attrs: { id: "collapseUser1" }
+            },
+            [
+              _c("div", { staticClass: "card-body mb-3 p-0 border-top" }, [
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-12" }, [
+                    _c("div", { staticClass: "table-responsive" }, [
+                      _c("div", { staticClass: "col-12 p-0" }, [
+                        _c(
+                          "table",
+                          {
+                            staticClass:
+                              "table table-striped border-bottom font-size-sm text-nowrap"
+                          },
+                          [
+                            _c("thead", [
+                              _c("tr", [
+                                _c(
+                                  "td",
+                                  {
+                                    staticClass: "text-center align-middle w-20"
+                                  },
+                                  [_vm._v("日付")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "td",
+                                  {
+                                    staticClass: "text-center align-middle w-20"
+                                  },
+                                  [_vm._v("出勤時間")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "td",
+                                  {
+                                    staticClass: "text-center align-middle w-20"
+                                  },
+                                  [_vm._v("退勤時間")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "td",
+                                  {
+                                    staticClass:
+                                      "text-center align-middle mw-rem-20"
+                                  },
+                                  [_vm._v("備考")]
+                                )
+                              ])
+                            ]),
+                            _vm._v(" "),
+                            _c("tbody", [
+                              _c("tr", [
+                                _c(
+                                  "td",
+                                  { staticClass: "text-center align-middle" },
+                                  [_vm._v("2019年07月01日（日）")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "td",
+                                  { staticClass: "text-center align-middle" },
+                                  [_vm._v("08:30")]
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "td",
+                                  { staticClass: "text-center align-middle" },
+                                  [_vm._v("18:00")]
+                                ),
+                                _vm._v(" "),
+                                _c("td", {
+                                  staticClass: "text-center align-middle"
+                                })
+                              ])
+                            ])
+                          ]
+                        )
                       ])
                     ])
                   ])
                 ])
-              ]
-            )
-          ])
+              ])
+            ]
+          )
         ])
       ])
     ])
@@ -83472,7 +83508,7 @@ var render = function() {
       this.blankData ? _c("option", { attrs: { value: "" } }) : _vm._e(),
       _vm._v(" "),
       _vm._l(_vm.departmentList, function(departments) {
-        return _c("option", { domProps: { value: departments.id } }, [
+        return _c("option", { domProps: { value: departments.code } }, [
           _vm._v("\n    " + _vm._s(departments.name) + "\n  ")
         ])
       })

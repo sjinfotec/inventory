@@ -11,7 +11,7 @@ class CardInformation extends Model
     protected $guarded = array('id');
 
     private $user_code;
-    private $department_id;
+    private $department_code;
     private $card_idm;
     private $created_user;
     private $updated_user;
@@ -29,12 +29,12 @@ class CardInformation extends Model
 
     public function getDepartmentIdAttribute()
     {
-        return $this->department_id;
+        return $this->department_code;
     }
 
     public function setDepartmentIdAttribute($value)
     {
-        $this->department_id = $value;
+        $this->department_code = $value;
     }
 
     public function getCardIdmAttribute()
@@ -88,7 +88,7 @@ class CardInformation extends Model
         $data = DB::table('card_informations')
             ->join('users', function ($join) {
                 $join->on('users.code', '=', 'card_informations.user_code');
-                $join->on('users.department_id', '=', 'card_informations.department_id');
+                $join->on('users.department_code', '=', 'card_informations.department_code');
             })
             ->where('card_informations.card_idm',$this->card_idm)
             ->where('users.is_deleted',0)
@@ -102,7 +102,7 @@ class CardInformation extends Model
         DB::table('card_informations')->insert(
             [
                 'user_code' => $this->user_code,
-                'department_id' => $this->department_id,
+                'department_code' => $this->department_code,
                 'card_idm' => $this->card_idm,
                 'created_user'=>$this->created_user,
                 'created_at'=>$this->systemdate

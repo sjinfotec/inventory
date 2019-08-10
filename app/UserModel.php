@@ -124,7 +124,7 @@ class UserModel extends Model
             [
                 'code' => $this->code,
                 'employment_status' => $this->employment_status,
-                'department_id' => $this->department_code,
+                'department_code' => $this->department_code,
                 'name' => $this->name,
                 'kana' => $this->kana,
                 'working_timetable_no' => $this->working_timetable_no,
@@ -146,7 +146,7 @@ class UserModel extends Model
             ->where('id', $this->id)
             ->update([
                 'code' => $this->code,
-                'department_id' => $this->department_code,
+                'department_code' => $this->department_code,
                 'employment_status' => $this->employment_status,
                 'name' => $this->name,
                 'kana' => $this->kana,
@@ -168,7 +168,7 @@ class UserModel extends Model
                 $this->table.'.id',
                 $this->table.'.code',
                 $this->table.'.employment_status',
-                $this->table.'.department_id',
+                $this->table.'.department_code',
                 $this->table.'.name',
                 $this->table.'.kana',
                 $this->table.'.working_timetable_no',

@@ -271,7 +271,7 @@
                 ></col-notemploymentworking>
                 <!-- /.col -->
                 <!-- col -->
-                <col-note v-bind:item-name="'備考：'" v-bind:item-value="calclist.note"></col-note>
+                <col-note v-bind:item-name="'備考：'" v-bind:item-note="calclist.note" v-bind:item-late="calclist.late" v-bind:item-leaveearly="calclist.leave_early"></col-note>
                 <!-- /.col -->
               </div>
               <!-- /.row -->
@@ -333,6 +333,18 @@
               ></col-notemploymentworking>
               <col-notemploymentworking
                 v-bind:item-name="'時間外労働'"
+                v-bind:item-value="sumresult.off_hours_working_hours"
+              ></col-notemploymentworking>
+              <col-notemploymentworking
+                v-bind:item-name="'出勤者数'"
+                v-bind:item-value="sumresult.off_hours_working_hours"
+              ></col-notemploymentworking>
+              <col-notemploymentworking
+                v-bind:item-name="'外出者数'"
+                v-bind:item-value="sumresult.off_hours_working_hours"
+              ></col-notemploymentworking>
+              <col-notemploymentworking
+                v-bind:item-name="'休暇者数'"
                 v-bind:item-value="sumresult.off_hours_working_hours"
               ></col-notemploymentworking>
             </div>

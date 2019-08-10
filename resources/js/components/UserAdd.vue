@@ -415,7 +415,7 @@ export default {
             this.form.code = this.userDetails[0].code;
             this.form.password = this.userDetails[0].password;
             this.form.email = this.userDetails[0].email;
-            this.form.departmentCode = this.userDetails[0].department_id;
+            this.form.departmentCode = this.userDetails[0].department_code;
             this.form.status = "" + this.userDetails[0].employment_status + "";
             this.form.table_no =
               "" + this.userDetails[0].working_timetable_no + "";

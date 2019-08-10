@@ -50,13 +50,13 @@ export default {
       }
       if(this.itemLate == '1'){
         if(this.itemValue != ''){
-          this.itemValue += '  ';
+          this.itemValue += '、';
         }
         this.itemValue += '遅刻';
       }
       if(this.itemLeaveearly == '1'){
         if(this.itemValue != ''){
-          this.itemValue += '  ';
+          this.itemValue += '、';
         }
         this.itemValue += '早退';
       }

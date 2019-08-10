@@ -22,7 +22,7 @@ class UserHolidayKubun extends Model
     //--------------- 項目属性 -----------------------------------
 
     private $working_date;                  // 日付
-    private $department_id;                 // 部署コード
+    private $department_code;                 // 部署コード
     private $user_code;                     // ユーザー
     private $holiday_kubun;                 // 休暇区分
     private $created_user;                  // 作成ユーザー
@@ -45,12 +45,12 @@ class UserHolidayKubun extends Model
     // 部署コード
     public function getDepartmentidAttribute()
     {
-        return $this->department_id;
+        return $this->department_code;
     }
 
     public function setDepartmentidAttribute($value)
     {
-        $this->department_id = $value;
+        $this->department_code = $value;
     }
 
 
@@ -127,7 +127,7 @@ class UserHolidayKubun extends Model
     //--------------- パラメータ項目属性 -----------------------------------
 
     private $param_user_code;                   // ユーザー
-    private $param_department_id;               // 部署
+    private $param_department_code;               // 部署
     private $param_date_from;                   // 開始日付
     private $param_date_to;                     // 終了日付
 
@@ -145,12 +145,12 @@ class UserHolidayKubun extends Model
     // 部署
     public function getParamDepartmentcodeAttribute()
     {
-        return $this->param_department_id;
+        return $this->param_department_code;
     }
 
     public function setParamDepartmentcodeAttribute($value)
     {
-        $this->param_department_id = $value;
+        $this->param_department_code = $value;
     }
 
 
@@ -191,7 +191,7 @@ class UserHolidayKubun extends Model
         DB::table($this->table)->insert(
             [
                 'working_date' => $this->working_date,
-                'department_id' => $this->department_id,
+                'department_code' => $this->department_code,
                 'user_code' => $this->user_code,
                 'holiday_kubun' => $this->holiday_kubun,
                 'created_user' => $this->created_user,
