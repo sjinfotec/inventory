@@ -32,7 +32,9 @@
                                     </div>
                                 </div>
                                 @endif
-                                <user-add></user-add>
+								@can('admin-higher')
+                                	<user-add></user-add>
+								@endcan
 							</div>
 						</div>
 						<!-- /.panel -->

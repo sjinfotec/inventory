@@ -11,8 +11,8 @@
 								<!-- panel header -->
 								<div class="card-header bg-transparent pt-2 border-0">
 									<h1 class="float-left font-size-xl">
-                                        <img class="icon-size-rg mr-3" src="{{ asset('images/round-laptop-chromebook-w.svg') }}" alt="">時間計算設定
-                                    </h1>
+										<img class="icon-size-rg mr-3" src="{{ asset('images/round-laptop-chromebook-w.svg') }}" alt="">時間計算設定
+									</h1>
 								</div>
 								<!-- /.panel header -->
 							</div>
@@ -37,6 +37,8 @@
 					</div>
 					<!-- /main contentns row -->
 					@endif
-					<setting-calc></setting-calc>
+					@can('admin-higher')
+						<setting-calc></setting-calc>
+					@endcan
 					<!-- /main contentns row -->
 @endsection
