@@ -52,14 +52,14 @@ class User extends Authenticatable
         $data = DB::table('users')
             ->select(
                 'users.id',
-                'users.department_id as department_id',
+                'users.department_code as department_code',
                 'users.name',
                 'users.code',
                 'card_informations.card_idm'
             )
             ->Join('card_informations', function ($join) { 
                 $join->on('card_informations.user_code', '=', 'users.code');
-                $join->on('card_informations.department_id', '=', 'users.department_id')
+                $join->on('card_informations.department_code', '=', 'users.department_code')
                 ->where('card_informations.is_deleted',0);
             })
             ->where('card_informations.card_idm',$card_id)
@@ -87,12 +87,12 @@ class User extends Authenticatable
         $sunquery1 = DB::table('users as t1')
             ->select(
                 't1.code as user_code',
-                't1.department_id as department_id',
+                't1.department_code as department_code',
                 't2.card_idm'
             )
             ->leftJoin('card_informations as t2', function ($join) { 
                 $join->on('t2.user_code', '=', 't1.code');
-                $join->on('t2.department_id', '=', 't1.department_id')
+                $join->on('t2.department_code', '=', 't1.department_code')
                 ->where('t2.is_deleted',0);
             })
             ->where('t1.role',"<>",10)
@@ -102,15 +102,15 @@ class User extends Authenticatable
             ->select(
                 't3.code as user_code',
                 't3.name as user_name',
-                't3.department_id as department_id',
+                't3.department_code as department_code',
                 't5.name as department_name'
                 )
             ->leftJoinSub($sunquery1, 't4', function ($join) { 
                 $join->on('t4.user_code', '=', 't3.code');
-                $join->on('t4.department_id', '=', 't3.department_id');
+                $join->on('t4.department_code', '=', 't3.department_code');
             })
             ->leftJoin('departments as t5', function ($join) { 
-                $join->on('t5.id', '=', 't3.department_id')
+                $join->on('t5.id', '=', 't3.department_code')
                 ->where('t5.is_deleted',0);
             })
             ->where('t3.role',"<>",10)

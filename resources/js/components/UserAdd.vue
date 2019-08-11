@@ -213,8 +213,8 @@
                       type="submit"
                       class="btn btn-success"
                       v-if="userCode=='' || userCode==null "
-                    >追加</button>
-                    <button type="submit" class="btn btn-success" id="edit" v-if="userCode != ''">編集</button>
+                    >追加する</button>
+                    <button type="submit" class="btn btn-success" id="edit" v-if="userCode != ''">修正する</button>
                   </div>
                 </div>
                 <!-- /.col -->
@@ -226,7 +226,7 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <div class="btn-group d-flex">
-                  <button class="btn btn-danger" @click="alertDelConf('warning')">削除</button>
+                  <button class="btn btn-danger" @click="alertDelConf('warning')">削除する</button>
                 </div>
               </div>
               <!-- /.col -->
@@ -415,7 +415,7 @@ export default {
             this.form.code = this.userDetails[0].code;
             this.form.password = this.userDetails[0].password;
             this.form.email = this.userDetails[0].email;
-            this.form.departmentCode = this.userDetails[0].department_id;
+            this.form.departmentCode = this.userDetails[0].department_code;
             this.form.status = "" + this.userDetails[0].employment_status + "";
             this.form.table_no =
               "" + this.userDetails[0].working_timetable_no + "";

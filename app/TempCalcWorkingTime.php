@@ -47,17 +47,17 @@ class TempCalcWorkingTime extends Model
         $this->employment_status = $value;
     }
 
-    private $department_id;                 // 部署ID
+    private $department_code;                 // 部署ID
 
     // 部署ID
     public function getDepartmentidAttribute()
     {
-        return $this->department_id;
+        return $this->department_code;
     }
 
     public function setDepartmentidAttribute($value)
     {
-        $this->department_id = $value;
+        $this->department_code = $value;
     }
 
     private $user_code;                 // ユーザー
@@ -637,7 +637,7 @@ class TempCalcWorkingTime extends Model
     private $param_date_from;                   // 開始日付（00:00:00から）
     private $param_date_to;                     // 終了日付（23:59:59まで）
     private $param_employment_status;           // 雇用形態
-    private $param_department_id;               // 部署
+    private $param_department_code;               // 部署
     private $param_user_code;                   // ユーザー
 
     private $array_record_time;                 // 日付範囲配列
@@ -683,12 +683,12 @@ class TempCalcWorkingTime extends Model
     // 部署
     public function getParamDepartmentcodeAttribute()
     {
-        return $this->param_department_id;
+        return $this->param_department_code;
     }
 
     public function setParamDepartmentcodeAttribute($value)
     {
-        $this->param_department_id = $value;
+        $this->param_department_code = $value;
     }
 
     // ユーザー
@@ -734,12 +734,11 @@ class TempCalcWorkingTime extends Model
      * @return void
      */
     public function getTempCalcWorkingtime(){
-        \DB::enableQueryLog();
         $mainquery = DB::table($this->table.' AS t1')
             ->select(
                 't1.working_date as working_date',
                 't1.employment_status as employment_status',
-                't1.department_id as department_id',
+                't1.department_code as department_code',
                 't1.user_code as user_code',
                 't1.employment_status_name as employment_status_name',
                 't1.department_name as department_name',
@@ -796,8 +795,8 @@ class TempCalcWorkingTime extends Model
         if(!empty($this->param_employment_status)){
             $mainquery->where('t1.employment_status', $this->param_employment_status);      //　雇用形態指定
         }
-        if(!empty($this->param_department_id)){
-            $mainquery->where('t1.department_id', $this->param_department_id);              // department_id指定
+        if(!empty($this->param_department_code)){
+            $mainquery->where('t1.department_code', $this->param_department_code);              // department_code指定
         }
         if(!empty($this->param_user_code)){
             $mainquery->where('t1.user_code', $this->param_user_code);                      // user_code指定
@@ -805,16 +804,10 @@ class TempCalcWorkingTime extends Model
         
         $results = $mainquery
             ->orderBy('t1.working_date','asc')
-            ->orderBy('t1.department_id','asc')
+            ->orderBy('t1.department_code','asc')
             ->orderBy('t1.user_code','asc')
             ->orderBy('t1.record_time','asc')
             ->get();
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getTempCalcWorkingtime' => \DB::getQueryLog()
-            ]
-        );
     
         return $results;
     }
@@ -833,7 +826,7 @@ class TempCalcWorkingTime extends Model
                 [
                     'working_date' => $this->working_date,
                     'employment_status' => $this->employment_status,
-                    'department_id' => $this->department_id,
+                    'department_code' => $this->department_code,
                     'user_code' => $this->user_code,
                     'employment_status_name' => $this->employment_status_name,
                     'department_name' => $this->department_name,

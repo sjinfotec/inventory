@@ -28,7 +28,7 @@ class WorkingTimedate extends Model
 
     private $working_date;                  // 日付
     private $employment_status;             // 雇用形態
-    private $department_id;                 // 部署ID
+    private $department_code;                 // 部署ID
     private $user_code;                     // ユーザー
     private $employment_status_name;        // 雇用形態名称
     private $department_name;               // 部署名称
@@ -106,12 +106,12 @@ class WorkingTimedate extends Model
     // 部署ID
     public function getDepartmentidAttribute()
     {
-        return $this->department_id;
+        return $this->department_code;
     }
 
     public function setDepartmentidAttribute($value)
     {
-        $this->department_id = $value;
+        $this->department_code = $value;
     }
 
 
@@ -706,7 +706,7 @@ class WorkingTimedate extends Model
 
     private $param_employment_status;           // 雇用形態
     private $param_user_code;                   // ユーザー
-    private $param_department_id;               // 部署
+    private $param_department_code;               // 部署
     private $param_date_from;                   // 開始日付
     private $param_date_to;                     // 終了日付
 
@@ -739,12 +739,12 @@ class WorkingTimedate extends Model
     // 部署
     public function getParamDepartmentcodeAttribute()
     {
-        return $this->param_department_id;
+        return $this->param_department_code;
     }
 
     public function setParamDepartmentcodeAttribute($value)
     {
-        $this->param_department_id = $value;
+        $this->param_department_code = $value;
     }
 
 
@@ -822,7 +822,7 @@ class WorkingTimedate extends Model
                 ->select(
                     $this->table.'.working_date',
                     $this->table.'.employment_status',
-                    $this->table.'.department_id',
+                    $this->table.'.department_code',
                     $this->table.'.user_code',
                     $this->table.'.employment_status_name',
                     $this->table.'.department_name',
@@ -905,8 +905,8 @@ class WorkingTimedate extends Model
                 $mainquery->where($this->table.'.user_code', $this->param_user_code);                   //user_code指定
             }
             
-            if(!empty($this->param_department_id)){
-                $mainquery->where($this->table.'.department_id', $this->param_department_id);           //department_id指定
+            if(!empty($this->param_department_code)){
+                $mainquery->where($this->table.'.department_code', $this->param_department_code);           //department_code指定
             }
             $result = $mainquery->where('t1.is_deleted', '=', 0)->get();
         }catch(\PDOException $pe){
@@ -955,7 +955,7 @@ class WorkingTimedate extends Model
                 ->select(
                     $this->table.'.working_date',
                     $this->table.'.employment_status',
-                    $this->table.'.department_id',
+                    $this->table.'.department_code',
                     $this->table.'.user_code');
             $mainquery
                 ->selectRaw('ifnull('.$this->table.".employment_status_name,'　')  as employment_status_name")
@@ -1041,7 +1041,7 @@ class WorkingTimedate extends Model
             $mainquery
                 ->leftJoin($this->table_user_holiday_kubuns, function ($join) { 
                     $join->on($this->table.'.working_date', '=', $this->table_user_holiday_kubuns.'.working_date');
-                    $join->on($this->table.'.department_id', '=', $this->table_user_holiday_kubuns.'.department_id');
+                    $join->on($this->table.'.department_code', '=', $this->table_user_holiday_kubuns.'.department_code');
                     $join->on($this->table.'.user_code', '=', $this->table_user_holiday_kubuns.'.user_code')
                     ->where($this->table.'.is_deleted', '=', 0);
                 })
@@ -1056,7 +1056,7 @@ class WorkingTimedate extends Model
             $result = $mainquery
                 ->orderBy($this->table.'.working_date', 'asc')
                 ->orderBy($this->table.'.employment_status', 'asc')
-                ->orderBy($this->table.'.department_id', 'asc')
+                ->orderBy($this->table.'.department_code', 'asc')
                 ->orderBy($this->table.'.user_code', 'asc')
                 ->get();
             
@@ -1146,9 +1146,9 @@ class WorkingTimedate extends Model
                 $array_setBindingsStr += array($cnt=>$this->param_user_code);
             }
             
-            if(!empty($this->param_department_id)){
+            if(!empty($this->param_department_code)){
                 $cnt += 1;
-                $array_setBindingsStr += array($cnt=>$this->param_department_id);
+                $array_setBindingsStr += array($cnt=>$this->param_department_code);
             }
 
             if (count($array_setBindingsStr) > 0) {
@@ -1271,8 +1271,8 @@ class WorkingTimedate extends Model
                 $query->where($this->table.'.user_code', $this->param_user_code);                   //user_code指定
             }
             
-            if(!empty($this->param_department_id)){
-                $query->where($this->table.'.department_id', $this->param_department_id);           //department_id指定
+            if(!empty($this->param_department_code)){
+                $query->where($this->table.'.department_code', $this->param_department_code);           //department_code指定
             }
 
         }catch(\Exception $e){

@@ -21,11 +21,8 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text font-size-sm line-height-xs label-width-90" id="basic-addon1">指定年</span>
                 </div>
-                <select class="custom-select">
-                  <option selected></option>
-                  <option value="1">One</option>
-                  <option value="2">Two</option>
-                  <option value="3">Three</option>
+                <select class="form-control" v-model="year">
+                  <option v-for="n in 20" :value="n + baseYear -1">{{ n + baseYear -1 }}年</option>
                 </select>
               </div>
             </div>
@@ -441,6 +438,12 @@
 export default {
   mounted() {
     console.log("Component mounted.");
+  },
+  // マウント時
+  mounted() {
+    // this.getTimeTableList();
+    var date = new Date();
+    this.baseYear = date.getFullYear();
   }
 };
 </script>
