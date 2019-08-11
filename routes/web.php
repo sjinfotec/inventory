@@ -52,6 +52,8 @@ Route::get('/user_add/get', 'UserAddController@getUserDetails')->middleware('aut
 Route::post('/user_add/del', 'UserAddController@del')->middleware('auth');
 Route::post('/user_add/edit', 'UserAddController@edit')->middleware('auth');
 Route::post('/user_add/passchange', 'UserAddController@passChange')->middleware('auth');
+// ユーザー権限取得
+Route::get('/get_login_user_role', 'ApiCommonController@getLoginUserRole')->middleware('auth');
 // 部署
 Route::get('/create_department', 'CreateDepartmentController@index')->middleware('auth');
 Route::get('/create_department/get', 'CreateDepartmentController@getDetails')->middleware('auth');

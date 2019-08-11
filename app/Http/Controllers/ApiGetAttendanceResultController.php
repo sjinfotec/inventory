@@ -124,7 +124,7 @@ class ApiGetAttendanceResultController extends Controller
     private function chkMode($user_data, $mode, $systemdate){
         $apicommon = new ApiCommonController();
         $work_time = new WorkTime();
-        $work_time->setParamDepartmentcodeAttribute($user_data->department_id);
+        $work_time->setParamDepartmentcodeAttribute($user_data->department_code);
         $work_time->setParamUsercodeAttribute($user_data->code);
         $work_time->setParamDatefromAttribute($systemdate->format('Ymd'));
         $work_time->setParamDatetoAttribute($systemdate->format('Ymd'));
@@ -155,7 +155,7 @@ class ApiGetAttendanceResultController extends Controller
         try{
             $work_time = new WorkTime();
             $work_time->setUsercodeAttribute($user_data->code);
-            $work_time->setDepartmentcodeAttribute($user_data->department_id);
+            $work_time->setDepartmentcodeAttribute($user_data->department_code);
             $work_time->setRecordtimeAttribute($systemdate);
             $work_time->setModeAttribute($mode);
             $work_time->setCreateduserAttribute($user_data->code);

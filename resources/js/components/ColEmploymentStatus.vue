@@ -41,7 +41,6 @@ export default {
   },
   methods: {
     edtValue(){
-      console.log("this.itemName = "+this.itemName);
       if(this.itemValue != null && this.itemValue != '' && this.itemValue != '　'){
         this.value = this.itemValue;
       } else {
@@ -49,7 +48,6 @@ export default {
           this.value = this.itemsecoundValue;
         }
       }
-      console.log("this.value = "+this.value);
     }
   }
 };
