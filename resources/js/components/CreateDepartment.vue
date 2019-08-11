@@ -29,7 +29,7 @@
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
-                      >期首月</span>
+                      >部署</span>
                     </div>
                     <fvl-search-select
                       :selected.sync="selectId"
@@ -62,6 +62,36 @@
                     />
                   </div>
                 </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+              <!-- .row -->
+              <div class="row justify-content-between">
+                <!-- .col -->
+                <div class="col-md-6 pb-2" v-if="selectId != ''">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
+                        id="basic-addon1"
+                      >有効期間</span>
+                    </div>
+                    <fvl-search-select
+                      :selected.sync="selectId"
+                      class="p-0"
+                      name="selectId"
+                      :options="departmentList"
+                      placeholder="部署を選択すると編集モードになります"
+                      :allowEmpty="true"
+                      :search-keys="['id']"
+                      option-key="id"
+                      option-value="name"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2"></div>
                 <!-- /.col -->
               </div>
               <!-- /.row -->

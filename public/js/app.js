@@ -2625,6 +2625,36 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -78645,7 +78675,7 @@ var render = function() {
                                   "input-group-text font-size-sm line-height-xs label-width-150",
                                 attrs: { id: "basic-addon1" }
                               },
-                              [_vm._v("期首月")]
+                              [_vm._v("部署")]
                             )
                           ]),
                           _vm._v(" "),
@@ -78707,6 +78737,57 @@ var render = function() {
                         1
                       )
                     ])
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "row justify-content-between" }, [
+                    _vm.selectId != ""
+                      ? _c("div", { staticClass: "col-md-6 pb-2" }, [
+                          _c(
+                            "div",
+                            { staticClass: "input-group" },
+                            [
+                              _c(
+                                "div",
+                                { staticClass: "input-group-prepend" },
+                                [
+                                  _c(
+                                    "span",
+                                    {
+                                      staticClass:
+                                        "input-group-text font-size-sm line-height-xs label-width-150",
+                                      attrs: { id: "basic-addon1" }
+                                    },
+                                    [_vm._v("有効期間")]
+                                  )
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c("fvl-search-select", {
+                                staticClass: "p-0",
+                                attrs: {
+                                  selected: _vm.selectId,
+                                  name: "selectId",
+                                  options: _vm.departmentList,
+                                  placeholder:
+                                    "部署を選択すると編集モードになります",
+                                  allowEmpty: true,
+                                  "search-keys": ["id"],
+                                  "option-key": "id",
+                                  "option-value": "name"
+                                },
+                                on: {
+                                  "update:selected": function($event) {
+                                    _vm.selectId = $event
+                                  }
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ])
+                      : _vm._e(),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" })
                   ]),
                   _vm._v(" "),
                   _c("div", { staticClass: "row justify-content-between" }, [
