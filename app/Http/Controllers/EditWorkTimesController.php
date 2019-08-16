@@ -186,7 +186,7 @@ class EditWorkTimesController extends Controller
                     if($is_exists){
                         $user_holiday->delKbn();
                     }
-                    $user_holiday->setDepartmentidAttribute($detail['department_code']);
+                    $user_holiday->setDepartmentcodeAttribute($detail['department_code']);
                     $user_holiday->setHolidaykubunAttribute($detail['user_holiday_kbn']);
                     $user_holiday->setCreateduserAttribute($user_code);
                     $user_holiday->insertKbn();

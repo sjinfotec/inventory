@@ -27,12 +27,12 @@ class CardInformation extends Model
         $this->user_code = $value;
     }
 
-    public function getDepartmentIdAttribute()
+    public function getDepartmentcodeAttribute()
     {
         return $this->department_code;
     }
 
-    public function setDepartmentIdAttribute($value)
+    public function setDepartmentcodeAttribute($value)
     {
         $this->department_code = $value;
     }

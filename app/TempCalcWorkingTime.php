@@ -50,12 +50,12 @@ class TempCalcWorkingTime extends Model
     private $department_code;                 // 部署ID
 
     // 部署ID
-    public function getDepartmentidAttribute()
+    public function getDepartmentcodeAttribute()
     {
         return $this->department_code;
     }
 
-    public function setDepartmentidAttribute($value)
+    public function setDepartmentcodeAttribute($value)
     {
         $this->department_code = $value;
     }
@@ -637,7 +637,7 @@ class TempCalcWorkingTime extends Model
     private $param_date_from;                   // 開始日付（00:00:00から）
     private $param_date_to;                     // 終了日付（23:59:59まで）
     private $param_employment_status;           // 雇用形態
-    private $param_department_code;               // 部署
+    private $param_department_code;             // 部署
     private $param_user_code;                   // ユーザー
 
     private $array_record_time;                 // 日付範囲配列
@@ -796,7 +796,7 @@ class TempCalcWorkingTime extends Model
             $mainquery->where('t1.employment_status', $this->param_employment_status);      //　雇用形態指定
         }
         if(!empty($this->param_department_code)){
-            $mainquery->where('t1.department_code', $this->param_department_code);              // department_code指定
+            $mainquery->where('t1.department_code', $this->param_department_code);          // department_code指定
         }
         if(!empty($this->param_user_code)){
             $mainquery->where('t1.user_code', $this->param_user_code);                      // user_code指定

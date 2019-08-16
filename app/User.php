@@ -110,7 +110,7 @@ class User extends Authenticatable
                 $join->on('t4.department_code', '=', 't3.department_code');
             })
             ->leftJoin('departments as t5', function ($join) { 
-                $join->on('t5.id', '=', 't3.department_code')
+                $join->on('t5.code', '=', 't3.department_code')
                 ->where('t5.is_deleted',0);
             })
             ->where('t3.role',"<>",10)
