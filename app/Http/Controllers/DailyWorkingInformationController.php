@@ -76,8 +76,8 @@ class DailyWorkingInformationController extends Controller
             $employment_status = $request->employmentstatus;
         }
         $Departmentcode = null;
-        if(isset($request->DepartmentCode)){
-            $Departmentcode = $request->DepartmentCode;
+        if(isset($request->departmentcode)){
+            $Departmentcode =$request->departmentcode;
         }
         $usercode = null;
         if(isset($request->usercode)){
@@ -2292,13 +2292,15 @@ class DailyWorkingInformationController extends Controller
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
                             if ($array_working_time_kubun[$i] <> '') {
                                 $array_missing_middle_time[$i] += 
-                                    $this->calcTimes(2, $timetables,
+                                    $this->calcTimes(Config::get('const.INC_NO.missing_return'),
+                                        $timetables,
                                         $working_timetable_no,
                                         $array_working_time_kubun[$i],
                                         $current_date,
                                         $missing_middle_time,
                                         $missing_middle_return_time,
-                                        0);
+                                        $array_calc_time,
+                                        $array_missing_middle_time);
                                 Log::DEBUG('中抜けデータ　$i =  '.$i);
                                 Log::DEBUG('中抜けデータ　array_working_time_kubun[$i] =  '.$array_working_time_kubun[$i]);
                                 Log::DEBUG('中抜けデータ　array_missing_middle_time[$i] =  '.$array_missing_middle_time[$i]);
@@ -2320,13 +2322,15 @@ class DailyWorkingInformationController extends Controller
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
                             if ($array_working_time_kubun[$i] <> '') {
                                 $array_calc_time[$i] += 
-                                    $this->calcTimes(1, $timetables,
+                                    $this->calcTimes(Config::get('const.INC_NO.attendace_leaving'),
+                                        $timetables,
                                         $working_timetable_no,
                                         $array_working_time_kubun[$i],
                                         $current_date,
                                         $attendance_time,
                                         $leaving_time,
-                                        $attendance_time);
+                                        $array_calc_time,
+                                        $array_missing_middle_time);
                                 Log::DEBUG('退勤データ　$i =  '.$i);
                                 Log::DEBUG('退勤データ　array_working_time_kubun[$i] =  '.$array_working_time_kubun[$i]);
                                 Log::DEBUG('退勤データ　array_calc_time[$i] =  '.$array_calc_time[$i]);
@@ -2560,7 +2564,8 @@ class DailyWorkingInformationController extends Controller
      * @param  $target_to_time   ： 終了時刻（退勤・中抜け戻り）
      * @return 計算結果時間
      */
-    private function calcTimes($inc, $timetables, $working_timetable_no, $working_time_kubun, $current_date,$target_from_time, $target_to_time, $attendance_time)
+    private function calcTimes($inc, $timetables, $working_timetable_no, $working_time_kubun, $current_date,$target_from_time, $target_to_time,
+        $array_calc_time、array_missing_middle_time)
     {
         Log::DEBUG('---------------------- calcTimes in ------------------------ ');
         $apicommon = new ApiCommonController();
@@ -2602,7 +2607,7 @@ class DailyWorkingInformationController extends Controller
                 Log::DEBUG('working_time_calc_to = '.$working_time_calc_to);
                 Log::DEBUG('inc = '.$inc);
                 // 深夜労働残業時間以外の場合
-                if ($working_time_kubun != Config::get('const.C004.out_of_regular_night_working_time') || $inc == 2) {
+                if ($working_time_kubun != Config::get('const.C004.out_of_regular_night_working_time') || $inc == Config::get('const.INC_NO.missing_return')) {
                     if ($working_time_calc_from < $working_time_calc_to) {
                         $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
                         Log::DEBUG('calc_times = '.$calc_times);
@@ -2613,10 +2618,13 @@ class DailyWorkingInformationController extends Controller
                     // 深夜労働残業時間
                     Log::DEBUG('【深夜労働残業時間 計算開始】');
                     $w_time = 0;
-                    // 退勤時刻 > 深夜残業開始の場合、出勤->深夜残業開始の時間が8Hを超えている場合は深夜残業を計算する
-                    Log::DEBUG('$attendance_time = '.$attendance_time);
+                    // target_to_timeは退勤時刻
+                    Log::DEBUG('$target_to_time = '.$target_to_time);
+                    // ここまでに計算された労働時間と中抜け時間から
+                    // $array_calc_time、array_missing_middle_time
                     // 休憩とか中抜けとかも考慮しなければ正確な8Hを計算できない
-                    if ($attendance_time > Config::get('const.C002.legal_working_hours_day') * 60 * 60) {
+                    // 退勤時刻 > 深夜残業開始の場合、出勤->深夜残業開始の時間が8Hを超えている場合は深夜残業を計算する
+                    /*if ($attendance_time > Config::get('const.C002.legal_working_hours_day') * 60 * 60) {
                         // 出勤時刻の8時間後が深夜労働時間帯が含まれる場合
                         if ($attendance_8after > $working_time_calc_from) {     // 同じ時刻はなし
                             // 退勤時刻 >= 出勤時刻の8時間後
@@ -2637,7 +2645,7 @@ class DailyWorkingInformationController extends Controller
                                 Log::DEBUG('$working_times = '.$working_times);
                             }
                         }
-                    }
+                    } */
                 }
                 // 休憩時間を含んでいる場合、休憩時間累計（所定労働時間内の休憩時間を累計することになる）
                 $filtered = $timetables->where('no', $working_timetable_no)
