@@ -31,7 +31,7 @@ class UserAddController extends Controller
      * @return void
      */
     public function store(StoreUserPost $request){
-        $department_code = $request->departmentCode;
+        $department_code = $request->DepartmentCode;
         $kana = $request->kana;
         $code = $request->code;
         $name = $request->name;

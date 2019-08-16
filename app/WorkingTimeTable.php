@@ -143,7 +143,7 @@ class WorkingTimeTable extends Model
     private $param_date_from;                   // 開始日付
     private $param_date_to;                     // 終了日付
     private $param_employment_status;           // 雇用形態
-    private $param_department_code;               // 部署
+    private $param_department_code;             // 部署
     private $param_user_code;                   // ユーザー
 
     private $massegedata;                       // メッセージ
@@ -341,7 +341,7 @@ class WorkingTimeTable extends Model
                 $sunquery1->where($this->table_temp_calc_workingtimes.'.employment_status', $this->param_employment_status);      //　雇用形態指定
             }
             if(!empty($this->param_department_code)){
-                $sunquery1->where($this->table_temp_calc_workingtimes.'.department_code', $this->param_department_code);              // department_code指定
+                $sunquery1->where($this->table_temp_calc_workingtimes.'.department_code', $this->param_department_code);          // department_code指定
             }
             if(!empty($this->param_user_code)){
                 $sunquery1->where($this->table_temp_calc_workingtimes.'.user_code', $this->param_user_code);                      // user_code指定

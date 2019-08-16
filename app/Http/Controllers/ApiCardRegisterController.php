@@ -132,7 +132,7 @@ class ApiCardRegisterController extends Controller
         $login_user = Auth::user();
         try{
             $card_info->setUserCodeAttribute($user_code);
-            $card_info->setDepartmentIdAttribute($department_code);
+            $card_info->setDepartmentcodeAttribute($department_code);
             $card_info->setCardIdmAttribute($card_id);
             $card_info->setCreatedUserAttribute($login_user);
             $card_info->setSystemDateAttribute($systemdate);

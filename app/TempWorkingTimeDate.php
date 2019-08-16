@@ -93,12 +93,12 @@ class TempWorkingTimeDate extends Model
 
 
     // 部署ID
-    public function getDepartmentidAttribute()
+    public function getDepartmentcodeAttribute()
     {
         return $this->department_code;
     }
 
-    public function setDepartmentidAttribute($value)
+    public function setDepartmentcodeAttribute($value)
     {
         $this->department_code = $value;
     }
@@ -914,7 +914,7 @@ class TempWorkingTimeDate extends Model
                     $join->on('t2.employment_status', '=', 't1.employment_status');
                 })
                 ->leftJoin($this->table_departments.' as t3', function ($join) { 
-                    $join->on('t3.id', '=', 't1.department_code')
+                    $join->on('t3.code', '=', 't1.department_code')
                     ->where('t3.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_generalcodes.' as t4', function ($join) { 
