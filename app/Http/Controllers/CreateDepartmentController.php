@@ -36,6 +36,12 @@ class CreateDepartmentController extends Controller
         return $details;
     }
 
+    public function getDepartmentApplyTerm(Request $request){
+        $code = $request->code;
+        $terms = DB::table('departments')->where('code', $code)->where('is_deleted', 0)->orderby('apply_term_from','asc')->get();
+        return $terms;
+    }
+
     /**
      * 部署登録
      *

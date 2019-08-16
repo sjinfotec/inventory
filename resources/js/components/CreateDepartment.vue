@@ -38,8 +38,8 @@
                       :options="departmentList"
                       placeholder="部署を選択すると編集モードになります"
                       :allowEmpty="true"
-                      :search-keys="['id']"
-                      option-key="id"
+                      :search-keys="['code']"
+                      option-key="code"
                       option-value="name"
                     />
                   </div>
@@ -68,7 +68,7 @@
               <!-- .row -->
               <div class="row justify-content-between">
                 <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId != ''">
+                <div class="col-md-12 pb-2" v-if="selectId != ''">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
@@ -77,15 +77,15 @@
                       >有効期間</span>
                     </div>
                     <fvl-search-select
-                      :selected.sync="selectId"
+                      :selected.sync="selectApplyTerm"
                       class="p-0"
-                      name="selectId"
-                      :options="departmentList"
-                      placeholder="部署を選択すると編集モードになります"
+                      name="selectApplyTerm"
+                      :options="applyTerms"
+                      placeholder="有効期間を選択すると編集モードになります"
                       :allowEmpty="true"
                       :search-keys="['id']"
                       option-key="id"
-                      option-value="name"
+                      option-value="apply_term_from"
                     />
                   </div>
                 </div>
@@ -105,7 +105,12 @@
                       class="btn btn-success"
                       v-if="selectId=='' || selectId==null "
                     >追加する</button>
-                    <button type="submit" class="btn btn-success" id="edit" v-if="selectId != ''">修正する</button>
+                    <button
+                      type="submit"
+                      class="btn btn-success"
+                      id="edit"
+                      v-if="selectId != ''"
+                    >修正する</button>
                   </div>
                 </div>
                 <!-- /.col -->
@@ -162,7 +167,9 @@ export default {
       valuedepartment: "",
       departmentList: [],
       details: [],
+      applyTerms: [],
       selectId: "",
+      selectApplyTerm: "",
       oldId: ""
     };
   },
@@ -186,7 +193,7 @@ export default {
             this.form.id = this.details[0].id;
             // hidden
             this.oldId = this.details[0].id;
-
+            this.getDepartmentApplyTerm();
             console.log("部署名取得");
           })
           .catch(reason => {
@@ -220,11 +227,26 @@ export default {
         .get("/get_departments_list")
         .then(response => {
           this.departmentList = response.data;
-          this.object = { id: "", name: "新規登録" };
+          this.object = { code: "", name: "新規登録" };
           this.departmentList.unshift(this.object);
           console.log("部署リスト取得");
         })
         .catch(reason => {});
+    },
+    getDepartmentApplyTerm() {
+      this.$axios
+        .get("/create_department/get_apply", {
+          params: {
+            code: this.selectId
+          }
+        })
+        .then(response => {
+          this.applyTerms = response.data;
+          console.log("有効期間取得");
+        })
+        .catch(reason => {
+          alert("error");
+        });
     },
     addSuccess() {
       this.$toasted.show("登録しました");

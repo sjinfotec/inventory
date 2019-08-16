@@ -2651,6 +2651,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -2671,7 +2676,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       valuedepartment: "",
       departmentList: [],
       details: [],
+      applyTerms: [],
       selectId: "",
+      selectApplyTerm: "",
       oldId: ""
     };
   },
@@ -2696,6 +2703,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           _this.form.id = _this.details[0].id; // hidden
 
           _this.oldId = _this.details[0].id;
+
+          _this.getDepartmentApplyTerm();
+
           console.log("部署名取得");
         })["catch"](function (reason) {
           alert("error");
@@ -2730,7 +2740,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.$axios.get("/get_departments_list").then(function (response) {
         _this3.departmentList = response.data;
         _this3.object = {
-          id: "",
+          code: "",
           name: "新規登録"
         };
 
@@ -2738,6 +2748,20 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
         console.log("部署リスト取得");
       })["catch"](function (reason) {});
+    },
+    getDepartmentApplyTerm: function getDepartmentApplyTerm() {
+      var _this4 = this;
+
+      this.$axios.get("/create_department/get_apply", {
+        params: {
+          code: this.selectId
+        }
+      }).then(function (response) {
+        _this4.applyTerms = response.data;
+        console.log("有効期間取得");
+      })["catch"](function (reason) {
+        alert("error");
+      });
     },
     addSuccess: function addSuccess() {
       this.$toasted.show("登録しました");
@@ -2754,7 +2778,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     // 削除
     del: function del() {
-      var _this4 = this;
+      var _this5 = this;
 
       this.$axios.post("/create_department/del", {
         id: this.selectId
@@ -2762,11 +2786,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         var res = response.data;
 
         if (res.result == 0) {
-          _this4.alert("success", _this4.form.name + " を削除しました", "削除成功");
+          _this5.alert("success", _this5.form.name + " を削除しました", "削除成功");
 
-          _this4.inputClear();
+          _this5.inputClear();
 
-          _this4.getDepartmentList();
+          _this5.getDepartmentList();
         } else {}
       })["catch"](function (reason) {});
     },
@@ -78743,8 +78767,8 @@ var render = function() {
                               placeholder:
                                 "部署を選択すると編集モードになります",
                               allowEmpty: true,
-                              "search-keys": ["id"],
-                              "option-key": "id",
+                              "search-keys": ["code"],
+                              "option-key": "code",
                               "option-value": "name"
                             },
                             on: {
@@ -78796,7 +78820,7 @@ var render = function() {
                   _vm._v(" "),
                   _c("div", { staticClass: "row justify-content-between" }, [
                     _vm.selectId != ""
-                      ? _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      ? _c("div", { staticClass: "col-md-12 pb-2" }, [
                           _c(
                             "div",
                             { staticClass: "input-group" },
@@ -78820,19 +78844,19 @@ var render = function() {
                               _c("fvl-search-select", {
                                 staticClass: "p-0",
                                 attrs: {
-                                  selected: _vm.selectId,
-                                  name: "selectId",
-                                  options: _vm.departmentList,
+                                  selected: _vm.selectApplyTerm,
+                                  name: "selectApplyTerm",
+                                  options: _vm.applyTerms,
                                   placeholder:
-                                    "部署を選択すると編集モードになります",
+                                    "有効期間を選択すると編集モードになります",
                                   allowEmpty: true,
                                   "search-keys": ["id"],
                                   "option-key": "id",
-                                  "option-value": "name"
+                                  "option-value": "apply_term_from"
                                 },
                                 on: {
                                   "update:selected": function($event) {
-                                    _vm.selectId = $event
+                                    _vm.selectApplyTerm = $event
                                   }
                                 }
                               })

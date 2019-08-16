@@ -60,6 +60,7 @@ Route::get('/create_department/get', 'CreateDepartmentController@getDetails')->m
 Route::post('/create_department/store', 'CreateDepartmentController@store')->middleware('auth');
 Route::post('/create_department/del', 'CreateDepartmentController@del')->middleware('auth');
 Route::post('/create_department/edit', 'CreateDepartmentController@edit')->middleware('auth');
+Route::get('/create_department/get_apply', 'CreateDepartmentController@getDepartmentApplyTerm')->middleware('auth');
 // カレンダー登録
 Route::get('/create_calendar', 'CreateCalendarController@index')->middleware('auth');
 Route::post('/create_calendar/store', 'CreateCalendarController@store')->middleware('auth');
