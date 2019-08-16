@@ -28,10 +28,6 @@ class ApiCommonController extends Controller
         if (!isset($request->getdo)) { return null; }
         $getdo = $request->getdo;
         if (!isset($getdo)) { return null; }
-        // ログインユーザの権限取得
-        $chk_user_id = Auth::user()->id;
-        $role = $this->getUserRole($chk_user_id);
-        if(!isset($role)) { return null; }
         // 適用期間日付の取得
         $dt = null;
         if (isset($request->targetdate)) {
@@ -40,61 +36,78 @@ class ApiCommonController extends Controller
             $dt = new Carbon();
         }
         $target_date = $dt->format('Ymd');
-        $max_date = DB::table('users')->where('apply_term_from', '<=',$target_date)->max('apply_term_from');
-        if (!isset($max_date)) { return null; }
+        // ログインユーザの権限取得
+        $chk_user_id = Auth::user()->code;
+        $role = $this->getUserRole($chk_user_id, $target_date);
+        if(!isset($role)) { return null; }
+
+        $subquery1 = DB::table('users')
+            ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+            ->selectRaw('code as code')
+            ->where('apply_term_from', '<=',$target_date)
+            ->where('is_deleted', '=', 0)
+            ->groupBy('code');
 
         if ($getdo == 1) {
             if (isset($request->code)) {
                 if (isset($request->employment)) {
                     $mainQuery = DB::table('users')
-                        ->where('department_code', $request->code)
-                        ->where('employment_status', $request->employment)
-                        ->where('apply_term_from', '=',$max_date);
+                        ->JoinSub($subquery1, 't1', function ($join) { 
+                            $join->on('t1.code', '=', 'users.code');
+                            $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                        })
+                        ->where('users.department_code', $request->code)
+                        ->where('users.employment_status', $request->employment);
                     if($role < 8){
-                        $mainQuery->where('id','=',$chk_user_id);
+                        $mainQuery->where('users.code','=',$chk_user_id);
                     }
-                    $users = $mainQuery->where('is_deleted', 0)
-                        ->orderby('code','asc')
+                    $users = $mainQuery->where('users.is_deleted', 0)
+                        ->orderby('users.code','asc')
                         ->get();
                 } else {
-                    Log::DEBUG('$max_date2= '.$max_date);
                     $mainQuery = DB::table('users')
-                        ->where('department_code', $request->code)
-                        ->where('apply_term_from', '=',$max_date);
+                        ->JoinSub($subquery1, 't1', function ($join) { 
+                            $join->on('t1.code', '=', 'users.code');
+                            $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                        })
+                        ->where('users.department_code', $request->code);
                     if($role < 8){
-                        $mainQuery->where('id','=',$chk_user_id);
+                        $mainQuery->where('users.code','=',$chk_user_id);
                     }
-                    $users = $mainQuery->where('is_deleted', 0)
-                        ->orderby('code','asc')
+                    $users = $mainQuery->where('users.is_deleted', 0)
+                        ->orderby('users.code','asc')
                         ->get();
                 }
             } else {
-                Log::DEBUG('$max_date3 = '.$max_date);
                 if (isset($request->employment)) {
                     $mainQuery = DB::table('users')
-                        ->where('employment_status', $request->employment)
-                        ->where('apply_term_from', '=',$max_date);
+                        ->JoinSub($subquery1, 't1', function ($join) { 
+                            $join->on('t1.code', '=', 'users.code');
+                            $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                        })
+                        ->where('users.employment_status', $request->employment);
                     if($role < 8){
-                        $mainQuery->where('id','=',$chk_user_id);
+                        $mainQuery->where('users.code','=',$chk_user_id);
                     }
-                    $users = $mainQuery->where('is_deleted', 0)
-                        ->orderby('code','asc')
+                    $users = $mainQuery->where('users.is_deleted', 0)
+                        ->orderby('users.code','asc')
                         ->get();
                 } else {
-                    Log::DEBUG('$max_date4 = '.$max_date);
                     $mainQuery = DB::table('users')
-                        ->where('apply_term_from', '=',$max_date);
+                        ->JoinSub($subquery1, 't1', function ($join) { 
+                            $join->on('t1.code', '=', 'users.code');
+                            $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                        });
                     if($role < 8){
-                        $mainQuery->where('id','=',$chk_user_id);
+                        $mainQuery->where('users.code','=',$chk_user_id);
                     }
-                    $users = $mainQuery->where('is_deleted', 0)->get();
+                    $users = $mainQuery->where('users.is_deleted', 0)->get();
                 }
             }
         } else {
             return null;
         }
 
-        Log::DEBUG('$max_date5 = '.$max_date);
         return $users;
     }
 
@@ -124,10 +137,6 @@ class ApiCommonController extends Controller
      * @return list departments
      */
     public function getDepartmentList(Request $request){
-        // ログインユーザの権限取得
-        $chk_user_id = Auth::user()->id;
-        $role = $this->getUserRole($chk_user_id);
-        if(!isset($role)) { return null; }
         // 適用期間日付の取得
         $dt = null;
         if (isset($request->targetdate)) {
@@ -136,27 +145,41 @@ class ApiCommonController extends Controller
             $dt = new Carbon();
         }
         $target_date = $dt->format('Ymd');
-        $max_date = DB::table('users')->where('apply_term_from', '<=',$target_date)->max('apply_term_from');
-        if (!isset($max_date)) { return null; }
+        // ログインユーザの権限取得
+        $chk_user_id = Auth::user()->code;
+        $role = $this->getUserRole($chk_user_id, $target_date);
+        if(!isset($role)) { return null; }
+        $subquery1 = DB::table('departments')
+            ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+            ->selectRaw('code as code')
+            ->where('apply_term_from', '<=',$target_date)
+            ->where('is_deleted', '=', 0)
+            ->groupBy('code');
 
         if($role < 8){
             $departments = DB::table('departments')
+                ->JoinSub($subquery1, 't1', function ($join) { 
+                    $join->on('t1.code', '=', 'departments.code');
+                    $join->on('t1.max_apply_term_from', '=', 'departments.apply_term_from');
+                })
                 ->Join('users', function ($join) { 
                     $join->on('users.department_code', '=', 'departments.code')
                     ->where('users.is_deleted', '=', 0);
                 })
                 ->select('departments.code','departments.name')
-                ->where('apply_term_from', '=',$max_date)
-                ->where('users.id','=',$chk_user_id)
+                ->where('users.code','=',$chk_user_id)
                 ->where('departments.is_deleted', 0)
                 ->orderby('departments.code','asc')
                 ->get();
         } else {
             $departments = DB::table('departments')
-                ->select('code','name')
-                ->where('apply_term_from', '=',$max_date)
-                ->where('is_deleted', 0)
-                ->orderby('code','asc')
+                ->select('departments.code','departments.name')
+                ->JoinSub($subquery1, 't1', function ($join) { 
+                    $join->on('t1.code', '=', 'departments.code');
+                    $join->on('t1.max_apply_term_from', '=', 'departments.apply_term_from');
+                })
+                ->where('departments.is_deleted', 0)
+                ->orderby('departments.code','asc')
                 ->get();
         }
         return $departments;
@@ -168,10 +191,11 @@ class ApiCommonController extends Controller
      */
     public function getLoginUserRole(){
         // ログインユーザの権限取得
-        Log::DEBUG('$getLoginUserRole in ');
-        $chk_user_id = Auth::user()->id;
-        $role = $this->getUserRole($chk_user_id);
-        Log::DEBUG('$getLoginUserRole end ');
+        $chk_user_id = Auth::user()->code;
+        // 適用期間日付の取得（現在日付とする）
+        $dt = new Carbon();
+        $target_date = $dt->format('Ymd');
+        $role = $this->getUserRole($chk_user_id, $target_date);
         return $role;
     }
         
@@ -179,13 +203,35 @@ class ApiCommonController extends Controller
      *
      * @return list departments
      */
-    public function getUserRole($user_id){
+    public function getUserRole($user_id, $target_date){
         // ユーザの権限取得
-        Log::DEBUG('$getUserRole in ');
-        $role = DB::table('users')->where('id','=',''.$user_id)->where('is_deleted', 0)->value('role');     
-        if(!isset($role)) { return null; }
-        Log::DEBUG('$getUserRole end ');
-        return $role;
+        $dt = null;
+        if (isset($target_date)) {
+            $dt = new Carbon($target_date);
+        } else {
+            $dt = new Carbon();
+        }
+        $target_date = $dt->format('Ymd');
+        $subquery1 = DB::table('users')
+            ->selectRaw('code as code')
+            ->selectRaw('department_code as department_code')
+            ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+            ->where('apply_term_from', '<=',$target_date)
+            ->where('is_deleted', '=', 0)
+            ->groupBy('code', 'department_code');
+        $userrole = DB::table('users')
+            ->JoinSub($subquery1, 't1', function ($join) { 
+                $join->on('t1.code', '=', 'users.code');
+                $join->on('t1.department_code', '=', 'users.department_code');
+                $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+            })
+            ->where('users.code', $user_id)
+            ->where('users.is_deleted', 0)
+            ->value('role');
+        if(!isset($userrole)) { return null; }
+
+        Log::DEBUG('$getUserRole end '.$userrole);
+        return $userrole;
     }
 
     /** 雇用形態リスト取得
