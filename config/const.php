@@ -136,6 +136,12 @@ return [
         'basic_no' => 1
     ],
 
+    'INC_NO' => [
+        'attendace_leaving' => 1,
+        'missing_return' => 2
+    ],
+
+
     'MEMO_DATA' => [
         'MEMO_DATA_001' => '出勤済',
         'MEMO_DATA_002' => '当日出勤なし',
