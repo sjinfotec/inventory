@@ -104,12 +104,12 @@ class WorkingTimedate extends Model
 
 
     // 部署ID
-    public function getDepartmentidAttribute()
+    public function getDepartmentcodeAttribute()
     {
         return $this->department_code;
     }
 
-    public function setDepartmentidAttribute($value)
+    public function setDepartmentcodeAttribute($value)
     {
         $this->department_code = $value;
     }
@@ -706,7 +706,7 @@ class WorkingTimedate extends Model
 
     private $param_employment_status;           // 雇用形態
     private $param_user_code;                   // ユーザー
-    private $param_department_code;               // 部署
+    private $param_department_code;             // 部署
     private $param_date_from;                   // 開始日付
     private $param_date_to;                     // 終了日付
 
@@ -906,7 +906,7 @@ class WorkingTimedate extends Model
             }
             
             if(!empty($this->param_department_code)){
-                $mainquery->where($this->table.'.department_code', $this->param_department_code);           //department_code指定
+                $mainquery->where($this->table.'.department_code', $this->param_department_code);       //department_code指定
             }
             $result = $mainquery->where('t1.is_deleted', '=', 0)->get();
         }catch(\PDOException $pe){
@@ -1272,7 +1272,7 @@ class WorkingTimedate extends Model
             }
             
             if(!empty($this->param_department_code)){
-                $query->where($this->table.'.department_code', $this->param_department_code);           //department_code指定
+                $query->where($this->table.'.department_code', $this->param_department_code);       //department_code指定
             }
 
         }catch(\Exception $e){

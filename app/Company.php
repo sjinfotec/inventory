@@ -10,7 +10,6 @@ class Company extends Model
     protected $table = 'companies';
 
     private $apply_term_from;                   // 適用期間開始
-    private $apply_term_to;                     // 適用期間終了
     private $name;                              // 会社名
     private $kana;                              // 会社カナ
     private $post_code;                         // 郵便番号
@@ -39,17 +38,6 @@ class Company extends Model
         $this->apply_term_from = $value;
     }
 
-
-    // 適用期間終了
-    public function getApplytermtoAttribute()
-    {
-        return $this->apply_term_to;
-    }
-
-    public function setApplytermtoAttribute($value)
-    {
-        $this->apply_term_to = $value;
-    }
     
      
     // 会社名
@@ -252,7 +240,6 @@ class Company extends Model
         DB::table($this->table)->insert(
             [
                 'apply_term_from' => $this->apply_term_from,
-                'apply_term_to' => $this->apply_term_to,
                 'name' => $this->name,
                 'kana' => $this->kana,
                 'post_code' => $this->post_code,
@@ -279,7 +266,6 @@ class Company extends Model
         $data = DB::table($this->table)
         ->select(
                 'apply_term_from',
-                'apply_term_to',
                 'name',
                 'kana',
                 'post_code',

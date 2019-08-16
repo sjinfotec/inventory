@@ -75,9 +75,9 @@ class DailyWorkingInformationController extends Controller
         if(isset($request->employmentstatus)){
             $employment_status = $request->employmentstatus;
         }
-        $departmentcode = null;
-        if(isset($request->departmentcode)){
-            $departmentcode = $request->departmentcode;
+        $Departmentcode = null;
+        if(isset($request->DepartmentCode)){
+            $Departmentcode = $request->DepartmentCode;
         }
         $usercode = null;
         if(isset($request->usercode)){
@@ -90,7 +90,7 @@ class DailyWorkingInformationController extends Controller
         $work_time->setParamDatefromAttribute($datefrom);
         $work_time->setParamDatetoAttribute($dateto);
         $work_time->setParamemploymentstatusAttribute($employment_status);
-        $work_time->setParamDepartmentcodeAttribute($departmentcode);
+        $work_time->setParamDepartmentcodeAttribute($Departmentcode);
         $work_time->setParamUsercodeAttribute($usercode);
         // パラメータのチェック
         $chk_result = $work_time->chkWorkingTimeData();
@@ -118,7 +118,7 @@ class DailyWorkingInformationController extends Controller
                             $timetable_model->setParamdatefromAttribute($datefrom);
                             $timetable_model->setParamdatetoAttribute($dateto);
                             $timetable_model->setParamemploymentstatusAttribute($employment_status);
-                            $timetable_model->setParamDepartmentcodeAttribute($departmentcode);
+                            $timetable_model->setParamDepartmentcodeAttribute($Departmentcode);
                             $timetables = $timetable_model->getWorkingTimeTableJoin();
                             if (isset($timetables)) {
                                 // 日次集計
@@ -170,7 +170,7 @@ class DailyWorkingInformationController extends Controller
             $temp_working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
             $temp_working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
             $temp_working_model->setParamEmploymentStatusAttribute($employment_status);
-            $temp_working_model->setParamDepartmentcodeAttribute($departmentcode);
+            $temp_working_model->setParamDepartmentcodeAttribute($Departmentcode);
             $temp_working_model->setParamUsercodeAttribute($usercode);
             try{
                 Log::debug('getTempWorkingTimeDateUserJoin ');
@@ -181,7 +181,7 @@ class DailyWorkingInformationController extends Controller
                     $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
                     $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
                     $working_model->setParamEmploymentStatusAttribute($employment_status);
-                    $working_model->setParamDepartmentcodeAttribute($departmentcode);
+                    $working_model->setParamDepartmentcodeAttribute($Departmentcode);
                     $working_model->setParamUsercodeAttribute($usercode);
                     try{
                         DB::beginTransaction();
@@ -2120,7 +2120,7 @@ class DailyWorkingInformationController extends Controller
         // 計算用配列からtemporary項目を設定する
         $temp_calc_model->setWorkingdateAttribute($target_date);
         $temp_calc_model->setEmploymentstatusAttribute($result->employment_status);
-        $temp_calc_model->setDepartmentidAttribute($result->department_code);
+        $temp_calc_model->setDepartmentcodeAttribute($result->department_code);
         $temp_calc_model->setUsercodeAttribute($result->user_code);
         $temp_calc_model->setEmploymentstatusnameAttribute($result->employment_status_name);
         $temp_calc_model->setDepartmentnameAttribute($result->department_name);
@@ -2600,6 +2600,7 @@ class DailyWorkingInformationController extends Controller
                 Log::DEBUG('target_to_time = '.$target_to_time);
                 Log::DEBUG('working_time_calc_from = '.$working_time_calc_from);
                 Log::DEBUG('working_time_calc_to = '.$working_time_calc_to);
+                Log::DEBUG('inc = '.$inc);
                 // 深夜労働残業時間以外の場合
                 if ($working_time_kubun != Config::get('const.C004.out_of_regular_night_working_time') || $inc == 2) {
                     if ($working_time_calc_from < $working_time_calc_to) {
@@ -2712,7 +2713,7 @@ class DailyWorkingInformationController extends Controller
 
         $temp_working_model->setWorkingdateAttribute(date_format(new Carbon($target_date), 'Ymd'));
         $temp_working_model->setEmploymentstatusAttribute($target_result->employment_status);
-        $temp_working_model->setDepartmentidAttribute($target_department_code);
+        $temp_working_model->setDepartmentcodeAttribute($target_department_code);
         $temp_working_model->setUsercodeAttribute($target_user_code);
         $temp_working_model->setEmploymentstatusnameAttribute($target_result->employment_status_name);
         $temp_working_model->setDepartmentnameAttribute($target_result->department_name);

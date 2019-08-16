@@ -142,14 +142,14 @@ class ApiCommonController extends Controller
         if($role < 8){
             $departments = DB::table('departments')
                 ->Join('users', function ($join) { 
-                    $join->on('users.department_code', '=', 'departments.id')
+                    $join->on('users.department_code', '=', 'departments.code')
                     ->where('users.is_deleted', '=', 0);
                 })
-                ->select('departments.id','departments.name')
+                ->select('departments.code','departments.name')
                 ->where('apply_term_from', '=',$max_date)
                 ->where('users.id','=',$chk_user_id)
                 ->where('departments.is_deleted', 0)
-                ->orderby('departments.id','asc')
+                ->orderby('departments.code','asc')
                 ->get();
         } else {
             $departments = DB::table('departments')

@@ -14,6 +14,7 @@ class UserModel extends Model
 
     //--------------- メンバー属性 -----------------------------------
     private $id;
+    private $apply_term_from;                  
     private $code;                  
     private $department_code;                  
     private $name;                  
@@ -33,6 +34,16 @@ class UserModel extends Model
         $this->id = $value;
     }
 
+    public function getApplytermfromAttribute()
+    {
+        return $this->code;
+    }
+
+    public function setApplytermfromAttribute($value)
+    {
+        $this->code = $value;
+    }
+     
     public function getCodeAttribute()
     {
         return $this->code;
@@ -122,6 +133,7 @@ class UserModel extends Model
         $systemdate = Carbon::now();
         DB::table('users')->insert(
             [
+                'apply_term_from' => $this->apply_term_from,
                 'code' => $this->code,
                 'employment_status' => $this->employment_status,
                 'department_code' => $this->department_code,
@@ -145,6 +157,7 @@ class UserModel extends Model
         DB::table($this->table)
             ->where('id', $this->id)
             ->update([
+                'apply_term_from' => $this->apply_term_from,
                 'code' => $this->code,
                 'department_code' => $this->department_code,
                 'employment_status' => $this->employment_status,
@@ -166,6 +179,7 @@ class UserModel extends Model
         $data = DB::table($this->table)
             ->select(
                 $this->table.'.id',
+                $this->table.'.apply_term_from',
                 $this->table.'.code',
                 $this->table.'.employment_status',
                 $this->table.'.department_code',

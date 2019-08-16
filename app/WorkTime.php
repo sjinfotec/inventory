@@ -18,7 +18,7 @@ class WorkTime extends Model
 
     private $id;
     private $user_code;                     // ユーザーコード
-    private $department_code;                 // 部署コード
+    private $department_code;               // 部署コード
     private $record_time;                   // 打刻時間
     private $mode;                          // 打刻モード
     private $created_user;                  // 作成ユーザー
@@ -151,7 +151,7 @@ class WorkTime extends Model
     private $param_date_from;                   // 開始日付（00:00:00から）
     private $param_date_to;                     // 終了日付（23:59:59まで）
     private $param_employment_status;           // 雇用形態
-    private $param_department_code;               // 部署
+    private $param_department_code;             // 部署
     private $param_user_code;                   // ユーザー
 
     private $array_record_time;                 // 日付範囲配列
@@ -471,7 +471,7 @@ class WorkTime extends Model
                 ->where('t4.is_deleted', '=', 0);
             })
             ->leftJoin('departments as t5', function ($join) { 
-                $join->on('t5.id', '=', 't1.department_code')
+                $join->on('t5.code', '=', 't1.department_code')
                 ->where('t5.is_deleted', '=', 0);
             })
             ->leftJoin('working_timetables as t6', function ($join) { 
@@ -673,7 +673,7 @@ class WorkTime extends Model
         \DB::enableQueryLog();
         $data = DB::table($this->table)
             ->join('users','users.code','=',$this->table.'.user_code')
-            ->join('departments','departments.id','users.department_code')
+            ->join('departments','departments.code','users.department_code')
             ->leftJoin('generalcodes as g', function ($join) { 
                 $join->on('g.code', '=', $this->table.'.mode')
                 ->where('g.identification_id', '=', Config::get('const.C005.value'));
