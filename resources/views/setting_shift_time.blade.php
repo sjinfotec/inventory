@@ -39,5 +39,5 @@
 		@endif
 		@can('admin-higher')
 			<setting-shift-time></setting-shift-time>
-		@can('admin-higher')
+		@endcan
 @endsection

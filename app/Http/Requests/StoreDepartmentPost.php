@@ -24,7 +24,8 @@ class StoreDepartmentPost extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:50|unique:departments,name'
+            // 'name' => 'required|string|max:50|unique:departments,name'
+            'name' => 'required|string|max:50'
         ];
     }
 
@@ -36,7 +37,7 @@ class StoreDepartmentPost extends FormRequest
         return[
             'name.required'  => '部署名を入力してください',
             'name.max'  => '部署名の最大文字数は 50 です',
-            'name.unique'  => '入力した部署名は既に使用済みです'
+            // 'name.unique'  => '入力した部署名は既に使用済みです'
         ];
     }
 }

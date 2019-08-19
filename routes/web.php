@@ -58,6 +58,7 @@ Route::get('/get_login_user_role', 'ApiCommonController@getLoginUserRole')->midd
 Route::get('/create_department', 'CreateDepartmentController@index')->middleware('auth');
 Route::get('/create_department/get', 'CreateDepartmentController@getDetails')->middleware('auth');
 Route::post('/create_department/store', 'CreateDepartmentController@store')->middleware('auth');
+Route::post('/create_department/fix', 'CreateDepartmentController@fix')->middleware('auth');
 Route::post('/create_department/del', 'CreateDepartmentController@del')->middleware('auth');
 Route::post('/create_department/edit', 'CreateDepartmentController@edit')->middleware('auth');
 Route::get('/create_department/get_apply', 'CreateDepartmentController@getDepartmentApplyTerm')->middleware('auth');

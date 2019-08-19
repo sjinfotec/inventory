@@ -12,8 +12,9 @@ class Department extends Model
     protected $table_users = 'users';
     protected $guarded = array('id');
 
+    private $id;
     private $apply_term_from;               // 適用期間開始
-    private $apply_term_to;                 // 適用期間終了
+    private $code;                          // 部署コード
     private $name;                          // 部署名
     private $is_deleted;                    // 削除フラグ
     private $created_user;                  // 作成ユーザー
@@ -21,6 +22,17 @@ class Department extends Model
     private $created_at;                    // 作成日時
     private $updated_at;                    // 修正日時
 
+
+    // ID
+    public function getIdAttribute()
+    {
+        return $this->id;
+    }
+
+    public function setIdAttribute($value)
+    {
+        $this->id = $value;
+    }
 
     // 適用期間開始
     public function getApplytermfromAttribute()
@@ -33,15 +45,15 @@ class Department extends Model
         $this->apply_term_from = $value;
     }
 
-    // 適用期間終了
-    public function getApplytermtoAttribute()
+    // 部署コード
+    public function getCodeAttribute()
     {
-        return $this->apply_term_to;
+        return $this->code;
     }
 
-    public function setApplytermtoAttribute($value)
+    public function setCodeAttribute($value)
     {
-        $this->apply_term_to = $value;
+        $this->code = $value;
     }
 
     // 部署名
@@ -111,15 +123,64 @@ class Department extends Model
     }
 
 
+    /**
+     * 部署追加
+     *
+     * @return void
+     */
     public function insertDepartment(){
         DB::table($this->table)->insert(
             [
                 'apply_term_from' => $this->apply_term_from,
-                'apply_term_to' => $this->apply_term_to,
+                'code' => $this->code,
                 'name' => $this->name,
+                'created_user'=>$this->created_user,
                 'created_at'=>$this->created_at
             ]
         );
+    }
+
+    /**
+     * 部署更新
+     *
+     * @return void
+     */
+    public function updateDepartment(){
+        DB::table($this->table)
+            ->where('id', $this->id)
+            ->where('is_deleted', 0)
+            ->update([
+                'apply_term_from' => $this->apply_term_from,
+                'name' => $this->name,
+                'updated_at'=>$this->updated_at,
+                'updated_user'=>$this->updated_user
+            ]);
+    }
+
+    /**
+     * 最大コード取得
+     *
+     * @return max_code
+     */
+    public function getMaxCode(){
+        $max_code = DB::select($this->maxCodeSql());
+        if(isset($max_code[0]->{'max_code'})){
+            $max_code = $max_code[0]->{'max_code'};
+        }else{
+            $max_code = 0;
+        }
+        return $max_code;
+    }
+
+    private function maxCodeSql(){
+        $sql = "select";
+        $sql .= " max(CAST(code AS SIGNED)) as max_code";
+        $sql .= " from";
+        $sql .= " departments";
+        $sql .= " where";
+        $sql .= " is_deleted = 0";
+
+        return $sql;
     }
 
 }
