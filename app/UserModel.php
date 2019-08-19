@@ -22,7 +22,13 @@ class UserModel extends Model
     private $password;                  
     private $email;                  
     private $employment_status;                  
-    private $working_timetable_no;                  
+    private $working_timetable_no;
+    private $is_deleted;                 // 削除フラグ
+    private $updated_user;                 // 修正ユーザー
+    private $created_user;                 // 作成ユーザー
+    private $updated_at;                 // 修正日時
+    private $created_at;                 // 作成日時
+
  
     public function getIdAttribute()
     {
@@ -36,12 +42,12 @@ class UserModel extends Model
 
     public function getApplytermfromAttribute()
     {
-        return $this->code;
+        return $this->apply_term_from;
     }
 
     public function setApplytermfromAttribute($value)
     {
-        $this->code = $value;
+        $this->apply_term_from = $value;
     }
      
     public function getCodeAttribute()
@@ -124,14 +130,69 @@ class UserModel extends Model
         $this->working_timetable_no = $value;
     }
 
+    // 作成日時
+    public function getCreatedatAttribute()
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedatAttribute($value)
+    {
+        $this->created_at = $value;
+    }
+
+    // 修正日時
+    public function getUpdatedatAttribute()
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedatAttribute($value)
+    {
+        $this->updated_at = $value;
+    }
+
+    // 作成ユーザー
+    public function getCreateduserAttribute()
+    {
+        return $this->created_user;
+    }
+
+    public function setCreateduserAttribute($value)
+    {
+        $this->created_user = $value;
+    }
+
+    // 修正ユーザー
+    public function getUpdateduserAttribute()
+    {
+        return $this->updated_user;
+    }
+
+    public function setUpdateduserAttribute($value)
+    {
+        $this->updated_user = $value;
+    }
+
+    // 削除フラグ
+    public function getIsdeletedAttribute()
+    {
+        return $this->is_deleted;
+    }
+
+    public function setIsdeletedAttribute($value)
+    {
+        $this->is_deleted = $value;
+    }
+
+
     /**
      * ユーザー新規登録
      *
      * @return void
      */
     public function insertNewUser(){
-        $systemdate = Carbon::now();
-        DB::table('users')->insert(
+        DB::table($this->table)->insert(
             [
                 'apply_term_from' => $this->apply_term_from,
                 'code' => $this->code,
@@ -142,7 +203,8 @@ class UserModel extends Model
                 'working_timetable_no' => $this->working_timetable_no,
                 'email' => $this->email,
                 'password' => $this->password,
-                'created_at'=>$systemdate
+                'created_user'=>$this->created_user,
+                'created_at'=>$this->created_at
             ]
         );
     }
@@ -153,7 +215,6 @@ class UserModel extends Model
      * @return void
      */
     public function updateUser(){
-        $systemdate = Carbon::now();
         DB::table($this->table)
             ->where('id', $this->id)
             ->update([
@@ -165,7 +226,8 @@ class UserModel extends Model
                 'kana' => $this->kana,
                 'working_timetable_no' => $this->working_timetable_no,
                 'email' => $this->email,
-                'updated_at' => $systemdate
+                'updated_user'=>$this->updated_user,
+                'updated_at' => $this->updated_at
                 ]
             );
     }
@@ -202,13 +264,13 @@ class UserModel extends Model
      * @return void
      */
     public function updatePassWord(){
-        $systemdate = Carbon::now();
         DB::table($this->table)
             ->where('code', $this->code)
             ->update([
                 'password' => $this->password,
-                'updated_at' => $systemdate
-                ]);
+                'updated_user'=>$this->updated_user,
+                'updated_at' => $this->updated_at
+            ]);
     }
 
     /**
@@ -218,7 +280,7 @@ class UserModel extends Model
      */
     public function updateIsDelete(){
         DB::table($this->table)
-            ->where('code', $this->code)
+            ->where('id', $this->id)
             ->update(['is_deleted' => 1]);
     }
 
