@@ -58,7 +58,10 @@
                       for="target_department"
                     >所属部署</label>
                   </div>
-                  <select-department v-bind:blank-data="true" v-on:change-event="departmentChanges"></select-department>
+                  <select-department
+                    ref="selectdepartment"
+                    v-bind:blank-data="true" v-on:change-event="departmentChanges"
+                  ></select-department>
                   <message-data v-bind:messagedatas="messagedatadepartment"></message-data>
                 </div>
               </div>
@@ -75,7 +78,8 @@
                   <select-user
                     ref="selectuser"
                     v-bind:blank-data="true"
-                    v-bind:get-Do="getDo"
+                    v-bind:get-do="getDo"
+                    v-bind:date-value="fromdate"
                     v-on:change-event="userChanges"
                   ></select-user>
                   <message-data v-bind:messagedatas="messagedatauser"></message-data>
@@ -213,20 +217,20 @@
             <div class="collapse" v-bind:id="'collapseUser' + index">
               <!-- .row -->
               <div class="row mt-2">
-                <!-- col  雇用形態 勤務時間 勤務状態 勤務シフト-->
+                <!-- col  雇用形態 勤務時間 勤務シフト-->
                 <col-employmentstatus
                   v-bind:item-name="'雇用形態'"
                   v-bind:item-value="calclist.employment_status_name"
                 ></col-employmentstatus>
-                <col-regularworking
-                  v-bind:item-name="'勤務時間'"
-                  v-bind:item-value="calclist.total_working_times"
-                ></col-regularworking>
                 <col-employmentstatus
                   v-bind:item-name="'勤務状態'"
                   v-bind:item-value="calclist.working_status_name"
                   v-bind:itemsecound-value="calclist.holiday_name"
                 ></col-employmentstatus>
+                <col-regularworking
+                  v-bind:item-name="'勤務時間'"
+                  v-bind:item-value="calclist.total_working_times"
+                ></col-regularworking>
                 <col-employmentstatus
                   v-bind:item-name="'勤務シフト'"
                   v-bind:item-value="calclist.working_timetable_name"
@@ -337,15 +341,15 @@
               ></col-notemploymentworking>
               <col-notemploymentworking
                 v-bind:item-name="'出勤者数'"
-                v-bind:item-value="sumresult.off_hours_working_hours"
+                v-bind:item-value="sumresult.total_working_status"
               ></col-notemploymentworking>
               <col-notemploymentworking
                 v-bind:item-name="'外出者数'"
-                v-bind:item-value="sumresult.off_hours_working_hours"
+                v-bind:item-value="sumresult.total_go_out"
               ></col-notemploymentworking>
               <col-notemploymentworking
                 v-bind:item-name="'休暇者数'"
-                v-bind:item-value="sumresult.off_hours_working_hours"
+                v-bind:item-value="sumresult.total_holiday_kubun"
               ></col-notemploymentworking>
             </div>
             <!-- /.row -->
@@ -369,7 +373,8 @@ export default {
     return {
       valuedepartment: "",
       valueemploymentstatus: "",
-      getDo: 0,
+      getDo: 1,
+      fromdate: "",
       valueuser: "",
       valuefromdate: "",
       userrole: "",
@@ -385,7 +390,7 @@ export default {
       messagedatastodate: [],
       messagedatadepartment: [],
       messagedatauser: [],
-       validate: false,
+      validate: false,
       initialized: false
     };
   },
@@ -432,73 +437,10 @@ export default {
         })
         .then(response => {
           this.userrole = response.data;
-          console.log("this.userrole = " + this.userrole);
         })
         .catch(reason => {
           alert("ログインユーザー権限取得エラー");
         });
-    },
-    // 雇用形態が変更された場合の処理
-    employmentChanges: function(value) {
-      this.valueemploymentstatus = value;
-      // ユーザー選択コンポーネントの取得メソッドを実行
-      this.getDo = 1;
-      if (this.valuedepartment == "") {
-        if (this.valueemploymentstatus == "") {
-          this.$refs.selectuser.getUserList(this.getDo);
-        } else {
-          this.$refs.selectuser.getUserListByEmployment(
-            this.getDo,
-            this.valueemploymentstatus
-          );
-        }
-      } else {
-        if (this.valueemploymentstatus == "") {
-          this.$refs.selectuser.getUserListByDepartment(
-            this.getDo,
-            this.valuedepartment
-          );
-        } else {
-          this.$refs.selectuser.getUserListByDepartmentEmployment(
-            this.getDo,
-            this.valuedepartment,
-            this.valueemploymentstatus
-          );
-        }
-      }
-    },
-    // 部署選択が変更された場合の処理
-    departmentChanges: function(value) {
-      this.valuedepartment = value;
-      // ユーザー選択コンポーネントの取得メソッドを実行
-      this.getDo = 1;
-      if (this.valueemploymentstatus == "") {
-        if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserList(this.getDo);
-        } else {
-          this.$refs.selectuser.getUserListByDepartment(
-            this.getDo,
-            this.valuedepartment
-          );
-        }
-      } else {
-        if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserListByEmployment(
-            this.getDo,
-            this.valueemploymentstatus
-          );
-        } else {
-          this.$refs.selectuser.getUserListByDepartmentEmployment(
-            this.getDo,
-            this.valuedepartment,
-            this.valueemploymentstatus
-          );
-        }
-      }
-    },
-    // ユーザー選択が変更された場合の処理
-    userChanges: function(value) {
-      this.valueuser = value;
     },
     // 指定日付が変更された場合の処理
     fromdateChanges: function(value) {
@@ -512,6 +454,31 @@ export default {
         );
         this.stringtext = "日次集計 " + this.datejaFormat;
       }
+      // 再取得
+      this.fromdate = ""
+      if (this.valuefromdate) {
+        this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
+      }
+      this.$refs.selectdepartment.getDepartmentList(this.fromdate);
+      this.getUserSelected();
+    },
+    // 雇用形態が変更された場合の処理
+    employmentChanges: function(value) {
+      this.valueemploymentstatus = value;
+      // ユーザー選択コンポーネントの取得メソッドを実行
+      this.getDo = 1;
+      this.getUserSelected();
+    },
+    // 部署選択が変更された場合の処理
+    departmentChanges: function(value) {
+      this.valuedepartment = value;
+      // ユーザー選択コンポーネントの取得メソッドを実行
+      this.getDo = 1;
+      this.getUserSelected();
+    },
+    // ユーザー選択が変更された場合の処理
+    userChanges: function(value) {
+      this.valueuser = value;
     },
     // 集計開始ボタンがクリックされた場合の処理
     searchclick: function(e) {
@@ -532,7 +499,8 @@ export default {
             this.calcresults = this.resresults.calcresults;
             this.sumresults = this.resresults.sumresults;
             this.dispmessage(this.resresults.massegedata);
-            console.log("集計時間取得4" + Object.keys(this.resresults).length);
+            this.messagedatasserver.length = 0;
+            this.$forceUpdate();
             console.log("sumresults" + Object.keys(this.sumresults).length);
           })
           .catch(reason => {
@@ -540,11 +508,51 @@ export default {
           });
       }
     },
+
+    // ----------------- 共通メソッド ----------------------------------
+
+    // ユーザー選択コンポーネント取得メソッド
+    getUserSelected: function() {
+      this.fromdate = ""
+      if (this.valuefromdate) {
+        this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
+      }
+      if (this.valueemploymentstatus == "") {
+        if (this.valuedepartment == "") {
+          this.$refs.selectuser.getUserList(this.getDo, this.fromdate);
+        } else {
+          this.$refs.selectuser.getUserListByDepartment(
+            this.getDo,
+            this.valuedepartment,
+            this.fromdate
+          );
+        }
+      } else {
+        if (this.valuedepartment == "") {
+          this.$refs.selectuser.getUserListByEmployment(
+            this.getDo,
+            this.valueemploymentstatus,
+            this.fromdate
+          );
+        } else {
+          this.$refs.selectuser.getUserListByDepartmentEmployment(
+            this.getDo,
+            this.valuedepartment,
+            this.valueemploymentstatus,
+            this.fromdate
+          );
+        }
+      }
+    },
     // メッセージ処理
     dispmessage: function(items) {
       items.forEach(function(value) {
         this.messagedatasserver.push(value);
       });
+    },
+    // メッセージ処理
+    dispmessagevalue: function(value) {
+      this.messagedatasserver.push(value);
     },
     // メッセージ処理
     dispmessage1: function(items) {

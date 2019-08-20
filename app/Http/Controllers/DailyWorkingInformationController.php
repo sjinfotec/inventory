@@ -71,13 +71,13 @@ class DailyWorkingInformationController extends Controller
         if(isset($request->dateto)){
             $dateto = $request->dateto;
         }
-        $employment_status = null;
+        $employmentstatus = null;
         if(isset($request->employmentstatus)){
-            $employment_status = $request->employmentstatus;
+            $employmentstatus = $request->employmentstatus;
         }
-        $Departmentcode = null;
+        $departmentcode = null;
         if(isset($request->departmentcode)){
-            $Departmentcode =$request->departmentcode;
+            $departmentcode =$request->departmentcode;
         }
         $usercode = null;
         if(isset($request->usercode)){
@@ -89,8 +89,8 @@ class DailyWorkingInformationController extends Controller
         $work_time = new WorkTime();
         $work_time->setParamDatefromAttribute($datefrom);
         $work_time->setParamDatetoAttribute($dateto);
-        $work_time->setParamemploymentstatusAttribute($employment_status);
-        $work_time->setParamDepartmentcodeAttribute($Departmentcode);
+        $work_time->setParamemploymentstatusAttribute($employmentstatus);
+        $work_time->setParamDepartmentcodeAttribute($departmentcode);
         $work_time->setParamUsercodeAttribute($usercode);
         // パラメータのチェック
         $chk_result = $work_time->chkWorkingTimeData();
@@ -100,7 +100,8 @@ class DailyWorkingInformationController extends Controller
             // シフト打刻を取得するために$datetoの翌日をParamDatetoを再設定
             $nextdt =$apicommon->getNextDay($dateto, 'Y/m/d');
             $work_time->setParamDatetoAttribute($nextdt);
-            $work_time_result = $work_time->getWorkTimes();
+            // 終了日付で検索（最新の情報として）
+            $work_time_result = $work_time->getWorkTimes($dateto);
             if(isset($work_time_result)){
                 $temp_calc_model = new TempCalcWorkingTime();
                 try{
@@ -117,8 +118,8 @@ class DailyWorkingInformationController extends Controller
                             $timetable_model = new WorkingTimeTable();
                             $timetable_model->setParamdatefromAttribute($datefrom);
                             $timetable_model->setParamdatetoAttribute($dateto);
-                            $timetable_model->setParamemploymentstatusAttribute($employment_status);
-                            $timetable_model->setParamDepartmentcodeAttribute($Departmentcode);
+                            $timetable_model->setParamemploymentstatusAttribute($employmentstatus);
+                            $timetable_model->setParamDepartmentcodeAttribute($departmentcode);
                             $timetables = $timetable_model->getWorkingTimeTableJoin();
                             if (isset($timetables)) {
                                 // 日次集計
@@ -169,19 +170,19 @@ class DailyWorkingInformationController extends Controller
         if ($add_result) {
             $temp_working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
             $temp_working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
-            $temp_working_model->setParamEmploymentStatusAttribute($employment_status);
-            $temp_working_model->setParamDepartmentcodeAttribute($Departmentcode);
+            $temp_working_model->setParamEmploymentStatusAttribute($employmentstatus);
+            $temp_working_model->setParamDepartmentcodeAttribute($departmentcode);
             $temp_working_model->setParamUsercodeAttribute($usercode);
             try{
                 Log::debug('getTempWorkingTimeDateUserJoin ');
-                $temp_working_time_dates = $temp_working_model->getTempWorkingTimeDateUserJoin();
+                $temp_working_time_dates = $temp_working_model->getTempWorkingTimeDateUserJoin($dateto);
                 if (isset($temp_working_time_dates)) {
                     Log::debug('isset $temp_working_time_dates true ');
                     $working_model = new WorkingTimedate();
                     $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
                     $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
-                    $working_model->setParamEmploymentStatusAttribute($employment_status);
-                    $working_model->setParamDepartmentcodeAttribute($Departmentcode);
+                    $working_model->setParamEmploymentStatusAttribute($employmentstatus);
+                    $working_model->setParamDepartmentcodeAttribute($departmentcode);
                     $working_model->setParamUsercodeAttribute($usercode);
                     try{
                         DB::beginTransaction();
@@ -197,7 +198,7 @@ class DailyWorkingInformationController extends Controller
                             $temp_array[] = $temp_collect->toArray();
                         } 
                         $working_model->insertWorkingTimeDateFromTemp($temp_array);
-                        $working_time_dates = $working_model->getWorkingTimeDateTimeFormat();
+                        $working_time_dates = $working_model->getWorkingTimeDateTimeFormat(Config::get('const.WORKINGTIME_ORDERBY.daily_basic'));
                         $working_time_sum = $working_model->getWorkingTimeDateTimeSum();
                         DB::commit();
                         Log::debug(' calc commit ');
@@ -2212,15 +2213,15 @@ class DailyWorkingInformationController extends Controller
         $leaving_time = '';
         $missing_middle_time = '';
         $missing_middle_return_time = '';
-        $working_status = '';
+        $working_status = 0;
         $array_working_time_kubun = array(Config::get('const.C004.regular_working_time'),
-            '',
+            Config::get('const.C004.regular_working_breaks_time'),
             Config::get('const.C004.out_of_regular_working_time'),
             Config::get('const.C004.out_of_regular_night_working_time'),
             Config::get('const.C004.statutory_working_time'),
             Config::get('const.C004.out_of_statutory_working_time'),
             Config::get('const.C004.out_of_statutory_night_working_time'),
-            ''
+            Config::get('const.C004.working_breaks_time')
         );
         // 出勤・退勤の労働時間数配列
         $array_calc_time = array();
@@ -2268,10 +2269,12 @@ class DailyWorkingInformationController extends Controller
                 if ($result->to_be_confirmed == '1') {$to_be_confirmed = '1';}
                 $working_timetable_no = $result->working_timetable_no;
                 $dtNow = new Carbon();
-                Log::DEBUG('$result->record_datetime < $dtNow '.$result->record_datetime.' '.$dtNow);
+                Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$result->record_datetime);
+                Log::DEBUG('当日分　勤務状態 現在時刻 =  '.$dtNow);
                 if ($result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
                     $working_status = $result->working_status;
                 }
+                Log::DEBUG('当日分　勤務状態 =  '.$working_status);
         
                 // 労働時間の計算
                 Log::DEBUG('当日分　$result->current_calc =  '.$result->current_calc);
@@ -2290,7 +2293,8 @@ class DailyWorkingInformationController extends Controller
                     if ($missing_middle_time <> '' && $missing_middle_return_time <> ''){
                         Log::DEBUG('count($array_working_time_kubun) =  '.count($array_working_time_kubun));
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            if ($array_working_time_kubun[$i] <> '') {
+                            if (($array_working_time_kubun[$i] <> Config::get('const.C004.regular_working_breaks_time')) &&
+                                ($array_working_time_kubun[$i] <> Config::get('const.C004.working_breaks_time')))  {
                                 $array_missing_middle_time[$i] += 
                                     $this->calcTimes(Config::get('const.INC_NO.missing_return'),
                                         $timetables,
@@ -2320,7 +2324,8 @@ class DailyWorkingInformationController extends Controller
                         $array_add_leaving_time[] = $leaving_time;
                         $index = (int)(Config::get('const.C004.regular_working_time'))-1;
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            if ($array_working_time_kubun[$i] <> '') {
+                            if (($array_working_time_kubun[$i] <> Config::get('const.C004.regular_working_breaks_time')) &&
+                                ($array_working_time_kubun[$i] <> Config::get('const.C004.working_breaks_time')))  {
                                 $array_calc_time[$i] += 
                                     $this->calcTimes(Config::get('const.INC_NO.attendace_leaving'),
                                         $timetables,
@@ -2336,6 +2341,16 @@ class DailyWorkingInformationController extends Controller
                                 Log::DEBUG('退勤データ　array_calc_time[$i] =  '.$array_calc_time[$i]);
                                 Log::DEBUG('退勤データ　attendance_time =  '.$attendance_time);
                                 Log::DEBUG('退勤データ　leaving_time =  '.$leaving_time);
+                            } else {
+                                // 休憩時間を別途計算する
+                                $this->not_employment_working += 
+                                    $this->calcBreakTimes(
+                                        $timetables,
+                                        $working_timetable_no,
+                                        $array_working_time_kubun[$i],
+                                        $current_date,
+                                        $attendance_time,
+                                        $leaving_time);
                             }
                         }
                         // 出勤退勤時刻を初期化して次の計算準備
@@ -2348,7 +2363,15 @@ class DailyWorkingInformationController extends Controller
                 // 日付が変わった場合
                 Log::DEBUG('date break ');
                 try{
-                    // ユーザー労働時間登録(１個前のユーザーを登録する)
+                    if ($working_status == 0) {
+                        Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
+                        Log::DEBUG('当日分　勤務状態 現在時刻 =  '.$dtNow);
+                        if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
+                            $working_status = $before_result->working_status;
+                        }
+                        Log::DEBUG('当日分　勤務状態 =  '.$working_status);
+                    }
+                        // ユーザー労働時間登録(１個前のユーザーを登録する)
                     $add_result = $this->addTempWorkingTimeDate(
                         $before_date,
                         $before_user_code,
@@ -2386,7 +2409,7 @@ class DailyWorkingInformationController extends Controller
                         if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
                             $array_add_attendance_time[] = $attendance_time;
                         }
-                        if ($leaving_time <> ''){
+                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                             $array_add_leaving_time[] = $leaving_time;
                         }
                     }
@@ -2394,6 +2417,7 @@ class DailyWorkingInformationController extends Controller
                     $before_date = $current_date;
                     $before_result = $result;
                     $this->not_employment_working = 0;
+                    $working_status = 0;
                 }catch(\PDOException $pe){
                     $add_result = false;
                     throw $pe;
@@ -2405,6 +2429,14 @@ class DailyWorkingInformationController extends Controller
                 // 部署が変わった場合
                 Log::DEBUG('department break ');
                 try{
+                    if ($working_status == 0) {
+                        Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
+                        Log::DEBUG('当日分　勤務状態 現在時刻 =  '.$dtNow);
+                        if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
+                            $working_status = $before_result->working_status;
+                        }
+                        Log::DEBUG('当日分　勤務状態 =  '.$working_status);
+                    }
                     // ユーザー労働時間登録(１個前のユーザーを登録する)
                     $add_result = $this->addTempWorkingTimeDate(
                         $before_date,
@@ -2443,7 +2475,7 @@ class DailyWorkingInformationController extends Controller
                         if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
                             $array_add_attendance_time[] = $attendance_time;
                         }
-                        if ($leaving_time <> ''){
+                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                             $array_add_leaving_time[] = $leaving_time;
                         }
                     }
@@ -2453,6 +2485,7 @@ class DailyWorkingInformationController extends Controller
                     $before_department_code = $current_department_code;
                     $before_result = $result;
                     $this->not_employment_working = 0;
+                    $working_status = 0;
                 }catch(\PDOException $pe){
                     $add_result = false;
                     throw $pe;
@@ -2469,6 +2502,14 @@ class DailyWorkingInformationController extends Controller
                 Log::DEBUG('calcTempWorkingTimeDate $result->working_timetable_from_time  '.$result->working_timetable_from_time);
                 Log::DEBUG('calcTempWorkingTimeDate $result->working_timetable_to_time  '.$result->working_timetable_to_time);
                 try{
+                    if ($working_status == 0) {
+                        Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
+                        Log::DEBUG('当日分　勤務状態 現在時刻 =  '.$dtNow);
+                        if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
+                            $working_status = $before_result->working_status;
+                        }
+                        Log::DEBUG('当日分　勤務状態 =  '.$working_status);
+                    }
                     // ユーザー労働時間登録(１個前のユーザーを登録する)
                     $add_result = $this->addTempWorkingTimeDate(
                         $before_date,
@@ -2497,6 +2538,10 @@ class DailyWorkingInformationController extends Controller
                     $array_add_leaving_time = array();
                     $array_add_missing_middle_time = array();
                     $array_add_missing_middle_return_time = array();
+                    Log::DEBUG('calcTempWorkingTimeDate addTempWorkingTimeDate後 $result->current_calc  '.$result->current_calc);
+                    Log::DEBUG('calcTempWorkingTimeDate addTempWorkingTimeDate後 $result->mode  '.$result->mode);
+                    Log::DEBUG('calcTempWorkingTimeDate addTempWorkingTimeDate後 $leaving_time  '.$leaving_time);
+                    Log::DEBUG('calcTempWorkingTimeDate count $array_add_leaving_time  '.count($array_add_leaving_time));
                     if ($result->current_calc == '1') {             // 当日分である場合
                         if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
                             $array_add_missing_middle_time[] = $missing_middle_time;
@@ -2507,10 +2552,11 @@ class DailyWorkingInformationController extends Controller
                         if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
                             $array_add_attendance_time[] = $attendance_time;
                         }
-                        if ($leaving_time <> ''){
+                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                             $array_add_leaving_time[] = $leaving_time;
                         }
                     }
+                    Log::DEBUG('calcTempWorkingTimeDate count $array_add_leaving_time  '.count($array_add_leaving_time));
                     // 日付を同じく設定
                     $before_date = $current_date;
                     // 部署を同じく設定
@@ -2519,6 +2565,7 @@ class DailyWorkingInformationController extends Controller
                     $before_user_code = $current_user_code; 
                     $before_result = $result;
                     $this->not_employment_working = 0;
+                    $working_status = 0;
                 }catch(\PDOException $pe){
                     $add_result = false;
                     throw $pe;
@@ -2531,6 +2578,14 @@ class DailyWorkingInformationController extends Controller
 
         if (count($array_calc_time) > 0) {
             try{
+                if ($working_status == 0) {
+                    Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
+                    Log::DEBUG('当日分　勤務状態 現在時刻 =  '.$dtNow);
+                    if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
+                        $working_status = $before_result->working_status;
+                    }
+                    Log::DEBUG('当日分　勤務状態 =  '.$working_status);
+                }
                 $add_result = $this->addTempWorkingTimeDate(
                     $before_date,
                     $before_user_code,
@@ -2565,12 +2620,21 @@ class DailyWorkingInformationController extends Controller
      * @return 計算結果時間
      */
     private function calcTimes($inc, $timetables, $working_timetable_no, $working_time_kubun, $current_date,$target_from_time, $target_to_time,
-        $array_calc_time、array_missing_middle_time)
+        $array_calc_time, $array_missing_middle_time)
     {
-        Log::DEBUG('---------------------- calcTimes in ------------------------ ');
+        Log::DEBUG('---------------------- calcTimes in working_time_kubun = '.$working_time_kubun.' ------------------------ ');
         $apicommon = new ApiCommonController();
         $working_times = 0;             // 労働時間
+        $calc_times = 0;
+        $calc_times_regular = 0;
 
+        // 時刻だけのデータに日付付与するための基準時刻を法定の出勤時刻とする。
+        $filtered_init = $timetables->where('no', Config::get('const.C999.init_setting_code'))->where('working_time_kubun', 4);
+        if (!isset($filtered_init)) { return $working_times; }
+        foreach($filtered_init as $result_init) {
+            $init_setting_from_time = $result_init->to_time;
+            break;
+        }
         // 労働時間区分の開始終了時刻を取得
         // タイムテーブルをnoとworking_time_kubunで特定
         $filtered = $timetables->where('no', $working_timetable_no)->where('working_time_kubun', $working_time_kubun);
@@ -2582,9 +2646,9 @@ class DailyWorkingInformationController extends Controller
             if (isset($from_time) && isset($to_time)) {
                 // 日付付与
                 // $from_timeが当日は当日+開始時刻、翌日は翌日+開始時刻
-                $working_time_calc_from = $apicommon->convTimeToDate($from_time, $target_from_time, $current_date);         
+                $working_time_calc_from = $apicommon->convTimeToDate($from_time, $init_setting_from_time, $current_date);         
                 // $to_timeが当日は当日+開始時刻、翌日は翌日+開始時刻
-                $working_time_calc_to = $apicommon->convTimeToDate($to_time, $target_from_time, $current_date);         
+                $working_time_calc_to = $apicommon->convTimeToDate($to_time, $working_time_calc_from, $working_time_calc_from);         
                 Log::DEBUG('from_time = '.$from_time);
                 Log::DEBUG('to_time = '.$to_time);
                 Log::DEBUG('current_date = '.$current_date);
@@ -2620,76 +2684,155 @@ class DailyWorkingInformationController extends Controller
                     $w_time = 0;
                     // target_to_timeは退勤時刻
                     Log::DEBUG('$target_to_time = '.$target_to_time);
-                    // ここまでに計算された労働時間と中抜け時間から
-                    // $array_calc_time、array_missing_middle_time
-                    // 休憩とか中抜けとかも考慮しなければ正確な8Hを計算できない
-                    // 退勤時刻 > 深夜残業開始の場合、出勤->深夜残業開始の時間が8Hを超えている場合は深夜残業を計算する
-                    /*if ($attendance_time > Config::get('const.C002.legal_working_hours_day') * 60 * 60) {
-                        // 出勤時刻の8時間後が深夜労働時間帯が含まれる場合
-                        if ($attendance_8after > $working_time_calc_from) {     // 同じ時刻はなし
-                            // 退勤時刻 >= 出勤時刻の8時間後
-                            Log::DEBUG('$target_to_time = '.$target_to_time);
-                            if ($target_to_time >= $attendance_8after) {
-                                Log::DEBUG('$working_time_calc_to = '.$working_time_calc_to);
-                                // 退勤時刻<=深夜残業終了
-                                if ($target_to_time <= $working_time_calc_to) {
-                                    // 退勤時刻-出勤時刻の8時間後を深夜残業とする
-                                    $calc_times = $apicommon->diffTimeSerial($target_to_time, $attendance_8after);
-                                    Log::DEBUG('$calc_times = '.$calc_times);
+                    // 退勤時刻 > 深夜残業開始の場合
+                    Log::DEBUG('$working_time_calc_from = '.$working_time_calc_from);
+                    if ($target_to_time > $working_time_calc_from) {
+                        // ここまでに計算された労働時間と中抜け時間から労働時間を算出
+                        $index = (int)(Config::get('const.C004.regular_working_time'))-1;
+                        $w_time += $array_calc_time[$index];
+                        Log::DEBUG('$w_time $array_calc_time 1 = '.$w_time.'  '.$array_calc_time[$index]);
+                        $index = (int)(Config::get('const.C004.regular_working_breaks_time'))-1;
+                        $w_time -= $array_calc_time[$index];
+                        Log::DEBUG('$w_time $array_calc_time 2 = '.$w_time.'  '.$array_calc_time[$index]);
+                        $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
+                        $w_time += $array_calc_time[$index];
+                        Log::DEBUG('$w_time $array_calc_time 3 = '.$w_time.'  '.$array_calc_time[$index]);
+                        $index = (int)(Config::get('const.C004.regular_working_time'))-1;
+                        $w_time -= $array_missing_middle_time[$index];
+                        Log::DEBUG('$w_time $array_missing_middle_time = '.$w_time.'  '.$array_missing_middle_time[$index]);
+                        $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
+                        $w_time -= $array_missing_middle_time[$index];
+                        Log::DEBUG('$w_time $array_missing_middle_time = '.$w_time.'  '.$array_missing_middle_time[$index]);
+                        Log::DEBUG('legal_working_hours_day = '.(double)Config::get('const.C002.legal_working_hours_day') * 60 * 60);
+                        // ここまでに計算された労働時間が8Hを超えている場合は深夜残業を計算する
+                        if ($w_time > (double)Config::get('const.C002.legal_working_hours_day') * 60 * 60) {
+                            // 退勤時刻<=深夜残業終了
+                            if ($target_to_time <= $working_time_calc_to) {
+                                // 出勤時刻<=深夜残業開始
+                                if ($target_from_time <= $working_time_calc_from) {
+                                    // 深夜残業開始から退勤時刻を深夜残業とする
+                                    $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $target_to_time);
                                 } else {
-                                    // 出勤時刻の8時間後-深夜残業終了を深夜残業とする
-                                    $calc_times = $apicommon->diffTimeSerial($attendance_8after, $working_time_calc_to);
-                                    Log::DEBUG('$calc_times = '.$calc_times);
+                                    // 出勤時刻から退勤時刻を深夜残業とする
+                                    $calc_times = $apicommon->diffTimeSerial($target_from_time, $target_to_time);
                                 }
-                                $working_times += $calc_times;
-                                Log::DEBUG('$working_times = '.$working_times);
+                            } else {
+                                // 出勤時刻<=深夜残業開始
+                                if ($target_from_time <= $working_time_calc_from) {
+                                    // 深夜残業開始から深夜残業終了を深夜残業とする
+                                    $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
+                                } else {
+                                    // 出勤時刻から深夜残業終了を深夜残業とする
+                                    $calc_times = $apicommon->diffTimeSerial($target_from_time, $working_time_calc_to);
+                                }
                             }
+                            Log::DEBUG('$calc_times = '.$calc_times);
+                            $working_times += $calc_times;
+                            Log::DEBUG('$working_times = '.$working_times);
                         }
-                    } */
+                        // さらにシフト勤務などは所定労働時間と重複する時間となりうるので、重複時間があれば減算する。
+                        $filtered_regular = 
+                            $timetables->where('no', $working_timetable_no)->where('working_time_kubun', Config::get('const.C004.regular_working_time'));
+                        foreach($filtered_regular as $result_regular) {
+                            Log::DEBUG('重複時間 $result_regular->from_time = '.$result_regular->from_time);
+                            Log::DEBUG('重複時間 $result_regular->to_time = '.$result_regular->to_time);
+                            // 所定労働時間登録の開始時間
+                            $from_time_regular = $result_regular->from_time;
+                            // 所定労働時間登録の終了時間
+                            $to_time_regular = $result_regular->to_time;
+                            if (isset($from_time_regular) && isset($to_time_regular)) {
+                                // 日付付与
+                                // $from_timeが当日は当日+開始時刻、翌日は翌日+開始時刻
+                                $working_time_calc_from_regular = $apicommon->convTimeToDate($from_time_regular, $init_setting_from_time, $current_date);         
+                                // $to_timeが当日は当日+開始時刻、翌日は翌日+開始時刻
+                                $working_time_calc_to_regular = $apicommon->convTimeToDate($to_time_regular, $working_time_calc_from_regular, $working_time_calc_from_regular);
+                                Log::DEBUG('重複時間 所定労働時間 $init_setting_from_time = '.$init_setting_from_time);
+                                Log::DEBUG('重複時間 所定労働時間 $working_time_calc_from_regular = '.$working_time_calc_from_regular);
+                                Log::DEBUG('重複時間 所定労働時間 $working_time_calc_to_regular = '.$working_time_calc_to_regular);
+                                Log::DEBUG('重複時間 所定労働時間 $working_time_calc_from = '.$working_time_calc_from);
+                                Log::DEBUG('重複時間 所定労働時間 $working_time_calc_to = '.$working_time_calc_to);
+                                if (($working_time_calc_from > $working_time_calc_from_regular && $working_time_calc_from < $working_time_calc_to_regular) ||
+                                    ($working_time_calc_to > $working_time_calc_from_regular && $working_time_calc_to < $working_time_calc_to_regular)) {
+                                    // 時間登録の終了時間<=所定労働時間登録終了
+                                    if ($working_time_calc_to <= $working_time_calc_to_regular) {
+                                        // 所定労働時間登録開始<= 時間登録の開始時間
+                                        if ($working_time_calc_from_regular <= $working_time_calc_from) {
+                                            // 時間登録の開始時間から時間登録の終了時間を計算する
+                                            $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
+                                        } else {
+                                            // 所定労働時間登録開始から時間登録の終了を計算する
+                                            $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from_regular, $working_time_calc_to);
+                                        }
+                                    } else {
+                                        // 所定労働時間登録開始<=時間登録の開始時間
+                                        if ($working_time_calc_from_regular <= $working_time_calc_from) {
+                                            // 時間登録の開始時間から所定労働時間登録終了を計算する
+                                            $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to_regular);
+                                        } else {
+                                            // 所定労働時間登録開始から所定労働時間登録終了を計算する
+                                            $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from_regular, $working_time_calc_to_regular);
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        }       
+                        Log::DEBUG('$calc_times_regular = '.$calc_times_regular);
+                        $working_times -= $calc_times_regular;
+                        Log::DEBUG('$working_times = '.$working_times);
+                    }
                 }
                 // 休憩時間を含んでいる場合、休憩時間累計（所定労働時間内の休憩時間を累計することになる）
-                $filtered = $timetables->where('no', $working_timetable_no)
-                    ->where('working_time_kubun', Config::get('const.C004.regular_working_breaks_time'));
-                // 休憩時間帯は複数あるかも
-                if ($this->not_employment_working == 0) {
+                if ($working_times != 0) {
+                    // 休憩時間を含んでいる場合、休憩時間累計を求めて減算する
+                    $filtered = $timetables->where('no', $working_timetable_no)
+                        ->where('working_time_kubun', Config::get('const.C004.regular_working_breaks_time'));
+                    // 休憩時間帯は複数あるかも
                     foreach($filtered as $result_breaks_time) {
-                        $from_time = $result_breaks_time->from_time;
-                        $to_time = $result_breaks_time->to_time;
+                        $from_time = $result_breaks_time->from_time;        // 休憩開始時刻
+                        $to_time = $result_breaks_time->to_time;            // 休憩終了時刻
                         Log::DEBUG('休憩時間 from_time = '.$from_time);
                         Log::DEBUG('休憩時間 to_time = '.$to_time);
                         if (isset($from_time) && isset($to_time)) {
-                            $dt = new Carbon($working_time_calc_from);
-                            $dttime1 = date_format($dt, 'H:i:s');
-                            Log::DEBUG('休憩時間 dttime1 = '.$dttime1);
                             // $from_timeが当日は当日+開始時刻、翌日は翌日+開始時刻
                             $dt = new Carbon($from_time);
-                            $dttime2 = date_format($dt, 'H:i:s');
-                            Log::DEBUG('休憩時間 dttime2 = '.$dttime2);
-                            $time_calc_from = $apicommon->convTimeToDate($dttime2, $dttime1, $current_date);         
+                            $dttime1 = date_format($dt, 'H:i:s');
                             // $to_timeが当日は当日+開始時刻、翌日は翌日+開始時刻
                             $dt = new Carbon($to_time);
                             $dttime2 = date_format($dt, 'H:i:s');
+                            Log::DEBUG('休憩時間 init_setting_from_time = '.$init_setting_from_time);
+                            Log::DEBUG('休憩時間 dttime1 = '.$dttime1);
                             Log::DEBUG('休憩時間 dttime2 = '.$dttime2);
-                            $time_calc_to = $apicommon->convTimeToDate($dttime2, $dttime1, $current_date);         
+                            // 休憩開始日時
+                            $time_calc_from = $apicommon->convTimeToDate($dttime1, $init_setting_from_time, $current_date);         
+                            // 休憩終了日時
+                            $time_calc_to = $apicommon->convTimeToDate($dttime2, $time_calc_from, $time_calc_from);         
                             Log::DEBUG('休憩時間 time_calc_from = '.$time_calc_from);
                             Log::DEBUG('休憩時間 time_calc_to = '.$time_calc_to);
+                            Log::DEBUG('休憩時間 working_time_calc_from = '.$working_time_calc_from);
+                            Log::DEBUG('休憩時間 working_time_calc_to = '.$working_time_calc_to);
                             Log::DEBUG('休憩時間 target_from_time = '.$target_from_time);
                             Log::DEBUG('休憩時間 target_to_time = '.$target_to_time);
-                            if ($time_calc_from >= $target_from_time && $time_calc_to <= $target_to_time) {
-                                if ($target_from_time > $time_calc_from) {
-                                    $time_calc_from = $target_from_time;
-                                }
-                                if ($target_to_time < $time_calc_to) {
-                                    $time_calc_to = $target_to_time;
-                                }
-                                Log::DEBUG('time_calc_from = '.$time_calc_from);
-                                Log::DEBUG('time_calc_to = '.$time_calc_to);
-                                if ($time_calc_from < $time_calc_to) {
-                                    $calc_times = $apicommon->diffTimeSerial($time_calc_from, $time_calc_to);
-                                    Log::DEBUG('休憩時間 calc_times = '.$calc_times);
-                                    $working_times -= $calc_times;
-                                    Log::DEBUG('休憩時間 $working_times = '.$working_times);
-                                    $this->not_employment_working += $calc_times;
+                            //  計算対象のタイムテーブルの開始終了日時の範囲内に休憩開始終了時刻がある場合で
+                            if (($time_calc_from > $working_time_calc_from && $time_calc_from < $working_time_calc_to) ||
+                                ($time_calc_to > $working_time_calc_from && $time_calc_to < $working_time_calc_to)) {
+                                //  出退勤時間の範囲内に休憩開始終了時刻がある場合に計算する
+                                if (($time_calc_from > $target_from_time && $time_calc_from < $target_to_time) ||
+                                    ($time_calc_to > $target_from_time && $time_calc_to < $target_to_time)) {
+                                    if ($target_from_time > $time_calc_from) {
+                                        $time_calc_from = $target_from_time;
+                                    }
+                                    if ($target_to_time < $time_calc_to) {
+                                        $time_calc_to = $target_to_time;
+                                    }
+                                    Log::DEBUG('time_calc_from = '.$time_calc_from);
+                                    Log::DEBUG('time_calc_to = '.$time_calc_to);
+                                    if ($time_calc_from < $time_calc_to) {
+                                        $calc_times = $apicommon->diffTimeSerial($time_calc_from, $time_calc_to);
+                                        Log::DEBUG('休憩時間 calc_times = '.$calc_times);
+                                        $working_times -= $calc_times;
+                                        Log::DEBUG('休憩時間 $working_times = '.$working_times);
+                                    }
                                 }
                             }
                         }
@@ -2698,8 +2841,81 @@ class DailyWorkingInformationController extends Controller
             }
         }
         Log::DEBUG('calcTimes end '.$working_times);
-        Log::DEBUG('休憩時間 not_employment_working = '.$this->not_employment_working);
         Log::DEBUG('---------------------- calcTimes end ------------------------ ');
+
+        return $working_times;
+    }
+
+    /**
+     * 休憩時間合計計算（未就労時間）
+     *
+     *
+     * @param  $attendance_time ： 開始時刻（出勤）
+     * @param  $leaving_time    ： 終了時刻（退勤）
+     * @return 計算結果時間
+     */
+    private function calcBreakTimes($timetables, $working_timetable_no, $working_time_kubun, $current_date, $attendance_time, $leaving_time)
+    {
+        Log::DEBUG('---------------------- calcBreakTimes in working_time_kubun = '.$working_time_kubun.' ------------------------ ');
+        $apicommon = new ApiCommonController();
+        $working_times = 0;             // 休憩時間合計時間
+
+        // 時刻だけのデータに日付付与するための基準時刻を法定の出勤時刻とする。
+        $filtered_init = $timetables->where('no', Config::get('const.C999.init_setting_code'))->where('working_time_kubun', 4);
+        if (!isset($filtered_init)) { return $working_times; }
+        foreach($filtered_init as $result_init) {
+            $init_setting_from_time = $result_init->to_time;
+            break;
+        }
+
+        // 労働時間区分の開始終了時刻を取得
+        // タイムテーブルをnoとworking_time_kubunで特定
+        $filtered = $timetables->where('no', $working_timetable_no)->where('working_time_kubun', $working_time_kubun);
+        foreach($filtered as $result_time) {
+            // 時間登録の開始時間
+            $from_time = $result_time->from_time;
+            // 時間登録の終了時間
+            $to_time = $result_time->to_time;
+            if (isset($from_time) && isset($to_time)) {
+                // 日付付与
+                // $from_timeが当日は当日+開始時刻、翌日は翌日+開始時刻
+                $working_time_calc_from = $apicommon->convTimeToDate($from_time, $init_setting_from_time, $current_date);         
+                // $to_timeが当日は当日+開始時刻、翌日は翌日+開始時刻
+                $working_time_calc_to = $apicommon->convTimeToDate($to_time, $working_time_calc_from, $working_time_calc_from);         
+                Log::DEBUG('from_time = '.$from_time);
+                Log::DEBUG('to_time = '.$to_time);
+                Log::DEBUG('current_date = '.$current_date);
+                Log::DEBUG('attendance_time = '.$attendance_time);
+                Log::DEBUG('leaving_time = '.$leaving_time);
+                Log::DEBUG('working_time_calc_from = '.$working_time_calc_from);
+                Log::DEBUG('working_time_calc_to = '.$working_time_calc_to);
+                // 出退勤の範囲内であれば計算
+                if (($working_time_calc_from > $attendance_time && $working_time_calc_from < $leaving_time) ||
+                    ($working_time_calc_to > $attendance_time && $working_time_calc_to < $leaving_time)) {
+                    if ($attendance_time > $working_time_calc_from) {
+                        $working_time_calc_from = $attendance_time;
+                        Log::DEBUG('working_time_calc_from if then= '.$working_time_calc_from);
+                    }
+                    if ($leaving_time < $working_time_calc_to) {
+                        $working_time_calc_to = $leaving_time;
+                        Log::DEBUG('working_time_calc_to if then= '.$working_time_calc_to);
+                    }
+                    Log::DEBUG('working_time_kubun = '.$working_time_kubun);
+                    Log::DEBUG('attendance_time = '.$attendance_time);
+                    Log::DEBUG('leaving_time = '.$leaving_time);
+                    Log::DEBUG('working_time_calc_from = '.$working_time_calc_from);
+                    Log::DEBUG('working_time_calc_to = '.$working_time_calc_to);
+                    if ($working_time_calc_from < $working_time_calc_to) {
+                        $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
+                        Log::DEBUG('calc_times = '.$calc_times);
+                        $working_times += $calc_times;
+                        Log::DEBUG('$working_times = '.$working_times);
+                    }
+                }
+            }
+        }
+        Log::DEBUG('calcBreakTimes end '.$working_times);
+        Log::DEBUG('---------------------- calcBreakTimes end '.$working_times.'------------------------ ');
 
         return $working_times;
     }

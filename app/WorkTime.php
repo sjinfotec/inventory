@@ -6,11 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
+use App\Http\Controllers\ApiCommonController;
+use Carbon\Carbon;
 
 class WorkTime extends Model
 {
     protected $table = 'work_times';
     protected $table_users = 'users';
+    protected $table_departments = 'departments';
     protected $table_shift_informations = 'shift_informations';
     // protected $guarded = array('id');
 
@@ -339,15 +342,15 @@ class WorkTime extends Model
             if($chkDateFrom <= $chkDateTo){
                 $this->setArrayrecordtimeAttribute($chkDateFrom, $chkDateTo);
             } else {
-                $this->massegedata = array_add(['msg' -> Config::get('const.MSG_ERROR.not_between_workindate')]);
+                array_add($this->massegedata, 'msg', Config::get('const.MSG_ERROR.not_between_workindate'));
                 $result = false;
             }
         } else {
-            $this->massegedata = array_add(['msg' -> Config::get('const.MSG_ERROR.not_input_workindatefromto')]);
+            array_add($this->massegedata, 'msg', Config::get('const.MSG_ERROR.not_input_workindatefromto'));
             $result = false;
         }
 
-        return true;
+        return $result;
 
     }
 
@@ -370,8 +373,7 @@ class WorkTime extends Model
      *
      * @return sql取得結果
      */
-    public function getWorkTimes(){
-
+    public function getWorkTimes($targetdate){
 
         // 日次労働時間取得SQL作成
         // subquery1    work_times
@@ -400,11 +402,19 @@ class WorkTime extends Model
         $subquery2 = DB::table($this->table_shift_informations)
             ->select(
                 $this->table_shift_informations.'.user_code as user_code',
+                $this->table_shift_informations.'.department_code as department_code',
                 $this->table_shift_informations.'.working_timetable_no as shift_no',
                 $this->table_shift_informations.'.is_deleted as is_deleted'
                 )
             ->selectRaw('DATE_FORMAT('.$this->table_shift_informations.'.target_date'.",'%Y%m%d') as target_date");
         $subquery2->where($this->table_shift_informations.'.is_deleted', '=', 0);
+
+        // 適用期間日付の取得
+        $apicommon = new ApiCommonController();
+        // usersの最大適用開始日付subquery
+        $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate);
+        // departmentsの最大適用開始日付subquery
+        $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
 
         // mainqueryにsunqueryを組み込む
         // mainquery    users
@@ -458,8 +468,12 @@ class WorkTime extends Model
             })
             ->leftJoinSub($subquery2, 't9', function ($join) { 
                 $join->on('t9.user_code', '=', 't1.code');
+                $join->on('t9.department_code', '=', 't1.department_code');
                 $join->on('t9.target_date', '=', 't2.record_date')
                 ->where('t9.is_deleted', '=', 0);
+            })
+            ->leftJoinSub($subquery4, 't5', function ($join) { 
+                $join->on('t5.code', '=', 't1.department_code');
             })
             ->leftJoin('calendars as t3', function ($join) { 
                 $join->on('t3.date', '=', 't2.record_date')
@@ -469,10 +483,6 @@ class WorkTime extends Model
                 $join->on('t4.year', '=', 't2.record_year');
                 $join->on('t4.fiscal_month', '=', 't2.record_month')
                 ->where('t4.is_deleted', '=', 0);
-            })
-            ->leftJoin('departments as t5', function ($join) { 
-                $join->on('t5.code', '=', 't1.department_code')
-                ->where('t5.is_deleted', '=', 0);
             })
             ->leftJoin('working_timetables as t6', function ($join) { 
                 $join->on('t6.no', '=', 't1.working_timetable_no')
@@ -514,9 +524,13 @@ class WorkTime extends Model
             $mainquery->where('t1.department_code', $this->param_department_code);      //department_code指定
         }
         if(!empty($this->param_user_code)){
-            $mainquery->where('t1.code', $this->param_user_code);                   //user_code指定
+            $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
         }
         $result = $mainquery
+            ->JoinSub($subquery3, 't14', function ($join) { 
+                $join->on('t14.code', '=', 't1.code');
+                $join->on('t14.max_apply_term_from', '=', 't1.apply_term_from');
+            })
             ->where('t1.is_deleted', '=', 0)
             ->orderBy('t1.department_code', 'asc')
             ->orderBy('t1.employment_status', 'asc')

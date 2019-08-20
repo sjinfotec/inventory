@@ -28,7 +28,7 @@ class WorkingTimedate extends Model
 
     private $working_date;                  // 日付
     private $employment_status;             // 雇用形態
-    private $department_code;                 // 部署ID
+    private $department_code;               // 部署ID
     private $user_code;                     // ユーザー
     private $employment_status_name;        // 雇用形態名称
     private $department_name;               // 部署名称
@@ -799,6 +799,53 @@ class WorkingTimedate extends Model
 
     // --------------------- メソッド ------------------------------------------------------
 
+    /**
+     * 日次労働時間取得事前チェック
+     *
+     *      指定したユーザー、部署、日付範囲内の労働時間計算のもとデータを取得するSQL
+     *
+     *      INPUT：
+     *          ①テーブル：departments　指定部署内 and 削除=0
+     *          ②テーブル：users　      指定ユーザー内 and 削除=0
+     *          ③テーブル：work_times　 ユーザーand日付範囲内 and 削除=0
+     *          ④①と②と③の結合          ①.ユーザー = ②.ユーザー and ②.ユーザー = ③.ユーザー
+     *
+     *      チェック方法：
+     *          ①日付範囲指定必須チェック
+     *          ②user_code範囲指定プロパティを事前設定（未設定有効）
+     *          ③日付範囲指定プロパティを事前設定（未設定無効）
+     *          ④メソッド：calcWorkingTimeDateを実行
+     *s
+     * @return sql取得結果
+     */
+    public function chkWorkingTimeData() {
+        Log::debug('chkWorkingTimeData in'.$this->param_date_from);
+        Log::debug('chkWorkingTimeData in'.$this->param_date_to);
+
+        $this->massegedata = array();
+        $result = true;
+
+        // 日付範囲指定必須チェック
+        if(isset($this->param_date_from) && isset($this->param_date_to)) {
+            // 日付範囲指定比較チェック
+            $chkDateFrom = $this->getParamDatefromAttribute();
+            $chkDateTo = $this->getParamDatetoAttribute();
+            if($chkDateFrom <= $chkDateTo){
+                $this->setArrayrecordtimeAttribute($chkDateFrom, $chkDateTo);
+            } else {
+                array_add($this->massegedata, 'msg', Config::get('const.MSG_ERROR.not_between_workindate'));
+                $result = false;
+            }
+        } else {
+            array_add($this->massegedata, 'msg', Config::get('const.MSG_ERROR.not_input_workindatefromto'));
+            $result = false;
+        }
+        Log::debug('chkWorkingTimeData end $result = '.$result);
+
+        return $result;
+
+    }
+
 
     /**
      * 日次労働時間取得
@@ -941,7 +988,7 @@ class WorkingTimedate extends Model
      *
      * @return sql取得結果
      */
-    public function getWorkingTimeDateTimeFormat(){
+    public function getWorkingTimeDateTimeFormat($orderbykbn){
 
 
         // 日次労働時間取得SQL作成
@@ -1053,12 +1100,21 @@ class WorkingTimedate extends Model
 
             $mainquery = $this->setWhereSql($mainquery);
 
-            $result = $mainquery
-                ->orderBy($this->table.'.working_date', 'asc')
-                ->orderBy($this->table.'.employment_status', 'asc')
-                ->orderBy($this->table.'.department_code', 'asc')
-                ->orderBy($this->table.'.user_code', 'asc')
-                ->get();
+            if ($orderbykbn == Config::get('const.WORKINGTIME_ORDERBY.daily_basic')) {
+                $result = $mainquery
+                    ->orderBy($this->table.'.working_date', 'asc')
+                    ->orderBy($this->table.'.employment_status', 'asc')
+                    ->orderBy($this->table.'.department_code', 'asc')
+                    ->orderBy($this->table.'.user_code', 'asc')
+                    ->get();
+            } elseif ($orderbykbn == Config::get('const.WORKINGTIME_ORDERBY.monthly_basic')) {
+                $result = $mainquery
+                    ->orderBy($this->table.'.department_code', 'asc')
+                    ->orderBy($this->table.'.employment_status', 'asc')
+                    ->orderBy($this->table.'.user_code', 'asc')
+                    ->orderBy($this->table.'.working_date', 'asc')
+                    ->get();
+            }
             
         }catch(\PDOException $pe){
             Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
@@ -1081,7 +1137,7 @@ class WorkingTimedate extends Model
     }
 
     /**
-     * 日次労働時間合計取得
+     * 日時労働時間合計取得
      *
      *      指定したユーザー、日付範囲内の労働時間計算のもとデータを取得するSQL
      *
@@ -1095,12 +1151,50 @@ class WorkingTimedate extends Model
     public function getWorkingTimeDateTimeSum(){
 
 
-        // 日次労働時間合計取得SQL作成
-        \DB::enableQueryLog();
+        // 日時労働時間合計取得SQL作成
         try{
             $case_where = "CASE ifnull({0},0) WHEN 0 THEN '00:00' ";
             $case_where .= "ELSE CONCAT(CONCAT(LPAD(TRUNCATE({0}, 0), 2, '0'),':'),LPAD(TRUNCATE((mod({0} * 100, 100) * 60) / 100, 0) , 2, '0')) ";
             $case_where .= ' END as {1}';
+
+            $case_working_status = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
+            $case_working_status .= "WHEN {1} THEN 1 ";
+            $case_working_status .= "WHEN {2} THEN 1 ";
+            $case_working_status .= "WHEN {3} THEN 1 ";
+            $case_working_status .= "ELSE 0 ";
+            $case_working_status .= ' END';
+
+            $case_go_out = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
+            $case_go_out .= "WHEN {1} THEN 1 ";
+            $case_go_out .= "ELSE 0 ";
+            $case_go_out .= ' END';
+
+            $case_holiday_kubun = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
+            $case_holiday_kubun .= "WHEN {1} THEN 0 ";
+            $case_holiday_kubun .= "WHEN {2} THEN 0 ";
+            $case_holiday_kubun .= "WHEN {3} THEN 0 ";
+            $case_holiday_kubun .= "ELSE ";
+            $case_holiday_kubun .= "  CASE ifnull({4},0) WHEN 0 THEN 0 ";
+            $case_holiday_kubun .= "  WHEN {4} >= {5} and {4} <= {6} THEN 1 ";
+            $case_holiday_kubun .= "ELSE 0 ";
+            $case_holiday_kubun .= ' END ';
+            $case_holiday_kubun .= 'END';
+
+            $str_replace_working_status0 =str_replace('{0}', 'working_status', $case_working_status);
+            $str_replace_working_status1 =str_replace('{1}', Config::get('const.C012.attendance'), $str_replace_working_status0);
+            $str_replace_working_status2 =str_replace('{2}', Config::get('const.C012.missing_middle_return'), $str_replace_working_status1);
+            $str_replace_working_status3 =str_replace('{3}', Config::get('const.C012.continue_work'), $str_replace_working_status2);
+
+            $str_replace_go_out0 =str_replace('{0}', 'working_status', $case_go_out);
+            $str_replace_go_out1 =str_replace('{1}', Config::get('const.C012.missing_middle'), $str_replace_go_out0);
+
+            $str_replace_holiday_kubun0 =str_replace('{0}', 'working_status', $case_holiday_kubun);
+            $str_replace_holiday_kubun1 =str_replace('{1}', Config::get('const.C012.attendance'), $str_replace_holiday_kubun0);
+            $str_replace_holiday_kubun2 =str_replace('{2}', Config::get('const.C012.missing_middle_return'), $str_replace_holiday_kubun1);
+            $str_replace_holiday_kubun3 =str_replace('{3}', Config::get('const.C012.continue_work'), $str_replace_holiday_kubun2);
+            $str_replace_holiday_kubun4 =str_replace('{4}', 'holiday_kubun', $str_replace_holiday_kubun3);
+            $str_replace_holiday_kubun5 =str_replace('{5}', Config::get('const.C013.min_break_value'), $str_replace_holiday_kubun4);
+            $str_replace_holiday_kubun6 =str_replace('{6}', Config::get('const.C013.max_break_value'), $str_replace_holiday_kubun5);
 
             $subquery = DB::table($this->table)
                 ->selectRaw('sum(ifnull('.$this->table.'.total_working_times, 0)) as total_working_times')
@@ -1112,6 +1206,9 @@ class WorkingTimedate extends Model
                 ->selectRaw('sum(ifnull('.$this->table.'.out_of_legal_working_times, 0)) as out_of_legal_working_times')
                 ->selectRaw('sum(ifnull('.$this->table.'.not_employment_working_hours, 0)) as not_employment_working_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.off_hours_working_hours, 0)) as off_hours_working_hours')
+                ->selectRaw('sum('.$str_replace_working_status3.') as total_working_status')
+                ->selectRaw('sum('.$str_replace_go_out1.') as total_go_out')
+                ->selectRaw('sum('.$str_replace_holiday_kubun6.') as total_holiday_kubun')
                 ;
             $subquery = $this->setWhereSql($subquery)->toSql();
 
@@ -1125,6 +1222,9 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'out_of_legal_working_times', str_replace('{0}', 't1.out_of_legal_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'not_employment_working_hours', str_replace('{0}', 't1.not_employment_working_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'off_hours_working_hours', str_replace('{0}', 't1.off_hours_working_hours', $case_where)))
+                ->selectRaw('ifnull(t1.total_working_status, 0) as total_working_status' )
+                ->selectRaw('ifnull(t1.total_go_out, 0) as total_go_out' )
+                ->selectRaw('ifnull(t1.total_holiday_kubun, 0) as total_holiday_kubun' )
                 ;
 
             $array_setBindingsStr = array();
@@ -1166,13 +1266,6 @@ class WorkingTimedate extends Model
             Log::error($e->getMessage());
             throw $e;
         }
-
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getWorkingTimeDateUserJoin' => \DB::getQueryLog()
-            ]
-        );
         
         return $result;
     }

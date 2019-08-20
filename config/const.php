@@ -18,6 +18,7 @@ return [
         'legal_working_hours_week' => 40
     ],
 
+    // working_timetablesにはout_of_regular_night_working_timeまでのデータしかない
     'C004' => [
         'value' => 'C004',
         'regular_working_time' => 1,
@@ -88,6 +89,7 @@ return [
 
     'C013' => [
         'value' => 'C013',
+        'min_break_value' => 1,
         'paid_leave' => 1,
         'morning_off' => 2,
         'afternoon_off' => 3,
@@ -101,7 +103,8 @@ return [
         'childcare_care_leave' => 11,
         'nursing_care_leave' => 12,
         'congratulatory_or_consolatory_leave' => 13,
-        'refresh_leave' => 14
+        'refresh_leave' => 14,
+        'max_break_value' => 14
     ],
 
     'C014' => [
@@ -113,6 +116,18 @@ return [
         'value' => 'C015',
         'night_from' => '22:00:00',
         'night_to' => '05:00:00',
+    ],
+
+    'C016' => [
+        'value' => 'C016',
+        'display_closing' => '1',
+        'display_month_start' => '2',
+    ],
+
+    'C999' => [
+        'value' => 'C999',
+        'init_setting_code' => '9999',
+        'init_setting_user' => 'systemuser'
     ],
 
     'WEEK_KANJI' => [
@@ -191,6 +206,11 @@ return [
  
     'RESPONCE_ITEM' => [
         'messagedata' => 'messagedata'
+    ],
+ 
+    'WORKINGTIME_ORDERBY' => [
+        'daily_basic' => '1',
+        'monthly_basic' => '2'
     ],
 
     'MSG_WARNING' => [
