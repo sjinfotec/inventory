@@ -16,6 +16,8 @@ use App\WorkingTimeTable;
 class ApiCommonController extends Controller
 {
 
+    protected $table_generalcodes = 'generalcodes';
+
     /**
      * ユーザーリスト取得
      *
@@ -24,6 +26,8 @@ class ApiCommonController extends Controller
      */
     public function getUserList(Request $request){
 
+        Log::DEBUG('$getUserList param= $request->getdo '.$request->getdo);
+        Log::DEBUG('$getUserList param= $request->targetdate '.$request->targetdate);
         // パラメータチェック　getdoは必須
         if (!isset($request->getdo)) { return null; }
         $getdo = $request->getdo;
@@ -107,7 +111,7 @@ class ApiCommonController extends Controller
         } else {
             return null;
         }
-
+    
         return $users;
     }
 
@@ -233,6 +237,61 @@ class ApiCommonController extends Controller
         Log::DEBUG('$getUserRole end '.$userrole);
         return $userrole;
     }
+        
+    /** ユーザー適用期間開始サブクエリー作成
+     *
+     * @return string サブクエリー
+     */
+    public function getUserApplyTermSubquery($targetdate){
+        // 適用期間日付の取得
+        $dt = null;
+        if (isset($targetdate)) {
+            $dt = new Carbon($targetdate);
+        } else {
+            $dt = new Carbon();
+        }
+        $target_date = $dt->format('Ymd');
+
+        // usersの最大適用開始日付subquery
+        $subquery = DB::table('users')
+            ->select('code as code')
+            ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+            ->where('apply_term_from', '<=',$target_date)
+            ->where('is_deleted', '=', 0)
+            ->groupBy('code');
+        return $subquery;
+    }
+        
+    /** 部署適用期間開始サブクエリー作成
+     *
+     * @return string サブクエリー
+     */
+    public function getDepartmentApplyTermSubquery($targetdate){
+        // 適用期間日付の取得
+        $dt = null;
+        if (isset($targetdate)) {
+            $dt = new Carbon($targetdate);
+        } else {
+            $dt = new Carbon();
+        }
+        $target_date = $dt->format('Ymd');
+
+        // departmentsの最大適用開始日付subquery
+        $subquery1 = DB::table('departments')
+            ->select('code as code')
+            ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+            ->where('apply_term_from', '<=',$target_date)
+            ->where('is_deleted', '=', 0)
+            ->groupBy('code');
+        $subquery2 = DB::table('departments as t1')
+            ->select('t1.code as code', 't1.name as name')
+            ->JoinSub($subquery1, 't2', function ($join) { 
+                $join->on('t1.code', '=', 't2.code');
+                $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
+            })
+            ->where('t1.is_deleted', '=', 0);
+        return $subquery2;
+    }
 
     /** 雇用形態リスト取得
      *
@@ -240,7 +299,7 @@ class ApiCommonController extends Controller
      */
     public function getEmploymentStatusList(){
         Log::DEBUG('$getEmploymentStatusList in ');
-        $statuses = DB::table('generalcodes')->where('identification_id', Config::get('const.C001.value'))->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        $statuses = DB::table($this->table_generalcodes)->where('identification_id', Config::get('const.C001.value'))->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
         Log::DEBUG('$getEmploymentStatusList end ');
         return $statuses;
     }
@@ -262,7 +321,7 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getBusinessDayList(){
-        $businessDays = DB::table('generalcodes')->where('identification_id', Config::get('const.C007.value'))->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        $businessDays = DB::table($this->table_generalcodes)->where('identification_id', Config::get('const.C007.value'))->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
         return $businessDays;
     }
     
@@ -272,7 +331,7 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getHoliDayList(){
-        $holiDays = DB::table('generalcodes')->where('identification_id', Config::get('const.C008.value'))->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        $holiDays = DB::table($this->table_generalcodes)->where('identification_id', Config::get('const.C008.value'))->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
         return $holiDays;
     }
 
@@ -282,7 +341,7 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getTimeUnitList(){
-        $timeUnits = DB::table('generalcodes')->where('identification_id', 'C009')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        $timeUnits = DB::table($this->table_generalcodes)->where('identification_id', 'C009')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
         return $timeUnits;
     }
 
@@ -292,7 +351,7 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getTimeRoundingList(){
-        $timeRounds = DB::table('generalcodes')->where('identification_id', 'C010')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        $timeRounds = DB::table($this->table_generalcodes)->where('identification_id', 'C010')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
         return $timeRounds;
     }
 
@@ -302,7 +361,7 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getUserLeaveKbnList(){
-        $userLeaveKbnList = DB::table('generalcodes')->where('identification_id', 'C013')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        $userLeaveKbnList = DB::table($this->table_generalcodes)->where('identification_id', 'C013')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
         return $userLeaveKbnList;
     }
 
@@ -312,8 +371,30 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getModeList(){
-        $modeList = DB::table('generalcodes')->where('identification_id', 'C005')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        $modeList = DB::table($this->table_generalcodes)->where('identification_id', 'C005')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
         return $modeList;
+    }
+
+    /**
+     * コードリスト取得（Request）
+     *
+     * @return list
+     */
+    public function getRequestGeneralList(Request $request){
+        // パラメータチェック
+        Log::DEBUG('$getRequestGeneralList in '.$request->identificationid);
+        if (!isset($request->identificationid)) { return null; }
+        return $this->getGeneralList($request->identificationid);
+    }
+
+    /**
+     * コードリスト取得
+     *
+     * @return list
+     */
+    public function getGeneralList($identification_id){
+        $codeList = DB::table($this->table_generalcodes)->where('identification_id', $identification_id)->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        return $codeList;
     }
     
 
@@ -392,7 +473,8 @@ class ApiCommonController extends Controller
             $dt = new Carbon($target_time);
             $convDateTime = $this->getNextDay($basic_date, 'Y-m-d').' '.date_format($dt, 'H:i:s');
         } else {
-            $convDateTime = $basic_date.' '.$target_time;
+            $dt = new Carbon($basic_date);
+            $convDateTime = date_format($dt, 'Y-m-d').' '.$target_time;
         }
 
         return $convDateTime;
@@ -423,10 +505,10 @@ class ApiCommonController extends Controller
     public function diffTimeSerial($time_from, $time_to){
         $from = strtotime(date('Y-m-d H:i:00',strtotime($time_from)));
         $to   = strtotime(date('Y-m-d H:i:00',strtotime($time_to))); 
-        Log::DEBUG('diffTimeSerial from = '.$from);
-        Log::DEBUG('diffTimeSerial to = '.$to);
+        Log::DEBUG('diffTimeSerial() from = '.$from);
+        Log::DEBUG('diffTimeSerial() to = '.$to);
         $interval = $to - $from;
-        Log::DEBUG('interval = '.$interval);
+        Log::DEBUG('diffTimeSerial() interval = '.$interval);
         return $interval;
     }
     

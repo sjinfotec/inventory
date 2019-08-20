@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class Company extends Model
 {
@@ -282,6 +283,38 @@ class Company extends Model
         ->get();
     
         return $data;
+    }
+
+    /**
+     * 会社情報取得（適用期間）
+     *
+     * @return void
+     */
+    public function getCompanyInfoApply(){
+        // 適用期間日付の取得
+        $dt = null;
+        if (isset($this->apply_term_from)) {
+            $dt = new Carbon($this->apply_term_from);
+        } else {
+            $dt = new Carbon();
+        }
+        $target_date = $dt->format('Ymd');
+
+        // companyの最大適用開始日付subquery
+        $subquery = DB::table($this->table)
+            ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+            ->where('apply_term_from', '<=',$target_date)
+            ->where('is_deleted', '=', 0);
+        $mainquery = DB::table($this->table.' as t1')
+            ->select('t1.name as name')
+            ->JoinSub($subquery, 't2', function ($join) { 
+                $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
+            })
+            ->where('t1.is_deleted', '=', 0)
+            ->get();
+
+        return $mainquery;
+
     }
 
     /**

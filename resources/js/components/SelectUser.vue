@@ -18,6 +18,10 @@ export default {
     getDo: {
         type: Number,
         default: 1
+    },
+    dateValue: {
+        type: String,
+        default: ''
     }
   },
   data() {
@@ -28,29 +32,16 @@ export default {
   },
   // マウント時
   mounted() {
+    console.log("UserList マウント ");
     this.getUserList(this.getDo, '');
   },
   methods: {
-    getUserList(getdovalue){
-      this.$axios
-        .get("/get_user_list", {
-          params: {
-            getdo: getdovalue
-          }
-        })
-        .then(response => {
-          this.userList = response.data;
-        })
-        .catch(reason => {
-          alert("社員選択リスト作成エラー");
-        });
-    },
-    getUserListByDepartment(getdovalue, value){
+    getUserList(getdovalue, datevalue){
       this.$axios
         .get("/get_user_list", {
           params: {
             getdo: getdovalue,
-            code: value
+            targetdate: datevalue
           }
         })
         .then(response => {
@@ -60,28 +51,46 @@ export default {
           alert("社員選択リスト作成エラー");
         });
     },
-    getUserListByEmployment(getdovalue, empvalue){
-      this.$axios
-        .get("/get_user_list", {
-          params: {
-            getdo: getdovalue,
-            employment: empvalue
-          }
-        })
-        .then(response => {
-          this.userList = response.data;
-        })
-        .catch(reason => {
-          alert("社員選択リスト作成エラー");
-        });
-    },
-    getUserListByDepartmentEmployment(getdovalue, value, empvalue){
+    getUserListByDepartment(getdovalue, value, datevalue){
       this.$axios
         .get("/get_user_list", {
           params: {
             getdo: getdovalue,
             code: value,
-            employment: empvalue
+            targetdate: datevalue
+          }
+        })
+        .then(response => {
+          this.userList = response.data;
+        })
+        .catch(reason => {
+          alert("社員選択リスト作成エラー");
+        });
+    },
+    getUserListByEmployment(getdovalue, empvalue, datevalue){
+      this.$axios
+        .get("/get_user_list", {
+          params: {
+            getdo: getdovalue,
+            employment: empvalue,
+            targetdate: datevalue
+          }
+        })
+        .then(response => {
+          this.userList = response.data;
+        })
+        .catch(reason => {
+          alert("社員選択リスト作成エラー");
+        });
+    },
+    getUserListByDepartmentEmployment(getdovalue, value, empvalue, datevalue){
+      this.$axios
+        .get("/get_user_list", {
+          params: {
+            getdo: getdovalue,
+            code: value,
+            employment: empvalue,
+            targetdate: datevalue
           }
         })
         .then(response => {

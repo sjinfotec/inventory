@@ -301,7 +301,6 @@ class Setting extends Model
 
     // --------------------- メソッド ------------------------------------------------------
 
-
     /**
      * 設定項目マスタ取得
      *
@@ -345,6 +344,24 @@ class Setting extends Model
             ->get();
 
         return $data;
+    }
+
+    /**
+     * 締め日取得
+     *
+     *      指定した年月度の締め日を取得する
+     *
+     * @return sql取得結果
+     */
+    public function getMonthClosing(){
+
+        // 取得
+        return $mainquery = DB::table($this->table)
+            ->where($this->table.'.year', $this->param_year)
+            ->where($this->table.'.fiscal_month', $this->param_fiscal_month)
+            ->where($this->table.'.is_deleted', 0)
+            ->value($this->table.'.closing');
+
     }
 
     public function insertSettings(){
