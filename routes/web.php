@@ -52,6 +52,7 @@ Route::post('/user_add/store', 'UserAddController@store')->middleware('auth');
 Route::get('/user_add/get', 'UserAddController@getUserDetails')->middleware('auth');
 Route::post('/user_add/del', 'UserAddController@del')->middleware('auth');
 Route::post('/user_add/edit', 'UserAddController@edit')->middleware('auth');
+Route::post('/user_add/fix', 'UserAddController@fixUser')->middleware('auth');
 Route::post('/user_add/passchange', 'UserAddController@passChange')->middleware('auth');
 // ユーザー権限取得
 Route::get('/get_login_user_role', 'ApiCommonController@getLoginUserRole')->middleware('auth');
@@ -59,8 +60,10 @@ Route::get('/get_login_user_role', 'ApiCommonController@getLoginUserRole')->midd
 Route::get('/create_department', 'CreateDepartmentController@index')->middleware('auth');
 Route::get('/create_department/get', 'CreateDepartmentController@getDetails')->middleware('auth');
 Route::post('/create_department/store', 'CreateDepartmentController@store')->middleware('auth');
+Route::post('/create_department/fix', 'CreateDepartmentController@fix')->middleware('auth');
 Route::post('/create_department/del', 'CreateDepartmentController@del')->middleware('auth');
 Route::post('/create_department/edit', 'CreateDepartmentController@edit')->middleware('auth');
+Route::get('/create_department/get_apply', 'CreateDepartmentController@getDepartmentApplyTerm')->middleware('auth');
 // カレンダー登録
 Route::get('/create_calendar', 'CreateCalendarController@index')->middleware('auth');
 Route::post('/create_calendar/store', 'CreateCalendarController@store')->middleware('auth');

@@ -1,7 +1,6 @@
 /node_modules
 /public/hot
 /public/storage
-/public/js/app.js
 /storage/*.key
 /vendor
 .env
@@ -15,4 +14,4 @@ package-lock.json
 mix-manifest.json
 /.vscode
 /config/database.php
-
+public/js/app.js

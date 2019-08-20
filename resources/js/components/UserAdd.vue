@@ -6,7 +6,10 @@
       <div class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
-          <div class="card-header bg-transparent pb-0 border-0">
+          <div
+            class="card-header bg-transparent pb-0 border-0"
+            v-if="userCode=='' || userCode==null "
+          >
             <h1 class="float-sm-left font-size-rg">ユーザー登録および編集</h1>
             <span class="float-sm-right font-size-sm">ユーザーを選択すると登録済みのユーザー情報を編集できます</span>
           </div>
@@ -46,7 +49,7 @@
                 </div>
                 <!-- /.col -->
                 <!-- .col -->
-                <div class="col-md-6 pb-2">
+                <div class="col-md-6 pb-2" v-if="userCode=='' || userCode==null ">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
@@ -64,7 +67,7 @@
                 </div>
                 <!-- /.col -->
                 <!-- .col -->
-                <div class="col-md-6 pb-2">
+                <div class="col-md-6 pb-2" v-if="userCode=='' || userCode==null ">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
@@ -82,7 +85,7 @@
                 </div>
                 <!-- /.col -->
                 <!-- .col -->
-                <div class="col-md-6 pb-2">
+                <div class="col-md-6 pb-2" v-if="userCode=='' || userCode==null ">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
@@ -122,7 +125,7 @@
                 </div>
                 <!-- /.col -->
                 <!-- .col -->
-                <div class="col-md-6 pb-2">
+                <div class="col-md-6 pb-2" v-if="userCode=='' || userCode==null ">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
@@ -140,7 +143,7 @@
                 </div>
                 <!-- /.col -->
                 <!-- .col -->
-                <div class="col-md-6 pb-2">
+                <div class="col-md-6 pb-2" v-if="userCode=='' || userCode==null ">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
@@ -154,14 +157,14 @@
                       name="departmentCode"
                       :options="departmentList"
                       :search-keys="['name']"
-                      option-key="id"
+                      option-key="code"
                       option-value="name"
                     />
                   </div>
                 </div>
                 <!-- /.col -->
                 <!-- .col -->
-                <div class="col-md-6 pb-2">
+                <div class="col-md-6 pb-2" v-if="userCode=='' || userCode==null ">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
@@ -182,7 +185,7 @@
                 </div>
                 <!-- /.col -->
                 <!-- .col -->
-                <div class="col-md-6 pb-2">
+                <div class="col-md-6 pb-2" v-if="userCode=='' || userCode==null ">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
@@ -214,30 +217,191 @@
                       class="btn btn-success"
                       v-if="userCode=='' || userCode==null "
                     >追加する</button>
-                    <button type="submit" class="btn btn-success" id="edit" v-if="userCode != ''">修正する</button>
                   </div>
                 </div>
                 <!-- /.col -->
               </div>
               <!-- /.row -->
             </fvl-form>
-            <!-- .row -->
-            <div class="row justify-content-between" v-if="userCode != ''">
+            <!-- main contentns row -->
+            <div class="row justify-content-between" v-if="userDetails.length">
+              <!-- .panel -->
+              <div class="col-md pt-3 align-self-stretch">
+                <div class="card shadow-pl">
+                  <!-- panel header -->
+                  <div class="card-header bg-transparent pt-3 border-0">
+                    <h1 class="float-sm-left font-size-rg">
+                      <span>
+                        <button class="btn btn-success btn-lg font-size-rg" @click="append">+</button>
+                      </span>
+                      ユーザー情報
+                    </h1>
+                    <span class="float-sm-right font-size-sm">登録済みのユーザーを編集できます</span>
+                  </div>
+                  <!-- /.panel header -->
+                  <!-- panel body -->
+                  <!-- .row -->
+                  <div class="row justify-content-between" v-if="errors.length">
+                    <!-- col -->
+                    <div class="col-md-12 pb-2">
+                      <ul class="error-red color-red">
+                        <li v-for="(error,index) in errors" v-bind:key="index">{{ error }}</li>
+                      </ul>
+                    </div>
+                    <!-- /.col -->
+                  </div>
+                  <!-- /.row -->
+                  <div class="card-body mb-3 p-0 border-top">
+                    <!-- panel contents -->
+                    <!-- .row -->
+                    <div class="row">
+                      <div class="col-12">
+                        <div class="table-responsive">
+                          <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                            <thead>
+                              <tr>
+                                <td class="text-center align-middle w-30">有効期間</td>
+                                <td class="text-center align-middle w-35 mw-rem-10">社員名</td>
+                                <td class="text-center align-middle w-35 mw-rem-10">ふりがな</td>
+                                <td class="text-center align-middle w-35 mw-rem-10">メールアドレス</td>
+                                <td class="text-center align-middle w-35 mw-rem-10">部署</td>
+                                <td class="text-center align-middle w-35 mw-rem-10">雇用形態</td>
+                                <td class="text-center align-middle w-35 mw-rem-10">労働時間</td>
+                                <td class="text-center align-middle w-35 mw-rem-10">ログインID(編集不可)</td>
+                                <td class="text-center align-middle w-35 mw-rem-10">操作</td>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr v-for="(item,index) in userDetails" v-bind:key="item.id">
+                                <td class="text-center align-middle">
+                                  <div class>
+                                    <input
+                                      type="date"
+                                      class="form-control"
+                                      v-model="userDetails[index].apply_term_from"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <input
+                                      type="text"
+                                      maxlength="191"
+                                      class="form-control"
+                                      v-model="userDetails[index].name"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <input
+                                      type="text"
+                                      maxlength="30"
+                                      class="form-control"
+                                      v-model="userDetails[index].kana"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <input
+                                      type="email"
+                                      maxlength="191"
+                                      class="form-control"
+                                      v-model="userDetails[index].email"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <select
+                                      class="custom-select"
+                                      v-model="userDetails[index].department_code"
+                                    >
+                                      <option value></option>
+                                      <option
+                                        v-for="dlist in departmentList"
+                                        :value="dlist.code"
+                                        v-bind:key="dlist.code"
+                                      >{{ dlist.name }}</option>
+                                    </select>
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <select
+                                      class="custom-select"
+                                      v-model="userDetails[index].employment_status"
+                                    >
+                                      <option value></option>
+                                      <option
+                                        v-for="elist in employStatusList"
+                                        :value="elist.code"
+                                        v-bind:key="elist.code"
+                                      >{{ elist.code_name }}</option>
+                                    </select>
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <select
+                                      class="custom-select"
+                                      v-model="userDetails[index].working_timetable_no"
+                                    >
+                                      <option value></option>
+                                      <option
+                                        v-for="tlist in timeTableList"
+                                        :value="tlist.no"
+                                        v-bind:key="tlist.no"
+                                      >{{ tlist.name }}</option>
+                                    </select>
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <input
+                                      type="text"
+                                      class="form-control"
+                                      readonly="true"
+                                      v-model="userDetails[index].code"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                  <div class="btn-group">
+                                    <button
+                                      type="button"
+                                      class="btn btn-danger btn-lg font-size-rg"
+                                      @click="alertDelConf('info',item.id,index)"
+                                    >削除</button>
+                                  </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /.row -->
+                    <!-- /.panel contents -->
+                  </div>
+                  <!-- /panel body -->
+                </div>
+              </div>
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <div class="btn-group d-flex">
-                  <button class="btn btn-danger" @click="alertDelConf('warning')">削除する</button>
+                  <button class="btn btn-success" @click="FixUser()" v-if="userCode != ''">修正する</button>
                 </div>
               </div>
               <!-- /.col -->
             </div>
-            <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between" v-if="userCode != ''">
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <div class="btn-group d-flex">
-                  <button class="btn btn-success" v-on:click="show">パスワード変更</button>
+                  <button class="btn btn-primary" v-on:click="show">パスワード変更</button>
                 </div>
               </div>
               <!-- /.col -->
@@ -310,7 +474,7 @@
                     <div class="btn-group d-flex">
                       <button
                         type="button"
-                        class="btn btn-success btn-lg font-size-rg w-100"
+                        class="btn btn-primary btn-lg font-size-rg w-100"
                         v-on:click="alertPassConf('warning')"
                       >パスワードを変更</button>
                     </div>
@@ -385,11 +549,13 @@ export default {
       reEnterPass: "",
       validate: false,
       errors: [],
-      oldCode: ""
+      oldCode: "",
+      oldPass: ""
     };
   },
   // マウント時
   mounted() {
+    this.userDetails = [];
     console.log("UserAdd Component mounted.");
     this.getDepartmentList();
     this.getEmploymentStatusList();
@@ -421,6 +587,7 @@ export default {
               "" + this.userDetails[0].working_timetable_no + "";
             // hidden
             this.oldCode = this.userDetails[0].code;
+            this.oldPass = this.userDetails[0].password;
             console.log("ユーザー詳細情報取得");
           })
           .catch(reason => {
@@ -432,6 +599,18 @@ export default {
     }
   },
   methods: {
+    append: function() {
+      this.userDetails.push({
+        apply_term_from: "",
+        code: this.userCode,
+        department_code: "",
+        email: "",
+        kana: "",
+        working_timetable_no: "",
+        employment_status: "",
+        name: ""
+      });
+    },
     alert: function(state, message, title) {
       this.$swal(title, message, state);
     },
@@ -456,8 +635,94 @@ export default {
         }
       });
     },
+    alertDelConf: function(state, id, index) {
+      if (id >= 0) {
+        this.$swal({
+          title: "確認",
+          text: "削除しますか？",
+          icon: state,
+          buttons: true,
+          dangerMode: true
+        }).then(willDelete => {
+          if (willDelete) {
+            this.del(id, index);
+          } else {
+          }
+        });
+      } else {
+        this.userDetails.splice(index, 1);
+      }
+    },
+    FixUser() {
+      this.validate = this.checkForm();
+      if (this.validate) {
+        this.$axios
+          .post("/user_add/fix", {
+            details: this.userDetails,
+            pass: this.oldPass
+          })
+          .then(response => {
+            var res = response.data;
+            this.alert("success", "修正をしました", "修正完了");
+          })
+          .catch(reason => {
+            this.alert("error", "修正に失敗しました", "エラー");
+          });
+      } else {
+        console.log("fix error");
+      }
+    },
+    // 削除
+    del: function(id, index) {
+      this.userDetails.splice(index, 1);
+      this.$axios
+        .post("/user_add/del", {
+          id: id
+        })
+        .then(response => {
+          var res = response.data;
+          if (res.result == 0) {
+            this.alert("success", " ユーザーを削除しました", "削除成功");
+            // this.getDepartmentList();
+          } else {
+          }
+        })
+        .catch(reason => {});
+    },
     // バリデーション
     checkForm: function() {
+      var flag = false;
+      this.errors = [];
+      this.userDetails.forEach(element => {
+        flag = true;
+        if (element.apply_term_from == "") {
+          this.errors.push("有効期間を入力してください");
+          flag = false;
+        }
+        if (element.name == "") {
+          this.errors.push("社員名を入力してください");
+          flag = false;
+        }
+        if (element.department_code == "") {
+          this.errors.push("部署を選択してください");
+          flag = false;
+        }
+        if (element.employment_status == "") {
+          this.errors.push("雇用形態を選択してください");
+          flag = false;
+        }
+        if (element.working_timetable_no == "") {
+          this.errors.push("労働時間を選択してください");
+          flag = false;
+        }
+        if (element.kana == "") {
+          this.errors.push("ふりがなを入力してください");
+          flag = false;
+        }
+      });
+      return flag;
+    },
+    checkFormPass: function() {
       var flag = false;
       this.errors = [];
 
@@ -482,7 +747,7 @@ export default {
       }
     },
     passChange: function() {
-      this.validate = this.checkForm();
+      this.validate = this.checkFormPass();
       if (this.validate) {
         this.$axios
           .post("/user_add/passchange", {
@@ -562,40 +827,6 @@ export default {
     error() {
       this.alert("error", "登録に失敗しました", "エラー");
     },
-    alertDelConf: function(state) {
-      this.$swal({
-        title: "確認",
-        text: "削除してもよろしいですか？",
-        icon: state,
-        buttons: true,
-        dangerMode: true
-      }).then(willDelete => {
-        if (willDelete) {
-          this.del();
-        } else {
-        }
-      });
-    },
-    // 削除
-    del: function() {
-      this.$axios
-        .post("/user_add/del", {
-          user_code: this.userCode
-        })
-        .then(response => {
-          var res = response.data;
-          if (res.result == 0) {
-            this.alert("success", "ユーザーを削除しました", "削除成功");
-            this.inputClear();
-            this.getUserList(1, null);
-          } else {
-            this.alert("error", "削除に失敗しました", "エラー");
-          }
-        })
-        .catch(reason => {
-          this.alert("error", "削除に失敗しました", "エラー");
-        });
-    },
     inputClear() {
       this.form.id = "";
       this.form.name = "";
@@ -607,6 +838,7 @@ export default {
       this.form.status = "";
       this.form.table_no = "";
       this.userCode = "";
+      this.userDetails = [];
     },
     inputPassClear() {
       this.enterPass = "";
