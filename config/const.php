@@ -36,7 +36,9 @@ return [
         'attendance_time' => 1,
         'leaving_time' => 2,
         'missing_middle_time' => 11,
-        'missing_middle_return_time' => 12
+        'missing_middle_return_time' => 12,
+        'public_going_out_time' => 21,
+        'public_going_out_return_time' => 22
     ],
 
     'C006' => [
@@ -82,8 +84,10 @@ return [
         'leaving' => 2,
         'missing_middle' => 3,
         'missing_middle_return' => 4,
-        'continue_work' => 5,
-        'forget' => 9,
+        'public_going_out' => 5,
+        'public_going_out_return' => 6,
+        'continue_work' => 10,
+        'forget' => 90,
         'unknown' => 99
     ],
 
@@ -144,7 +148,9 @@ return [
         'attendace_time' => 5,
         'leaving_time' => 5,
         'missing_middle_time' => 5,
-        'missing_middle_return_time' => 5
+        'missing_middle_return_time' => 5,
+        'public_going_out_time' => 5,
+        'public_going_out_return_time' => 5
     ],
 
     'TIME_TABLE_NO' => [
@@ -153,20 +159,21 @@ return [
 
     'INC_NO' => [
         'attendace_leaving' => 1,
-        'missing_return' => 2
+        'missing_return' => 2,
+        'public_going_out_return' => 3
     ],
 
 
     'MEMO_DATA' => [
         'MEMO_DATA_001' => '出勤済',
         'MEMO_DATA_002' => '当日出勤なし',
-        'MEMO_DATA_003' => '中抜け状態',
+        'MEMO_DATA_003' => '外出状態',
         'MEMO_DATA_004' => '不明な打刻',
         'MEMO_DATA_005' => '当日時間計算なし',
         'MEMO_DATA_006' => '自動設定',
         'MEMO_DATA_007' => '勤務間インターバルオーバー',
         'MEMO_DATA_008' => '未出勤',
-        'MEMO_DATA_009' => '中抜けなし',
+        'MEMO_DATA_009' => '外出なし',
         'MEMO_DATA_010' => '部署設定ミス',
         'MEMO_DATA_011' => '締日設定ミス',
         'MEMO_DATA_012' => '時間単位設定ミス',

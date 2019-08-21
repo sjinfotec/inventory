@@ -128,16 +128,31 @@ class ApiGetAttendanceResultController extends Controller
         $work_time->setParamUsercodeAttribute($user_data->code);
         $work_time->setParamDatefromAttribute($systemdate->format('Ymd'));
         $work_time->setParamDatetoAttribute($systemdate->format('Ymd'));
+        $this->source_mode = '';
         // MAX打刻取得
         $chk_result = true;
         $daily_times = $work_time->getDailyMaxData();
         if(isset($daily_times)){
+            $i=0;
             foreach ($daily_times as $result) {
                 // モードチェック
-                $this->source_mode = $result->mode;
-                $chk_result = $apicommon->chkMode($mode, $this->source_mode);
+                if(isset($result->mode)){
+                    $i += 1;
+                    $this->source_mode = $result->mode;
+                    $chk_result = $apicommon->chkMode($mode, $this->source_mode);
+                } else {
+                    // ない場合は出勤以外はエラーとする
+                    $chk_result = $apicommon->chkMode($mode, '');
+                }
                 break;
             }
+            if ($i == 0) {
+                // ない場合は出勤以外はエラーとする
+                $chk_result = $apicommon->chkMode($mode, '');
+            }
+        } else {
+            // ない場合は出勤以外はエラーとする
+            $chk_result = $apicommon->chkMode($mode, '');
         }
 
         return $chk_result;

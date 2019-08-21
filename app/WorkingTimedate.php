@@ -35,10 +35,12 @@ class WorkingTimedate extends Model
     private $user_name;                     // ユーザー名称
     private $working_timetable_no;          // タイムテーブルNo
     private $working_timetable_name;        // タイムテーブル名称
-    private $array_attendance_time = [null,null,null,null,null];                // 出勤時刻
-    private $array_leaving_time = [null,null,null,null,null];                   // 退勤時刻
-    private $array_missing_middle_time = [null,null,null,null,null];            // 中抜け時刻
-    private $array_missing_middle_return_time = [null,null,null,null,null];     // 中抜け戻り時刻
+    private $array_attendance_time = [null,null,null,null,null];                    // 出勤時刻
+    private $array_leaving_time = [null,null,null,null,null];                       // 退勤時刻
+    private $array_missing_middle_time = [null,null,null,null,null];                // 私用外出時刻
+    private $array_missing_middle_return_time = [null,null,null,null,null];         // 私用外出戻り時刻
+    private $array_public_going_out_time = [null,null,null,null,null];              // 公用外出時刻
+    private $array_public_going_out_return_time = [null,null,null,null,null];       // 公用外出戻り時刻
     private $total_working_times;           // 合計勤務時間
     private $regular_working_times;         // 所定労働時間
     private $out_of_regular_working_times;  // 所定外労働時間
@@ -48,6 +50,8 @@ class WorkingTimedate extends Model
     private $out_of_legal_working_times;    // 法定外労働時間
     private $not_employment_working_hours;  // 未就労労働時間
     private $off_hours_working_hours;       // 時間外労働時間
+    private $missing_middle_hours;          // 私用外出時間
+    private $public_going_out_hours;        // 公用外出時間
     private $working_status;                // 勤務状態
     private $working_status_name;           // 勤務状態名称
     private $note;                          // メモ
@@ -212,7 +216,7 @@ class WorkingTimedate extends Model
         $this->array_leaving_time[$index] = $value;
     }
 
-    // 中抜け時刻
+    // 私用外出時刻
     public function getMissingmiddletimeAttribute($index)
     {
         return $this->array_missing_middle_time[$index];
@@ -223,7 +227,7 @@ class WorkingTimedate extends Model
         $this->array_missing_middle_time[$index] = $value;
     }
 
-    // 中抜け戻り時刻
+    // 私用外出戻り時刻
     public function getMissingmiddlereturntimeAttribute($index)
     {
         return $this->array_missing_middle_return_time[$index];
@@ -232,6 +236,28 @@ class WorkingTimedate extends Model
     public function setMissingmiddlereturntimeAttribute($index, $value)
     {
         $this->array_missing_middle_return_time[$index] = $value;
+    }
+
+    // 公用外出時刻
+    public function getPublicgoingouttimeAttribute($index)
+    {
+        return $this->array_public_going_out_time[$index];
+    }
+
+    public function setPublicgoingouttimeAttribute($index, $value)
+    {
+        $this->array_public_going_out_time[$index] = $value;
+    }
+
+    // 公用外出戻り時刻
+    public function getPublicgoingoutreturntimeAttribute($index)
+    {
+        return $this->array_public_going_out_return_time[$index];
+    }
+
+    public function setPublicgoingoutreturntimeAttribute($index, $value)
+    {
+        $this->array_public_going_out_return_time[$index] = $value;
     }
 
     // 合計勤務時間
@@ -339,6 +365,28 @@ class WorkingTimedate extends Model
     public function setOffhoursworkinghoursAttribute($value)
     {
         $this->off_hours_working_hours = $value;
+    }
+
+    // 私用外出時間
+    public function getMissingmiddlehoursAttribute()
+    {
+        return $this->missing_middle_hours;
+    }
+
+    public function setMissingmiddlehoursAttribute($value)
+    {
+        $this->missing_middle_hours = $value;
+    }
+
+    // 公用外出時間
+    public function getPublicgoingouthoursAttribute()
+    {
+        return $this->public_going_out_hours;
+    }
+
+    public function setPublicgoingouthoursAttribute($value)
+    {
+        $this->public_going_out_hours = $value;
     }
 
 
@@ -896,6 +944,16 @@ class WorkingTimedate extends Model
                     $this->table.'.missing_middle_return_time_3',
                     $this->table.'.missing_middle_return_time_4',
                     $this->table.'.missing_middle_return_time_5',
+                    $this->table.'.public_going_out_time_1',
+                    $this->table.'.public_going_out_time_2',
+                    $this->table.'.public_going_out_time_3',
+                    $this->table.'.public_going_out_time_4',
+                    $this->table.'.public_going_out_time_5',
+                    $this->table.'.public_going_out_return_time_1',
+                    $this->table.'.public_going_out_return_time_2',
+                    $this->table.'.public_going_out_return_time_3',
+                    $this->table.'.public_going_out_return_time_4',
+                    $this->table.'.public_going_out_return_time_5',
                     $this->table.'.total_working_times',
                     $this->table.'.regular_working_times',
                     $this->table.'.out_of_regular_working_times',
@@ -905,6 +963,8 @@ class WorkingTimedate extends Model
                     $this->table.'.out_of_legal_working_times',
                     $this->table.'.not_employment_working_hours',
                     $this->table.'.off_hours_working_hours',
+                    $this->table.'.public_going_out_hours',
+                    $this->table.'.missing_middle_hours',
                     $this->table.'.working_status',
                     $this->table.'.working_status_name',
                     $this->table.'.note',
@@ -1034,6 +1094,16 @@ class WorkingTimedate extends Model
                 ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_return_time_3,'."'%H:%i'".')  as missing_middle_return_time_3')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_return_time_4,'."'%H:%i'".')  as missing_middle_return_time_4')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.missing_middle_return_time_5,'."'%H:%i'".')  as missing_middle_return_time_5')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_1,'."'%H:%i'".')  as public_going_out_time_1')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_2,'."'%H:%i'".')  as public_going_out_time_2')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_3,'."'%H:%i'".')  as public_going_out_time_3')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_4,'."'%H:%i'".')  as public_going_out_time_4')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_5,'."'%H:%i'".')  as public_going_out_time_5')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_1,'."'%H:%i'".')  as public_going_out_return_time_1')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_2,'."'%H:%i'".')  as public_going_out_return_time_2')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_3,'."'%H:%i'".')  as public_going_out_return_time_3')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_4,'."'%H:%i'".')  as public_going_out_return_time_4')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_5,'."'%H:%i'".')  as public_going_out_return_time_5')
                 ->selectRaw(str_replace('{1}', 'total_working_times', str_replace('{0}', $this->table.'.total_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'regular_working_times', str_replace('{0}', $this->table.'.regular_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'out_of_regular_working_times', str_replace('{0}', $this->table.'.out_of_regular_working_times', $case_where)))
@@ -1042,7 +1112,9 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'legal_working_times', str_replace('{0}', $this->table.'.legal_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'out_of_legal_working_times', str_replace('{0}', $this->table.'.out_of_legal_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'not_employment_working_hours', str_replace('{0}', $this->table.'.not_employment_working_hours', $case_where)))
-                ->selectRaw(str_replace('{1}', 'off_hours_working_hours', str_replace('{0}', $this->table.'.off_hours_working_hours', $case_where)));
+                ->selectRaw(str_replace('{1}', 'off_hours_working_hours', str_replace('{0}', $this->table.'.off_hours_working_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'public_going_out_hours', str_replace('{0}', $this->table.'.public_going_out_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'missing_middle_hours', str_replace('{0}', $this->table.'.missing_middle_hours', $case_where)));
 
             $mainquery
                 ->addselect($this->table.'.working_status');
@@ -1161,11 +1233,13 @@ class WorkingTimedate extends Model
             $case_working_status .= "WHEN {1} THEN 1 ";
             $case_working_status .= "WHEN {2} THEN 1 ";
             $case_working_status .= "WHEN {3} THEN 1 ";
+            $case_working_status .= "WHEN {4} THEN 1 ";
             $case_working_status .= "ELSE 0 ";
             $case_working_status .= ' END';
 
             $case_go_out = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
             $case_go_out .= "WHEN {1} THEN 1 ";
+            $case_go_out .= "WHEN {2} THEN 1 ";
             $case_go_out .= "ELSE 0 ";
             $case_go_out .= ' END';
 
@@ -1173,6 +1247,7 @@ class WorkingTimedate extends Model
             $case_holiday_kubun .= "WHEN {1} THEN 0 ";
             $case_holiday_kubun .= "WHEN {2} THEN 0 ";
             $case_holiday_kubun .= "WHEN {3} THEN 0 ";
+            $case_holiday_kubun .= "WHEN {4} THEN 0 ";
             $case_holiday_kubun .= "ELSE ";
             $case_holiday_kubun .= "  CASE ifnull({4},0) WHEN 0 THEN 0 ";
             $case_holiday_kubun .= "  WHEN {4} >= {5} and {4} <= {6} THEN 1 ";
@@ -1183,18 +1258,21 @@ class WorkingTimedate extends Model
             $str_replace_working_status0 =str_replace('{0}', 'working_status', $case_working_status);
             $str_replace_working_status1 =str_replace('{1}', Config::get('const.C012.attendance'), $str_replace_working_status0);
             $str_replace_working_status2 =str_replace('{2}', Config::get('const.C012.missing_middle_return'), $str_replace_working_status1);
-            $str_replace_working_status3 =str_replace('{3}', Config::get('const.C012.continue_work'), $str_replace_working_status2);
+            $str_replace_working_status3 =str_replace('{3}', Config::get('const.C012.public_going_out_return'), $str_replace_working_status2);
+            $str_replace_working_status4 =str_replace('{4}', Config::get('const.C012.continue_work'), $str_replace_working_status3);
 
             $str_replace_go_out0 =str_replace('{0}', 'working_status', $case_go_out);
             $str_replace_go_out1 =str_replace('{1}', Config::get('const.C012.missing_middle'), $str_replace_go_out0);
+            $str_replace_go_out2 =str_replace('{2}', Config::get('const.C012.public_going_out'), $str_replace_go_out1);
 
             $str_replace_holiday_kubun0 =str_replace('{0}', 'working_status', $case_holiday_kubun);
             $str_replace_holiday_kubun1 =str_replace('{1}', Config::get('const.C012.attendance'), $str_replace_holiday_kubun0);
             $str_replace_holiday_kubun2 =str_replace('{2}', Config::get('const.C012.missing_middle_return'), $str_replace_holiday_kubun1);
-            $str_replace_holiday_kubun3 =str_replace('{3}', Config::get('const.C012.continue_work'), $str_replace_holiday_kubun2);
-            $str_replace_holiday_kubun4 =str_replace('{4}', 'holiday_kubun', $str_replace_holiday_kubun3);
-            $str_replace_holiday_kubun5 =str_replace('{5}', Config::get('const.C013.min_break_value'), $str_replace_holiday_kubun4);
-            $str_replace_holiday_kubun6 =str_replace('{6}', Config::get('const.C013.max_break_value'), $str_replace_holiday_kubun5);
+            $str_replace_holiday_kubun3 =str_replace('{3}', Config::get('const.C012.public_going_out_return'), $str_replace_holiday_kubun2);
+            $str_replace_holiday_kubun4 =str_replace('{4}', Config::get('const.C012.continue_work'), $str_replace_holiday_kubun3);
+            $str_replace_holiday_kubun5 =str_replace('{5}', 'holiday_kubun', $str_replace_holiday_kubun4);
+            $str_replace_holiday_kubun6 =str_replace('{6}', Config::get('const.C013.min_break_value'), $str_replace_holiday_kubun5);
+            $str_replace_holiday_kubun7 =str_replace('{7}', Config::get('const.C013.max_break_value'), $str_replace_holiday_kubun6);
 
             $subquery = DB::table($this->table)
                 ->selectRaw('sum(ifnull('.$this->table.'.total_working_times, 0)) as total_working_times')
@@ -1206,9 +1284,11 @@ class WorkingTimedate extends Model
                 ->selectRaw('sum(ifnull('.$this->table.'.out_of_legal_working_times, 0)) as out_of_legal_working_times')
                 ->selectRaw('sum(ifnull('.$this->table.'.not_employment_working_hours, 0)) as not_employment_working_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.off_hours_working_hours, 0)) as off_hours_working_hours')
-                ->selectRaw('sum('.$str_replace_working_status3.') as total_working_status')
-                ->selectRaw('sum('.$str_replace_go_out1.') as total_go_out')
-                ->selectRaw('sum('.$str_replace_holiday_kubun6.') as total_holiday_kubun')
+                ->selectRaw('sum(ifnull('.$this->table.'.public_going_out_hours, 0)) as public_going_out_hours')
+                ->selectRaw('sum(ifnull('.$this->table.'.missing_middle_hours, 0)) as missing_middle_hours')
+                ->selectRaw('sum('.$str_replace_working_status4.') as total_working_status')
+                ->selectRaw('sum('.$str_replace_go_out2.') as total_go_out')
+                ->selectRaw('sum('.$str_replace_holiday_kubun7.') as total_holiday_kubun')
                 ;
             $subquery = $this->setWhereSql($subquery)->toSql();
 
@@ -1222,6 +1302,8 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'out_of_legal_working_times', str_replace('{0}', 't1.out_of_legal_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'not_employment_working_hours', str_replace('{0}', 't1.not_employment_working_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'off_hours_working_hours', str_replace('{0}', 't1.off_hours_working_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'public_going_out_hours', str_replace('{0}', 't1.public_going_out_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'missing_middle_hours', str_replace('{0}', 't1.missing_middle_hours', $case_where)))
                 ->selectRaw('ifnull(t1.total_working_status, 0) as total_working_status' )
                 ->selectRaw('ifnull(t1.total_go_out, 0) as total_go_out' )
                 ->selectRaw('ifnull(t1.total_holiday_kubun, 0) as total_holiday_kubun' )

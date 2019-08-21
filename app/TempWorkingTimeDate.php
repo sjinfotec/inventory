@@ -21,17 +21,19 @@ class TempWorkingTimeDate extends Model
 
     private $working_date;                  // 日付
     private $employment_status;             // 雇用形態
-    private $department_code;                 // 部署ID
+    private $department_code;               // 部署ID
     private $user_code;                     // ユーザー
     private $employment_status_name;        // 雇用形態名称
     private $department_name;               // 部署名称
     private $user_name;                     // ユーザー名称
     private $working_timetable_no;          // タイムテーブルNo
     private $working_timetable_name;        // タイムテーブル名称
-    private $array_attendance_time = [null,null,null,null,null];                // 出勤時刻
-    private $array_leaving_time = [null,null,null,null,null];                   // 退勤時刻
-    private $array_missing_middle_time = [null,null,null,null,null];            // 中抜け時刻
-    private $array_missing_middle_return_time = [null,null,null,null,null];     // 中抜け戻り時刻
+    private $array_attendance_time = [null,null,null,null,null];                    // 出勤時刻
+    private $array_leaving_time = [null,null,null,null,null];                       // 退勤時刻
+    private $array_missing_middle_time = [null,null,null,null,null];                // 私用外出時刻
+    private $array_missing_middle_return_time = [null,null,null,null,null];         // 私用外出戻り時刻
+    private $array_public_going_out_time = [null,null,null,null,null];              // 公用外出時刻
+    private $array_public_going_out_return_time = [null,null,null,null,null];       // 公用外出戻り時刻
     private $total_working_times;           // 合計勤務時間
     private $regular_working_times;         // 所定労働時間
     private $out_of_regular_working_times;  // 所定外労働時間
@@ -41,6 +43,8 @@ class TempWorkingTimeDate extends Model
     private $out_of_legal_working_times;    // 法定外労働時間
     private $not_employment_working_hours;  // 未就労労働時間
     private $off_hours_working_hours;       // 時間外労働時間
+    private $missing_middle_hours;          // 私用外出時間
+    private $public_going_out_hours;        // 公用外出時間
     private $working_status;                // 勤務状態
     private $working_status_name;           // 勤務状態名称
     private $note;                          // メモ
@@ -199,7 +203,7 @@ class TempWorkingTimeDate extends Model
         $this->array_leaving_time[$index] = $value;
     }
 
-    // 中抜け時刻
+    // 私用外出時刻
     public function getMissingmiddletimeAttribute($index)
     {
         return $this->array_missing_middle_time[$index];
@@ -210,7 +214,7 @@ class TempWorkingTimeDate extends Model
         $this->array_missing_middle_time[$index] = $value;
     }
 
-    // 中抜け戻り時刻
+    // 私用外出戻り時刻
     public function getMissingmiddlereturntimeAttribute($index)
     {
         return $this->array_missing_middle_return_time[$index];
@@ -219,6 +223,28 @@ class TempWorkingTimeDate extends Model
     public function setMissingmiddlereturntimeAttribute($index, $value)
     {
         $this->array_missing_middle_return_time[$index] = $value;
+    }
+
+    // 公用外出時刻
+    public function getPublicgoingouttimeAttribute($index)
+    {
+        return $this->array_public_going_out_time[$index];
+    }
+
+    public function setPublicgoingouttimeAttribute($index, $value)
+    {
+        $this->array_public_going_out_time[$index] = $value;
+    }
+
+    // 公用外出戻り時刻
+    public function getPublicgoingoutreturntimeAttribute($index)
+    {
+        return $this->array_public_going_out_return_time[$index];
+    }
+
+    public function setPublicgoingoutreturntimeAttribute($index, $value)
+    {
+        $this->array_public_going_out_return_time[$index] = $value;
     }
 
     // 合計勤務時間
@@ -326,6 +352,28 @@ class TempWorkingTimeDate extends Model
     public function setOffhoursworkinghoursAttribute($value)
     {
         $this->off_hours_working_hours = $value;
+    }
+
+    // 私用外出時間
+    public function getMissingmiddlehoursAttribute()
+    {
+        return $this->missing_middle_hours;
+    }
+
+    public function setMissingmiddlehoursAttribute($value)
+    {
+        $this->missing_middle_hours = $value;
+    }
+
+    // 公用外出時間
+    public function getPublicgoingouthoursAttribute()
+    {
+        return $this->public_going_out_hours;
+    }
+
+    public function setPublicgoingouthoursAttribute($value)
+    {
+        $this->public_going_out_hours = $value;
     }
 
 
@@ -795,6 +843,16 @@ class TempWorkingTimeDate extends Model
                     $this->table.'.missing_middle_return_time_3',
                     $this->table.'.missing_middle_return_time_4',
                     $this->table.'.missing_middle_return_time_5',
+                    $this->table.'.public_going_out_time_1',
+                    $this->table.'.public_going_out_time_2',
+                    $this->table.'.public_going_out_time_3',
+                    $this->table.'.public_going_out_time_4',
+                    $this->table.'.public_going_out_time_5',
+                    $this->table.'.public_going_out_return_time_1',
+                    $this->table.'.public_going_out_return_time_2',
+                    $this->table.'.public_going_out_return_time_3',
+                    $this->table.'.public_going_out_return_time_4',
+                    $this->table.'.public_going_out_return_time_5',
                     $this->table.'.total_working_times',
                     $this->table.'.regular_working_times',
                     $this->table.'.out_of_regular_working_times',
@@ -804,6 +862,8 @@ class TempWorkingTimeDate extends Model
                     $this->table.'.out_of_legal_working_times',
                     $this->table.'.not_employment_working_hours',
                     $this->table.'.off_hours_working_hours',
+                    $this->table.'.public_going_out_hours',
+                    $this->table.'.missing_middle_hours',
                     $this->table.'.working_status',
                     $this->table.'.working_status_name',
                     $this->table.'.note',
@@ -877,7 +937,17 @@ class TempWorkingTimeDate extends Model
                 ->selectRaw('(case when t2.missing_middle_return_time_2 is not null then t2.missing_middle_return_time_2 else null end) as missing_middle_return_time_2')
                 ->selectRaw('(case when t2.missing_middle_return_time_3 is not null then t2.missing_middle_return_time_3 else null end) as missing_middle_return_time_3')
                 ->selectRaw('(case when t2.missing_middle_return_time_4 is not null then t2.missing_middle_return_time_4 else null end) as missing_middle_return_time_4')
-                ->selectRaw('(case when t2.missing_middle_return_time_5 is not null then t2.missing_middle_return_time_5 else null end) as missing_middle_return_time_5');
+                ->selectRaw('(case when t2.missing_middle_return_time_5 is not null then t2.missing_middle_return_time_5 else null end) as missing_middle_return_time_5')
+                ->selectRaw('(case when t2.public_going_out_time_1 is not null then t2.public_going_out_time_1 else null end) as public_going_out_time_1')
+                ->selectRaw('(case when t2.public_going_out_time_2 is not null then t2.public_going_out_time_2 else null end) as public_going_out_time_2')
+                ->selectRaw('(case when t2.public_going_out_time_3 is not null then t2.public_going_out_time_3 else null end) as public_going_out_time_3')
+                ->selectRaw('(case when t2.public_going_out_time_4 is not null then t2.public_going_out_time_4 else null end) as public_going_out_time_4')
+                ->selectRaw('(case when t2.public_going_out_time_5 is not null then t2.public_going_out_time_5 else null end) as public_going_out_time_5')
+                ->selectRaw('(case when t2.public_going_out_return_time_1 is not null then t2.public_going_out_return_time_1 else null end) as public_going_out_return_time_1')
+                ->selectRaw('(case when t2.public_going_out_return_time_2 is not null then t2.public_going_out_return_time_2 else null end) as public_going_out_return_time_2')
+                ->selectRaw('(case when t2.public_going_out_return_time_3 is not null then t2.public_going_out_return_time_3 else null end) as public_going_out_return_time_3')
+                ->selectRaw('(case when t2.public_going_out_return_time_4 is not null then t2.public_going_out_return_time_4 else null end) as public_going_out_return_time_4')
+                ->selectRaw('(case when t2.public_going_out_return_time_5 is not null then t2.public_going_out_return_time_5 else null end) as public_going_out_return_time_5');
             $mainquery->addselect('t2.total_working_times')
                 ->addselect('t2.regular_working_times')
                 ->addselect('t2.out_of_regular_working_times')
@@ -887,6 +957,8 @@ class TempWorkingTimeDate extends Model
                 ->addselect('t2.out_of_legal_working_times')
                 ->addselect('t2.not_employment_working_hours')
                 ->addselect('t2.off_hours_working_hours')
+                ->addselect('t2.public_going_out_hours')
+                ->addselect('t2.missing_middle_hours')
                 ->addselect('t2.working_status')
                 ->addselect('t5.code_name as working_status_name')
                 ->addselect('t2.note')
@@ -1011,6 +1083,16 @@ class TempWorkingTimeDate extends Model
                     'missing_middle_return_time_3' => $this->array_missing_middle_return_time[2],
                     'missing_middle_return_time_4' => $this->array_missing_middle_return_time[3],
                     'missing_middle_return_time_5' => $this->array_missing_middle_return_time[4],
+                    'public_going_out_time_1' => $this->array_public_going_out_time[0],
+                    'public_going_out_time_2' => $this->array_public_going_out_time[1],
+                    'public_going_out_time_3' => $this->array_public_going_out_time[2],
+                    'public_going_out_time_4' => $this->array_public_going_out_time[3],
+                    'public_going_out_time_5' => $this->array_public_going_out_time[4],
+                    'public_going_out_return_time_1' => $this->array_public_going_out_return_time[0],
+                    'public_going_out_return_time_2' => $this->array_public_going_out_return_time[1],
+                    'public_going_out_return_time_3' => $this->array_public_going_out_return_time[2],
+                    'public_going_out_return_time_4' => $this->array_public_going_out_return_time[3],
+                    'public_going_out_return_time_5' => $this->array_public_going_out_return_time[4],
                     'total_working_times' => $this->total_working_times,
                     'regular_working_times' => $this->regular_working_times,
                     'out_of_regular_working_times' => $this->out_of_regular_working_times,
@@ -1020,6 +1102,8 @@ class TempWorkingTimeDate extends Model
                     'out_of_legal_working_times' => $this->out_of_legal_working_times,
                     'not_employment_working_hours' => $this->not_employment_working_hours,
                     'off_hours_working_hours' => $this->off_hours_working_hours,
+                    'public_going_out_hours' => $this->public_going_out_hours,
+                    'missing_middle_hours' => $this->missing_middle_hours,
                     'working_status' => $this->working_status,
                     'working_status_name' => $this->working_status_name,
                     'note' => $this->note,
