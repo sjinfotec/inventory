@@ -534,7 +534,7 @@ class WorkTime extends Model
             ->where('t1.is_deleted', '=', 0)
             ->orderBy('t1.department_code', 'asc')
             ->orderBy('t1.employment_status', 'asc')
-            ->orderBy('t1.name', 'asc')
+            ->orderBy('t1.code', 'asc')
             ->orderBy('t2.record_date', 'asc')
             ->orderBy('t2.record_datetime', 'asc')
             ->get();
