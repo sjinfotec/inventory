@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ApiCommonController;
 
 class TempWorkingTimeDate extends Model
 {
@@ -758,8 +759,7 @@ class TempWorkingTimeDate extends Model
      *
      * @return sql取得結果
      */
-    public function getTempWorkingTimeDateUserJoin(){
-
+    public function getTempWorkingTimeDateUserJoin($targetdate){
 
         // 日次労働時間取得SQL作成
         \DB::enableQueryLog();
@@ -830,6 +830,13 @@ class TempWorkingTimeDate extends Model
                     $this->table.'.year',
                     $this->table.'.pattern',
                     $this->table.'.fixedtime');
+
+            // 適用期間日付の取得
+            $apicommon = new ApiCommonController();
+            // usersの最大適用開始日付subquery
+            $subquery2 = $apicommon->getUserApplyTermSubquery($targetdate);
+            // departmentsの最大適用開始日付subquery
+            $subquery3 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
 
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $date = date_create($this->param_date_from);
@@ -913,9 +920,8 @@ class TempWorkingTimeDate extends Model
                     $join->on('t2.department_code', '=', 't1.department_code');
                     $join->on('t2.employment_status', '=', 't1.employment_status');
                 })
-                ->leftJoin($this->table_departments.' as t3', function ($join) { 
-                    $join->on('t3.code', '=', 't1.department_code')
-                    ->where('t3.is_deleted', '=', 0);
+                ->leftJoinSub($subquery3, 't3', function ($join) { 
+                    $join->on('t3.code', '=', 't1.department_code');
                 })
                 ->leftJoin($this->table_generalcodes.' as t4', function ($join) { 
                     $join->on('t4.code', '=', 't1.employment_status')
@@ -929,17 +935,23 @@ class TempWorkingTimeDate extends Model
                 });
                         
             if(!empty($this->param_employment_status)){
-                $mainquery->where('t1.employment_status', $this->param_employment_status);   //employment_status指定
+                $mainquery->where('t1.employment_status', $this->param_employment_status);      //employment_status指定
             }
             
             if(!empty($this->param_user_code)){
-                $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
+                $mainquery->where('t1.code', $this->param_user_code);                           //user_code指定
             }
             
             if(!empty($this->param_department_code)){
                 $mainquery->where('t1.department_code', $this->param_department_code);          //department_code指定
             }
-            $result = $mainquery->where('t1.is_deleted', '=', 0)->get();
+            $result = 
+                $mainquery
+                ->JoinSub($subquery2, 't6', function ($join) { 
+                    $join->on('t6.code', '=', 't1.code');
+                    $join->on('t6.max_apply_term_from', '=', 't1.apply_term_from');
+                })
+                ->get();
             
         }catch(\PDOException $pe){
             Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');

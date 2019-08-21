@@ -12,8 +12,8 @@ export default {
   name: "selectDepartment",
   props: {
     blankData: {
-        type: Boolean,
-        default: false
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -24,19 +24,21 @@ export default {
   },
   // マウント時
   mounted() {
-    this.getDepartmentList();
+    this.getDepartmentList('');
   },
   methods: {
-    getDepartmentList(){
+    getDepartmentList(datevalue){
       this.$axios
-        .get("/get_departments_list")
+        .get("/get_departments_list", {
+          params: {
+            targetdate: datevalue
+          }
+        })
         .then(response => {
-          console.log("部署リスト取得 1");
           this.departmentList = response.data;
-          console.log("部署リスト取得 2");
         })
         .catch(reason => {
-          alert("error");
+          alert("部署選択リスト作成エラー");
         });
     },
     // 選択が変更された場合、親コンポーネントに選択値を返却

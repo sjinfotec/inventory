@@ -92,6 +92,8 @@ Vue.component(
     require("./components/InputDatepicker.vue").default
 );
 
+Vue.component("input-ym", require("./components/InputDateYm.vue").default);
+
 Vue.component("user-add", require("./components/UserAdd.vue").default);
 
 Vue.component(
@@ -173,6 +175,8 @@ Vue.component(
 );
 
 Vue.component("col-note", require("./components/ColNote.vue").default);
+
+Vue.component("general-list", require("./components/SelectGeneralList.vue").default);
 
 // CSV ダウンロードボタン
 Vue.component(
