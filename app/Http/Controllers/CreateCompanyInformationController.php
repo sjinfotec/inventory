@@ -64,9 +64,11 @@ class CreateCompanyInformationController extends Controller
         $systemdate = Carbon::now();
         $user = Auth::user();
         $user_code = $user->code;
+        $apply_term_from = "20000101";
 
         DB::beginTransaction();
         try{
+            $company->setApplytermfromAttribute($apply_term_from);
             $company->setNameAttribute($inputs->get('company_name'));
             $company->setKanaAttribute($inputs->get('company_kana'));
             $company->setPostcodeAttribute($inputs->get('post_code'));
