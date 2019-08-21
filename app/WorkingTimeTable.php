@@ -26,7 +26,9 @@ class WorkingTimeTable extends Model
     private $updated_user;                  
     private $created_at;                  
     private $updated_at;                  
-    private $is_deleted;                  
+    private $is_deleted;
+    private $apply_term_from;                 // 適用期間開始
+
 
     public function getIdAttribute()
     {
@@ -138,6 +140,17 @@ class WorkingTimeTable extends Model
         $this->is_deleted = $value;
     }
 
+    // 適用期間開始
+    public function getApplytermfromAttribute()
+    {
+        return $this->apply_term_from;
+    }
+
+    public function setApplytermfromAttribute($value)
+    {
+        $this->apply_term_from = $value;
+    }
+
     //--------------- パラメータ項目属性 -----------------------------------
 
     private $param_date_from;                   // 開始日付
@@ -228,16 +241,24 @@ class WorkingTimeTable extends Model
             ->where($this->table_generalcodes.'.code', '1')
             ->value('code_name');
 
-        $data = DB::table($this->table)
-            ->select(
-                $this->table.'.no',
-                $this->table.'.name'
-            )
-            ->whereNotIn($this->table.'.no', [$code_name])
-            ->where($this->table.'.is_deleted', '0')
-            ->groupBy($this->table.'.no',$this->table.'.name')
-            ->get();
+        // no nameでgroup by した際　noが同じでnameが異なるものが別れて表示してしまう対策
+        $subquery = DB::table($this->table)
+            ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+            ->selectRaw('no as no')
+            ->where('is_deleted', '=', 0)
+            ->groupBy('no');
 
+        $data = DB::table($this->table)
+            ->JoinSub($subquery, 't1', function ($join) { 
+                $join->on('t1.no', '=', $this->table.'.no');
+                $join->on('t1.max_apply_term_from', '=', $this->table.'.apply_term_from');
+            })
+            ->select($this->table.'.no',$this->table.'.name')
+            ->whereNotIn($this->table.'.no', [$code_name])
+            ->groupBy($this->table.'.no',$this->table.'.name')
+            ->orderby($this->table.'.no','asc')
+            ->get();
+    
         return $data;
     }
 
@@ -249,6 +270,7 @@ class WorkingTimeTable extends Model
     public function insert(){
         DB::table($this->table)->insert(
             [
+                'apply_term_from' => $this->apply_term_from,
                 'no' => $this->no,
                 'name' => $this->name,
                 'working_time_kubun' => $this->working_time_kubun,
@@ -261,7 +283,7 @@ class WorkingTimeTable extends Model
     }
 
     /**
-     * 登録(UPDATE)
+     * 修正(UPDATE)
      *
      * @return void
      */
@@ -271,6 +293,7 @@ class WorkingTimeTable extends Model
             ->where($this->table.'.is_deleted', 0)
             ->update(
                 [
+                    'apply_term_from' => $this->apply_term_from,
                     'name' => $this->name,
                     'working_time_kubun' => $this->working_time_kubun,
                     'from_time' => $this->from_time,
@@ -290,6 +313,7 @@ class WorkingTimeTable extends Model
         $data = DB::table($this->table)
             ->select(
                 $this->table.'.id',
+                $this->table.'.apply_term_from',
                 $this->table.'.no',
                 $this->table.'.name',
                 $this->table.'.working_time_kubun',
@@ -313,6 +337,7 @@ class WorkingTimeTable extends Model
     public function updateIsDelete(){
         DB::table($this->table)
             ->where('no', $this->no)
+            ->where('apply_term_from', $this->apply_term_from)
             ->update(['is_deleted' => 1]);
     }
 

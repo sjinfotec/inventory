@@ -83,6 +83,8 @@ Route::get('/create_time_table', 'CreateTimeTableController@index')->middleware(
 Route::get('/create_time_table/get', 'CreateTimeTableController@getDetail')->middleware('auth');
 Route::post('/create_time_table/store', 'CreateTimeTableController@store')->middleware('auth');
 Route::post('/create_time_table/del', 'CreateTimeTableController@del')->middleware('auth');
+Route::post('/create_time_table/fix', 'CreateTimeTableController@fix')->middleware('auth');
+Route::post('/create_time_table/add', 'CreateTimeTableController@add')->middleware('auth');
 // リスト取得
 Route::get('/get_departments_list', 'ApiCommonController@getDepartmentList')->middleware('auth');
 Route::get('/get_employment_status_list', 'ApiCommonController@getEmploymentStatusList')->middleware('auth');
