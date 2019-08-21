@@ -788,6 +788,13 @@ class ApiCommonController extends Controller
      */
     public function chkMode($target_mode, $source_mode){
 
+        if ( $source_mode == '') {
+            Log::debug('chkMode  target_mode = '.$target_mode);
+            if ($target_mode == Config::get('const.C005.attendance_time')) {
+                return true;
+            }
+            return false;
+        }
         if ($target_mode == Config::get('const.C005.attendance_time')) {
             if ($source_mode == Config::get('const.C005.leaving_time')) {
                 return true;
@@ -799,6 +806,9 @@ class ApiCommonController extends Controller
             if ($source_mode == Config::get('const.C005.missing_middle_return_time')) {
                 return true;
             }
+            if ($source_mode == Config::get('const.C005.public_going_out_return_time')) {
+                return true;
+            }
         } elseif ($target_mode == Config::get('const.C005.missing_middle_time')) {
             if ($source_mode == Config::get('const.C005.attendance_time')) {
                 return true;
@@ -806,8 +816,25 @@ class ApiCommonController extends Controller
             if ($source_mode == Config::get('const.C005.missing_middle_return_time')) {
                 return true;
             }
+            if ($source_mode == Config::get('const.C005.public_going_out_return_time')) {
+                return true;
+            }
         } elseif ($target_mode == Config::get('const.C005.missing_middle_return_time')) {
             if ($source_mode == Config::get('const.C005.missing_middle_time')) {
+                return true;
+            }
+        } elseif ($target_mode == Config::get('const.C005.public_going_out_time')) {
+            if ($source_mode == Config::get('const.C005.attendance_time')) {
+                return true;
+            }
+            if ($source_mode == Config::get('const.C005.missing_middle_return_time')) {
+                return true;
+            }
+            if ($source_mode == Config::get('const.C005.public_going_out_return_time')) {
+                return true;
+            }
+        } elseif ($target_mode == Config::get('const.C005.public_going_out_return_time')) {
+            if ($source_mode == Config::get('const.C005.public_going_out_time')) {
                 return true;
             }
         } else {

@@ -180,32 +180,73 @@
                 class="col-12 col-lg-4 p-0 align-self-stretch"
               ></col-attendance>
               <!-- /.col -->
-              <!-- col 中抜け 戻り -->
+              <!-- col 公用外出 戻り -->
               <col-missingmiddle
+                v-bind:missingmiddlename="'公用外出時間'"
+                v-bind:missingmiddletime="calclist.public_going_out_time_1"
+                v-bind:missingmiddlereturntime="calclist.public_going_out_return_time_1"
+                v-bind:displaynone="false"
+                class="col-12 col-lg-4 p-0 align-self-stretch"
+              ></col-missingmiddle>
+              <col-missingmiddle
+                v-bind:missingmiddlename="'公用外出時間'"
+                v-bind:missingmiddletime="calclist.public_going_out_time_2"
+                v-bind:missingmiddlereturntime="calclist.public_going_out_return_time_2"
+                v-bind:displaynone="false"
+                class="col-12 col-lg-4 p-0 align-self-stretch"
+              ></col-missingmiddle>
+              <col-missingmiddle
+                v-bind:missingmiddlename="'公用外出時間'"
+                v-bind:missingmiddletime="calclist.public_going_out_time_3"
+                v-bind:missingmiddlereturntime="calclist.public_going_out_return_time_3"
+                v-bind:displaynone="false"
+                class="col-12 col-lg-4 p-0 align-self-stretch"
+              ></col-missingmiddle>
+              <col-missingmiddle
+                v-bind:missingmiddlename="'公用外出時間'"
+                v-bind:missingmiddletime="calclist.public_going_out_time_4"
+                v-bind:missingmiddlereturntime="calclist.public_going_out_return_time_4"
+                v-bind:displaynone="false"
+                class="col-12 col-lg-4 p-0 align-self-stretch"
+              ></col-missingmiddle>
+              <col-missingmiddle
+                v-bind:missingmiddlename="'公用外出時間'"
+                v-bind:missingmiddletime="calclist.public_going_out_time_5"
+                v-bind:missingmiddlereturntime="calclist.public_going_out_return_time_5"
+                v-bind:displaynone="false"
+                class="col-12 col-lg-4 p-0 align-self-stretch"
+              ></col-missingmiddle>
+              <!-- col 私用外出 戻り -->
+              <col-missingmiddle
+                v-bind:missingmiddlename="'私用外出時間'"
                 v-bind:missingmiddletime="calclist.missing_middle_time_1"
                 v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_1"
                 v-bind:displaynone="false"
                 class="col-12 col-lg-4 p-0 align-self-stretch"
               ></col-missingmiddle>
               <col-missingmiddle
+                v-bind:missingmiddlename="'私用外出時間'"
                 v-bind:missingmiddletime="calclist.missing_middle_time_2"
                 v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_2"
                 v-bind:displaynone="false"
                 class="col-12 col-lg-4 p-0 align-self-stretch"
               ></col-missingmiddle>
               <col-missingmiddle
+                v-bind:missingmiddlename="'私用外出時間'"
                 v-bind:missingmiddletime="calclist.missing_middle_time_3"
                 v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_3"
                 v-bind:displaynone="false"
                 class="col-12 col-lg-4 p-0 align-self-stretch"
               ></col-missingmiddle>
               <col-missingmiddle
+                v-bind:missingmiddlename="'私用外出時間'"
                 v-bind:missingmiddletime="calclist.missing_middle_time_4"
                 v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_4"
                 v-bind:displaynone="false"
                 class="col-12 col-lg-4 p-0 align-self-stretch"
               ></col-missingmiddle>
               <col-missingmiddle
+                v-bind:missingmiddlename="'私用外出時間'"
                 v-bind:missingmiddletime="calclist.missing_middle_time_5"
                 v-bind:missingmiddlereturntime="calclist.missing_middle_return_time_5"
                 v-bind:displaynone="false"
