@@ -305,7 +305,7 @@ class ApiCommonController extends Controller
     }
 
     /**
-     * リスト取得
+     * タイムテーブルリスト取得
      *
      * @return list
      */

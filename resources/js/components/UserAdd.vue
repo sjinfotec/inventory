@@ -26,7 +26,28 @@
               <!-- .row -->
               <div class="row justify-content-between">
                 <!-- .col -->
-                <div class="col-12 pb-2">
+                <div class="col-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        id="basic-addon1"
+                      >部署</span>
+                    </div>
+                    <fvl-search-select
+                      :selected.sync="departmentCode"
+                      class="p-0"
+                      name="departmentCode"
+                      :options="departmentList"
+                      placeholder="選択すると編集モードになります"
+                      :allowEmpty="true"
+                      :search-keys="['code']"
+                      option-key="code"
+                      option-value="name"
+                    />
+                  </div>
+                </div>
+                <div class="col-6 pb-2">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
@@ -39,7 +60,7 @@
                       class="p-0"
                       name="userCode"
                       :options="userList"
-                      placeholder="ユーザーを選択すると編集モードになります"
+                      placeholder="選択すると編集モードになります"
                       :allowEmpty="true"
                       :search-keys="['code']"
                       option-key="code"
@@ -545,6 +566,7 @@ export default {
       userList: [],
       userDetails: [],
       userCode: "",
+      departmentCode: "",
       enterPass: "",
       reEnterPass: "",
       validate: false,
@@ -596,6 +618,15 @@ export default {
       } else {
         this.inputClear();
       }
+    },
+    departmentCode: function(val, oldVal) {
+      if (this.departmentCode != "") {
+        this.getUserList(1, this.departmentCode);
+      } else {
+        this.userCode = "";
+        this.getUserList(1, null);
+      }
+      console.log("ユーザー再取得");
     }
   },
   methods: {
@@ -773,6 +804,8 @@ export default {
         .get("/get_departments_list")
         .then(response => {
           this.departmentList = response.data;
+          this.object = { code: "", name: "未選択" };
+          this.departmentList.unshift(this.object);
           console.log("部署リスト取得");
         })
         .catch(reason => {
