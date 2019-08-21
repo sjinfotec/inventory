@@ -253,9 +253,9 @@ class WorkingTimeTable extends Model
                 $join->on('t1.no', '=', $this->table.'.no');
                 $join->on('t1.max_apply_term_from', '=', $this->table.'.apply_term_from');
             })
-            ->select($this->table.'.no',$this->table.'.name')
+            ->select($this->table.'.no',$this->table.'.name',$this->table.'.apply_term_from')
             ->whereNotIn($this->table.'.no', [$code_name])
-            ->groupBy($this->table.'.no',$this->table.'.name')
+            ->groupBy($this->table.'.no',$this->table.'.name',$this->table.'.apply_term_from')
             ->orderby($this->table.'.no','asc')
             ->get();
     

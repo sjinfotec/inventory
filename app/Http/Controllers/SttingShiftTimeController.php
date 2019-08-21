@@ -73,13 +73,14 @@ class SttingShiftTimeController extends Controller
         $response = collect();
         $code = $request->user_code;
         $time_table_no = $request->time_table_no;
+        $department_code = $request->department_code;
             
         $from = new Carbon($request->from);
         $from = $from->format("Y/m/d");
         $to = new Carbon($request->to);
         $to = $to->format("Y/m/d");
 
-        $result = $this->dbConnectInsert($code,$time_table_no,$from,$to);
+        $result = $this->dbConnectInsert($code,$department_code,$time_table_no,$from,$to);
         if($result){
             $response->put('result',self::SUCCESS);
         }else{
@@ -98,12 +99,13 @@ class SttingShiftTimeController extends Controller
      * @param [type] $to
      * @return void
      */
-    private function dbConnectInsert($code,$time_table_no,$from,$to){
+    private function dbConnectInsert($code,$department_code,$time_table_no,$from,$to){
         $systemdate = Carbon::now();
         DB::beginTransaction();
         try{
             $shift_info = new ShiftInformation();
             $shift_info->setUsercodeAttribute($code);
+            $shift_info->setDepartmentcodeAttribute($department_code);
             $shift_info->setWorkingtimetablenoAttribute($time_table_no);
             $shift_info->setStarttargetdateAttribute($from);
             $shift_info->setEndtargetdateAttribute($to);
