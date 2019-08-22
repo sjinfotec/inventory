@@ -54,6 +54,7 @@ Route::post('/user_add/del', 'UserAddController@del')->middleware('auth');
 Route::post('/user_add/edit', 'UserAddController@edit')->middleware('auth');
 Route::post('/user_add/fix', 'UserAddController@fixUser')->middleware('auth');
 Route::post('/user_add/passchange', 'UserAddController@passChange')->middleware('auth');
+Route::post('/user_add/release_card_info', 'UserAddController@releaseCardInfo')->middleware('auth');
 // ユーザー権限取得
 Route::get('/get_login_user_role', 'ApiCommonController@getLoginUserRole')->middleware('auth');
 // 部署

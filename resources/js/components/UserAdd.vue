@@ -410,6 +410,17 @@
                 </div>
               </div>
               <!-- col -->
+              <div class="col-md-12 pb-2" v-if="cardId">
+                <div class="btn-group d-flex">
+                  <button
+                    class="btn btn-warning"
+                    @click="ReleaseCardInfo('warning')"
+                    v-if="userCode != ''"
+                  >ICカード情報を削除する</button>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- col -->
               <div class="col-md-12 pb-2">
                 <div class="btn-group d-flex">
                   <button class="btn btn-success" @click="FixUser()" v-if="userCode != ''">修正する</button>
@@ -572,6 +583,7 @@ export default {
       validate: false,
       errors: [],
       oldCode: "",
+      cardId: "",
       oldPass: ""
     };
   },
@@ -597,19 +609,23 @@ export default {
           })
           .then(response => {
             this.userDetails = response.data;
-            this.form.id = this.userDetails[0].id;
-            this.form.name = this.userDetails[0].name;
-            this.form.kana = this.userDetails[0].kana;
-            this.form.code = this.userDetails[0].code;
-            this.form.password = this.userDetails[0].password;
-            this.form.email = this.userDetails[0].email;
-            this.form.departmentCode = this.userDetails[0].department_code;
-            this.form.status = "" + this.userDetails[0].employment_status + "";
-            this.form.table_no =
-              "" + this.userDetails[0].working_timetable_no + "";
-            // hidden
-            this.oldCode = this.userDetails[0].code;
-            this.oldPass = this.userDetails[0].password;
+            if (this.userDetails.length > 0) {
+              console.log("length > 0");
+              this.cardId = this.userDetails[0].card_idm;
+            }
+            // this.form.id = this.userDetails[0].id;
+            // this.form.name = this.userDetails[0].name;
+            // this.form.kana = this.userDetails[0].kana;
+            // this.form.code = this.userDetails[0].code;
+            // this.form.password = this.userDetails[0].password;
+            // this.form.email = this.userDetails[0].email;
+            // this.form.departmentCode = this.userDetails[0].department_code;
+            // this.form.status = "" + this.userDetails[0].employment_status + "";
+            // this.form.table_no =
+            //   "" + this.userDetails[0].working_timetable_no + "";
+            // // hidden
+            // this.oldCode = this.userDetails[0].code;
+            // this.oldPass = this.userDetails[0].password;
             console.log("ユーザー詳細情報取得");
           })
           .catch(reason => {
@@ -702,6 +718,33 @@ export default {
       } else {
         console.log("fix error");
       }
+    },
+    ReleaseCardInfo: function(state) {
+      this.$swal({
+        title: "ユーザーに紐づいているICカードを解除します",
+        text: "解除しますか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(willDelete => {
+        if (willDelete) {
+          this.$axios
+            .post("/user_add/release_card_info", {
+              card_idm: this.cardId
+            })
+            .then(response => {
+              var res = response.data;
+              if (res.result == 0) {
+                this.alert("success", "カードを解除しました", "解除完了");
+                this.cardId = "";
+                // this.get;
+              } else {
+              }
+            })
+            .catch(reason => {});
+        } else {
+        }
+      });
     },
     // 削除
     del: function(id, index) {

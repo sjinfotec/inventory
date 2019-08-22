@@ -7,7 +7,7 @@
         <div class="card shadow-pl">
           <!-- panel header -->
           <div class="card-header bg-transparent pb-0 border-0">
-            <h1 class="float-sm-left font-size-rg">シフトを割り当てを編集する</h1>
+            <h1 class="float-sm-left font-size-rg">シフトの割り当てを編集する</h1>
             <span class="float-sm-right font-size-sm">勤務時間設定で登録したタイムテーブルを割り当てることができます</span>
           </div>
           <!-- /.panel header -->
@@ -271,7 +271,7 @@ export default {
         }
         if (!this.timeTable.no) {
           flag = false;
-          this.errors.push("タイムテーブル選択をしてください");
+          this.errors.push("シフトを選択をしてください");
         }
         if (!this.from) {
           flag = false;

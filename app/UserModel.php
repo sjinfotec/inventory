@@ -10,6 +10,7 @@ use Carbon\Carbon;
 class UserModel extends Model
 {
     protected $table = 'users';
+    protected $table_card_infomations = 'card_informations';
     protected $guarded = array('id');
 
     //--------------- メンバー属性 -----------------------------------
@@ -238,7 +239,16 @@ class UserModel extends Model
      * @return void
      */
     public function getUserDetails(){
+        $subquery = DB::table($this->table_card_infomations)
+            ->selectRaw('id')
+            ->selectRaw('user_code')
+            ->selectRaw('card_idm')
+            ->where('is_deleted', '=', 0);
+    
         $data = DB::table($this->table)
+            ->leftJoinSub($subquery, 't1', function ($join) { 
+                $join->on('t1.user_code', '=', $this->table.'.code');
+            })
             ->select(
                 $this->table.'.id',
                 $this->table.'.apply_term_from',
@@ -249,7 +259,8 @@ class UserModel extends Model
                 $this->table.'.kana',
                 $this->table.'.working_timetable_no',
                 $this->table.'.email',
-                $this->table.'.password'
+                $this->table.'.password',
+                't1.card_idm'
             )
             ->where($this->table.'.code', $this->code)
             ->where($this->table.'.is_deleted', 0)

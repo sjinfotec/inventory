@@ -257,4 +257,25 @@ class UserAddController extends Controller
         return $response;
 
     }
+
+    public function releaseCardInfo(Request $request){
+        $card_idm = $request->card_idm;
+        $response = collect();
+        $systemdate = Carbon::now();
+        $user = Auth::user();
+        $user_code = $user->code;
+    
+        // パスワード変更
+        DB::beginTransaction();
+        try{
+            DB::table('card_informations')->where('card_idm', $card_idm)->update(['is_deleted' => 1,'updated_user' => $user_code ,'updated_at' => $systemdate]);
+            DB::commit();
+            $response->put('result',self::SUCCESS);
+
+        }catch(\PDOException $e){
+            DB::rollBack();
+            $response->put('result',self::FAILED);
+        }
+        return $response;
+    }
 }
