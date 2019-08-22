@@ -575,7 +575,7 @@ body {
 /* header */
 
 .logo-height {
-	height: 1.25rem;
+    height: 1.25rem;
 }
 
 /* login */
@@ -604,12 +604,12 @@ body {
 }
 
 .fvl-input-wrapper {
-    padding: 0;    
+    padding: 0;
 }
 
 .fvl-input {
     padding: 0.55rem 0.75rem;
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     border: none;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
@@ -620,20 +620,20 @@ body {
 }
 
 .radius .fvl-input {
-    border-radius: .25rem;
+    border-radius: 0.25rem;
 }
 
 .input-group-text {
-    height: 2.29rem!important;
+    height: 2.29rem !important;
 }
 
 .fvl-has-error {
-    margin-bottom: 1.4rem!important;
-    display: block!important;
+    margin-bottom: 1.4rem !important;
+    display: block !important;
 }
 
 .fvl-checkbox-error-message {
-    text-align: right!important;
+    text-align: right !important;
 }
 
 /* vue datepicker */
@@ -682,7 +682,7 @@ body {
 }
 
 .fvl-search-select {
-    background-color: #FFFFFF;
+    background-color: #ffffff;
     border-radius: 0.25rem;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
@@ -693,66 +693,68 @@ body {
 /* vue setting modal */
 
 .v--modal-box {
-    height: auto!important;    
+    height: auto !important;
 }
 
 .v--modal {
-    border-radius: 4px!important;    
+    border-radius: 4px !important;
 }
 
 .color-red {
     color: red;
 }
 
+.error-red {
+    color: crimson;
+}
+
 /* global setteing */
 
 .print-only {
-	display: none;
+    display: none;
 }
 
 .page-break-after {
-	page-break-after: always;
+    page-break-after: always;
 }
 
 /* print setteing */
 
 @page {
-	size: A4;
-	margin: 5mm 2mm;
- }
+    size: A4;
+    margin: 5mm 2mm;
+}
 
 @media print {
+    body {
+        padding-top: 0;
+    }
 
-	body {
-		padding-top: 0;
-	}
+    .print-none {
+        display: none;
+    }
 
-	.print-none {
-		display: none;
-	}
+    .print-only {
+        display: block;
+    }
 
-	.print-only {
-		display: block;
-	}
+    .table td {
+        padding: 0.5rem;
+    }
 
-	.table td {
-		padding: 0.5rem;
-	}
+    .font-size-rg {
+        font-size: 0.8rem;
+    }
 
-	.font-size-rg {
-		font-size: 0.8rem;
-	}
+    .font-size-sm {
+        font-size: 0.6rem;
+    }
 
-	.font-size-sm {
-		font-size: 0.6rem;
-	}
+    .card {
+        display: block;
+    }
 
-	.card {
-		display: block;
-	}
-
- 	.collapse:not(.show) {
-    	display: block;
-	}
-
+    .collapse:not(.show) {
+        display: block;
+    }
 }

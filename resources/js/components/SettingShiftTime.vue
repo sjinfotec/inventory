@@ -137,6 +137,15 @@
                 <div class="btn-group d-flex">
                   <button
                     type="button"
+                    class="btn btn-primary btn-lg font-size-rg w-100"
+                    @click="getUserShift()"
+                  >指定した期間のシフトを表示する</button>
+                </div>
+              </div>
+              <div class="col-md-12 pb-2">
+                <div class="btn-group d-flex">
+                  <button
+                    type="button"
                     class="btn btn-danger btn-lg font-size-rg w-100"
                     @click="alertRangeDelConf('info')"
                   >指定した期間を削除する</button>
@@ -250,7 +259,7 @@ export default {
     // バリデーション
     checkForm: function() {
       var flag = false;
-      if (this.selectedUser && this.no && this.from && this.to) {
+      if (this.selectedUser && this.timeTable.no && this.from && this.to) {
         flag = true;
         return flag;
       } else {
@@ -260,9 +269,33 @@ export default {
           flag = false;
           this.errors.push("ユーザーを選択してください");
         }
-        if (!this.no) {
+        if (!this.timeTable.no) {
           flag = false;
           this.errors.push("タイムテーブル選択をしてください");
+        }
+        if (!this.from) {
+          flag = false;
+          this.errors.push("開始日を入力してください");
+        }
+        if (!this.to) {
+          flag = false;
+          this.errors.push("終了日を入力してください");
+        }
+        return flag;
+      }
+    },
+    // 検索・削除のバリデーション
+    checkFormSearch: function() {
+      var flag = false;
+      if (this.selectedUser && this.from && this.to) {
+        flag = true;
+        return flag;
+      } else {
+        this.errors = [];
+
+        if (!this.selectedUser) {
+          flag = false;
+          this.errors.push("ユーザーを選択してください");
         }
         if (!this.from) {
           flag = false;
@@ -279,18 +312,22 @@ export default {
       this.$swal(title, message, state);
     },
     alertRangeDelConf: function(state) {
-      this.$swal({
-        title: "確認",
-        text: "選択した日付範囲のシフトを削除しますか？",
-        icon: state,
-        buttons: true,
-        dangerMode: true
-      }).then(willDelete => {
-        if (willDelete) {
-          this.rangeDell();
-        } else {
-        }
-      });
+      this.validate = this.checkFormSearch();
+      if (this.validate) {
+        this.$swal({
+          title: "確認",
+          text: "選択した日付範囲のシフトを削除しますか？",
+          icon: state,
+          buttons: true,
+          dangerMode: true
+        }).then(willDelete => {
+          if (willDelete) {
+            this.rangeDell();
+          } else {
+          }
+        });
+      } else {
+      }
     },
     alertDelConf: function(state, id) {
       this.$swal({
@@ -324,7 +361,8 @@ export default {
             console.log(res.result);
             if (res.result == 0) {
               this.$toasted.show("シフトを登録しました");
-              this.getUserShift(this.selectedUser);
+              this.errors = [];
+              // this.getUserShift(this.selectedUser);
             } else {
               this.alert("error", "シフトの登録に失敗しました", "エラー");
             }
@@ -351,16 +389,22 @@ export default {
         });
     },
     // ユーザーリスト変更時
-    getUserShift: function(code) {
-      console.log(code);
-      this.$axios
-        .post("/get_user_shift", {
-          code: code
-        })
-        .then(response => {
-          this.shiftInfo = response.data;
-        })
-        .catch(reason => {});
+    getUserShift: function() {
+      this.validate = this.checkFormSearch();
+      if (this.validate) {
+        this.$axios
+          .post("/get_user_shift", {
+            code: this.selectedUser,
+            from: this.from,
+            to: this.to
+          })
+          .then(response => {
+            this.shiftInfo = response.data;
+            this.errors = [];
+          })
+          .catch(reason => {});
+      } else {
+      }
     },
     // 部署選択が変更された場合の処理
     departmentChanges: function(value) {
@@ -406,7 +450,8 @@ export default {
           var res = response.data;
           if (res.result == 0) {
             this.$toasted.show("シフトを削除しました");
-            this.getUserShift(this.selectedUser);
+            this.getUserShift();
+            this.errors = [];
           } else {
           }
         })
@@ -428,7 +473,8 @@ export default {
               "選択した日付のシフトを削除しました",
               "削除成功"
             );
-            this.getUserShift(this.selectedUser);
+            this.getUserShift();
+            this.errors = [];
           } else {
             this.alert("error", "削除に失敗しました", "エラー");
           }
@@ -438,7 +484,7 @@ export default {
     // ユーザー選択が変更された場合の処理
     userChanges: function(value) {
       this.selectedUser = value;
-      this.getUserShift(value);
+      // this.getUserShift(value);
       console.log("userChanges = " + value);
     }
   }

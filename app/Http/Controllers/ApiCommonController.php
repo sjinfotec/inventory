@@ -122,9 +122,16 @@ class ApiCommonController extends Controller
      */
     public function getShiftInformation(Request $request){
         $code = $request->code;
+        $from = new Carbon($request->from);
+        $from = $from->format("Y/m/d");
+        $to = new Carbon($request->to);
+        $to = $to->format("Y/m/d");
+    
         $shift_info = new ShiftInformation();
 
         $shift_info->setUsercodeAttribute($code);
+        $shift_info->setStarttargetdateAttribute($from);
+        $shift_info->setEndtargetdateAttribute($to);
         $results = $shift_info->getUserShift();
         foreach ($results as $item) {
             if(isset($item->target_date)){

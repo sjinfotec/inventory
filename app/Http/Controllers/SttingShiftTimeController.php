@@ -76,9 +76,9 @@ class SttingShiftTimeController extends Controller
         $department_code = $request->department_code;
             
         $from = new Carbon($request->from);
-        $from = $from->format("Y/m/d");
+        // $from = $from->format("Y/m/d");
         $to = new Carbon($request->to);
-        $to = $to->format("Y/m/d");
+        // $to = $to->format("Y/m/d");
 
         $result = $this->dbConnectInsert($code,$department_code,$time_table_no,$from,$to);
         if($result){
@@ -107,14 +107,17 @@ class SttingShiftTimeController extends Controller
             $shift_info->setUsercodeAttribute($code);
             $shift_info->setDepartmentcodeAttribute($department_code);
             $shift_info->setWorkingtimetablenoAttribute($time_table_no);
-            $shift_info->setStarttargetdateAttribute($from);
-            $shift_info->setEndtargetdateAttribute($to);
             $shift_info->setCreatedatAttribute($systemdate);
             $is_exists = $shift_info->isExistsShiftInfo();
             if($is_exists){
                $shift_info->delShiftInfo();
             }
-            $shift_info->insertUserShift();
+            // from -> to までtarget_date登録する
+            for ($i=$from; $i->lte($to); $i->addDay()) {
+                $target_date = $from->copy()->format("Y/m/d"); 
+                $shift_info->setTargetdateAttribute($target_date);
+                $shift_info->insertUserShift();
+            }
             DB::commit();
             return true;
 

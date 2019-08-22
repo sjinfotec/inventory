@@ -121,9 +121,9 @@ class ShiftInformation extends Model
      * @return void
      */
     public function getUserShift(){
-        $today = Carbon::now();
-        $start_date = $today->copy()->format("Y/m/d");
-        $end_date = $today->copy()->addMonth(1)->format("Y/m/d");
+        // $today = Carbon::now();
+        // $start_date = $today->copy()->format("Y/m/d");
+        // $end_date = $today->copy()->addMonth(1)->format("Y/m/d");
         $subquery = DB::table('working_timetables')
             ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
             ->selectRaw('no as no')
@@ -144,7 +144,7 @@ class ShiftInformation extends Model
                     )
             ->where('users.code',$this->user_code)
             ->where('shift_informations.is_deleted', 0)
-            ->whereBetween('shift_informations.target_date',[$start_date,$end_date])
+            ->whereBetween('shift_informations.target_date',[$this->start_target_date,$this->end_target_date])
             ->groupBy('shift_informations.target_date','shift_informations.id','working_timetables.name','shift_informations.working_timetable_no')
             ->orderBy('shift_informations.target_date','asc')
             ->get();
@@ -158,18 +158,15 @@ class ShiftInformation extends Model
      * @return void
      */
     public function insertUserShift(){
-        for ($i=$this->start_target_date; $i <= $this->end_target_date; $i++) { 
-            DB::table('shift_informations')->insert(
-                [
-                    'user_code' => $this->user_code,
-                    'department_code' => $this->department_code,
-                    'working_timetable_no' => $this->working_timetable_no,
-                    'target_date' => $i,
-                    'created_at' => $this->created_at,
-                ]
-            );
-        }
-        
+        DB::table('shift_informations')->insert(
+            [
+                'user_code' => $this->user_code,
+                'department_code' => $this->department_code,
+                'working_timetable_no' => $this->working_timetable_no,
+                'target_date' => $this->target_date,
+                'created_at' => $this->created_at,
+            ]
+        );
     }
 
     /**
