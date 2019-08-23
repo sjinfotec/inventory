@@ -45,7 +45,7 @@ class SettingCalcController extends Controller
      */
     public function store(StoreSettingPost $request){
         // request
-        $year = $request->year;
+        $fiscal_year = $request->year;
         $b_month = $request->biginningMonth;
         $three_month_total = $request->threeMonthTotal;
         $six_month_total = $request->sixMonthTotal;
@@ -58,7 +58,7 @@ class SettingCalcController extends Controller
         $converts = array();
         $response = collect();
     
-        $result = $this->insert($year,$b_month,$three_month_total,$six_month_total,$year_total,
+        $result = $this->insert($fiscal_year,$b_month,$three_month_total,$six_month_total,$year_total,
                                 $interval,$up_times,$closing_date,$time_rounds,$time_units);
 
         if($result){
@@ -83,7 +83,7 @@ class SettingCalcController extends Controller
      * @param [type] $time_units
      * @return void
      */
-    private function insert($year,$b_month,$three_month_total,$six_month_total,$year_total,
+    private function insert($fiscal_year,$b_month,$three_month_total,$six_month_total,$year_total,
                                 $interval,$up_times,$closing_date,$time_rounds,$time_units){
         $setting = new Setting();
         $systemdate = Carbon::now();
@@ -92,7 +92,7 @@ class SettingCalcController extends Controller
 
         DB::beginTransaction();
         try{
-            $setting->setFiscalyearAttribute($year);
+            $setting->setFiscalyearAttribute($fiscal_year);
             // 既に存在した場合削除新規する
             $is_exists = $setting->isExistsSetting();    
             if($is_exists){
@@ -103,13 +103,19 @@ class SettingCalcController extends Controller
             $setting->setMax12MonthtotalAttribute($year_total);
             $setting->setBeginningmonthAttribute($b_month);
             $setting->setIntervalAttribute($interval);
-            $setting->setYearAttribute($year);
             $setting->setCreateduserAttribute($user_code);
             $setting->setCreatedatAttribute($systemdate);
         
             for ($i=0; $i < 12; $i++) {
                 $month = $i + 1;
                 $setting->setFiscalmonthAttribute($month);
+                $year = $fiscal_year;
+                // 期首月基準で year 設定
+                if($month >= $b_month){
+                    $setting->setYearAttribute($year);
+                }else{
+                    $setting->setYearAttribute($year + 1);
+                }
                 if(isset($closing_date[$i])){
                     $setting->setClosingAttribute($closing_date[$i]);
                 }else{

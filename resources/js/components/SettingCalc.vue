@@ -69,7 +69,7 @@
                       >期首月</span>
                     </div>
                     <fvl-search-select
-                      :selected.sync="form.biginningMonth"
+                      :selected.sync="bMonth"
                       class="p-0"
                       name="biginningMonth"
                       :options="monthList"
@@ -213,7 +213,7 @@
                             <td class="text-center align-middle">{{ n }}月</td>
                             <td class="text-center align-middle">
                               <div class="input-group">
-                                <select class="custom-select" v-model="form.closingDate[index]">
+                                <select class="form-control" v-model="form.closingDate[index]">
                                   <option
                                     v-for="n in days_max[index]"
                                     :value="n"
@@ -236,7 +236,7 @@
                             </td>
                             <td class="text-center align-middle">
                               <div class="input-group">
-                                <select class="custom-select" v-model="form.timeunit[index]">
+                                <select class="form-control" v-model="form.timeunit[index]">
                                   <option value></option>
                                   <option
                                     v-for="tulist in TimeUnitList"
@@ -248,7 +248,7 @@
                             </td>
                             <td class="text-center align-middle">
                               <div class="btn-group d-flex">
-                                <select class="custom-select" v-model="form.timeround[index]">
+                                <select class="form-control" v-model="form.timeround[index]">
                                   <option value></option>
                                   <option
                                     v-for="trlist in TimeRoundingList"
@@ -316,6 +316,7 @@ export default {
   data() {
     return {
       year: "",
+      bMonth: "",
       form: {
         year: "",
         threeMonthTotal: "",
@@ -354,9 +355,13 @@ export default {
   },
   watch: {
     year: function(val, oldVal) {
-      this.form.year = val;
-      this.getDetail();
+      this.form.year = this.year;
+      this.getDetail(this.form.year);
       console.log(val + " " + oldVal);
+    },
+    bMonth: function(val, oldVal) {
+      this.form.biginningMonth = this.bMonth;
+      this.hidden = "GET";
     },
     details: function(val, oldVal) {
       console.log("各配列振り分け　開始");
@@ -381,6 +386,7 @@ export default {
         } else {
           this.form.timeround[i] = "";
         }
+        this.bMonth = detail.beginning_month;
       });
       this.hidden = "GET";
       console.log("各配列振り分け 終了");
@@ -409,17 +415,17 @@ export default {
       }
       console.log("年度更新");
     },
-    getDetail() {
+    getDetail(year) {
       this.$axios
         .get("/setting_calc/get", {
           params: {
-            year: this.year
+            year: year
           }
         })
         .then(response => {
           if (response.data.length > 0) {
             this.details = response.data;
-            this.form.year = this.details[0].year;
+            this.form.year = this.details[0].fiscal_year;
             this.form.biginningMonth = this.details[0].beginning_month;
             if (this.details[0].max_3month_total != null) {
               this.form.threeMonthTotal = this.details[0].max_3month_total.toString();
@@ -491,5 +497,10 @@ export default {
 <style scoped>
 .width15 {
   width: 15%;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 </style>
