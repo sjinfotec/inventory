@@ -9,7 +9,7 @@
       v-on:change="selChanges(selectedBusinessDay)"
       placeholder="営業日区分を選択してください"
     >
-      <option v-if="this.blankData" value></option>
+      <option v-if="this.blankData" value="0"></option>
       <option
         v-for="BusinessDay in BusinessDayList"
         v-bind:value="BusinessDay.code"

@@ -613,19 +613,6 @@ export default {
               console.log("length > 0");
               this.cardId = this.userDetails[0].card_idm;
             }
-            // this.form.id = this.userDetails[0].id;
-            // this.form.name = this.userDetails[0].name;
-            // this.form.kana = this.userDetails[0].kana;
-            // this.form.code = this.userDetails[0].code;
-            // this.form.password = this.userDetails[0].password;
-            // this.form.email = this.userDetails[0].email;
-            // this.form.departmentCode = this.userDetails[0].department_code;
-            // this.form.status = "" + this.userDetails[0].employment_status + "";
-            // this.form.table_no =
-            //   "" + this.userDetails[0].working_timetable_no + "";
-            // // hidden
-            // this.oldCode = this.userDetails[0].code;
-            // this.oldPass = this.userDetails[0].password;
             console.log("ユーザー詳細情報取得");
           })
           .catch(reason => {
