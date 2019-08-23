@@ -143,7 +143,7 @@
                 <!-- panel header -->
                 <div class="card-header col-12 bg-transparent pb-2 border-0">
                   <h1 class="float-sm-left font-size-rg">休憩時間設定</h1>
-                  <span class="float-sm-right font-size-sm">2パターンまで設定できます</span>
+                  <span class="float-sm-right font-size-sm">5パターンまで設定できます</span>
                 </div>
                 <!-- /.panel header -->
               </div>
@@ -222,33 +222,19 @@
                   </div>
                 </div>
                 <!-- /.col -->
-              </div>
-              <!-- /.row -->
-              <!-- .row -->
-              <div class="row justify-content-between" v-if="selectId=='' || selectId==null ">
-                <!-- panel header -->
-                <div class="card-header col-12 bg-transparent pb-2 border-0">
-                  <h1 class="float-sm-left font-size-rg">残業時間設定</h1>
-                  <span class="float-sm-right font-size-sm">3パターンまで設定できます</span>
-                </div>
-                <!-- /.panel header -->
-              </div>
-              <!-- /.row -->
-              <!-- .row -->
-              <div class="row justify-content-between" v-if="selectId=='' || selectId==null ">
                 <!-- .col -->
-                <div class="col-md-6 pb-2">
+                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
-                      >残業開始時間 A</span>
+                      >休憩開始時間 C</span>
                     </div>
                     <fvl-input
                       type="time"
                       class="form-control p-0"
-                      :value.sync="form.irregularFrom1"
+                      :value.sync="form.regularRestFrom3"
                       name="syoteifrom"
                     />
                   </div>
@@ -261,12 +247,12 @@
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
-                      >残業終了時間 A</span>
+                      >休憩終了時間 C</span>
                     </div>
                     <fvl-input
                       type="time"
                       class="form-control p-0"
-                      :value.sync="form.irregularTo1"
+                      :value.sync="form.regularRestTo3"
                       name="syoteito"
                     />
                   </div>
@@ -279,12 +265,12 @@
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
-                      >残業開始時間 B</span>
+                      >休憩開始時間 D</span>
                     </div>
                     <fvl-input
                       type="time"
                       class="form-control p-0"
-                      :value.sync="form.irregularFrom2"
+                      :value.sync="form.regularRestFrom4"
                       name="syoteifrom"
                     />
                   </div>
@@ -297,12 +283,12 @@
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
-                      >残業終了時間 B</span>
+                      >休憩終了時間 D</span>
                     </div>
                     <fvl-input
                       type="time"
                       class="form-control p-0"
-                      :value.sync="form.irregularTo2"
+                      :value.sync="form.regularRestTo4"
                       name="syoteito"
                     />
                   </div>
@@ -315,12 +301,12 @@
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
-                      >残業開始時間 C</span>
+                      >休憩開始時間 E</span>
                     </div>
                     <fvl-input
                       type="time"
                       class="form-control p-0"
-                      :value.sync="form.irregularFrom3"
+                      :value.sync="form.regularRestFrom5"
                       name="syoteifrom"
                     />
                   </div>
@@ -333,12 +319,12 @@
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
-                      >残業終了時間 C</span>
+                      >休憩終了時間 E</span>
                     </div>
                     <fvl-input
                       type="time"
                       class="form-control p-0"
-                      :value.sync="form.irregularTo3"
+                      :value.sync="form.regularRestTo5"
                       name="syoteito"
                     />
                   </div>
@@ -513,7 +499,7 @@
                         <!-- panel header -->
                         <div class="card-header col-12 bg-transparent pb-2 border-0">
                           <h1 class="float-sm-left font-size-rg">休憩時間設定</h1>
-                          <span class="float-sm-right font-size-sm">2パターンまで設定できます</span>
+                          <span class="float-sm-right font-size-sm">5パターンまで設定できます</span>
                         </div>
                         <!-- /.panel header -->
                       </div>
@@ -592,20 +578,6 @@
                           </div>
                         </div>
                         <!-- /.col -->
-                      </div>
-                      <!-- /.row -->
-                      <!-- .row -->
-                      <div class="row justify-content-between">
-                        <!-- panel header -->
-                        <div class="card-header col-12 bg-transparent pb-2 border-0">
-                          <h1 class="float-sm-left font-size-rg">残業時間設定</h1>
-                          <span class="float-sm-right font-size-sm">3パターンまで設定できます</span>
-                        </div>
-                        <!-- /.panel header -->
-                      </div>
-                      <!-- /.row -->
-                      <!-- .row -->
-                      <div class="row justify-content-between">
                         <!-- .col -->
                         <div class="col-md-6 pb-2">
                           <div class="input-group">
@@ -613,7 +585,7 @@
                               <span
                                 class="input-group-text font-size-sm line-height-xs label-width-150"
                                 id="basic-addon1"
-                              >残業開始時間 A</span>
+                              >休憩開始時間 C</span>
                             </div>
                             <input
                               type="time"
@@ -631,7 +603,7 @@
                               <span
                                 class="input-group-text font-size-sm line-height-xs label-width-150"
                                 id="basic-addon1"
-                              >残業終了時間 A</span>
+                              >休憩終了時間 C</span>
                             </div>
                             <input
                               type="time"
@@ -649,7 +621,7 @@
                               <span
                                 class="input-group-text font-size-sm line-height-xs label-width-150"
                                 id="basic-addon1"
-                              >残業開始時間 B</span>
+                              >休憩開始時間 D</span>
                             </div>
                             <input
                               type="time"
@@ -667,7 +639,7 @@
                               <span
                                 class="input-group-text font-size-sm line-height-xs label-width-150"
                                 id="basic-addon1"
-                              >残業終了時間 B</span>
+                              >休憩終了時間 D</span>
                             </div>
                             <input
                               type="time"
@@ -685,7 +657,7 @@
                               <span
                                 class="input-group-text font-size-sm line-height-xs label-width-150"
                                 id="basic-addon1"
-                              >残業開始時間 C</span>
+                              >休憩開始時間 E</span>
                             </div>
                             <input
                               type="time"
@@ -703,7 +675,7 @@
                               <span
                                 class="input-group-text font-size-sm line-height-xs label-width-150"
                                 id="basic-addon1"
-                              >残業終了時間 C</span>
+                              >休憩終了時間 E</span>
                             </div>
                             <input
                               type="time"
@@ -877,7 +849,7 @@
             <!-- panel header -->
             <div class="card-header col-12 bg-transparent pb-2 border-0">
               <h1 class="float-sm-left font-size-rg">休憩時間設定</h1>
-              <span class="float-sm-right font-size-sm">2パターンまで設定できます</span>
+              <span class="float-sm-right font-size-sm">5パターンまで設定できます</span>
             </div>
             <!-- /.panel header -->
           </div>
@@ -956,20 +928,6 @@
               </div>
             </div>
             <!-- /.col -->
-          </div>
-          <!-- /.row -->
-          <!-- .row -->
-          <div class="row justify-content-between">
-            <!-- panel header -->
-            <div class="card-header col-12 bg-transparent pb-2 border-0">
-              <h1 class="float-sm-left font-size-rg">残業時間設定</h1>
-              <span class="float-sm-right font-size-sm">3パターンまで設定できます</span>
-            </div>
-            <!-- /.panel header -->
-          </div>
-          <!-- /.row -->
-          <!-- .row -->
-          <div class="row justify-content-between">
             <!-- .col -->
             <div class="col-md-6 pb-2">
               <div class="input-group">
@@ -977,12 +935,12 @@
                   <span
                     class="input-group-text font-size-sm line-height-xs label-width-150"
                     id="basic-addon1"
-                  >残業開始時間 A</span>
+                  >休憩開始時間 C</span>
                 </div>
                 <input
                   type="time"
                   class="form-control"
-                  v-model="add.irregularFrom1"
+                  v-model="add.regularRestFrom3"
                   name="syoteifrom"
                 />
               </div>
@@ -995,9 +953,14 @@
                   <span
                     class="input-group-text font-size-sm line-height-xs label-width-150"
                     id="basic-addon1"
-                  >残業終了時間 A</span>
+                  >休憩終了時間 C</span>
                 </div>
-                <input type="time" class="form-control" v-model="add.irregularTo1" name="syoteito" />
+                <input
+                  type="time"
+                  class="form-control"
+                  v-model="add.regularRestTo3"
+                  name="syoteito"
+                />
               </div>
             </div>
             <!-- /.col -->
@@ -1008,12 +971,12 @@
                   <span
                     class="input-group-text font-size-sm line-height-xs label-width-150"
                     id="basic-addon1"
-                  >残業開始時間 B</span>
+                  >休憩開始時間 D</span>
                 </div>
                 <input
                   type="time"
                   class="form-control"
-                  v-model="add.irregularFrom2"
+                  v-model="add.regularRestFrom4"
                   name="syoteifrom"
                 />
               </div>
@@ -1026,9 +989,14 @@
                   <span
                     class="input-group-text font-size-sm line-height-xs label-width-150"
                     id="basic-addon1"
-                  >残業終了時間 B</span>
+                  >休憩終了時間 D</span>
                 </div>
-                <input type="time" class="form-control" v-model="add.irregularTo2" name="syoteito" />
+                <input
+                  type="time"
+                  class="form-control"
+                  v-model="add.regularRestTo4"
+                  name="syoteito"
+                />
               </div>
             </div>
             <!-- /.col -->
@@ -1039,12 +1007,12 @@
                   <span
                     class="input-group-text font-size-sm line-height-xs label-width-150"
                     id="basic-addon1"
-                  >残業開始時間 C</span>
+                  >休憩開始時間 E</span>
                 </div>
                 <input
                   type="time"
                   class="form-control"
-                  v-model="add.irregularFrom3"
+                  v-model="add.regularRestFrom5"
                   name="syoteifrom"
                 />
               </div>
@@ -1057,9 +1025,14 @@
                   <span
                     class="input-group-text font-size-sm line-height-xs label-width-150"
                     id="basic-addon1"
-                  >残業終了時間 C</span>
+                  >休憩終了時間 E</span>
                 </div>
-                <input type="time" class="form-control" v-model="add.irregularTo3" name="syoteito" />
+                <input
+                  type="time"
+                  class="form-control"
+                  v-model="add.regularRestTo5"
+                  name="syoteito"
+                />
               </div>
             </div>
             <!-- /.col -->
@@ -1178,6 +1151,12 @@ export default {
         regularRestTo1: "",
         regularRestFrom2: "",
         regularRestTo2: "",
+        regularRestFrom3: "",
+        regularRestTo3: "",
+        regularRestFrom4: "",
+        regularRestTo4: "",
+        regularRestFrom5: "",
+        regularRestTo5: "",
         irregularFrom1: "",
         irregularTo1: "",
         irregularFrom2: "",
@@ -1197,6 +1176,12 @@ export default {
         regularRestTo1: "",
         regularRestFrom2: "",
         regularRestTo2: "",
+        regularRestFrom3: "",
+        regularRestTo3: "",
+        regularRestFrom4: "",
+        regularRestTo4: "",
+        regularRestFrom5: "",
+        regularRestTo5: "",
         irregularFrom1: "",
         irregularTo1: "",
         irregularFrom2: "",
@@ -1224,6 +1209,7 @@ export default {
       if (this.selectId != "") {
         this.getDetail();
       } else {
+        this.details = [];
         this.inputClear();
       }
     }
@@ -1297,6 +1283,9 @@ export default {
         .get("/get_time_table_list")
         .then(response => {
           this.timeTableList = response.data;
+          this.object = { apply_term_from: "", name: "新規登録", no: "" };
+          this.timeTableList.unshift(this.object);
+
           console.log("タイムテーブルリスト取得");
         })
         .catch(reason => {
@@ -1347,6 +1336,7 @@ export default {
             );
             this.getDetail();
             this.getTimeTableList();
+            this.selectId = "";
           } else {
           }
         })
@@ -1366,14 +1356,12 @@ export default {
       this.form.regularRestTo1 = "";
       this.form.regularRestFrom2 = "";
       this.form.regularRestTo2 = "";
-
-      this.form.irregularFrom1 = "";
-      this.form.irregularTo1 = "";
-      this.form.irregularFrom2 = "";
-      this.form.irregularTo2 = "";
-      this.form.irregularFrom3 = "";
-      this.form.irregularTo3 = "";
-
+      this.form.regularRestFrom3 = "";
+      this.form.regularRestTo3 = "";
+      this.form.regularRestFrom4 = "";
+      this.form.regularRestTo4 = "";
+      this.form.regularRestFrom5 = "";
+      this.form.regularRestTo5 = "";
       this.form.irregularMidNightFrom = "";
       this.form.irregularMidNightTo = "";
     },
@@ -1386,12 +1374,12 @@ export default {
       this.add.regularRestTo1 = "";
       this.add.regularRestFrom2 = "";
       this.add.regularRestTo2 = "";
-      this.add.irregularFrom1 = "";
-      this.add.irregularTo1 = "";
-      this.add.irregularFrom2 = "";
-      this.add.irregularTo2 = "";
-      this.add.irregularFrom3 = "";
-      this.add.irregularTo3 = "";
+      this.add.regularRestFrom3 = "";
+      this.add.regularRestTo3 = "";
+      this.add.regularRestFrom4 = "";
+      this.add.regularRestTo4 = "";
+      this.add.regularRestFrom5 = "";
+      this.add.regularRestTo5 = "";
       this.add.irregularMidNightFrom = "";
       this.add.irregularMidNightTo = "";
     }

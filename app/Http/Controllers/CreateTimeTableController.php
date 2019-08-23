@@ -45,27 +45,19 @@ class CreateTimeTableController extends Controller
         $data[2]['working_time_kubun'] = 2;
         $data[2]['from_time'] = $request->regularRestFrom2;
         $data[2]['to_time'] = $request->regularRestTo2;
-        $data[3]['working_time_kubun'] = 3;
-        $data[3]['from_time'] = $request->irregularFrom1;
-        $data[3]['to_time'] = $request->irregularTo1;
-        $data[4]['working_time_kubun'] = 3;
-        $data[4]['from_time'] = $request->irregularFrom2;
-        $data[4]['to_time'] = $request->irregularTo2;
-        $data[5]['working_time_kubun'] = 3;
-        $data[5]['from_time'] = $request->irregularFrom3;
-        $data[5]['to_time'] = $request->irregularTo3;
+        $data[3]['working_time_kubun'] = 2;
+        $data[3]['from_time'] = $request->regularRestFrom3;
+        $data[3]['to_time'] = $request->regularRestTo3;
+        $data[4]['working_time_kubun'] = 2;
+        $data[4]['from_time'] = $request->regularRestFrom4;
+        $data[4]['to_time'] = $request->regularRestTo4;
+        $data[5]['working_time_kubun'] = 2;
+        $data[5]['from_time'] = $request->regularRestFrom5;
+        $data[5]['to_time'] = $request->regularRestTo5;
         $data[6]['working_time_kubun'] = 4;
         $data[6]['from_time'] = $request->irregularMidNightFrom;
         $data[6]['to_time'] = $request->irregularMidNightTo;
         if(isset($request->id)){    // UPDATE
-            // $validatedData = $request->validate([
-            //     'name' => 'required|string|max:191'
-            // ],[
-            //     'name.required'  => 'タイムテーブル名称を入力してください',
-            //     'name.max'  => 'タイムテーブル名称の最大文字数は 191 です',
-            // ]);
-            // $id = $request->id;
-            // $result = $this->update($data,$id,$name);
         }else{                      // INSERT
             $validatedData = $request->validate([
                 'no' => 'required|unique:working_timetables|max:10',
@@ -165,15 +157,15 @@ class CreateTimeTableController extends Controller
         $data[2]['working_time_kubun'] = 2;
         $data[2]['from_time'] = $details['details']['regularRestFrom2'];
         $data[2]['to_time'] = $details['details']['regularRestTo2'];
-        $data[3]['working_time_kubun'] = 3;
-        $data[3]['from_time'] = $details['details']['irregularFrom1'];
-        $data[3]['to_time'] = $details['details']['irregularTo1'];
-        $data[4]['working_time_kubun'] = 3;
-        $data[4]['from_time'] = $details['details']['irregularFrom2'];
-        $data[4]['to_time'] = $details['details']['irregularTo2'];
-        $data[5]['working_time_kubun'] = 3;
-        $data[5]['from_time'] = $details['details']['irregularFrom3'];
-        $data[5]['to_time'] = $details['details']['irregularTo3'];
+        $data[3]['working_time_kubun'] = 2;
+        $data[3]['from_time'] = $details['details']['regularRestFrom3'];
+        $data[3]['to_time'] = $details['details']['regularRestTo3'];
+        $data[4]['working_time_kubun'] = 2;
+        $data[4]['from_time'] = $details['details']['regularRestFrom4'];
+        $data[4]['to_time'] = $details['details']['regularRestTo4'];
+        $data[5]['working_time_kubun'] = 2;
+        $data[5]['from_time'] = $details['details']['regularRestFrom5'];
+        $data[5]['to_time'] = $details['details']['regularRestTo5'];
         $data[6]['working_time_kubun'] = 4;
         $data[6]['from_time'] = $details['details']['irregularMidNightFrom'];
         $data[6]['to_time'] = $details['details']['irregularMidNightTo'];
