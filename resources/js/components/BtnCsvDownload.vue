@@ -24,19 +24,37 @@ export default {
   methods: {
     downloadCSV() {
       var csv = "";
+      var user_head = "";
+      var user_line = "";
+      var data_head = "";
+      var line = "";
       // 1ユーザーごと
       this.csvData.forEach(user => {
+        user_head = "";
+        user_line = "";
+        data_head = "";
+
         user_head =
           "\ufeff" +
           "社員名,部署,雇用形態,勤務時間,所定労働時間,所定外労働時間,残業時間,深夜残業時間\n";
 
-        var user_line =
+        user_line =
           user["user_name"] +
           "," +
           user["department"] +
           "," +
           user["employment"] +
-          "\n";
+          "," +
+          user["total_working_times"] +
+          "," +
+          user["regular_working_times"] +
+          "," +
+          user["out_of_regular_working_times"] +
+          "," +
+          user["overtime_hours"] +
+          "," +
+          user["late_night_overtime_hours"] +
+          "\n\n";
         data_head =
           "\ufeff" +
           "日付,出勤1,出勤2,出勤3,出勤4,出勤5,退勤1,退勤2,退勤3,退勤4,退勤5\n";
@@ -48,7 +66,7 @@ export default {
         user.date.forEach(record => {
           console.log(record);
 
-          var line =
+          line =
             record["workingdate"] +
             "," +
             record["attendance1"] +
@@ -73,6 +91,7 @@ export default {
             "\n";
           csv += line;
         });
+        line = "";
         // console.log(user);
         // var line =
         //   el["user_name"] +
