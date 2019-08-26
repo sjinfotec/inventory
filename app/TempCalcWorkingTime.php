@@ -286,11 +286,13 @@ class TempCalcWorkingTime extends Model
     // 打刻時刻
     public function getRecordtimeAttribute()
     {
+        Log::DEBUG('getRecordtimeAttribute '.$this->record_time);
         return $this->record_time;
     }
 
     public function setRecordtimeAttribute($value)
     {
+        Log::DEBUG('setRecordtimeAttribute '.$value);
         $this->record_time = $value;
     }
 
@@ -734,6 +736,8 @@ class TempCalcWorkingTime extends Model
      * @return void
      */
     public function getTempCalcWorkingtime(){
+        Log::DEBUG('getTempCalcWorkingtime in ');
+        \DB::enableQueryLog();
         $mainquery = DB::table($this->table.' AS t1')
             ->select(
                 't1.working_date as working_date',
@@ -806,9 +810,16 @@ class TempCalcWorkingTime extends Model
             ->orderBy('t1.working_date','asc')
             ->orderBy('t1.department_code','asc')
             ->orderBy('t1.user_code','asc')
-            ->orderBy('t1.record_time','asc')
+            ->orderBy('t1.record_datetime','asc')
             ->get();
-    
+
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getTempCalcWorkingtime' => \DB::getQueryLog()
+            ]
+            );
+
         return $results;
     }
 

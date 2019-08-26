@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Collection;
 use Carbon\Carbon;
 use App\ShiftInformation;
 use App\WorkingTimeTable;
@@ -457,6 +458,127 @@ class ApiCommonController extends Controller
     
 
     /**
+     * タイムテーブルの分解
+     *
+     * @return 
+     */
+    public function analyzeTimeTable($timetables, $working_time_kubun, $working_timetable_no){
+        Log::DEBUG('analyzeTimeTable in $working_time_kubun = '.$working_time_kubun);
+        Log::DEBUG('analyzeTimeTable in $working_timetable_no = '.$working_timetable_no);
+        $array_times = array();
+        if ($working_time_kubun != Config::get('const.C004.out_of_regular_working_time')) {
+            $filtered = $timetables->where('no', $working_timetable_no)->where('working_time_kubun', $working_time_kubun);
+            foreach($filtered as $result_time) {
+                Log::DEBUG('$filtered from_time = '. $result_time->from_time);
+                Log::DEBUG('$filtered to_time = '.$result_time->to_time);
+                if (isset($result_time->from_time) && isset($result_time->to_time)) {
+                    $array_times[] = array('from_time' => $result_time->from_time , 'to_time' => $result_time->to_time);
+                }
+            }
+        } else {
+            // 時間外労働時間は画面からの入力がないため、所定労働時間と休憩と深夜労働時間の時間以外を時間外労働時間とする
+            $filtered = $timetables
+                ->where('no', $working_timetable_no)
+                ->where('working_time_kubun', '!=', Config::get('const.C004.out_of_regular_working_time'))
+                ->sortBy('from_time');
+            $dt = new Carbon('2019-08-01 00:00:00');
+            $source_time0 = date_format($dt, 'H:i:s');
+            $dt = new Carbon('2019-08-01 23:59:59');
+            $source_time24 = date_format($dt, 'H:i:s');
+            Log::DEBUG('$source_time0 = '. $source_time0);
+            Log::DEBUG('$source_time24 = '. $source_time24);
+            $temp_times = array();
+            foreach($filtered as $result_time) {
+                Log::DEBUG('$filtered working_time_kubun = '. $result_time->working_time_kubun);
+                Log::DEBUG('$filtered from_time = '. $result_time->from_time);
+                Log::DEBUG('$filtered to_time = '.$result_time->to_time);
+                if (isset($result_time->from_time) && isset($result_time->to_time)) {
+                    Log::DEBUG('count($temp_times) = '.count($temp_times));
+                    if (count($temp_times) == 0) {
+                        $dt = new Carbon('2019-08-01 '.$result_time->from_time);
+                        $check_time = date_format($dt, 'H:i:s');
+                        if ($source_time0 < $check_time) {
+                            $set_from_time = $source_time0;
+                            $set_to_time = $check_time;
+                            $temp_times[] = array('from_time' => $set_from_time , 'to_time' => $set_to_time);
+                            $dt = new Carbon('2019-08-01 '.$result_time->to_time);
+                            $check_time = date_format($dt->subSecond(), 'H:i:s');       // 1秒前
+                            if ($check_time < $source_time24) {
+                                $set_from_time = $result_time->to_time;
+                                $dt = new Carbon('2019-08-01 23:59:59');
+                                $set_to_time = date_format($dt->addSecond(), 'H:i:s');  // 1秒後
+                                $temp_times[] = array('from_time' => $set_from_time , 'to_time' => $set_to_time);
+                            }
+                        }
+                        foreach($temp_times as $item) {
+                            Log::DEBUG('analyzeTimeTable --- in $temp_times from_time = '.$item['from_time']);
+                            Log::DEBUG('analyzeTimeTable --- in $temp_times to_time = '.$item['to_time']);
+                        }
+                    } else {
+                        $array_result_times = array();
+                        if ($result_time->from_time < $result_time->to_time) {
+                            $array_result_times[] = array('from_time' => $result_time->from_time , 'to_time' => $result_time->to_time);
+                        } else {
+                            $dt = new Carbon('2019-08-01 23:59:59');
+                            $set_to_time = date_format($dt, 'H:i:s');
+                            $array_result_times[] = array('from_time' => $source_time0 , 'to_time' => $result_time->to_time);
+                            $array_result_times[] = array('from_time' => $result_time->from_time , 'to_time' => $set_to_time);
+                        }
+                        foreach($array_result_times as $item) {
+                            Log::DEBUG('analyzeTimeTable --- in $array_result_times from_time = '.$item['from_time']);
+                            Log::DEBUG('analyzeTimeTable --- in $array_result_times to_time = '.$item['to_time']);
+                        }
+                        $temp_times_1 = $temp_times;
+                        $temp_times = array();
+                        $set_flg = false;
+                        foreach($array_result_times as $array_result_time) {
+                            foreach($temp_times_1 as $item) {
+                                $w_time = $item['to_time'];
+                                if ($item['to_time'] == '00:00:00') { $w_time = '23:59:59'; }
+                                Log::DEBUG('analyzeTimeTable --- $array_result_time[from_time] = '.$array_result_time['from_time']);
+                                Log::DEBUG('analyzeTimeTable --- $item[from_time] = '.$item['from_time']);
+                                Log::DEBUG('analyzeTimeTable --- $w_time = '.$w_time);
+                                if($array_result_time['from_time'] > $item['from_time'] && $array_result_time['from_time'] < $w_time) {
+                                    Log::DEBUG('analyzeTimeTable --- 1 $temp_times[] = array( '.$item['from_time'].' '.$array_result_time['from_time']);
+                                    $temp_times[] = array('from_time' => $item['from_time'] , 'to_time' => $array_result_time['from_time']);
+                                    $set_flg = true;
+                                }
+                                Log::DEBUG('analyzeTimeTable --- $array_result_time[to_time] = '.$array_result_time['to_time']);
+                                Log::DEBUG('analyzeTimeTable --- $item[from_time] = '.$item['from_time']);
+                                Log::DEBUG('analyzeTimeTable --- $w_time = '.$w_time);
+                                if($array_result_time['to_time'] > $item['from_time'] && $array_result_time['to_time'] < $w_time) {
+                                    Log::DEBUG('analyzeTimeTable --- 2 $temp_times[] = array( '.$array_result_time['to_time'].' '.$item['to_time']);
+                                    $temp_times[] = array('from_time' =>$array_result_time['to_time'] , 'to_time' => $item['to_time']);
+                                    $set_flg = true;
+                                }
+                                Log::DEBUG('analyzeTimeTable --- $set_flg = '.$set_flg);
+                                if ($set_flg == false) {
+                                    Log::DEBUG('analyzeTimeTable --- 3 $temp_times[] = array( '.$item['from_time'].' '.$item['to_time']);
+                                    $temp_times[] = array('from_time' =>$item['from_time'] , 'to_time' => $item['to_time']);
+                                }
+                            }
+                            foreach($temp_times as $item) {
+                                Log::DEBUG('analyzeTimeTable --- in $temp_times from_time = '.$item['from_time']);
+                                Log::DEBUG('analyzeTimeTable --- in $temp_times to_time = '.$item['to_time']);
+                            }
+                        }
+                        if (count($temp_times) == 0) {
+                            $temp_times = $temp_times_1;
+                        }
+                    }
+                }
+            }
+            $array_times = $temp_times;
+        }
+        foreach($array_times as $item) {
+            Log::DEBUG(' result --- analyzeTimeTable in $array_time from_time = '.$item['from_time']);
+            Log::DEBUG(' result --- analyzeTimeTable in $array_time to_time = '.$item['to_time']);
+        }
+        return $array_times;
+    }
+    
+
+    /**
      * 翌日を求める
      *
      * @return 翌日
@@ -528,10 +650,10 @@ class ApiCommonController extends Controller
 
         if ($time_rounding == Config::get('const.C010.round_half_up')) {
             // 四捨五入
-            if ($time_rounding == Config::get('const.C009.round1')) {
+            if ($time_unit == Config::get('const.C009.round1')) {
                 // 分求める
                 $result_round_time = round($round_time / 60);
-            } elseif ($time_rounding == Config::get('const.C009.round5')) {
+                } elseif ($time_unit == Config::get('const.C009.round5')) {
                 // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
@@ -564,10 +686,10 @@ class ApiCommonController extends Controller
                 } else {
                     $result_round_time = $w_time2 + 60;
                 }
-            } elseif ($time_rounding == Config::get('const.C009.round10')) {
+            } elseif ($time_unit == Config::get('const.C009.round10')) {
                 // 分求める
                 $result_round_time = round($round_time / 60 / 10) * 10;
-            } elseif ($time_rounding == Config::get('const.C009.round15')) {
+            } elseif ($time_unit == Config::get('const.C009.round15')) {
                 // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
@@ -584,7 +706,7 @@ class ApiCommonController extends Controller
                 } else {
                     $result_round_time = $w_time2 + 60;
                 }
-            } elseif ($time_rounding == Config::get('const.C009.round30')) {
+            } elseif ($time_unit == Config::get('const.C009.round30')) {
                 // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
@@ -597,7 +719,7 @@ class ApiCommonController extends Controller
                 } else {
                     $result_round_time = $w_time2 + 60;
                 }
-            } elseif ($time_rounding == Config::get('const.C009.round60')) {
+            } elseif ($time_unit == Config::get('const.C009.round60')) {
                 // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
@@ -611,10 +733,10 @@ class ApiCommonController extends Controller
             }
         } elseif ($time_rounding == Config::get('const.C010.round_down')) {
             // 切り捨て
-            if ($time_rounding == Config::get('const.C009.round1')) {
+            if ($time_unit == Config::get('const.C009.round1')) {
                 // 分求める
                 $result_round_time = floor($round_time / 60);
-            } elseif ($time_rounding == Config::get('const.C009.round5')) {
+            } elseif ($time_unit == Config::get('const.C009.round5')) {
                 // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
@@ -647,10 +769,10 @@ class ApiCommonController extends Controller
                 } else {
                     $result_round_time = $w_time2 + 60;
                 }
-            } elseif ($time_rounding == Config::get('const.C009.round10')) {
+            } elseif ($time_unit == Config::get('const.C009.round10')) {
                 // 分求める
                 $result_round_time = floor($round_time / 60 / 10) * 10;
-            } elseif ($time_rounding == Config::get('const.C009.round15')) {
+            } elseif ($time_unit == Config::get('const.C009.round15')) {
                 // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
@@ -667,7 +789,7 @@ class ApiCommonController extends Controller
                 } else {
                     $result_round_time = $w_time2 + 60;
                 }
-            } elseif ($time_rounding == Config::get('const.C009.round30')) {
+            } elseif ($time_unit == Config::get('const.C009.round30')) {
                 // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
@@ -680,7 +802,7 @@ class ApiCommonController extends Controller
                 } else {
                     $result_round_time = $w_time2 + 60;
                 }
-            } elseif ($time_rounding == Config::get('const.C009.round60')) {
+            } elseif ($time_unit == Config::get('const.C009.round60')) {
                 // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
@@ -694,10 +816,10 @@ class ApiCommonController extends Controller
             }
         } elseif ($time_rounding == Config::get('const.C010.round_up')) {
             // 切り上げ
-            if ($time_rounding == Config::get('const.C009.round1')) {
+            if ($time_unit == Config::get('const.C009.round1')) {
                 // 分求める
                 $result_round_time = ceil($round_time / 60);
-            } elseif ($time_rounding == Config::get('const.C009.round5')) {
+            } elseif ($time_unit == Config::get('const.C009.round5')) {
                 // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
@@ -730,10 +852,10 @@ class ApiCommonController extends Controller
                 } else {
                     $result_round_time = $w_time2 + 60;
                 }
-            } elseif ($time_rounding == Config::get('const.C009.round10')) {
+            } elseif ($time_unit == Config::get('const.C009.round10')) {
                 // 分求める
                 $result_round_time = ceil($round_time / 60 / 10) * 10;
-            } elseif ($time_rounding == Config::get('const.C009.round15')) {
+            } elseif ($time_unit == Config::get('const.C009.round15')) {
                 // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
@@ -750,7 +872,7 @@ class ApiCommonController extends Controller
                 } else {
                     $result_round_time = $w_time2 + 60;
                 }
-            } elseif ($time_rounding == Config::get('const.C009.round30')) {
+            } elseif ($time_unit == Config::get('const.C009.round30')) {
                 // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
@@ -763,7 +885,7 @@ class ApiCommonController extends Controller
                 } else {
                     $result_round_time = $w_time2 + 60;
                 }
-            } elseif ($time_rounding == Config::get('const.C009.round60')) {
+            } elseif ($time_unit == Config::get('const.C009.round60')) {
                 // 切り捨てて時間求める
                 $w_time1 = floor($round_time / 60 / 60);
                 $w_time2 = $w_time1 * 60;
@@ -775,7 +897,7 @@ class ApiCommonController extends Controller
                     $result_round_time = $w_time2 + 60;
                 }
             }
-        } elseif ($time_rounding == Config::get('const.C010.non')) {
+        } elseif ($time_unit == Config::get('const.C010.non')) {
             // なし
             $result_round_time = $round_time / 60;
             Log::DEBUG('$round_time'.$round_time);

@@ -53,7 +53,10 @@ return [
     ],
 
     'C007' => [
-        'value' => 'C007'
+        'value' => 'C007',
+        'basic' => '1',
+        'legal_holoday' => '2',
+        'legal_out_holoday' => '3'
     ],
 
     'C008' => [
@@ -144,6 +147,24 @@ return [
         'sat' => '(土)'
     ],
 
+    'WORKING_TIME_NAME' => [
+        'basic' => '労働合計時間',
+        'legal_holoday' => '法定休日勤務時間',
+        'legal_out_holoday' => '法定外休日勤務時間'
+    ],
+
+    'PREDETER_TIME_NAME' => [
+        'basic' => '残業時間',
+        'legal_holoday' => '法定休日残業時間',
+        'legal_out_holoday' => '法定外休日残業時間'
+    ],
+
+    'PREDETER_NIGHT_TIME_NAME' => [
+        'basic' => '所定外深夜労働時間',
+        'legal_holoday' => '法定休日深夜労働時間',
+        'legal_out_holoday' => '法定外休日深夜労働時間'
+    ],
+
     'ARRAY_MAX_INDEX' => [
         'attendace_time' => 5,
         'leaving_time' => 5,
@@ -215,7 +236,7 @@ return [
         'messagedata' => 'messagedata'
     ],
  
-    'WORKINGTIME_ORDERBY' => [
+    'WORKINGTIME_DAY_OR_MONTH' => [
         'daily_basic' => '1',
         'monthly_basic' => '2'
     ],

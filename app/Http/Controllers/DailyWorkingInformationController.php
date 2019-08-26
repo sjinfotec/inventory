@@ -85,6 +85,9 @@ class DailyWorkingInformationController extends Controller
         }
         $this->collect_massegedata = collect();
 
+        $working_time_dates = null;
+        $working_time_sum = null;
+
         // 打刻時刻を取得
         $work_time = new WorkTime();
         $work_time->setParamDatefromAttribute($datefrom);
@@ -94,74 +97,120 @@ class DailyWorkingInformationController extends Controller
         $work_time->setParamUsercodeAttribute($usercode);
         // パラメータのチェック
         $chk_result = $work_time->chkWorkingTimeData();
-        $temp_working_model = new TempWorkingTimeDate();
-        $apicommon = new ApiCommonController();
         if ($chk_result) {
-            // シフト打刻を取得するために$datetoの翌日をParamDatetoを再設定
-            $nextdt =$apicommon->getNextDay($dateto, 'Y/m/d');
-            $work_time->setParamDatetoAttribute($nextdt);
-            // 終了日付で検索（最新の情報として）
-            $work_time_result = $work_time->getWorkTimes($dateto);
-            if(isset($work_time_result)){
-                $temp_calc_model = new TempCalcWorkingTime();
-                try{
-                    // temporary削除処理
-                    DB::beginTransaction();
-                    Log::debug('temporary beginTransaction');
-                    $temp_calc_model->delTempCalcWorkingtime();
-                    $temp_working_model->delTempWorkingTimeDate();
-                    try{
-                        // 日次集計計算登録
-                        $calc_result = $this->calcWorkingTimeDate($work_time_result, $work_time->getParamDatefromAttribute());
-                        if ($calc_result) {
-                            // タイムテーブルを取得
-                            $timetable_model = new WorkingTimeTable();
-                            $timetable_model->setParamdatefromAttribute($datefrom);
-                            $timetable_model->setParamdatetoAttribute($dateto);
-                            $timetable_model->setParamemploymentstatusAttribute($employmentstatus);
-                            $timetable_model->setParamDepartmentcodeAttribute($departmentcode);
-                            $timetables = $timetable_model->getWorkingTimeTableJoin();
-                            if (isset($timetables)) {
-                                // 日次集計
-                                $add_result = $this->calcTempWorkingTimeDate($timetables);
-                            } else {
-                                array_push($this->array_massegedata, Config::get('const.MSG_ERROR.not_setting_timetable'));
-                                $this->collect_massegedata->put(Config::get('const.RESPONCE_ITEM.messagedata'),Config::get('const.MSG_ERROR.not_setting_timetable'));
-                                Log::error(Config::get('const.LOG_MSG.not_setting_timetable'));
-                                $add_result = false;
-                            }
-                        }
-                        DB::commit();
-                        Log::debug('temporary commit');
-                    }catch(\PDOException $pe){
-                        DB::rollBack();
-                        Log::debug('temporary rollBack');
-                        array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
-                        Log::error(Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
-                        Log::error($pe->getMessage());
-                        $add_result = false;
-                    }catch(\Exception $e){
-                        DB::rollBack();
-                        Log::debug('temporary rollBack');
-                        array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_error_dailycalc'));
-                        Log::error(Config::get('const.LOG_MSG.data_error_dailycalc'));
-                        Log::error($e->getMessage());
-                        $add_result = false;
-                    }
-                }catch(\PDOException $pe){
-                    DB::rollBack();
-                    Log::debug('temporary rollBack');
-                    array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
-                    Log::error($pe->getMessage());
-                    $add_result = false;
-                }
+            $addCalc = $this->addDailyCalc(
+                $work_time,
+                $datefrom,
+                $dateto,
+                $employmentstatus,
+                $departmentcode,
+                $usercode);
+            if ($addCalc) {
+                $working_model = new WorkingTimedate();
+                $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
+                $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
+                $working_model->setParamEmploymentStatusAttribute($employmentstatus);
+                $working_model->setParamDepartmentcodeAttribute($departmentcode);
+                $working_model->setParamUsercodeAttribute($usercode);
+                $working_time_dates = $working_model->getWorkingTimeDateTimeFormat(Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'));
+                $working_time_sum = $working_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'));
+                Log::debug('$working_model = '.count($working_time_dates));
+                Log::debug('$working_time_sum = '.count($working_time_sum));
             } else {
                 $add_result = false;
-                array_push($this->array_massegedata, Config::get('const.MSG_ERROR.not_workintime'));
+                array_push($this->array_massegedata, $work_time->getMassegedataAttribute());
             }
         } else {
             $add_result = false;
             array_push($this->array_massegedata, $work_time->getMassegedataAttribute());
+        }
+    
+        //$this->collect_massegedata->put(Config::get('const.RESPONCE_ITEM.messagedata'),Config::get('const.MSG_ERROR.not_setting_timetable'));
+        return response()->json(['calcresults' => $working_time_dates, 'sumresults' => $working_time_sum, 'massegedata' => $this->array_massegedata]);
+        //return response()->json(['calcresults' => $working_time_dates, 'sumresults' => $working_time_sum, 'massegedata' => $this->collect_massegedata]);
+    }
+
+    /**
+     * 日次集計表示 
+     *
+     * @return void
+     */
+    public function addDailyCalc($work_time, $datefrom, $dateto, $employmentstatus, $departmentcode, $usercode) {
+        Log::DEBUG('---------------------- addDailyCalc in ------------------------ ');
+
+        Log::DEBUG(' param $work_time count = '.count($work_time));
+        Log::DEBUG(' param $datefrom = '.$datefrom);
+        Log::DEBUG(' param $dateto = '.$dateto);
+        Log::DEBUG(' param $employmentstatus = '.$employmentstatus);
+        Log::DEBUG(' param $departmentcode = '.$departmentcode);
+        Log::DEBUG(' param $usercode = '.$usercode);
+        $calc_result = true;
+        $add_result = true;
+
+        // 打刻時刻を取得
+        $temp_working_model = new TempWorkingTimeDate();
+        $apicommon = new ApiCommonController();
+        // シフト打刻を取得するために$datetoの翌日をParamDatetoを再設定
+        $nextdt =$apicommon->getNextDay($dateto, 'Y/m/d');
+        $work_time->setParamDatetoAttribute($nextdt);
+        // 終了日付で検索（最新の情報として）
+        $work_time_result = $work_time->getWorkTimes($dateto);
+        if(isset($work_time_result)){
+            $temp_calc_model = new TempCalcWorkingTime();
+            try{
+                // temporary削除処理
+                DB::beginTransaction();
+                Log::debug('temporary beginTransaction');
+                $temp_calc_model->delTempCalcWorkingtime();
+                $temp_working_model->delTempWorkingTimeDate();
+                try{
+                    // 日次集計計算登録
+                    $calc_result = $this->calcWorkingTimeDate($work_time_result, $work_time->getParamDatefromAttribute());
+                    if ($calc_result) {
+                        // タイムテーブルを取得
+                        $timetable_model = new WorkingTimeTable();
+                        $timetable_model->setParamdatefromAttribute($datefrom);
+                        $timetable_model->setParamdatetoAttribute($dateto);
+                        $timetable_model->setParamemploymentstatusAttribute($employmentstatus);
+                        $timetable_model->setParamDepartmentcodeAttribute($departmentcode);
+                        $timetables = $timetable_model->getWorkingTimeTableJoin();
+                        if (isset($timetables)) {
+                            // 日次集計
+                            $add_result = $this->calcTempWorkingTimeDate($timetables);
+                        } else {
+                            array_push($this->array_massegedata, Config::get('const.MSG_ERROR.not_setting_timetable'));
+                            $this->collect_massegedata->put(Config::get('const.RESPONCE_ITEM.messagedata'),Config::get('const.MSG_ERROR.not_setting_timetable'));
+                            Log::error(Config::get('const.LOG_MSG.not_setting_timetable'));
+                            $add_result = false;
+                        }
+                    }
+                    DB::commit();
+                    Log::debug('temporary commit');
+                }catch(\PDOException $pe){
+                    DB::rollBack();
+                    Log::debug('temporary rollBack');
+                    array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
+                    Log::error(Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
+                    Log::error($pe->getMessage());
+                    $add_result = false;
+                }catch(\Exception $e){
+                    DB::rollBack();
+                    Log::debug('temporary rollBack');
+                    array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_error_dailycalc'));
+                    Log::error(Config::get('const.LOG_MSG.data_error_dailycalc'));
+                    Log::error($e->getMessage());
+                    $add_result = false;
+                }
+            }catch(\PDOException $pe){
+                DB::rollBack();
+                Log::debug('temporary rollBack');
+                array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
+                Log::error($pe->getMessage());
+                $add_result = false;
+            }
+        } else {
+            $add_result = false;
+            array_push($this->array_massegedata, Config::get('const.MSG_ERROR.not_workintime'));
         }
 
         // 出勤・退勤データtempから登録
@@ -198,8 +247,6 @@ class DailyWorkingInformationController extends Controller
                             $temp_array[] = $temp_collect->toArray();
                         } 
                         $working_model->insertWorkingTimeDateFromTemp($temp_array);
-                        $working_time_dates = $working_model->getWorkingTimeDateTimeFormat(Config::get('const.WORKINGTIME_ORDERBY.daily_basic'));
-                        $working_time_sum = $working_model->getWorkingTimeDateTimeSum();
                         DB::commit();
                         Log::debug(' calc commit ');
                     }catch(\PDOException $pe){
@@ -210,20 +257,21 @@ class DailyWorkingInformationController extends Controller
                         DB::rollBack();
                         Log::debug(' calc rollBack ');
                         array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
+                        $add_result = false;
                     }
                 }
             }catch(\PDOException $pe){
                 array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_error_dailycalc'));
                 Log::error(Config::get('const.LOG_MSG.data_error_dailycalc'));
                 Log::error($e->getMessage());
+                $add_result = false;
             }catch(\Exception $e){
                 array_push($this->array_massegedata, Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
+                $add_result = false;
             }
         }
 
-        //$this->collect_massegedata->put(Config::get('const.RESPONCE_ITEM.messagedata'),Config::get('const.MSG_ERROR.not_setting_timetable'));
-        return response()->json(['calcresults' => $working_time_dates, 'sumresults' => $working_time_sum, 'massegedata' => $this->array_massegedata]);
-        //return response()->json(['calcresults' => $working_time_dates, 'sumresults' => $working_time_sum, 'massegedata' => $this->collect_massegedata]);
+        return $add_result;
     }
 
     /**
@@ -291,12 +339,13 @@ class DailyWorkingInformationController extends Controller
                         if ($current_date == $before_date &&
                             $current_department_code == $before_department_code &&
                             $current_user_code == $before_user_code) {
+                            Log::DEBUG('同じキーの場合 ');
                             // 打刻データ配列の設定
                             $this->pushArrayWorkingTime($result);
                         } elseif ($current_date == $before_date &&
-                            $current_department_code == $before_department_code)    {
+                            $current_department_code == $before_department_code) {
                             // ユーザーが変わった場合
-                            Log::DEBUG('user break ');
+                            Log::DEBUG('ユーザーが変わった場合 ');
                             Log::DEBUG('$result->user_code  '.$result->user_code);
                             Log::DEBUG('$result->mode  '.$result->mode);
                             Log::DEBUG('$result->record_datetime  '.$result->record_datetime);
@@ -368,6 +417,22 @@ class DailyWorkingInformationController extends Controller
                                 throw $e;
                             }
                         }
+                    /*} else {
+                        // 打刻ないデータはtempに出力
+                        $ptn = 0;
+                        $this->pushArrayCalc($this->setNoInputTimePtn($ptn));
+                        // temporaryに登録する
+                        $this->insTempCalcItem($target_date, $result);
+                        // 次データ計算事前処理(刻ないデータはbeforeArrayWorkingTimeは使用しない)
+                        $before_date = null;
+                        $before_user_code = null;
+                        $before_department_code = null;
+                        $before_result = null;
+                        // 次データ計算事前処理
+                        // 打刻データ配列の初期化
+                        $this->iniArrayWorkingTime();
+                        // 計算用配列の初期化
+                        $this->iniArrayCalc(); */
                     }
                 } else {
                     // 前のデータが打刻ありであれば計算する
@@ -950,7 +1015,7 @@ class DailyWorkingInformationController extends Controller
      */
     private function setAttendanceCollectPtn($ptn, $record_datetime, $chk_interval)
     {
-        Log::DEBUG('---------------------- setAttendanceCollectPtn in ------------------------ ');
+        Log::DEBUG('---------------------- setAttendanceCollectPtn in ------------------------ '.$record_datetime);
         $temp_calc_model = new TempCalcWorkingTime();
 
         if ($ptn == '1') {
@@ -2600,10 +2665,6 @@ class DailyWorkingInformationController extends Controller
         $temp_calc_model->setShiftnameAttribute($result->shift_name);
         $temp_calc_model->setShiftfromtimeAttribute($result->shift_from_time);
         $temp_calc_model->setShifttotimeAttribute($result->shift_to_time);
-        $temp_calc_model->setRecordyearAttribute($result->record_year);
-        $temp_calc_model->setRecordmonthAttribute($result->record_month);
-        $temp_calc_model->setRecorddateAttribute($result->record_date);
-        $temp_calc_model->setRecordtimeAttribute($result->record_time);
         $temp_calc_model->setWeekdaykubunAttribute($result->weekday_kubun);
         $temp_calc_model->setWeekdaynameAttribute($result->weekday_name);
         $temp_calc_model->setBusinesskubunAttribute($result->business_kubun);
@@ -2626,6 +2687,11 @@ class DailyWorkingInformationController extends Controller
         for($i=0;$i<count($this->array_calc_mode);$i++){
             $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
             $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
+            $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
+            $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
+            $temp_calc_model->setRecordmonthAttribute($edt_calc_datetime->format('m'));
+            $temp_calc_model->setRecorddateAttribute($edt_calc_datetime->format('Ymd'));
+            $temp_calc_model->setRecordtimeAttribute($edt_calc_datetime->format('His'));
             $temp_calc_model->setWorkingstatusAttribute($this->array_calc_status[$i]);
             $temp_calc_model->setNoteAttribute($this->array_calc_note[$i]);
             $temp_calc_model->setLateAttribute($this->array_calc_late[$i]);
@@ -2639,7 +2705,6 @@ class DailyWorkingInformationController extends Controller
             }catch(\PDOException $pe){
                 throw $pe;
             }
-            Log::DEBUG('insTempCalcItem end');
         }
         Log::DEBUG('---------------------- insTempCalcItem end ------------------------ ');
     }
@@ -2723,10 +2788,14 @@ class DailyWorkingInformationController extends Controller
             if ($before_department_code == null) {$before_department_code = $current_department_code;}
             if ($before_user_code == null) {$before_user_code = $current_user_code;}
             if ($before_result == null) {$before_result = $result;}
+            Log::DEBUG('キー比較 $current_date '.$current_date.'  '.$before_date);
+            Log::DEBUG('キー比較 $current_department_code '.$current_department_code.'  '.$current_department_code);
+            Log::DEBUG('キー比較 $current_user_code '.$current_user_code.'  '.$before_user_code);
             // 同じキーの場合
             if ($current_date == $before_date &&
-                $current_department_code == $before_department_code &&
+                $current_department_code == $current_department_code &&
                 $current_user_code == $before_user_code) {
+                Log::DEBUG('同じキーの場合  ');
                 $add_cnt++;
                 if ($result->mode == Config::get('const.C005.attendance_time')) {$attendance_time = $result->record_datetime;}
                 if ($result->mode == Config::get('const.C005.leaving_time')) {$leaving_time = $result->record_datetime;}
@@ -2873,14 +2942,14 @@ class DailyWorkingInformationController extends Controller
             } elseif ($current_date == $before_date &&
                     $current_department_code == $before_department_code) {
                 // ユーザーが変わった場合
-                Log::DEBUG('calcTempWorkingTimeDate user break ');
+                Log::DEBUG('calcTempWorkingTimeDate ユーザーが変わった場合 ');
                 Log::DEBUG('calcTempWorkingTimeDate $result->user_code  '.$result->user_code);
                 Log::DEBUG('calcTempWorkingTimeDate $result->mode  '.$result->mode);
                 Log::DEBUG('calcTempWorkingTimeDate $result->record_datetime  '.$result->record_datetime);
                 Log::DEBUG('calcTempWorkingTimeDate $result->working_timetable_from_time  '.$result->working_timetable_from_time);
                 Log::DEBUG('calcTempWorkingTimeDate $result->working_timetable_to_time  '.$result->working_timetable_to_time);
                 try{
-                    if ($working_status == 0) {
+                    if ($working_status == 0 ) {
                         Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
                         Log::DEBUG('当日分　勤務状態 現在時刻 =  '.$dtNow);
                         if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
@@ -2965,9 +3034,9 @@ class DailyWorkingInformationController extends Controller
                 }
             } elseif ($current_date == $before_date) {
                 // 部署が変わった場合
-                Log::DEBUG('department break ');
+                Log::DEBUG('部署が変わった場合 ');
                 try{
-                    if ($working_status == 0) {
+                    if ($working_status == 0 ) {
                         Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
                         Log::DEBUG('当日分　勤務状態 現在時刻 =  '.$dtNow);
                         if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
@@ -3048,9 +3117,9 @@ class DailyWorkingInformationController extends Controller
                 }
             } else {
                 // 日付が変わった場合
-                Log::DEBUG('date break ');
+                Log::DEBUG('日付が変わった場合 ');
                 try{
-                    if ($working_status == 0) {
+                    if ($working_status == 0 ) {
                         Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
                         Log::DEBUG('当日分　勤務状態 現在時刻 =  '.$dtNow);
                         if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
@@ -3058,7 +3127,7 @@ class DailyWorkingInformationController extends Controller
                         }
                         Log::DEBUG('当日分　勤務状態 =  '.$working_status);
                     }
-                        // ユーザー労働時間登録(１個前のユーザーを登録する)
+                    // ユーザー労働時間登録(１個前のユーザーを登録する)
                     $add_result = $this->addTempWorkingTimeDate(
                         $before_date,
                         $before_user_code,
@@ -3133,22 +3202,15 @@ class DailyWorkingInformationController extends Controller
             }
         }
 
-        Log::DEBUG('残り　count($array_calc_time) > 0 =  '.count($array_calc_time));
-        if (count($array_calc_time) > 0) {
+        Log::DEBUG('残り　working_status  =  '.$working_status);
+        if ($working_status != 0) {
             try{
-                if ($working_status == 0) {
-                    Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
-                    Log::DEBUG('当日分　勤務状態 現在時刻 =  '.$dtNow);
-                    if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
-                        $working_status = $before_result->working_status;
-                    }
-                    Log::DEBUG('当日分　勤務状態 =  '.$working_status);
-                }
+                Log::DEBUG('残り　当日分　勤務状態 =  '.$working_status);
                 $add_result = $this->addTempWorkingTimeDate(
-                    $before_date,
-                    $before_user_code,
-                    $before_department_code,
-                    $before_result,
+                    $current_date,
+                    $current_user_code,
+                    $current_department_code,
+                    $current_result,
                     $working_status,
                     $array_calc_time,
                     $array_missing_middle_time,
@@ -3198,14 +3260,17 @@ class DailyWorkingInformationController extends Controller
             $init_setting_from_time = $result_init->to_time;
             break;
         }
+
         // 労働時間区分の開始終了時刻を取得
         // タイムテーブルをnoとworking_time_kubunで特定
-        $filtered = $timetables->where('no', $working_timetable_no)->where('working_time_kubun', $working_time_kubun);
-        foreach($filtered as $result_time) {
+        $array_times = $apicommon->analyzeTimeTable($timetables, $working_time_kubun, $working_timetable_no);
+
+        //$filtered = $timetables->where('no', $working_timetable_no)->where('working_time_kubun', $working_time_kubun);
+        foreach($array_times as $result_time) {
             // 時間登録の開始時間
-            $from_time = $result_time->from_time;
+            $from_time = $result_time['from_time'];
             // 時間登録の終了時間
-            $to_time = $result_time->to_time;
+            $to_time = $result_time['to_time'];
             if (isset($from_time) && isset($to_time)) {
                 // 日付付与
                 // $from_timeが当日は当日+開始時刻、翌日は翌日+開始時刻
@@ -3435,12 +3500,14 @@ class DailyWorkingInformationController extends Controller
 
         // 労働時間区分の開始終了時刻を取得
         // タイムテーブルをnoとworking_time_kubunで特定
-        $filtered = $timetables->where('no', $working_timetable_no)->where('working_time_kubun', $working_time_kubun);
-        foreach($filtered as $result_time) {
+        $array_times = $apicommon->analyzeTimeTable($timetables, $working_time_kubun, $working_timetable_no);
+
+        //$filtered = $timetables->where('no', $working_timetable_no)->where('working_time_kubun', $working_time_kubun);
+        foreach($array_times as $result_time) {
             // 時間登録の開始時間
-            $from_time = $result_time->from_time;
+            $from_time = $result_time['from_time'];
             // 時間登録の終了時間
-            $to_time = $result_time->to_time;
+            $to_time = $result_time['to_time'];
             if (isset($from_time) && isset($to_time)) {
                 // 日付付与
                 // $from_timeが当日は当日+開始時刻、翌日は翌日+開始時刻

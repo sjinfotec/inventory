@@ -21,6 +21,7 @@ class WorkingTimedate extends Model
     protected $table_users = 'users';
     protected $table_departments = 'departments';
     protected $table_user_holiday_kubuns = 'user_holiday_kubuns';
+    protected $table_calendars = 'calendars';
     protected $table_generalcodes = 'generalcodes';
     protected $guarded = array('id');
 
@@ -911,7 +912,6 @@ class WorkingTimedate extends Model
 
 
         // 日次労働時間取得SQL作成
-        \DB::enableQueryLog();
         try{
             $mainquery = DB::table($this->table)
                 ->select(
@@ -1025,13 +1025,6 @@ class WorkingTimedate extends Model
             Log::error($e->getMessage());
             throw $e;
         }
-
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getWorkTimes' => \DB::getQueryLog()
-            ]
-        );
         
         return $result;
     }
@@ -1048,11 +1041,12 @@ class WorkingTimedate extends Model
      *
      * @return sql取得結果
      */
-    public function getWorkingTimeDateTimeFormat($orderbykbn){
+    public function getWorkingTimeDateTimeFormat($dayormonth){
 
 
         // 日次労働時間取得SQL作成
-        \DB::enableQueryLog();
+        $result = true;
+
         try{
             $case_where = "CASE ifnull({0},0) WHEN 0 THEN '00:00' ";
             $case_where .= "ELSE CONCAT(CONCAT(LPAD(TRUNCATE({0}, 0), 2, '0'),':'),LPAD(TRUNCATE((mod({0} * 100, 100) * 60) / 100, 0) , 2, '0')) ";
@@ -1155,8 +1149,46 @@ class WorkingTimedate extends Model
                 ->addselect($this->table.'.updated_user')
                 ->addselect($this->table.'.is_deleted')
                 ->addselect($this->table_user_holiday_kubuns.'.holiday_kubun')
-                ->addselect($this->table_generalcodes.'.code_name as holiday_name');
-            
+                ->addselect($this->table_generalcodes.'.code_name as holiday_name')
+                ->addselect($this->table_calendars.'.business_kubun as calendars_business_kubun');
+                
+            $case_where = "CASE ifnull({0},{1}) WHEN {1} THEN '{2}' ";
+            $case_where .= " WHEN {3} THEN '{4}' ";
+            $case_where .= " WHEN {5} THEN '{6}' ";
+            $case_where .= " ELSE '{2}' ";
+            $case_where .= ' END as {7}';
+
+            $case_where_working_time_name = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where);
+            $case_where_working_time_name = str_replace('{1}', Config::get('const.C007.basic'), $case_where_working_time_name);
+            $case_where_working_time_name = str_replace('{2}', Config::get('const.WORKING_TIME_NAME.basic'), $case_where_working_time_name);
+            $case_where_working_time_name = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_working_time_name);
+            $case_where_working_time_name = str_replace('{4}', Config::get('const.WORKING_TIME_NAME.legal_holoday'), $case_where_working_time_name);
+            $case_where_working_time_name = str_replace('{5}', Config::get('const.C007.legal_out_holoday'), $case_where_working_time_name);
+            $case_where_working_time_name = str_replace('{6}', Config::get('const.WORKING_TIME_NAME.legal_out_holoday'), $case_where_working_time_name);
+            $case_where_working_time_name = str_replace('{7}', 'working_time_name', $case_where_working_time_name);
+
+            $case_where_predeter_time_name = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where);
+            $case_where_predeter_time_name = str_replace('{1}', Config::get('const.C007.basic'), $case_where_predeter_time_name);
+            $case_where_predeter_time_name = str_replace('{2}', Config::get('const.PREDETER_TIME_NAME.basic'), $case_where_predeter_time_name);
+            $case_where_predeter_time_name = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_predeter_time_name);
+            $case_where_predeter_time_name = str_replace('{4}', Config::get('const.PREDETER_TIME_NAME.legal_holoday'), $case_where_predeter_time_name);
+            $case_where_predeter_time_name = str_replace('{5}', Config::get('const.C007.legal_out_holoday'), $case_where_predeter_time_name);
+            $case_where_predeter_time_name = str_replace('{6}', Config::get('const.PREDETER_TIME_NAME.legal_out_holoday'), $case_where_predeter_time_name);
+            $case_where_predeter_time_name = str_replace('{7}', 'predeter_time_name', $case_where_predeter_time_name);
+
+            $case_where_predeter_night_time_name = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where);
+            $case_where_predeter_night_time_name = str_replace('{1}', Config::get('const.C007.basic'), $case_where_predeter_night_time_name);
+            $case_where_predeter_night_time_name = str_replace('{2}', Config::get('const.PREDETER_NIGHT_TIME_NAME.basic'), $case_where_predeter_night_time_name);
+            $case_where_predeter_night_time_name = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_predeter_night_time_name);
+            $case_where_predeter_night_time_name = str_replace('{4}', Config::get('const.PREDETER_NIGHT_TIME_NAME.legal_holoday'), $case_where_predeter_night_time_name);
+            $case_where_predeter_night_time_name = str_replace('{5}', Config::get('const.C007.legal_out_holoday'), $case_where_predeter_night_time_name);
+            $case_where_predeter_night_time_name = str_replace('{6}', Config::get('const.PREDETER_NIGHT_TIME_NAME.legal_out_holoday'), $case_where_predeter_night_time_name);
+            $case_where_predeter_night_time_name = str_replace('{7}', 'predeter_night_time_name', $case_where_predeter_night_time_name);
+
+            $mainquery
+                ->selectRaw($case_where_working_time_name)
+                ->selectRaw($case_where_predeter_time_name)
+                ->selectRaw($case_where_predeter_night_time_name);
             $mainquery
                 ->leftJoin($this->table_user_holiday_kubuns, function ($join) { 
                     $join->on($this->table.'.working_date', '=', $this->table_user_holiday_kubuns.'.working_date');
@@ -1168,18 +1200,22 @@ class WorkingTimedate extends Model
                     $join->on($this->table_generalcodes.'.code', '=', $this->table_user_holiday_kubuns.'.holiday_kubun')
                     ->where($this->table_generalcodes.'.identification_id', '=', Config::get('const.C013.value'))
                     ->where($this->table_generalcodes.'.is_deleted', '=', 0);
+                })
+                ->leftJoin($this->table_calendars, function ($join) { 
+                    $join->on($this->table.'.working_date', '=', $this->table_calendars.'.date')
+                    ->where($this->table_calendars.'.is_deleted', '=', 0);
                 });
 
             $mainquery = $this->setWhereSql($mainquery);
 
-            if ($orderbykbn == Config::get('const.WORKINGTIME_ORDERBY.daily_basic')) {
+            if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
                 $result = $mainquery
                     ->orderBy($this->table.'.working_date', 'asc')
                     ->orderBy($this->table.'.employment_status', 'asc')
                     ->orderBy($this->table.'.department_code', 'asc')
                     ->orderBy($this->table.'.user_code', 'asc')
                     ->get();
-            } elseif ($orderbykbn == Config::get('const.WORKINGTIME_ORDERBY.monthly_basic')) {
+            } elseif ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic')) {
                 $result = $mainquery
                     ->orderBy($this->table.'.department_code', 'asc')
                     ->orderBy($this->table.'.employment_status', 'asc')
@@ -1198,13 +1234,6 @@ class WorkingTimedate extends Model
             throw $e;
         }
 
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getWorkingTimeDateUserJoin' => \DB::getQueryLog()
-            ]
-        );
-        
         return $result;
     }
 
@@ -1220,13 +1249,15 @@ class WorkingTimedate extends Model
      *
      * @return sql取得結果
      */
-    public function getWorkingTimeDateTimeSum(){
+    public function getWorkingTimeDateTimeSum($dayormonth){
 
+        Log::debug('getWorkingTimeDateTimeSum in '.$dayormonth);
 
         // 日時労働時間合計取得SQL作成
         try{
+            \DB::enableQueryLog();
             $case_where = "CASE ifnull({0},0) WHEN 0 THEN '00:00' ";
-            $case_where .= "ELSE CONCAT(CONCAT(LPAD(TRUNCATE({0}, 0), 2, '0'),':'),LPAD(TRUNCATE((mod({0} * 100, 100) * 60) / 100, 0) , 2, '0')) ";
+            $case_where .= "ELSE CONCAT(CONCAT(TRUNCATE({0}, 0),':'),LPAD(TRUNCATE((mod({0} * 100, 100) * 60) / 100, 0) , 2, '0')) ";
             $case_where .= ' END as {1}';
 
             $case_working_status = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
@@ -1270,10 +1301,11 @@ class WorkingTimedate extends Model
             $str_replace_holiday_kubun2 =str_replace('{2}', Config::get('const.C012.missing_middle_return'), $str_replace_holiday_kubun1);
             $str_replace_holiday_kubun3 =str_replace('{3}', Config::get('const.C012.public_going_out_return'), $str_replace_holiday_kubun2);
             $str_replace_holiday_kubun4 =str_replace('{4}', Config::get('const.C012.continue_work'), $str_replace_holiday_kubun3);
-            $str_replace_holiday_kubun5 =str_replace('{5}', 'holiday_kubun', $str_replace_holiday_kubun4);
+            $str_replace_holiday_kubun5 =str_replace('{5}', $this->table.'.holiday_kubun', $str_replace_holiday_kubun4);
             $str_replace_holiday_kubun6 =str_replace('{6}', Config::get('const.C013.min_break_value'), $str_replace_holiday_kubun5);
             $str_replace_holiday_kubun7 =str_replace('{7}', Config::get('const.C013.max_break_value'), $str_replace_holiday_kubun6);
 
+            Log::debug('$subquery in '.$dayormonth);
             $subquery = DB::table($this->table)
                 ->selectRaw('sum(ifnull('.$this->table.'.total_working_times, 0)) as total_working_times')
                 ->selectRaw('sum(ifnull('.$this->table.'.regular_working_times, 0)) as regular_working_times')
@@ -1288,11 +1320,70 @@ class WorkingTimedate extends Model
                 ->selectRaw('sum(ifnull('.$this->table.'.missing_middle_hours, 0)) as missing_middle_hours')
                 ->selectRaw('sum('.$str_replace_working_status4.') as total_working_status')
                 ->selectRaw('sum('.$str_replace_go_out2.') as total_go_out')
-                ->selectRaw('sum('.$str_replace_holiday_kubun7.') as total_holiday_kubun')
-                ;
-            $subquery = $this->setWhereSql($subquery)->toSql();
+                ->selectRaw('sum('.$str_replace_holiday_kubun7.') as total_holiday_kubun');
+            if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
+                $subquery->addselect($this->table.'.working_date');
+            }
 
-            $mainquery = DB::table(DB::raw('('.$subquery.') AS t1'))
+            $array_groupby = [];
+            $subquery = $this->setWhereSql($subquery);
+            
+            $case_where_1 = "";
+            $case_where_working_time_name = "";
+            $case_where_predeter_time_name = "";
+            $case_where_predeter_night_time_name = "";
+            if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
+                Log::debug('daily_basic');
+                $array_groupby[] = $this->table.'.working_date';
+
+                $case_where_1 = "CASE ifnull({0},{1}) WHEN {1} THEN '{2}' ";
+                $case_where_1 .= " WHEN {3} THEN '{4}' ";
+                $case_where_1 .= " WHEN {5} THEN '{6}' ";
+                $case_where_1 .= " ELSE '{2}' ";
+                $case_where_1 .= ' END as {7}';
+    
+                $case_where_working_time_name = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where_1);
+                $case_where_working_time_name = str_replace('{1}', Config::get('const.C007.basic'), $case_where_working_time_name);
+                $case_where_working_time_name = str_replace('{2}', Config::get('const.WORKING_TIME_NAME.basic'), $case_where_working_time_name);
+                $case_where_working_time_name = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_working_time_name);
+                $case_where_working_time_name = str_replace('{4}', Config::get('const.WORKING_TIME_NAME.legal_holoday'), $case_where_working_time_name);
+                $case_where_working_time_name = str_replace('{5}', Config::get('const.C007.legal_out_holoday'), $case_where_working_time_name);
+                $case_where_working_time_name = str_replace('{6}', Config::get('const.WORKING_TIME_NAME.legal_out_holoday'), $case_where_working_time_name);
+                $case_where_working_time_name = str_replace('{7}', 'working_time_name', $case_where_working_time_name);
+    
+                $case_where_predeter_time_name = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where_1);
+                $case_where_predeter_time_name = str_replace('{1}', Config::get('const.C007.basic'), $case_where_predeter_time_name);
+                $case_where_predeter_time_name = str_replace('{2}', Config::get('const.PREDETER_TIME_NAME.basic'), $case_where_predeter_time_name);
+                $case_where_predeter_time_name = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_predeter_time_name);
+                $case_where_predeter_time_name = str_replace('{4}', Config::get('const.PREDETER_TIME_NAME.legal_holoday'), $case_where_predeter_time_name);
+                $case_where_predeter_time_name = str_replace('{5}', Config::get('const.C007.legal_out_holoday'), $case_where_predeter_time_name);
+                $case_where_predeter_time_name = str_replace('{6}', Config::get('const.PREDETER_TIME_NAME.legal_out_holoday'), $case_where_predeter_time_name);
+                $case_where_predeter_time_name = str_replace('{7}', 'predeter_time_name', $case_where_predeter_time_name);
+    
+                $case_where_predeter_night_time_name = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where_1);
+                $case_where_predeter_night_time_name = str_replace('{1}', Config::get('const.C007.basic'), $case_where_predeter_night_time_name);
+                $case_where_predeter_night_time_name = str_replace('{2}', Config::get('const.PREDETER_NIGHT_TIME_NAME.basic'), $case_where_predeter_night_time_name);
+                $case_where_predeter_night_time_name = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_predeter_night_time_name);
+                $case_where_predeter_night_time_name = str_replace('{4}', Config::get('const.PREDETER_NIGHT_TIME_NAME.legal_holoday'), $case_where_predeter_night_time_name);
+                $case_where_predeter_night_time_name = str_replace('{5}', Config::get('const.C007.legal_out_holoday'), $case_where_predeter_night_time_name);
+                $case_where_predeter_night_time_name = str_replace('{6}', Config::get('const.PREDETER_NIGHT_TIME_NAME.legal_out_holoday'), $case_where_predeter_night_time_name);
+                $case_where_predeter_night_time_name = str_replace('{7}', 'predeter_night_time_name', $case_where_predeter_night_time_name);
+            }
+            if(!empty($this->param_employment_status)){
+                $array_groupby[] = $this->table.'.employment_status';
+            }
+            if(!empty($this->param_user_code)){
+                $array_groupby[] = $this->table.'.user_code';
+            }
+            if(!empty($this->param_department_code)){
+                $array_groupby[] = $this->table.'.department_code';
+            }
+            if (count($array_groupby) > 0) {
+                $subquery->groupby($array_groupby);
+            }
+            $subquery1 = $subquery->toSql();
+
+            $mainquery = DB::table(DB::raw('('.$subquery1.') AS t1'))
                 ->selectRaw(str_replace('{1}', 'total_working_times', str_replace('{0}', 't1.total_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'regular_working_times', str_replace('{0}', 't1.regular_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'out_of_regular_working_times', str_replace('{0}', 't1.out_of_regular_working_times', $case_where)))
@@ -1306,9 +1397,18 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'missing_middle_hours', str_replace('{0}', 't1.missing_middle_hours', $case_where)))
                 ->selectRaw('ifnull(t1.total_working_status, 0) as total_working_status' )
                 ->selectRaw('ifnull(t1.total_go_out, 0) as total_go_out' )
-                ->selectRaw('ifnull(t1.total_holiday_kubun, 0) as total_holiday_kubun' )
-                ;
+                ->selectRaw('ifnull(t1.total_holiday_kubun, 0) as total_holiday_kubun' );
 
+            if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
+                $mainquery
+                    ->selectRaw($case_where_working_time_name)
+                    ->selectRaw($case_where_predeter_time_name)
+                    ->selectRaw($case_where_predeter_night_time_name);
+                $mainquery->leftJoin($this->table_calendars, function ($join) { 
+                    $join->on('t1.working_date', '=', $this->table_calendars.'.date');
+                });
+            }
+            
             $array_setBindingsStr = array();
             $cnt = 0;
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
@@ -1338,7 +1438,13 @@ class WorkingTimedate extends Model
             }
 
             $result = $mainquery->get();
-            
+            \Log::debug(
+                'sql_debug_log',
+                [
+                    'getWorkingTimeDateTimeSum' => \DB::getQueryLog()
+                ]
+            );
+                
         }catch(\PDOException $pe){
             Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());

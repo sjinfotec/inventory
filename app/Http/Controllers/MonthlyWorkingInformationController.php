@@ -8,9 +8,11 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use App\WorkTime;
 use App\WorkingTimedate;
 use App\Setting;
 use App\Company;
+use App\Http\Controllers\DailyWorkingInformationController;
 
 class MonthlyWorkingInformationController extends Controller
 {
@@ -40,7 +42,7 @@ class MonthlyWorkingInformationController extends Controller
      */
     public function show(Request $request)
     {
-        Log::debug('show in');
+        Log::debug('monthly show in');
 
         // reqestクエリーセット
         $datefrom = $this->setRequestQeury($request->datefrom);
@@ -70,6 +72,8 @@ class MonthlyWorkingInformationController extends Controller
                 $workingtimedate_model->setParamUsercodeAttribute($usercode);
                 // 労働時間の集計
                 $working_time_dates = $this->calctWorkingTime($workingtimedate_model);
+                Log::debug('$working_model = '.count($working_time_dates));
+                Log::debug('$working_time_sum = '.count($working_time_sum));
                 // 会社名を取得
                 $company_model = new Company();
                 $company_model->setApplytermfromAttribute($workingtimedate_model->getParamdatefromAttribute());
@@ -90,6 +94,92 @@ class MonthlyWorkingInformationController extends Controller
 
         return response()->json(
             ['calcresults' => $working_time_dates, 'sumresults' => $working_time_sum, 'company_name' => $company_name, 'massegedata' => $this->array_massegedata]
+        );
+    }
+
+
+    /**
+     * 最新更新集計処理
+     *
+     * @return void
+     */
+    public function calc(Request $request)
+    {
+        Log::debug('monthly calc in');
+
+        $calc_result = true;
+        $working_time_dates = array();
+        $working_time_sum = array();
+        $company_name = '';
+
+        // reqestクエリーセット
+        $datefrom = $this->setRequestQeury($request->datefrom);
+        $displaykbn = $this->setRequestQeury($request->displaykbn);
+        $employmentstatus = $this->setRequestQeury($request->employmentstatus);
+        $departmentcode = $this->setRequestQeury($request->departmentcode);
+        $usercode = $this->setRequestQeury($request->usercode);
+        Log::debug('$datefrom = '.$datefrom);
+        Log::debug('$displaykbn = '.$displaykbn);
+        Log::debug('$employmentstatus = '.$employmentstatus);
+        Log::debug('$departmentcode = '.$departmentcode);
+        Log::debug('$usercode = '.$usercode);
+
+        // メッセージ設定collect
+        $this->collect_massegedata = collect();
+
+        $workingtimedate_model = new WorkingTimedate();
+        // 日付開始終了の作成
+        $chk_result = $this->makeDateFromTo($displaykbn,  $datefrom, $workingtimedate_model);
+        $datefrom = $workingtimedate_model->getParamdatefromAttribute();
+        $dateto = $workingtimedate_model->getParamdatetoAttribute();
+        $datefrom_date = new Carbon($datefrom);
+        $dateto_date = new Carbon($dateto);
+        Log::debug('$datefrom = '.$datefrom);
+        Log::debug('$dateto = '.$dateto);
+        Log::debug('$datefrom_date = '.$datefrom_date);
+        Log::debug('$dateto_date = '.$dateto_date);
+
+        $work_time = new WorkTime();
+        // work_timeのパラメータのチェックを実施する
+        $work_time->setParamDatefromAttribute($datefrom);
+        $work_time->setParamDatetoAttribute($dateto);
+        $work_time->setParamemploymentstatusAttribute($employmentstatus);
+        $work_time->setParamDepartmentcodeAttribute($departmentcode);
+        $work_time->setParamUsercodeAttribute($usercode);
+        $chk_result = $work_time->chkWorkingTimeData();
+        if ($chk_result) {
+            Log::debug('work_timeのパラメータのチェック OK ');
+            // 日次集計の計算を呼ぶ
+            $daily_controller = new DailyWorkingInformationController();
+            $calc_date = $datefrom_date;
+            Log::debug('first $calc_date = '.$calc_date);
+            while (true) {
+                Log::debug('$calc_date = '.$calc_date);
+                Log::debug('$dateto_date = '.$dateto_date);
+                if ($calc_date > $dateto_date) { break; }
+                // 打刻時刻を取得
+                $work_time->setParamDatefromAttribute($calc_date);
+                $work_time->setParamDatetoAttribute($calc_date);
+                $work_time->setParamemploymentstatusAttribute($employmentstatus);
+                $work_time->setParamDepartmentcodeAttribute($departmentcode);
+                $work_time->setParamUsercodeAttribute($usercode);
+                $calc_result = $daily_controller->addDailyCalc(
+                    $work_time,
+                    $calc_date,
+                    $calc_date,
+                    $employmentstatus,
+                    $departmentcode,
+                    $usercode
+                );
+                $calc_date = $calc_date->addDay(1);
+                Log::debug('$calc_date = '.$calc_date);
+            }
+        } else {
+            $calc_result = false;
+        }
+
+        return response()->json(
+            ['calcresult' => $calc_result,'calcresults' => $working_time_dates, 'sumresults' => $working_time_sum, 'company_name' => $company_name, 'massegedata' => $this->array_massegedata]
         );
     }
 
@@ -204,7 +294,7 @@ class MonthlyWorkingInformationController extends Controller
         $before_date = null;
         $before_result = null;
         // 指定パラメータよりレコード取得パラメータはメインで設定済み
-        $workingtimedates = $workingtimedate_model->getWorkingTimeDateTimeFormat(Config::get('const.WORKINGTIME_ORDERBY.monthly_basic'));
+        $workingtimedates = $workingtimedate_model->getWorkingTimeDateTimeFormat(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
 
         if(isset($workingtimedates)){
             foreach($workingtimedates as $result) {
@@ -237,7 +327,8 @@ class MonthlyWorkingInformationController extends Controller
                     $workingtimedate_model->setParamEmploymentStatusAttribute($before_employment_status);
                     $workingtimedate_model->setParamDepartmentcodeAttribute($before_department_code);
                     $workingtimedate_model->setParamUsercodeAttribute($before_user_code);
-                    $working_time_sum = $workingtimedate_model->getWorkingTimeDateTimeSum();
+                    $working_time_sum = $workingtimedate_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
+                    Log::debug('ユーザーが変わった $working_time_sum = '.count($working_time_sum));
                     $this->setArrayUser($before_result, $working_time_sum);
                     Log::debug('ユーザーが変わった $array_date = '.count($this->array_date));
                     Log::debug('ユーザーが変わった $array_user = '.count($this->array_user));
@@ -259,7 +350,7 @@ class MonthlyWorkingInformationController extends Controller
                     $workingtimedate_model->setParamEmploymentStatusAttribute($before_employment_status);
                     $workingtimedate_model->setParamDepartmentcodeAttribute($before_department_code);
                     $workingtimedate_model->setParamUsercodeAttribute($before_user_code);
-                    $working_time_sum = $workingtimedate_model->getWorkingTimeDateTimeSum();
+                    $working_time_sum = $workingtimedate_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
                     $this->setArrayUser($before_result, $working_time_sum);
                     Log::debug('部署が変わった $array_date = '.count($this->array_date));
                     Log::debug('部署が変わった $array_user = '.count($this->array_user));
@@ -281,7 +372,7 @@ class MonthlyWorkingInformationController extends Controller
                     $workingtimedate_model->setParamEmploymentStatusAttribute($before_employment_status);
                     $workingtimedate_model->setParamDepartmentcodeAttribute($before_department_code);
                     $workingtimedate_model->setParamUsercodeAttribute($before_user_code);
-                    $working_time_sum = $workingtimedate_model->getWorkingTimeDateTimeSum();
+                    $working_time_sum = $workingtimedate_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
                     $this->setArrayUser($before_result, $working_time_sum);
                     Log::debug('勤務形態が変わった $array_date = '.count($this->array_date));
                     Log::debug('勤務形態が変わった $array_user = '.count($this->array_user));
@@ -304,7 +395,7 @@ class MonthlyWorkingInformationController extends Controller
             $workingtimedate_model->setParamEmploymentStatusAttribute($current_employment_status);
             $workingtimedate_model->setParamDepartmentcodeAttribute($current_department_code);
             $workingtimedate_model->setParamUsercodeAttribute($current_user_code);
-            $working_time_sum = $workingtimedate_model->getWorkingTimeDateTimeSum();
+            $working_time_sum = $workingtimedate_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
             $this->setArrayUser($before_result, $working_time_sum);
             Log::debug('残り $array_date = '.count($this->array_date));
             Log::debug('残り $array_user = '.count($this->array_user));

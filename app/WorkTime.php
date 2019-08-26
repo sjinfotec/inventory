@@ -377,7 +377,6 @@ class WorkTime extends Model
 
         // 日次労働時間取得SQL作成
         // subquery1    work_times
-        \DB::enableQueryLog();
         $subquery1 = DB::table($this->table)
             ->select(
                 $this->table.'.user_code as user_code',
@@ -538,12 +537,6 @@ class WorkTime extends Model
             ->orderBy('t2.record_date', 'asc')
             ->orderBy('t2.record_datetime', 'asc')
             ->get();
-        \Log::debug(
-        'sql_debug_log',
-        [
-            'getWorkTimes' => \DB::getQueryLog()
-        ]
-        );
 
         return $result;
     }
@@ -638,7 +631,6 @@ class WorkTime extends Model
     public function getDailyMaxData(){
         // 開始日付直前の打刻時刻を取得
         // sunquery1    work_times
-        \DB::enableQueryLog();
         $sunquery1 = DB::table($this->table)
             ->select(
                 $this->table.'.user_code',
@@ -668,12 +660,6 @@ class WorkTime extends Model
             ->where('t1.is_deleted', '=', 0)
             ->get();
 
-        \Log::debug(
-        'sql_debug_log',
-        [
-            'getDailyMaxData' => \DB::getQueryLog()
-        ]
-        );
 
         return $mainquery;
     }
@@ -684,7 +670,6 @@ class WorkTime extends Model
      * @return $data
      */
     public function getUserDetails(){
-        \DB::enableQueryLog();
         $data = DB::table($this->table)
             ->join('users','users.code','=',$this->table.'.user_code')
             ->join('departments','departments.code','users.department_code')
@@ -707,12 +692,6 @@ class WorkTime extends Model
             ->where($this->table.'.is_deleted', 0)
             ->orderBy($this->table.'.record_time', 'asc')
             ->get();
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getUserDetails' => \DB::getQueryLog()
-            ]
-            );
         
         return $data;
     }

@@ -27,6 +27,7 @@ Route::get('/daily/calc', 'DailyWorkingInformationController@show')->middleware(
 Route::get('/daily/show', 'DailyWorkingInformationController@show')->middleware('auth');
 
 Route::get('/monthly', 'MonthlyWorkingInformationController@index')->middleware('auth');
+Route::get('/monthly/calc', 'MonthlyWorkingInformationController@calc')->middleware('auth');
 Route::get('/monthly/show', 'MonthlyWorkingInformationController@show')->middleware('auth');
 // 勤怠編集
 Route::get('/edit_work_times', 'EditWorkTimesController@index')->middleware('auth');

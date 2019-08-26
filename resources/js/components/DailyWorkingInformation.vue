@@ -269,7 +269,7 @@
                   v-bind:itemsecound-value="calclist.holiday_name"
                 ></col-employmentstatus>
                 <col-regularworking
-                  v-bind:item-name="'勤務時間'"
+                  v-bind:item-name="calclist.working_time_name"
                   v-bind:item-value="calclist.total_working_times"
                 ></col-regularworking>
                 <col-employmentstatus
@@ -277,23 +277,23 @@
                   v-bind:item-value="calclist.working_timetable_name"
                 ></col-employmentstatus>
                 <!-- col  所定労働時間 所定外労働時間-->
-                <col-regularworking
+                <col-regularworking v-if="calclist.business_kubun === 1"
                   v-bind:item-name="'所定労働時間'"
                   v-bind:item-value="calclist.regular_working_times"
                 ></col-regularworking>
-                <col-regularworking
+                <col-regularworking v-if="calclist.business_kubun === 1"
                   v-bind:item-name="'所定外労働時間'"
                   v-bind:item-value="calclist.out_of_regular_working_times"
                 ></col-regularworking>
                 <!-- /.col -->
                 <!-- col -->
                 <!-- col  残業時間 深夜残業時間 法定労働時間 法定外労働時間-->
+                <col-notemploymentworking
+                  v-bind:item-name="calclist.predeter_time_name"
+                  v-bind:item-value="calclist.off_hours_working_hours"
+                ></col-notemploymentworking>
                 <col-overtimehours
-                  v-bind:item-name="'残業時間'"
-                  v-bind:item-value="calclist.overtime_hours"
-                ></col-overtimehours>
-                <col-overtimehours
-                  v-bind:item-name="'深夜残業時間'"
+                  v-bind:item-name="calclist.predeter_night_time_name"
                   v-bind:item-value="calclist.late_night_overtime_hours"
                 ></col-overtimehours>
                 <col-overtimehours
@@ -305,14 +305,18 @@
                   v-bind:item-value="calclist.out_of_legal_working_times"
                 ></col-overtimehours>
                 <!-- /.col -->
-                <!-- col  未就労時間 時間外労働-->
+                <!-- col  未就労時間-->
+                <col-notemploymentworking
+                  v-bind:item-name="'公用外出時間'"
+                  v-bind:item-value="calclist.public_going_out_hours"
+                ></col-notemploymentworking>
+                <col-notemploymentworking
+                  v-bind:item-name="'私用外出時間'"
+                  v-bind:item-value="calclist.missing_middle_hours"
+                ></col-notemploymentworking>
                 <col-notemploymentworking
                   v-bind:item-name="'未就労時間'"
                   v-bind:item-value="calclist.not_employment_working_hours"
-                ></col-notemploymentworking>
-                <col-notemploymentworking
-                  v-bind:item-name="'時間外労働'"
-                  v-bind:item-value="calclist.off_hours_working_hours"
                 ></col-notemploymentworking>
                 <!-- /.col -->
                 <!-- col -->
@@ -345,23 +349,23 @@
             <!-- .row -->
             <div class="row">
               <col-regularworking
-                v-bind:item-name="'勤務時間'"
+                v-bind:item-name="sumresult.working_time_name"
                 v-bind:item-value="sumresult.total_working_times"
               ></col-regularworking>
-              <col-regularworking
+              <col-regularworking v-if="sumresult.business_kubun === 1"
                 v-bind:item-name="'所定労働時間'"
                 v-bind:item-value="sumresult.regular_working_times"
               ></col-regularworking>
-              <col-regularworking
+              <col-regularworking v-if="sumresult.business_kubun === 1"
                 v-bind:item-name="'所定外労働時間'"
                 v-bind:item-value="sumresult.out_of_regular_working_times"
               ></col-regularworking>
+              <col-notemploymentworking
+                v-bind:item-name="sumresult.predeter_time_name"
+                v-bind:item-value="sumresult.off_hours_working_hours"
+              ></col-notemploymentworking>
               <col-overtimehours
-                v-bind:item-name="'残業時間'"
-                v-bind:item-value="sumresult.overtime_hours"
-              ></col-overtimehours>
-              <col-overtimehours
-                v-bind:item-name="'深夜残業時間'"
+                v-bind:item-name="sumresult.predeter_night_time_name"
                 v-bind:item-value="sumresult.late_night_overtime_hours"
               ></col-overtimehours>
               <col-overtimehours
@@ -375,10 +379,6 @@
               <col-notemploymentworking
                 v-bind:item-name="'未就労時間'"
                 v-bind:item-value="sumresult.not_employment_working_hours"
-              ></col-notemploymentworking>
-              <col-notemploymentworking
-                v-bind:item-name="'時間外労働'"
-                v-bind:item-value="sumresult.off_hours_working_hours"
               ></col-notemploymentworking>
               <col-notemploymentworking
                 v-bind:item-name="'出勤者数'"
@@ -525,6 +525,7 @@ export default {
     searchclick: function(e) {
       this.validate = this.checkForm(e);
       if (this.validate) {
+        this.itemClear();
         this.$axios
           .get("/daily/calc", {
             params: {
@@ -542,6 +543,7 @@ export default {
             this.dispmessage(this.resresults.massegedata);
             this.messagedatasserver.length = 0;
             this.$forceUpdate();
+            console.log("calcresults" + Object.keys(this.calcresults).length);
             console.log("sumresults" + Object.keys(this.sumresults).length);
           })
           .catch(reason => {
@@ -584,6 +586,17 @@ export default {
           );
         }
       }
+    },
+    // クリアメソッド
+    itemClear: function() {
+      this.resresults = [];
+      this.calcresults = [];
+      this.sumresults = [];
+      this.messagedatasserver = [];
+      this.messagedatasfromdate = [];
+      this.messagedatastodate = [];
+      this.messagedatadepartment = [];
+      this.messagedatauser = [];
     },
     // メッセージ処理
     dispmessage: function(items) {
