@@ -92,15 +92,6 @@ export default {
           csv += line;
         });
         line = "";
-        // console.log(user);
-        // var line =
-        //   el["user_name"] +
-        //   "," +
-        //   el["department"] +
-        //   "," +
-        //   el["employment"] +
-        //   "\n";
-        // csv += line;
       });
       let blob = new Blob([csv], { type: "text/csv" });
       let link = document.createElement("a");

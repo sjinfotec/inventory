@@ -176,13 +176,22 @@ Vue.component(
 
 Vue.component("col-note", require("./components/ColNote.vue").default);
 
-Vue.component("general-list", require("./components/SelectGeneralList.vue").default);
+Vue.component(
+    "general-list",
+    require("./components/SelectGeneralList.vue").default
+);
 
 // CSV ダウンロードボタン
 Vue.component(
     "btn-csv-download",
     require("./components/BtnCsvDownload.vue").default
 );
+
+Vue.component(
+    "update-workingtimebutton",
+    require("./components/WorkTimeUpdateButton.vue").default
+);
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
