@@ -11260,7 +11260,7 @@ body {
 
 .fvl-input {
   padding: 0.55rem 0.75rem;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border: none;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
@@ -11333,7 +11333,7 @@ body {
 }
 
 .fvl-search-select {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border-radius: 0.25rem;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
@@ -11353,6 +11353,10 @@ body {
 
 .color-red {
   color: red;
+}
+
+.error-red {
+  color: crimson;
 }
 
 /* global setteing */

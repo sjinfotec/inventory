@@ -1,5 +1,5 @@
 <template>
-  <button class="btn btn-primary" v-on:click="downloadCSV">CSVダウンロード</button>
+  <button class="btn btn-primary" v-on:click="downloadCSV">集計結果をCSVファイルに出力する</button>
 </template>
 <script>
 export default {
@@ -7,6 +7,10 @@ export default {
   props: {
     csvData: {
       type: Array,
+      required: true
+    },
+    date: {
+      type: String,
       required: true
     }
   },
@@ -19,21 +23,70 @@ export default {
   mounted() {},
   methods: {
     downloadCSV() {
-      var csv = "\ufeff" + "タイムテーブル名称,タイムテーブルNo,対象日付\n";
-      this.csvData.forEach(el => {
-        var line =
-          el["name"] +
+      var csv = "";
+      // 1ユーザーごと
+      this.csvData.forEach(user => {
+        user_head =
+          "\ufeff" +
+          "社員名,部署,雇用形態,勤務時間,所定労働時間,所定外労働時間,残業時間,深夜残業時間\n";
+
+        var user_line =
+          user["user_name"] +
           "," +
-          el["working_timetable_no"] +
+          user["department"] +
           "," +
-          el["target_date"] +
+          user["employment"] +
           "\n";
-        csv += line;
+        data_head =
+          "\ufeff" +
+          "日付,出勤1,出勤2,出勤3,出勤4,出勤5,退勤1,退勤2,退勤3,退勤4,退勤5\n";
+
+        csv += user_head;
+        csv += user_line;
+        csv += data_head;
+
+        user.date.forEach(record => {
+          console.log(record);
+
+          var line =
+            record["workingdate"] +
+            "," +
+            record["attendance1"] +
+            "," +
+            record["attendance2"] +
+            "," +
+            record["attendance3"] +
+            "," +
+            record["attendance4"] +
+            "," +
+            record["attendance5"] +
+            "," +
+            record["leaving1"] +
+            "," +
+            record["leaving2"] +
+            "," +
+            record["leaving3"] +
+            "," +
+            record["leaving4"] +
+            "," +
+            record["leaving5"] +
+            "\n";
+          csv += line;
+        });
+        // console.log(user);
+        // var line =
+        //   el["user_name"] +
+        //   "," +
+        //   el["department"] +
+        //   "," +
+        //   el["employment"] +
+        //   "\n";
+        // csv += line;
       });
       let blob = new Blob([csv], { type: "text/csv" });
       let link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
-      link.download = "集計.csv";
+      link.download = this.date + "_月次集計.csv";
       link.click();
     }
   }
