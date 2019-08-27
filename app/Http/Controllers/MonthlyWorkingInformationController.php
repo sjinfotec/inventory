@@ -92,6 +92,41 @@ class MonthlyWorkingInformationController extends Controller
             $calc_result = false;
         }
 
+        // CSV出力用　null → ""
+        foreach ($working_time_dates as $index1 => $date) {
+            foreach ($date['date'] as $index2 => $record) {
+                if(!isset($record['attendance1'])){
+                   $working_time_dates[$index1]['date'][$index2]['attendance1'] = "";
+                }
+                if(!isset($record['attendance2'])){
+                   $working_time_dates[$index1]['date'][$index2]['attendance2'] = "";
+                }
+                if(!isset($record['attendance3'])){
+                   $working_time_dates[$index1]['date'][$index2]['attendance3'] = "";
+                }
+                if(!isset($record['attendance4'])){
+                   $working_time_dates[$index1]['date'][$index2]['attendance4'] = "";
+                }
+                if(!isset($record['attendance5'])){
+                   $working_time_dates[$index1]['date'][$index2]['attendance5'] = "";
+                }
+                if(!isset($record['leaving1'])){
+                   $working_time_dates[$index1]['date'][$index2]['leaving1'] = "";
+                }
+                if(!isset($record['leaving2'])){
+                   $working_time_dates[$index1]['date'][$index2]['leaving2'] = "";
+                }
+                if(!isset($record['leaving3'])){
+                   $working_time_dates[$index1]['date'][$index2]['leaving3'] = "";
+                }
+                if(!isset($record['leaving4'])){
+                   $working_time_dates[$index1]['date'][$index2]['leaving4'] = "";
+                }
+                if(!isset($record['leaving5'])){
+                   $working_time_dates[$index1]['date'][$index2]['leaving5'] = "";
+                }
+            }
+        }
         return response()->json(
             ['calcresults' => $working_time_dates, 'sumresults' => $working_time_sum, 'company_name' => $company_name, 'massegedata' => $this->array_massegedata]
         );
