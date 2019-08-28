@@ -43,7 +43,7 @@ class ApiGetAttendanceResultController extends Controller
         $is_exists = DB::table('card_informations')->where('card_idm', $card_id)->exists();
         if($is_exists){
             $user_datas = $user->getUserCardData($card_id);
-            if (isset($user_datas) && count($user_datas) > 0) {
+            if (count($user_datas) > 0) {
                 foreach($user_datas as $user_data) {
                     $chk_result = $this->chkMode($user_data, $mode, $systemdate);
                     if($chk_result){
@@ -134,7 +134,7 @@ class ApiGetAttendanceResultController extends Controller
         // MAX打刻取得
         $chk_result = true;
         $daily_times = $work_time->getDailyMaxData();
-        if(!empty($daily_times && count($daily_times) > 0)){
+        if(count($daily_times) > 0)){
             Log::debug('MAX打刻取得 OK ');
             $i=0;
             foreach ($daily_times as $result) {
