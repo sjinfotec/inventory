@@ -134,7 +134,7 @@ class ApiGetAttendanceResultController extends Controller
         // MAX打刻取得
         $chk_result = true;
         $daily_times = $work_time->getDailyMaxData();
-        if(count($daily_times) > 0)){
+        if(count($daily_times) > 0){
             Log::debug('MAX打刻取得 OK ');
             $i=0;
             foreach ($daily_times as $result) {
