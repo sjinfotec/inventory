@@ -3666,6 +3666,7 @@ class DailyWorkingInformationController extends Controller
                 $regular_calc_time = $temp_calc;
                 $calc_time = 0;
             }
+            $temp_working_model->setOffhoursworkinghoursAttribute($calc_time);
         }
         $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);   // 所定労働時間
         $total_time = $total_time + $regular_calc_time;
