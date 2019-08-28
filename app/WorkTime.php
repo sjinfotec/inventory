@@ -177,6 +177,13 @@ class WorkTime extends Model
         Log::debug('$this->param_date_from = '.$this->param_date_from);
     }
 
+    public function setParamdatefromNoneditAttribute($value)
+    {
+        $date = date_create($value);
+        $this->param_date_from = $date->format('Y/m/d H:i:s');
+        Log::debug('$this->param_date_from = '.$this->param_date_from);
+    }
+
 
     // 終了日付（23:59:59まで）
     public function getParamdatetoAttribute()
@@ -188,6 +195,13 @@ class WorkTime extends Model
     {
         $date = date_create($value);
         $this->param_date_to = $date->format('Y/m/d').' 23:59:59';
+        Log::debug('$this->param_date_to = '.$this->param_date_to);
+    }
+
+    public function setParamdatetoNoneditAttribute($value)
+    {
+        $date = date_create($value);
+        $this->param_date_to = $date->format('Y/m/d H:i:s');
         Log::debug('$this->param_date_to = '.$this->param_date_to);
     }
 
@@ -623,7 +637,7 @@ class WorkTime extends Model
     }
 
     /**
-     * 当日の勤務状態取得
+     * 現在の勤務状態取得
      *      開始日付の打刻モード、時刻を取得する
      * 
      * @return void
@@ -636,12 +650,11 @@ class WorkTime extends Model
                 $this->table.'.user_code',
                 $this->table.'.department_code',
                 $this->table.'.is_deleted',
-                DB::raw('MAX('.$this->table.'.record_time) as min_record_time')
+                DB::raw('MAX('.$this->table.'.record_time) as max_record_time')
                 )
             ->where($this->table.'.user_code', '=', $this->param_user_code)
             ->where($this->table.'.department_code', '=', $this->param_department_code)
-            ->where($this->table.'.record_time', '>=', $this->param_date_from)
-            ->where($this->table.'.record_time', '<=', $this->param_date_to)
+            ->where($this->table.'.record_time', '<', $this->param_date_from)
             ->groupBy($this->table.'.user_code', $this->table.'.department_code', $this->table.'.is_deleted');
 
         // mainqueryにsunqueryを組み込む
@@ -654,7 +667,7 @@ class WorkTime extends Model
             ->JoinSub($sunquery1, 't2', function ($join) { 
                 $join->on('t2.user_code', '=', 't1.user_code');
                 $join->on('t2.department_code', '=', 't1.department_code');
-                $join->on('t2.min_record_time', '=', 't1.record_time')
+                $join->on('t2.max_record_time', '=', 't1.record_time')
                 ->where('t2.is_deleted', '=', 0);
             })
             ->where('t1.is_deleted', '=', 0)

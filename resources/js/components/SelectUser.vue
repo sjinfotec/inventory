@@ -37,6 +37,8 @@ export default {
   },
   methods: {
     getUserList(getdovalue, datevalue){
+      this.selectedUser ='';
+      this.userList = [];
       this.$axios
         .get("/get_user_list", {
           params: {
@@ -52,6 +54,8 @@ export default {
         });
     },
     getUserListByDepartment(getdovalue, value, datevalue){
+      this.selectedUser ='';
+      this.userList = [];
       this.$axios
         .get("/get_user_list", {
           params: {
@@ -68,6 +72,8 @@ export default {
         });
     },
     getUserListByEmployment(getdovalue, empvalue, datevalue){
+      this.selectedUser ='';
+      this.userList = [];
       this.$axios
         .get("/get_user_list", {
           params: {
@@ -84,6 +90,8 @@ export default {
         });
     },
     getUserListByDepartmentEmployment(getdovalue, value, empvalue, datevalue){
+      this.selectedUser ='';
+      this.userList = [];
       this.$axios
         .get("/get_user_list", {
           params: {

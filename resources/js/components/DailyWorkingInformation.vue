@@ -277,11 +277,11 @@
                   v-bind:item-value="calclist.working_timetable_name"
                 ></col-employmentstatus>
                 <!-- col  所定労働時間 所定外労働時間-->
-                <col-regularworking v-if="calclist.business_kubun === 1"
+                <col-regularworking v-if="calclist.business_kubun === '1'"
                   v-bind:item-name="'所定労働時間'"
                   v-bind:item-value="calclist.regular_working_times"
                 ></col-regularworking>
-                <col-regularworking v-if="calclist.business_kubun === 1"
+                <col-regularworking v-if="calclist.business_kubun === '1'"
                   v-bind:item-name="'所定外労働時間'"
                   v-bind:item-value="calclist.out_of_regular_working_times"
                 ></col-regularworking>
@@ -352,11 +352,11 @@
                 v-bind:item-name="sumresult.working_time_name"
                 v-bind:item-value="sumresult.total_working_times"
               ></col-regularworking>
-              <col-regularworking v-if="sumresult.business_kubun === 1"
+              <col-regularworking v-if="sumresult.business_kubun === '1'"
                 v-bind:item-name="'所定労働時間'"
                 v-bind:item-value="sumresult.regular_working_times"
               ></col-regularworking>
-              <col-regularworking v-if="sumresult.business_kubun === 1"
+              <col-regularworking v-if="sumresult.business_kubun === '1'"
                 v-bind:item-name="'所定外労働時間'"
                 v-bind:item-value="sumresult.out_of_regular_working_times"
               ></col-regularworking>
@@ -524,6 +524,10 @@ export default {
     // 集計開始ボタンがクリックされた場合の処理
     searchclick: function(e) {
       this.validate = this.checkForm(e);
+      console.log("this.valuefromdate" + this.valuefromdate);
+      console.log("this.valueemploymentstatus" + this.valueemploymentstatus);
+      console.log("this.valuedepartment" + this.valuedepartment);
+      console.log("this.valueuser" + this.valueuser);
       if (this.validate) {
         this.itemClear();
         this.$axios
@@ -556,7 +560,8 @@ export default {
 
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
-      this.fromdate = ""
+      this.fromdate = "";
+      this.valueuser = "";
       if (this.valuefromdate) {
         this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
       }

@@ -477,94 +477,114 @@ class ApiCommonController extends Controller
             }
         } else {
             // 時間外労働時間は画面からの入力がないため、所定労働時間と休憩と深夜労働時間の時間以外を時間外労働時間とする
+            $array_sets = array();
+            for ($i=0;$i<24;$i++) {
+                for ($j=0;$j<60;$j++) {
+                    $array_sets[$i][$j] = 0;
+                }
+            }
             $filtered = $timetables
                 ->where('no', $working_timetable_no)
                 ->where('working_time_kubun', '!=', Config::get('const.C004.out_of_regular_working_time'))
                 ->sortBy('from_time');
-            $dt = new Carbon('2019-08-01 00:00:00');
-            $source_time0 = date_format($dt, 'H:i:s');
-            $dt = new Carbon('2019-08-01 23:59:59');
-            $source_time24 = date_format($dt, 'H:i:s');
-            Log::DEBUG('$source_time0 = '. $source_time0);
-            Log::DEBUG('$source_time24 = '. $source_time24);
-            $temp_times = array();
             foreach($filtered as $result_time) {
-                Log::DEBUG('$filtered working_time_kubun = '. $result_time->working_time_kubun);
-                Log::DEBUG('$filtered from_time = '. $result_time->from_time);
-                Log::DEBUG('$filtered to_time = '.$result_time->to_time);
                 if (isset($result_time->from_time) && isset($result_time->to_time)) {
-                    Log::DEBUG('count($temp_times) = '.count($temp_times));
-                    if (count($temp_times) == 0) {
-                        $dt = new Carbon('2019-08-01 '.$result_time->from_time);
-                        $check_time = date_format($dt, 'H:i:s');
-                        if ($source_time0 < $check_time) {
-                            $set_from_time = $source_time0;
-                            $set_to_time = $check_time;
-                            $temp_times[] = array('from_time' => $set_from_time , 'to_time' => $set_to_time);
-                            $dt = new Carbon('2019-08-01 '.$result_time->to_time);
-                            $check_time = date_format($dt->subSecond(), 'H:i:s');       // 1秒前
-                            if ($check_time < $source_time24) {
-                                $set_from_time = $result_time->to_time;
-                                $dt = new Carbon('2019-08-01 23:59:59');
-                                $set_to_time = date_format($dt->addSecond(), 'H:i:s');  // 1秒後
-                                $temp_times[] = array('from_time' => $set_from_time , 'to_time' => $set_to_time);
+                    Log::DEBUG('analyzeTimeTable $result_time->from_time = '.$result_time->from_time);
+                    Log::DEBUG('analyzeTimeTable $result_time->to_time = '.$result_time->to_time);
+                    $dt = new Carbon('2019-08-01 '.$result_time->from_time);
+                    $check_from_hour = date_format($dt, 'H');
+                    $check_from_minute = date_format($dt, 'i');
+                    $dt = new Carbon('2019-08-01 '.$result_time->to_time);
+                    $check_to_hour = date_format($dt, 'H');
+                    $check_to_minute = date_format($dt, 'i');
+                    Log::DEBUG('analyzeTimeTable check_from_hour = '.$check_from_hour);
+                    Log::DEBUG('analyzeTimeTable check_from_minute = '.$check_from_minute);
+                    Log::DEBUG('analyzeTimeTable check_to_hour = '.$check_to_hour);
+                    Log::DEBUG('analyzeTimeTable check_to_minute = '.$check_to_hour);
+                    if ($result_time->from_time < $result_time->to_time) {
+                        for ($i=(int)$check_from_hour;$i<=$check_to_hour;$i++) {
+                            if ($i == (int)$check_from_hour) {      // １回目
+                                $minute_from = (int)$check_from_minute;
+                                if ($check_from_hour == $check_to_hour) {
+                                    $minute_to = (int)$check_to_minute;
+                                } else {
+                                    $minute_to = 60;
+                                }
+                            } elseif ($i == $check_to_hour) {   // 最後
+                                $minute_from = 0;
+                                $minute_to = (int)$check_to_minute;
+                            } else {
+                                $minute_from = 0;
+                                $minute_to = 60;
                             }
-                        }
-                        foreach($temp_times as $item) {
-                            Log::DEBUG('analyzeTimeTable --- in $temp_times from_time = '.$item['from_time']);
-                            Log::DEBUG('analyzeTimeTable --- in $temp_times to_time = '.$item['to_time']);
+                            for ($j=$minute_from;$j<$minute_to;$j++) {
+                                $array_sets[$i][$j] = 1;
+                            }
                         }
                     } else {
-                        $array_result_times = array();
-                        if ($result_time->from_time < $result_time->to_time) {
-                            $array_result_times[] = array('from_time' => $result_time->from_time , 'to_time' => $result_time->to_time);
-                        } else {
-                            $dt = new Carbon('2019-08-01 23:59:59');
-                            $set_to_time = date_format($dt, 'H:i:s');
-                            $array_result_times[] = array('from_time' => $source_time0 , 'to_time' => $result_time->to_time);
-                            $array_result_times[] = array('from_time' => $result_time->from_time , 'to_time' => $set_to_time);
-                        }
-                        foreach($array_result_times as $item) {
-                            Log::DEBUG('analyzeTimeTable --- in $array_result_times from_time = '.$item['from_time']);
-                            Log::DEBUG('analyzeTimeTable --- in $array_result_times to_time = '.$item['to_time']);
-                        }
-                        $temp_times_1 = $temp_times;
-                        $temp_times = array();
-                        $set_flg = false;
-                        foreach($array_result_times as $array_result_time) {
-                            foreach($temp_times_1 as $item) {
-                                $w_time = $item['to_time'];
-                                if ($item['to_time'] == '00:00:00') { $w_time = '23:59:59'; }
-                                Log::DEBUG('analyzeTimeTable --- $array_result_time[from_time] = '.$array_result_time['from_time']);
-                                Log::DEBUG('analyzeTimeTable --- $item[from_time] = '.$item['from_time']);
-                                Log::DEBUG('analyzeTimeTable --- $w_time = '.$w_time);
-                                if($array_result_time['from_time'] > $item['from_time'] && $array_result_time['from_time'] < $w_time) {
-                                    Log::DEBUG('analyzeTimeTable --- 1 $temp_times[] = array( '.$item['from_time'].' '.$array_result_time['from_time']);
-                                    $temp_times[] = array('from_time' => $item['from_time'] , 'to_time' => $array_result_time['from_time']);
-                                    $set_flg = true;
-                                }
-                                Log::DEBUG('analyzeTimeTable --- $array_result_time[to_time] = '.$array_result_time['to_time']);
-                                Log::DEBUG('analyzeTimeTable --- $item[from_time] = '.$item['from_time']);
-                                Log::DEBUG('analyzeTimeTable --- $w_time = '.$w_time);
-                                if($array_result_time['to_time'] > $item['from_time'] && $array_result_time['to_time'] < $w_time) {
-                                    Log::DEBUG('analyzeTimeTable --- 2 $temp_times[] = array( '.$array_result_time['to_time'].' '.$item['to_time']);
-                                    $temp_times[] = array('from_time' =>$array_result_time['to_time'] , 'to_time' => $item['to_time']);
-                                    $set_flg = true;
-                                }
-                                Log::DEBUG('analyzeTimeTable --- $set_flg = '.$set_flg);
-                                if ($set_flg == false) {
-                                    Log::DEBUG('analyzeTimeTable --- 3 $temp_times[] = array( '.$item['from_time'].' '.$item['to_time']);
-                                    $temp_times[] = array('from_time' =>$item['from_time'] , 'to_time' => $item['to_time']);
-                                }
+                        // fromから2400まで
+                        for ($i=(int)$check_from_hour;$i<24;$i++) {
+                            if ($i == (int)$check_from_hour) {      // １回目
+                                $minute_from = (int)$check_from_minute;
+                                $minute_to = 60;
+                            } else {
+                                $minute_from = 0;
+                                $minute_to = 60;
                             }
-                            foreach($temp_times as $item) {
-                                Log::DEBUG('analyzeTimeTable --- in $temp_times from_time = '.$item['from_time']);
-                                Log::DEBUG('analyzeTimeTable --- in $temp_times to_time = '.$item['to_time']);
+                            for ($j=$minute_from;$j<$minute_to;$j++) {
+                                $array_sets[$i][$j] = 1;
                             }
                         }
-                        if (count($temp_times) == 0) {
-                            $temp_times = $temp_times_1;
+                        // 0からtoまで
+                        for ($i=0;$i<=(int)$check_to_hour;$i++) {
+                            if ($i == 0) {      // １回目
+                                $minute_from = 0;
+                                if (0 == $check_to_hour) {
+                                    $minute_to = (int)$check_to_minute;
+                                } else {
+                                    $minute_to = 60;
+                                }
+                            } elseif ($i == $check_to_hour) {   // 最後
+                                $minute_from = 0;
+                                $minute_to = (int)$check_to_minute;
+                            } else {
+                                $minute_from = 0;
+                                $minute_to = 60;
+                            }
+                            for ($j=$minute_from;$j<$minute_to;$j++) {
+                                $array_sets[$i][$j] = 1;
+                            }
                         }
+                    }
+                    // 配列=0の範囲を設定する
+                    $temp_times = array();
+                    $temp_from_time = "";
+                    $temp_to_time = "";
+                    $save_i = 0;
+                    $save_j = 0;
+                    for ($i=0;$i<24;$i++) {
+                        for ($j=0;$j<60;$j++) {
+                            if ($array_sets[$i][$j] == 0) {
+                                if ($temp_from_time == "") {
+                                    $temp_from_time = str_pad($i,2,0,STR_PAD_LEFT).':'.str_pad($j,2,0,STR_PAD_LEFT).':00';
+                                }
+                            } else {
+                                if ($temp_from_time == "") {
+                                    $temp_to_time ="";
+                                } else {
+                                    $temp_to_time = str_pad($i,2,0,STR_PAD_LEFT).':'.str_pad($j,2,0,STR_PAD_LEFT).':00';
+                                    $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
+                                    $temp_from_time ="";
+                                    $temp_to_time ="";
+                                }
+                            }
+                            $save_j = $j;
+                        }
+                        $save_i = $i;
+                    }
+                    if ($temp_from_time != "") {
+                        $temp_from_time = str_pad($save_i,2,0,STR_PAD_LEFT).':'.str_pad($save_j,2,0,STR_PAD_LEFT).':00';
+                        $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
                     }
                 }
             }
@@ -596,17 +616,167 @@ class ApiCommonController extends Controller
      */
     public function convTimeToDate($target_time, $basic_time, $basic_date){
         // 日付付与
+        Log::DEBUG('convTimeToDate $target_time = '.$target_time);
+        Log::DEBUG('convTimeToDate $basic_time = '.$basic_time);
+        Log::DEBUG('convTimeToDate $basic_date = '.$basic_date);
         $convDateTime = null;
         $dt = new Carbon($basic_time);
-        if ($target_time <= date_format($dt, 'H:i:s')) {
+        if ($target_time < date_format($dt, 'H:i:s')) {
             $dt = new Carbon($target_time);
             $convDateTime = $this->getNextDay($basic_date, 'Y-m-d').' '.date_format($dt, 'H:i:s');
+            Log::DEBUG('convTimeToDate next day  = '.$convDateTime);
         } else {
             $dt = new Carbon($basic_date);
             $convDateTime = date_format($dt, 'Y-m-d').' '.$target_time;
+            Log::DEBUG('convTimeToDate current day  = '.$convDateTime);
         }
 
         return $convDateTime;
+    }
+
+    /**
+     * 時刻日付変換
+     *      target_timeがbasic_from_timeから24:00:00の時刻内であるときはbasic_from_timeと同じ日付を設定
+     *      上記以外は
+     *      target_timeが00:00:00からbasic_to_timeの時刻内であるときはbasic_to_timeと同じ日付を設定
+     * @return 日付時刻
+     */
+    public function convTimeToDateTarget($target_time, $basic_from_time, $basic_to_time){
+        // 日付付与
+        Log::DEBUG('convTimeToDateTarget $target_time = '.$target_time);
+        Log::DEBUG('convTimeToDateTarget $basic_from_time = '.$basic_from_time);
+        Log::DEBUG('convTimeToDateTarget $basic_to_time = '.$basic_to_time);
+        $dt_from = new Carbon($basic_from_time);
+        $dt_from_ymd = date_format($dt_from, 'Y-m-d');
+        $dt_from23 = new Carbon($dt_from_ymd.' 23:59:59');
+        $dt_from24 = $dt_from23->addSecond();
+        $dt_target_time = new Carbon($dt_from_ymd.' '.$target_time);
+        Log::DEBUG('convTimeToDateTarget from $dt_from = '.$dt_from);
+        Log::DEBUG('convTimeToDateTarget from $dt_from24 = '.$dt_from24);
+        if ($dt_target_time >= $dt_from && $dt_target_time <= $dt_from24) {
+            Log::DEBUG('convTimeToDateTarget from $dt_target_time = '.$dt_target_time);
+            return $dt_target_time;
+        }
+
+        $dt_from = new Carbon($basic_to_time);
+        $dt_from_ymd = date_format($dt_from, 'Y-m-d');
+        $dt_from00 = new Carbon($dt_from_ymd.' 00:00:00');
+        $dt_target_time = new Carbon($dt_from_ymd.' '.$target_time);
+        Log::DEBUG('convTimeToDateTarget from $dt_from00 = '.$dt_from00);
+        Log::DEBUG('convTimeToDateTarget from $dt_from = '.$dt_from);
+        if ($dt_target_time >= $dt_from00 && $dt_target_time <= $dt_from) {
+            Log::DEBUG('convTimeToDateTarget to $dt_target_time = '.$dt_target_time);
+            return $dt_target_time;
+        }
+
+        return null;
+    }
+
+    /**
+     * 時刻日付変換from
+     * @return 日付時刻
+     */
+    public function convTimeToDateFrom($from_time, $current_date, $target_from_time, $target_to_time){
+
+        Log::DEBUG('         ------------- convTimeToDateFrom in ');
+
+        Log::DEBUG('from_time = '.$from_time);
+        Log::DEBUG('current_date = '.$current_date);
+        Log::DEBUG('target_from_time = '.$target_from_time);
+        Log::DEBUG('target_to_time = '.$target_to_time);
+        $current_date_ymd = date_format(new Carbon($current_date),'Ymd');
+        $target_from_ymd = date_format(new Carbon($target_from_time),'Ymd');
+        $target_from_his = date_format(new Carbon($target_from_time),'His');
+        $target_to_ymd = date_format(new Carbon($target_to_time),'Ymd');
+        $target_to_his = date_format(new Carbon($target_to_time),'His');
+        Log::DEBUG('target_from_his = '.$target_from_his);
+        Log::DEBUG('target_from_his = '.$target_from_his);
+        Log::DEBUG('current_date_ymd = '.$current_date_ymd);
+        Log::DEBUG('target_from_ymd = '.$target_from_ymd);
+        // 日付付与
+        $cnv_from_date = null;
+        if ($current_date_ymd == $target_from_ymd) {
+            if ($target_from_his > $from_time && $from_time > Config::get('const.C010.non')) {
+                $cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
+                Log::DEBUG('cnv_from_date if then= '.$cnv_from_date);
+            } else {
+                if ($from_time >= Config::get('const.C015.night_to')) {
+                    $cnv_from_date = new Carbon($target_from_ymd.' '.$from_time);
+                } else {
+                    $w_edt_date = new Carbon($target_from_ymd);
+                    $w_edt_date = date_format($w_edt_date->addDay(),'Y-m-d');
+                    $cnv_from_date = new Carbon($w_edt_date.' '.$from_time);
+                }
+                Log::DEBUG('cnv_from_date if else= '.$cnv_from_date);
+            }
+        } else {
+            $cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
+            Log::DEBUG('cnv_from_date if else= '.$cnv_from_date);
+        }
+
+        return $cnv_from_date;
+    }
+
+    /**
+     * 時刻日付変換to
+     * @return 日付時刻
+     */
+    public function convTimeToDateTo($from_time, $to_time, $current_date, $target_from_time, $target_to_time){
+
+        Log::DEBUG('         ------------- convTimeToDateTo in ');
+
+        Log::DEBUG('from_time = '.$from_time);
+        Log::DEBUG('to_time = '.$to_time);
+        Log::DEBUG('current_date = '.$current_date);
+        Log::DEBUG('target_from_time = '.$target_from_time);
+        Log::DEBUG('target_to_time = '.$target_to_time);
+
+        $current_date_ymd = date_format(new Carbon($current_date),'Ymd');
+        $target_from_ymd = date_format(new Carbon($target_from_time),'Ymd');    // 打刻時刻
+        $target_from_his = date_format(new Carbon($target_from_time),'His');    // 打刻時刻
+        $target_to_ymd = date_format(new Carbon($target_to_time),'Ymd');        // 打刻時刻
+        $target_to_his = date_format(new Carbon($target_to_time),'His');        // 打刻時刻
+        Log::DEBUG('current_date_ymd = '.$current_date_ymd);
+        Log::DEBUG('target_from_ymd = '.$target_from_ymd);
+        Log::DEBUG('target_from_his = '.$target_from_his);
+        Log::DEBUG('target_to_ymd = '.$target_to_ymd);
+        Log::DEBUG('target_to_his = '.$target_to_his);
+        // 日付付与
+        $cnv_to_date = null;
+        if ($current_date_ymd == $target_to_ymd) {
+            if ($from_time > $to_time) {
+                $cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                Log::DEBUG('cnv_to_date if then= '.$cnv_to_date);
+            } else {
+                if ($target_to_his < $to_time) {
+                    $cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                    Log::DEBUG('cnv_to_date if then= '.$cnv_to_date);
+                } else {
+                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
+                    Log::DEBUG('cnv_to_date if else= '.$cnv_to_date);
+                }
+            }
+        } else {
+            if ($from_time > $to_time) {
+                if ($target_to_his < $to_time) {
+                    $cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                    Log::DEBUG('cnv_to_date if then= '.$cnv_to_date);
+                } else {
+                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
+                    Log::DEBUG('cnv_to_date if else= '.$cnv_to_date);
+                }
+            } else {
+                if ($to_time >= Config::get('const.C015.night_to')) {
+                    $cnv_to_date = new Carbon($current_date_ymd.' '.$to_time);
+                    Log::DEBUG('cnv_to_date if else= '.$cnv_to_date);
+                } else {
+                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
+                    Log::DEBUG('cnv_to_date if else= '.$cnv_to_date);
+                }
+            }
+        }
+
+        return $cnv_to_date;
     }
 
     /**
@@ -917,6 +1087,7 @@ class ApiCommonController extends Controller
      */
     public function chkMode($target_mode, $source_mode){
 
+        Log::debug('chkMode  source_mode = '.$source_mode);
         if ( $source_mode == '') {
             Log::debug('chkMode  target_mode = '.$target_mode);
             if ($target_mode == Config::get('const.C005.attendance_time')) {

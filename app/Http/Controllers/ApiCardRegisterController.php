@@ -27,7 +27,7 @@ class ApiCardRegisterController extends Controller
         $result = '';
         $response = collect();              // 端末の戻り値
         $lists = $user->getNotRegistUser();
-        if(isset($lists)){
+        if(isset($lists) && count($lists) > 0){
             $result = Config::get('const.RESULT_CODE.success');
         } else {         // 該当ユーザーがいない
             $result = Config::get('const.RESULT_CODE.user_not_exsits');
@@ -65,7 +65,7 @@ class ApiCardRegisterController extends Controller
             try{
                 $result = $this->insCardInfo($user_code,$card_id,$department_code);
                 $user_datas = $user->getUserCardData($card_id);
-                if (isset($user_datas)) {
+                if (isset($user_datas) && count($user_datas) > 0) {
                     DB::commit();
                     $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
                     foreach ($user_datas as $user_data) {
