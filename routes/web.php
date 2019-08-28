@@ -22,13 +22,20 @@ Auth::routes();
 
 Route::get('/', 'DailyWorkingInformationController@index')->middleware('auth');
 Route::get('/home', 'HomeController@index')->name('home');
+// 日次集計
 Route::get('/daily', 'DailyWorkingInformationController@index')->middleware('auth');
 Route::get('/daily/calc', 'DailyWorkingInformationController@show')->middleware('auth');
 Route::get('/daily/show', 'DailyWorkingInformationController@show')->middleware('auth');
-
+// 月次集計
 Route::get('/monthly', 'MonthlyWorkingInformationController@index')->middleware('auth');
 Route::get('/monthly/calc', 'MonthlyWorkingInformationController@calc')->middleware('auth');
 Route::get('/monthly/show', 'MonthlyWorkingInformationController@show')->middleware('auth');
+// 日次警告通知
+Route::get('/daily_alert', 'DailyWorkingAlertController@index')->middleware('auth');
+Route::get('/daily_alert/show', 'DailyWorkingAlertController@show')->middleware('auth');
+// 月次警告通知
+Route::get('/monthly_alert', 'MonthlyWorkingAlertController@index')->middleware('auth');
+Route::get('/monthly_alert/show', 'MonthlyWorkingAlertController@show')->middleware('auth');
 // 勤怠編集
 Route::get('/edit_work_times', 'EditWorkTimesController@index')->middleware('auth');
 Route::get('/edit_work_times/get', 'EditWorkTimesController@get')->middleware('auth');
