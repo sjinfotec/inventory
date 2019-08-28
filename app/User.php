@@ -82,7 +82,6 @@ class User extends Authenticatable
      * @return void
      */
     public function getNotRegistUser(){
-        \DB::enableQueryLog();
 
         $sunquery1 = DB::table('users as t1')
             ->select(
@@ -118,12 +117,6 @@ class User extends Authenticatable
             ->whereNull('t4.card_idm');      // whereNull 
 
         $data = $mainquery->get();
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getNotRegistUser' => \DB::getQueryLog()
-            ]
-        );
 
         return $data;
     }

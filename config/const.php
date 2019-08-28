@@ -160,9 +160,9 @@ return [
     ],
 
     'PREDETER_NIGHT_TIME_NAME' => [
-        'basic' => '所定外深夜労働時間',
-        'legal_holoday' => '法定休日深夜労働時間',
-        'legal_out_holoday' => '法定外休日深夜労働時間'
+        'basic' => '深夜残業時間',
+        'legal_holoday' => '法定休日深夜残業時間',
+        'legal_out_holoday' => '法定外休日残業労働時間'
     ],
 
     'ARRAY_MAX_INDEX' => [
@@ -200,6 +200,7 @@ return [
         'MEMO_DATA_012' => '時間単位設定ミス',
         'MEMO_DATA_013' => '時間端数処理設定ミス',
         'MEMO_DATA_014' => '期首月設定ミス',
+        'MEMO_DATA_015' => '未設定',
         'MEMO_DATA_NON' => ''
     ],
  
