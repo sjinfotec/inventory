@@ -331,7 +331,7 @@ class MonthlyWorkingInformationController extends Controller
         // 指定パラメータよりレコード取得パラメータはメインで設定済み
         $workingtimedates = $workingtimedate_model->getWorkingTimeDateTimeFormat(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
 
-        if(isset($workingtimedates) && count($workingtimedates) > 0){
+        if(count($workingtimedates) > 0){
             foreach($workingtimedates as $result) {
                 $current_employment_status = $result->employment_status;
                 $current_department_code = $result->department_code;

@@ -463,7 +463,9 @@ class WorkTime extends Model
                 't4.max_12month_total as max_12month_total',
                 't4.beginning_month as beginning_month',
                 't4.interval as interval',
-                't4.year as year'
+                't4.year as year',
+                't14.holiday_kubun as user_holiday_kubun',
+                't15.code_name as user_holiday_name'
             );
         $mainquery
             ->selectRaw('ifnull(t9.shift_no, t6.no) as working_timetable_no ')
@@ -477,12 +479,14 @@ class WorkTime extends Model
             ->leftJoinSub($subquery1, 't2', function ($join) { 
                 $join->on('t2.user_code', '=', 't1.code');
                 $join->on('t2.department_code', '=', 't1.department_code')
+                ->where('t1.is_deleted', '=', 0)
                 ->where('t2.is_deleted', '=', 0);
             })
             ->leftJoinSub($subquery2, 't9', function ($join) { 
                 $join->on('t9.user_code', '=', 't1.code');
                 $join->on('t9.department_code', '=', 't1.department_code');
                 $join->on('t9.target_date', '=', 't2.record_date')
+                ->where('t1.is_deleted', '=', 0)
                 ->where('t9.is_deleted', '=', 0);
             })
             ->leftJoinSub($subquery4, 't5', function ($join) { 
@@ -519,15 +523,29 @@ class WorkTime extends Model
             })
             ->leftJoin('generalcodes as t11', function ($join) { 
                 $join->on('t11.code', '=', 't3.weekday_kubun')
-                ->where('t11.identification_id', '=', Config::get('const.C006.value'));
+                ->where('t11.identification_id', '=', Config::get('const.C006.value'))
+                ->where('t11.is_deleted', '=', 0);
             })
             ->leftJoin('generalcodes as t12', function ($join) { 
                 $join->on('t12.code', '=', 't3.business_kubun')
-                ->where('t12.identification_id', '=', Config::get('const.C007.value'));
+                ->where('t12.identification_id', '=', Config::get('const.C007.value'))
+                ->where('t12.is_deleted', '=', 0);
             })
             ->leftJoin('generalcodes as t13', function ($join) { 
                 $join->on('t13.code', '=', 't3.holiday_kubun')
-                ->where('t13.identification_id', '=', Config::get('const.C008.value'));
+                ->where('t13.identification_id', '=', Config::get('const.C008.value'))
+                ->where('t13.is_deleted', '=', 0);
+            })
+            ->leftJoin('user_holiday_kubuns as t14', function ($join) { 
+                $join->on('t14.working_date', '=', 't2.record_date');
+                $join->on('t14.user_code', '=', 't1.code');
+                $join->on('t14.department_code', '=', 't1.department_code')
+                ->where('t14.is_deleted', '=', 0);
+            })
+            ->leftJoin('generalcodes as t15', function ($join) { 
+                $join->on('t15.code', '=', 't14.holiday_kubun')
+                ->where('t15.identification_id', '=', Config::get('const.C013.value'))
+                ->where('t15.is_deleted', '=', 0);
             });
 
         if(!empty($this->param_employment_status)){
