@@ -43,7 +43,7 @@ class ApiGetAttendanceResultController extends Controller
         $is_exists = DB::table('card_informations')->where('card_idm', $card_id)->exists();
         if($is_exists){
             $user_datas = $user->getUserCardData($card_id);
-            if (isset($user_datas)) {
+            if (count($user_datas) > 0) {
                 foreach($user_datas as $user_data) {
                     $chk_result = $this->chkMode($user_data, $mode, $systemdate);
                     if($chk_result){
@@ -60,7 +60,8 @@ class ApiGetAttendanceResultController extends Controller
 
                         }catch(\PDOException $pe){
                             DB::rollBack();
-                            Log::debug(Config::get('const.RESULT_CODE.insert_error'));
+                            Log::error(Config::get('insert_error = '.'const.RESULT_CODE.insert_error'));
+                            Log::error(Config::get('$pe = '.$pe->getMessage()));
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.insert_error'));
                             $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
                             $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
@@ -68,7 +69,7 @@ class ApiGetAttendanceResultController extends Controller
                             $response->put(Config::get('const.PUT_ITEM.source_mode'),$this->source_mode);
                         }
                     }else{
-                        Log::debug(Config::get('const.RESULT_CODE.mode_illegal'));
+                        Log::debug('カード情報チェック NG'.Config::get('const.RESULT_CODE.mode_illegal'));
                         $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.mode_illegal'));
                         $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
                         $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
@@ -78,11 +79,11 @@ class ApiGetAttendanceResultController extends Controller
                     break;
                 }
             } else {
-                Log::debug(Config::get('const.RESULT_CODE.user_not_exsits'));
+                Log::debug('カード情報取得 NG'.Config::get('const.RESULT_CODE.user_not_exsits'));
                 $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.user_not_exsits'));
             }
         }else{  // カード情報が存在しない
-            Log::debug(Config::get('const.RESULT_CODE.card_not_exsits'));
+            Log::debug('カード情報存在チェック NG'.Config::get('const.RESULT_CODE.card_not_exsits'));
             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.card_not_exsits'));
         }
 
@@ -125,14 +126,16 @@ class ApiGetAttendanceResultController extends Controller
         $apicommon = new ApiCommonController();
         $work_time = new WorkTime();
         $work_time->setParamDepartmentcodeAttribute($user_data->department_code);
+        Log::debug('setParamDepartmentcodeAttribute = '.$user_data->department_code);
         $work_time->setParamUsercodeAttribute($user_data->code);
-        $work_time->setParamDatefromAttribute($systemdate->format('Ymd'));
-        $work_time->setParamDatetoAttribute($systemdate->format('Ymd'));
+        Log::debug('setParamdatefromNonformatAttribute = '.$systemdate->format('Ymd His'));
+        $work_time->setParamdatefromNoneditAttribute($systemdate->format('Ymd His'));
         $this->source_mode = '';
         // MAX打刻取得
         $chk_result = true;
         $daily_times = $work_time->getDailyMaxData();
-        if(isset($daily_times)){
+        if(count($daily_times) > 0){
+            Log::debug('MAX打刻取得 OK ');
             $i=0;
             foreach ($daily_times as $result) {
                 // モードチェック

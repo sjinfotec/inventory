@@ -56,7 +56,7 @@ class MonthlyWorkingInformationController extends Controller
 
         $working_time_dates = array();
         $working_time_sum = array();
-        $company_name = '';
+        $company_name = Config::get('const.MEMO_DATA.MEMO_DATA_015');
 
         $workingtimedate_model = new WorkingTimedate();
         // 日付開始終了の作成
@@ -72,19 +72,19 @@ class MonthlyWorkingInformationController extends Controller
                 $workingtimedate_model->setParamUsercodeAttribute($usercode);
                 // 労働時間の集計
                 $working_time_dates = $this->calctWorkingTime($workingtimedate_model);
+                $workingtimedate_model->setParamUsercodeAttribute(null);
+                $working_time_sum = $workingtimedate_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
                 Log::debug('$working_model = '.count($working_time_dates));
                 Log::debug('$working_time_sum = '.count($working_time_sum));
                 // 会社名を取得
                 $company_model = new Company();
                 $company_model->setApplytermfromAttribute($workingtimedate_model->getParamdatefromAttribute());
                 $companys = $company_model->getCompanyInfoApply();
-                if (isset($companys)) {
-                    foreach ($companys as $company_result) {
-                        $company_name = $company_result->name;
-                        break;
-                    }
+                foreach ($companys as $company_result) {
+                    $company_name = $company_result->name;
+                    break;
                 }
-                $calc_result = true;
+            $calc_result = true;
             } else {
                 $calc_result = false;
             }
@@ -331,7 +331,7 @@ class MonthlyWorkingInformationController extends Controller
         // 指定パラメータよりレコード取得パラメータはメインで設定済み
         $workingtimedates = $workingtimedate_model->getWorkingTimeDateTimeFormat(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
 
-        if(isset($workingtimedates)){
+        if(isset($workingtimedates) && count($workingtimedates) > 0){
             foreach($workingtimedates as $result) {
                 $current_employment_status = $result->employment_status;
                 $current_department_code = $result->department_code;
@@ -478,29 +478,27 @@ class MonthlyWorkingInformationController extends Controller
         Log::debug('集計配列ユーザーセット $result->user_name = '.$result->user_name);
         Log::debug('集計配列ユーザーセット $result->employment_status_name = '.$result->employment_status_name);
         Log::debug('集計配列ユーザーセット $result->department_name = '.$result->department_name);
-        if (isset($working_time_sum)) {
-            foreach($working_time_sum as $working_time_sum_result) {
-                $this->array_user[] = array(
-                    'user_code' => $result->user_code, 
-                    'user_name' => $result->user_name, 
-                    'employment' => $result->employment_status_name,
-                    'department' => $result->department_name,
-                    'total_working_times' => $working_time_sum_result->total_working_times,
-                    'regular_working_times' => $working_time_sum_result->regular_working_times,
-                    'out_of_regular_working_times' => $working_time_sum_result->out_of_regular_working_times,
-                    'overtime_hours' => $working_time_sum_result->overtime_hours,
-                    'late_night_overtime_hours' => $working_time_sum_result->late_night_overtime_hours,
-                    'legal_working_times' => $working_time_sum_result->legal_working_times,
-                    'out_of_legal_working_times' => $working_time_sum_result->out_of_legal_working_times,
-                    'not_employment_working_hours' => $working_time_sum_result->not_employment_working_hours,
-                    'off_hours_working_hours' => $working_time_sum_result->off_hours_working_hours,
-                    'total_working_status' => $working_time_sum_result->total_working_status,
-                    'total_go_out' => $working_time_sum_result->total_go_out,
-                    'total_holiday_kubun' => $working_time_sum_result->total_holiday_kubun,
-                    'date' => $this->array_date
-                );
-                break;
-            }
+        foreach($working_time_sum as $working_time_sum_result) {
+            $this->array_user[] = array(
+                'user_code' => $result->user_code, 
+                'user_name' => $result->user_name, 
+                'employment' => $result->employment_status_name,
+                'department' => $result->department_name,
+                'total_working_times' => $working_time_sum_result->total_working_times,
+                'regular_working_times' => $working_time_sum_result->regular_working_times,
+                'out_of_regular_working_times' => $working_time_sum_result->out_of_regular_working_times,
+                'overtime_hours' => $working_time_sum_result->overtime_hours,
+                'late_night_overtime_hours' => $working_time_sum_result->late_night_overtime_hours,
+                'legal_working_times' => $working_time_sum_result->legal_working_times,
+                'out_of_legal_working_times' => $working_time_sum_result->out_of_legal_working_times,
+                'not_employment_working_hours' => $working_time_sum_result->not_employment_working_hours,
+                'off_hours_working_hours' => $working_time_sum_result->off_hours_working_hours,
+                'total_working_status' => $working_time_sum_result->total_working_status,
+                'total_go_out' => $working_time_sum_result->total_go_out,
+                'total_holiday_kubun' => $working_time_sum_result->total_holiday_kubun,
+                'date' => $this->array_date
+            );
+            break;
         }
     }
 

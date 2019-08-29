@@ -50,9 +50,20 @@ Vue.component(
 );
 
 Vue.component(
+    "daily-working-alert",
+    require("./components/DailyWorkingAlert.vue").default
+);
+
+Vue.component(
     "monthly-working-information",
     require("./components/MonthlyWorkingInformation.vue").default
 );
+
+Vue.component(
+    "monthly-working-alert",
+    require("./components/MonthlyWorkingAlert.vue").default
+);
+
 Vue.component("app-component", require("./components/App.vue").default);
 
 Vue.component(

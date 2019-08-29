@@ -7,7 +7,7 @@
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:headertext1="'日付を指定して集計を表示する'"
+            v-bind:headertext1="'指定日付から過去１週間以内の警告を表示する'"
             v-bind:headertext2="'雇用形態や所属部署でフィルタリングして表示できます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
@@ -23,7 +23,7 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       for="target_fromdate"
-                    >指定日付</span>
+                    >指定日付＊</span>
                   </div>
                   <input-datepicker
                     v-bind:default-Date="defaultDate"
@@ -108,12 +108,6 @@
       <!-- .panel -->
       <div class="col-md pt-3 align-self-stretch">
         <div class="card shadow-pl">
-          <!-- panel header -->
-          <daily-working-information-panel-header
-            v-bind:headertext1="stringtext"
-            v-bind:headertext2="'虫眼鏡アイコンをクリックすると集計結果が表示されます'"
-          ></daily-working-information-panel-header>
-          <!-- /.panel header -->
           <!-- panel body -->
           <div
             v-for="(calclist,index) in calcresults"
