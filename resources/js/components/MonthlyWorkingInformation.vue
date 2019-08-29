@@ -21,7 +21,10 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <span class="input-group-text font-size-sm line-height-xs label-width-90" id="basic-addon1">指定年月</span>
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      id="basic-addon1"
+                    >指定年月</span>
                   </div>
                   <input-ym v-on:change-event="fromdateChanges"></input-ym>
                 </div>
@@ -32,7 +35,10 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <label class="input-group-text font-size-sm line-height-xs label-width-90" for="inputGroupSelect01">表示区分</label>
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      for="inputGroupSelect01"
+                    >表示区分</label>
                   </div>
                   <general-list
                     v-bind:identification-id="'C016'"
@@ -48,7 +54,10 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <label class="input-group-text font-size-sm line-height-xs label-width-90" for="inputGroupSelect01">雇用形態</label>
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      for="inputGroupSelect01"
+                    >雇用形態</label>
                   </div>
                   <select-employmentstatus
                     v-bind:blank-data="true"
@@ -61,7 +70,10 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <label class="input-group-text font-size-sm line-height-xs label-width-90" for="inputGroupSelect01">所属部署</label>
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      for="inputGroupSelect01"
+                    >所属部署</label>
                   </div>
                   <select-department
                     ref="selectdepartment"
@@ -76,7 +88,10 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <label class="input-group-text font-size-sm line-height-xs label-width-90" for="inputGroupSelect01">氏　　名</label>
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      for="inputGroupSelect01"
+                    >氏 名</label>
                   </div>
                   <select-user
                     ref="selectuser"
@@ -137,7 +152,9 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <div class="btn-group d-flex">
-                  <button type="button" class="btn btn-success btn-lg font-size-rg w-100"><img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">集計結果をCSVファイルに出力する</button>
+                  <button type="button" class="btn btn-success btn-lg font-size-rg w-100">
+                    <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt />集計結果をCSVファイルに出力する
+                  </button>
                 </div>
               </div>
               <!-- /.col -->
@@ -180,7 +197,9 @@
                   role="button"
                   aria-expanded="true"
                   v-bind:aria-controls="'collapseUser' + index"
-                ><img class="icon-size-rg" src="/images/round-search-w.svg" alt=""></a>
+                >
+                  <img class="icon-size-rg" src="/images/round-search-w.svg" alt />
+                </a>
                 <h1 class="font-size-sm m-0 mb-1">氏名</h1>
                 <p class="font-size-rg font-weight-bold m-0">{{ calclist.user_name }}</p>
               </div>
@@ -240,30 +259,12 @@
                 v-bind:item-name="'未就労時間'"
                 v-bind:item-value="calclist.not_employment_working_hours"
               ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定休日勤務時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定休日残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定休日深夜残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外休日勤務時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外休日残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外休日深夜残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
+              <col-employmentstatus v-bind:item-name="'法定休日勤務時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
+              <col-employmentstatus v-bind:item-name="'法定休日残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
+              <col-employmentstatus v-bind:item-name="'法定休日深夜残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
+              <col-employmentstatus v-bind:item-name="'法定外休日勤務時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
+              <col-employmentstatus v-bind:item-name="'法定外休日残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
+              <col-employmentstatus v-bind:item-name="'法定外休日深夜残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
               <col-employmentstatus
                 v-bind:item-name="'遅刻日数'"
                 v-bind:item-value="calclist.total_working_status + '日'"
@@ -276,10 +277,7 @@
                 v-bind:item-name="'休暇日数'"
                 v-bind:item-value="calclist.total_holiday_kubun + '日'"
               ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'有給休暇日数'"
-                v-bind:item-value="'0日'"
-              ></col-employmentstatus>
+              <col-employmentstatus v-bind:item-name="'有給休暇日数'" v-bind:item-value="'0日'"></col-employmentstatus>
               <!-- /.col -->
             </div>
             <!-- /.row -->
@@ -307,10 +305,18 @@
                             </thead>
                             <tbody>
                               <tr v-for="calclisttimedate in calclist.date">
-                                <td class="text-center align-middle">{{ calclisttimedate.workingdate }}</td>
-                                <td v-if="calclisttimedate.attendance1 != '00:00' || calclisttimedate.leaving1 != '00:00'" class="text-center align-middle">{{ calclisttimedate.attendance1 }}</td>
-                                <td v-if="calclisttimedate.attendance1 != '00:00' || calclisttimedate.leaving1 != '00:00'"  class="text-center align-middle">{{ calclisttimedate.leaving1 }}</td>
-                                <td class="text-center align-middle"> </td>
+                                <td
+                                  class="text-center align-middle"
+                                >{{ calclisttimedate.workingdate }}</td>
+                                <td
+                                  v-if="calclisttimedate.attendance1 != '00:00' || calclisttimedate.leaving1 != '00:00'"
+                                  class="text-center align-middle"
+                                >{{ calclisttimedate.attendance1 }}</td>
+                                <td
+                                  v-if="calclisttimedate.attendance1 != '00:00' || calclisttimedate.leaving1 != '00:00'"
+                                  class="text-center align-middle"
+                                >{{ calclisttimedate.leaving1 }}</td>
+                                <td class="text-center align-middle"></td>
                               </tr>
                             </tbody>
                           </div>
@@ -386,30 +392,12 @@
                 v-bind:item-name="'未就労時間'"
                 v-bind:item-value="sumresult.not_employment_working_hours"
               ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定休日勤務時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定休日残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定休日深夜残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外休日勤務時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外休日残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外休日深夜残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
+              <col-employmentstatus v-bind:item-name="'法定休日勤務時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
+              <col-employmentstatus v-bind:item-name="'法定休日残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
+              <col-employmentstatus v-bind:item-name="'法定休日深夜残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
+              <col-employmentstatus v-bind:item-name="'法定外休日勤務時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
+              <col-employmentstatus v-bind:item-name="'法定外休日残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
+              <col-employmentstatus v-bind:item-name="'法定外休日深夜残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
               <col-employmentstatus
                 v-bind:item-name="'遅刻日数'"
                 v-bind:item-value="sumresult.total_working_status + '日'"
@@ -422,14 +410,12 @@
                 v-bind:item-name="'休暇日数'"
                 v-bind:item-value="sumresult.total_holiday_kubun + '日'"
               ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'有給休暇日数'"
-                v-bind:item-value="'0日'"
-              ></col-employmentstatus>
+              <col-employmentstatus v-bind:item-name="'有給休暇日数'" v-bind:item-value="'0日'"></col-employmentstatus>
             </div>
             <!-- /.row -->
             <!-- /panel contents -->
           </div>
+          <!-- /collapse -->
         </div>
         <!-- /panel -->
       </div>
@@ -476,7 +462,7 @@ export default {
   // マウント時
   mounted() {
     this.getUserRole();
-    },
+  },
   methods: {
     // バリデーション
     checkForm: function(e) {
@@ -528,8 +514,7 @@ export default {
     // ログインユーザーの権限を取得
     getUserRole: function() {
       this.$axios
-        .get("/get_login_user_role", {
-        })
+        .get("/get_login_user_role", {})
         .then(response => {
           this.userrole = response.data;
         })
@@ -544,7 +529,7 @@ export default {
       // パネルに表示
       this.setPanelHeader();
       // 再取得
-      this.fromdate = ""
+      this.fromdate = "";
       if (this.valuefromdate) {
         this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
       }
@@ -657,7 +642,7 @@ export default {
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
       this.getDo = 1;
-      this.fromdate = ""
+      this.fromdate = "";
       if (this.valuefromdate) {
         this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
       }
@@ -691,7 +676,7 @@ export default {
 
     // 集計パネルヘッダ文字列編集処理
     setPanelHeader: function() {
-      console.log("setPanelHeader in "+this.valueym);
+      console.log("setPanelHeader in " + this.valueym);
       moment.locale("ja");
       if (this.valueym == null || this.valueym == "") {
         this.stringtext = "";
@@ -702,18 +687,25 @@ export default {
           if (this.valuedisplay == null || this.valuedisplay == "") {
             this.stringtext = "";
           } else {
-            this.valuefromdate = this.valueym + '-01';
-            if (moment(this.valuefromdate).format("YYYYMM") != moment().format("YYYYMM")) {
-              this.valuefromdate = moment(this.valuefromdate).endOf('month').format("YYYYMMDD");
+            this.valuefromdate = this.valueym + "-01";
+            if (
+              moment(this.valuefromdate).format("YYYYMM") !=
+              moment().format("YYYYMM")
+            ) {
+              this.valuefromdate = moment(this.valuefromdate)
+                .endOf("month")
+                .format("YYYYMMDD");
             } else {
               this.valuefromdate = moment().format("YYYYMMDD");
             }
             this.datejaFormat = moment(this.valuefromdate).format("YYYY年MM月");
             if (this.valuedisplay == "1") {
-              this.stringtext = "月次集計 " + this.datejaFormat + "を〆日で集計";
+              this.stringtext =
+                "月次集計 " + this.datejaFormat + "を〆日で集計";
             } else {
               if (this.valuedisplay == "2") {
-                this.stringtext = "月次集計 " + this.datejaFormat + "1日から月末で集計";
+                this.stringtext =
+                  "月次集計 " + this.datejaFormat + "1日から月末で集計";
               } else {
                 this.stringtext = "";
               }
@@ -735,11 +727,10 @@ export default {
     // メッセージ処理
     dispmessage1: function(items) {
       console.log("dispmessage1 " + Object.keys(items).length);
-      Object.keys(items).forEach(function (value) {
+      Object.keys(items).forEach(function(value) {
         console.log(value.messagedata + "はと鳴いた！");
       });
     }
   }
-
 };
 </script>

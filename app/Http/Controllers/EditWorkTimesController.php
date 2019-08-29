@@ -35,7 +35,7 @@ class EditWorkTimesController extends Controller
         $code = $request->code;
         $year = $request->year;
         $month = $request->month;
-        $closing = $users = DB::table('settings')->where('fiscal_year', $year)->where('fiscal_month', $month)->where('is_deleted', 0)->value('closing');
+        $closing = DB::table('settings')->where('fiscal_year', $year)->where('fiscal_month', $month)->where('is_deleted', 0)->value('closing');
         $ymd_start = $year."/".$month."/".$closing." 00:00:00";
         $ymd_end = $year."/".$month."/".$closing." 23:59:59";
         $closing_start = new Carbon($ymd_start);
@@ -97,21 +97,60 @@ class EditWorkTimesController extends Controller
         $user_code = $user->code;
         $response = collect();
 
-        DB::beginTransaction();
-        try{
-            $work_time->setUsercodeAttribute($code);
-            $work_time->setDepartmentcodeAttribute($department_code);
-            $work_time->setRecordtimeAttribute($record_time);
-            $work_time->setModeAttribute($mode);
-            $work_time->setCreateduserAttribute($user_code);
-            $work_time->setSystemDateAttribute($systemdate);
-            $result = $work_time->insertWorkTime();
-            DB::commit();
-            $result = true;
+        if($holiday_kbn != ""){     // 休暇区分のみ登録
+            DB::beginTransaction();
+                try{
+                    $record_time = $date;
+                    $ymd = new Carbon($record_time);
+                    $working_date = $ymd->copy()->format('Ymd');
+                    $user_holiday = new UserHolidayKubun();
+                    $user_holiday->setUsercodeAttribute($code);
+                    $user_holiday->setWorkingdateAttribute($working_date);
+                    $user_holiday->setSystemDateAttribute($systemdate);
+                    // 既に存在する場合は論理削除する
+                    $is_exists = $user_holiday->isExistsKbn();
+                    if($is_exists){
+                        $user_holiday->delKbn();
+                    }
+                    $user_holiday->setDepartmentcodeAttribute($department_code);
+                    $user_holiday->setHolidaykubunAttribute($holiday_kbn);
+                    $user_holiday->setCreateduserAttribute($user_code);
+                    $user_holiday->insertKbn();
 
-        }catch(\PDOException $e){
-            DB::rollBack();
-            $result = false;
+                    // 空の出勤データも登録
+                    $work_time->setUsercodeAttribute($code);
+                    $work_time->setDepartmentcodeAttribute($department_code);
+                    $record_time = $date." "."0:00:00";
+                    $work_time->setRecordtimeAttribute($record_time);
+                    $work_time->setCreateduserAttribute($user_code);
+                    $work_time->setSystemDateAttribute($systemdate);
+                    $result = $work_time->insertWorkTime();
+            
+                    DB::commit();
+                    $result = true;
+
+                }catch(\PDOException $e){
+                    DB::rollBack();
+                    $result = false;
+                }
+    
+        }else{                      // 通常の登録
+            DB::beginTransaction();
+                try{
+                    $work_time->setUsercodeAttribute($code);
+                    $work_time->setDepartmentcodeAttribute($department_code);
+                    $work_time->setRecordtimeAttribute($record_time);
+                    $work_time->setModeAttribute($mode);
+                    $work_time->setCreateduserAttribute($user_code);
+                    $work_time->setSystemDateAttribute($systemdate);
+                    $result = $work_time->insertWorkTime();
+                    DB::commit();
+                    $result = true;
+
+                }catch(\PDOException $e){
+                    DB::rollBack();
+                    $result = false;
+                }
         }
         if($result){
             $response->put('result',self::SUCCESS);
@@ -168,6 +207,9 @@ class EditWorkTimesController extends Controller
                 $work_time->setIdAttribute($detail['id']);
                 $work_time->delWorkTime();
                 // 新規登録
+                if(!isset($detail['time'])){
+                    $detail['time'] = "00:00:00";
+                }
                 $record_time = $detail['date']." ".$detail['time'];
                 $work_time->setUsercodeAttribute($detail['user_code']);
                 $work_time->setDepartmentcodeAttribute($detail['department_code']);

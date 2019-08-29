@@ -54,7 +54,7 @@ export default {
           user["overtime_hours"] +
           "," +
           user["late_night_overtime_hours"] +
-          "\n\n";
+          "\n";
         data_head =
           "\ufeff" +
           "日付,出勤1,出勤2,出勤3,出勤4,出勤5,退勤1,退勤2,退勤3,退勤4,退勤5\n";
@@ -91,6 +91,7 @@ export default {
             "\n";
           csv += line;
         });
+        csv += "\n";
         line = "";
       });
       let blob = new Blob([csv], { type: "text/csv" });
