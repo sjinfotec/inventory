@@ -203,6 +203,11 @@ Vue.component(
     require("./components/WorkTimeUpdateButton.vue").default
 );
 
+Vue.component(
+    "daily-working-alert-table",
+    require("./components/DailyWorkingAlertTable.vue").default
+);
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application

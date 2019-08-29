@@ -155,8 +155,8 @@ class DailyWorkingInformationController extends Controller
         $nextdt =$apicommon->getNextDay($dateto, 'Y/m/d');
         $work_time->setParamDatetoAttribute($nextdt);
         // 終了日付で検索（最新の情報として）
-        $work_time_result = $work_time->getWorkTimes($dateto);
-        if(isset($work_time_result) && count($work_time_result) > 0){
+        $work_time_results = $work_time->getWorkTimes($dateto);
+        if(count($work_time_results) > 0){
             $temp_calc_model = new TempCalcWorkingTime();
             try{
                 // temporary削除処理
@@ -166,7 +166,7 @@ class DailyWorkingInformationController extends Controller
                 $temp_working_model->delTempWorkingTimeDate();
                 try{
                     // 日次集計計算登録
-                    $calc_result = $this->calcWorkingTimeDate($work_time_result, $work_time->getParamDatefromAttribute());
+                    $calc_result = $this->calcWorkingTimeDate($work_time_results, $work_time->getParamDatefromAttribute());
                     if ($calc_result) {
                         // タイムテーブルを取得
                         $timetable_model = new WorkingTimeTable();
@@ -175,7 +175,7 @@ class DailyWorkingInformationController extends Controller
                         $timetable_model->setParamemploymentstatusAttribute($employmentstatus);
                         $timetable_model->setParamDepartmentcodeAttribute($departmentcode);
                         $timetables = $timetable_model->getWorkingTimeTableJoin();
-                        if (isset($timetables) && count($timetables) > 0) {
+                        if (count($timetables) > 0) {
                             // 日次集計
                             $add_result = $this->calcTempWorkingTimeDate($timetables);
                         } else {
@@ -227,7 +227,7 @@ class DailyWorkingInformationController extends Controller
             try{
                 Log::debug('getTempWorkingTimeDateUserJoin ');
                 $temp_working_time_dates = $temp_working_model->getTempWorkingTimeDateUserJoin($dateto);
-                if (isset($temp_working_time_dates) && count($temp_working_time_dates) > 0) {
+                if (count($temp_working_time_dates) > 0) {
                     Log::debug('isset $temp_working_time_dates true ');
                     $working_model = new WorkingTimedate();
                     $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
@@ -2731,8 +2731,8 @@ class DailyWorkingInformationController extends Controller
         $leave_early = '';
         $current_calc = '';
         $to_be_confirmed = '';
+        $array_notelateetc = array();
         // 計算用時刻保存
-        $add_cnt = 0;
         $attendance_time = '';
         $leaving_time = '';
         $missing_middle_time = '';
@@ -2777,9 +2777,10 @@ class DailyWorkingInformationController extends Controller
         $temp_calc_model = new TempCalcWorkingTime();
         $worktimes = $temp_calc_model->getTempCalcWorkingtime();
         $add_result = true;
-        if (!isset($worktimes) || count($worktimes) == 0) {
+        if (count($worktimes) == 0) {
             return false;
         }
+        $calc_nobreak_cnt = 0;
         foreach ($worktimes as $result) {
             // 現在の情報保存
             $current_date = $result->working_date;
@@ -2798,17 +2799,26 @@ class DailyWorkingInformationController extends Controller
                 $current_department_code == $current_department_code &&
                 $current_user_code == $before_user_code) {
                 Log::DEBUG('同じキーの場合  ');
-                $add_cnt++;
+                $calc_nobreak_cnt++;
+                if ($calc_nobreak_cnt == 1) {
+                    Log::DEBUG('--- '.$result->user_name.' 開始  ------ '.$current_date.' モード  ------ '.$result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
+                } else {
+                    Log::DEBUG('--- '.$result->user_name.' 継続  ------ '.$current_date.' モード  ------ '.$result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
+                }
+
                 if ($result->mode == Config::get('const.C005.attendance_time')) {$attendance_time = $result->record_datetime;}
                 if ($result->mode == Config::get('const.C005.leaving_time')) {$leaving_time = $result->record_datetime;}
                 if ($result->mode == Config::get('const.C005.missing_middle_time')) {$missing_middle_time = $result->record_datetime;}
                 if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {$missing_middle_return_time = $result->record_datetime;}
                 if ($result->mode == Config::get('const.C005.public_going_out_time')) {$public_going_out_time = $result->record_datetime;}
                 if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {$public_going_out_return_time = $result->record_datetime;}
-                $note .= $result->note.' ';
-                if ($result->late == '1') {$late = '1';}
-                if ($result->leave_early == '1') {$leave_early = '1';}
-                if ($result->to_be_confirmed == '1') {$to_be_confirmed = '1';}
+                
+                $array_notelateetc = $this->setNoteLateEtc($result);
+                $note .= $array_notelateetc[0];
+                Log::DEBUG('setNoteLateEtc $note =  '.$note);
+                $late = $array_notelateetc[1];
+                $leave_early = $array_notelateetc[2];
+                $to_be_confirmed = $array_notelateetc[3];
                 $working_timetable_no = $result->working_timetable_no;
                 $dtNow = new Carbon();
                 Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$result->record_datetime);
@@ -2940,9 +2950,44 @@ class DailyWorkingInformationController extends Controller
                         $attendance_time = '';
                         $leaving_time = '';
                     }
+                } else {
+                    // 時刻だけ設定する
+                    Log::DEBUG('当日分と判断できなかった');
+                    // ----------------------- 私用外出 -------------------------------------------
+                    Log::DEBUG('$missing_middle_time = '.$missing_middle_time);
+                    if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
+                        $array_add_missing_middle_time[] = $missing_middle_time;
+                        Log::DEBUG('$array_add_missing_middle_time count = '.count($array_add_missing_middle_time));
+                    }
+                    Log::DEBUG('$missing_middle_return_time = '.$missing_middle_return_time);
+                    if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
+                        $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                        Log::DEBUG('$array_add_missing_middle_return_time count = '.count($array_add_missing_middle_return_time));
+                    }
+                    // ----------------------- 公用外出 -------------------------------------------
+                    Log::DEBUG('$public_going_out_time = '.$public_going_out_time);
+                    if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
+                        $array_add_public_going_out_time[] = $public_going_out_time;
+                        Log::DEBUG('$array_add_public_going_out_time count = '.count($array_add_public_going_out_time));
+                    }
+                    Log::DEBUG('$public_going_out_return_time = '.$public_going_out_return_time);
+                    if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
+                        $array_add_public_going_out_return_time[] = $public_going_out_return_time;
+                        Log::DEBUG('$array_add_public_going_out_return_time count = '.count($array_add_public_going_out_return_time));
+                    }
+                    // ----------------------- 出勤 -------------------------------------------
+                    if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
+                        $array_add_attendance_time[] = $attendance_time;
+                    }
+                    // ----------------------- 退勤 -------------------------------------------
+                    if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
+                        $array_add_leaving_time[] = $leaving_time;
+                    }
                 }
             } elseif ($current_date == $before_date &&
                     $current_department_code == $before_department_code) {
+                Log::DEBUG('--- '.$before_result->user_name.' 終了  ------ '.$before_date.' モード  ------ '.$before_result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
+                Log::DEBUG('--- '.$result->user_name.' 開始  ------ '.$current_date.' モード  ------ '.$result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
                 // ユーザーが変わった場合
                 Log::DEBUG('calcTempWorkingTimeDate ユーザーが変わった場合 ');
                 Log::DEBUG('calcTempWorkingTimeDate $result->user_code  '.$result->user_code);
@@ -2959,12 +3004,21 @@ class DailyWorkingInformationController extends Controller
                         }
                         Log::DEBUG('当日分　勤務状態 =  '.$working_status);
                     }
+                    if ($calc_nobreak_cnt == 0) {
+                        $array_notelateetc = $this->setNoteLateEtc($before_result);
+                        $note .= $array_notelateetc[0];
+                        Log::DEBUG('setNoteLateEtc $note =  '.$note);
+                        $late = $array_notelateetc[1];
+                        $leave_early = $array_notelateetc[2];
+                        $to_be_confirmed = $array_notelateetc[3];
+                    }
                     // ユーザー労働時間登録(１個前のユーザーを登録する)
-                    $add_result = $this->addTempWorkingTimeDate(
+                        $add_result = $this->addTempWorkingTimeDate(
                         $before_date,
                         $before_user_code,
                         $before_department_code,
                         $before_result,
+                        $note,
                         $working_status,
                         $array_calc_time,
                         $array_missing_middle_time,
@@ -3027,7 +3081,19 @@ class DailyWorkingInformationController extends Controller
                     $before_result = $result;
                     $this->not_employment_working = 0;
                     $working_status = 0;
-                }catch(\PDOException $pe){
+                    $note = '';
+                    $late = '';
+                    $leave_early = '';
+                    $to_be_confirmed = '';
+                    $calc_nobreak_cnt = 0;
+                    $array_notelateetc = $this->setNoteLateEtc($result);
+                    $note .= $array_notelateetc[0];
+                    Log::DEBUG('setNoteLateEtc $note =  '.$note);
+                    $late = $array_notelateetc[1];
+                    $leave_early = $array_notelateetc[2];
+                    $to_be_confirmed = $array_notelateetc[3];
+                    $calc_nobreak_cnt++;
+            }catch(\PDOException $pe){
                     $add_result = false;
                     throw $pe;
                 }catch(\Exception $e){
@@ -3037,6 +3103,8 @@ class DailyWorkingInformationController extends Controller
             } elseif ($current_date == $before_date) {
                 // 部署が変わった場合
                 Log::DEBUG('部署が変わった場合 ');
+                Log::DEBUG('--- '.$before_result->user_name.' 終了  ------ '.$before_date.' モード  ------ '.$before_result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
+                Log::DEBUG('--- '.$result->user_name.' 開始  ------ '.$current_date.' モード  ------ '.$result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
                 try{
                     if ($working_status == 0 ) {
                         Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
@@ -3046,12 +3114,21 @@ class DailyWorkingInformationController extends Controller
                         }
                         Log::DEBUG('当日分　勤務状態 =  '.$working_status);
                     }
+                    if ($calc_nobreak_cnt == 0) {
+                        $array_notelateetc = $this->setNoteLateEtc($before_result);
+                        $note .= $array_notelateetc[0];
+                        Log::DEBUG('setNoteLateEtc $note =  '.$note);
+                        $late = $array_notelateetc[1];
+                        $leave_early = $array_notelateetc[2];
+                        $to_be_confirmed = $array_notelateetc[3];
+                    }
                     // ユーザー労働時間登録(１個前のユーザーを登録する)
                     $add_result = $this->addTempWorkingTimeDate(
                         $before_date,
                         $before_user_code,
                         $before_department_code,
                         $before_result,
+                        $note,
                         $working_status,
                         $array_calc_time,
                         $array_missing_middle_time,
@@ -3110,6 +3187,18 @@ class DailyWorkingInformationController extends Controller
                     $before_result = $result;
                     $this->not_employment_working = 0;
                     $working_status = 0;
+                    $note = '';
+                    $late = '';
+                    $leave_early = '';
+                    $to_be_confirmed = '';
+                    $calc_nobreak_cnt = 0;
+                    $array_notelateetc = $this->setNoteLateEtc($result);
+                    $note .= $array_notelateetc[0];
+                    Log::DEBUG('setNoteLateEtc $note =  '.$note);
+                    $late = $array_notelateetc[1];
+                    $leave_early = $array_notelateetc[2];
+                    $to_be_confirmed = $array_notelateetc[3];
+                    $calc_nobreak_cnt++;
                 }catch(\PDOException $pe){
                     $add_result = false;
                     throw $pe;
@@ -3120,6 +3209,8 @@ class DailyWorkingInformationController extends Controller
             } else {
                 // 日付が変わった場合
                 Log::DEBUG('日付が変わった場合 ');
+                Log::DEBUG('--- '.$before_result->user_name.' 終了  ------ '.$before_date.' モード  ------ '.$before_result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
+                Log::DEBUG('--- '.$result->user_name.' 開始  ------ '.$current_date.' モード  ------ '.$result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
                 try{
                     if ($working_status == 0 ) {
                         Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
@@ -3129,12 +3220,21 @@ class DailyWorkingInformationController extends Controller
                         }
                         Log::DEBUG('当日分　勤務状態 =  '.$working_status);
                     }
+                    if ($calc_nobreak_cnt == 0) {
+                        $array_notelateetc = $this->setNoteLateEtc($before_result);
+                        $note .= $array_notelateetc[0];
+                        Log::DEBUG('setNoteLateEtc $note =  '.$note);
+                        $late = $array_notelateetc[1];
+                        $leave_early = $array_notelateetc[2];
+                        $to_be_confirmed = $array_notelateetc[3];
+                    }
                     // ユーザー労働時間登録(１個前のユーザーを登録する)
                     $add_result = $this->addTempWorkingTimeDate(
                         $before_date,
                         $before_user_code,
                         $before_department_code,
                         $before_result,
+                        $note,
                         $working_status,
                         $array_calc_time,
                         $array_missing_middle_time,
@@ -3194,6 +3294,18 @@ class DailyWorkingInformationController extends Controller
                     $before_result = $result;
                     $this->not_employment_working = 0;
                     $working_status = 0;
+                    $note = '';
+                    $late = '';
+                    $leave_early = '';
+                    $to_be_confirmed = '';
+                    $calc_nobreak_cnt = 0;
+                    $array_notelateetc = $this->setNoteLateEtc($result);
+                    $note .= $array_notelateetc[0];
+                    Log::DEBUG('setNoteLateEtc $note =  '.$note);
+                    $late = $array_notelateetc[1];
+                    $leave_early = $array_notelateetc[2];
+                    $to_be_confirmed = $array_notelateetc[3];
+                    $calc_nobreak_cnt++;
                 }catch(\PDOException $pe){
                     $add_result = false;
                     throw $pe;
@@ -3204,15 +3316,17 @@ class DailyWorkingInformationController extends Controller
             }
         }
 
-        Log::DEBUG('残り　working_status  =  '.$working_status);
-        if ($working_status != 0) {
+        Log::DEBUG('残り　$calc_nobreak_cnt  =  '.$calc_nobreak_cnt);
+        if ($calc_nobreak_cnt > 0) {
             try{
+                Log::DEBUG('--- '.$current_result->user_name.' 終了  ------ '.$current_date.' モード  ------ '.$current_result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
                 Log::DEBUG('残り　当日分　勤務状態 =  '.$working_status);
                 $add_result = $this->addTempWorkingTimeDate(
                     $current_date,
                     $current_user_code,
                     $current_department_code,
                     $current_result,
+                    $note,
                     $working_status,
                     $array_calc_time,
                     $array_missing_middle_time,
@@ -3555,7 +3669,7 @@ class DailyWorkingInformationController extends Controller
      *
      * @return 登録結果
      */
-    private function addTempWorkingTimeDate($target_date, $target_user_code, $target_department_code, $target_result, $working_status,
+    private function addTempWorkingTimeDate($target_date, $target_user_code, $target_department_code, $target_result, $note, $working_status,
         $array_calc_time, $array_missing_middle_time, $array_public_going_out_time,
         $array_add_attendance_time, $array_add_leaving_time, $array_add_missing_middle_time, $array_add_missing_middle_return_time,
         $array_add_public_going_out_time, $array_add_public_going_out_return_time)
@@ -3581,9 +3695,14 @@ class DailyWorkingInformationController extends Controller
                 Log::DEBUG('$array_calc_time[$i] = null $i = '.$i);
             }
         }
+        $attendence_note_set = false;
         $index = (int)(Config::get('const.ARRAY_MAX_INDEX.attendace_time'));
         Log::DEBUG('$index = '.$index);
         Log::DEBUG('count($array_add_attendance_time = '.count($array_add_attendance_time));
+        if (count($array_add_attendance_time) > $index) {
+            $note .= Config::get('const.MEMO_DATA.MEMO_DATA_016').' '; 
+            $attendence_note_set = true;
+        }
         for ($i=0;$i<$index;$i++) {
             if (count($array_add_attendance_time) > 0 && $i < count($array_add_attendance_time)){
                 Log::DEBUG('$array_add_attendance_time[$i] = '.$array_add_attendance_time[$i].' $i = '.$i);
@@ -3594,6 +3713,11 @@ class DailyWorkingInformationController extends Controller
             }
         }
         $index = (int)(Config::get('const.ARRAY_MAX_INDEX.leaving_time'));
+        if (count($array_add_leaving_time) > $index) {
+            if ($attendence_note_set == false) {
+                $note .= Config::get('const.MEMO_DATA.MEMO_DATA_016').' '; 
+            }
+        }
         for ($i=0;$i<$index;$i++) {
             if (count($array_add_leaving_time) > 0 && $i < count($array_add_leaving_time)){
                 $temp_working_model->setLeavingtimeAttribute($i, $array_add_leaving_time[$i]);
@@ -3601,9 +3725,14 @@ class DailyWorkingInformationController extends Controller
                 $temp_working_model->setLeavingtimeAttribute($i, null);
             }
         }
+        $missing_middle_note_set = false;
         $index = (int)(Config::get('const.ARRAY_MAX_INDEX.missing_middle_time'));
         Log::DEBUG('$index = '.$index);
         Log::DEBUG('count($array_add_missing_middle_time = '.count($array_add_missing_middle_time));
+        if (count($array_add_missing_middle_time) > $index) {
+            $note .= Config::get('const.MEMO_DATA.MEMO_DATA_018').' '; 
+            $missing_middle_note_set = true;
+        }
         for ($i=0;$i<$index;$i++) {
             if (count($array_add_missing_middle_time) > 0 && $i < count($array_add_missing_middle_time)){
                 Log::DEBUG('$array_add_missing_middle_time[$i] = '.$array_add_missing_middle_time[$i].' $i = '.$i);
@@ -3613,6 +3742,11 @@ class DailyWorkingInformationController extends Controller
             }
         }
         $index = (int)(Config::get('const.ARRAY_MAX_INDEX.missing_middle_return_time'));
+        if (count($array_add_missing_middle_return_time) > $index) {
+            if ($missing_middle_note_set == false) {
+                $note .= Config::get('const.MEMO_DATA.MEMO_DATA_018').' '; 
+            }
+        }
         for ($i=0;$i<$index;$i++) {
             if (count($array_add_missing_middle_return_time) > 0 && $i < count($array_add_missing_middle_return_time)){
                 $temp_working_model->setMissingmiddlereturntimeAttribute($i, $array_add_missing_middle_return_time[$i]);
@@ -3620,9 +3754,14 @@ class DailyWorkingInformationController extends Controller
                 $temp_working_model->setMissingmiddlereturntimeAttribute($i, null);
             }
         }
+        $public_going_out_note_set = false;
         $index = (int)(Config::get('const.ARRAY_MAX_INDEX.public_going_out_time'));
         Log::DEBUG('$index = '.$index);
         Log::DEBUG('count($array_add_public_going_out_time = '.count($array_add_public_going_out_time));
+        if (count($array_add_public_going_out_time) > $index) {
+            $note .= Config::get('const.MEMO_DATA.MEMO_DATA_017').' '; 
+            $public_going_out_note_set = true;
+        }
         for ($i=0;$i<$index;$i++) {
             if (count($array_add_public_going_out_time) > 0 && $i < count($array_add_public_going_out_time)){
                 Log::DEBUG('$array_add_public_going_out_time[$i] = '.$array_add_public_going_out_time[$i].' $i = '.$i);
@@ -3632,6 +3771,11 @@ class DailyWorkingInformationController extends Controller
             }
         }
         $index = (int)(Config::get('const.ARRAY_MAX_INDEX.public_going_out_return_time'));
+        if (count($array_add_public_going_out_return_time) > $index) {
+            if ($missing_middle_note_set == false) {
+                $note .= Config::get('const.MEMO_DATA.MEMO_DATA_017').' '; 
+            }
+        }
         for ($i=0;$i<$index;$i++) {
             if (count($array_add_public_going_out_return_time) > 0 && $i < count($array_add_public_going_out_return_time)){
                 $temp_working_model->setPublicgoingoutreturntimeAttribute($i, $array_add_public_going_out_return_time[$i]);
@@ -3727,7 +3871,7 @@ class DailyWorkingInformationController extends Controller
         $timetables = $timetable_model->getWorkingTimeTableJoin();
         Log::DEBUG('$getWorkingTimeTableJoin  count = '.count($timetables));
         $calc_time = 0;
-        if (isset($timetables) && count($timetables) > 0) {
+        if (count($timetables) > 0) {
             $w_time = 0;
             $w_break_time = 0;
             $w_from_time1 = "";
@@ -3856,7 +4000,7 @@ class DailyWorkingInformationController extends Controller
         $calc_time = round($apicommon->roundTime($calc_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
         $temp_working_model->setPublicgoingouthoursAttribute($calc_time);
         $temp_working_model->setWorkingstatusAttribute($working_status);
-        $temp_working_model->setNoteAttribute($target_result->note);
+        $temp_working_model->setNoteAttribute($note);
         $temp_working_model->setLateAttribute($target_result->late);
         $temp_working_model->setLeaveearlyAttribute($target_result->leave_early);
         $temp_working_model->setCurrentcalcAttribute($target_result->current_calc);
@@ -3901,6 +4045,50 @@ class DailyWorkingInformationController extends Controller
 
         return true;
 
+    }
+ 
+    /**
+     * 打刻時刻状況の判定
+     * 
+     *      メモ、遅刻、早退、要確認の設定
+     *
+     * @return 
+     */
+    private function setNoteLateEtc($target_result)
+    {
+        Log::DEBUG('---------------------- setNoteLateEtc in ------------------------ ');
+        $note = '';
+        $late = '';
+        $leave_early = '';
+        $to_be_confirmed = '';
+        if (isset($target_result->note)) { $note .= $target_result->note.' '; }
+        Log::DEBUG('$target_result->note = '.$note);
+        if (isset($target_result->working_interval)) {
+            if ($target_result->mode == Config::get('const.C005.attendance_time')) {
+                if ($target_result->working_interval == '1') {
+                    $note .= Config::get('const.MEMO_DATA.MEMO_DATA_007').' '; 
+                    Log::DEBUG('working_interval = '.$note);
+                }
+            }
+        }
+        if (isset($target_result->late)) {
+            if ($target_result->late == '1') {
+                $late = '1';
+            }
+        }
+        if (isset($target_result->leave_early)) {
+            if ($target_result->leave_early == '1') {
+                $leave_early = '1';
+            }
+        }
+        if (isset($target_result->to_be_confirmed)) {
+            if ($target_result->to_be_confirmed == '1') {
+                $to_be_confirmed = '1';
+            }
+        }
+        Log::DEBUG('---------------------- setNoteLateEtc end ------------------------ ');
+
+        return array($note, $late, $leave_early, $to_be_confirmed);
     }
 
 }
