@@ -670,9 +670,53 @@ class WorkTime extends Model
      * @return $data
      */
     public function getUserDetails(){
+        // users max(apply_term_from)
+        $max_user_apply = DB::table($this->table_users)
+            ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+            ->where('is_deleted', '=', 0)
+            ->where('code',$this->user_code)
+            ->value('max_apply_term_from');
+        
+        $user_department_code = DB::table($this->table_users)
+            ->where('code', $this->user_code)
+            ->where('apply_term_from', $max_user_apply)
+            ->where('is_deleted', 0)->value('department_code');
+
+        // departments max(apply_term_from)
+        $max_department_apply = DB::table($this->table_departments)
+            ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+            ->where('is_deleted', '=', 0)
+            ->where('code',$user_department_code)
+            ->value('max_apply_term_from');
+
+        // users
+        $subquery1 = DB::table($this->table_users)
+            // ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+            ->selectRaw('code as code')
+            ->selectRaw('name as name')
+            ->where('is_deleted', '=', 0)
+            ->where('apply_term_from',$max_user_apply);
+        
+        // departments
+        $subquery2 = DB::table($this->table_departments)
+            // ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+            ->selectRaw('code as code')
+            ->selectRaw('name as name')
+            ->where('is_deleted', '=', 0)
+            ->where('apply_term_from',$max_department_apply);
+    
+        // \DB::enableQueryLog();
         $data = DB::table($this->table)
-            ->join('users','users.code','=',$this->table.'.user_code')
-            ->join('departments','departments.code','users.department_code')
+            // ->join('users','users.code','=',$this->table.'.user_code')
+            // ->join('departments','departments.code','users.department_code')
+            ->JoinSub($subquery1, 't1', function ($join) { 
+                $join->on('t1.code', '=', $this->table.'.user_code');
+                // $join->on('t1.max_apply_term_from', '=', $max_user_apply);
+            })
+            ->JoinSub($subquery2, 't2', function ($join) { 
+                $join->on('t2.code', '=', $this->table.'.department_code');
+                // $join->on('t2.max_apply_term_from', '=', $max_department_apply);
+            })
             ->leftJoin('generalcodes as g', function ($join) { 
                 $join->on('g.code', '=', $this->table.'.mode')
                 ->where('g.identification_id', '=', Config::get('const.C005.value'));
@@ -683,8 +727,8 @@ class WorkTime extends Model
                 $this->table.'.department_code',
                 $this->table.'.record_time',
                 $this->table.'.mode',
-                'users.name as user_name',
-                'departments.name as d_name',
+                't1.name as user_name',
+                't2.name as d_name',
                 'g.code_name'
             )
             ->where($this->table.'.user_code', $this->user_code)
@@ -692,6 +736,13 @@ class WorkTime extends Model
             ->where($this->table.'.is_deleted', 0)
             ->orderBy($this->table.'.record_time', 'asc')
             ->get();
+
+        //  \Log::debug(
+        //    'sql_debug_log',
+        //    [
+        //        'わかりやすい名称' => \DB::getQueryLog()
+        //    ]
+        //    );
         
         return $data;
     }
