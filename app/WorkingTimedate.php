@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use App\TempWorkingTimeDate;
 
 /**
  * テーブル：日次タイムレコード（working_time_date）のモデル
@@ -1041,7 +1042,7 @@ class WorkingTimedate extends Model
      *
      * @return sql取得結果
      */
-    public function getWorkingTimeDateTimeFormat($dayormonth){
+    public function getWorkingTimeDateTimeFormat($dayormonth, $business_kubun){
 
 
         // 日次労働時間取得SQL作成
@@ -1206,9 +1207,17 @@ class WorkingTimedate extends Model
                     ->where($this->table_calendars.'.is_deleted', '=', 0);
                 });
 
-            $mainquery = $this->setWhereSql($mainquery);
-
             if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
+                if ($business_kubun != Config::get('const.C007.basic')) {
+                    $mainquery
+                        ->Join($this->table_temp_working_time_dates, function ($join) { 
+                            $join->on($this->table_temp_working_time_dates.'.working_date', '=', $this->table.'.working_date');
+                            $join->on($this->table_temp_working_time_dates.'.employment_status', '=', $this->table.'.employment_status');
+                            $join->on($this->table_temp_working_time_dates.'.department_code', '=', $this->table.'.department_code');
+                            $join->on($this->table_temp_working_time_dates.'.user_code', '=', $this->table.'.user_code');
+                        });
+                }
+                $mainquery = $this->setWhereSql($mainquery);
                 $result = $mainquery
                     ->orderBy($this->table.'.working_date', 'asc')
                     ->orderBy($this->table.'.employment_status', 'asc')
@@ -1216,6 +1225,7 @@ class WorkingTimedate extends Model
                     ->orderBy($this->table.'.user_code', 'asc')
                     ->get();
             } elseif ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic')) {
+                $mainquery = $this->setWhereSql($mainquery);
                 $result = $mainquery
                     ->orderBy($this->table.'.department_code', 'asc')
                     ->orderBy($this->table.'.employment_status', 'asc')

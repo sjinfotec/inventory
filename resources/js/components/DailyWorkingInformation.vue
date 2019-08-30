@@ -16,21 +16,20 @@
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- .col -->
-              <message-data v-bind:messagedatas="messagedatasserver"></message-data>
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       for="target_fromdate"
-                    >指定日付*</span>
+                    >指定日付＊</span>
                   </div>
                   <input-datepicker
                     v-bind:default-Date="defaultDate"
                     v-on:change-event="fromdateChanges"
                   ></input-datepicker>
-                  <message-data v-bind:messagedatas="messagedatasfromdate"></message-data>
                 </div>
+                <message-data v-bind:messagedatas="messagedatasfromdate"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -85,6 +84,7 @@
                   <message-data v-bind:messagedatas="messagedatauser"></message-data>
                 </div>
               </div>
+              <message-data v-bind:messagedatas="messagedatasserver"></message-data>
               <!-- /.col -->
             </div>
             <!-- /.row -->
@@ -426,6 +426,7 @@ export default {
       resresults: [],
       calcresults: [],
       sumresults: [],
+      messages: [],
       messagedatasserver: [],
       messagedatasfromdate: [],
       messagedatastodate: [],
@@ -450,7 +451,7 @@ export default {
       this.messagedatadepartment = [];
       this.messagedatauser = [];
       if (!this.valuefromdate) {
-        this.messagedatasfromdate.push("指定日付は必ず入力してください。");
+        this.messagedatasfromdate[0] = '指定日付は必ず入力してください。';
         this.validate = false;
       }
       if (this.userrole < "8") {
@@ -541,14 +542,20 @@ export default {
             }
           })
           .then(response => {
+            console.log("response");
             this.resresults = response.data;
-            this.calcresults = this.resresults.calcresults;
-            this.sumresults = this.resresults.sumresults;
-            this.dispmessage(this.resresults.massegedata);
-            this.messagedatasserver.length = 0;
-            this.$forceUpdate();
+            if (this.resresults.calcresults != null) {
+              this.calcresults = this.resresults.calcresults;
+            }
+            if (this.resresults.sumresults != null) {
+              this.sumresults = this.resresults.sumresults;
+            }
             console.log("calcresults" + Object.keys(this.calcresults).length);
             console.log("sumresults" + Object.keys(this.sumresults).length);
+            this.messages = this.resresults.messagedata;
+            console.log("messages" + Object.keys(this.messages).length);
+            this.dispmessage(this.messages);
+            this.$forceUpdate();
           })
           .catch(reason => {
             alert("error");
@@ -597,6 +604,7 @@ export default {
       this.resresults = [];
       this.calcresults = [];
       this.sumresults = [];
+      this.messages = [];
       this.messagedatasserver = [];
       this.messagedatasfromdate = [];
       this.messagedatastodate = [];
@@ -604,10 +612,8 @@ export default {
       this.messagedatauser = [];
     },
     // メッセージ処理
-    dispmessage: function(items) {
-      items.forEach(function(value) {
-        this.messagedatasserver.push(value);
-      });
+    dispmessage: function(value) {
+        this.messagedatasserver = value;
     },
     // メッセージ処理
     dispmessagevalue: function(value) {

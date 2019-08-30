@@ -24,7 +24,7 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       id="basic-addon1"
-                    >指定年月</span>
+                    >指定年月＊</span>
                   </div>
                   <input-ym v-on:change-event="fromdateChanges"></input-ym>
                 </div>
@@ -38,7 +38,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       for="inputGroupSelect01"
-                    >表示区分</label>
+                    >表示区分＊</label>
                   </div>
                   <general-list
                     v-bind:identification-id="'C016'"
@@ -80,9 +80,9 @@
                     v-bind:blank-data="true"
                     v-on:change-event="departmentChanges"
                   ></select-department>
-                  <message-data v-bind:messagedatas="messagedatadepartment"></message-data>
                 </div>
               </div>
+              <message-data v-bind:messagedatas="messagedatadepartment"></message-data>
               <!-- /.col -->
               <!-- .col -->
               <div class="col-md-6 pb-2">
@@ -475,20 +475,24 @@ export default {
       if (!this.valueym) {
         this.messagedatasfromdate.push("指定年月は必ず入力してください。");
         this.validate = false;
+        console.log("指定年月は必ず入力してください。");
       }
       if (!this.valuedisplay) {
         this.messagedatadisplay.push("表示区分は必ず入力してください。");
         this.validate = false;
+        console.log("表示区分は必ず入力してください。");
       }
       if (this.serchorupdate == "update") {
         if (!this.valuedepartment) {
           this.messagedatadepartment.push("所属部署は必ず入力してください。");
           this.validate = false;
+          console.log("所属部署は必ず入力してください。");
         }
         if (this.userrole < "8") {
           if (!this.valueuser) {
             this.messagedatauser.push("氏名は必ず入力してください。");
             this.validate = false;
+            console.log("氏名は必ず入力してください。");
           }
         }
       } else {
@@ -496,18 +500,20 @@ export default {
           if (!this.valuedepartment) {
             this.messagedatadepartment.push("所属部署は必ず入力してください。");
             this.validate = false;
+            console.log("所属部署は必ず入力してください。");
           }
           if (!this.valueuser) {
             this.messagedatauser.push("氏名は必ず入力してください。");
             this.validate = false;
+            console.log("氏名は必ず入力してください。");
           }
         }
       }
-      console.log("validate = true");
 
       if (this.validate) {
         return this.validate;
       }
+      console.log("validate = false");
 
       e.preventDefault();
     },
@@ -563,8 +569,10 @@ export default {
     searchclick: function(e) {
       this.serchorupdate = "search";
       this.validate = this.checkForm(e);
+      console.log("集計開始" + this.validate);
       if (this.validate) {
         this.itemClear();
+        this.$toasted.show("集計を開始しました");
         this.$axios
           .get("/monthly/show", {
             params: {
@@ -586,6 +594,7 @@ export default {
             console.log("calcresults" + Object.keys(this.calcresults).length);
             console.log("sumresults" + Object.keys(this.sumresults).length);
             console.log("company_name" + this.company_name);
+            this.$toasted.show("集計しました");
           })
           .catch(reason => {
             alert("月次集計エラー");
@@ -596,6 +605,7 @@ export default {
     updateclick: function(e) {
       this.serchorupdate = "update";
       this.validate = this.checkForm(e);
+      console.log("更新を開始" + this.validate);
       if (this.validate) {
         this.itemClear();
         this.$toasted.show("更新を開始しました");
@@ -620,7 +630,7 @@ export default {
             this.$toasted.show("集計を最新に更新しました");
           })
           .catch(reason => {
-            alert("月次集計エラー");
+            alert("月次集計最新更新エラー");
           });
       }
     },

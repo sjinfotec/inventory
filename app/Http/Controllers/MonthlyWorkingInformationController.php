@@ -329,7 +329,7 @@ class MonthlyWorkingInformationController extends Controller
         $before_date = null;
         $before_result = null;
         // 指定パラメータよりレコード取得パラメータはメインで設定済み
-        $workingtimedates = $workingtimedate_model->getWorkingTimeDateTimeFormat(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
+        $workingtimedates = $workingtimedate_model->getWorkingTimeDateTimeFormat(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'), '');
 
         if(count($workingtimedates) > 0){
             foreach($workingtimedates as $result) {

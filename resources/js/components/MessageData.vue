@@ -1,7 +1,7 @@
 <template>
-  <p v-if="messagedatas.length">
+  <p  v-if="messagedatas.length">
     <ul>
-      <li v-for="messagedata in messagedatas">{{ messagedata }}</li>
+      <li v-for="messagedata in messagedatas">{{ messagedata.massege }}</li>
     </ul>
   </p>
 </template>

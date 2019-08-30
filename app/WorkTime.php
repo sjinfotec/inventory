@@ -387,10 +387,11 @@ class WorkTime extends Model
      *
      * @return sql取得結果
      */
-    public function getWorkTimes($targetdate){
+    public function getWorkTimes($targetdate, $business_kubun){
 
         // 日次労働時間取得SQL作成
         // subquery1    work_times
+        \DB::enableQueryLog();
         $subquery1 = DB::table($this->table)
             ->select(
                 $this->table.'.user_code as user_code',
@@ -557,11 +558,15 @@ class WorkTime extends Model
         if(!empty($this->param_user_code)){
             $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
         }
-        $result = $mainquery
+        $mainquery
             ->JoinSub($subquery3, 't14', function ($join) { 
                 $join->on('t14.code', '=', 't1.code');
                 $join->on('t14.max_apply_term_from', '=', 't1.apply_term_from');
-            })
+            });
+        if ($business_kubun != Config::get('const.C007.basic')) {
+            $mainquery->whereNotNull('t2.record_datetime');
+        }
+        $result = $mainquery
             ->where('t1.is_deleted', '=', 0)
             ->orderBy('t1.department_code', 'asc')
             ->orderBy('t1.employment_status', 'asc')
@@ -569,6 +574,12 @@ class WorkTime extends Model
             ->orderBy('t2.record_date', 'asc')
             ->orderBy('t2.record_datetime', 'asc')
             ->get();
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getWorkTimes' => \DB::getQueryLog()
+            ]
+        );
 
         return $result;
     }

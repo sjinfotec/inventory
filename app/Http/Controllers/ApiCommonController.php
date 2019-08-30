@@ -11,6 +11,7 @@ use Illuminate\Support\Collection;
 use Carbon\Carbon;
 use App\ShiftInformation;
 use App\WorkingTimeTable;
+use App\Calendar;
 
 
 
@@ -607,6 +608,31 @@ class ApiCommonController extends Controller
         $dt = new Carbon($target_date);
         return date_format($dt->addDay(), $str_format);
     }
+ 
+    /**
+     * 法定法定外休日判定
+     * 
+     *
+     * @return 
+     */
+    public function jdgBusinessKbn($target_date)
+    {
+        // 指定日が休日かどうか
+        $business_kubun = null;
+        $calender_model = new Calendar();
+        $calender_model->setDateAttribute(date_format(new Carbon($target_date), 'Ymd'));
+        $calendars = $calender_model->getCalenderDate();
+        if (count($calendars) > 0) {
+            foreach ($calendars as $result) {
+                if (isset($result->business_kubun)) {
+                    $business_kubun = $result->business_kubun;
+                }
+                break;
+            }
+        }
+
+        return $business_kubun;
+    }
 
     /**
      * 時刻日付変換
@@ -689,15 +715,17 @@ class ApiCommonController extends Controller
         $target_from_his = date_format(new Carbon($target_from_time),'His');
         $target_to_ymd = date_format(new Carbon($target_to_time),'Ymd');
         $target_to_his = date_format(new Carbon($target_to_time),'His');
-        Log::DEBUG('target_from_his = '.$target_from_his);
-        Log::DEBUG('target_from_his = '.$target_from_his);
         Log::DEBUG('current_date_ymd = '.$current_date_ymd);
         Log::DEBUG('target_from_ymd = '.$target_from_ymd);
+        Log::DEBUG('target_to_ymd = '.$target_to_ymd);
+        Log::DEBUG('target_from_his = '.$target_from_his);
+        Log::DEBUG('target_to_his = '.$target_to_his);
         // 日付付与
         $cnv_from_date = null;
         if ($current_date_ymd == $target_from_ymd) {
-            if ($target_from_his > $from_time && $from_time > Config::get('const.C010.non')) {
-                $cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
+            if ($target_from_his > $from_time && $from_time >= Config::get('const.C015.night_to')) {
+                //$cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
+                $cnv_from_date = new Carbon($target_from_ymd.' '.$from_time);
                 Log::DEBUG('cnv_from_date if then= '.$cnv_from_date);
             } else {
                 if ($from_time >= Config::get('const.C015.night_to')) {
@@ -710,9 +738,11 @@ class ApiCommonController extends Controller
                 Log::DEBUG('cnv_from_date if else= '.$cnv_from_date);
             }
         } else {
-            $cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
-            Log::DEBUG('cnv_from_date if else= '.$cnv_from_date);
+            //$cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
+            $cnv_from_date = new Carbon($target_from_ymd.' '.$from_time);
+            Log::DEBUG('cnv_from_date i$current_date_ymd != $target_from_ymd '.$cnv_from_date);
         }
+        Log::DEBUG('         ------------- convTimeToDateFrom end '.$cnv_from_date);
 
         return $cnv_from_date;
     }
@@ -738,18 +768,19 @@ class ApiCommonController extends Controller
         $target_to_his = date_format(new Carbon($target_to_time),'His');        // 打刻時刻
         Log::DEBUG('current_date_ymd = '.$current_date_ymd);
         Log::DEBUG('target_from_ymd = '.$target_from_ymd);
-        Log::DEBUG('target_from_his = '.$target_from_his);
         Log::DEBUG('target_to_ymd = '.$target_to_ymd);
+        Log::DEBUG('target_from_his = '.$target_from_his);
         Log::DEBUG('target_to_his = '.$target_to_his);
         // 日付付与
         $cnv_to_date = null;
         if ($current_date_ymd == $target_to_ymd) {
             if ($from_time > $to_time) {
-                $cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                //$cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                $cnv_to_date = $this->getNextDay($target_to_ymd, 'Y-m-d').' '.$to_time;
                 Log::DEBUG('cnv_to_date if then= '.$cnv_to_date);
             } else {
                 if ($target_to_his < $to_time) {
-                    $cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
                     Log::DEBUG('cnv_to_date if then= '.$cnv_to_date);
                 } else {
                     $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
@@ -759,7 +790,8 @@ class ApiCommonController extends Controller
         } else {
             if ($from_time > $to_time) {
                 if ($target_to_his < $to_time) {
-                    $cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                    //$cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
                     Log::DEBUG('cnv_to_date if then= '.$cnv_to_date);
                 } else {
                     $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
@@ -775,8 +807,33 @@ class ApiCommonController extends Controller
                 }
             }
         }
+        Log::DEBUG('         ------------- convTimeToDateTo end '.$cnv_to_date);
 
         return $cnv_to_date;
+    }
+
+    /**
+     * 時間範囲内であるか判定
+     * 
+     *      target_from_datetime～target_to_datetimeはchk_from_datetime～chk_to_datetimeの範囲内に一部または全部あるか判定
+     *      前提
+     *          target_from_datetime <= target_to_datetime
+     *          chk_from_datetime <= chk_to_datetime
+     *
+     * @return 
+     */
+    public function chkBetweenTime($target_from_datetime, $target_to_datetime, $chk_from_datetime, $chk_to_datetime){
+
+        $chk_result = true;
+
+        if ($target_from_datetime <=  $chk_from_datetime) {
+            if ($target_to_datetime <=  $chk_from_datetime) {
+                $chk_result = false;
+            }
+        } elseif ($target_from_datetime >=  $chk_to_datetime) {
+            $chk_result = false;
+        }
+        return $chk_result;
     }
 
     /**
