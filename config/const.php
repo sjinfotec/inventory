@@ -192,7 +192,7 @@ return [
         'MEMO_DATA_004' => '不明な打刻。',
         'MEMO_DATA_005' => '当日時間計算なし。',
         'MEMO_DATA_006' => '自動設定。',
-        'MEMO_DATA_007' => '退勤時刻から出勤時刻までの時間が設定時間より少ない。',
+        'MEMO_DATA_007' => 'インターバル時間が設定時間より少ない。',
         'MEMO_DATA_008' => '休暇入力ないため未出勤。',
         'MEMO_DATA_009' => '外出なし。',
         'MEMO_DATA_010' => '部署設定ミス。',
@@ -256,14 +256,15 @@ return [
         'not_input_workindatefrom' => '計算開始日付は必ず入力してください。',
         'not_input_workindateto' => '計算終了日付は必ず入力してください。',
         'not_input_workindatefromto' => '計算開始日付と計算終了日付は必ず入力してください。',
-        'not_setting_department_code' => 'さんの部署が設定されていません。',
+        'not_setting_department_code' => '{0}さんの部署が設定されていません。',
         'not_setting_department_code_nouser' => '部署が設定されていない社員がいます。確認してください。',
         'not_setting_closing' => '締日が設定されていません。',
         'not_setting_time_unit' => '時間計算の単位が設定されていません。',
         'not_setting_time_rounding' => '時間計算の端数処理が設定されていません。',
         'not_setting_beginning_month' => '期首月が設定されていません。',
-        'not_setting_timetable' => 'タイムテーブルが設定されていません。',
+        'not_setting_timetable' => '期間内に該当する勤務時間がないかまたはタイムテーブルが設定されていません。',
         'data_eror_dailycalc' => '労働時間計算処理にてエラーのため計算できませんでした。',
+        'not_setting_calendar' => '{0}のカレンダー設定がされていません。',
         'data_accesee_eror_dailycalc' => '労働時間計算処理にてデータアクセスエラーのため計算できませんでした。',
         'mismatch_data' => 'データ不整合'
     ],
@@ -275,7 +276,8 @@ return [
         'data_delete_erorr' => 'データdeleteエラー table = [{0}]',
         'data_exists_erorr' => 'データexistsエラー table = [{0}]',
         'mismatch_data' => 'データ不整合',
-        'not_set_time_rounding ' => '時間の端数処理が設定されていない'
+        'not_set_time_rounding ' => '時間の端数処理が設定されていない',
+        'not_setting_timetable' => '期間内に該当する勤務時間がないかまたはタイムテーブルが設定されていません。',
     ]
 
 ];

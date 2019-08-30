@@ -195,4 +195,34 @@ class Calendar extends Model
 
         return $result;
     }
+
+    /**
+     * 検索
+     *
+     * @return void
+     */
+    public function getCalenderDate(){
+        $data = DB::table($this->table)
+        ->select(
+                'date',
+                'weekday_kubun',
+                'business_kubun',
+                'holiday_kubun'
+        );
+        if(isset($this->date)){
+            $data->where('date', $this->date);
+        }
+        if(isset($this->business_kubun)){
+            $data->where('business_kubun',$this->business_kubun);
+        }
+        if(isset($this->holiday_kubun)){
+            $data->where('holiday_kubun',$this->holiday_kubun);
+        }
+        $data->where('is_deleted',0);
+        $result = $data->get();
+
+
+        return $result;
+    }
+
 }
