@@ -1,7 +1,12 @@
-<template>
-  <p  v-if="messagedatas.length">
+<template v-if="messageDatas.length">
+  <p  v-if="messageClass === 'info'">
     <ul>
-      <li v-for="messagedata in messagedatas">{{ messagedata.massege }}</li>
+      <li v-for="(messagedata,index) in messageDatas" v-bind:key="index">{{ messagedata }}</li>
+    </ul>
+  </p>
+  <p  v-else>
+    <ul class="error-red color-red">
+      <li v-for="(messagedata,index) in messageDatas" v-bind:key="index">{{ messagedata }}</li>
     </ul>
   </p>
 </template>
@@ -10,9 +15,13 @@
 export default {
   name: "messageData",
   props: {
-    messagedatas: {
+    messageDatas: {
         type: Array,
         default: () => []
+    },
+    messageClass: {
+        type: String,
+        default: "info"
     }
   }
 };
