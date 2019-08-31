@@ -22,14 +22,13 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       for="target_fromdate"
-                    >指定日付＊</span>
+                    >指定日付<span class="color-red">＊</span></span>
                   </div>
                   <input-datepicker
                     v-bind:default-Date="defaultDate"
                     v-on:change-event="fromdateChanges"
                   ></input-datepicker>
                 </div>
-                <message-data v-bind:messagedatas="messagedatasfromdate"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -61,7 +60,7 @@
                     ref="selectdepartment"
                     v-bind:blank-data="true" v-on:change-event="departmentChanges"
                   ></select-department>
-                  <message-data v-bind:messagedatas="messagedatadepartment"></message-data>
+                  <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
                 </div>
               </div>
               <!-- /.col -->
@@ -81,10 +80,10 @@
                     v-bind:date-value="fromdate"
                     v-on:change-event="userChanges"
                   ></select-user>
-                  <message-data v-bind:messagedatas="messagedatauser"></message-data>
+                  <message-data v-bind:message-datas="messagedatauser" v-bind:message-class="'warning'"></message-data>
                 </div>
               </div>
-              <message-data v-bind:messagedatas="messagedatasserver"></message-data>
+              <message-data v-bind:message-datas="messagedatasserver" v-bind:message-class="'warning'"></message-data>
               <!-- /.col -->
             </div>
             <!-- /.row -->
@@ -92,7 +91,12 @@
             <div class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
-                <search-workingtimebutton v-on:searchclick-event="searchclick"></search-workingtimebutton>
+                <btn-work-time
+                  v-on:searchclick-event="searchclick"
+                  v-bind:btn-mode="'search'"
+                  v-bind:is-push="issearchbutton">
+                </btn-work-time>
+                <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting>
               </div>
               <!-- /.col -->
             </div>
@@ -432,6 +436,8 @@ export default {
       messagedatastodate: [],
       messagedatadepartment: [],
       messagedatauser: [],
+      messageshowsearch: false,
+      issearchbutton: false,
       validate: false,
       initialized: false
     };
@@ -451,9 +457,10 @@ export default {
       this.messagedatadepartment = [];
       this.messagedatauser = [];
       if (!this.valuefromdate) {
-        this.messagedatasfromdate[0] = '指定日付は必ず入力してください。';
+        this.messagedatasfromdate.push("指定日付は必ず入力してください。");
         this.validate = false;
       }
+      console.log("this.userrole " + this.userrole);
       if (this.userrole < "8") {
         if (!this.valuedepartment) {
           this.messagedatadepartment.push("所属部署は必ず入力してください。");
@@ -530,6 +537,8 @@ export default {
       console.log("this.valuedepartment" + this.valuedepartment);
       console.log("this.valueuser" + this.valueuser);
       if (this.validate) {
+        this.issearchbutton = true;
+        this.messageshowsearch = true;
         this.itemClear();
         this.$axios
           .get("/daily/calc", {
@@ -556,9 +565,13 @@ export default {
             console.log("messages" + Object.keys(this.messages).length);
             this.dispmessage(this.messages);
             this.$forceUpdate();
+            this.messageshowsearch = false;
+            this.issearchbutton = false;
           })
           .catch(reason => {
-            alert("error");
+            this.messageshowsearch = false;
+            this.issearchbutton = false;
+            alert("日次集計エラー");
           });
       }
     },

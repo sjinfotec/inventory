@@ -77,8 +77,8 @@ Vue.component(
 );
 
 Vue.component(
-    "search-workingtimebutton",
-    require("./components/WorkTimeSearchButton.vue").default
+    "btn-work-time",
+    require("./components/BtnWorkTime.vue").default
 );
 
 Vue.component(
@@ -199,13 +199,13 @@ Vue.component(
 );
 
 Vue.component(
-    "update-workingtimebutton",
-    require("./components/WorkTimeUpdateButton.vue").default
+    "daily-working-alert-table",
+    require("./components/DailyWorkingAlertTable.vue").default
 );
 
 Vue.component(
-    "daily-working-alert-table",
-    require("./components/DailyWorkingAlertTable.vue").default
+    "message-waiting",
+    require("./components/MessageWaiting.vue").default
 );
 
 /**
