@@ -24,6 +24,8 @@ class WorkTime extends Model
     private $department_code;               // 部署コード
     private $record_time;                   // 打刻時間
     private $mode;                          // 打刻モード
+    private $check_result;                  // 打刻チェック結果
+    private $check_max_time;                // 打刻回数最大チェック結果
     private $created_user;                  // 作成ユーザー
     private $updated_user;                  // 修正ユーザー
     private $is_deleted;                    // 削除フラグ
@@ -86,6 +88,30 @@ class WorkTime extends Model
         $this->mode = $value;
     }
 
+
+    // 打刻チェック結果
+    public function getCheckresultAttribute()
+    {
+        return $this->check_result;
+    }
+
+    public function setCheckresultAttribute($value)
+    {
+        $this->check_result = $value;
+    }
+
+
+    // 打刻回数最大チェック結果
+    public function getCheckmaxtimeAttribute()
+    {
+        return $this->check_max_time;
+    }
+
+    public function setCheckmaxtimeAttribute($value)
+    {
+        $this->check_max_time = $value;
+    }
+    
 
     // 作成ユーザー
     public function getCreateduserAttribute()
@@ -156,6 +182,7 @@ class WorkTime extends Model
     private $param_employment_status;           // 雇用形態
     private $param_department_code;             // 部署
     private $param_user_code;                   // ユーザー
+    private $param_mode;                        // 打刻モード
 
     private $array_record_time;                 // 日付範囲配列
     private $massegedata;                       // メッセージ
@@ -238,6 +265,17 @@ class WorkTime extends Model
         $this->param_user_code = $value;
     }
 
+    // 打刻モード
+    public function getParamModeAttribute()
+    {
+        return $this->param_mode;
+    }
+
+    public function setParamModeAttribute($value)
+    {
+        $this->param_mode = $value;
+    }
+
     // 日付範囲配列
     public function getArrayrecordtimeAttribute()
     {
@@ -298,6 +336,8 @@ class WorkTime extends Model
                 'department_code' => $this->department_code,
                 'record_time' => $this->record_time,
                 'mode' => $this->mode,
+                'check_result' => $this->check_result,
+                'check_max_time' => $this->check_max_time,
                 'created_user' => $this->created_user,
                 'created_at'=>$this->systemdate
             ]
@@ -398,6 +438,8 @@ class WorkTime extends Model
                 $this->table.'.department_code as department_code',
                 $this->table.'.record_time as record_datetime',
                 $this->table.'.mode as mode',
+                $this->table.'.check_result as check_result',
+                $this->table.'.check_max_time as check_max_time',
                 $this->table.'.is_deleted as is_deleted'
             )
             ->selectRaw('DATE_FORMAT('.$this->table.'.record_time'.",'%Y') as record_year")
@@ -448,6 +490,8 @@ class WorkTime extends Model
                 't1.employment_status as employment_status',
                 't8.code_name as employment_status_name',
                 't2.mode as mode',
+                't2.check_result as check_result',
+                't2.check_max_time as check_max_time',
                 't3.weekday_kubun as weekday_kubun',
                 't11.code_name as weekday_name',
                 't3.business_kubun as business_kubun',
@@ -557,6 +601,8 @@ class WorkTime extends Model
         }
         if(!empty($this->param_user_code)){
             $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
+        } else {
+            $mainquery->where('t1.role','<',Config::get('const.C017.out_of_user'));
         }
         $mainquery
             ->JoinSub($subquery3, 't14', function ($join) { 
@@ -802,6 +848,22 @@ class WorkTime extends Model
                 'is_deleted' => 1,
                 'updated_at' => $this->systemdate
                 ]);
+    }
+
+    /**
+     * モード回数取得
+     *
+     * @return void
+     */
+    public function getModeCount(){
+        $users = DB::table($this->table)
+            ->where($this->table.'.user_code', '=', $this->param_user_code)
+            ->where($this->table.'.department_code', '=', $this->param_department_code)
+            ->where($this->table.'.mode', '<', $this->param_mode)
+            ->where('is_deleted', 0)
+            ->count();
+
+        return $users;
     }
 
     

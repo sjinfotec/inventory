@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use App\ShiftInformation;
 use App\WorkingTimeTable;
 use App\Calendar;
+use App\Setting;
 
 
 
@@ -64,8 +65,10 @@ class ApiCommonController extends Controller
                         })
                         ->where('users.department_code', $request->code)
                         ->where('users.employment_status', $request->employment);
-                    if($role < 8){
+                    if($role < Config::get('const.C017.out_of_user')){
                         $mainQuery->where('users.code','=',$chk_user_id);
+                    } else {
+                        $mainQuery->where('users.role','<',Config::get('const.C017.out_of_user'));
                     }
                     $users = $mainQuery->where('users.is_deleted', 0)
                         ->orderby('users.code','asc')
@@ -77,8 +80,10 @@ class ApiCommonController extends Controller
                             $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
                         })
                         ->where('users.department_code', $request->code);
-                    if($role < 8){
+                    if($role < Config::get('const.C017.out_of_user')){
                         $mainQuery->where('users.code','=',$chk_user_id);
+                    } else {
+                        $mainQuery->where('users.role','<',Config::get('const.C017.out_of_user'));
                     }
                     $users = $mainQuery->where('users.is_deleted', 0)
                         ->orderby('users.code','asc')
@@ -92,8 +97,10 @@ class ApiCommonController extends Controller
                             $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
                         })
                         ->where('users.employment_status', $request->employment);
-                    if($role < 8){
+                    if($role < Config::get('const.C017.out_of_user')){
                         $mainQuery->where('users.code','=',$chk_user_id);
+                    } else {
+                        $mainQuery->where('users.role','<',Config::get('const.C017.out_of_user'));
                     }
                     $users = $mainQuery->where('users.is_deleted', 0)
                         ->orderby('users.code','asc')
@@ -104,8 +111,10 @@ class ApiCommonController extends Controller
                             $join->on('t1.code', '=', 'users.code');
                             $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
                         });
-                    if($role < 8){
+                    if($role < Config::get('const.C017.out_of_user')){
                         $mainQuery->where('users.code','=',$chk_user_id);
+                    } else {
+                        $mainQuery->where('users.role','<',Config::get('const.C017.out_of_user'));
                     }
                     $users = $mainQuery->where('users.is_deleted', 0)->get();
                 }
@@ -169,7 +178,7 @@ class ApiCommonController extends Controller
             ->where('is_deleted', '=', 0)
             ->groupBy('code');
 
-        if($role < 8){
+        if($role < Config::get('const.C017.out_of_user')){
             $departments = DB::table('departments')
                 ->JoinSub($subquery1, 't1', function ($join) { 
                     $join->on('t1.code', '=', 'departments.code');
@@ -869,6 +878,41 @@ class ApiCommonController extends Controller
     }
     
     /**
+     * 出勤時間差をチェック
+     * 
+     *  設定する時刻はDATETIMEで
+     *
+     * @return 時間差
+     */
+    public function chkInteval($target_datetime, $before_datetime){
+        // 設定項目よりインターバル時間を取得
+        $setting_model = new Setting();
+        $dt = new Carbon($target_datetime);
+        $setting_model->setYearAttribute(date_format($dt, 'Y'));
+        $setting_model->setFiscalmonthAttribute(date_format($dt, 'm'));
+        $settings = $setting_model->getSettingDatas();
+        $interval = 0;
+        foreach($settings as $setting) {
+            if (isset($setting->interval)) {
+                $interval = $setting->interval;
+                break;
+            }
+        }
+        // 設定されていない場合はチェック不要
+        if ($interval == 0) {return true;}
+        // $target_datetime - $before_datetime <= $interval であること
+        $diffInterval = $this->diffTimeSerial($before_datetime, $target_datetime);
+        // $intervalも$diffIntervalもシリアル値
+        Log::DEBUG('chkInteval() $interval = '.$interval);
+        Log::DEBUG('chkInteval() $diffInterval = '.$diffInterval);
+        if ($diffInterval < $interval * 60 * 60) {
+            return Config::get('const.C018.interval_stamp');
+        }
+        return Config::get('const.RESULT_CODE.normal');
+    }
+    
+
+    /**
      * 時間丸め処理（シリアルで丸めする）
      *
      * @return 分で返却
@@ -1138,66 +1182,67 @@ class ApiCommonController extends Controller
     }
     
     /**
-     * モードのチェック
+     * 打刻のモードチェック
      *
+     *  $target_mode：現打刻モード
+     *  $source_mode：前回打刻モード
+     * 
      * @return チェック結果
      */
     public function chkMode($target_mode, $source_mode){
 
-        Log::debug('chkMode  source_mode = '.$source_mode);
         if ( $source_mode == '') {
-            Log::debug('chkMode  target_mode = '.$target_mode);
             if ($target_mode == Config::get('const.C005.attendance_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
-            return false;
+            return Config::get('const.C018.forget_stamp');
         }
         if ($target_mode == Config::get('const.C005.attendance_time')) {
             if ($source_mode == Config::get('const.C005.leaving_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
         } elseif ($target_mode == Config::get('const.C005.leaving_time')) {
             if ($source_mode == Config::get('const.C005.attendance_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
             if ($source_mode == Config::get('const.C005.missing_middle_return_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
             if ($source_mode == Config::get('const.C005.public_going_out_return_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
         } elseif ($target_mode == Config::get('const.C005.missing_middle_time')) {
             if ($source_mode == Config::get('const.C005.attendance_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
             if ($source_mode == Config::get('const.C005.missing_middle_return_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
             if ($source_mode == Config::get('const.C005.public_going_out_return_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
         } elseif ($target_mode == Config::get('const.C005.missing_middle_return_time')) {
             if ($source_mode == Config::get('const.C005.missing_middle_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
         } elseif ($target_mode == Config::get('const.C005.public_going_out_time')) {
             if ($source_mode == Config::get('const.C005.attendance_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
             if ($source_mode == Config::get('const.C005.missing_middle_return_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
             if ($source_mode == Config::get('const.C005.public_going_out_return_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
         } elseif ($target_mode == Config::get('const.C005.public_going_out_return_time')) {
             if ($source_mode == Config::get('const.C005.public_going_out_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
         } else {
-            return false;
+            return Config::get('const.C018.forget_stamp');
         }
-        return false;
+        return Config::get('const.C018.forget_stamp');
     }
 
 }

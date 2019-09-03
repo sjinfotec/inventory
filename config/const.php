@@ -130,6 +130,27 @@ return [
         'display_closing' => '1',
         'display_month_start' => '2',
     ],
+ 
+    'C017' => [
+        'value' => 'C017',
+        'target_user' => 1,
+        'out_of_user' => 9,
+        'admin_user' => 10
+    ],
+ 
+    'C018' => [
+        'value' => 'C018',
+        'normal_stamp' => 0,
+        'forget_stamp' => 1,
+        'interval_stamp' => 2,
+        'no_leave_apply' => 3,
+        'max_time_over' => 4
+    ],
+ 
+    'C019' => [
+        'value' => 'C019',
+        'max_times' => 5
+    ],
 
     'C999' => [
         'value' => 'C999',
@@ -233,6 +254,8 @@ return [
         'insert_error' => 5,
         'already_data' => 6,
         'select_error' => 7,
+        'interval_stamp' => 8,
+        'max_time_over' => 9,
         'other' => 99
     ],
  
