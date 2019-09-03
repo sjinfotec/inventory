@@ -325,6 +325,7 @@ class Setting extends Model
                 $this->table.'.max_6month_total',
                 $this->table.'.max_12month_total',
                 $this->table.'.beginning_month',
+                $this->table.'.interval',
                 $this->table.'.year',
                 $this->table.'.is_deleted');
 
@@ -340,7 +341,7 @@ class Setting extends Model
             $mainquery->where($this->table.'.year', $this->param_year);                         //年指定
         }
 
-        $data = $mainquery->where('t1.is_deleted', '=', 0)
+        $data = $mainquery->where($this->table.'.is_deleted', '=', 0)
             ->get();
 
         return $data;
