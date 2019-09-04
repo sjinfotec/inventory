@@ -60,9 +60,9 @@
                     ref="selectdepartment"
                     v-bind:blank-data="true" v-on:change-event="departmentChanges"
                   ></select-department>
-                  <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
                 </div>
               </div>
+              <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
               <!-- /.col -->
               <!-- .col -->
               <div class="col-md-6 pb-2">
@@ -80,12 +80,12 @@
                     v-bind:date-value="fromdate"
                     v-on:change-event="userChanges"
                   ></select-user>
-                  <message-data v-bind:message-datas="messagedatauser" v-bind:message-class="'warning'"></message-data>
                 </div>
+                <message-data v-bind:message-datas="messagedatauser" v-bind:message-class="'warning'"></message-data>
               </div>
-              <message-data v-bind:message-datas="messagedatasserver" v-bind:message-class="'warning'"></message-data>
               <!-- /.col -->
             </div>
+            <message-data-server v-bind:message-datas="messagedatasserver" v-bind:message-class="'warning'"></message-data-server
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between">
@@ -559,11 +559,12 @@ export default {
             if (this.resresults.sumresults != null) {
               this.sumresults = this.resresults.sumresults;
             }
+            if (this.resresults.messagedata != null) {
+              this.messagedatasserver = this.resresults.messagedata;
+            }
             console.log("calcresults" + Object.keys(this.calcresults).length);
             console.log("sumresults" + Object.keys(this.sumresults).length);
-            this.messages = this.resresults.messagedata;
             console.log("messages" + Object.keys(this.messages).length);
-            this.dispmessage(this.messages);
             this.$forceUpdate();
             this.messageshowsearch = false;
             this.issearchbutton = false;
@@ -626,7 +627,9 @@ export default {
     },
     // メッセージ処理
     dispmessage: function(value) {
-        this.messagedatasserver = value;
+      console.log("value " + Object.keys(value).length);
+      //this.messagedatasserver = value;
+      console.log("messagedatasserver " + Object.keys(messagedatasserver).length);
     },
     // メッセージ処理
     dispmessagevalue: function(value) {

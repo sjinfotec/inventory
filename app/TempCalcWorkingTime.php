@@ -582,19 +582,6 @@ class TempCalcWorkingTime extends Model
         $this->beginning_month = $value;
     }
 
-    private $working_interval;                 // 勤務間インターバル
-
-    // 勤務間インターバル
-    public function getWorkingintervalAttribute()
-    {
-        return $this->working_interval;
-    }
-
-    public function setWorkingintervalAttribute($value)
-    {
-        $this->working_interval = $value;
-    }
-
     private $year;                 // 年
 
     // 年
@@ -619,6 +606,32 @@ class TempCalcWorkingTime extends Model
     public function setPatternAttribute($value)
     {
         $this->pattern = $value;
+    }
+
+    private $check_result;                      // 打刻チェック結果
+
+    // 打刻チェック結果
+    public function getCheckresultAttribute()
+    {
+        return $this->check_result;
+    }
+
+    public function setCheckresultAttribute($value)
+    {
+        $this->check_result = $value;
+    }
+
+    private $check_max_times;                   // 打刻回数最大チェック結果
+
+    // 打刻回数最大チェック結果
+    public function getCheckmaxtimesAttribute()
+    {
+        return $this->check_max_times;
+    }
+
+    public function setCheckmaxtimesAttribute($value)
+    {
+        $this->check_max_times = $value;
     }
 
     private $systemdate;
@@ -783,9 +796,10 @@ class TempCalcWorkingTime extends Model
                 't1.max_6month_total as max_6month_total',
                 't1.max_12month_total as max_12month_total',
                 't1.beginning_month as beginning_month',
-                't1.working_interval as working_interval',
                 't1.year as year',
-                't1.pattern as pattern'
+                't1.pattern as pattern',
+                't1.check_result as check_result',
+                't1.check_max_times as check_max_times'
             );
 
         if(!empty($this->param_date_from) && !empty($this->param_date_to)){
@@ -878,9 +892,10 @@ class TempCalcWorkingTime extends Model
                     'max_6month_total' => $this->max_6month_total,
                     'max_12month_total' => $this->max_12month_total,
                     'beginning_month' => $this->beginning_month,
-                    'working_interval' => $this->working_interval,
                     'year' => $this->year,
                     'pattern' => $this->pattern,
+                    'check_result' => $this->check_result,
+                    'check_max_times' => $this->check_max_times,
                     'created_at'=>$this->systemdate
                 ]
             );

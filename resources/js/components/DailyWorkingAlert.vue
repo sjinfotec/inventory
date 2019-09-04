@@ -7,7 +7,7 @@
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:headertext1="'指定日付から過去１週間以内の警告を表示（警告内容を確認し、必要であれば勤怠編集で修正してください。）'"
+            v-bind:headertext1="'指定日付から過去１週間以内の警告を表示'"
             v-bind:headertext2="'雇用形態や所属部署でフィルタリングして表示できます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
@@ -16,20 +16,22 @@
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- .col -->
-              <message-data v-bind:messagedatas="messagedatasserver"></message-data>
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       for="target_fromdate"
-                    >指定日付＊</span>
+                    >指定日付<span class="color-red">＊</span></span>
                   </div>
                   <input-datepicker
                     v-bind:default-Date="defaultDate"
                     v-on:change-event="fromdateChanges"
                   ></input-datepicker>
-                  <message-data v-bind:messagedatas="messagedatasfromdate"></message-data>
+                  <message-data
+                    v-bind:message-datas="messagedatasfromdate"
+                    v-bind:message-class="'warning'">
+                  </message-data>
                 </div>
               </div>
               <!-- /.col -->
@@ -62,7 +64,7 @@
                     ref="selectdepartment"
                     v-bind:blank-data="true" v-on:change-event="departmentChanges"
                   ></select-department>
-                  <message-data v-bind:messagedatas="messagedatadepartment"></message-data>
+                  <message-data v-bind:message-datas="messagedatadepartment"></message-data>
                 </div>
               </div>
               <!-- /.col -->
@@ -82,17 +84,18 @@
                     v-bind:date-value="fromdate"
                     v-on:change-event="userChanges"
                   ></select-user>
-                  <message-data v-bind:messagedatas="messagedatauser"></message-data>
+                  <message-data v-bind:message-datas="messagedatauser"></message-data>
                 </div>
               </div>
               <!-- /.col -->
             </div>
+            <message-data-server v-bind:message-datas="messagedatasserver" v-bind:message-class="'warning'"></message-data-server>
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
-                <search-workingtimebutton v-on:searchclick-event="searchclick"></search-workingtimebutton>
+                <btn-work-time v-bind:btn-mode="'search'" v-on:searchclick-event="searchclick"></btn-work-time>
               </div>
               <!-- /.col -->
             </div>
@@ -110,7 +113,7 @@
         <div class="card shadow-pl">
           <!-- panel body -->
           <daily-working-alert-table
-            v-bind:alert-lists="calcresults"
+            v-bind:alert-lists="alertresults"
           ></daily-working-alert-table>
           <!-- /panel body -->
         </div>
@@ -140,10 +143,9 @@ export default {
       datejaFormat: "",
       hrefindex: "",
       resresults: [],
-      calcresults: [],
+      alertresults: [],
       messagedatasserver: [],
       messagedatasfromdate: [],
-      messagedatastodate: [],
       messagedatadepartment: [],
       messagedatauser: [],
       validate: false,
@@ -161,7 +163,6 @@ export default {
       this.validate = true;
       this.messagedatasserver = [];
       this.messagedatasfromdate = [];
-      this.messagedatastodate = [];
       this.messagedatadepartment = [];
       this.messagedatauser = [];
       if (!this.valuefromdate) {
@@ -249,11 +250,15 @@ export default {
           })
           .then(response => {
             this.resresults = response.data;
-            this.calcresults = this.resresults.calcresults;
-            this.dispmessage(this.resresults.massegedata);
-            this.messagedatasserver.length = 0;
+            if (this.resresults.alertresults != null) {
+              this.alertresults = this.resresults.alertresults;
+            }
+            if (this.resresults.messagedata != null) {
+              this.messagedatasserver = this.resresults.messagedata;
+            }
+            console.log("alertresults" + Object.keys(this.alertresults).length);
+            console.log("messagedatasserver" + Object.keys(this.messagedatasserver).length);
             this.$forceUpdate();
-            console.log("calcresults" + Object.keys(this.calcresults).length);
           })
           .catch(reason => {
             alert("error");
@@ -300,29 +305,12 @@ export default {
     // クリアメソッド
     itemClear: function() {
       this.resresults = [];
-      this.calcresults = [];
+      this.alertresults = [];
       this.messagedatasserver = [];
       this.messagedatasfromdate = [];
       this.messagedatastodate = [];
       this.messagedatadepartment = [];
       this.messagedatauser = [];
-    },
-    // メッセージ処理
-    dispmessage: function(items) {
-      items.forEach(function(value) {
-        this.messagedatasserver.push(value);
-      });
-    },
-    // メッセージ処理
-    dispmessagevalue: function(value) {
-      this.messagedatasserver.push(value);
-    },
-    // メッセージ処理
-    dispmessage1: function(items) {
-      console.log("dispmessage1 " + Object.keys(items).length);
-      Object.keys(items).forEach(function (value) {
-        console.log(value.messagedata + "はと鳴いた！");
-      });
     }
   }
 };

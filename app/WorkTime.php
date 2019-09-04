@@ -396,11 +396,11 @@ class WorkTime extends Model
             if($chkDateFrom <= $chkDateTo){
                 $this->setArrayrecordtimeAttribute($chkDateFrom, $chkDateTo);
             } else {
-                array_add($this->massegedata, 'msg', Config::get('const.MSG_ERROR.not_between_workindate'));
+                $this->massegedata[] = array(Config::get('const.RESPONCE_ITEM.message') =>Config::get('const.MSG_ERROR.not_between_workindate'));
                 $result = false;
             }
         } else {
-            array_add($this->massegedata, 'msg', Config::get('const.MSG_ERROR.not_input_workindatefromto'));
+            $this->massegedata[] = array(Config::get('const.RESPONCE_ITEM.message') =>Config::get('const.MSG_ERROR.not_input_workindatefromto'));
             $result = false;
         }
 
@@ -864,6 +864,126 @@ class WorkTime extends Model
             ->count();
 
         return $users;
+    }
+
+    /**
+     * 警告打刻取得
+     * 
+     *  $targetdateは適用期間
+     *
+     * @return void
+     */
+    public function getAlertData($targetdate){
+        // 日次労働時間取得SQL作成
+        // subquery1    work_times
+        \DB::enableQueryLog();
+        $subquery1 = DB::table($this->table)
+            ->selectRaw(
+                'concat(DATE_FORMAT('.$this->table.".record_time,'%Y年%m月%d日'),'(',substring('月火水木金土日',convert(DATE_FORMAT(".$this->table.".record_time,'%w'),char),1),')') as record_date ");
+        $subquery1
+            ->addselect($this->table.'.user_code as user_code')
+            ->addselect($this->table.'.department_code as department_code')
+            ->addselect($this->table.'.record_time as record_time')
+            ->addselect($this->table.'.mode as mode');
+        $subquery1
+            ->selectRaw('case check_result when null then 0 else check_result end as check_result')
+            ->selectRaw('case check_max_time when null then 0 else check_max_time end as check_max_time');
+        $record_time = $this->getArrayrecordtimeAttribute();
+        if(!empty($record_time)){
+            $subquery1->where($this->table.'.record_time', '>=', $this->param_date_from);       //record_time範囲指定
+            $subquery1->where($this->table.'.record_time', '<=', $this->param_date_to);         //record_time範囲指定
+        }
+        $subquery1->where($this->table.'.is_deleted', '=', 0);
+
+        // 適用期間日付の取得
+        $apicommon = new ApiCommonController();
+        // usersの最大適用開始日付subquery
+        $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate);
+        // departmentsの最大適用開始日付subquery
+        $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
+
+        // mainqueryにsunqueryを組み込む
+        $mainquery = DB::table($this->table_users.' AS t1')
+            ->select(
+                't1.code as user_code',
+                't1.name as user_name',
+                't1.employment_status as employment_status',
+                't5.code_name as employment_status_name',
+                't1.department_code as department_code',
+                't3.name as department_name',
+                't2.record_date as record_date',
+                't2.record_time as record_time',
+                't2.mode as mode',
+                't6.code_name as mode_name',
+                't2.check_result as check_result',
+                't2.check_max_time as check_max_time');
+        $mainquery
+            ->selectRaw("case t7.code_name is null when 1 then case t8.code_name is null when 1 then null else t8.code_name end else case t8.code_name is null when 1 then t7.code_name else t7.code_name || ' ' ||t8.code_name end end as alert_memo")
+            ->leftJoinSub($subquery1, 't2', function ($join) { 
+                $join->on('t2.user_code', '=', 't1.code');
+                $join->on('t2.department_code', '=', 't1.department_code')
+                ->where('t1.is_deleted', '=', 0);
+            })
+            ->leftJoinSub($subquery4, 't3', function ($join) { 
+                $join->on('t3.code', '=', 't1.department_code');
+            })
+            ->leftJoin('generalcodes as t5', function ($join) { 
+                $join->on('t5.code', '=', 't1.employment_status')
+                ->where('t5.identification_id', '=', Config::get('const.C001.value'))
+                ->where('t5.is_deleted', '=', 0);
+            })
+            ->leftJoin('generalcodes as t6', function ($join) { 
+                $join->on('t6.code', '=', 't2.mode')
+                ->where('t6.identification_id', '=', Config::get('const.C005.value'))
+                ->where('t6.is_deleted', '=', 0);
+            })
+            ->leftJoin('generalcodes as t7', function ($join) { 
+                $join->on('t7.code', '=', 't2.check_result')
+                ->where('t7.identification_id', '=', Config::get('const.C018.value'))
+                ->where('t7.is_deleted', '=', 0);
+            })
+            ->leftJoin('generalcodes as t8', function ($join) { 
+                $join->on('t8.code', '=', 't2.check_max_time')
+                ->where('t8.identification_id', '=', Config::get('const.C018.value'))
+                ->where('t8.is_deleted', '=', 0);
+            });
+
+        if(!empty($this->param_employment_status)){
+            $mainquery->where('t1.employment_status', $this->param_employment_status);  //　雇用形態指定
+        }
+        if(!empty($this->param_department_code)){
+            $mainquery->where('t1.department_code', $this->param_department_code);      //department_code指定
+        }
+        if(!empty($this->param_user_code)){
+            $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
+        } else {
+            $mainquery->where('t1.role','<',Config::get('const.C017.out_of_user'));
+        }
+        $mainquery
+            ->JoinSub($subquery3, 't4', function ($join) { 
+                $join->on('t4.code', '=', 't1.code');
+                $join->on('t4.max_apply_term_from', '=', 't1.apply_term_from');
+            });
+        $result = $mainquery
+            ->where(function ($query) {
+                $query->where('t2.check_result', '>', 0)
+                      ->orWhere('t2.check_max_time', '>', 0);
+            })
+            ->where('t1.is_deleted', '=', 0)
+            ->orderBy('t1.department_code', 'asc')
+            ->orderBy('t1.employment_status', 'asc')
+            ->orderBy('t1.code', 'asc')
+            ->orderBy('t2.record_date', 'asc')
+            ->orderBy('t2.record_time', 'asc')
+            ->get();
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getAlertData' => \DB::getQueryLog()
+            ]
+        );
+
+        return $result;
     }
 
     
