@@ -396,7 +396,8 @@ export default {
           .post("/get_user_shift", {
             code: this.selectedUser,
             from: this.from,
-            to: this.to
+            to: this.to,
+            no: this.timeTable.no
           })
           .then(response => {
             this.shiftInfo = response.data;

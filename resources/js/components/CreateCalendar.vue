@@ -75,6 +75,21 @@
               <!-- /.col -->
             </div>
             <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <div class="btn-group d-flex">
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-lg font-size-rg w-100"
+                    @click="gotoedit()"
+                  >カレンダー編集画面へ</button>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
           </div>
           <!-- /.panel contents -->
         </div>
@@ -175,6 +190,9 @@ export default {
     inputClear() {
       // this.dates.length = 0;
       this.dates = [];
+    },
+    gotoedit() {
+      location.href = "/edit_calendar";
     }
   }
 };

@@ -127,6 +127,7 @@ class ShiftInformation extends Model
         $subquery = DB::table('working_timetables')
             ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
             ->selectRaw('no as no')
+            ->where('no',$this->working_timetable_no)
             ->where('is_deleted', '=', 0)
             ->groupBy('no');
 
@@ -148,8 +149,8 @@ class ShiftInformation extends Model
             ->groupBy('shift_informations.target_date','shift_informations.id','working_timetables.name','shift_informations.working_timetable_no')
             ->orderBy('shift_informations.target_date','asc')
             ->get();
-
-        return $shift_informatinos;
+    
+            return $shift_informatinos;
     }
 
     /**
