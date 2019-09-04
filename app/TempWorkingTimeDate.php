@@ -67,9 +67,10 @@ class TempWorkingTimeDate extends Model
     private $max_6month_total;              // ６ヶ月累計
     private $max_12month_total;             // １年間累計
     private $beginning_month;               // 期首月
-    private $working_interval;              // 勤務間インターバル
     private $year;                          // 年
     private $pattern;                       // 打刻パターン
+    private $check_result;                  // 打刻チェック結果
+    private $check_max_times;               // 打刻回数最大チェック結果
     private $fixedtime;                     // 確定
     private $systemdate;
 
@@ -640,18 +641,6 @@ class TempWorkingTimeDate extends Model
     }
 
 
-    // 勤務間インターバル
-    public function getWorkingintervalAttribute()
-    {
-        return $this->working_interval;
-    }
-
-    public function setWorkingintervalAttribute($value)
-    {
-        $this->working_interval = $value;
-    }
-
-
     // 年
     public function getYearAttribute()
     {
@@ -673,6 +662,30 @@ class TempWorkingTimeDate extends Model
     public function setPatternAttribute($value)
     {
         $this->pattern = $value;
+    }
+
+
+    // 打刻チェック結果
+    public function getCheckresultAttribute()
+    {
+        return $this->check_result;
+    }
+
+    public function setCheckresultAttribute($value)
+    {
+        $this->check_result = $value;
+    }
+
+
+    // 打刻回数最大チェック結果
+    public function getCheckmaxtimesAttribute()
+    {
+        return $this->check_max_times;
+    }
+
+    public function setCheckmaxtimesAttribute($value)
+    {
+        $this->check_max_times = $value;
     }
 
 
@@ -702,10 +715,9 @@ class TempWorkingTimeDate extends Model
 
     private $param_employment_status;           // 雇用形態
     private $param_user_code;                   // ユーザー
-    private $param_department_code;               // 部署
+    private $param_department_code;             // 部署
     private $param_date_from;                   // 開始日付
     private $param_date_to;                     // 終了日付
-
     private $array_record_time;                 // 日付範囲配列
     private $massegedata;                       // メッセージ
 
@@ -886,9 +898,10 @@ class TempWorkingTimeDate extends Model
                     $this->table.'.max_6month_total',
                     $this->table.'.max_12month_total',
                     $this->table.'.beginning_month',
-                    $this->table.'.working_interval',
                     $this->table.'.year',
                     $this->table.'.pattern',
+                    $this->table.'.check_result',
+                    $this->table.'.check_max_times',
                     $this->table.'.fixedtime');
 
             // 適用期間日付の取得
@@ -981,9 +994,10 @@ class TempWorkingTimeDate extends Model
                 ->addselect('t2.max_6month_total')
                 ->addselect('t2.max_12month_total')
                 ->addselect('t2.beginning_month')
-                ->addselect('t2.working_interval')
                 ->addselect('t2.year')
                 ->addselect('t2.pattern')
+                ->addselect('t2.check_result')
+                ->addselect('t2.check_max_times')
                 ->addselect('t2.fixedtime');
             $mainquery->selectRaw(Auth::user()->id.' as created_user');
             $mainquery->selectRaw('null as updated_user');
@@ -1126,9 +1140,10 @@ class TempWorkingTimeDate extends Model
                     'max_6month_total' => $this->max_6month_total,
                     'max_12month_total' => $this->max_12month_total,
                     'beginning_month' => $this->beginning_month,
-                    'working_interval' => $this->working_interval,
                     'year' => $this->year,
                     'pattern' => $this->pattern,
+                    'check_result' => $this->check_result,
+                    'check_max_times' => $this->check_max_times,
                     'fixedtime' => $this->fixedtime,
                     'created_at'=>$this->systemdate
                 ]

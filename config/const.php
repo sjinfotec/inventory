@@ -260,7 +260,8 @@ return [
     ],
  
     'RESPONCE_ITEM' => [
-        'messagedata' => 'messagedata'
+        'messagedata' => 'messagedata',
+        'message' => 'message'
     ],
  
     'WORKINGTIME_DAY_OR_MONTH' => [
@@ -268,9 +269,10 @@ return [
         'monthly_basic' => '2'
     ],
 
-    'MSG_WARNING' => [
+    'MSG_INFO' => [
         'past_closing' => '締日を過ぎていますが、集計しますか？',
-        'past_closing_already' => '締日を過ぎていて集計済みですが、再集計しますか？'
+        'past_closing_already' => '締日を過ぎていて集計済みですが、再集計しますか？',
+        'no_alert_data' => '警告に該当する打刻内容はありませんでした。'
     ],
 
     'MSG_ERROR' => [

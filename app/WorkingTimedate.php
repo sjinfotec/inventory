@@ -76,9 +76,10 @@ class WorkingTimedate extends Model
     private $max_6month_total;              // ６ヶ月累計
     private $max_12month_total;             // １年間累計
     private $beginning_month;               // 期首月
-    private $working_interval;              // 勤務間インターバル
     private $year;                          // 年
     private $pattern;                       // 打刻パターン
+    private $check_result;                  // 打刻チェック結果
+    private $check_max_times;               // 打刻回数最大チェック結果
     private $fixedtime;                     // 確定
     private $created_user;                  // 作成ユーザー
     private $updated_user;                  // 修正ユーザー
@@ -655,18 +656,6 @@ class WorkingTimedate extends Model
     }
 
 
-    // 勤務間インターバル
-    public function getWorkingintervalAttribute()
-    {
-        return $this->working_interval;
-    }
-
-    public function setWorkingintervalAttribute($value)
-    {
-        $this->working_interval = $value;
-    }
-
-
     // 年
     public function getYearAttribute()
     {
@@ -688,6 +677,30 @@ class WorkingTimedate extends Model
     public function setPatternAttribute($value)
     {
         $this->pattern = $value;
+    }
+
+
+    // 打刻チェック結果
+    public function getCheckresultAttribute()
+    {
+        return $this->check_result;
+    }
+
+    public function setCheckresultAttribute($value)
+    {
+        $this->check_result = $value;
+    }
+
+
+    // 打刻回数最大チェック結果
+    public function getCheckmaxtimesAttribute()
+    {
+        return $this->check_max_times;
+    }
+
+    public function setCheckmaxtimesAttribute($value)
+    {
+        $this->check_max_times = $value;
     }
 
 
@@ -988,9 +1001,10 @@ class WorkingTimedate extends Model
                     $this->table.'.max_6month_total',
                     $this->table.'.max_12month_total',
                     $this->table.'.beginning_month',
-                    $this->table.'.working_interval',
                     $this->table.'.year',
                     $this->table.'.pattern',
+                    $this->table.'.check_result',
+                    $this->table.'.check_max_times',
                     $this->table.'.fixedtime',
                     $this->table.'.created_user',
                     $this->table.'.updated_user',
@@ -1142,9 +1156,10 @@ class WorkingTimedate extends Model
                 ->addselect($this->table.'.max_6month_total')
                 ->addselect($this->table.'.max_12month_total')
                 ->addselect($this->table.'.beginning_month')
-                ->addselect($this->table.'.working_interval')
                 ->addselect($this->table.'.year')
                 ->addselect($this->table.'.pattern')
+                ->addselect($this->table.'.check_result')
+                ->addselect($this->table.'.check_max_times')
                 ->addselect($this->table.'.fixedtime')
                 ->addselect($this->table.'.created_user')
                 ->addselect($this->table.'.updated_user')
