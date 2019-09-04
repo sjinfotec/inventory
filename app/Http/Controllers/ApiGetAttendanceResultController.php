@@ -45,32 +45,34 @@ class ApiGetAttendanceResultController extends Controller
             $user_datas = $user->getUserCardData($card_id);
             if (count($user_datas) > 0) {
                 foreach($user_datas as $user_data) {
-                    $chk_result = $this->chkMode($user_data, $mode, $systemdate);
-                    if($chk_result){
-                        // 打刻データ登録
-                        DB::beginTransaction();
-                        try{
-                            $ins_result = $this->insertTime($user_data, $mode, $systemdate);
-                            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
-                            $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
-                            $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
-                            $response->put(Config::get('const.PUT_ITEM.record_time'),$systemdate->format('H:i:s'));
-                            $response->put(Config::get('const.PUT_ITEM.source_mode'),$this->source_mode);
-                            DB::commit();
-
-                        }catch(\PDOException $pe){
-                            DB::rollBack();
-                            Log::error(Config::get('insert_error = '.'const.RESULT_CODE.insert_error'));
-                            Log::error(Config::get('$pe = '.$pe->getMessage()));
-                            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.insert_error'));
-                            $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
-                            $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
-                            $response->put(Config::get('const.PUT_ITEM.record_time'),$systemdate->format('H:i:s'));
-                            $response->put(Config::get('const.PUT_ITEM.source_mode'),$this->source_mode);
-                        }
-                    }else{
-                        Log::debug('カード情報チェック NG'.Config::get('const.RESULT_CODE.mode_illegal'));
+                    $chkAttendance_result = $this->chkAttendance($user_data, $mode, $systemdate);
+                    if($chkAttendance_result == Config::get('const.RESULT_CODE.normal')){
+                        $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
+                    } elseif($chkAttendance_result == Config::get('const.C018.forget_stamp')) {
+                        Log::debug('カード情報MODEチェック NG'.Config::get('const.RESULT_CODE.mode_illegal'));
                         $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.mode_illegal'));
+                    } elseif($chkAttendance_result == Config::get('const.C018.interval_stamp')) {
+                        Log::debug('カード情報intervalチェック NG'.Config::get('const.RESULT_CODE.interval_stamp'));
+                        $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.interval_stamp'));
+                    } else {
+                        Log::debug('カード情報不明 NG'.Config::get('const.RESULT_CODE.unknown'));
+                        $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.unknown'));
+                    }
+                    // 打刻データ登録
+                    DB::beginTransaction();
+                    try{
+                        $ins_result = $this->insertTime($user_data, $mode, $chkAttendance_result, $systemdate);
+                        $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
+                        $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
+                        $response->put(Config::get('const.PUT_ITEM.record_time'),$systemdate->format('H:i:s'));
+                        $response->put(Config::get('const.PUT_ITEM.source_mode'),$this->source_mode);
+                        DB::commit();
+
+                    }catch(\PDOException $pe){
+                        DB::rollBack();
+                        Log::error(Config::get('insert_error = '.'const.RESULT_CODE.insert_error'));
+                        Log::error(Config::get('$pe = '.$pe->getMessage()));
+                        $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.insert_error'));
                         $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
                         $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
                         $response->put(Config::get('const.PUT_ITEM.record_time'),$systemdate->format('H:i:s'));
@@ -122,20 +124,17 @@ class ApiGetAttendanceResultController extends Controller
      * @param [type] $mode
      * @return void
      */
-    private function chkMode($user_data, $mode, $systemdate){
+    private function chkAttendance($user_data, $mode, $systemdate){
         $apicommon = new ApiCommonController();
-        $work_time = new WorkTime();
-        $work_time->setParamDepartmentcodeAttribute($user_data->department_code);
-        Log::debug('setParamDepartmentcodeAttribute = '.$user_data->department_code);
-        $work_time->setParamUsercodeAttribute($user_data->code);
-        Log::debug('setParamdatefromNonformatAttribute = '.$systemdate->format('Ymd His'));
-        $work_time->setParamdatefromNoneditAttribute($systemdate->format('Ymd His'));
+        $work_time_model = new WorkTime();
+        $work_time_model->setParamDepartmentcodeAttribute($user_data->department_code);
+        $work_time_model->setParamUsercodeAttribute($user_data->code);
+        $work_time_model->setParamdatefromNoneditAttribute($systemdate->format('Ymd His'));
         $this->source_mode = '';
         // MAX打刻取得
-        $chk_result = true;
-        $daily_times = $work_time->getDailyMaxData();
+        $chk_result = Config::get('const.RESULT_CODE.normal');
+        $daily_times = $work_time_model->getDailyMaxData();
         if(count($daily_times) > 0){
-            Log::debug('MAX打刻取得 OK ');
             $i=0;
             foreach ($daily_times as $result) {
                 // モードチェック
@@ -143,6 +142,14 @@ class ApiGetAttendanceResultController extends Controller
                     $i += 1;
                     $this->source_mode = $result->mode;
                     $chk_result = $apicommon->chkMode($mode, $this->source_mode);
+                    if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
+                        // 出勤インターバルチェック
+                        if ($mode == Config::get('const.C005.attendance_time')) {
+                            if ($this->source_mode == Config::get('const.C005.leaving_time')) {
+                                $chk_result = $apicommon->chkInteval($systemdate, $result->record_datetime);
+                            }
+                        }
+                    }
                 } else {
                     // ない場合は出勤以外はエラーとする
                     $chk_result = $apicommon->chkMode($mode, '');
@@ -158,6 +165,20 @@ class ApiGetAttendanceResultController extends Controller
             $chk_result = $apicommon->chkMode($mode, '');
         }
 
+        // 各モード1日最大5回まで
+        if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
+            $work_time_model->setParamDepartmentcodeAttribute($user_data->department_code);
+            $work_time_model->setParamUsercodeAttribute($user_data->code);
+            $work_time_model->setParamModeAttribute($mode);
+            $value_count = $work_time_model->getModeCount();
+            Log::debug('chkAttendance value_count = '.$value_count);
+            if (isset($value_count)) {
+                if ($value_count >= Config::get('const.C019.max_times')) {
+                    $chk_result = Config::get('const.RESULT_CODE.max_times');
+                }
+            }
+        }
+
         return $chk_result;
     }
 
@@ -168,7 +189,7 @@ class ApiGetAttendanceResultController extends Controller
      * @param [type] $id
      * @return void
      */
-    public function insertTime($user_data, $mode, $systemdate) {
+    public function insertTime($user_data, $mode, $check_result, $systemdate) {
 
         try{
             $work_time = new WorkTime();
@@ -176,6 +197,7 @@ class ApiGetAttendanceResultController extends Controller
             $work_time->setDepartmentcodeAttribute($user_data->department_code);
             $work_time->setRecordtimeAttribute($systemdate);
             $work_time->setModeAttribute($mode);
+            $work_time->setCheckresultAttribute($check_result);
             $work_time->setCreateduserAttribute($user_data->code);
             $work_time->setSystemDateAttribute($systemdate);
             $work_time->insertWorkTime();

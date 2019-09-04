@@ -13,6 +13,7 @@ use App\WorkingTimedate;
 use App\Setting;
 use App\Company;
 use App\Http\Controllers\DailyWorkingInformationController;
+use App\Http\Controllers\ApiCommonController;
 
 class MonthlyWorkingInformationController extends Controller
 {
@@ -198,13 +199,17 @@ class MonthlyWorkingInformationController extends Controller
                 $work_time->setParamemploymentstatusAttribute($employmentstatus);
                 $work_time->setParamDepartmentcodeAttribute($departmentcode);
                 $work_time->setParamUsercodeAttribute($usercode);
+                // 休日判定
+                $apicommon = new ApiCommonController();
+                $business_kubun = $apicommon->jdgBusinessKbn($calc_date);
                 $calc_result = $daily_controller->addDailyCalc(
                     $work_time,
                     $calc_date,
                     $calc_date,
                     $employmentstatus,
                     $departmentcode,
-                    $usercode
+                    $usercode,
+                    $business_kubun
                 );
                 $calc_date = $calc_date->addDay(1);
                 Log::debug('$calc_date = '.$calc_date);
@@ -329,9 +334,9 @@ class MonthlyWorkingInformationController extends Controller
         $before_date = null;
         $before_result = null;
         // 指定パラメータよりレコード取得パラメータはメインで設定済み
-        $workingtimedates = $workingtimedate_model->getWorkingTimeDateTimeFormat(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
+        $workingtimedates = $workingtimedate_model->getWorkingTimeDateTimeFormat(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'), '');
 
-        if(isset($workingtimedates) && count($workingtimedates) > 0){
+        if(count($workingtimedates) > 0){
             foreach($workingtimedates as $result) {
                 $current_employment_status = $result->employment_status;
                 $current_department_code = $result->department_code;

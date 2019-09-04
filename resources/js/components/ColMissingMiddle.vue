@@ -37,10 +37,6 @@ export default {
         type: Boolean,
         default: true
     }
-  },
-  // マウント時
-  mounted() {
-    console.log("ColMissingMiddle mounted"+this.missingmiddlename);
   }
 };
 </script>

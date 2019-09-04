@@ -24,11 +24,11 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       id="basic-addon1"
-                    >指定年月</span>
+                    >指定年月<span class="color-red">＊</span></span>
                   </div>
                   <input-ym v-on:change-event="fromdateChanges"></input-ym>
                 </div>
-                <message-data v-bind:messagedatas="messagedatasfromdate"></message-data>
+                <message-data v-bind:message-datas="messagedatasfromdate"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -38,7 +38,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       for="inputGroupSelect01"
-                    >表示区分</label>
+                    >表示区分<span class="color-red">＊</span></label>
                   </div>
                   <general-list
                     v-bind:identification-id="'C016'"
@@ -47,7 +47,7 @@
                     v-on:change-event="displayChange"
                   ></general-list>
                 </div>
-                <message-data v-bind:messagedatas="messagedatadisplay"></message-data>
+                <message-data v-bind:message-datas="messagedatadisplay"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -80,9 +80,9 @@
                     v-bind:blank-data="true"
                     v-on:change-event="departmentChanges"
                   ></select-department>
-                  <message-data v-bind:messagedatas="messagedatadepartment"></message-data>
                 </div>
               </div>
+              <message-data v-bind:message-datas="messagedatadepartment"></message-data>
               <!-- /.col -->
               <!-- .col -->
               <div class="col-md-6 pb-2">
@@ -100,7 +100,7 @@
                     v-bind:date-value="fromdate"
                     v-on:change-event="userChanges"
                   ></select-user>
-                  <message-data v-bind:messagedatas="messagedatauser"></message-data>
+                  <message-data v-bind:message-datas="messagedatauser"></message-data>
                 </div>
               </div>
               <!-- /.col -->
@@ -110,7 +110,12 @@
             <div class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
-                <search-workingtimebutton v-on:searchclick-event="searchclick"></search-workingtimebutton>
+                <btn-work-time
+                  v-on:searchclick-event="searchclick"
+                  v-bind:btn-mode="'search'"
+                  v-bind:is-push="issearchbutton">
+                </btn-work-time>
+                <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting>
               </div>
               <!-- /.col -->
             </div>
@@ -119,7 +124,12 @@
             <div class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
-                <update-workingtimebutton v-on:updateclick-event="updateclick"></update-workingtimebutton>
+                <btn-work-time
+                  v-on:updateclick-event="updateclick"
+                  v-bind:btn-mode="'update'"
+                  v-bind:is-push="isupdatebutton">
+                </btn-work-time>
+                <message-waiting v-bind:is-message-show="messageshowupdate"></message-waiting>
               </div>
               <!-- /.col -->
             </div>
@@ -152,7 +162,7 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <div class="btn-group d-flex">
-                  <button type="button" class="btn btn-success btn-lg font-size-rg w-100">
+                  <button type="button" class="btn btn-success btn-lg font-size-rg w-100"　:disabled="iscsvbutton">
                     <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt />集計結果をCSVファイルに出力する
                   </button>
                 </div>
@@ -455,6 +465,11 @@ export default {
       messagedatadisplay: [],
       messagedatadepartment: [],
       messagedatauser: [],
+      messageshowsearch: false,
+      messageshowupdate: false,
+      issearchbutton: false,
+      isupdatebutton: false,
+      iscsvbutton: false,
       validate: false,
       initialized: false
     };
@@ -475,20 +490,24 @@ export default {
       if (!this.valueym) {
         this.messagedatasfromdate.push("指定年月は必ず入力してください。");
         this.validate = false;
+        console.log("指定年月は必ず入力してください。");
       }
       if (!this.valuedisplay) {
         this.messagedatadisplay.push("表示区分は必ず入力してください。");
         this.validate = false;
+        console.log("表示区分は必ず入力してください。");
       }
       if (this.serchorupdate == "update") {
         if (!this.valuedepartment) {
           this.messagedatadepartment.push("所属部署は必ず入力してください。");
           this.validate = false;
+          console.log("所属部署は必ず入力してください。");
         }
         if (this.userrole < "8") {
           if (!this.valueuser) {
             this.messagedatauser.push("氏名は必ず入力してください。");
             this.validate = false;
+            console.log("氏名は必ず入力してください。");
           }
         }
       } else {
@@ -496,18 +515,20 @@ export default {
           if (!this.valuedepartment) {
             this.messagedatadepartment.push("所属部署は必ず入力してください。");
             this.validate = false;
+            console.log("所属部署は必ず入力してください。");
           }
           if (!this.valueuser) {
             this.messagedatauser.push("氏名は必ず入力してください。");
             this.validate = false;
+            console.log("氏名は必ず入力してください。");
           }
         }
       }
-      console.log("validate = true");
 
       if (this.validate) {
         return this.validate;
       }
+      console.log("validate = false");
 
       e.preventDefault();
     },
@@ -564,6 +585,10 @@ export default {
       this.serchorupdate = "search";
       this.validate = this.checkForm(e);
       if (this.validate) {
+        this.issearchbutton = true;
+        this.isupdatebutton = true;
+        this.iscsvbutton = true;
+        this.messageshowsearch = true;
         this.itemClear();
         this.$axios
           .get("/monthly/show", {
@@ -582,12 +607,20 @@ export default {
             this.company_name = this.resresults.company_name;
             this.dispmessage(this.resresults.massegedata);
             this.messagedatasserver.length = 0;
-            this.$forceUpdate();
             console.log("calcresults" + Object.keys(this.calcresults).length);
             console.log("sumresults" + Object.keys(this.sumresults).length);
             console.log("company_name" + this.company_name);
+            this.messageshowsearch = false;
+            this.issearchbutton = false;
+            this.isupdatebutton = false;
+            this.iscsvbutton = false;
+            this.$forceUpdate();
           })
           .catch(reason => {
+            this.messageshowsearch = false;
+            this.issearchbutton = false;
+            this.isupdatebutton = false;
+            this.iscsvbutton = false;
             alert("月次集計エラー");
           });
       }
@@ -596,9 +629,13 @@ export default {
     updateclick: function(e) {
       this.serchorupdate = "update";
       this.validate = this.checkForm(e);
+      console.log("更新を開始" + this.validate);
       if (this.validate) {
+        this.issearchbutton = true;
+        this.isupdatebutton = true;
+        this.iscsvbutton = true;
+        this.messageshowupdate = true;
         this.itemClear();
-        this.$toasted.show("更新を開始しました");
         this.$axios
           .get("/monthly/calc", {
             params: {
@@ -616,11 +653,18 @@ export default {
             this.company_name = this.resresults.company_name;
             this.dispmessage(this.resresults.massegedata);
             this.messagedatasserver.length = 0;
+            this.messageshowupdate = false;
+            this.issearchbutton = false;
+            this.isupdatebutton = false;
+            this.iscsvbutton = false;
             this.$forceUpdate();
-            this.$toasted.show("集計を最新に更新しました");
           })
           .catch(reason => {
-            alert("月次集計エラー");
+            this.messageshowupdate = false;
+            this.issearchbutton = false;
+            this.isupdatebutton = false;
+            this.iscsvbutton = false;
+            alert("月次集計最新更新エラー");
           });
       }
     },

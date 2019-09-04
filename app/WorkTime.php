@@ -24,6 +24,8 @@ class WorkTime extends Model
     private $department_code;               // 部署コード
     private $record_time;                   // 打刻時間
     private $mode;                          // 打刻モード
+    private $check_result;                  // 打刻チェック結果
+    private $check_max_time;                // 打刻回数最大チェック結果
     private $created_user;                  // 作成ユーザー
     private $updated_user;                  // 修正ユーザー
     private $is_deleted;                    // 削除フラグ
@@ -86,6 +88,30 @@ class WorkTime extends Model
         $this->mode = $value;
     }
 
+
+    // 打刻チェック結果
+    public function getCheckresultAttribute()
+    {
+        return $this->check_result;
+    }
+
+    public function setCheckresultAttribute($value)
+    {
+        $this->check_result = $value;
+    }
+
+
+    // 打刻回数最大チェック結果
+    public function getCheckmaxtimeAttribute()
+    {
+        return $this->check_max_time;
+    }
+
+    public function setCheckmaxtimeAttribute($value)
+    {
+        $this->check_max_time = $value;
+    }
+    
 
     // 作成ユーザー
     public function getCreateduserAttribute()
@@ -156,6 +182,7 @@ class WorkTime extends Model
     private $param_employment_status;           // 雇用形態
     private $param_department_code;             // 部署
     private $param_user_code;                   // ユーザー
+    private $param_mode;                        // 打刻モード
 
     private $array_record_time;                 // 日付範囲配列
     private $massegedata;                       // メッセージ
@@ -238,6 +265,17 @@ class WorkTime extends Model
         $this->param_user_code = $value;
     }
 
+    // 打刻モード
+    public function getParamModeAttribute()
+    {
+        return $this->param_mode;
+    }
+
+    public function setParamModeAttribute($value)
+    {
+        $this->param_mode = $value;
+    }
+
     // 日付範囲配列
     public function getArrayrecordtimeAttribute()
     {
@@ -298,6 +336,8 @@ class WorkTime extends Model
                 'department_code' => $this->department_code,
                 'record_time' => $this->record_time,
                 'mode' => $this->mode,
+                'check_result' => $this->check_result,
+                'check_max_time' => $this->check_max_time,
                 'created_user' => $this->created_user,
                 'created_at'=>$this->systemdate
             ]
@@ -387,16 +427,19 @@ class WorkTime extends Model
      *
      * @return sql取得結果
      */
-    public function getWorkTimes($targetdate){
+    public function getWorkTimes($targetdate, $business_kubun){
 
         // 日次労働時間取得SQL作成
         // subquery1    work_times
+        \DB::enableQueryLog();
         $subquery1 = DB::table($this->table)
             ->select(
                 $this->table.'.user_code as user_code',
                 $this->table.'.department_code as department_code',
                 $this->table.'.record_time as record_datetime',
                 $this->table.'.mode as mode',
+                $this->table.'.check_result as check_result',
+                $this->table.'.check_max_time as check_max_time',
                 $this->table.'.is_deleted as is_deleted'
             )
             ->selectRaw('DATE_FORMAT('.$this->table.'.record_time'.",'%Y') as record_year")
@@ -447,6 +490,8 @@ class WorkTime extends Model
                 't1.employment_status as employment_status',
                 't8.code_name as employment_status_name',
                 't2.mode as mode',
+                't2.check_result as check_result',
+                't2.check_max_time as check_max_time',
                 't3.weekday_kubun as weekday_kubun',
                 't11.code_name as weekday_name',
                 't3.business_kubun as business_kubun',
@@ -463,7 +508,9 @@ class WorkTime extends Model
                 't4.max_12month_total as max_12month_total',
                 't4.beginning_month as beginning_month',
                 't4.interval as interval',
-                't4.year as year'
+                't4.year as year',
+                't14.holiday_kubun as user_holiday_kubun',
+                't15.code_name as user_holiday_name'
             );
         $mainquery
             ->selectRaw('ifnull(t9.shift_no, t6.no) as working_timetable_no ')
@@ -477,12 +524,14 @@ class WorkTime extends Model
             ->leftJoinSub($subquery1, 't2', function ($join) { 
                 $join->on('t2.user_code', '=', 't1.code');
                 $join->on('t2.department_code', '=', 't1.department_code')
+                ->where('t1.is_deleted', '=', 0)
                 ->where('t2.is_deleted', '=', 0);
             })
             ->leftJoinSub($subquery2, 't9', function ($join) { 
                 $join->on('t9.user_code', '=', 't1.code');
                 $join->on('t9.department_code', '=', 't1.department_code');
                 $join->on('t9.target_date', '=', 't2.record_date')
+                ->where('t1.is_deleted', '=', 0)
                 ->where('t9.is_deleted', '=', 0);
             })
             ->leftJoinSub($subquery4, 't5', function ($join) { 
@@ -519,15 +568,29 @@ class WorkTime extends Model
             })
             ->leftJoin('generalcodes as t11', function ($join) { 
                 $join->on('t11.code', '=', 't3.weekday_kubun')
-                ->where('t11.identification_id', '=', Config::get('const.C006.value'));
+                ->where('t11.identification_id', '=', Config::get('const.C006.value'))
+                ->where('t11.is_deleted', '=', 0);
             })
             ->leftJoin('generalcodes as t12', function ($join) { 
                 $join->on('t12.code', '=', 't3.business_kubun')
-                ->where('t12.identification_id', '=', Config::get('const.C007.value'));
+                ->where('t12.identification_id', '=', Config::get('const.C007.value'))
+                ->where('t12.is_deleted', '=', 0);
             })
             ->leftJoin('generalcodes as t13', function ($join) { 
                 $join->on('t13.code', '=', 't3.holiday_kubun')
-                ->where('t13.identification_id', '=', Config::get('const.C008.value'));
+                ->where('t13.identification_id', '=', Config::get('const.C008.value'))
+                ->where('t13.is_deleted', '=', 0);
+            })
+            ->leftJoin('user_holiday_kubuns as t14', function ($join) { 
+                $join->on('t14.working_date', '=', 't2.record_date');
+                $join->on('t14.user_code', '=', 't1.code');
+                $join->on('t14.department_code', '=', 't1.department_code')
+                ->where('t14.is_deleted', '=', 0);
+            })
+            ->leftJoin('generalcodes as t15', function ($join) { 
+                $join->on('t15.code', '=', 't14.holiday_kubun')
+                ->where('t15.identification_id', '=', Config::get('const.C013.value'))
+                ->where('t15.is_deleted', '=', 0);
             });
 
         if(!empty($this->param_employment_status)){
@@ -538,12 +601,18 @@ class WorkTime extends Model
         }
         if(!empty($this->param_user_code)){
             $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
+        } else {
+            $mainquery->where('t1.role','<',Config::get('const.C017.out_of_user'));
         }
-        $result = $mainquery
+        $mainquery
             ->JoinSub($subquery3, 't14', function ($join) { 
                 $join->on('t14.code', '=', 't1.code');
                 $join->on('t14.max_apply_term_from', '=', 't1.apply_term_from');
-            })
+            });
+        if ($business_kubun != Config::get('const.C007.basic')) {
+            $mainquery->whereNotNull('t2.record_datetime');
+        }
+        $result = $mainquery
             ->where('t1.is_deleted', '=', 0)
             ->orderBy('t1.department_code', 'asc')
             ->orderBy('t1.employment_status', 'asc')
@@ -551,6 +620,12 @@ class WorkTime extends Model
             ->orderBy('t2.record_date', 'asc')
             ->orderBy('t2.record_datetime', 'asc')
             ->get();
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getWorkTimes' => \DB::getQueryLog()
+            ]
+        );
 
         return $result;
     }
@@ -773,6 +848,22 @@ class WorkTime extends Model
                 'is_deleted' => 1,
                 'updated_at' => $this->systemdate
                 ]);
+    }
+
+    /**
+     * モード回数取得
+     *
+     * @return void
+     */
+    public function getModeCount(){
+        $users = DB::table($this->table)
+            ->where($this->table.'.user_code', '=', $this->param_user_code)
+            ->where($this->table.'.department_code', '=', $this->param_department_code)
+            ->where($this->table.'.mode', '<', $this->param_mode)
+            ->where('is_deleted', 0)
+            ->count();
+
+        return $users;
     }
 
     

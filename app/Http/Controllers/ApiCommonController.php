@@ -11,6 +11,8 @@ use Illuminate\Support\Collection;
 use Carbon\Carbon;
 use App\ShiftInformation;
 use App\WorkingTimeTable;
+use App\Calendar;
+use App\Setting;
 
 
 
@@ -63,8 +65,10 @@ class ApiCommonController extends Controller
                         })
                         ->where('users.department_code', $request->code)
                         ->where('users.employment_status', $request->employment);
-                    if($role < 8){
+                    if($role < Config::get('const.C017.out_of_user')){
                         $mainQuery->where('users.code','=',$chk_user_id);
+                    } else {
+                        $mainQuery->where('users.role','<',Config::get('const.C017.out_of_user'));
                     }
                     $users = $mainQuery->where('users.is_deleted', 0)
                         ->orderby('users.code','asc')
@@ -76,8 +80,10 @@ class ApiCommonController extends Controller
                             $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
                         })
                         ->where('users.department_code', $request->code);
-                    if($role < 8){
+                    if($role < Config::get('const.C017.out_of_user')){
                         $mainQuery->where('users.code','=',$chk_user_id);
+                    } else {
+                        $mainQuery->where('users.role','<',Config::get('const.C017.out_of_user'));
                     }
                     $users = $mainQuery->where('users.is_deleted', 0)
                         ->orderby('users.code','asc')
@@ -91,8 +97,10 @@ class ApiCommonController extends Controller
                             $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
                         })
                         ->where('users.employment_status', $request->employment);
-                    if($role < 8){
+                    if($role < Config::get('const.C017.out_of_user')){
                         $mainQuery->where('users.code','=',$chk_user_id);
+                    } else {
+                        $mainQuery->where('users.role','<',Config::get('const.C017.out_of_user'));
                     }
                     $users = $mainQuery->where('users.is_deleted', 0)
                         ->orderby('users.code','asc')
@@ -103,8 +111,10 @@ class ApiCommonController extends Controller
                             $join->on('t1.code', '=', 'users.code');
                             $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
                         });
-                    if($role < 8){
+                    if($role < Config::get('const.C017.out_of_user')){
                         $mainQuery->where('users.code','=',$chk_user_id);
+                    } else {
+                        $mainQuery->where('users.role','<',Config::get('const.C017.out_of_user'));
                     }
                     $users = $mainQuery->where('users.is_deleted', 0)->get();
                 }
@@ -170,7 +180,7 @@ class ApiCommonController extends Controller
             ->where('is_deleted', '=', 0)
             ->groupBy('code');
 
-        if($role < 8){
+        if($role < Config::get('const.C017.out_of_user')){
             $departments = DB::table('departments')
                 ->JoinSub($subquery1, 't1', function ($join) { 
                     $join->on('t1.code', '=', 'departments.code');
@@ -609,6 +619,31 @@ class ApiCommonController extends Controller
         $dt = new Carbon($target_date);
         return date_format($dt->addDay(), $str_format);
     }
+ 
+    /**
+     * 法定法定外休日判定
+     * 
+     *
+     * @return 
+     */
+    public function jdgBusinessKbn($target_date)
+    {
+        // 指定日が休日かどうか
+        $business_kubun = null;
+        $calender_model = new Calendar();
+        $calender_model->setDateAttribute(date_format(new Carbon($target_date), 'Ymd'));
+        $calendars = $calender_model->getCalenderDate();
+        if (count($calendars) > 0) {
+            foreach ($calendars as $result) {
+                if (isset($result->business_kubun)) {
+                    $business_kubun = $result->business_kubun;
+                }
+                break;
+            }
+        }
+
+        return $business_kubun;
+    }
 
     /**
      * 時刻日付変換
@@ -691,15 +726,17 @@ class ApiCommonController extends Controller
         $target_from_his = date_format(new Carbon($target_from_time),'His');
         $target_to_ymd = date_format(new Carbon($target_to_time),'Ymd');
         $target_to_his = date_format(new Carbon($target_to_time),'His');
-        Log::DEBUG('target_from_his = '.$target_from_his);
-        Log::DEBUG('target_from_his = '.$target_from_his);
         Log::DEBUG('current_date_ymd = '.$current_date_ymd);
         Log::DEBUG('target_from_ymd = '.$target_from_ymd);
+        Log::DEBUG('target_to_ymd = '.$target_to_ymd);
+        Log::DEBUG('target_from_his = '.$target_from_his);
+        Log::DEBUG('target_to_his = '.$target_to_his);
         // 日付付与
         $cnv_from_date = null;
         if ($current_date_ymd == $target_from_ymd) {
-            if ($target_from_his > $from_time && $from_time > Config::get('const.C010.non')) {
-                $cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
+            if ($target_from_his > $from_time && $from_time >= Config::get('const.C015.night_to')) {
+                //$cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
+                $cnv_from_date = new Carbon($target_from_ymd.' '.$from_time);
                 Log::DEBUG('cnv_from_date if then= '.$cnv_from_date);
             } else {
                 if ($from_time >= Config::get('const.C015.night_to')) {
@@ -712,9 +749,11 @@ class ApiCommonController extends Controller
                 Log::DEBUG('cnv_from_date if else= '.$cnv_from_date);
             }
         } else {
-            $cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
-            Log::DEBUG('cnv_from_date if else= '.$cnv_from_date);
+            //$cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
+            $cnv_from_date = new Carbon($target_from_ymd.' '.$from_time);
+            Log::DEBUG('cnv_from_date i$current_date_ymd != $target_from_ymd '.$cnv_from_date);
         }
+        Log::DEBUG('         ------------- convTimeToDateFrom end '.$cnv_from_date);
 
         return $cnv_from_date;
     }
@@ -740,18 +779,19 @@ class ApiCommonController extends Controller
         $target_to_his = date_format(new Carbon($target_to_time),'His');        // 打刻時刻
         Log::DEBUG('current_date_ymd = '.$current_date_ymd);
         Log::DEBUG('target_from_ymd = '.$target_from_ymd);
-        Log::DEBUG('target_from_his = '.$target_from_his);
         Log::DEBUG('target_to_ymd = '.$target_to_ymd);
+        Log::DEBUG('target_from_his = '.$target_from_his);
         Log::DEBUG('target_to_his = '.$target_to_his);
         // 日付付与
         $cnv_to_date = null;
         if ($current_date_ymd == $target_to_ymd) {
             if ($from_time > $to_time) {
-                $cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                //$cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                $cnv_to_date = $this->getNextDay($target_to_ymd, 'Y-m-d').' '.$to_time;
                 Log::DEBUG('cnv_to_date if then= '.$cnv_to_date);
             } else {
                 if ($target_to_his < $to_time) {
-                    $cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
                     Log::DEBUG('cnv_to_date if then= '.$cnv_to_date);
                 } else {
                     $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
@@ -761,7 +801,8 @@ class ApiCommonController extends Controller
         } else {
             if ($from_time > $to_time) {
                 if ($target_to_his < $to_time) {
-                    $cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                    //$cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
                     Log::DEBUG('cnv_to_date if then= '.$cnv_to_date);
                 } else {
                     $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
@@ -777,8 +818,33 @@ class ApiCommonController extends Controller
                 }
             }
         }
+        Log::DEBUG('         ------------- convTimeToDateTo end '.$cnv_to_date);
 
         return $cnv_to_date;
+    }
+
+    /**
+     * 時間範囲内であるか判定
+     * 
+     *      target_from_datetime～target_to_datetimeはchk_from_datetime～chk_to_datetimeの範囲内に一部または全部あるか判定
+     *      前提
+     *          target_from_datetime <= target_to_datetime
+     *          chk_from_datetime <= chk_to_datetime
+     *
+     * @return 
+     */
+    public function chkBetweenTime($target_from_datetime, $target_to_datetime, $chk_from_datetime, $chk_to_datetime){
+
+        $chk_result = true;
+
+        if ($target_from_datetime <=  $chk_from_datetime) {
+            if ($target_to_datetime <=  $chk_from_datetime) {
+                $chk_result = false;
+            }
+        } elseif ($target_from_datetime >=  $chk_to_datetime) {
+            $chk_result = false;
+        }
+        return $chk_result;
     }
 
     /**
@@ -813,6 +879,41 @@ class ApiCommonController extends Controller
         return $interval;
     }
     
+    /**
+     * 出勤時間差をチェック
+     * 
+     *  設定する時刻はDATETIMEで
+     *
+     * @return 時間差
+     */
+    public function chkInteval($target_datetime, $before_datetime){
+        // 設定項目よりインターバル時間を取得
+        $setting_model = new Setting();
+        $dt = new Carbon($target_datetime);
+        $setting_model->setYearAttribute(date_format($dt, 'Y'));
+        $setting_model->setFiscalmonthAttribute(date_format($dt, 'm'));
+        $settings = $setting_model->getSettingDatas();
+        $interval = 0;
+        foreach($settings as $setting) {
+            if (isset($setting->interval)) {
+                $interval = $setting->interval;
+                break;
+            }
+        }
+        // 設定されていない場合はチェック不要
+        if ($interval == 0) {return true;}
+        // $target_datetime - $before_datetime <= $interval であること
+        $diffInterval = $this->diffTimeSerial($before_datetime, $target_datetime);
+        // $intervalも$diffIntervalもシリアル値
+        Log::DEBUG('chkInteval() $interval = '.$interval);
+        Log::DEBUG('chkInteval() $diffInterval = '.$diffInterval);
+        if ($diffInterval < $interval * 60 * 60) {
+            return Config::get('const.C018.interval_stamp');
+        }
+        return Config::get('const.RESULT_CODE.normal');
+    }
+    
+
     /**
      * 時間丸め処理（シリアルで丸めする）
      *
@@ -1083,66 +1184,67 @@ class ApiCommonController extends Controller
     }
     
     /**
-     * モードのチェック
+     * 打刻のモードチェック
      *
+     *  $target_mode：現打刻モード
+     *  $source_mode：前回打刻モード
+     * 
      * @return チェック結果
      */
     public function chkMode($target_mode, $source_mode){
 
-        Log::debug('chkMode  source_mode = '.$source_mode);
         if ( $source_mode == '') {
-            Log::debug('chkMode  target_mode = '.$target_mode);
             if ($target_mode == Config::get('const.C005.attendance_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
-            return false;
+            return Config::get('const.C018.forget_stamp');
         }
         if ($target_mode == Config::get('const.C005.attendance_time')) {
             if ($source_mode == Config::get('const.C005.leaving_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
         } elseif ($target_mode == Config::get('const.C005.leaving_time')) {
             if ($source_mode == Config::get('const.C005.attendance_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
             if ($source_mode == Config::get('const.C005.missing_middle_return_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
             if ($source_mode == Config::get('const.C005.public_going_out_return_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
         } elseif ($target_mode == Config::get('const.C005.missing_middle_time')) {
             if ($source_mode == Config::get('const.C005.attendance_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
             if ($source_mode == Config::get('const.C005.missing_middle_return_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
             if ($source_mode == Config::get('const.C005.public_going_out_return_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
         } elseif ($target_mode == Config::get('const.C005.missing_middle_return_time')) {
             if ($source_mode == Config::get('const.C005.missing_middle_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
         } elseif ($target_mode == Config::get('const.C005.public_going_out_time')) {
             if ($source_mode == Config::get('const.C005.attendance_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
             if ($source_mode == Config::get('const.C005.missing_middle_return_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
             if ($source_mode == Config::get('const.C005.public_going_out_return_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
         } elseif ($target_mode == Config::get('const.C005.public_going_out_return_time')) {
             if ($source_mode == Config::get('const.C005.public_going_out_time')) {
-                return true;
+                return Config::get('const.RESULT_CODE.normal');
             }
         } else {
-            return false;
+            return Config::get('const.C018.forget_stamp');
         }
-        return false;
+        return Config::get('const.C018.forget_stamp');
     }
 
 }

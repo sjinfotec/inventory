@@ -130,6 +130,27 @@ return [
         'display_closing' => '1',
         'display_month_start' => '2',
     ],
+ 
+    'C017' => [
+        'value' => 'C017',
+        'target_user' => 1,
+        'out_of_user' => 9,
+        'admin_user' => 10
+    ],
+ 
+    'C018' => [
+        'value' => 'C018',
+        'normal_stamp' => 0,
+        'forget_stamp' => 1,
+        'interval_stamp' => 2,
+        'no_leave_apply' => 3,
+        'max_time_over' => 4
+    ],
+ 
+    'C019' => [
+        'value' => 'C019',
+        'max_times' => 5
+    ],
 
     'C999' => [
         'value' => 'C999',
@@ -186,21 +207,24 @@ return [
 
 
     'MEMO_DATA' => [
-        'MEMO_DATA_001' => '出勤済',
-        'MEMO_DATA_002' => '当日出勤なし',
-        'MEMO_DATA_003' => '外出状態',
-        'MEMO_DATA_004' => '不明な打刻',
-        'MEMO_DATA_005' => '当日時間計算なし',
-        'MEMO_DATA_006' => '自動設定',
-        'MEMO_DATA_007' => '勤務間インターバルオーバー',
-        'MEMO_DATA_008' => '未出勤',
-        'MEMO_DATA_009' => '外出なし',
-        'MEMO_DATA_010' => '部署設定ミス',
-        'MEMO_DATA_011' => '締日設定ミス',
-        'MEMO_DATA_012' => '時間単位設定ミス',
-        'MEMO_DATA_013' => '時間端数処理設定ミス',
-        'MEMO_DATA_014' => '期首月設定ミス',
-        'MEMO_DATA_015' => '未設定',
+        'MEMO_DATA_001' => '前日退勤打刻ないため二重出勤。',
+        'MEMO_DATA_002' => '当日出勤なし。',
+        'MEMO_DATA_003' => '外出状態。',
+        'MEMO_DATA_004' => '不明な打刻。',
+        'MEMO_DATA_005' => '当日時間計算なし。',
+        'MEMO_DATA_006' => '自動設定。',
+        'MEMO_DATA_007' => 'インターバル時間が設定時間より少ない。',
+        'MEMO_DATA_008' => '休暇入力ないため未出勤。',
+        'MEMO_DATA_009' => '外出なし。',
+        'MEMO_DATA_010' => '部署設定ミス。',
+        'MEMO_DATA_011' => '締日設定ミス。',
+        'MEMO_DATA_012' => '時間単位設定ミス。',
+        'MEMO_DATA_013' => '時間端数処理設定ミス。',
+        'MEMO_DATA_014' => '期首月設定ミス。',
+        'MEMO_DATA_015' => '未設定。',
+        'MEMO_DATA_016' => '出退勤打刻は１日最大５回まで。',
+        'MEMO_DATA_017' => '公用外出打刻は１日最大５回まで。',
+        'MEMO_DATA_018' => '私用外出打刻は１日最大５回まで。',
         'MEMO_DATA_NON' => ''
     ],
  
@@ -230,6 +254,8 @@ return [
         'insert_error' => 5,
         'already_data' => 6,
         'select_error' => 7,
+        'interval_stamp' => 8,
+        'max_time_over' => 9,
         'other' => 99
     ],
  
@@ -253,14 +279,15 @@ return [
         'not_input_workindatefrom' => '計算開始日付は必ず入力してください。',
         'not_input_workindateto' => '計算終了日付は必ず入力してください。',
         'not_input_workindatefromto' => '計算開始日付と計算終了日付は必ず入力してください。',
-        'not_setting_department_code' => 'さんの部署が設定されていません。',
+        'not_setting_department_code' => '{0}さんの部署が設定されていません。',
         'not_setting_department_code_nouser' => '部署が設定されていない社員がいます。確認してください。',
         'not_setting_closing' => '締日が設定されていません。',
         'not_setting_time_unit' => '時間計算の単位が設定されていません。',
         'not_setting_time_rounding' => '時間計算の端数処理が設定されていません。',
         'not_setting_beginning_month' => '期首月が設定されていません。',
-        'not_setting_timetable' => 'タイムテーブルが設定されていません。',
+        'not_setting_timetable' => '期間内に該当する勤務時間がないかまたはタイムテーブルが設定されていません。',
         'data_eror_dailycalc' => '労働時間計算処理にてエラーのため計算できませんでした。',
+        'not_setting_calendar' => '{0}のカレンダー設定がされていません。',
         'data_accesee_eror_dailycalc' => '労働時間計算処理にてデータアクセスエラーのため計算できませんでした。',
         'mismatch_data' => 'データ不整合'
     ],
@@ -272,7 +299,8 @@ return [
         'data_delete_erorr' => 'データdeleteエラー table = [{0}]',
         'data_exists_erorr' => 'データexistsエラー table = [{0}]',
         'mismatch_data' => 'データ不整合',
-        'not_set_time_rounding ' => '時間の端数処理が設定されていない'
+        'not_set_time_rounding ' => '時間の端数処理が設定されていない',
+        'not_setting_timetable' => '期間内に該当する勤務時間がないかまたはタイムテーブルが設定されていません。',
     ]
 
 ];

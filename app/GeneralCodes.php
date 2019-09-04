@@ -192,7 +192,6 @@ class GeneralCodes extends Model
      * @return 取得結果
      */
     public function getGeneralcode(){
-        \DB::enableQueryLog();
         $data = DB::table($this->table)
             ->select(
                 $this->table.'.identification_id as identification_id',
@@ -213,12 +212,6 @@ class GeneralCodes extends Model
             ->orderBy($this->table.'.identification_id', 'asc')
             ->orderBy($this->table.'.sort_seq', 'asc')
             ->get();
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getGeneralcode' => \DB::getQueryLog()
-            ]
-            );
         
         return $result;
     }
