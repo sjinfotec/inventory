@@ -1247,4 +1247,19 @@ class ApiCommonController extends Controller
         return Config::get('const.C018.forget_stamp');
     }
 
+    /**
+     * reqestクエリーセット
+     *      
+     * @return void
+     */
+    public function setRequestQeury($val)
+    {
+
+        if(isset($val)){
+            return $val;
+        } else {
+            return null;
+        }
+    }
+
 }

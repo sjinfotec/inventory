@@ -38,11 +38,11 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       for="inputGroupSelect01"
-                    >表示区分<span class="color-red">＊</span></label>
+                    >集計区分<span class="color-red">＊</span></label>
                   </div>
                   <general-list
                     v-bind:identification-id="'C016'"
-                    v-bind:placeholder-data="'表示区分を選択してください'"
+                    v-bind:placeholder-data="'集計区分を選択してください'"
                     v-bind:blank-data="false"
                     v-on:change-event="displayChange"
                   ></general-list>
@@ -223,73 +223,10 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row mt-2 print-none">
-              <!-- col  雇用形態 勤務時間 勤務シフト-->
-              <col-employmentstatus
-                v-bind:item-name="'雇用形態'"
-                v-bind:item-value="calclist.employment"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'労働合計時間'"
-                v-bind:item-value="calclist.total_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'所定労働時間'"
-                v-bind:item-value="calclist.regular_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'所定外労働時間'"
-                v-bind:item-value="calclist.out_of_regular_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'残業時間'"
-                v-bind:item-value="calclist.overtime_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'深夜残業時間'"
-                v-bind:item-value="calclist.late_night_overtime_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定労働時間'"
-                v-bind:item-value="calclist.legal_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外労働時間'"
-                v-bind:item-value="calclist.out_of_legal_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'公用外出時間'"
-                v-bind:item-value="calclist.not_employment_working_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'私用外出時間'"
-                v-bind:item-value="calclist.not_employment_working_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'未就労時間'"
-                v-bind:item-value="calclist.not_employment_working_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus v-bind:item-name="'法定休日勤務時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
-              <col-employmentstatus v-bind:item-name="'法定休日残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
-              <col-employmentstatus v-bind:item-name="'法定休日深夜残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
-              <col-employmentstatus v-bind:item-name="'法定外休日勤務時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
-              <col-employmentstatus v-bind:item-name="'法定外休日残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
-              <col-employmentstatus v-bind:item-name="'法定外休日深夜残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'遅刻日数'"
-                v-bind:item-value="calclist.total_working_status + '日'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'早退日数'"
-                v-bind:item-value="calclist.total_go_out + '日'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'休暇日数'"
-                v-bind:item-value="calclist.total_holiday_kubun + '日'"
-              ></col-employmentstatus>
-              <col-employmentstatus v-bind:item-name="'有給休暇日数'" v-bind:item-value="'0日'"></col-employmentstatus>
-              <!-- /.col -->
-            </div>
+            <monthly-working-info-table
+              v-bind:detail-or-total="'detail'"
+              v-bind:calc-lists="calclist"
+            ></monthly-working-info-table>
             <!-- /.row -->
             <!-- /.panel contents -->
             <!-- /panel body -->
@@ -348,7 +285,7 @@
     </div>
     <!-- /main contentns row -->
     <!-- main contentns row -->
-    <div v-for="sumresult in sumresults" class="row justify-content-between print-none">
+    <div class="row justify-content-between print-none">
       <!-- .panel -->
       <div class="col-md pt-3">
         <div class="card shadow-pl">
@@ -361,67 +298,10 @@
           <div class="card-body pt-2">
             <!-- panel contents -->
             <!-- .row -->
-            <div class="row">
-              <col-employmentstatus
-                v-bind:item-name="'労働合計時間'"
-                v-bind:item-value="sumresult.total_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'所定労働時間'"
-                v-bind:item-value="sumresult.regular_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'所定外労働時間'"
-                v-bind:item-value="sumresult.out_of_regular_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'残業時間'"
-                v-bind:item-value="sumresult.overtime_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'深夜残業時間'"
-                v-bind:item-value="sumresult.late_night_overtime_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定労働時間'"
-                v-bind:item-value="sumresult.legal_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外労働時間'"
-                v-bind:item-value="sumresult.out_of_legal_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'公用外出時間'"
-                v-bind:item-value="sumresult.not_employment_working_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'私用外出時間'"
-                v-bind:item-value="sumresult.not_employment_working_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'未就労時間'"
-                v-bind:item-value="sumresult.not_employment_working_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus v-bind:item-name="'法定休日勤務時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
-              <col-employmentstatus v-bind:item-name="'法定休日残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
-              <col-employmentstatus v-bind:item-name="'法定休日深夜残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
-              <col-employmentstatus v-bind:item-name="'法定外休日勤務時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
-              <col-employmentstatus v-bind:item-name="'法定外休日残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
-              <col-employmentstatus v-bind:item-name="'法定外休日深夜残業時間'" v-bind:item-value="'00:00'"></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'遅刻日数'"
-                v-bind:item-value="sumresult.total_working_status + '日'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'早退日数'"
-                v-bind:item-value="sumresult.total_go_out + '日'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'休暇日数'"
-                v-bind:item-value="sumresult.total_holiday_kubun + '日'"
-              ></col-employmentstatus>
-              <col-employmentstatus v-bind:item-name="'有給休暇日数'" v-bind:item-value="'0日'"></col-employmentstatus>
-            </div>
+            <monthly-working-info-table
+              v-bind:detail-or-total="'total'"
+              v-bind:calc-lists="sumresults"
+            ></monthly-working-info-table>
             <!-- /.row -->
             <!-- /panel contents -->
           </div>

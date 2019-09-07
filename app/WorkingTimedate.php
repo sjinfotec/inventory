@@ -6,7 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 use App\TempWorkingTimeDate;
+use App\Http\Controllers\ApiCommonController;
+use App\Setting;
+
 
 /**
  * テーブル：日次タイムレコード（working_time_date）のモデル
@@ -772,6 +776,9 @@ class WorkingTimedate extends Model
     private $param_department_code;             // 部署
     private $param_date_from;                   // 開始日付
     private $param_date_to;                     // 終了日付
+    // 月次アラート用に開始終了日付を１２か月分定義
+    private $array_param_date_from = array();   // 開始日付
+    private $array_param_date_to = array();     // 終了日付
 
     private $array_record_time;                 // 日付範囲配列
     private $massegedata;                       // メッセージ
@@ -836,6 +843,195 @@ class WorkingTimedate extends Model
         $this->param_date_to = $value;
     }
 
+    //  月次アラート用開始日付
+    public function getArrayParamdatefromAttribute()
+    {
+        return $this->array_param_date_from;
+    }
+
+    // 入力日付と検索区分
+    public function setArrayParamdatefromAttribute($value, $search_kbn)
+    {
+        $this->massegedata = array();
+        $this->array_param_date_from = array();
+        $dt = new Carbon($value.'01');
+        $to_date_closing = '';
+        for ($i=0;$i<12;$i++) {
+            $this->array_param_date_from[$i] = null;
+        }
+        $set_from_date_flg = false;
+        if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
+            $search_kbn == Config::get('const.C022.monthly_alert_begining_month_first') ||
+            $search_kbn == Config::get('const.C022.monthly_alert_first_month_closing')) {
+            // 期首月と〆日取得
+            $dt_first = null;
+            $setting_model = new Setting();
+            $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
+            $settings = $setting_model->getSettingDatasYearOrderBy();
+            $set_beginning_or_first_ymd_flg = false;
+            $set_from_date_flg = false;
+            $set_index = 0;
+            foreach($settings as $setting) {
+                if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
+                    $search_kbn == Config::get('const.C022.monthly_alert_begining_month_first')) {
+                    if (!isset($setting->beginning_month)) {
+                        $this->massegedata[] = array(Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_setting_beginning_month'));
+                        break;
+                    }
+                }
+                if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
+                    $search_kbn == Config::get('const.C022.monthly_alert_first_month_closing')) {
+                    if (!isset($setting->closing)) {
+                        $this->massegedata[] = array(Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_setting_closing'));
+                        break;
+                    }
+                }
+                if (!isset($setting->fiscal_month)) {
+                    $this->massegedata[] = array(Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_setting_fiscal_month'));
+                    break;
+                }
+                // 開始年月の設定
+                $settings_ymd = new Carbon($setting->year.str_pad($setting->fiscal_month, 2, 0, STR_PAD_LEFT).'01');
+                $settings_ym = date_format($settings_ymd,'Ym');
+                if (!$set_beginning_or_first_ymd_flg) {
+                    $beginning_ymd = new Carbon($setting->year.str_pad($setting->beginning_month, 2, 0, STR_PAD_LEFT).'01');
+                    $first_ymd = new Carbon($setting->year.str_pad(1, 2, 0, STR_PAD_LEFT).'01');
+                    $beginning_ym = date_format($beginning_ymd,'Ym');
+                    $first_ym = date_format($first_ymd,'Ym');
+                    $set_beginning_or_first_ymd_flg = true;
+                }
+                if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing')) {
+                    if ($settings_ym == $beginning_ym) {
+                        $begining_closing_ymd = new Carbon($setting->year.str_pad($setting->beginning_month, 2, 0, STR_PAD_LEFT).str_pad($setting->closing, 2, 0, STR_PAD_LEFT));
+                        $closing_from_ymd = new Carbon($begining_closing_ymd);
+                        $date_from = $closing_from_ymd->subMonthNoOverflow()->addDay();
+                        $date_from_ym = date_format(new Carbon($date_from),'Ym');
+                        $closing_to_ymd = new Carbon($date_from_ym.'01');
+                        $date_to = $closing_to_ymd->addYear();
+                        $date_to_ym = date_format(new Carbon($date_to),'Ym');
+                        $set_from_date_flg = true;
+                        $set_index = 0;
+                    }
+                }
+                if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_first')) {
+                    if ($settings_ym == $beginning_ym) {
+                        $begining_first_ymd = new Carbon($setting->year.str_pad($setting->beginning_month, 2, 0, STR_PAD_LEFT).'01');
+                        $date_from_ym = date_format(new Carbon($begining_first_ymd),'Ym');
+                        $closing_to_ymd = new Carbon($date_from_ym.'01');
+                        $date_to = $closing_to_ymd->addYear();
+                        $date_to_ym = date_format(new Carbon($date_to),'Ym');
+                        $set_from_date_flg = true;
+                        $set_index = 0;
+                    }
+                }
+                if ($search_kbn == Config::get('const.C022.monthly_alert_first_month_closing')) {
+                    if ($settings_ym == $first_ym) {
+                        Log::debug('set_from_date_flg = true'.$settings_ym.' '.$first_ym);
+                        $first_closing_ymd = new Carbon($setting->year.str_pad(1, 2, 0, STR_PAD_LEFT).str_pad($setting->closing, 2, 0, STR_PAD_LEFT));
+                        $closing_from_ymd = new Carbon($first_closing_ymd);
+                        $date_from = $closing_from_ymd->subMonthNoOverflow()->addDay();
+                        $date_from_ym = date_format(new Carbon($date_from),'Ym');
+                        $closing_to_ymd = new Carbon($date_from_ym.'01');
+                        $date_to = $closing_to_ymd->addYear();
+                        $date_to_ym = date_format(new Carbon($date_to),'Ym');
+                        $set_from_date_flg = true;
+                        $set_index = 0;
+                    }
+                }
+                // 開始終了日付設定された場合
+                if ($set_from_date_flg) {
+                    if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing')) {
+                        $begining_closing_ymd = new Carbon($setting->year.str_pad($setting->fiscal_month, 2, 0, STR_PAD_LEFT).str_pad($setting->closing, 2, 0, STR_PAD_LEFT));
+                        $set_closing_ymd = new Carbon($begining_closing_ymd);
+                        $this->array_param_date_from[$set_index] = date_format($set_closing_ymd->subMonthNoOverflow()->addDay(),'Ymd');
+                        Log::debug('setArrayParamdatetoAttribute  darray_param_date_from = '.$set_index.' '.$this->array_param_date_from[$set_index]);
+                    }
+                    if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_first')) {
+                        $begining_first_ymd = new Carbon($setting->year.str_pad($setting->fiscal_month, 2, 0, STR_PAD_LEFT).'01');
+                        $this->array_param_date_from[$set_index] = date_format($begining_first_ymd,'Ymd');
+                    }
+                    if ($search_kbn == Config::get('const.C022.monthly_alert_first_month_closing')) {
+                        $first_closing_ymd = new Carbon($setting->year.str_pad($setting->fiscal_month, 2, 0, STR_PAD_LEFT).str_pad($setting->closing, 2, 0, STR_PAD_LEFT));
+                        $set_closing_ymd = new Carbon($first_closing_ymd);
+                        $this->array_param_date_from[$set_index] = date_format($set_closing_ymd->subMonthNoOverflow()->addDay(),'Ymd');
+                    }
+                    $set_index++;
+                    // 終了月を超えたら終わり
+                    Log::debug('setArrayParamdatefrmAttribute  date_format($settings_ymd = '.date_format($settings_ymd, 'Ym'));
+                    Log::debug('setArrayParamdatefrmAttribute  $date_to_ym = '.$date_to_ym);
+                    if (date_format($settings_ymd, 'Ym') >= $date_to_ym) {
+                        // 終了日付設定のため、締日を保存
+                        $to_date_closing = $setting->closing;
+                        break;
+                    }
+                }
+            }
+            if (!$set_from_date_flg) {
+                Log::debug(Config::get('const.MSG_ERROR.not_setting_closing'));
+                $this->massegedata[] = array(Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_setting_closing'));
+            }
+        } else {
+            $set_from_date_flg = true;
+            $dt_first = new Carbon(date_format($dt, 'Y').'0101');
+            $date_to_ymd = new Carbon(date_format($dt, 'Y').'0101');
+            // $dt_firstから$valueまで各月１日を設定
+            $date_to_ym = date_format($date_to_ymd->addYear()->subMonthNoOverflow(), 'Ym');
+            $set_date = new Carbon($dt_first);
+            $i = 0;
+            while(true) {
+                $this->array_param_date_from[$i] = date_format(new Carbon($set_date),'Ymd');
+                if (date_format($set_date, 'Ym') >= $date_to_ym) {
+                    break;
+                }
+                $set_date = new Carbon($dt_first->addMonthNoOverflow(1));
+                $dt_first = $set_date;
+                $i++;
+            }
+        }
+        if ($set_from_date_flg) {
+            $this->setArrayParamdatetoAttribute($this->array_param_date_from, $to_date_closing, $search_kbn);
+            for ($i=0;$i<count($this->array_param_date_from);$i++) {
+                Log::debug('結果  $array_param_date_from = '.$this->array_param_date_from[$i]);
+                Log::debug('結果  $array_param_date_to = '.$this->array_param_date_to[$i]);
+            }
+        }
+    }
+
+    //  月次アラート用終了日付
+    public function getArrayParamdatetoAttribute()
+    {
+        return $this->array_param_date_to;
+    }
+
+    //  月次アラート用終了日付（月次アラート用開始日付から設定するので$valueは）
+    public function setArrayParamdatetoAttribute($value, $closing, $search_kbn)
+    {
+        for ($i=0;$i<12;$i++) {
+            $this->array_param_date_to[$i] = null;
+        }
+        if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
+            $search_kbn == Config::get('const.C022.monthly_alert_first_month_closing')) {
+            for ($i=1;$i<count($value);$i++) {
+                if (isset($value[$i])) {
+                    $dt = new Carbon($value[$i]);
+                    $dt_last = new Carbon($value[$i]);
+                    $this->array_param_date_to[$i-1] = date_format($dt->subDay(),'Ymd');
+                }
+            }
+            $dt = new Carbon(date_format($dt_last->addMonthNoOverflow(1),'Ym').str_pad($closing, 2, 0, STR_PAD_LEFT));
+            $this->array_param_date_to[$i-1] = date_format($dt->subDay(),'Ymd');
+        } else {
+            for ($i=0;$i<=count($value)-1;$i++) {
+                if (isset($value[$i])) {
+                    $dt = new Carbon($value[$i]);
+                    $dt_last = $dt->addMonthNoOverflow(1);
+                    $this->array_param_date_to[$i] = date_format($dt_last->subDay(),'Ymd');
+                }
+            }
+        }
+    }
+
+
     // 日付範囲配列
     public function getArrayrecordtimeAttribute()
     {
@@ -847,6 +1043,7 @@ class WorkingTimedate extends Model
         $this->array_record_time = array();       //初期化
         $this->array_record_time = array($valuefrom, $valueto);
     }
+
 
     // メッセージ
     public function getMassegedataAttribute()
@@ -896,11 +1093,11 @@ class WorkingTimedate extends Model
             if($chkDateFrom <= $chkDateTo){
                 $this->setArrayrecordtimeAttribute($chkDateFrom, $chkDateTo);
             } else {
-                array_add($this->massegedata, 'msg', Config::get('const.MSG_ERROR.not_between_workindate'));
+                $this->massegedata[] = array(Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_between_workindate'));
                 $result = false;
             }
         } else {
-            array_add($this->massegedata, 'msg', Config::get('const.MSG_ERROR.not_input_workindatefromto'));
+            $this->massegedata[] = array(Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_input_workindatefromto'));
             $result = false;
         }
         Log::debug('chkWorkingTimeData end $result = '.$result);
@@ -1062,6 +1259,7 @@ class WorkingTimedate extends Model
         // 日次労働時間取得SQL作成
         $result = true;
 
+        \DB::enableQueryLog();
         try{
             $case_where = "CASE ifnull({0},0) WHEN 0 THEN '00:00' ";
             $case_where .= "ELSE CONCAT(CONCAT(LPAD(TRUNCATE({0}, 0), 2, '0'),':'),LPAD(TRUNCATE((mod({0} * 100, 100) * 60) / 100, 0) , 2, '0')) ";
@@ -1127,10 +1325,28 @@ class WorkingTimedate extends Model
 
             $mainquery
                 ->addselect($this->table.'.working_status');
+            $remarks_date_note = 'CASE ifnull('.$this->table.".note,'') WHEN '' THEN "; 
+            $remarks_date_note .= 'CASE ifnull('.$this->table.".late,'') WHEN '1' THEN "; 
+            $remarks_date_note .= 'CASE ifnull('.$this->table.".leave_early,'') WHEN '1' THEN "; 
+            $remarks_date_note .= "'".Config::get('const.REMARKS_DATA.late')."' || '、' || '".Config::get('const.REMARKS_DATA.leaveearly')."' "; 
+            $remarks_date_note .= "ELSE '".Config::get('const.REMARKS_DATA.late'). "' END "; 
+            $remarks_date_note .= 'ELSE CASE ifnull('.$this->table.".leave_early,'') WHEN '1' THEN "; 
+            $remarks_date_note .= "'".Config::get('const.REMARKS_DATA.leaveearly')."' "; 
+            $remarks_date_note .= "ELSE '' END END "; 
+            $remarks_date_note .= 'ELSE '; 
+            $remarks_date_note .= 'CASE ifnull('.$this->table.".late,'') WHEN '1' THEN "; 
+            $remarks_date_note .= 'CASE ifnull('.$this->table.".leave_early,'') WHEN '1' THEN "; 
+            $remarks_date_note .= $this->table.".note || '、' || '".Config::get('const.REMARKS_DATA.late')."' || '、' || '".Config::get('const.REMARKS_DATA.leaveearly')."' "; 
+            $remarks_date_note .= 'ELSE '.$this->table.".note || '、' || '".Config::get('const.REMARKS_DATA.late')."' END ";
+            $remarks_date_note .= 'ELSE ';
+            $remarks_date_note .= 'CASE ifnull('.$this->table.".leave_early,'') WHEN '1' THEN "; 
+            $remarks_date_note .= $this->table.".note || '、' || '".Config::get('const.REMARKS_DATA.leaveearly')."' ";
+            $remarks_date_note .= 'ELSE '.$this->table.'.note END END END as remark_data';
             $mainquery
                 ->selectRaw('ifnull('.$this->table.".working_status_name,'　')  as working_status_name")
-                ->selectRaw('ifnull('.$this->table.".note,'') as note");
+                ->selectRaw($remarks_date_note);
             $mainquery
+                ->addselect($this->table.'.note')
                 ->addselect($this->table.'.late')
                 ->addselect($this->table.'.leave_early')
                 ->addselect($this->table.'.current_calc')
@@ -1258,12 +1474,18 @@ class WorkingTimedate extends Model
             Log::error($e->getMessage());
             throw $e;
         }
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getAlertData' => \DB::getQueryLog()
+            ]
+        );
 
         return $result;
     }
 
     /**
-     * 日時労働時間合計取得
+     * 日次労働時間合計取得
      *
      *      指定したユーザー、日付範囲内の労働時間計算のもとデータを取得するSQL
      *
@@ -1305,9 +1527,9 @@ class WorkingTimedate extends Model
             $case_holiday_kubun .= "WHEN {3} THEN 0 ";
             $case_holiday_kubun .= "WHEN {4} THEN 0 ";
             $case_holiday_kubun .= "ELSE ";
-            $case_holiday_kubun .= "  CASE ifnull({4},0) WHEN 0 THEN 0 ";
-            $case_holiday_kubun .= "  WHEN {4} >= {5} and {4} <= {6} THEN 1 ";
-            $case_holiday_kubun .= "ELSE 0 ";
+            $case_holiday_kubun .= "  CASE ifnull({5},0) WHEN 0 THEN 0 ";
+            $case_holiday_kubun .= "  WHEN {5} >= {6} and {5} <= {7} THEN {8} ";
+            $case_holiday_kubun .= "ELSE {9} ";
             $case_holiday_kubun .= ' END ';
             $case_holiday_kubun .= 'END';
 
@@ -1329,6 +1551,19 @@ class WorkingTimedate extends Model
             $str_replace_holiday_kubun5 =str_replace('{5}', $this->table.'.holiday_kubun', $str_replace_holiday_kubun4);
             $str_replace_holiday_kubun6 =str_replace('{6}', Config::get('const.C013.min_break_value'), $str_replace_holiday_kubun5);
             $str_replace_holiday_kubun7 =str_replace('{7}', Config::get('const.C013.max_break_value'), $str_replace_holiday_kubun6);
+            $str_replace_holiday_kubun8 =str_replace('{8}', 1, $str_replace_holiday_kubun7);
+            $str_replace_holiday_kubun9 =str_replace('{9}', 0, $str_replace_holiday_kubun8);
+
+            $str_replace_absence_kubun0 =str_replace('{0}', 'working_status', $case_holiday_kubun);
+            $str_replace_absence_kubun1 =str_replace('{1}', Config::get('const.C012.attendance'), $str_replace_absence_kubun0);
+            $str_replace_absence_kubun2 =str_replace('{2}', Config::get('const.C012.missing_middle_return'), $str_replace_absence_kubun1);
+            $str_replace_absence_kubun3 =str_replace('{3}', Config::get('const.C012.public_going_out_return'), $str_replace_absence_kubun2);
+            $str_replace_absence_kubun4 =str_replace('{4}', Config::get('const.C012.continue_work'), $str_replace_absence_kubun3);
+            $str_replace_absence_kubun5 =str_replace('{5}', $this->table.'.holiday_kubun', $str_replace_absence_kubun4);
+            $str_replace_absence_kubun6 =str_replace('{6}', Config::get('const.C013.min_break_value'), $str_replace_absence_kubun5);
+            $str_replace_absence_kubun7 =str_replace('{7}', Config::get('const.C013.max_break_value'), $str_replace_absence_kubun6);
+            $str_replace_absence_kubun8 =str_replace('{8}', 0, $str_replace_absence_kubun7);
+            $str_replace_absence_kubun9 =str_replace('{9}', 1, $str_replace_absence_kubun8);
 
             Log::debug('$subquery in '.$dayormonth);
             $subquery = DB::table($this->table)
@@ -1345,7 +1580,8 @@ class WorkingTimedate extends Model
                 ->selectRaw('sum(ifnull('.$this->table.'.missing_middle_hours, 0)) as missing_middle_hours')
                 ->selectRaw('sum('.$str_replace_working_status4.') as total_working_status')
                 ->selectRaw('sum('.$str_replace_go_out2.') as total_go_out')
-                ->selectRaw('sum('.$str_replace_holiday_kubun7.') as total_holiday_kubun');
+                ->selectRaw('sum('.$str_replace_holiday_kubun9.') as total_holiday_kubun')
+                ->selectRaw('sum('.$str_replace_absence_kubun9.') as total_absence');
             if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
                 $subquery->addselect($this->table.'.working_date');
             }
@@ -1422,7 +1658,8 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'missing_middle_hours', str_replace('{0}', 't1.missing_middle_hours', $case_where)))
                 ->selectRaw('ifnull(t1.total_working_status, 0) as total_working_status' )
                 ->selectRaw('ifnull(t1.total_go_out, 0) as total_go_out' )
-                ->selectRaw('ifnull(t1.total_holiday_kubun, 0) as total_holiday_kubun' );
+                ->selectRaw('ifnull(t1.total_holiday_kubun, 0) as total_holiday_kubun' )
+                ->selectRaw('ifnull(t1.total_absence, 0) as total_absence' );
 
             if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
                 $mainquery
@@ -1467,6 +1704,114 @@ class WorkingTimedate extends Model
                 'sql_debug_log',
                 [
                     'getWorkingTimeDateTimeSum' => \DB::getQueryLog()
+                ]
+            );
+                
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+        
+        return $result;
+    }
+
+    /**
+     * 累計時間取得
+     *
+     *      指定したユーザー、日付範囲内の労働時間計算のもとデータを取得するSQL
+     *
+     *      INPUT：
+     *          ①テーブル：departments　部署範囲内 and 削除=0
+     *          ②テーブル：users　      ユーザー範囲内 and 削除=0
+     *          ③テーブル：work_times　 ユーザーand日付範囲内 and 削除=0
+     *
+     * @return sql取得結果
+     */
+    public function getMonthlyTimeSum($targetdate){
+
+        Log::debug('getWorkingTimeDateTimeSum in '.$targetdate);
+
+        // 日時労働時間合計取得SQL作成
+        try{
+            \DB::enableQueryLog();
+            // 各月の集計SQL
+            $array_subquery = array(); 
+            for ($i=0;$i<count($this->array_param_date_from);$i++) {
+                $array_subquery[] = DB::table($this->table)
+                    ->select(
+                        $this->table.'.employment_status as employment_status',
+                        $this->table.'.department_code as department_code',
+                        $this->table.'.user_code as user_code')
+                    ->selectRaw('DATE_FORMAT(MAX('.$this->table.".working_date), '%Y年%m月') as working_date")
+                    ->selectRaw('SUM('.$this->table.'.overtime_hours + '.$this->table.'.late_night_overtime_hours) as total_working_times')
+                    ->where($this->table.'.working_date', '>=', $this->array_param_date_from[$i])
+                    ->where($this->table.'.working_date', '<=', $this->array_param_date_to[$i])
+                    ->where($this->table.'.is_deleted', '=', 0)
+                    ->groupBy($this->table.'.employment_status', $this->table.'.department_code', $this->table.'.user_code');
+            }
+
+            // 適用期間日付の取得
+            $apicommon = new ApiCommonController();
+            // usersの最大適用開始日付subquery
+            $subquery1 = $apicommon->getUserApplyTermSubquery($targetdate);
+            // departmentsの最大適用開始日付subquery
+            $subquery2 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
+
+            $mainquery = DB::table(DB::raw($this->table_users.' AS t1'))
+                ->select(
+                    't22.code_name as employment_status_name',
+                    't21.name as department_name',
+                    't1.name as user_name'
+                );
+            for ($i=0;$i<count($this->array_param_date_from);$i++) {
+                $this->as_number = $i+1;
+                $this->arias_number = $i+2;
+                $mainquery
+                    ->addselect('t'.$this->arias_number.'.working_date as working_date_'.$this->as_number);
+                $mainquery
+                    ->selectRaw('IFNULL(t'.$this->arias_number.'.total_working_times, 0) as total_working_times_'.$this->as_number);
+            }
+            for ($i=0;$i<count($this->array_param_date_from);$i++) {
+                $this->arias_number = $i+2;
+                $mainquery
+                    ->leftJoinSub($array_subquery[$i], 't'.$this->arias_number, function ($join) { 
+                        $join->on('t'.$this->arias_number.'.employment_status', '=', 't1.employment_status');
+                        $join->on('t'.$this->arias_number.'.department_code', '=', 't1.department_code');
+                        $join->on('t'.$this->arias_number.'.user_code', '=', 't1.code');
+                    });
+            }
+
+            $mainquery
+                ->leftJoinSub($subquery2, 't21', function ($join) { 
+                    $join->on('t21.code', '=', 't1.department_code');
+                })
+                ->leftJoin('generalcodes as t22', function ($join) { 
+                    $join->on('t22.code', '=', 't1.employment_status')
+                    ->where('t22.identification_id', '=', Config::get('const.C001.value'))
+                    ->where('t22.is_deleted', '=', 0);
+                });
+    
+            $mainquery
+                ->JoinSub($subquery1, 't23', function ($join) { 
+                    $join->on('t23.code', '=', 't1.code');
+                    $join->on('t23.max_apply_term_from', '=', 't1.apply_term_from');
+                });
+
+            $result = $mainquery
+                ->where('t1.is_deleted', '=', 0)
+                ->orderBy('t1.department_code', 'asc')
+                ->orderBy('t1.employment_status', 'asc')
+                ->orderBy('t1.code', 'asc')
+                ->get();
+            \Log::debug(
+                'sql_debug_log',
+                [
+                    'getWorkTimes' => \DB::getQueryLog()
                 ]
             );
                 
