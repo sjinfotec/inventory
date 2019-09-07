@@ -348,6 +348,55 @@ class Setting extends Model
     }
 
     /**
+     * 設定項目マスタ取得
+     *
+     *      指定した年をもとに年月淳に設定項目マスタを取得する
+     *
+     * @return sql取得結果
+     */
+    public function getSettingDatasYearOrderBy(){
+
+
+        // 取得SQL作成
+        $sunquery1 = DB::table($this->table)
+            ->select(
+                DB::raw('MAX('.$this->table.'.fiscal_year) as fiscal_year')
+            );
+        if(!empty($this->param_year)){
+            $sunquery1->where($this->table.'.year', $this->param_year);                         //年指定
+        }
+        $sunquery1
+            ->where($this->table.'.is_deleted', '=', 0)
+            ->groupBy($this->table.'.year');
+
+        $mainquery = DB::table($this->table)
+            ->select(
+                $this->table.'.fiscal_year',
+                $this->table.'.fiscal_month',
+                $this->table.'.closing',
+                $this->table.'.uplimit_time',
+                $this->table.'.statutory_uplimit_time',
+                $this->table.'.time_unit',
+                $this->table.'.time_rounding',
+                $this->table.'.max_3month_total',
+                $this->table.'.max_6month_total',
+                $this->table.'.max_12month_total',
+                $this->table.'.beginning_month',
+                $this->table.'.interval',
+                $this->table.'.year',
+                $this->table.'.is_deleted')
+            ->JoinSub($sunquery1, 't2', function ($join) { 
+                $join->on('t2.fiscal_year', '=', $this->table.'.fiscal_year');
+            })
+            ->where($this->table.'.is_deleted', '=', 0)
+            ->orderBy($this->table.'.year', 'asc')
+            ->orderBy($this->table.'.fiscal_month', 'asc')
+            ->get();
+
+        return $mainquery;
+    }
+
+    /**
      * 締め日取得
      *
      *      指定した年月度の締め日を取得する

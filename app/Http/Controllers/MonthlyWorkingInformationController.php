@@ -45,6 +45,7 @@ class MonthlyWorkingInformationController extends Controller
     {
         Log::debug('monthly show in');
 
+        $apicommon = new ApiCommonController();
         // reqestクエリーセット
         $datefrom = $this->setRequestQeury($request->datefrom);
         $displaykbn = $this->setRequestQeury($request->displaykbn);
@@ -148,12 +149,14 @@ class MonthlyWorkingInformationController extends Controller
         $working_time_sum = array();
         $company_name = '';
 
+        $apicommon = new ApiCommonController();
+
         // reqestクエリーセット
-        $datefrom = $this->setRequestQeury($request->datefrom);
-        $displaykbn = $this->setRequestQeury($request->displaykbn);
-        $employmentstatus = $this->setRequestQeury($request->employmentstatus);
-        $departmentcode = $this->setRequestQeury($request->departmentcode);
-        $usercode = $this->setRequestQeury($request->usercode);
+        $datefrom = $apicommon->setRequestQeury($request->datefrom);
+        $displaykbn = $apicommon->setRequestQeury($request->displaykbn);
+        $employmentstatus = $apicommon->setRequestQeury($request->employmentstatus);
+        $departmentcode = $apicommon->setRequestQeury($request->departmentcode);
+        $usercode = $apicommon->setRequestQeury($request->usercode);
         Log::debug('$datefrom = '.$datefrom);
         Log::debug('$displaykbn = '.$displaykbn);
         Log::debug('$employmentstatus = '.$employmentstatus);
@@ -200,7 +203,6 @@ class MonthlyWorkingInformationController extends Controller
                 $work_time->setParamDepartmentcodeAttribute($departmentcode);
                 $work_time->setParamUsercodeAttribute($usercode);
                 // 休日判定
-                $apicommon = new ApiCommonController();
                 $business_kubun = $apicommon->jdgBusinessKbn($calc_date);
                 $calc_result = $daily_controller->addDailyCalc(
                     $work_time,
@@ -225,21 +227,6 @@ class MonthlyWorkingInformationController extends Controller
 
 
     // -------------------------------------------------------------------------------
-
-    /**
-     * reqestクエリーセット
-     *      
-     * @return void
-     */
-    public function setRequestQeury($val)
-    {
-
-        if(isset($val)){
-            return $val;
-        } else {
-            return null;
-        }
-    }
 
     /**
      * 日付開始終了作成

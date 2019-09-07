@@ -8,7 +8,7 @@
           <!-- panel header -->
           <div class="card-header bg-transparent pb-0 border-0">
             <daily-working-information-panel-header
-              v-bind:headertext1="'年月を指定して集計を表示する'"
+              v-bind:headertext1="'期首月または１月（検索区分）から指定年月の間でアラートを表示'"
               v-bind:headertext2="'雇用形態や所属部署でフィルタリングして表示できます'"
             ></daily-working-information-panel-header>
           </div>
@@ -21,22 +21,21 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <span class="input-group-text font-size-sm line-height-xs label-width-90" id="basic-addon1">指定年月</span>
+                    <span class="input-group-text font-size-sm line-height-xs label-width-90" id="basic-addon1">指定年月<span class="color-red">＊</span></span>
                   </div>
                   <input-ym v-on:change-event="fromdateChanges"></input-ym>
                 </div>
-                <message-data v-bind:messagedatas="messagedatasfromdate"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <label class="input-group-text font-size-sm line-height-xs label-width-90" for="inputGroupSelect01">表示区分</label>
+                    <label class="input-group-text font-size-sm line-height-xs label-width-90" for="inputGroupSelect01">検索区分<span class="color-red">＊</span></label>
                   </div>
                   <general-list
-                    v-bind:identification-id="'C016'"
-                    v-bind:placeholder-data="'表示区分を選択してください'"
+                    v-bind:identification-id="'C022'"
+                    v-bind:placeholder-data="'検索区分を選択してください'"
                     v-bind:blank-data="false"
                     v-on:change-event="displayChange"
                   ></general-list>
@@ -88,6 +87,7 @@
                   <message-data v-bind:messagedatas="messagedatauser"></message-data>
                 </div>
               </div>
+              <message-data-server v-bind:message-datas="messagedatasserver" v-bind:message-class="'warning'"></message-data-server>
               <!-- /.col -->
             </div>
             <!-- /.row -->
@@ -95,16 +95,7 @@
             <div class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
-                <search-workingtimebutton v-on:searchclick-event="searchclick"></search-workingtimebutton>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- col -->
-              <div class="col-md-12 pb-2">
-                <update-workingtimebutton v-on:updateclick-event="updateclick"></update-workingtimebutton>
+                <btn-work-time v-bind:btn-mode="'search'" v-on:searchclick-event="searchclick"></btn-work-time>
               </div>
               <!-- /.col -->
             </div>
@@ -125,27 +116,10 @@
           <div class="card-header bg-transparent pt-3 border-0 print-none">
             <daily-working-information-panel-header
               v-bind:headertext1="stringtext"
-              v-bind:headertext2="'虫眼鏡アイコンをクリックするとタイムカードが表示されます'"
+              v-bind:headertext2="''"
             ></daily-working-information-panel-header>
           </div>
           <!-- /.panel header -->
-          <!-- panel body -->
-          <div class="card-body mb-3 py-0 pt-4 border-top print-none">
-            <!-- panel contents -->
-            <!-- .row -->
-            <div class="row">
-              <!-- col -->
-              <div class="col-md-12 pb-2">
-                <div class="btn-group d-flex">
-                  <button type="button" class="btn btn-success btn-lg font-size-rg w-100"><img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">集計結果をCSVファイルに出力する</button>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- /.panel contents -->
-          </div>
-          <!-- /panel body -->
           <!-- panel body -->
           <div class="card-body mb-3 py-0 pt-4 border-top print-only print-space">
             <!-- panel contents -->
@@ -163,273 +137,10 @@
           </div>
           <!-- /panel body -->
           <!-- panel body -->
-          <div
-            v-for="(calclist,index) in calcresults"
-            :key="calclist.user_code"
-            class="card-body mb-3 py-0 pt-4 border-top print-space"
-          >
-            <!-- panel contents -->
-            <!-- .row -->
-            <div class="row">
-              <!-- col -->
-              <div class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">
-                <a
-                  class="float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg print-none"
-                  data-toggle="collapse"
-                  v-bind:href="'#collapseUser' + index"
-                  role="button"
-                  aria-expanded="true"
-                  v-bind:aria-controls="'collapseUser' + index"
-                ><img class="icon-size-rg" src="/images/round-search-w.svg" alt=""></a>
-                <h1 class="font-size-sm m-0 mb-1">氏名</h1>
-                <p class="font-size-rg font-weight-bold m-0">{{ calclist.user_name }}</p>
-              </div>
-              <!-- /.col -->
-              <!-- col -->
-              <div class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">
-                <h1 class="font-size-sm m-0 mb-1 text-sm-right">所属部署</h1>
-                <p class="font-size-rg m-0 text-sm-right">{{ calclist.department }}</p>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row mt-2 print-none">
-              <!-- col  雇用形態 勤務時間 勤務シフト-->
-              <col-employmentstatus
-                v-bind:item-name="'雇用形態'"
-                v-bind:item-value="calclist.employment"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'労働合計時間'"
-                v-bind:item-value="calclist.total_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'所定労働時間'"
-                v-bind:item-value="calclist.regular_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'所定外労働時間'"
-                v-bind:item-value="calclist.out_of_regular_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'残業時間'"
-                v-bind:item-value="calclist.overtime_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'深夜残業時間'"
-                v-bind:item-value="calclist.late_night_overtime_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定労働時間'"
-                v-bind:item-value="calclist.legal_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外労働時間'"
-                v-bind:item-value="calclist.out_of_legal_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'公用外出時間'"
-                v-bind:item-value="calclist.not_employment_working_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'私用外出時間'"
-                v-bind:item-value="calclist.not_employment_working_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'未就労時間'"
-                v-bind:item-value="calclist.not_employment_working_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定休日勤務時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定休日残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定休日深夜残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外休日勤務時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外休日残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外休日深夜残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'遅刻日数'"
-                v-bind:item-value="calclist.total_working_status + '日'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'早退日数'"
-                v-bind:item-value="calclist.total_go_out + '日'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'休暇日数'"
-                v-bind:item-value="calclist.total_holiday_kubun + '日'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'有給休暇日数'"
-                v-bind:item-value="'0日'"
-              ></col-employmentstatus>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- /.panel contents -->
-            <!-- /panel body -->
-            <!-- collapse -->
-            <div class="collapse page-break-after" v-bind:id="'collapseUser' + index">
-              <!-- panel body -->
-              <div class="card-body mb-3 p-0 border-top">
-                <!-- panel contents -->
-                <!-- .row -->
-                <div class="row">
-                  <div class="col-12">
-                    <div class="table-responsive">
-                      <div class="col-12 p-0">
-                        <table class="table table-striped border-bottom font-size-sm text-nowrap">
-                          <div v-if="calclist.date.length">
-                            <thead>
-                              <tr>
-                                <td class="text-center align-middle w-20">日付</td>
-                                <td class="text-center align-middle w-20">出勤時間</td>
-                                <td class="text-center align-middle w-20">退勤時間</td>
-                                <td class="text-center align-middle mw-rem-20">備考</td>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr v-for="calclisttimedate in calclist.date">
-                                <td class="text-center align-middle">{{ calclisttimedate.workingdate }}</td>
-                                <td v-if="calclisttimedate.attendance1 != '00:00' || calclisttimedate.leaving1 != '00:00'" class="text-center align-middle">{{ calclisttimedate.attendance1 }}</td>
-                                <td v-if="calclisttimedate.attendance1 != '00:00' || calclisttimedate.leaving1 != '00:00'"  class="text-center align-middle">{{ calclisttimedate.leaving1 }}</td>
-                                <td class="text-center align-middle"> </td>
-                              </tr>
-                            </tbody>
-                          </div>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- /.row -->
-                <!-- /.panel contents -->
-              </div>
-              <!-- /panel body -->
-            </div>
-          </div>
-          <!-- /collapse -->
-        </div>
-      </div>
-      <!-- /.panel -->
-    </div>
-    <!-- /main contentns row -->
-    <!-- main contentns row -->
-    <div v-for="sumresult in sumresults" class="row justify-content-between print-none">
-      <!-- .panel -->
-      <div class="col-md pt-3">
-        <div class="card shadow-pl">
-          <!-- panel header -->
-          <daily-working-information-panel-header
-            v-bind:headertext1="'合計'"
-            v-bind:headertext2="'集計月の合計が表示されます'"
-          ></daily-working-information-panel-header>
-          <!-- /.panel header -->
-          <div class="card-body pt-2">
-            <!-- panel contents -->
-            <!-- .row -->
-            <div class="row">
-              <col-employmentstatus
-                v-bind:item-name="'労働合計時間'"
-                v-bind:item-value="sumresult.total_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'所定労働時間'"
-                v-bind:item-value="sumresult.regular_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'所定外労働時間'"
-                v-bind:item-value="sumresult.out_of_regular_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'残業時間'"
-                v-bind:item-value="sumresult.overtime_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'深夜残業時間'"
-                v-bind:item-value="sumresult.late_night_overtime_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定労働時間'"
-                v-bind:item-value="sumresult.legal_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外労働時間'"
-                v-bind:item-value="sumresult.out_of_legal_working_times"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'公用外出時間'"
-                v-bind:item-value="sumresult.not_employment_working_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'私用外出時間'"
-                v-bind:item-value="sumresult.not_employment_working_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'未就労時間'"
-                v-bind:item-value="sumresult.not_employment_working_hours"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定休日勤務時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定休日残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定休日深夜残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外休日勤務時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外休日残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'法定外休日深夜残業時間'"
-                v-bind:item-value="'00:00'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'遅刻日数'"
-                v-bind:item-value="sumresult.total_working_status + '日'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'早退日数'"
-                v-bind:item-value="sumresult.total_go_out + '日'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'休暇日数'"
-                v-bind:item-value="sumresult.total_holiday_kubun + '日'"
-              ></col-employmentstatus>
-              <col-employmentstatus
-                v-bind:item-name="'有給休暇日数'"
-                v-bind:item-value="'0日'"
-              ></col-employmentstatus>
-            </div>
-            <!-- /.row -->
-            <!-- /panel contents -->
-          </div>
+          <monthly-working-alert-table
+            v-bind:time-items="timeitems"
+            v-bind:time-values="timevalues"
+          ></monthly-working-alert-table>
         </div>
         <!-- /panel -->
       </div>
@@ -460,9 +171,8 @@ export default {
       datejaFormat: "",
       hrefindex: "",
       resresults: [],
-      calcresults: [],
-      sumresults: [],
-      serchorupdate: "",
+      timeitems: [],
+      timevalues: [],
       messagedatasserver: [],
       messagedatasfromdate: [],
       messagedatastodate: [],
@@ -574,14 +284,14 @@ export default {
     userChanges: function(value) {
       this.valueuser = value;
     },
-    // 集計開始ボタンがクリックされた場合の処理
+    // 検索開始ボタンがクリックされた場合の処理
     searchclick: function(e) {
       this.serchorupdate = "search";
       this.validate = this.checkForm(e);
       if (this.validate) {
         this.itemClear();
         this.$axios
-          .get("/monthly/show", {
+          .get("/monthly_alert/show", {
             params: {
               datefrom: moment(this.valuefromdate).format("YYYYMM"),
               displaykbn: this.valuedisplay,
@@ -592,50 +302,22 @@ export default {
           })
           .then(response => {
             this.resresults = response.data;
-            this.calcresults = this.resresults.calcresults;
-            this.sumresults = this.resresults.sumresults;
-            this.company_name = this.resresults.company_name;
-            this.dispmessage(this.resresults.massegedata);
-            this.messagedatasserver.length = 0;
-            this.$forceUpdate();
-            console.log("calcresults" + Object.keys(this.calcresults).length);
-            console.log("sumresults" + Object.keys(this.sumresults).length);
-            console.log("company_name" + this.company_name);
-          })
-          .catch(reason => {
-            alert("月次集計エラー");
-          });
-      }
-    },
-    // 最新更新開始ボタンがクリックされた場合の処理
-    updateclick: function(e) {
-      this.serchorupdate = "update";
-      this.validate = this.checkForm(e);
-      if (this.validate) {
-        this.itemClear();
-        this.$toasted.show("更新を開始しました");
-        this.$axios
-          .get("/monthly/calc", {
-            params: {
-              datefrom: moment(this.valuefromdate).format("YYYYMM"),
-              displaykbn: this.valuedisplay,
-              employmentstatus: this.valueemploymentstatus,
-              departmentcode: this.valuedepartment,
-              usercode: this.valueuser
+            if (this.resresults.timeitems != null) {
+              this.timeitems = this.resresults.timeitems;
             }
-          })
-          .then(response => {
-            this.resresults = response.data;
-            this.calcresults = this.resresults.calcresults;
-            this.sumresults = this.resresults.sumresults;
-            this.company_name = this.resresults.company_name;
-            this.dispmessage(this.resresults.massegedata);
-            this.messagedatasserver.length = 0;
+            if (this.resresults.timevalues != null) {
+              this.timevalues = this.resresults.timevalues;
+            }
+            if (this.resresults.messagedata != null) {
+              this.messagedatasserver = this.resresults.messagedata;
+            }
+            console.log("timeitems" + Object.keys(this.timeitems).length);
+            console.log("timevalues" + Object.keys(this.timevalues).length);
+            console.log("messagedatasserver" + Object.keys(this.messagedatasserver).length);
             this.$forceUpdate();
-            this.$toasted.show("集計を最新に更新しました");
           })
           .catch(reason => {
-            alert("月次集計エラー");
+            alert("月次警告通知エラー");
           });
       }
     },
@@ -644,9 +326,8 @@ export default {
     // クリアメソッド
     itemClear: function() {
       this.resresults = [];
-      this.calcresults = [];
-      this.sumresults = [];
-      this.serchorupdate = "";
+      this.timeitems = [];
+      this.timevalues = [];
       this.messagedatasserver = [];
       this.messagedatasfromdate = [];
       this.messagedatastodate = [];
@@ -710,10 +391,10 @@ export default {
             }
             this.datejaFormat = moment(this.valuefromdate).format("YYYY年MM月");
             if (this.valuedisplay == "1") {
-              this.stringtext = "月次集計 " + this.datejaFormat + "を〆日で集計";
+              this.stringtext = "月次アラート " + this.datejaFormat + "を〆日でアラート検索";
             } else {
               if (this.valuedisplay == "2") {
-                this.stringtext = "月次集計 " + this.datejaFormat + "1日から月末で集計";
+                this.stringtext = "月次アラート " + this.datejaFormat + "1日からアラート検索";
               } else {
                 this.stringtext = "";
               }
@@ -726,17 +407,6 @@ export default {
     dispmessage: function(items) {
       items.forEach(function(value) {
         this.messagedatasserver.push(value);
-      });
-    },
-    // メッセージ処理
-    dispmessagevalue: function(value) {
-      this.messagedatasserver.push(value);
-    },
-    // メッセージ処理
-    dispmessage1: function(items) {
-      console.log("dispmessage1 " + Object.keys(items).length);
-      Object.keys(items).forEach(function (value) {
-        console.log(value.messagedata + "はと鳴いた！");
       });
     }
   }

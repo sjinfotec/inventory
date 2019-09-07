@@ -151,6 +151,26 @@ return [
         'value' => 'C019',
         'max_times' => 5
     ],
+ 
+    'C023' => [
+        'value' => 'C023',
+        'manthly_alert_warning_1' => 40,
+        'manthly_alert_warning_2' => 72,
+        'manthly_alert_warning_3' => 108,
+        'manthly_alert_warning_4' => 324,
+        'manthly_alert_warning_5' => 5,
+        'manthly_alert_warning_6' => 80,
+        'manthly_alert_warning_7' => 72,
+        'manthly_alert_warning_8' => 648
+    ],
+ 
+    'C022' => [
+        'value' => 'C022',
+        'monthly_alert_begining_month_closing' => 1,
+        'monthly_alert_begining_month_first' => 2,
+        'monthly_alert_first_month_closing' => 3,
+        'monthly_alert_first_month_first' => 4
+    ],
 
     'C999' => [
         'value' => 'C999',
@@ -182,8 +202,8 @@ return [
 
     'PREDETER_NIGHT_TIME_NAME' => [
         'basic' => '深夜残業時間',
-        'legal_holoday' => '法定休日深夜残業時間',
-        'legal_out_holoday' => '法定外休日残業労働時間'
+        'legal_holoday' => '法定休日深夜時間',
+        'legal_out_holoday' => '法定外休日深夜時間'
     ],
 
     'ARRAY_MAX_INDEX' => [
@@ -203,6 +223,11 @@ return [
         'attendace_leaving' => 1,
         'missing_return' => 2,
         'public_going_out_return' => 3
+    ],
+
+    'REMARKS_DATA' => [
+        'late' => '遅刻',
+        'leaveearly' => '早退'
     ],
 
 
@@ -268,6 +293,26 @@ return [
         'daily_basic' => '1',
         'monthly_basic' => '2'
     ],
+ 
+    'ALERT_MONTHLY_ITEM' => [
+        'items_1' => '45H/月',
+        'items_2' => '81H/2月',
+        'items_3' => '120H/3月',
+        'items_4' => '360H/Year',
+        'items_5' => '45H超計6月',
+        'items_6' => '45H超100H/月',
+        'items_7' => '2月平均80H以内',
+        'items_8' => '3月平均80H以内',
+        'items_9' => '4月平均80H以内',
+        'items_10' => '5月平均80H以内',
+        'items_11' => '6月平均80H以内',
+        'items_12' => '720H/年'
+    ],
+ 
+    'ALERT_INFO_RESULT' => [
+        'OK' => '〇',
+        'NG' => '×'
+    ],
 
     'MSG_INFO' => [
         'past_closing' => '締日を過ぎていますが、集計しますか？',
@@ -283,6 +328,7 @@ return [
         'not_input_workindatefromto' => '計算開始日付と計算終了日付は必ず入力してください。',
         'not_setting_department_code' => '{0}さんの部署が設定されていません。',
         'not_setting_department_code_nouser' => '部署が設定されていない社員がいます。確認してください。',
+        'not_setting_fiscal_month' => '月の時間計算設定が設定されていません。',
         'not_setting_closing' => '締日が設定されていません。',
         'not_setting_time_unit' => '時間計算の単位が設定されていません。',
         'not_setting_time_rounding' => '時間計算の端数処理が設定されていません。',

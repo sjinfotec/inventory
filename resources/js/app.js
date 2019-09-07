@@ -50,6 +50,11 @@ Vue.component(
 );
 
 Vue.component(
+    "daily-working-info-table",
+    require("./components/DailyWorkingInfoTable.vue").default
+);
+
+Vue.component(
     "daily-working-alert",
     require("./components/DailyWorkingAlert.vue").default
 );
@@ -57,6 +62,11 @@ Vue.component(
 Vue.component(
     "monthly-working-information",
     require("./components/MonthlyWorkingInformation.vue").default
+);
+
+Vue.component(
+    "monthly-working-info-table",
+    require("./components/MonthlyWorkingInfoTable.vue").default
 );
 
 Vue.component(
@@ -201,6 +211,11 @@ Vue.component(
 Vue.component(
     "daily-working-alert-table",
     require("./components/DailyWorkingAlertTable.vue").default
+);
+
+Vue.component(
+    "monthly-working-alert-table",
+    require("./components/MonthlyWorkingAlertTable.vue").default
 );
 
 Vue.component(
