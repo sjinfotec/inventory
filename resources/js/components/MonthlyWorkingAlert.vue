@@ -40,7 +40,7 @@
                     v-on:change-event="displayChange"
                   ></general-list>
                 </div>
-                <message-data v-bind:messagedatas="messagedatadisplay"></message-data>
+                <message-data v-bind:message-datas="messagedatadisplay"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -67,7 +67,7 @@
                     v-bind:blank-data="true"
                     v-on:change-event="departmentChanges"
                   ></select-department>
-                  <message-data v-bind:messagedatas="messagedatadepartment"></message-data>
+                  <message-data v-bind:message-datas="messagedatadepartment"></message-data>
                 </div>
               </div>
               <!-- /.col -->
@@ -84,7 +84,7 @@
                     v-bind:date-value="fromdate"
                     v-on:change-event="userChanges"
                   ></select-user>
-                  <message-data v-bind:messagedatas="messagedatauser"></message-data>
+                  <message-data v-bind:message-datas="messagedatauser"></message-data>
                 </div>
               </div>
               <message-data-server v-bind:message-datas="messagedatasserver" v-bind:message-class="'warning'"></message-data-server>

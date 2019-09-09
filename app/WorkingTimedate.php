@@ -1341,7 +1341,7 @@ class WorkingTimedate extends Model
             $remarks_date_note .= 'ELSE ';
             $remarks_date_note .= 'CASE ifnull('.$this->table.".leave_early,'') WHEN '1' THEN "; 
             $remarks_date_note .= $this->table.".note || '、' || '".Config::get('const.REMARKS_DATA.leaveearly')."' ";
-            $remarks_date_note .= 'ELSE '.$this->table.'.note END END END as remark_data';
+            $remarks_date_note .= 'ELSE '.$this->table.".note END END END as remark_data";
             $mainquery
                 ->selectRaw('ifnull('.$this->table.".working_status_name,'　')  as working_status_name")
                 ->selectRaw($remarks_date_note);
@@ -1686,11 +1686,10 @@ class WorkingTimedate extends Model
                     ->selectRaw($case_where_predeter_time_name)
                     ->selectRaw($case_where_predeter_night_time_name);
                 $mainquery->leftJoin($this->table_calendars, function ($join) { 
-                    $join->on('t1.working_date', '=', $this->table_calendars.'.date')
-                    ->where($this->table_calendars.'.is_deleted', '=', 0);
+                    $join->on('t1.working_date', '=', $this->table_calendars.'.date');
                 });
             }
-            
+                
             $array_setBindingsStr = array();
             $cnt = 0;
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
