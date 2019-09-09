@@ -1744,28 +1744,29 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {},
   methods: {
     downloadCSV: function downloadCSV() {
-      var csv = ""; // 1ユーザーごと
+      var csv = "";
+      var user_head = "";
+      var user_line = "";
+      var data_head = "";
+      var line = ""; // 1ユーザーごと
 
       this.csvData.forEach(function (user) {
+        user_head = "";
+        user_line = "";
+        data_head = "";
         user_head = "\uFEFF" + "社員名,部署,雇用形態,勤務時間,所定労働時間,所定外労働時間,残業時間,深夜残業時間\n";
-        var user_line = user["user_name"] + "," + user["department"] + "," + user["employment"] + "\n";
+        user_line = user["user_name"] + "," + user["department"] + "," + user["employment"] + "," + user["total_working_times"] + "," + user["regular_working_times"] + "," + user["out_of_regular_working_times"] + "," + user["overtime_hours"] + "," + user["late_night_overtime_hours"] + "\n";
         data_head = "\uFEFF" + "日付,出勤1,出勤2,出勤3,出勤4,出勤5,退勤1,退勤2,退勤3,退勤4,退勤5\n";
         csv += user_head;
         csv += user_line;
         csv += data_head;
         user.date.forEach(function (record) {
           console.log(record);
-          var line = record["workingdate"] + "," + record["attendance1"] + "," + record["attendance2"] + "," + record["attendance3"] + "," + record["attendance4"] + "," + record["attendance5"] + "," + record["leaving1"] + "," + record["leaving2"] + "," + record["leaving3"] + "," + record["leaving4"] + "," + record["leaving5"] + "\n";
+          line = record["workingdate"] + "," + record["attendance1"] + "," + record["attendance2"] + "," + record["attendance3"] + "," + record["attendance4"] + "," + record["attendance5"] + "," + record["leaving1"] + "," + record["leaving2"] + "," + record["leaving3"] + "," + record["leaving4"] + "," + record["leaving5"] + "\n";
           csv += line;
-        }); // console.log(user);
-        // var line =
-        //   el["user_name"] +
-        //   "," +
-        //   el["department"] +
-        //   "," +
-        //   el["employment"] +
-        //   "\n";
-        // csv += line;
+        });
+        csv += "\n";
+        line = "";
       });
       var blob = new Blob([csv], {
         type: "text/csv"
@@ -1774,6 +1775,55 @@ __webpack_require__.r(__webpack_exports__);
       link.href = window.URL.createObjectURL(blob);
       link.download = this.date + "_月次集計.csv";
       link.click();
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/BtnWorkTime.vue?vue&type=script&lang=js&":
+/*!**********************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/BtnWorkTime.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "btnworktime",
+  props: {
+    btnMode: {
+      "default": "search",
+      type: String
+    },
+    isPush: {
+      "default": false,
+      type: Boolean
+    }
+  },
+  // マウント時
+  mounted: function mounted() {
+    console.log("WorkTimeSearchButton Component mounted.");
+  },
+  methods: {
+    searchclickBtn: function searchclickBtn() {
+      console.log("searchclickBtn start ");
+      this.$emit('searchclick-event', event);
+    },
+    updateclickBtn: function updateclickBtn() {
+      console.log("updateclickBtn start ");
+      this.$emit('updateclick-event', event);
     }
   }
 });
@@ -1936,10 +1986,6 @@ __webpack_require__.r(__webpack_exports__);
       type: Boolean,
       "default": true
     }
-  },
-  // マウント時
-  mounted: function mounted() {
-    console.log("ColMissingMiddle mounted" + this.missingmiddlename);
   }
 });
 
@@ -2236,6 +2282,21 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "CreateCalendar",
@@ -2327,6 +2388,9 @@ __webpack_require__.r(__webpack_exports__);
     inputClear: function inputClear() {
       // this.dates.length = 0;
       this.dates = [];
+    },
+    gotoedit: function gotoedit() {
+      location.href = "/edit_calendar";
     }
   }
 });
@@ -4504,10 +4568,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 /***/ }),
 
-/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingInformation.vue?vue&type=script&lang=js&":
-/*!**********************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/DailyWorkingInformation.vue?vue&type=script&lang=js& ***!
-  \**********************************************************************************************************************************************************************************/
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingAlert.vue?vue&type=script&lang=js&":
+/*!****************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/DailyWorkingAlert.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -4643,6 +4707,201 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "dailyworkingalert",
+  data: function data() {
+    return {
+      valuedepartment: "",
+      valueemploymentstatus: "",
+      getDo: 1,
+      fromdate: "",
+      valueuser: "",
+      valuefromdate: "",
+      userrole: "",
+      defaultDate: new Date(),
+      datejaFormat: "",
+      hrefindex: "",
+      resresults: [],
+      alertresults: [],
+      messagedatasserver: [],
+      messagedatasfromdate: [],
+      messagedatadepartment: [],
+      messagedatauser: [],
+      validate: false,
+      initialized: false
+    };
+  },
+  // マウント時
+  mounted: function mounted() {
+    this.getUserRole();
+  },
+  methods: {
+    // バリデーション
+    checkForm: function checkForm(e) {
+      console.log("checkForm in ");
+      this.validate = true;
+      this.messagedatasserver = [];
+      this.messagedatasfromdate = [];
+      this.messagedatadepartment = [];
+      this.messagedatauser = [];
+
+      if (!this.valuefromdate) {
+        this.messagedatasfromdate.push("指定日付は必ず入力してください。");
+        this.validate = false;
+      }
+
+      if (this.userrole < "8") {
+        if (!this.valuedepartment) {
+          this.messagedatadepartment.push("所属部署は必ず入力してください。");
+          this.validate = false;
+        }
+
+        if (!this.valueuser) {
+          this.messagedatauser.push("氏名は必ず入力してください。");
+          this.validate = false;
+        }
+      }
+
+      console.log("validate = true");
+
+      if (this.validate) {
+        return this.validate;
+      }
+
+      e.preventDefault();
+    },
+    // ログインユーザーの権限を取得
+    getUserRole: function getUserRole() {
+      var _this = this;
+
+      this.$axios.get("/get_login_user_role", {}).then(function (response) {
+        _this.userrole = response.data;
+      })["catch"](function (reason) {
+        alert("ログインユーザー権限取得エラー");
+      });
+    },
+    // 指定日付が変更された場合の処理
+    fromdateChanges: function fromdateChanges(value) {
+      moment__WEBPACK_IMPORTED_MODULE_1___default.a.locale("ja");
+      this.valuefromdate = value; // 再取得
+
+      this.fromdate = "";
+
+      if (this.valuefromdate) {
+        this.fromdate = moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYYMMDD");
+      }
+
+      this.$refs.selectdepartment.getDepartmentList(this.fromdate);
+      this.getUserSelected();
+    },
+    // 雇用形態が変更された場合の処理
+    employmentChanges: function employmentChanges(value) {
+      this.valueemploymentstatus = value; // ユーザー選択コンポーネントの取得メソッドを実行
+
+      this.getDo = 1;
+      this.getUserSelected();
+    },
+    // 部署選択が変更された場合の処理
+    departmentChanges: function departmentChanges(value) {
+      this.valuedepartment = value; // ユーザー選択コンポーネントの取得メソッドを実行
+
+      this.getDo = 1;
+      this.getUserSelected();
+    },
+    // ユーザー選択が変更された場合の処理
+    userChanges: function userChanges(value) {
+      this.valueuser = value;
+    },
+    // 集計開始ボタンがクリックされた場合の処理
+    searchclick: function searchclick(e) {
+      var _this2 = this;
+
+      this.validate = this.checkForm(e);
+      console.log("this.valuefromdate" + this.valuefromdate);
+      console.log("this.valueemploymentstatus" + this.valueemploymentstatus);
+      console.log("this.valuedepartment" + this.valuedepartment);
+      console.log("this.valueuser" + this.valueuser);
+
+      if (this.validate) {
+        this.itemClear();
+        this.$axios.get("/daily_alert/show", {
+          params: {
+            datefrom: moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYYMMDD"),
+            dateto: moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYYMMDD"),
+            employmentstatus: this.valueemploymentstatus,
+            departmentcode: this.valuedepartment,
+            usercode: this.valueuser
+          }
+        }).then(function (response) {
+          _this2.resresults = response.data;
+
+          if (_this2.resresults.alertresults != null) {
+            _this2.alertresults = _this2.resresults.alertresults;
+          }
+
+          if (_this2.resresults.messagedata != null) {
+            _this2.messagedatasserver = _this2.resresults.messagedata;
+          }
+
+          console.log("alertresults" + Object.keys(_this2.alertresults).length);
+          console.log("messagedatasserver" + Object.keys(_this2.messagedatasserver).length);
+
+          _this2.$forceUpdate();
+        })["catch"](function (reason) {
+          alert("error");
+        });
+      }
+    },
+    // ----------------- 共通メソッド ----------------------------------
+    // ユーザー選択コンポーネント取得メソッド
+    getUserSelected: function getUserSelected() {
+      this.fromdate = "";
+      this.valueuser = "";
+
+      if (this.valuefromdate) {
+        this.fromdate = moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYYMMDD");
+      }
+
+      if (this.valueemploymentstatus == "") {
+        if (this.valuedepartment == "") {
+          this.$refs.selectuser.getUserList(this.getDo, this.fromdate);
+        } else {
+          this.$refs.selectuser.getUserListByDepartment(this.getDo, this.valuedepartment, this.fromdate);
+        }
+      } else {
+        if (this.valuedepartment == "") {
+          this.$refs.selectuser.getUserListByEmployment(this.getDo, this.valueemploymentstatus, this.fromdate);
+        } else {
+          this.$refs.selectuser.getUserListByDepartmentEmployment(this.getDo, this.valuedepartment, this.valueemploymentstatus, this.fromdate);
+        }
+      }
+    },
+    // クリアメソッド
+    itemClear: function itemClear() {
+      this.resresults = [];
+      this.alertresults = [];
+      this.messagedatasserver = [];
+      this.messagedatasfromdate = [];
+      this.messagedatastodate = [];
+      this.messagedatadepartment = [];
+      this.messagedatauser = [];
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingAlertTable.vue?vue&type=script&lang=js&":
+/*!*********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/DailyWorkingAlertTable.vue?vue&type=script&lang=js& ***!
+  \*********************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
 //
 //
 //
@@ -4670,6 +4929,30 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "dailyworkingalerttable",
+  props: {
+    alertLists: {
+      type: Array
+    }
+  },
+  // マウント時
+  mounted: function mounted() {
+    console.log(this.name + "マウント");
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingInfoTable.vue?vue&type=script&lang=js&":
+/*!********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/DailyWorkingInfoTable.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
 //
 //
 //
@@ -4736,29 +5019,46 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "dailyworkinginfotable",
+  props: {
+    detailOrTotal: {
+      type: String,
+      "default": 'detail'
+    },
+    calcLists: {
+      type: Array
+    },
+    predeterTimeName: {
+      type: String,
+      "default": '残業時間'
+    },
+    predeterNightTimeName: {
+      type: String,
+      "default": '深夜残業時間'
+    }
+  },
+  // マウント時
+  mounted: function mounted() {
+    console.log("dailyworkinginfotable  マウント");
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingInformation.vue?vue&type=script&lang=js&":
+/*!**********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/DailyWorkingInformation.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_1__);
 //
 //
 //
@@ -4943,11 +5243,16 @@ __webpack_require__.r(__webpack_exports__);
       resresults: [],
       calcresults: [],
       sumresults: [],
+      messages: [],
       messagedatasserver: [],
       messagedatasfromdate: [],
       messagedatastodate: [],
       messagedatadepartment: [],
       messagedatauser: [],
+      predetertimename: "",
+      predeternighttimename: "",
+      messageshowsearch: false,
+      issearchbutton: false,
       validate: false,
       initialized: false
     };
@@ -4971,6 +5276,8 @@ __webpack_require__.r(__webpack_exports__);
         this.messagedatasfromdate.push("指定日付は必ず入力してください。");
         this.validate = false;
       }
+
+      console.log("this.userrole " + this.userrole);
 
       if (this.userrole < "8") {
         if (!this.valuedepartment) {
@@ -5047,8 +5354,15 @@ __webpack_require__.r(__webpack_exports__);
       var _this2 = this;
 
       this.validate = this.checkForm(e);
+      console.log("this.valuefromdate" + this.valuefromdate);
+      console.log("this.valueemploymentstatus" + this.valueemploymentstatus);
+      console.log("this.valuedepartment" + this.valuedepartment);
+      console.log("this.valueuser" + this.valueuser);
 
       if (this.validate) {
+        this.issearchbutton = true;
+        this.messageshowsearch = true;
+        this.itemClear();
         this.$axios.get("/daily/calc", {
           params: {
             datefrom: moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYYMMDD"),
@@ -5058,19 +5372,41 @@ __webpack_require__.r(__webpack_exports__);
             usercode: this.valueuser
           }
         }).then(function (response) {
+          console.log("response");
           _this2.resresults = response.data;
-          _this2.calcresults = _this2.resresults.calcresults;
-          _this2.sumresults = _this2.resresults.sumresults;
 
-          _this2.dispmessage(_this2.resresults.massegedata);
+          if (_this2.resresults.calcresults != null) {
+            _this2.calcresults = _this2.resresults.calcresults;
+          }
 
-          _this2.messagedatasserver.length = 0;
+          if (_this2.resresults.sumresults != null) {
+            _this2.sumresults = _this2.resresults.sumresults;
+          }
+
+          if (_this2.resresults.messagedata != null) {
+            _this2.messagedatasserver = _this2.resresults.messagedata;
+          }
+
+          console.log("calcresults" + Object.keys(_this2.calcresults).length);
+          console.log("sumresults" + Object.keys(_this2.sumresults).length);
+          console.log("messages" + Object.keys(_this2.messages).length);
+
+          for (var key in _this2.calcresults) {
+            _this2.predetertimename = _this2.calcresults[key]['predeter_time_name'];
+            _this2.predeternighttimename = _this2.calcresults[key]['predeter_night_time_name'];
+            break;
+          }
+
+          ;
 
           _this2.$forceUpdate();
 
-          console.log("sumresults" + Object.keys(_this2.sumresults).length);
+          _this2.messageshowsearch = false;
+          _this2.issearchbutton = false;
         })["catch"](function (reason) {
-          alert("error");
+          _this2.messageshowsearch = false;
+          _this2.issearchbutton = false;
+          alert("日次集計エラー");
         });
       }
     },
@@ -5078,6 +5414,7 @@ __webpack_require__.r(__webpack_exports__);
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function getUserSelected() {
       this.fromdate = "";
+      this.valueuser = "";
 
       if (this.valuefromdate) {
         this.fromdate = moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYYMMDD");
@@ -5097,11 +5434,23 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
     },
+    // クリアメソッド
+    itemClear: function itemClear() {
+      this.resresults = [];
+      this.calcresults = [];
+      this.sumresults = [];
+      this.messages = [];
+      this.messagedatasserver = [];
+      this.messagedatasfromdate = [];
+      this.messagedatastodate = [];
+      this.messagedatadepartment = [];
+      this.messagedatauser = [];
+    },
     // メッセージ処理
-    dispmessage: function dispmessage(items) {
-      items.forEach(function (value) {
-        this.messagedatasserver.push(value);
-      });
+    dispmessage: function dispmessage(value) {
+      console.log("value " + Object.keys(value).length); //this.messagedatasserver = value;
+
+      console.log("messagedatasserver " + Object.keys(messagedatasserver).length);
     },
     // メッセージ処理
     dispmessagevalue: function dispmessagevalue(value) {
@@ -5761,6 +6110,92 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -5809,35 +6244,48 @@ __webpack_require__.r(__webpack_exports__);
   watch: {
     month: function month(val, oldVal) {
       this.selectMonth = this.zeroPadding(val, 2);
+    },
+    addMode: function addMode(val, oldVal) {
+      this.addKbn = "";
+    },
+    addKbn: function addKbn(val, oldVal) {
+      this.addMode = "";
+      this.addTime = "";
     }
   },
   methods: {
     // バリデーション
     checkForm: function checkForm() {
       var flag = false;
+      this.errors = [];
 
-      if (this.addDate && this.addTime && this.addMode) {
+      if (this.addDate && this.addKbn) {
         flag = true;
         return flag;
       } else {
-        this.errors = [];
+        if (this.addDate && this.addTime && this.addMode) {
+          flag = true;
+          return flag;
+        } else {
+          if (!this.addDate) {
+            flag = false;
+            this.errors.push("登録する日付を選択してください");
+          }
 
-        if (!this.addDate) {
-          flag = false;
-          this.errors.push("登録する日付を選択してください");
+          if (this.addKbn == "") {
+            if (!this.addTime) {
+              flag = false;
+              this.errors.push("時間を入力してください");
+            }
+
+            if (!this.addMode) {
+              flag = false;
+              this.errors.push("モードを選択してください");
+            }
+          }
+
+          return flag;
         }
-
-        if (!this.addTime) {
-          flag = false;
-          this.errors.push("時間を入力してください");
-        }
-
-        if (!this.addMode) {
-          flag = false;
-          this.errors.push("モードを選択してください");
-        }
-
-        return flag;
       }
     },
     alert: function alert(state, message, title) {
@@ -5872,6 +6320,8 @@ __webpack_require__.r(__webpack_exports__);
           dangerMode: true
         }).then(function (willDelete) {
           if (willDelete) {
+            _this2.inputClear();
+
             _this2.addWorkTime();
           } else {}
         });
@@ -5901,7 +6351,6 @@ __webpack_require__.r(__webpack_exports__);
     addWorkTime: function addWorkTime() {
       var _this4 = this;
 
-      // パスワード変更
       this.$axios.post("/edit_work_times/add", {
         date: this.addDate,
         user_code: this.valueuser,
@@ -6041,6 +6490,9 @@ __webpack_require__.r(__webpack_exports__);
     // ゼロ埋め
     zeroPadding: function zeroPadding(num, length) {
       return ("0000000000" + num).slice(-length);
+    },
+    inputClear: function inputClear() {
+      this.errors = [];
     }
   }
 });
@@ -6167,24 +6619,115 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "messageData",
   props: {
-    messagedatas: {
+    messageDatas: {
       type: Array,
       "default": function _default() {
         return [];
       }
+    },
+    messageClass: {
+      type: String,
+      "default": "info"
     }
   }
 });
 
 /***/ }),
 
-/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MonthlyWorkingInformation.vue?vue&type=script&lang=js&":
-/*!************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/MonthlyWorkingInformation.vue?vue&type=script&lang=js& ***!
-  \************************************************************************************************************************************************************************************/
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MessageDataServer.vue?vue&type=script&lang=js&":
+/*!****************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/MessageDataServer.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "messageDataServer",
+  props: {
+    messageDatas: {
+      type: Array,
+      "default": function _default() {
+        return [];
+      }
+    },
+    messageClass: {
+      type: String,
+      "default": "info"
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MessageWaiting.vue?vue&type=script&lang=js&":
+/*!*************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/MessageWaiting.vue?vue&type=script&lang=js& ***!
+  \*************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "waiting",
+  props: {
+    messageText: {
+      "default": '処　理　中...',
+      type: String
+    },
+    isMessageShow: {
+      "default": false,
+      type: Boolean
+    }
+  },
+  // マウント時
+  mounted: function mounted() {
+    console.log("messagewaiting Component mounted.");
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MonthlyWorkingAlert.vue?vue&type=script&lang=js&":
+/*!******************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/MonthlyWorkingAlert.vue?vue&type=script&lang=js& ***!
+  \******************************************************************************************************************************************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -6256,6 +6799,536 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      placeholderdata: "",
+      company_name: "",
+      valueym: "",
+      valuedisplay: "",
+      valuedepartment: "",
+      valueemploymentstatus: "",
+      getDo: 1,
+      fromdate: "",
+      valueuser: "",
+      valuefromdate: "",
+      userrole: "",
+      defaultDate: new Date(),
+      stringtext: "",
+      datejaFormat: "",
+      hrefindex: "",
+      resresults: [],
+      timeitems: [],
+      timevalues: [],
+      messagedatasserver: [],
+      messagedatasfromdate: [],
+      messagedatastodate: [],
+      messagedatadisplay: [],
+      messagedatadepartment: [],
+      messagedatauser: [],
+      validate: false,
+      initialized: false
+    };
+  },
+  // マウント時
+  mounted: function mounted() {
+    this.getUserRole();
+  },
+  methods: {
+    // バリデーション
+    checkForm: function checkForm(e) {
+      this.validate = true;
+      this.messagedatasserver = [];
+      this.messagedatasfromdate = [];
+      this.messagedatadisplay = [];
+      this.messagedatadepartment = [];
+      this.messagedatauser = [];
+
+      if (!this.valueym) {
+        this.messagedatasfromdate.push("指定年月は必ず入力してください。");
+        this.validate = false;
+      }
+
+      if (!this.valuedisplay) {
+        this.messagedatadisplay.push("表示区分は必ず入力してください。");
+        this.validate = false;
+      }
+
+      if (this.serchorupdate == "update") {
+        if (!this.valuedepartment) {
+          this.messagedatadepartment.push("所属部署は必ず入力してください。");
+          this.validate = false;
+        }
+
+        if (this.userrole < "8") {
+          if (!this.valueuser) {
+            this.messagedatauser.push("氏名は必ず入力してください。");
+            this.validate = false;
+          }
+        }
+      } else {
+        if (this.userrole < "8") {
+          if (!this.valuedepartment) {
+            this.messagedatadepartment.push("所属部署は必ず入力してください。");
+            this.validate = false;
+          }
+
+          if (!this.valueuser) {
+            this.messagedatauser.push("氏名は必ず入力してください。");
+            this.validate = false;
+          }
+        }
+      }
+
+      console.log("validate = true");
+
+      if (this.validate) {
+        return this.validate;
+      }
+
+      e.preventDefault();
+    },
+    // ログインユーザーの権限を取得
+    getUserRole: function getUserRole() {
+      var _this = this;
+
+      this.$axios.get("/get_login_user_role", {}).then(function (response) {
+        _this.userrole = response.data;
+      })["catch"](function (reason) {
+        alert("ログインユーザー権限取得エラー");
+      });
+    },
+    // 指定年月が変更された場合の処理
+    fromdateChanges: function fromdateChanges(value) {
+      console.log("fromdateChanges value = " + value);
+      this.valueym = value; // パネルに表示
+
+      this.setPanelHeader(); // 再取得
+
+      this.fromdate = "";
+
+      if (this.valuefromdate) {
+        this.fromdate = moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYYMMDD");
+      }
+
+      this.$refs.selectdepartment.getDepartmentList(this.fromdate);
+      this.getUserSelected();
+    },
+    // 表示区分が変更された場合の処理
+    displayChange: function displayChange(value) {
+      this.valuedisplay = value;
+      this.setPanelHeader();
+    },
+    // 雇用形態が変更された場合の処理
+    employmentChanges: function employmentChanges(value) {
+      this.valueemploymentstatus = value;
+      this.getDo = 1; // ユーザー選択コンポーネントの取得メソッドを実行
+
+      this.getUserSelected();
+    },
+    // 部署選択が変更された場合の処理
+    departmentChanges: function departmentChanges(value) {
+      this.valuedepartment = value; // ユーザー選択コンポーネントの取得メソッドを実行
+
+      this.getDo = 1;
+      this.getUserSelected();
+    },
+    // ユーザー選択が変更された場合の処理
+    userChanges: function userChanges(value) {
+      this.valueuser = value;
+    },
+    // 検索開始ボタンがクリックされた場合の処理
+    searchclick: function searchclick(e) {
+      var _this2 = this;
+
+      this.serchorupdate = "search";
+      this.validate = this.checkForm(e);
+
+      if (this.validate) {
+        this.itemClear();
+        this.$axios.get("/monthly_alert/show", {
+          params: {
+            datefrom: moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYYMM"),
+            displaykbn: this.valuedisplay,
+            employmentstatus: this.valueemploymentstatus,
+            departmentcode: this.valuedepartment,
+            usercode: this.valueuser
+          }
+        }).then(function (response) {
+          _this2.resresults = response.data;
+
+          if (_this2.resresults.timeitems != null) {
+            _this2.timeitems = _this2.resresults.timeitems;
+          }
+
+          if (_this2.resresults.timevalues != null) {
+            _this2.timevalues = _this2.resresults.timevalues;
+          }
+
+          if (_this2.resresults.messagedata != null) {
+            _this2.messagedatasserver = _this2.resresults.messagedata;
+          }
+
+          console.log("timeitems" + Object.keys(_this2.timeitems).length);
+          console.log("timevalues" + Object.keys(_this2.timevalues).length);
+          console.log("messagedatasserver" + Object.keys(_this2.messagedatasserver).length);
+
+          _this2.$forceUpdate();
+        })["catch"](function (reason) {
+          alert("月次警告通知エラー");
+        });
+      }
+    },
+    // ----------------- 共通メソッド ----------------------------------
+    // クリアメソッド
+    itemClear: function itemClear() {
+      this.resresults = [];
+      this.timeitems = [];
+      this.timevalues = [];
+      this.messagedatasserver = [];
+      this.messagedatasfromdate = [];
+      this.messagedatastodate = [];
+      this.messagedatadisplay = [];
+      this.messagedatadepartment = [];
+      this.messagedatauser = [];
+    },
+    // ユーザー選択コンポーネント取得メソッド
+    getUserSelected: function getUserSelected() {
+      this.getDo = 1;
+      this.fromdate = "";
+
+      if (this.valuefromdate) {
+        this.fromdate = moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYYMMDD");
+      }
+
+      if (this.valueemploymentstatus == "") {
+        if (this.valuedepartment == "") {
+          this.$refs.selectuser.getUserList(this.getDo, this.fromdate);
+        } else {
+          this.$refs.selectuser.getUserListByDepartment(this.getDo, this.valuedepartment, this.fromdate);
+        }
+      } else {
+        if (this.valuedepartment == "") {
+          this.$refs.selectuser.getUserListByEmployment(this.getDo, this.valueemploymentstatus, this.fromdate);
+        } else {
+          this.$refs.selectuser.getUserListByDepartmentEmployment(this.getDo, this.valuedepartment, this.valueemploymentstatus, this.fromdate);
+        }
+      }
+    },
+    // 集計パネルヘッダ文字列編集処理
+    setPanelHeader: function setPanelHeader() {
+      console.log("setPanelHeader in " + this.valueym);
+      moment__WEBPACK_IMPORTED_MODULE_1___default.a.locale("ja");
+
+      if (this.valueym == null || this.valueym == "") {
+        this.stringtext = "";
+      } else {
+        if (this.valuedisplay == null || this.valuedisplay == "") {
+          this.stringtext = "";
+        } else {
+          if (this.valuedisplay == null || this.valuedisplay == "") {
+            this.stringtext = "";
+          } else {
+            this.valuefromdate = this.valueym + '-01';
+
+            if (moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYYMM") != moment__WEBPACK_IMPORTED_MODULE_1___default()().format("YYYYMM")) {
+              this.valuefromdate = moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).endOf('month').format("YYYYMMDD");
+            } else {
+              this.valuefromdate = moment__WEBPACK_IMPORTED_MODULE_1___default()().format("YYYYMMDD");
+            }
+
+            this.datejaFormat = moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYY年MM月");
+
+            if (this.valuedisplay == "1") {
+              this.stringtext = "月次アラート " + this.datejaFormat + "を〆日でアラート検索";
+            } else {
+              if (this.valuedisplay == "2") {
+                this.stringtext = "月次アラート " + this.datejaFormat + "1日からアラート検索";
+              } else {
+                this.stringtext = "";
+              }
+            }
+          }
+        }
+      }
+    },
+    // メッセージ処理
+    dispmessage: function dispmessage(items) {
+      items.forEach(function (value) {
+        this.messagedatasserver.push(value);
+      });
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MonthlyWorkingAlertTable.vue?vue&type=script&lang=js&":
+/*!***********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/MonthlyWorkingAlertTable.vue?vue&type=script&lang=js& ***!
+  \***********************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "dailyworkingalerttable",
+  props: {
+    timeItems: {
+      type: Array
+    },
+    timeValues: {
+      type: Array
+    }
+  },
+  // マウント時
+  mounted: function mounted() {
+    console.log(this.name + "マウント");
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MonthlyWorkingInfoTable.vue?vue&type=script&lang=js&":
+/*!**********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/MonthlyWorkingInfoTable.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  name: "monthlyworkinginfotable",
+  props: {
+    detailOrTotal: {
+      type: String,
+      "default": 'detail'
+    },
+    calcLists: {
+      type: Array
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MonthlyWorkingInformation.vue?vue&type=script&lang=js&":
+/*!************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/MonthlyWorkingInformation.vue?vue&type=script&lang=js& ***!
+  \************************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-toasted */ "./node_modules/vue-toasted/dist/vue-toasted.min.js");
+/* harmony import */ var vue_toasted__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue_toasted__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_1__);
 //
 //
 //
@@ -6594,12 +7667,18 @@ __webpack_require__.r(__webpack_exports__);
       resresults: [],
       calcresults: [],
       sumresults: [],
+      serchorupdate: "",
       messagedatasserver: [],
       messagedatasfromdate: [],
       messagedatastodate: [],
       messagedatadisplay: [],
       messagedatadepartment: [],
       messagedatauser: [],
+      messageshowsearch: false,
+      messageshowupdate: false,
+      issearchbutton: false,
+      isupdatebutton: false,
+      iscsvbutton: false,
       validate: false,
       initialized: false
     };
@@ -6621,31 +7700,50 @@ __webpack_require__.r(__webpack_exports__);
       if (!this.valueym) {
         this.messagedatasfromdate.push("指定年月は必ず入力してください。");
         this.validate = false;
+        console.log("指定年月は必ず入力してください。");
       }
 
       if (!this.valuedisplay) {
         this.messagedatadisplay.push("表示区分は必ず入力してください。");
         this.validate = false;
+        console.log("表示区分は必ず入力してください。");
       }
 
-      if (this.userrole < "8") {
+      if (this.serchorupdate == "update") {
         if (!this.valuedepartment) {
           this.messagedatadepartment.push("所属部署は必ず入力してください。");
           this.validate = false;
+          console.log("所属部署は必ず入力してください。");
         }
 
-        if (!this.valueuser) {
-          this.messagedatauser.push("氏名は必ず入力してください。");
-          this.validate = false;
+        if (this.userrole < "8") {
+          if (!this.valueuser) {
+            this.messagedatauser.push("氏名は必ず入力してください。");
+            this.validate = false;
+            console.log("氏名は必ず入力してください。");
+          }
+        }
+      } else {
+        if (this.userrole < "8") {
+          if (!this.valuedepartment) {
+            this.messagedatadepartment.push("所属部署は必ず入力してください。");
+            this.validate = false;
+            console.log("所属部署は必ず入力してください。");
+          }
+
+          if (!this.valueuser) {
+            this.messagedatauser.push("氏名は必ず入力してください。");
+            this.validate = false;
+            console.log("氏名は必ず入力してください。");
+          }
         }
       }
-
-      console.log("validate = true");
 
       if (this.validate) {
         return this.validate;
       }
 
+      console.log("validate = false");
       e.preventDefault();
     },
     // ログインユーザーの権限を取得
@@ -6701,9 +7799,15 @@ __webpack_require__.r(__webpack_exports__);
     searchclick: function searchclick(e) {
       var _this2 = this;
 
+      this.serchorupdate = "search";
       this.validate = this.checkForm(e);
 
       if (this.validate) {
+        this.issearchbutton = true;
+        this.isupdatebutton = true;
+        this.iscsvbutton = true;
+        this.messageshowsearch = true;
+        this.itemClear();
         this.$axios.get("/monthly/show", {
           params: {
             datefrom: moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYYMM"),
@@ -6721,18 +7825,84 @@ __webpack_require__.r(__webpack_exports__);
           _this2.dispmessage(_this2.resresults.massegedata);
 
           _this2.messagedatasserver.length = 0;
-
-          _this2.$forceUpdate();
-
           console.log("calcresults" + Object.keys(_this2.calcresults).length);
           console.log("sumresults" + Object.keys(_this2.sumresults).length);
           console.log("company_name" + _this2.company_name);
+          _this2.messageshowsearch = false;
+          _this2.issearchbutton = false;
+          _this2.isupdatebutton = false;
+          _this2.iscsvbutton = false;
+
+          _this2.$forceUpdate();
         })["catch"](function (reason) {
+          _this2.messageshowsearch = false;
+          _this2.issearchbutton = false;
+          _this2.isupdatebutton = false;
+          _this2.iscsvbutton = false;
           alert("月次集計エラー");
         });
       }
     },
+    // 最新更新開始ボタンがクリックされた場合の処理
+    updateclick: function updateclick(e) {
+      var _this3 = this;
+
+      this.serchorupdate = "update";
+      this.validate = this.checkForm(e);
+      console.log("更新を開始" + this.validate);
+
+      if (this.validate) {
+        this.issearchbutton = true;
+        this.isupdatebutton = true;
+        this.iscsvbutton = true;
+        this.messageshowupdate = true;
+        this.itemClear();
+        this.$axios.get("/monthly/calc", {
+          params: {
+            datefrom: moment__WEBPACK_IMPORTED_MODULE_1___default()(this.valuefromdate).format("YYYYMM"),
+            displaykbn: this.valuedisplay,
+            employmentstatus: this.valueemploymentstatus,
+            departmentcode: this.valuedepartment,
+            usercode: this.valueuser
+          }
+        }).then(function (response) {
+          _this3.resresults = response.data;
+          _this3.calcresults = _this3.resresults.calcresults;
+          _this3.sumresults = _this3.resresults.sumresults;
+          _this3.company_name = _this3.resresults.company_name;
+
+          _this3.dispmessage(_this3.resresults.massegedata);
+
+          _this3.messagedatasserver.length = 0;
+          _this3.messageshowupdate = false;
+          _this3.issearchbutton = false;
+          _this3.isupdatebutton = false;
+          _this3.iscsvbutton = false;
+
+          _this3.$forceUpdate();
+        })["catch"](function (reason) {
+          _this3.messageshowupdate = false;
+          _this3.issearchbutton = false;
+          _this3.isupdatebutton = false;
+          _this3.iscsvbutton = false;
+          alert("月次集計最新更新エラー");
+        });
+      }
+    },
     // ----------------- 共通メソッド ----------------------------------
+    // クリアメソッド
+    itemClear: function itemClear() {
+      this.resresults = [];
+      this.calcresults = [];
+      this.sumresults = [];
+      this.serchorupdate = "";
+      this.messagedatasserver = [];
+      this.messagedatasfromdate = [];
+      this.messagedatastodate = [];
+      this.messagedatadisplay = [];
+      this.messagedatadepartment = [];
+      this.messagedatauser = [];
+    },
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function getUserSelected() {
       this.getDo = 1;
@@ -7185,6 +8355,8 @@ __webpack_require__.r(__webpack_exports__);
     getUserList: function getUserList(getdovalue, datevalue) {
       var _this = this;
 
+      this.selectedUser = '';
+      this.userList = [];
       this.$axios.get("/get_user_list", {
         params: {
           getdo: getdovalue,
@@ -7199,6 +8371,8 @@ __webpack_require__.r(__webpack_exports__);
     getUserListByDepartment: function getUserListByDepartment(getdovalue, value, datevalue) {
       var _this2 = this;
 
+      this.selectedUser = '';
+      this.userList = [];
       this.$axios.get("/get_user_list", {
         params: {
           getdo: getdovalue,
@@ -7214,6 +8388,8 @@ __webpack_require__.r(__webpack_exports__);
     getUserListByEmployment: function getUserListByEmployment(getdovalue, empvalue, datevalue) {
       var _this3 = this;
 
+      this.selectedUser = '';
+      this.userList = [];
       this.$axios.get("/get_user_list", {
         params: {
           getdo: getdovalue,
@@ -7229,6 +8405,8 @@ __webpack_require__.r(__webpack_exports__);
     getUserListByDepartmentEmployment: function getUserListByDepartmentEmployment(getdovalue, value, empvalue, datevalue) {
       var _this4 = this;
 
+      this.selectedUser = '';
+      this.userList = [];
       this.$axios.get("/get_user_list", {
         params: {
           getdo: getdovalue,
@@ -8193,7 +9371,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         this.$axios.post("/get_user_shift", {
           code: this.selectedUser,
           from: this.from,
-          to: this.to
+          to: this.to,
+          no: this.timeTable.no
         }).then(function (response) {
           _this5.shiftInfo = response.data;
           _this5.errors = [];
@@ -9311,36 +10490,6 @@ __webpack_require__.r(__webpack_exports__);
     },
     fixedClick: function fixedClick(value) {
       console.log("fixedClick = " + value);
-    }
-  }
-});
-
-/***/ }),
-
-/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkTimeSearchButton.vue?vue&type=script&lang=js&":
-/*!*******************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkTimeSearchButton.vue?vue&type=script&lang=js& ***!
-  \*******************************************************************************************************************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-//
-//
-//
-//
-//
-/* harmony default export */ __webpack_exports__["default"] = ({
-  name: "WorkTimeSearchButton",
-  // マウント時
-  mounted: function mounted() {
-    console.log("WorkTimeSearchButton Component mounted.");
-  },
-  methods: {
-    searchclickBtn: function searchclickBtn() {
-      console.log("searchclickBtn start ");
-      this.$emit('searchclick-event', event);
     }
   }
 });
@@ -13862,6 +15011,25 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 // module
 exports.push([module.i, "\n.margin-set-mid[data-v-5bec2df0] {\n  margin-top: 30px;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MessageWaiting.vue?vue&type=style&index=0&lang=css&":
+/*!********************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/MessageWaiting.vue?vue&type=style&index=0&lang=css& ***!
+  \********************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n#modal {\n    margin: 3vw;\n}\n", ""]);
 
 // exports
 
@@ -78788,6 +79956,36 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MessageWaiting.vue?vue&type=style&index=0&lang=css&":
+/*!************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/MessageWaiting.vue?vue&type=style&index=0&lang=css& ***!
+  \************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./MessageWaiting.vue?vue&type=style&index=0&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MessageWaiting.vue?vue&type=style&index=0&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/SettingCalc.vue?vue&type=style&index=0&id=c2ff35ac&scoped=true&lang=css&":
 /*!*********************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/SettingCalc.vue?vue&type=style&index=0&id=c2ff35ac&scoped=true&lang=css& ***!
@@ -79534,6 +80732,92 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/BtnWorkTime.vue?vue&type=template&id=c9745c42&":
+/*!**************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/BtnWorkTime.vue?vue&type=template&id=c9745c42& ***!
+  \**************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { attrs: { id: "btnworktime" } }, [
+    _vm.btnMode === "search"
+      ? _c(
+          "div",
+          {
+            staticClass: "btn-group d-flex",
+            on: {
+              click: function($event) {
+                return _vm.searchclickBtn()
+              }
+            }
+          },
+          [
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-primary btn-lg font-size-rg w-100",
+                attrs: { type: "button", disabled: _vm.isPush }
+              },
+              [
+                _c("img", {
+                  staticClass: "icon-size-sm mr-2 pb-1",
+                  attrs: { src: "/images/round-search-w.svg", alt: "" }
+                }),
+                _vm._v("この条件で表示する")
+              ]
+            )
+          ]
+        )
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.btnMode === "update"
+      ? _c(
+          "div",
+          {
+            staticClass: "btn-group d-flex",
+            on: {
+              click: function($event) {
+                return _vm.updateclickBtn()
+              }
+            }
+          },
+          [
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-danger btn-lg font-size-rg w-100",
+                attrs: { type: "button", disabled: _vm.isPush }
+              },
+              [
+                _c("img", {
+                  staticClass: "icon-size-sm mr-2 pb-1",
+                  attrs: { src: "/images/round-search-w.svg", alt: "" }
+                }),
+                _vm._v(
+                  "日次集計を指定月日数分行います（数分程度）。終了後は「この条件で表示する」を押下してください"
+                )
+              ]
+            )
+          ]
+        )
+      : _vm._e()
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColAttendance.vue?vue&type=template&id=28c40fae&":
 /*!****************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColAttendance.vue?vue&type=template&id=28c40fae& ***!
@@ -79654,11 +80938,11 @@ var render = function() {
         [
           _c("div", { staticClass: "card-body px-3 py-2" }, [
             _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-              _vm._v(_vm._s(this.itemName))
+              _vm._v(_vm._s(_vm.itemName))
             ]),
             _vm._v(" "),
             _c("p", { staticClass: "font-size-rg m-0" }, [
-              _vm._v(_vm._s(this.value))
+              _vm._v(_vm._s(_vm.value))
             ])
           ])
         ]
@@ -80102,6 +81386,26 @@ var render = function() {
                       }
                     },
                     [_vm._v("この条件で登録する")]
+                  )
+                ])
+              ])
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "row justify-content-between" }, [
+              _c("div", { staticClass: "col-md-12 pb-2" }, [
+                _c("div", { staticClass: "btn-group d-flex" }, [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-primary btn-lg font-size-rg w-100",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          return _vm.gotoedit()
+                        }
+                      }
+                    },
+                    [_vm._v("カレンダー編集画面へ")]
                   )
                 ])
               ])
@@ -84341,10 +85645,10 @@ render._withStripped = true
 
 /***/ }),
 
-/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingInformation.vue?vue&type=template&id=10e0d6ce&":
-/*!**************************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/DailyWorkingInformation.vue?vue&type=template&id=10e0d6ce& ***!
-  \**************************************************************************************************************************************************************************************************************************/
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingAlert.vue?vue&type=template&id=6c811489&":
+/*!********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/DailyWorkingAlert.vue?vue&type=template&id=6c811489& ***!
+  \********************************************************************************************************************************************************************************************************************/
 /*! exports provided: render, staticRenderFns */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -84356,606 +85660,128 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    [
-      _c("div", { staticClass: "row justify-content-between" }, [
-        _c("div", { staticClass: "col-md pt-3" }, [
-          _c(
-            "div",
-            { staticClass: "card shadow-pl" },
-            [
-              _c("daily-working-information-panel-header", {
-                attrs: {
-                  headertext1: "日付を指定して集計を表示する",
-                  headertext2:
-                    "雇用形態や所属部署でフィルタリングして表示できます"
-                }
-              }),
-              _vm._v(" "),
-              _c("div", { staticClass: "card-body pt-2" }, [
-                _c(
-                  "div",
-                  { staticClass: "row justify-content-between" },
-                  [
-                    _c("message-data", {
-                      attrs: { messagedatas: _vm.messagedatasserver }
-                    }),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "col-md-6 pb-2" }, [
-                      _c(
-                        "div",
-                        { staticClass: "input-group" },
-                        [
-                          _vm._m(0),
-                          _vm._v(" "),
-                          _c("input-datepicker", {
-                            attrs: { "default-Date": _vm.defaultDate },
-                            on: { "change-event": _vm.fromdateChanges }
-                          }),
-                          _vm._v(" "),
-                          _c("message-data", {
-                            attrs: { messagedatas: _vm.messagedatasfromdate }
-                          })
-                        ],
-                        1
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "col-md-6 pb-2" }, [
-                      _c(
-                        "div",
-                        { staticClass: "input-group" },
-                        [
-                          _vm._m(1),
-                          _vm._v(" "),
-                          _c("select-employmentstatus", {
-                            attrs: { "blank-data": true },
-                            on: { "change-event": _vm.employmentChanges }
-                          })
-                        ],
-                        1
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "col-md-6 pb-2" }, [
-                      _c(
-                        "div",
-                        { staticClass: "input-group" },
-                        [
-                          _vm._m(2),
-                          _vm._v(" "),
-                          _c("select-department", {
-                            ref: "selectdepartment",
-                            attrs: { "blank-data": true },
-                            on: { "change-event": _vm.departmentChanges }
-                          }),
-                          _vm._v(" "),
-                          _c("message-data", {
-                            attrs: { messagedatas: _vm.messagedatadepartment }
-                          })
-                        ],
-                        1
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "col-md-6 pb-2" }, [
-                      _c(
-                        "div",
-                        { staticClass: "input-group" },
-                        [
-                          _vm._m(3),
-                          _vm._v(" "),
-                          _c("select-user", {
-                            ref: "selectuser",
-                            attrs: {
-                              "blank-data": true,
-                              "get-do": _vm.getDo,
-                              "date-value": _vm.fromdate
-                            },
-                            on: { "change-event": _vm.userChanges }
-                          }),
-                          _vm._v(" "),
-                          _c("message-data", {
-                            attrs: { messagedatas: _vm.messagedatauser }
-                          })
-                        ],
-                        1
-                      )
-                    ])
-                  ],
-                  1
-                ),
+  return _c("div", [
+    _c("div", { staticClass: "row justify-content-between" }, [
+      _c("div", { staticClass: "col-md pt-3" }, [
+        _c(
+          "div",
+          { staticClass: "card shadow-pl" },
+          [
+            _c("daily-working-information-panel-header", {
+              attrs: {
+                headertext1:
+                  "指定日付から過去１週間以内の警告を表示（確認して勤怠編集で修正入力します）",
+                headertext2:
+                  "雇用形態や所属部署でフィルタリングして表示できます"
+              }
+            }),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "card-body pt-2" },
+              [
+                _c("div", { staticClass: "row justify-content-between" }, [
+                  _c("div", { staticClass: "col-md-6 pb-2" }, [
+                    _c(
+                      "div",
+                      { staticClass: "input-group" },
+                      [
+                        _vm._m(0),
+                        _vm._v(" "),
+                        _c("input-datepicker", {
+                          attrs: { "default-Date": _vm.defaultDate },
+                          on: { "change-event": _vm.fromdateChanges }
+                        }),
+                        _vm._v(" "),
+                        _c("message-data", {
+                          attrs: {
+                            "message-datas": _vm.messagedatasfromdate,
+                            "message-class": "warning"
+                          }
+                        })
+                      ],
+                      1
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-6 pb-2" }, [
+                    _c(
+                      "div",
+                      { staticClass: "input-group" },
+                      [
+                        _vm._m(1),
+                        _vm._v(" "),
+                        _c("select-employmentstatus", {
+                          attrs: { "blank-data": true },
+                          on: { "change-event": _vm.employmentChanges }
+                        })
+                      ],
+                      1
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-6 pb-2" }, [
+                    _c(
+                      "div",
+                      { staticClass: "input-group" },
+                      [
+                        _vm._m(2),
+                        _vm._v(" "),
+                        _c("select-department", {
+                          ref: "selectdepartment",
+                          attrs: { "blank-data": true },
+                          on: { "change-event": _vm.departmentChanges }
+                        }),
+                        _vm._v(" "),
+                        _c("message-data", {
+                          attrs: { "message-datas": _vm.messagedatadepartment }
+                        })
+                      ],
+                      1
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-6 pb-2" }, [
+                    _c(
+                      "div",
+                      { staticClass: "input-group" },
+                      [
+                        _vm._m(3),
+                        _vm._v(" "),
+                        _c("select-user", {
+                          ref: "selectuser",
+                          attrs: {
+                            "blank-data": true,
+                            "get-do": _vm.getDo,
+                            "date-value": _vm.fromdate
+                          },
+                          on: { "change-event": _vm.userChanges }
+                        }),
+                        _vm._v(" "),
+                        _c("message-data", {
+                          attrs: { "message-datas": _vm.messagedatauser }
+                        })
+                      ],
+                      1
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("message-data-server", {
+                  attrs: {
+                    "message-datas": _vm.messagedatasserver,
+                    "message-class": "warning"
+                  }
+                }),
                 _vm._v(" "),
                 _c("div", { staticClass: "row justify-content-between" }, [
                   _c(
                     "div",
                     { staticClass: "col-md-12 pb-2" },
                     [
-                      _c("search-workingtimebutton", {
+                      _c("btn-work-time", {
+                        attrs: { "btn-mode": "search" },
                         on: { "searchclick-event": _vm.searchclick }
-                      })
-                    ],
-                    1
-                  )
-                ])
-              ])
-            ],
-            1
-          )
-        ])
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "row justify-content-between" }, [
-        _c("div", { staticClass: "col-md pt-3 align-self-stretch" }, [
-          _c(
-            "div",
-            { staticClass: "card shadow-pl" },
-            [
-              _c("daily-working-information-panel-header", {
-                attrs: {
-                  headertext1: _vm.stringtext,
-                  headertext2:
-                    "虫眼鏡アイコンをクリックすると集計結果が表示されます"
-                }
-              }),
-              _vm._v(" "),
-              _vm._l(_vm.calcresults, function(calclist, index) {
-                return _c(
-                  "div",
-                  {
-                    key: calclist.user_code,
-                    staticClass: "card-body mb-3 py-0 pt-4 border-top"
-                  },
-                  [
-                    _c(
-                      "div",
-                      { staticClass: "row" },
-                      [
-                        _c(
-                          "div",
-                          {
-                            staticClass:
-                              "col-sm-6 col-md-6 col-sm-6 col-lg-4 pb-2 align-self-stretch"
-                          },
-                          [
-                            _c(
-                              "a",
-                              {
-                                staticClass:
-                                  "float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg",
-                                attrs: {
-                                  "data-toggle": "collapse",
-                                  href: "#collapseUser" + index,
-                                  role: "button",
-                                  "aria-expanded": "true",
-                                  "aria-controls": "collapseUser" + index
-                                }
-                              },
-                              [
-                                _c("img", {
-                                  staticClass: "icon-size-rg",
-                                  attrs: {
-                                    src: "/images/round-search-w.svg",
-                                    alt: ""
-                                  }
-                                })
-                              ]
-                            ),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("氏名")
-                            ]),
-                            _vm._v(" "),
-                            _c(
-                              "p",
-                              {
-                                staticClass: "font-size-rg font-weight-bold m-0"
-                              },
-                              [_vm._v(_vm._s(calclist.user_name))]
-                            )
-                          ]
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "div",
-                          {
-                            staticClass:
-                              "col-sm-6 col-md-6 col-sm-6 col-lg-4 pb-2 align-self-stretch"
-                          },
-                          [
-                            _vm._m(4, true),
-                            _vm._v(" "),
-                            _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                              _vm._v("部署")
-                            ]),
-                            _vm._v(" "),
-                            _c("p", { staticClass: "font-size-rg m-0" }, [
-                              _vm._v(_vm._s(calclist.department_name))
-                            ])
-                          ]
-                        ),
-                        _vm._v(" "),
-                        _c("col-attendance", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            attendancetime: calclist.attendance_time_1,
-                            leavingtime: calclist.leaving_time_1,
-                            displaynone: true
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-attendance", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            attendancetime: calclist.attendance_time_2,
-                            leavingtime: calclist.leaving_time_2,
-                            displaynone: false
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-attendance", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            attendancetime: calclist.attendance_time_3,
-                            leavingtime: calclist.leaving_time_3,
-                            displaynone: false
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-attendance", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            attendancetime: calclist.attendance_time_4,
-                            leavingtime: calclist.leaving_time_4,
-                            displaynone: false
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-attendance", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            attendancetime: calclist.attendance_time_5,
-                            leavingtime: calclist.leaving_time_5,
-                            displaynone: false
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-missingmiddle", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            missingmiddlename: "公用外出時間",
-                            missingmiddletime: calclist.public_going_out_time_1,
-                            missingmiddlereturntime:
-                              calclist.public_going_out_return_time_1,
-                            displaynone: false
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-missingmiddle", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            missingmiddlename: "公用外出時間",
-                            missingmiddletime: calclist.public_going_out_time_2,
-                            missingmiddlereturntime:
-                              calclist.public_going_out_return_time_2,
-                            displaynone: false
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-missingmiddle", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            missingmiddlename: "公用外出時間",
-                            missingmiddletime: calclist.public_going_out_time_3,
-                            missingmiddlereturntime:
-                              calclist.public_going_out_return_time_3,
-                            displaynone: false
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-missingmiddle", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            missingmiddlename: "公用外出時間",
-                            missingmiddletime: calclist.public_going_out_time_4,
-                            missingmiddlereturntime:
-                              calclist.public_going_out_return_time_4,
-                            displaynone: false
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-missingmiddle", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            missingmiddlename: "公用外出時間",
-                            missingmiddletime: calclist.public_going_out_time_5,
-                            missingmiddlereturntime:
-                              calclist.public_going_out_return_time_5,
-                            displaynone: false
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-missingmiddle", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            missingmiddlename: "私用外出時間",
-                            missingmiddletime: calclist.missing_middle_time_1,
-                            missingmiddlereturntime:
-                              calclist.missing_middle_return_time_1,
-                            displaynone: false
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-missingmiddle", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            missingmiddlename: "私用外出時間",
-                            missingmiddletime: calclist.missing_middle_time_2,
-                            missingmiddlereturntime:
-                              calclist.missing_middle_return_time_2,
-                            displaynone: false
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-missingmiddle", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            missingmiddlename: "私用外出時間",
-                            missingmiddletime: calclist.missing_middle_time_3,
-                            missingmiddlereturntime:
-                              calclist.missing_middle_return_time_3,
-                            displaynone: false
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-missingmiddle", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            missingmiddlename: "私用外出時間",
-                            missingmiddletime: calclist.missing_middle_time_4,
-                            missingmiddlereturntime:
-                              calclist.missing_middle_return_time_4,
-                            displaynone: false
-                          }
-                        }),
-                        _vm._v(" "),
-                        _c("col-missingmiddle", {
-                          staticClass: "col-12 col-lg-4 p-0 align-self-stretch",
-                          attrs: {
-                            missingmiddlename: "私用外出時間",
-                            missingmiddletime: calclist.missing_middle_time_5,
-                            missingmiddlereturntime:
-                              calclist.missing_middle_return_time_5,
-                            displaynone: false
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      {
-                        staticClass: "collapse",
-                        attrs: { id: "collapseUser" + index }
-                      },
-                      [
-                        _c(
-                          "div",
-                          { staticClass: "row mt-2" },
-                          [
-                            _c("col-employmentstatus", {
-                              attrs: {
-                                "item-name": "雇用形態",
-                                "item-value": calclist.employment_status_name
-                              }
-                            }),
-                            _vm._v(" "),
-                            _c("col-employmentstatus", {
-                              attrs: {
-                                "item-name": "勤務状態",
-                                "item-value": calclist.working_status_name,
-                                "itemsecound-value": calclist.holiday_name
-                              }
-                            }),
-                            _vm._v(" "),
-                            _c("col-regularworking", {
-                              attrs: {
-                                "item-name": "勤務時間",
-                                "item-value": calclist.total_working_times
-                              }
-                            }),
-                            _vm._v(" "),
-                            _c("col-employmentstatus", {
-                              attrs: {
-                                "item-name": "勤務シフト",
-                                "item-value": calclist.working_timetable_name
-                              }
-                            }),
-                            _vm._v(" "),
-                            _c("col-regularworking", {
-                              attrs: {
-                                "item-name": "所定労働時間",
-                                "item-value": calclist.regular_working_times
-                              }
-                            }),
-                            _vm._v(" "),
-                            _c("col-regularworking", {
-                              attrs: {
-                                "item-name": "所定外労働時間",
-                                "item-value":
-                                  calclist.out_of_regular_working_times
-                              }
-                            }),
-                            _vm._v(" "),
-                            _c("col-overtimehours", {
-                              attrs: {
-                                "item-name": "残業時間",
-                                "item-value": calclist.overtime_hours
-                              }
-                            }),
-                            _vm._v(" "),
-                            _c("col-overtimehours", {
-                              attrs: {
-                                "item-name": "深夜残業時間",
-                                "item-value": calclist.late_night_overtime_hours
-                              }
-                            }),
-                            _vm._v(" "),
-                            _c("col-overtimehours", {
-                              attrs: {
-                                "item-name": "法定労働時間",
-                                "item-value": calclist.legal_working_times
-                              }
-                            }),
-                            _vm._v(" "),
-                            _c("col-overtimehours", {
-                              attrs: {
-                                "item-name": "法定外労働時間",
-                                "item-value":
-                                  calclist.out_of_legal_working_times
-                              }
-                            }),
-                            _vm._v(" "),
-                            _c("col-notemploymentworking", {
-                              attrs: {
-                                "item-name": "未就労時間",
-                                "item-value":
-                                  calclist.not_employment_working_hours
-                              }
-                            }),
-                            _vm._v(" "),
-                            _c("col-notemploymentworking", {
-                              attrs: {
-                                "item-name": "時間外労働",
-                                "item-value": calclist.off_hours_working_hours
-                              }
-                            }),
-                            _vm._v(" "),
-                            _c("col-note", {
-                              attrs: {
-                                "item-name": "備考：",
-                                "item-note": calclist.note,
-                                "item-late": calclist.late,
-                                "item-leaveearly": calclist.leave_early
-                              }
-                            })
-                          ],
-                          1
-                        )
-                      ]
-                    )
-                  ]
-                )
-              })
-            ],
-            2
-          )
-        ])
-      ]),
-      _vm._v(" "),
-      _vm._l(_vm.sumresults, function(sumresult) {
-        return _c("div", { staticClass: "row justify-content-between" }, [
-          _c("div", { staticClass: "col-md pt-3" }, [
-            _c(
-              "div",
-              { staticClass: "card shadow-pl" },
-              [
-                _c("daily-working-information-panel-header", {
-                  attrs: {
-                    headertext1: "合計",
-                    headertext2: "集計日の合計が表示されます"
-                  }
-                }),
-                _vm._v(" "),
-                _c("div", { staticClass: "card-body pt-2" }, [
-                  _c(
-                    "div",
-                    { staticClass: "row" },
-                    [
-                      _c("col-regularworking", {
-                        attrs: {
-                          "item-name": "勤務時間",
-                          "item-value": sumresult.total_working_times
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-regularworking", {
-                        attrs: {
-                          "item-name": "所定労働時間",
-                          "item-value": sumresult.regular_working_times
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-regularworking", {
-                        attrs: {
-                          "item-name": "所定外労働時間",
-                          "item-value": sumresult.out_of_regular_working_times
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-overtimehours", {
-                        attrs: {
-                          "item-name": "残業時間",
-                          "item-value": sumresult.overtime_hours
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-overtimehours", {
-                        attrs: {
-                          "item-name": "深夜残業時間",
-                          "item-value": sumresult.late_night_overtime_hours
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-overtimehours", {
-                        attrs: {
-                          "item-name": "法定労働時間",
-                          "item-value": sumresult.legal_working_times
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-overtimehours", {
-                        attrs: {
-                          "item-name": "法定外労働時間",
-                          "item-value": sumresult.out_of_legal_working_times
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-notemploymentworking", {
-                        attrs: {
-                          "item-name": "未就労時間",
-                          "item-value": sumresult.not_employment_working_hours
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-notemploymentworking", {
-                        attrs: {
-                          "item-name": "時間外労働",
-                          "item-value": sumresult.off_hours_working_hours
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-notemploymentworking", {
-                        attrs: {
-                          "item-name": "出勤者数",
-                          "item-value": sumresult.total_working_status
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-notemploymentworking", {
-                        attrs: {
-                          "item-name": "外出者数",
-                          "item-value": sumresult.total_go_out
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-notemploymentworking", {
-                        attrs: {
-                          "item-name": "休暇者数",
-                          "item-value": sumresult.total_holiday_kubun
-                        }
                       })
                     ],
                     1
@@ -84964,12 +85790,27 @@ var render = function() {
               ],
               1
             )
-          ])
-        ])
-      })
-    ],
-    2
-  )
+          ],
+          1
+        )
+      ])
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "row justify-content-between" }, [
+      _c("div", { staticClass: "col-md pt-3 align-self-stretch" }, [
+        _c(
+          "div",
+          { staticClass: "card shadow-pl" },
+          [
+            _c("daily-working-alert-table", {
+              attrs: { "alert-lists": _vm.alertresults }
+            })
+          ],
+          1
+        )
+      ])
+    ])
+  ])
 }
 var staticRenderFns = [
   function() {
@@ -84984,7 +85825,10 @@ var staticRenderFns = [
             "input-group-text font-size-sm line-height-xs label-width-90",
           attrs: { for: "target_fromdate" }
         },
-        [_vm._v("指定日付")]
+        [
+          _vm._v("指定日付"),
+          _c("span", { staticClass: "color-red" }, [_vm._v("＊")])
+        ]
       )
     ])
   },
@@ -85035,24 +85879,601 @@ var staticRenderFns = [
         [_vm._v("氏 名")]
       )
     ])
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingAlertTable.vue?vue&type=template&id=2ff6b816&":
+/*!*************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/DailyWorkingAlertTable.vue?vue&type=template&id=2ff6b816& ***!
+  \*************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _vm.alertLists.length
+    ? _c("div", [
+        _c(
+          "table",
+          { staticClass: "table table-striped table-bordered" },
+          [
+            _vm._m(0),
+            _vm._v(" "),
+            _vm._l(_vm.alertLists, function(alertList, index) {
+              return _c(
+                "tr",
+                { staticClass: "card-body mb-3 py-0 pt-4 border-top" },
+                [
+                  _c("td", { staticClass: "text-align-center" }, [
+                    _vm._v(_vm._s(alertList.record_date))
+                  ]),
+                  _vm._v(" "),
+                  _c("td", { staticClass: "text-align-center" }, [
+                    _vm._v(_vm._s(alertList.employment_status_name))
+                  ]),
+                  _vm._v(" "),
+                  _c("td", { staticClass: "text-align-center" }, [
+                    _vm._v(_vm._s(alertList.department_name))
+                  ]),
+                  _vm._v(" "),
+                  _c("td", { staticClass: "text-align-center" }, [
+                    _vm._v(_vm._s(alertList.user_name))
+                  ]),
+                  _vm._v(" "),
+                  _c("td", { staticClass: "text-align-center" }, [
+                    _vm._v(_vm._s(alertList.record_time))
+                  ]),
+                  _vm._v(" "),
+                  _c("td", { staticClass: "text-align-center" }, [
+                    _vm._v(_vm._s(alertList.mode_name))
+                  ]),
+                  _vm._v(" "),
+                  _c("td", { staticClass: "text-align-center" }, [
+                    _vm._v(_vm._s(alertList.alert_memo))
+                  ])
+                ]
+              )
+            })
+          ],
+          2
+        )
+      ])
+    : _vm._e()
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("tr", { attrs: { bgcolor: "#add8e6" } }, [
+      _c("th", [_vm._v("日付")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("雇用形態")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("部署")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("氏名")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("打刻時刻")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("打刻モード")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("警告内容")])
+    ])
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingInfoTable.vue?vue&type=template&id=ce1beb26&":
+/*!************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/DailyWorkingInfoTable.vue?vue&type=template&id=ce1beb26& ***!
+  \************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _vm.calcLists.length
+    ? _c("div", [
+        _c(
+          "table",
+          { staticClass: "table table-striped table-bordered" },
+          [
+            _vm.detailOrTotal === "detail"
+              ? _c("tr", { attrs: { bgcolor: "#add8e6" } }, [
+                  _c("th", [_vm._v("部署")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("雇用形態")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("氏名")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("出勤")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("退勤")]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { colspan: "2" } }, [_vm._v("公用外出")]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { colspan: "2" } }, [_vm._v("私用外出")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("勤務状態")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("労働合計時間")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v(_vm._s(_vm.predeterTimeName))]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v(_vm._s(_vm.predeterNightTimeName))]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("未就労時間")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("備考")])
+                ])
+              : _vm._e(),
+            _vm._v(" "),
+            _vm.detailOrTotal === "total"
+              ? _c("tr", { attrs: { bgcolor: "#7fffd4" } }, [
+                  _c("th", [_vm._v("労働合計時間")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v(_vm._s(_vm.predeterTimeName))]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v(_vm._s(_vm.predeterNightTimeName))]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("未就労時間")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("出勤者数")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("外出者数")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("休暇者数")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("欠勤者数")]),
+                  _vm._v(" "),
+                  _c("th", [_vm._v("備考")])
+                ])
+              : _vm._e(),
+            _vm._v(" "),
+            _vm._l(_vm.calcLists, function(calcList, index) {
+              return _vm.detailOrTotal === "detail"
+                ? _c(
+                    "tr",
+                    { staticClass: "card-body mb-3 py-0 pt-4 border-top" },
+                    [
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.department_name))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.employment_status_name))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.user_name))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.attendance_time_1))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.leaving_time_1))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.public_going_out_time_1))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.public_going_out_return_time_1))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.missing_middle_time_1))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.missing_middle_return_time_1))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.working_status_name))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.total_working_times))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.off_hours_working_hours))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.late_night_overtime_hours))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.not_employment_working_hours))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.remark_data))
+                      ])
+                    ]
+                  )
+                : _vm._e()
+            }),
+            _vm._v(" "),
+            _vm._l(_vm.calcLists, function(calcList, index) {
+              return _vm.detailOrTotal === "total"
+                ? _c(
+                    "tr",
+                    { staticClass: "card-body mb-3 py-0 pt-4 border-top" },
+                    [
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.total_working_times))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.off_hours_working_hours))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.late_night_overtime_hours))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.not_employment_working_hours))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.total_working_status))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.total_go_out))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.total_holiday_kubun))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" }, [
+                        _vm._v(_vm._s(calcList.total_absence))
+                      ]),
+                      _vm._v(" "),
+                      _c("td", { staticClass: "text-align-center" })
+                    ]
+                  )
+                : _vm._e()
+            })
+          ],
+          2
+        )
+      ])
+    : _vm._e()
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingInformation.vue?vue&type=template&id=10e0d6ce&":
+/*!**************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/DailyWorkingInformation.vue?vue&type=template&id=10e0d6ce& ***!
+  \**************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", [
+    _c("div", { staticClass: "row justify-content-between" }, [
+      _c("div", { staticClass: "col-md pt-3" }, [
+        _c(
+          "div",
+          { staticClass: "card shadow-pl" },
+          [
+            _c("daily-working-information-panel-header", {
+              attrs: {
+                headertext1: "日付を指定して集計を表示する",
+                headertext2:
+                  "雇用形態や所属部署でフィルタリングして表示できます"
+              }
+            }),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "card-body pt-2" },
+              [
+                _c(
+                  "div",
+                  { staticClass: "row justify-content-between" },
+                  [
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _vm._m(0),
+                          _vm._v(" "),
+                          _c("input-datepicker", {
+                            attrs: { "default-Date": _vm.defaultDate },
+                            on: { "change-event": _vm.fromdateChanges }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _vm._m(1),
+                          _vm._v(" "),
+                          _c("select-employmentstatus", {
+                            attrs: { "blank-data": true },
+                            on: { "change-event": _vm.employmentChanges }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-6 pb-2" }, [
+                      _c(
+                        "div",
+                        { staticClass: "input-group" },
+                        [
+                          _vm._m(2),
+                          _vm._v(" "),
+                          _c("select-department", {
+                            ref: "selectdepartment",
+                            attrs: { "blank-data": true },
+                            on: { "change-event": _vm.departmentChanges }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("message-data", {
+                      attrs: {
+                        "message-datas": _vm.messagedatadepartment,
+                        "message-class": "warning"
+                      }
+                    }),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "col-md-6 pb-2" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "input-group" },
+                          [
+                            _vm._m(3),
+                            _vm._v(" "),
+                            _c("select-user", {
+                              ref: "selectuser",
+                              attrs: {
+                                "blank-data": true,
+                                "get-do": _vm.getDo,
+                                "date-value": _vm.fromdate
+                              },
+                              on: { "change-event": _vm.userChanges }
+                            })
+                          ],
+                          1
+                        ),
+                        _vm._v(" "),
+                        _c("message-data", {
+                          attrs: {
+                            "message-datas": _vm.messagedatauser,
+                            "message-class": "warning"
+                          }
+                        })
+                      ],
+                      1
+                    )
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c("message-data-server", {
+                  attrs: {
+                    "message-datas": _vm.messagedatasserver,
+                    "message-class": "warning"
+                  }
+                }),
+                _vm._v(" "),
+                _c("div", { staticClass: "row justify-content-between" }, [
+                  _c(
+                    "div",
+                    { staticClass: "col-md-12 pb-2" },
+                    [
+                      _c("btn-work-time", {
+                        attrs: {
+                          "btn-mode": "search",
+                          "is-push": _vm.issearchbutton
+                        },
+                        on: { "searchclick-event": _vm.searchclick }
+                      }),
+                      _vm._v(" "),
+                      _c("message-waiting", {
+                        attrs: { "is-message-show": _vm.messageshowsearch }
+                      })
+                    ],
+                    1
+                  )
+                ])
+              ],
+              1
+            )
+          ],
+          1
+        )
+      ])
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "row justify-content-between" }, [
+      _c("div", { staticClass: "col-md pt-3 align-self-stretch" }, [
+        _c(
+          "div",
+          { staticClass: "card shadow-pl" },
+          [
+            _c("daily-working-information-panel-header", {
+              attrs: {
+                headertext1: _vm.stringtext,
+                headertext2:
+                  "虫眼鏡アイコンをクリックすると集計結果が表示されます"
+              }
+            }),
+            _vm._v(" "),
+            _c("daily-working-info-table", {
+              attrs: {
+                "detail-or-total": "detail",
+                "calc-lists": _vm.calcresults,
+                "predeter-time-name": _vm.predetertimename,
+                "predeter-night-time-name": _vm.predeternighttimename
+              }
+            })
+          ],
+          1
+        )
+      ])
+    ]),
+    _vm._v(" "),
+    _c("div", [
+      _c("div", { staticClass: "col-md pt-3" }, [
+        _c(
+          "div",
+          { staticClass: "card shadow-pl" },
+          [
+            _c("daily-working-information-panel-header", {
+              attrs: {
+                headertext1: "合計",
+                headertext2: "集計日の合計が表示されます"
+              }
+            }),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "card-body pt-2" },
+              [
+                _c("daily-working-info-table", {
+                  attrs: {
+                    "detail-or-total": "total",
+                    "calc-lists": _vm.sumresults,
+                    "predeter-time-name": _vm.predetertimename,
+                    "predeter-night-time-name": _vm.predeternighttimename
+                  }
+                })
+              ],
+              1
+            )
+          ],
+          1
+        )
+      ])
+    ])
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { for: "target_fromdate" }
+        },
+        [
+          _vm._v("指定日付"),
+          _c("span", { staticClass: "color-red" }, [_vm._v("＊")])
+        ]
+      )
+    ])
   },
   function() {
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c(
-      "span",
-      {
-        staticClass:
-          "float-left mr-2 py-2 px-2 font-size-lg text-white bg-success rounded"
-      },
-      [
-        _c("img", {
-          staticClass: "icon-size-lg",
-          attrs: { src: "/images/round-flag-w.svg", alt: "" }
-        })
-      ]
-    )
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "label",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { for: "target_employmentstatus" }
+        },
+        [_vm._v("雇用形態")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "label",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { for: "target_department" }
+        },
+        [_vm._v("所属部署")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "label",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { for: "target_users" }
+        },
+        [_vm._v("氏 名")]
+      )
+    ])
   }
 ]
 render._withStripped = true
@@ -85694,7 +87115,7 @@ var render = function() {
                           staticClass: "icon-size-sm mr-2 pb-1",
                           attrs: { src: "/images/round-search-w.svg", alt: "" }
                         }),
-                        _vm._v("この条件で表示する")
+                        _vm._v("この条件で表示する\n                ")
                       ]
                     )
                   ])
@@ -85718,7 +87139,7 @@ var render = function() {
                                 alt: ""
                               }
                             }),
-                            _vm._v("勤務時間を追加")
+                            _vm._v("勤務時間を追加\n                ")
                           ]
                         )
                       ])
@@ -86282,101 +87703,171 @@ var render = function() {
                   )
                 ]),
                 _vm._v(" "),
-                _c("div", { staticClass: "col-md-12 pb-2" }, [
-                  _c("div", { staticClass: "input-group" }, [
-                    _c("div", { staticClass: "input-group-prepend" }, [
-                      _c(
-                        "span",
-                        {
-                          staticClass:
-                            "input-group-text font-size-sm line-height-xs label-width-120",
-                          attrs: { for: "shift_end" }
-                        },
-                        [_vm._v("時間")]
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("input", {
-                      directives: [
-                        {
-                          name: "model",
-                          rawName: "v-model",
-                          value: _vm.addTime,
-                          expression: "addTime"
-                        }
-                      ],
-                      staticClass: "form-control",
-                      attrs: { type: "time" },
-                      domProps: { value: _vm.addTime },
-                      on: {
-                        input: function($event) {
-                          if ($event.target.composing) {
-                            return
-                          }
-                          _vm.addTime = $event.target.value
-                        }
-                      }
-                    })
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "col-md-12 pb-2" }, [
-                  _c("div", { staticClass: "input-group" }, [
-                    _c("div", { staticClass: "input-group-prepend" }, [
-                      _c(
-                        "span",
-                        {
-                          staticClass:
-                            "input-group-text font-size-sm line-height-xs label-width-120",
-                          attrs: { for: "shift_end" }
-                        },
-                        [_vm._v("区分")]
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "select",
-                      {
-                        directives: [
-                          {
-                            name: "model",
-                            rawName: "v-model",
-                            value: _vm.addMode,
-                            expression: "addMode"
-                          }
-                        ],
-                        staticClass: "form-control",
-                        on: {
-                          change: function($event) {
-                            var $$selectedVal = Array.prototype.filter
-                              .call($event.target.options, function(o) {
-                                return o.selected
-                              })
-                              .map(function(o) {
-                                var val = "_value" in o ? o._value : o.value
-                                return val
-                              })
-                            _vm.addMode = $event.target.multiple
-                              ? $$selectedVal
-                              : $$selectedVal[0]
-                          }
-                        }
-                      },
-                      [
-                        _c("option", { attrs: { value: "" } }),
-                        _vm._v(" "),
-                        _vm._l(_vm.modeList, function(mode) {
-                          return _c(
-                            "option",
-                            { domProps: { value: mode.code } },
-                            [_vm._v(_vm._s(mode.code_name))]
+                _vm.addKbn == ""
+                  ? _c("div", { staticClass: "col-md-12 pb-2" }, [
+                      _c("div", { staticClass: "input-group" }, [
+                        _c("div", { staticClass: "input-group-prepend" }, [
+                          _c(
+                            "span",
+                            {
+                              staticClass:
+                                "input-group-text font-size-sm line-height-xs label-width-120",
+                              attrs: { for: "shift_end" }
+                            },
+                            [_vm._v("時間")]
                           )
+                        ]),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.addTime,
+                              expression: "addTime"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: { type: "time" },
+                          domProps: { value: _vm.addTime },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.addTime = $event.target.value
+                            }
+                          }
                         })
-                      ],
-                      2
-                    )
-                  ])
-                ])
+                      ])
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.addKbn == ""
+                  ? _c("div", { staticClass: "col-md-12 pb-2" }, [
+                      _c("div", { staticClass: "input-group" }, [
+                        _c("div", { staticClass: "input-group-prepend" }, [
+                          _c(
+                            "span",
+                            {
+                              staticClass:
+                                "input-group-text font-size-sm line-height-xs label-width-120",
+                              attrs: { for: "shift_end" }
+                            },
+                            [_vm._v("勤務区分")]
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.addMode,
+                                expression: "addMode"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.addMode = $event.target.multiple
+                                  ? $$selectedVal
+                                  : $$selectedVal[0]
+                              }
+                            }
+                          },
+                          [
+                            _c("option", { attrs: { value: "" } }),
+                            _vm._v(" "),
+                            _vm._l(_vm.modeList, function(mode) {
+                              return _c(
+                                "option",
+                                {
+                                  key: mode.code,
+                                  domProps: { value: mode.code }
+                                },
+                                [_vm._v(_vm._s(mode.code_name))]
+                              )
+                            })
+                          ],
+                          2
+                        )
+                      ])
+                    ])
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.addMode == ""
+                  ? _c("div", { staticClass: "col-md-12 pb-2" }, [
+                      _c("div", { staticClass: "input-group" }, [
+                        _c("div", { staticClass: "input-group-prepend" }, [
+                          _c(
+                            "span",
+                            {
+                              staticClass:
+                                "input-group-text font-size-sm line-height-xs label-width-120",
+                              attrs: { for: "holiday_kbn" }
+                            },
+                            [_vm._v("休暇区分")]
+                          )
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.addKbn,
+                                expression: "addKbn"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.addKbn = $event.target.multiple
+                                  ? $$selectedVal
+                                  : $$selectedVal[0]
+                              }
+                            }
+                          },
+                          [
+                            _c("option", { attrs: { value: "" } }),
+                            _vm._v(" "),
+                            _vm._l(_vm.userLeaveKbnList, function(list) {
+                              return _c(
+                                "option",
+                                {
+                                  key: list.code,
+                                  domProps: { value: list.code }
+                                },
+                                [_vm._v(_vm._s(list.code_name))]
+                              )
+                            })
+                          ],
+                          2
+                        )
+                      ])
+                    ])
+                  : _vm._e()
               ]),
               _vm._v(" "),
               _c("div", { staticClass: "row justify-content-between" }, [
@@ -86705,17 +88196,867 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm.messagedatas.length
-    ? _c("p", [
-        _c(
-          "ul",
-          _vm._l(_vm.messagedatas, function(messagedata) {
-            return _c("li", [_vm._v(_vm._s(messagedata))])
+  return _vm.messageDatas.length
+    ? _c("div", [
+        _vm.messageClass === "info"
+          ? _c("p", [
+              _c(
+                "ul",
+                _vm._l(_vm.messageDatas, function(messagedata, index) {
+                  return _c("li", { key: index }, [_vm._v(_vm._s(messagedata))])
+                }),
+                0
+              )
+            ])
+          : _c("p", [
+              _c(
+                "ul",
+                { staticClass: "error-red color-red" },
+                _vm._l(_vm.messageDatas, function(messagedata, index) {
+                  return _c("li", { key: index }, [_vm._v(_vm._s(messagedata))])
+                }),
+                0
+              )
+            ])
+      ])
+    : _vm._e()
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MessageDataServer.vue?vue&type=template&id=69e21619&":
+/*!********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/MessageDataServer.vue?vue&type=template&id=69e21619& ***!
+  \********************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _vm.messageDatas.length
+    ? _c("div", [
+        _vm.messageClass === "info"
+          ? _c("p", [
+              _c(
+                "ul",
+                _vm._l(_vm.messageDatas, function(messagedata, index) {
+                  return _c("li", { key: index }, [
+                    _vm._v(_vm._s(messagedata.message))
+                  ])
+                }),
+                0
+              )
+            ])
+          : _c("p", [
+              _c(
+                "ul",
+                { staticClass: "error-red color-red" },
+                _vm._l(_vm.messageDatas, function(messagedata, index) {
+                  return _c("li", { key: index }, [
+                    _vm._v(_vm._s(messagedata.message))
+                  ])
+                }),
+                0
+              )
+            ])
+      ])
+    : _vm._e()
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MessageWaiting.vue?vue&type=template&id=724e4071&":
+/*!*****************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/MessageWaiting.vue?vue&type=template&id=724e4071& ***!
+  \*****************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("transition", { attrs: { id: "waiting", name: "slide-fade" } }, [
+    _vm.isMessageShow
+      ? _c("p", [
+          _c("img", {
+            attrs: { id: "loading", src: "/images/ajax-loader.gif" }
           }),
-          0
+          _vm._v(" "),
+          _c("span", { domProps: { textContent: _vm._s(_vm.messageText) } })
+        ])
+      : _vm._e()
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MonthlyWorkingAlert.vue?vue&type=template&id=a85e2186&":
+/*!**********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/MonthlyWorkingAlert.vue?vue&type=template&id=a85e2186& ***!
+  \**********************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", [
+    _c("div", { staticClass: "row justify-content-between print-none" }, [
+      _c("div", { staticClass: "col-md pt-3" }, [
+        _c("div", { staticClass: "card shadow-pl" }, [
+          _c(
+            "div",
+            { staticClass: "card-header bg-transparent pb-0 border-0" },
+            [
+              _c("daily-working-information-panel-header", {
+                attrs: {
+                  headertext1:
+                    "期首月または１月（検索区分）から指定年月の間でアラートを表示",
+                  headertext2:
+                    "雇用形態や所属部署でフィルタリングして表示できます"
+                }
+              })
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c("div", { staticClass: "card-body pt-2" }, [
+            _c(
+              "div",
+              { staticClass: "row justify-content-between" },
+              [
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group" },
+                    [
+                      _vm._m(0),
+                      _vm._v(" "),
+                      _c("input-ym", {
+                        on: { "change-event": _vm.fromdateChanges }
+                      })
+                    ],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  { staticClass: "col-md-6 pb-2" },
+                  [
+                    _c(
+                      "div",
+                      { staticClass: "input-group" },
+                      [
+                        _vm._m(1),
+                        _vm._v(" "),
+                        _c("general-list", {
+                          attrs: {
+                            "identification-id": "C022",
+                            "placeholder-data": "検索区分を選択してください",
+                            "blank-data": false
+                          },
+                          on: { "change-event": _vm.displayChange }
+                        })
+                      ],
+                      1
+                    ),
+                    _vm._v(" "),
+                    _c("message-data", {
+                      attrs: { messagedatas: _vm.messagedatadisplay }
+                    })
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group" },
+                    [
+                      _vm._m(2),
+                      _vm._v(" "),
+                      _c("select-employmentstatus", {
+                        attrs: { "blank-data": true },
+                        on: { "change-event": _vm.employmentChanges }
+                      })
+                    ],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group" },
+                    [
+                      _vm._m(3),
+                      _vm._v(" "),
+                      _c("select-department", {
+                        ref: "selectdepartment",
+                        attrs: { "blank-data": true },
+                        on: { "change-event": _vm.departmentChanges }
+                      }),
+                      _vm._v(" "),
+                      _c("message-data", {
+                        attrs: { messagedatas: _vm.messagedatadepartment }
+                      })
+                    ],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group" },
+                    [
+                      _vm._m(4),
+                      _vm._v(" "),
+                      _c("select-user", {
+                        ref: "selectuser",
+                        attrs: {
+                          "blank-data": true,
+                          "get-Do": "1",
+                          "date-value": _vm.fromdate
+                        },
+                        on: { "change-event": _vm.userChanges }
+                      }),
+                      _vm._v(" "),
+                      _c("message-data", {
+                        attrs: { messagedatas: _vm.messagedatauser }
+                      })
+                    ],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c("message-data-server", {
+                  attrs: {
+                    "message-datas": _vm.messagedatasserver,
+                    "message-class": "warning"
+                  }
+                })
+              ],
+              1
+            ),
+            _vm._v(" "),
+            _c("div", { staticClass: "row justify-content-between" }, [
+              _c(
+                "div",
+                { staticClass: "col-md-12 pb-2" },
+                [
+                  _c("btn-work-time", {
+                    attrs: { "btn-mode": "search" },
+                    on: { "searchclick-event": _vm.searchclick }
+                  })
+                ],
+                1
+              )
+            ])
+          ])
+        ])
+      ])
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "row justify-content-between" }, [
+      _c("div", { staticClass: "col-md pt-3 align-self-stretch" }, [
+        _c(
+          "div",
+          { staticClass: "card shadow-pl" },
+          [
+            _c(
+              "div",
+              {
+                staticClass:
+                  "card-header bg-transparent pt-3 border-0 print-none"
+              },
+              [
+                _c("daily-working-information-panel-header", {
+                  attrs: { headertext1: _vm.stringtext, headertext2: "" }
+                })
+              ],
+              1
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              {
+                staticClass:
+                  "card-body mb-3 py-0 pt-4 border-top print-only print-space"
+              },
+              [
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-md-12 pb-2" }, [
+                    _c("h1", { staticClass: "float-md-left font-size-rg" }, [
+                      _vm._v(_vm._s(_vm.company_name))
+                    ]),
+                    _vm._v(" "),
+                    _c("span", { staticClass: "float-md-right font-size-sm" }, [
+                      _vm._v(_vm._s(_vm.datejaFormat))
+                    ])
+                  ])
+                ])
+              ]
+            ),
+            _vm._v(" "),
+            _c("monthly-working-alert-table", {
+              attrs: {
+                "time-items": _vm.timeitems,
+                "time-values": _vm.timevalues
+              }
+            })
+          ],
+          1
+        )
+      ])
+    ])
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "span",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { id: "basic-addon1" }
+        },
+        [
+          _vm._v("指定年月"),
+          _c("span", { staticClass: "color-red" }, [_vm._v("＊")])
+        ]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "label",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { for: "inputGroupSelect01" }
+        },
+        [
+          _vm._v("検索区分"),
+          _c("span", { staticClass: "color-red" }, [_vm._v("＊")])
+        ]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "label",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { for: "inputGroupSelect01" }
+        },
+        [_vm._v("雇用形態")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "label",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { for: "inputGroupSelect01" }
+        },
+        [_vm._v("所属部署")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "input-group-prepend" }, [
+      _c(
+        "label",
+        {
+          staticClass:
+            "input-group-text font-size-sm line-height-xs label-width-90",
+          attrs: { for: "inputGroupSelect01" }
+        },
+        [_vm._v("氏　　名")]
+      )
+    ])
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MonthlyWorkingAlertTable.vue?vue&type=template&id=15b559c1&":
+/*!***************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/MonthlyWorkingAlertTable.vue?vue&type=template&id=15b559c1& ***!
+  \***************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _vm.timeValues.length
+    ? _c("div", [
+        _c(
+          "table",
+          { staticClass: "table table-striped table-bordered" },
+          [
+            _vm._l(_vm.timeItems, function(timeItem, index) {
+              return _c(
+                "tr",
+                {
+                  staticClass: "card-body mb-3 py-0 pt-4 border-top",
+                  attrs: { bgcolor: "#add8e6" }
+                },
+                [
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.department_name))
+                  ]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.employment_status_name))
+                  ]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.user_name))
+                  ]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.working_date_1))
+                  ]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.working_date_2))
+                  ]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.working_date_3))
+                  ]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.working_date_4))
+                  ]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.working_date_5))
+                  ]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.working_date_6))
+                  ]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.working_date_7))
+                  ]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.working_date_8))
+                  ]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.working_date_9))
+                  ]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.working_date_10))
+                  ]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.working_date_11))
+                  ]),
+                  _vm._v(" "),
+                  _c("th", { attrs: { width: "150" } }, [
+                    _vm._v(_vm._s(timeItem.working_date_12))
+                  ])
+                ]
+              )
+            }),
+            _vm._v(" "),
+            _vm._l(_vm.timeValues, function(timeValue, index) {
+              return _c(
+                "tr",
+                { staticClass: "card-body mb-3 py-0 pt-4 border-top" },
+                [
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.department_name))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.employment_status_name))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.user_name))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.total_working_times_1))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.total_working_times_2))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.total_working_times_3))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.total_working_times_4))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.total_working_times_5))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.total_working_times_6))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.total_working_times_7))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.total_working_times_8))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.total_working_times_9))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.total_working_times_10))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.total_working_times_11))]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-align-center",
+                      attrs: { width: "150" }
+                    },
+                    [_vm._v(_vm._s(timeValue.total_working_times_12))]
+                  )
+                ]
+              )
+            })
+          ],
+          2
         )
       ])
     : _vm._e()
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MonthlyWorkingInfoTable.vue?vue&type=template&id=baa529be&":
+/*!**************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/MonthlyWorkingInfoTable.vue?vue&type=template&id=baa529be& ***!
+  \**************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", [
+    _c(
+      "table",
+      { staticClass: "table table-striped table-bordered" },
+      [
+        _vm.detailOrTotal === "detail"
+          ? _c("tr", { attrs: { bgcolor: "#add8e6" } }, [
+              _c("th", [_vm._v("雇用形態")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("労働合計時間")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("残業時間")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("深夜残業時間")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("公用外出時間")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("私用外出時間")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("未就労時間")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("出勤日数")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("休暇日数")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("欠勤日数")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("有給休暇取得日数")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("備考")])
+            ])
+          : _vm._e(),
+        _vm._v(" "),
+        _vm.calcLists.length && _vm.detailOrTotal === "total"
+          ? _c("tr", { attrs: { bgcolor: "#7fffd4" } }, [
+              _c("th", [_vm._v("労働合計時間")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("残業時間")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("深夜残業時間")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("公用外出時間")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("私用外出時間")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("未就労時間")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("出勤日数")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("休暇日数")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("欠勤日数")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("有給休暇取得日数")]),
+              _vm._v(" "),
+              _c("th", [_vm._v("備考")])
+            ])
+          : _vm._e(),
+        _vm._v(" "),
+        _vm.detailOrTotal === "detail"
+          ? _c("tr", { staticClass: "card-body mb-3 py-0 pt-4 border-top" }, [
+              _c("td", { staticClass: "text-align-center" }, [
+                _vm._v(_vm._s(_vm.calcLists.employment))
+              ]),
+              _vm._v(" "),
+              _c("td", { staticClass: "text-align-center" }, [
+                _vm._v(_vm._s(_vm.calcLists.total_working_times))
+              ]),
+              _vm._v(" "),
+              _c("td", { staticClass: "text-align-center" }, [
+                _vm._v(_vm._s(_vm.calcLists.overtime_hours))
+              ]),
+              _vm._v(" "),
+              _c("td", { staticClass: "text-align-center" }, [
+                _vm._v(_vm._s(_vm.calcLists.late_night_overtime_hours))
+              ]),
+              _vm._v(" "),
+              _c("td", { staticClass: "text-align-center" }, [
+                _vm._v(_vm._s(_vm.calcLists.not_employment_working_hours))
+              ]),
+              _vm._v(" "),
+              _c("td", { staticClass: "text-align-center" }, [
+                _vm._v(_vm._s(_vm.calcLists.not_employment_working_hours))
+              ]),
+              _vm._v(" "),
+              _c("td", { staticClass: "text-align-center" }, [
+                _vm._v(_vm._s(_vm.calcLists.not_employment_working_hours))
+              ]),
+              _vm._v(" "),
+              _c("td", { staticClass: "text-align-center" }, [
+                _vm._v(_vm._s(_vm.calcLists.total_working_status) + " 日")
+              ]),
+              _vm._v(" "),
+              _c("td", { staticClass: "text-align-center" }, [
+                _vm._v(_vm._s(_vm.calcLists.total_holiday_kubun) + " 日")
+              ]),
+              _vm._v(" "),
+              _c("td", { staticClass: "text-align-center" }, [
+                _vm._v(_vm._s(_vm.calcLists.total_go_out) + " 日")
+              ]),
+              _vm._v(" "),
+              _c("td", { staticClass: "text-align-center" }, [
+                _vm._v(_vm._s(_vm.calcLists.total_go_out) + " 日")
+              ]),
+              _vm._v(" "),
+              _c("td", { staticClass: "text-align-center" })
+            ])
+          : _vm._e(),
+        _vm._v(" "),
+        _vm._l(_vm.calcLists, function(calcList, index) {
+          return _vm.detailOrTotal === "total"
+            ? _c("tr", { staticClass: "card-body mb-3 py-0 pt-4 border-top" }, [
+                _c("td", { staticClass: "text-align-center" }, [
+                  _vm._v(_vm._s(calcList.total_working_times))
+                ]),
+                _vm._v(" "),
+                _c("td", { staticClass: "text-align-center" }, [
+                  _vm._v(_vm._s(calcList.overtime_hours))
+                ]),
+                _vm._v(" "),
+                _c("td", { staticClass: "text-align-center" }, [
+                  _vm._v(_vm._s(calcList.late_night_overtime_hours))
+                ]),
+                _vm._v(" "),
+                _c("td", { staticClass: "text-align-center" }, [
+                  _vm._v(_vm._s(calcList.not_employment_working_hours))
+                ]),
+                _vm._v(" "),
+                _c("td", { staticClass: "text-align-center" }, [
+                  _vm._v(_vm._s(calcList.not_employment_working_hours))
+                ]),
+                _vm._v(" "),
+                _c("td", { staticClass: "text-align-center" }, [
+                  _vm._v(_vm._s(calcList.not_employment_working_hours))
+                ]),
+                _vm._v(" "),
+                _c("td", { staticClass: "text-align-center" }, [
+                  _vm._v(_vm._s(calcList.total_working_status) + " 日")
+                ]),
+                _vm._v(" "),
+                _c("td", { staticClass: "text-align-center" }, [
+                  _vm._v(_vm._s(calcList.total_holiday_kubun) + " 日")
+                ]),
+                _vm._v(" "),
+                _c("td", { staticClass: "text-align-center" }, [
+                  _vm._v(_vm._s(calcList.total_go_out) + " 日")
+                ]),
+                _vm._v(" "),
+                _c("td", { staticClass: "text-align-center" }, [
+                  _vm._v(_vm._s(calcList.total_go_out) + " 日")
+                ]),
+                _vm._v(" "),
+                _c("td", { staticClass: "text-align-center" })
+              ])
+            : _vm._e()
+        })
+      ],
+      2
+    )
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -86759,121 +89100,147 @@ var render = function() {
           ),
           _vm._v(" "),
           _c("div", { staticClass: "card-body pt-2" }, [
+            _c(
+              "div",
+              { staticClass: "row justify-content-between" },
+              [
+                _c(
+                  "div",
+                  { staticClass: "col-md-6 pb-2" },
+                  [
+                    _c(
+                      "div",
+                      { staticClass: "input-group" },
+                      [
+                        _vm._m(0),
+                        _vm._v(" "),
+                        _c("input-ym", {
+                          on: { "change-event": _vm.fromdateChanges }
+                        })
+                      ],
+                      1
+                    ),
+                    _vm._v(" "),
+                    _c("message-data", {
+                      attrs: { "message-datas": _vm.messagedatasfromdate }
+                    })
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  { staticClass: "col-md-6 pb-2" },
+                  [
+                    _c(
+                      "div",
+                      { staticClass: "input-group" },
+                      [
+                        _vm._m(1),
+                        _vm._v(" "),
+                        _c("general-list", {
+                          attrs: {
+                            "identification-id": "C016",
+                            "placeholder-data": "集計区分を選択してください",
+                            "blank-data": false
+                          },
+                          on: { "change-event": _vm.displayChange }
+                        })
+                      ],
+                      1
+                    ),
+                    _vm._v(" "),
+                    _c("message-data", {
+                      attrs: { "message-datas": _vm.messagedatadisplay }
+                    })
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group" },
+                    [
+                      _vm._m(2),
+                      _vm._v(" "),
+                      _c("select-employmentstatus", {
+                        attrs: { "blank-data": true },
+                        on: { "change-event": _vm.employmentChanges }
+                      })
+                    ],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group" },
+                    [
+                      _vm._m(3),
+                      _vm._v(" "),
+                      _c("select-department", {
+                        ref: "selectdepartment",
+                        attrs: { "blank-data": true },
+                        on: { "change-event": _vm.departmentChanges }
+                      })
+                    ],
+                    1
+                  )
+                ]),
+                _vm._v(" "),
+                _c("message-data", {
+                  attrs: { "message-datas": _vm.messagedatadepartment }
+                }),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6 pb-2" }, [
+                  _c(
+                    "div",
+                    { staticClass: "input-group" },
+                    [
+                      _vm._m(4),
+                      _vm._v(" "),
+                      _c("select-user", {
+                        ref: "selectuser",
+                        attrs: {
+                          "blank-data": true,
+                          "get-Do": "1",
+                          "date-value": _vm.fromdate
+                        },
+                        on: { "change-event": _vm.userChanges }
+                      }),
+                      _vm._v(" "),
+                      _c("message-data", {
+                        attrs: { "message-datas": _vm.messagedatauser }
+                      })
+                    ],
+                    1
+                  )
+                ])
+              ],
+              1
+            ),
+            _vm._v(" "),
             _c("div", { staticClass: "row justify-content-between" }, [
               _c(
                 "div",
-                { staticClass: "col-md-6 pb-2" },
+                { staticClass: "col-md-12 pb-2" },
                 [
-                  _c(
-                    "div",
-                    { staticClass: "input-group" },
-                    [
-                      _vm._m(0),
-                      _vm._v(" "),
-                      _c("input-ym", {
-                        on: { "change-event": _vm.fromdateChanges }
-                      })
-                    ],
-                    1
-                  ),
+                  _c("btn-work-time", {
+                    attrs: {
+                      "btn-mode": "search",
+                      "is-push": _vm.issearchbutton
+                    },
+                    on: { "searchclick-event": _vm.searchclick }
+                  }),
                   _vm._v(" "),
-                  _c("message-data", {
-                    attrs: { messagedatas: _vm.messagedatasfromdate }
+                  _c("message-waiting", {
+                    attrs: { "is-message-show": _vm.messageshowsearch }
                   })
                 ],
                 1
-              ),
-              _vm._v(" "),
-              _c(
-                "div",
-                { staticClass: "col-md-6 pb-2" },
-                [
-                  _c(
-                    "div",
-                    { staticClass: "input-group" },
-                    [
-                      _vm._m(1),
-                      _vm._v(" "),
-                      _c("general-list", {
-                        attrs: {
-                          "identification-id": "C016",
-                          "placeholder-data": "表示区分を選択してください",
-                          "blank-data": false
-                        },
-                        on: { "change-event": _vm.displayChange }
-                      })
-                    ],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c("message-data", {
-                    attrs: { messagedatas: _vm.messagedatadisplay }
-                  })
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c("div", { staticClass: "col-md-6 pb-2" }, [
-                _c(
-                  "div",
-                  { staticClass: "input-group" },
-                  [
-                    _vm._m(2),
-                    _vm._v(" "),
-                    _c("select-employmentstatus", {
-                      attrs: { "blank-data": true },
-                      on: { "change-event": _vm.employmentChanges }
-                    })
-                  ],
-                  1
-                )
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "col-md-6 pb-2" }, [
-                _c(
-                  "div",
-                  { staticClass: "input-group" },
-                  [
-                    _vm._m(3),
-                    _vm._v(" "),
-                    _c("select-department", {
-                      ref: "selectdepartment",
-                      attrs: { "blank-data": true },
-                      on: { "change-event": _vm.departmentChanges }
-                    }),
-                    _vm._v(" "),
-                    _c("message-data", {
-                      attrs: { messagedatas: _vm.messagedatadepartment }
-                    })
-                  ],
-                  1
-                )
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "col-md-6 pb-2" }, [
-                _c(
-                  "div",
-                  { staticClass: "input-group" },
-                  [
-                    _vm._m(4),
-                    _vm._v(" "),
-                    _c("select-user", {
-                      ref: "selectuser",
-                      attrs: {
-                        "blank-data": true,
-                        "get-Do": "1",
-                        "date-value": _vm.fromdate
-                      },
-                      on: { "change-event": _vm.userChanges }
-                    }),
-                    _vm._v(" "),
-                    _c("message-data", {
-                      attrs: { messagedatas: _vm.messagedatauser }
-                    })
-                  ],
-                  1
-                )
-              ])
+              )
             ]),
             _vm._v(" "),
             _c("div", { staticClass: "row justify-content-between" }, [
@@ -86881,8 +89248,16 @@ var render = function() {
                 "div",
                 { staticClass: "col-md-12 pb-2" },
                 [
-                  _c("search-workingtimebutton", {
-                    on: { "searchclick-event": _vm.searchclick }
+                  _c("btn-work-time", {
+                    attrs: {
+                      "btn-mode": "update",
+                      "is-push": _vm.isupdatebutton
+                    },
+                    on: { "updateclick-event": _vm.updateclick }
+                  }),
+                  _vm._v(" "),
+                  _c("message-waiting", {
+                    attrs: { "is-message-show": _vm.messageshowupdate }
                   })
                 ],
                 1
@@ -86923,19 +89298,28 @@ var render = function() {
               [
                 _c("div", { staticClass: "row" }, [
                   _c("div", { staticClass: "col-md-12 pb-2" }, [
-                    _c(
-                      "div",
-                      { staticClass: "btn-group d-flex" },
-                      [
-                        _c("btn-csv-download", {
-                          attrs: {
-                            csvData: _vm.calcresults,
-                            date: _vm.datejaFormat
-                          }
-                        })
-                      ],
-                      1
-                    )
+                    _c("div", { staticClass: "btn-group d-flex" }, [
+                      _c(
+                        "button",
+                        {
+                          staticClass:
+                            "btn btn-success btn-lg font-size-rg w-100",
+                          attrs: { type: "button", disabled: _vm.iscsvbutton }
+                        },
+                        [
+                          _c("img", {
+                            staticClass: "icon-size-sm mr-2 pb-1",
+                            attrs: {
+                              src: "/images/round-get-app-w.svg",
+                              alt: ""
+                            }
+                          }),
+                          _vm._v(
+                            "集計結果をCSVファイルに出力する\n                "
+                          )
+                        ]
+                      )
+                    ])
                   ])
                 ])
               ]
@@ -87038,118 +89422,12 @@ var render = function() {
                     )
                   ]),
                   _vm._v(" "),
-                  _c(
-                    "div",
-                    { staticClass: "row mt-2 print-none" },
-                    [
-                      _c("col-employmentstatus", {
-                        attrs: {
-                          "item-name": "雇用形態",
-                          "item-value": calclist.employment
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-employmentstatus", {
-                        attrs: {
-                          "item-name": "勤務時間",
-                          "item-value": calclist.total_working_times
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-employmentstatus", {
-                        attrs: {
-                          "item-name": "所定労働時間",
-                          "item-value": calclist.regular_working_times
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-employmentstatus", {
-                        attrs: {
-                          "item-name": "所定外労働時間",
-                          "item-value": calclist.out_of_regular_working_times
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-employmentstatus", {
-                        attrs: {
-                          "item-name": "残業時間",
-                          "item-value": calclist.overtime_hours
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-employmentstatus", {
-                        attrs: {
-                          "item-name": "深夜残業時間",
-                          "item-value": calclist.late_night_overtime_hours
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-employmentstatus", {
-                        attrs: {
-                          "item-name": "法定労働時間",
-                          "item-value": calclist.legal_working_times
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-employmentstatus", {
-                        attrs: {
-                          "item-name": "法定外労働時間",
-                          "item-value": calclist.out_of_legal_working_times
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-employmentstatus", {
-                        attrs: {
-                          "item-name": "未就労時間",
-                          "item-value": calclist.not_employment_working_hours
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-employmentstatus", {
-                        attrs: {
-                          "item-name": "時間外労働",
-                          "item-value": calclist.off_hours_working_hours
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-employmentstatus", {
-                        attrs: {
-                          "item-name": "遅刻日数",
-                          "item-value": calclist.total_working_status + "日"
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-employmentstatus", {
-                        attrs: {
-                          "item-name": "早退日数",
-                          "item-value": calclist.total_go_out + "日"
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-employmentstatus", {
-                        attrs: {
-                          "item-name": "休暇日数",
-                          "item-value": calclist.total_holiday_kubun + "日"
-                        }
-                      }),
-                      _vm._v(" "),
-                      _c("col-employmentstatus", {
-                        attrs: {
-                          "item-name": "有給休暇日数",
-                          "item-value": "0日"
-                        }
-                      }),
-                      _vm._v(" "),
-                      _vm._m(5, true),
-                      _vm._v(" "),
-                      _vm._m(6, true),
-                      _vm._v(" "),
-                      _vm._m(7, true),
-                      _vm._v(" "),
-                      _vm._m(8, true)
-                    ],
-                    1
-                  ),
+                  _c("monthly-working-info-table", {
+                    attrs: {
+                      "detail-or-total": "detail",
+                      "calc-lists": calclist
+                    }
+                  }),
                   _vm._v(" "),
                   _c(
                     "div",
@@ -87175,7 +89453,7 @@ var render = function() {
                                     [
                                       calclist.date.length
                                         ? _c("div", [
-                                            _vm._m(9, true),
+                                            _vm._m(5, true),
                                             _vm._v(" "),
                                             _c(
                                               "tbody",
@@ -87202,37 +89480,40 @@ var render = function() {
                                                     "00:00" ||
                                                   calclisttimedate.leaving1 !=
                                                     "00:00"
-                                                    ? _c("div", [
-                                                        _c(
-                                                          "td",
-                                                          {
-                                                            staticClass:
-                                                              "text-center align-middle"
-                                                          },
-                                                          [
-                                                            _vm._v(
-                                                              _vm._s(
-                                                                calclisttimedate.attendance1
-                                                              )
+                                                    ? _c(
+                                                        "td",
+                                                        {
+                                                          staticClass:
+                                                            "text-center align-middle"
+                                                        },
+                                                        [
+                                                          _vm._v(
+                                                            _vm._s(
+                                                              calclisttimedate.attendance1
                                                             )
-                                                          ]
-                                                        ),
-                                                        _vm._v(" "),
-                                                        _c(
-                                                          "td",
-                                                          {
-                                                            staticClass:
-                                                              "text-center align-middle"
-                                                          },
-                                                          [
-                                                            _vm._v(
-                                                              _vm._s(
-                                                                calclisttimedate.leaving1
-                                                              )
+                                                          )
+                                                        ]
+                                                      )
+                                                    : _vm._e(),
+                                                  _vm._v(" "),
+                                                  calclisttimedate.attendance1 !=
+                                                    "00:00" ||
+                                                  calclisttimedate.leaving1 !=
+                                                    "00:00"
+                                                    ? _c(
+                                                        "td",
+                                                        {
+                                                          staticClass:
+                                                            "text-center align-middle"
+                                                        },
+                                                        [
+                                                          _vm._v(
+                                                            _vm._s(
+                                                              calclisttimedate.leaving1
                                                             )
-                                                          ]
-                                                        )
-                                                      ])
+                                                          )
+                                                        ]
+                                                      )
                                                     : _vm._e(),
                                                   _vm._v(" "),
                                                   _c("td", {
@@ -87255,11 +89536,44 @@ var render = function() {
                       )
                     ]
                   )
-                ]
+                ],
+                1
               )
             })
           ],
           2
+        )
+      ])
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "row justify-content-between print-none" }, [
+      _c("div", { staticClass: "col-md pt-3" }, [
+        _c(
+          "div",
+          { staticClass: "card shadow-pl" },
+          [
+            _c("daily-working-information-panel-header", {
+              attrs: {
+                headertext1: "合計",
+                headertext2: "集計月の合計が表示されます"
+              }
+            }),
+            _vm._v(" "),
+            _c(
+              "div",
+              { staticClass: "card-body pt-2" },
+              [
+                _c("monthly-working-info-table", {
+                  attrs: {
+                    "detail-or-total": "total",
+                    "calc-lists": _vm.sumresults
+                  }
+                })
+              ],
+              1
+            )
+          ],
+          1
         )
       ])
     ])
@@ -87278,7 +89592,10 @@ var staticRenderFns = [
             "input-group-text font-size-sm line-height-xs label-width-90",
           attrs: { id: "basic-addon1" }
         },
-        [_vm._v("指定年月")]
+        [
+          _vm._v("指定年月"),
+          _c("span", { staticClass: "color-red" }, [_vm._v("＊")])
+        ]
       )
     ])
   },
@@ -87294,7 +89611,10 @@ var staticRenderFns = [
             "input-group-text font-size-sm line-height-xs label-width-90",
           attrs: { for: "inputGroupSelect01" }
         },
-        [_vm._v("表示区分")]
+        [
+          _vm._v("集計区分"),
+          _c("span", { staticClass: "color-red" }, [_vm._v("＊")])
+        ]
       )
     ])
   },
@@ -87350,144 +89670,18 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
-      [
-        _c(
-          "div",
-          { staticClass: "card text-secondary border border-secondary" },
-          [
-            _c("div", { staticClass: "card-body px-3 py-2" }, [
-              _c("span", { staticClass: "d-md-none float-left" }, [
-                _c("img", {
-                  staticClass: "icon-size-ml mr-2",
-                  attrs: { src: "/images/round-error-b.svg", alt: "" }
-                })
-              ]),
-              _vm._v(" "),
-              _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                _vm._v("時間外労働3ヵ月")
-              ]),
-              _vm._v(" "),
-              _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("00:00")])
-            ])
-          ]
-        )
-      ]
-    )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
-      [
-        _c(
-          "div",
-          { staticClass: "card text-secondary border border-secondary" },
-          [
-            _c("div", { staticClass: "card-body px-3 py-2" }, [
-              _c("span", { staticClass: "d-md-none float-left" }, [
-                _c("img", {
-                  staticClass: "icon-size-ml mr-2",
-                  attrs: { src: "/images/round-error-b.svg", alt: "" }
-                })
-              ]),
-              _vm._v(" "),
-              _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                _vm._v("時間外労働6ヵ月")
-              ]),
-              _vm._v(" "),
-              _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("00:00")])
-            ])
-          ]
-        )
-      ]
-    )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
-      [
-        _c(
-          "div",
-          { staticClass: "card text-secondary border border-secondary" },
-          [
-            _c("div", { staticClass: "card-body px-3 py-2" }, [
-              _c("span", { staticClass: "d-md-none float-left" }, [
-                _c("img", {
-                  staticClass: "icon-size-ml mr-2",
-                  attrs: { src: "/images/round-error-b.svg", alt: "" }
-                })
-              ]),
-              _vm._v(" "),
-              _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                _vm._v("時間外労働1年")
-              ]),
-              _vm._v(" "),
-              _c("p", { staticClass: "font-size-lg m-0" }, [_vm._v("00:00")])
-            ])
-          ]
-        )
-      ]
-    )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      { staticClass: "col-sm-6 col-md-3 col-lg-2 pb-2 align-self-stretch" },
-      [
-        _c(
-          "div",
-          { staticClass: "card text-secondary border border-secondary" },
-          [
-            _c("div", { staticClass: "card-body px-3 py-2" }, [
-              _c("span", { staticClass: "d-md-none float-left" }, [
-                _c("img", {
-                  staticClass: "icon-size-ml mr-2",
-                  attrs: { src: "/images/round-error-b.svg", alt: "" }
-                })
-              ]),
-              _vm._v(" "),
-              _c("h1", { staticClass: "font-size-sm m-0 mb-1" }, [
-                _vm._v("6ヵ月連続45時間")
-              ]),
-              _vm._v(" "),
-              _c("p", { staticClass: "font-size-lg m-0" })
-            ])
-          ]
-        )
-      ]
-    )
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
     return _c("thead", [
       _c("tr", [
         _c("td", { staticClass: "text-center align-middle w-20" }, [
           _vm._v("日付")
         ]),
         _vm._v(" "),
-        _c("div", [
-          _c("td", { staticClass: "text-center align-middle w-20" }, [
-            _vm._v("出勤時間")
-          ]),
-          _vm._v(" "),
-          _c("td", { staticClass: "text-center align-middle w-20" }, [
-            _vm._v("退勤時間")
-          ])
+        _c("td", { staticClass: "text-center align-middle w-20" }, [
+          _vm._v("出勤時間")
+        ]),
+        _vm._v(" "),
+        _c("td", { staticClass: "text-center align-middle w-20" }, [
+          _vm._v("退勤時間")
         ]),
         _vm._v(" "),
         _c("td", { staticClass: "text-center align-middle mw-rem-20" }, [
@@ -91105,61 +93299,6 @@ var staticRenderFns = [
         _c("th")
       ])
     ])
-  }
-]
-render._withStripped = true
-
-
-
-/***/ }),
-
-/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkTimeSearchButton.vue?vue&type=template&id=398a2483&":
-/*!***********************************************************************************************************************************************************************************************************************!*\
-  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkTimeSearchButton.vue?vue&type=template&id=398a2483& ***!
-  \***********************************************************************************************************************************************************************************************************************/
-/*! exports provided: render, staticRenderFns */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
-var render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    {
-      staticClass: "btn-group d-flex",
-      on: {
-        click: function($event) {
-          return _vm.searchclickBtn()
-        }
-      }
-    },
-    [_vm._m(0)]
-  )
-}
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
-      "button",
-      {
-        staticClass: "btn btn-primary btn-lg font-size-rg w-100",
-        attrs: { type: "button" }
-      },
-      [
-        _c("img", {
-          staticClass: "icon-size-sm mr-2 pb-1",
-          attrs: { src: "/images/round-search-w.svg", alt: "" }
-        }),
-        _vm._v("この条件で表示する")
-      ]
-    )
   }
 ]
 render._withStripped = true
@@ -106449,11 +108588,15 @@ vue__WEBPACK_IMPORTED_MODULE_4___default.a.prototype.$axios = axios__WEBPACK_IMP
 
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("daily-working-information", __webpack_require__(/*! ./components/DailyWorkingInformation.vue */ "./resources/js/components/DailyWorkingInformation.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("daily-working-information-panel-header", __webpack_require__(/*! ./components/DailyWorkingInformationPanelHeader.vue */ "./resources/js/components/DailyWorkingInformationPanelHeader.vue")["default"]);
+vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("daily-working-info-table", __webpack_require__(/*! ./components/DailyWorkingInfoTable.vue */ "./resources/js/components/DailyWorkingInfoTable.vue")["default"]);
+vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("daily-working-alert", __webpack_require__(/*! ./components/DailyWorkingAlert.vue */ "./resources/js/components/DailyWorkingAlert.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("monthly-working-information", __webpack_require__(/*! ./components/MonthlyWorkingInformation.vue */ "./resources/js/components/MonthlyWorkingInformation.vue")["default"]);
+vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("monthly-working-info-table", __webpack_require__(/*! ./components/MonthlyWorkingInfoTable.vue */ "./resources/js/components/MonthlyWorkingInfoTable.vue")["default"]);
+vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("monthly-working-alert", __webpack_require__(/*! ./components/MonthlyWorkingAlert.vue */ "./resources/js/components/MonthlyWorkingAlert.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("app-component", __webpack_require__(/*! ./components/App.vue */ "./resources/js/components/App.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("create-shift-time", __webpack_require__(/*! ./components/CreateShiftTime.vue */ "./resources/js/components/CreateShiftTime.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("setting-shift-time", __webpack_require__(/*! ./components/SettingShiftTime.vue */ "./resources/js/components/SettingShiftTime.vue")["default"]);
-vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("search-workingtimebutton", __webpack_require__(/*! ./components/WorkTimeSearchButton.vue */ "./resources/js/components/WorkTimeSearchButton.vue")["default"]);
+vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("btn-work-time", __webpack_require__(/*! ./components/BtnWorkTime.vue */ "./resources/js/components/BtnWorkTime.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("select-department", __webpack_require__(/*! ./components/SelectDepartment.vue */ "./resources/js/components/SelectDepartment.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("select-business-day", __webpack_require__(/*! ./components/SelectBusinessDay.vue */ "./resources/js/components/SelectBusinessDay.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("select-holi-day", __webpack_require__(/*! ./components/SelectHoliDay.vue */ "./resources/js/components/SelectHoliDay.vue")["default"]);
@@ -106473,7 +108616,6 @@ vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("worktime-day", __webpack_r
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("select-employmentstatus", __webpack_require__(/*! ./components/SelectEmploymentStatus.vue */ "./resources/js/components/SelectEmploymentStatus.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("col-attendance", __webpack_require__(/*! ./components/ColAttendance.vue */ "./resources/js/components/ColAttendance.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("col-missingmiddle", __webpack_require__(/*! ./components/ColMissingMiddle.vue */ "./resources/js/components/ColMissingMiddle.vue")["default"]);
-vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("col-missingmiddle", __webpack_require__(/*! ./components/ColMissingMiddle.vue */ "./resources/js/components/ColMissingMiddle.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("col-employmentstatus", __webpack_require__(/*! ./components/ColEmploymentStatus.vue */ "./resources/js/components/ColEmploymentStatus.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("col-regularworking", __webpack_require__(/*! ./components/ColRegularWorking.vue */ "./resources/js/components/ColRegularWorking.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("col-overtimehours", __webpack_require__(/*! ./components/ColOvertimeHours.vue */ "./resources/js/components/ColOvertimeHours.vue")["default"]);
@@ -106482,6 +108624,10 @@ vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("col-note", __webpack_requi
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("general-list", __webpack_require__(/*! ./components/SelectGeneralList.vue */ "./resources/js/components/SelectGeneralList.vue")["default"]); // CSV ダウンロードボタン
 
 vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("btn-csv-download", __webpack_require__(/*! ./components/BtnCsvDownload.vue */ "./resources/js/components/BtnCsvDownload.vue")["default"]);
+vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("daily-working-alert-table", __webpack_require__(/*! ./components/DailyWorkingAlertTable.vue */ "./resources/js/components/DailyWorkingAlertTable.vue")["default"]);
+vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("monthly-working-alert-table", __webpack_require__(/*! ./components/MonthlyWorkingAlertTable.vue */ "./resources/js/components/MonthlyWorkingAlertTable.vue")["default"]);
+vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("message-waiting", __webpack_require__(/*! ./components/MessageWaiting.vue */ "./resources/js/components/MessageWaiting.vue")["default"]);
+vue__WEBPACK_IMPORTED_MODULE_4___default.a.component("message-data-server", __webpack_require__(/*! ./components/MessageDataServer.vue */ "./resources/js/components/MessageDataServer.vue")["default"]);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -106688,6 +108834,75 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_BtnCsvDownload_vue_vue_type_template_id_1778e2dd___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_BtnCsvDownload_vue_vue_type_template_id_1778e2dd___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/BtnWorkTime.vue":
+/*!*************************************************!*\
+  !*** ./resources/js/components/BtnWorkTime.vue ***!
+  \*************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _BtnWorkTime_vue_vue_type_template_id_c9745c42___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./BtnWorkTime.vue?vue&type=template&id=c9745c42& */ "./resources/js/components/BtnWorkTime.vue?vue&type=template&id=c9745c42&");
+/* harmony import */ var _BtnWorkTime_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./BtnWorkTime.vue?vue&type=script&lang=js& */ "./resources/js/components/BtnWorkTime.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _BtnWorkTime_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _BtnWorkTime_vue_vue_type_template_id_c9745c42___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _BtnWorkTime_vue_vue_type_template_id_c9745c42___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/BtnWorkTime.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/BtnWorkTime.vue?vue&type=script&lang=js&":
+/*!**************************************************************************!*\
+  !*** ./resources/js/components/BtnWorkTime.vue?vue&type=script&lang=js& ***!
+  \**************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_BtnWorkTime_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./BtnWorkTime.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/BtnWorkTime.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_BtnWorkTime_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/BtnWorkTime.vue?vue&type=template&id=c9745c42&":
+/*!********************************************************************************!*\
+  !*** ./resources/js/components/BtnWorkTime.vue?vue&type=template&id=c9745c42& ***!
+  \********************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_BtnWorkTime_vue_vue_type_template_id_c9745c42___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./BtnWorkTime.vue?vue&type=template&id=c9745c42& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/BtnWorkTime.vue?vue&type=template&id=c9745c42&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_BtnWorkTime_vue_vue_type_template_id_c9745c42___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_BtnWorkTime_vue_vue_type_template_id_c9745c42___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 
@@ -107557,6 +109772,213 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/DailyWorkingAlert.vue":
+/*!*******************************************************!*\
+  !*** ./resources/js/components/DailyWorkingAlert.vue ***!
+  \*******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _DailyWorkingAlert_vue_vue_type_template_id_6c811489___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./DailyWorkingAlert.vue?vue&type=template&id=6c811489& */ "./resources/js/components/DailyWorkingAlert.vue?vue&type=template&id=6c811489&");
+/* harmony import */ var _DailyWorkingAlert_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./DailyWorkingAlert.vue?vue&type=script&lang=js& */ "./resources/js/components/DailyWorkingAlert.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _DailyWorkingAlert_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _DailyWorkingAlert_vue_vue_type_template_id_6c811489___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _DailyWorkingAlert_vue_vue_type_template_id_6c811489___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/DailyWorkingAlert.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/DailyWorkingAlert.vue?vue&type=script&lang=js&":
+/*!********************************************************************************!*\
+  !*** ./resources/js/components/DailyWorkingAlert.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingAlert_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./DailyWorkingAlert.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingAlert.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingAlert_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/DailyWorkingAlert.vue?vue&type=template&id=6c811489&":
+/*!**************************************************************************************!*\
+  !*** ./resources/js/components/DailyWorkingAlert.vue?vue&type=template&id=6c811489& ***!
+  \**************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingAlert_vue_vue_type_template_id_6c811489___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./DailyWorkingAlert.vue?vue&type=template&id=6c811489& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingAlert.vue?vue&type=template&id=6c811489&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingAlert_vue_vue_type_template_id_6c811489___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingAlert_vue_vue_type_template_id_6c811489___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/DailyWorkingAlertTable.vue":
+/*!************************************************************!*\
+  !*** ./resources/js/components/DailyWorkingAlertTable.vue ***!
+  \************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _DailyWorkingAlertTable_vue_vue_type_template_id_2ff6b816___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./DailyWorkingAlertTable.vue?vue&type=template&id=2ff6b816& */ "./resources/js/components/DailyWorkingAlertTable.vue?vue&type=template&id=2ff6b816&");
+/* harmony import */ var _DailyWorkingAlertTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./DailyWorkingAlertTable.vue?vue&type=script&lang=js& */ "./resources/js/components/DailyWorkingAlertTable.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _DailyWorkingAlertTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _DailyWorkingAlertTable_vue_vue_type_template_id_2ff6b816___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _DailyWorkingAlertTable_vue_vue_type_template_id_2ff6b816___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/DailyWorkingAlertTable.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/DailyWorkingAlertTable.vue?vue&type=script&lang=js&":
+/*!*************************************************************************************!*\
+  !*** ./resources/js/components/DailyWorkingAlertTable.vue?vue&type=script&lang=js& ***!
+  \*************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingAlertTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./DailyWorkingAlertTable.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingAlertTable.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingAlertTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/DailyWorkingAlertTable.vue?vue&type=template&id=2ff6b816&":
+/*!*******************************************************************************************!*\
+  !*** ./resources/js/components/DailyWorkingAlertTable.vue?vue&type=template&id=2ff6b816& ***!
+  \*******************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingAlertTable_vue_vue_type_template_id_2ff6b816___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./DailyWorkingAlertTable.vue?vue&type=template&id=2ff6b816& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingAlertTable.vue?vue&type=template&id=2ff6b816&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingAlertTable_vue_vue_type_template_id_2ff6b816___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingAlertTable_vue_vue_type_template_id_2ff6b816___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/DailyWorkingInfoTable.vue":
+/*!***********************************************************!*\
+  !*** ./resources/js/components/DailyWorkingInfoTable.vue ***!
+  \***********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _DailyWorkingInfoTable_vue_vue_type_template_id_ce1beb26___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./DailyWorkingInfoTable.vue?vue&type=template&id=ce1beb26& */ "./resources/js/components/DailyWorkingInfoTable.vue?vue&type=template&id=ce1beb26&");
+/* harmony import */ var _DailyWorkingInfoTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./DailyWorkingInfoTable.vue?vue&type=script&lang=js& */ "./resources/js/components/DailyWorkingInfoTable.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _DailyWorkingInfoTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _DailyWorkingInfoTable_vue_vue_type_template_id_ce1beb26___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _DailyWorkingInfoTable_vue_vue_type_template_id_ce1beb26___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/DailyWorkingInfoTable.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/DailyWorkingInfoTable.vue?vue&type=script&lang=js&":
+/*!************************************************************************************!*\
+  !*** ./resources/js/components/DailyWorkingInfoTable.vue?vue&type=script&lang=js& ***!
+  \************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingInfoTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./DailyWorkingInfoTable.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingInfoTable.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingInfoTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/DailyWorkingInfoTable.vue?vue&type=template&id=ce1beb26&":
+/*!******************************************************************************************!*\
+  !*** ./resources/js/components/DailyWorkingInfoTable.vue?vue&type=template&id=ce1beb26& ***!
+  \******************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingInfoTable_vue_vue_type_template_id_ce1beb26___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./DailyWorkingInfoTable.vue?vue&type=template&id=ce1beb26& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/DailyWorkingInfoTable.vue?vue&type=template&id=ce1beb26&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingInfoTable_vue_vue_type_template_id_ce1beb26___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_DailyWorkingInfoTable_vue_vue_type_template_id_ce1beb26___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
 /***/ "./resources/js/components/DailyWorkingInformation.vue":
 /*!*************************************************************!*\
   !*** ./resources/js/components/DailyWorkingInformation.vue ***!
@@ -108071,6 +110493,369 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageData_vue_vue_type_template_id_f63b1a94___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageData_vue_vue_type_template_id_f63b1a94___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/MessageDataServer.vue":
+/*!*******************************************************!*\
+  !*** ./resources/js/components/MessageDataServer.vue ***!
+  \*******************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _MessageDataServer_vue_vue_type_template_id_69e21619___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MessageDataServer.vue?vue&type=template&id=69e21619& */ "./resources/js/components/MessageDataServer.vue?vue&type=template&id=69e21619&");
+/* harmony import */ var _MessageDataServer_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MessageDataServer.vue?vue&type=script&lang=js& */ "./resources/js/components/MessageDataServer.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _MessageDataServer_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _MessageDataServer_vue_vue_type_template_id_69e21619___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _MessageDataServer_vue_vue_type_template_id_69e21619___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/MessageDataServer.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/MessageDataServer.vue?vue&type=script&lang=js&":
+/*!********************************************************************************!*\
+  !*** ./resources/js/components/MessageDataServer.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageDataServer_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./MessageDataServer.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MessageDataServer.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageDataServer_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/MessageDataServer.vue?vue&type=template&id=69e21619&":
+/*!**************************************************************************************!*\
+  !*** ./resources/js/components/MessageDataServer.vue?vue&type=template&id=69e21619& ***!
+  \**************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageDataServer_vue_vue_type_template_id_69e21619___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./MessageDataServer.vue?vue&type=template&id=69e21619& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MessageDataServer.vue?vue&type=template&id=69e21619&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageDataServer_vue_vue_type_template_id_69e21619___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageDataServer_vue_vue_type_template_id_69e21619___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/MessageWaiting.vue":
+/*!****************************************************!*\
+  !*** ./resources/js/components/MessageWaiting.vue ***!
+  \****************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _MessageWaiting_vue_vue_type_template_id_724e4071___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MessageWaiting.vue?vue&type=template&id=724e4071& */ "./resources/js/components/MessageWaiting.vue?vue&type=template&id=724e4071&");
+/* harmony import */ var _MessageWaiting_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MessageWaiting.vue?vue&type=script&lang=js& */ "./resources/js/components/MessageWaiting.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _MessageWaiting_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./MessageWaiting.vue?vue&type=style&index=0&lang=css& */ "./resources/js/components/MessageWaiting.vue?vue&type=style&index=0&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _MessageWaiting_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _MessageWaiting_vue_vue_type_template_id_724e4071___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _MessageWaiting_vue_vue_type_template_id_724e4071___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/MessageWaiting.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/MessageWaiting.vue?vue&type=script&lang=js&":
+/*!*****************************************************************************!*\
+  !*** ./resources/js/components/MessageWaiting.vue?vue&type=script&lang=js& ***!
+  \*****************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageWaiting_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./MessageWaiting.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MessageWaiting.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageWaiting_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/MessageWaiting.vue?vue&type=style&index=0&lang=css&":
+/*!*************************************************************************************!*\
+  !*** ./resources/js/components/MessageWaiting.vue?vue&type=style&index=0&lang=css& ***!
+  \*************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageWaiting_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./MessageWaiting.vue?vue&type=style&index=0&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MessageWaiting.vue?vue&type=style&index=0&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageWaiting_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageWaiting_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageWaiting_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageWaiting_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageWaiting_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
+/***/ }),
+
+/***/ "./resources/js/components/MessageWaiting.vue?vue&type=template&id=724e4071&":
+/*!***********************************************************************************!*\
+  !*** ./resources/js/components/MessageWaiting.vue?vue&type=template&id=724e4071& ***!
+  \***********************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageWaiting_vue_vue_type_template_id_724e4071___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./MessageWaiting.vue?vue&type=template&id=724e4071& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MessageWaiting.vue?vue&type=template&id=724e4071&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageWaiting_vue_vue_type_template_id_724e4071___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MessageWaiting_vue_vue_type_template_id_724e4071___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/MonthlyWorkingAlert.vue":
+/*!*********************************************************!*\
+  !*** ./resources/js/components/MonthlyWorkingAlert.vue ***!
+  \*********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _MonthlyWorkingAlert_vue_vue_type_template_id_a85e2186___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MonthlyWorkingAlert.vue?vue&type=template&id=a85e2186& */ "./resources/js/components/MonthlyWorkingAlert.vue?vue&type=template&id=a85e2186&");
+/* harmony import */ var _MonthlyWorkingAlert_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MonthlyWorkingAlert.vue?vue&type=script&lang=js& */ "./resources/js/components/MonthlyWorkingAlert.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _MonthlyWorkingAlert_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _MonthlyWorkingAlert_vue_vue_type_template_id_a85e2186___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _MonthlyWorkingAlert_vue_vue_type_template_id_a85e2186___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/MonthlyWorkingAlert.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/MonthlyWorkingAlert.vue?vue&type=script&lang=js&":
+/*!**********************************************************************************!*\
+  !*** ./resources/js/components/MonthlyWorkingAlert.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingAlert_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./MonthlyWorkingAlert.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MonthlyWorkingAlert.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingAlert_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/MonthlyWorkingAlert.vue?vue&type=template&id=a85e2186&":
+/*!****************************************************************************************!*\
+  !*** ./resources/js/components/MonthlyWorkingAlert.vue?vue&type=template&id=a85e2186& ***!
+  \****************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingAlert_vue_vue_type_template_id_a85e2186___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./MonthlyWorkingAlert.vue?vue&type=template&id=a85e2186& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MonthlyWorkingAlert.vue?vue&type=template&id=a85e2186&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingAlert_vue_vue_type_template_id_a85e2186___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingAlert_vue_vue_type_template_id_a85e2186___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/MonthlyWorkingAlertTable.vue":
+/*!**************************************************************!*\
+  !*** ./resources/js/components/MonthlyWorkingAlertTable.vue ***!
+  \**************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _MonthlyWorkingAlertTable_vue_vue_type_template_id_15b559c1___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MonthlyWorkingAlertTable.vue?vue&type=template&id=15b559c1& */ "./resources/js/components/MonthlyWorkingAlertTable.vue?vue&type=template&id=15b559c1&");
+/* harmony import */ var _MonthlyWorkingAlertTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MonthlyWorkingAlertTable.vue?vue&type=script&lang=js& */ "./resources/js/components/MonthlyWorkingAlertTable.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _MonthlyWorkingAlertTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _MonthlyWorkingAlertTable_vue_vue_type_template_id_15b559c1___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _MonthlyWorkingAlertTable_vue_vue_type_template_id_15b559c1___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/MonthlyWorkingAlertTable.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/MonthlyWorkingAlertTable.vue?vue&type=script&lang=js&":
+/*!***************************************************************************************!*\
+  !*** ./resources/js/components/MonthlyWorkingAlertTable.vue?vue&type=script&lang=js& ***!
+  \***************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingAlertTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./MonthlyWorkingAlertTable.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MonthlyWorkingAlertTable.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingAlertTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/MonthlyWorkingAlertTable.vue?vue&type=template&id=15b559c1&":
+/*!*********************************************************************************************!*\
+  !*** ./resources/js/components/MonthlyWorkingAlertTable.vue?vue&type=template&id=15b559c1& ***!
+  \*********************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingAlertTable_vue_vue_type_template_id_15b559c1___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./MonthlyWorkingAlertTable.vue?vue&type=template&id=15b559c1& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MonthlyWorkingAlertTable.vue?vue&type=template&id=15b559c1&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingAlertTable_vue_vue_type_template_id_15b559c1___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingAlertTable_vue_vue_type_template_id_15b559c1___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/MonthlyWorkingInfoTable.vue":
+/*!*************************************************************!*\
+  !*** ./resources/js/components/MonthlyWorkingInfoTable.vue ***!
+  \*************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _MonthlyWorkingInfoTable_vue_vue_type_template_id_baa529be___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MonthlyWorkingInfoTable.vue?vue&type=template&id=baa529be& */ "./resources/js/components/MonthlyWorkingInfoTable.vue?vue&type=template&id=baa529be&");
+/* harmony import */ var _MonthlyWorkingInfoTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MonthlyWorkingInfoTable.vue?vue&type=script&lang=js& */ "./resources/js/components/MonthlyWorkingInfoTable.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _MonthlyWorkingInfoTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _MonthlyWorkingInfoTable_vue_vue_type_template_id_baa529be___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _MonthlyWorkingInfoTable_vue_vue_type_template_id_baa529be___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/MonthlyWorkingInfoTable.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/MonthlyWorkingInfoTable.vue?vue&type=script&lang=js&":
+/*!**************************************************************************************!*\
+  !*** ./resources/js/components/MonthlyWorkingInfoTable.vue?vue&type=script&lang=js& ***!
+  \**************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingInfoTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./MonthlyWorkingInfoTable.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MonthlyWorkingInfoTable.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingInfoTable_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/MonthlyWorkingInfoTable.vue?vue&type=template&id=baa529be&":
+/*!********************************************************************************************!*\
+  !*** ./resources/js/components/MonthlyWorkingInfoTable.vue?vue&type=template&id=baa529be& ***!
+  \********************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingInfoTable_vue_vue_type_template_id_baa529be___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./MonthlyWorkingInfoTable.vue?vue&type=template&id=baa529be& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/MonthlyWorkingInfoTable.vue?vue&type=template&id=baa529be&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingInfoTable_vue_vue_type_template_id_baa529be___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MonthlyWorkingInfoTable_vue_vue_type_template_id_baa529be___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 
@@ -108866,75 +111651,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeDateTable_vue_vue_type_template_id_66c55507___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeDateTable_vue_vue_type_template_id_66c55507___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
-
-
-
-/***/ }),
-
-/***/ "./resources/js/components/WorkTimeSearchButton.vue":
-/*!**********************************************************!*\
-  !*** ./resources/js/components/WorkTimeSearchButton.vue ***!
-  \**********************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _WorkTimeSearchButton_vue_vue_type_template_id_398a2483___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WorkTimeSearchButton.vue?vue&type=template&id=398a2483& */ "./resources/js/components/WorkTimeSearchButton.vue?vue&type=template&id=398a2483&");
-/* harmony import */ var _WorkTimeSearchButton_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WorkTimeSearchButton.vue?vue&type=script&lang=js& */ "./resources/js/components/WorkTimeSearchButton.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
-
-
-
-
-
-/* normalize component */
-
-var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
-  _WorkTimeSearchButton_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
-  _WorkTimeSearchButton_vue_vue_type_template_id_398a2483___WEBPACK_IMPORTED_MODULE_0__["render"],
-  _WorkTimeSearchButton_vue_vue_type_template_id_398a2483___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* hot reload */
-if (false) { var api; }
-component.options.__file = "resources/js/components/WorkTimeSearchButton.vue"
-/* harmony default export */ __webpack_exports__["default"] = (component.exports);
-
-/***/ }),
-
-/***/ "./resources/js/components/WorkTimeSearchButton.vue?vue&type=script&lang=js&":
-/*!***********************************************************************************!*\
-  !*** ./resources/js/components/WorkTimeSearchButton.vue?vue&type=script&lang=js& ***!
-  \***********************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeSearchButton_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkTimeSearchButton.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkTimeSearchButton.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeSearchButton_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
-
-/***/ }),
-
-/***/ "./resources/js/components/WorkTimeSearchButton.vue?vue&type=template&id=398a2483&":
-/*!*****************************************************************************************!*\
-  !*** ./resources/js/components/WorkTimeSearchButton.vue?vue&type=template&id=398a2483& ***!
-  \*****************************************************************************************/
-/*! exports provided: render, staticRenderFns */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeSearchButton_vue_vue_type_template_id_398a2483___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkTimeSearchButton.vue?vue&type=template&id=398a2483& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkTimeSearchButton.vue?vue&type=template&id=398a2483&");
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeSearchButton_vue_vue_type_template_id_398a2483___WEBPACK_IMPORTED_MODULE_0__["render"]; });
-
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkTimeSearchButton_vue_vue_type_template_id_398a2483___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

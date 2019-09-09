@@ -535,7 +535,8 @@ class WorkTime extends Model
                 ->where('t9.is_deleted', '=', 0);
             })
             ->leftJoinSub($subquery4, 't5', function ($join) { 
-                $join->on('t5.code', '=', 't1.department_code');
+                $join->on('t5.code', '=', 't1.department_code')
+                ->where('t1.is_deleted', '=', 0);
             })
             ->leftJoin('calendars as t3', function ($join) { 
                 $join->on('t3.date', '=', 't2.record_date')
@@ -549,16 +550,19 @@ class WorkTime extends Model
             ->leftJoin('working_timetables as t6', function ($join) { 
                 $join->on('t6.no', '=', 't1.working_timetable_no')
                 ->where('t6.working_time_kubun', '=', Config::get('const.C004.regular_working_time'))
+                ->where('t1.is_deleted', '=', 0)
                 ->where('t6.is_deleted', '=', 0);
             })
             ->leftJoin('generalcodes as t7', function ($join) { 
                 $join->on('t7.code', '=', 't6.working_time_kubun')
                 ->where('t7.identification_id', '=', Config::get('const.C004.value'))
+                ->where('t6.is_deleted', '=', 0)
                 ->where('t7.is_deleted', '=', 0);
             })
             ->leftJoin('generalcodes as t8', function ($join) { 
                 $join->on('t8.code', '=', 't1.employment_status')
                 ->where('t8.identification_id', '=', Config::get('const.C001.value'))
+                ->where('t1.is_deleted', '=', 0)
                 ->where('t8.is_deleted', '=', 0);
             })
             ->leftJoin('working_timetables as t10', function ($join) { 
@@ -569,27 +573,32 @@ class WorkTime extends Model
             ->leftJoin('generalcodes as t11', function ($join) { 
                 $join->on('t11.code', '=', 't3.weekday_kubun')
                 ->where('t11.identification_id', '=', Config::get('const.C006.value'))
+                ->where('t3.is_deleted', '=', 0)
                 ->where('t11.is_deleted', '=', 0);
             })
             ->leftJoin('generalcodes as t12', function ($join) { 
                 $join->on('t12.code', '=', 't3.business_kubun')
                 ->where('t12.identification_id', '=', Config::get('const.C007.value'))
+                ->where('t3.is_deleted', '=', 0)
                 ->where('t12.is_deleted', '=', 0);
             })
             ->leftJoin('generalcodes as t13', function ($join) { 
                 $join->on('t13.code', '=', 't3.holiday_kubun')
                 ->where('t13.identification_id', '=', Config::get('const.C008.value'))
+                ->where('t3.is_deleted', '=', 0)
                 ->where('t13.is_deleted', '=', 0);
             })
             ->leftJoin('user_holiday_kubuns as t14', function ($join) { 
                 $join->on('t14.working_date', '=', 't2.record_date');
                 $join->on('t14.user_code', '=', 't1.code');
                 $join->on('t14.department_code', '=', 't1.department_code')
+                ->where('t1.is_deleted', '=', 0)
                 ->where('t14.is_deleted', '=', 0);
             })
             ->leftJoin('generalcodes as t15', function ($join) { 
                 $join->on('t15.code', '=', 't14.holiday_kubun')
                 ->where('t15.identification_id', '=', Config::get('const.C013.value'))
+                ->where('t14.is_deleted', '=', 0)
                 ->where('t15.is_deleted', '=', 0);
             });
 
@@ -926,11 +935,13 @@ class WorkTime extends Model
                 ->where('t1.is_deleted', '=', 0);
             })
             ->leftJoinSub($subquery4, 't3', function ($join) { 
-                $join->on('t3.code', '=', 't1.department_code');
+                $join->on('t3.code', '=', 't1.department_code')
+                ->where('t1.is_deleted', '=', 0);
             })
             ->leftJoin('generalcodes as t5', function ($join) { 
                 $join->on('t5.code', '=', 't1.employment_status')
                 ->where('t5.identification_id', '=', Config::get('const.C001.value'))
+                ->where('t1.is_deleted', '=', 0)
                 ->where('t5.is_deleted', '=', 0);
             })
             ->leftJoin('generalcodes as t6', function ($join) { 
