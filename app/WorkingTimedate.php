@@ -1533,6 +1533,22 @@ class WorkingTimedate extends Model
             $case_holiday_kubun .= ' END ';
             $case_holiday_kubun .= 'END';
 
+            $case_absence_kubun = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
+            $case_absence_kubun .= "WHEN {1} THEN 0 ";
+            $case_absence_kubun .= "WHEN {2} THEN 0 ";
+            $case_absence_kubun .= "WHEN {3} THEN 0 ";
+            $case_absence_kubun .= "WHEN {4} THEN 0 ";
+            $case_absence_kubun .= "ELSE ";
+            $case_absence_kubun .= "  CASE ifnull({5},0) WHEN 0 THEN 0 ";
+            $case_absence_kubun .= "  WHEN {5} >= {6} and {5} <= {7} THEN {8} ";
+            $case_absence_kubun .= "  ELSE ";
+            $case_absence_kubun .= "    CASE ifnull(attendance_time_1,0) WHEN 0 THEN ";
+            $case_absence_kubun .= "      CASE ifnull(leaving_time_1,0)  WHEN 0 THEN {9} ELSE {8} END ";
+            $case_absence_kubun .= "    ELSE 0 ";
+            $case_absence_kubun .= '    END ';
+            $case_absence_kubun .= '  END ';
+            $case_absence_kubun .= 'END';
+
             $str_replace_working_status0 =str_replace('{0}', 'working_status', $case_working_status);
             $str_replace_working_status1 =str_replace('{1}', Config::get('const.C012.attendance'), $str_replace_working_status0);
             $str_replace_working_status2 =str_replace('{2}', Config::get('const.C012.missing_middle_return'), $str_replace_working_status1);
@@ -1554,7 +1570,7 @@ class WorkingTimedate extends Model
             $str_replace_holiday_kubun8 =str_replace('{8}', 1, $str_replace_holiday_kubun7);
             $str_replace_holiday_kubun9 =str_replace('{9}', 0, $str_replace_holiday_kubun8);
 
-            $str_replace_absence_kubun0 =str_replace('{0}', 'working_status', $case_holiday_kubun);
+            $str_replace_absence_kubun0 =str_replace('{0}', 'working_status', $case_absence_kubun);
             $str_replace_absence_kubun1 =str_replace('{1}', Config::get('const.C012.attendance'), $str_replace_absence_kubun0);
             $str_replace_absence_kubun2 =str_replace('{2}', Config::get('const.C012.missing_middle_return'), $str_replace_absence_kubun1);
             $str_replace_absence_kubun3 =str_replace('{3}', Config::get('const.C012.public_going_out_return'), $str_replace_absence_kubun2);
