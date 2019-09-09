@@ -1426,15 +1426,18 @@ class WorkingTimedate extends Model
                     $join->on($this->table.'.working_date', '=', $this->table_user_holiday_kubuns.'.working_date');
                     $join->on($this->table.'.department_code', '=', $this->table_user_holiday_kubuns.'.department_code');
                     $join->on($this->table.'.user_code', '=', $this->table_user_holiday_kubuns.'.user_code')
-                    ->where($this->table.'.is_deleted', '=', 0);
+                    ->where($this->table.'.is_deleted', '=', 0)
+                    ->where($this->table_user_holiday_kubuns.'.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_generalcodes, function ($join) { 
                     $join->on($this->table_generalcodes.'.code', '=', $this->table_user_holiday_kubuns.'.holiday_kubun')
                     ->where($this->table_generalcodes.'.identification_id', '=', Config::get('const.C013.value'))
-                    ->where($this->table_generalcodes.'.is_deleted', '=', 0);
+                    ->where($this->table_generalcodes.'.is_deleted', '=', 0)
+                    ->where($this->table_user_holiday_kubuns.'.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_calendars, function ($join) { 
                     $join->on($this->table.'.working_date', '=', $this->table_calendars.'.date')
+                    ->where($this->table.'.is_deleted', '=', 0)
                     ->where($this->table_calendars.'.is_deleted', '=', 0);
                 });
 
@@ -1683,7 +1686,8 @@ class WorkingTimedate extends Model
                     ->selectRaw($case_where_predeter_time_name)
                     ->selectRaw($case_where_predeter_night_time_name);
                 $mainquery->leftJoin($this->table_calendars, function ($join) { 
-                    $join->on('t1.working_date', '=', $this->table_calendars.'.date');
+                    $join->on('t1.working_date', '=', $this->table_calendars.'.date')
+                    ->where($this->table_calendars.'.is_deleted', '=', 0);
                 });
             }
             
@@ -1804,11 +1808,13 @@ class WorkingTimedate extends Model
 
             $mainquery
                 ->leftJoinSub($subquery2, 't21', function ($join) { 
-                    $join->on('t21.code', '=', 't1.department_code');
+                    $join->on('t21.code', '=', 't1.department_code')
+                    ->where('t1.is_deleted', '=', 0);
                 })
                 ->leftJoin('generalcodes as t22', function ($join) { 
                     $join->on('t22.code', '=', 't1.employment_status')
                     ->where('t22.identification_id', '=', Config::get('const.C001.value'))
+                    ->where('t1.is_deleted', '=', 0)
                     ->where('t22.is_deleted', '=', 0);
                 });
     

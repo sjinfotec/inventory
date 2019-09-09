@@ -47,11 +47,11 @@ class MonthlyWorkingInformationController extends Controller
 
         $apicommon = new ApiCommonController();
         // reqestクエリーセット
-        $datefrom = $this->setRequestQeury($request->datefrom);
-        $displaykbn = $this->setRequestQeury($request->displaykbn);
-        $employmentstatus = $this->setRequestQeury($request->employmentstatus);
-        $departmentcode = $this->setRequestQeury($request->departmentcode);
-        $usercode = $this->setRequestQeury($request->usercode);
+        $datefrom = $apicommon->setRequestQeury($request->datefrom);
+        $displaykbn = $apicommon->setRequestQeury($request->displaykbn);
+        $employmentstatus = $apicommon->setRequestQeury($request->employmentstatus);
+        $departmentcode = $apicommon->setRequestQeury($request->departmentcode);
+        $usercode = $apicommon->setRequestQeury($request->usercode);
 
         // メッセージ設定collect
         $this->collect_massegedata = collect();
