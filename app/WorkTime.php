@@ -613,6 +613,7 @@ class WorkTime extends Model
             $mainquery->whereNotNull('t2.record_datetime');
         }
         $result = $mainquery
+            ->where('t1.role', '<', 10)
             ->where('t1.is_deleted', '=', 0)
             ->orderBy('t1.department_code', 'asc')
             ->orderBy('t1.employment_status', 'asc')
