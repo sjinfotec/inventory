@@ -45,7 +45,7 @@
         <td class="text-align-center">{{ calcList.off_hours_working_hours }}</td>
         <td class="text-align-center">{{ calcList.late_night_overtime_hours }}</td>
         <td class="text-align-center">{{ calcList.not_employment_working_hours }}</td>
-        <td class="text-align-center">{{ calcList.remark_data }}　{{ calcList.unused_holiday_name }}</td>
+        <td class="text-align-center">{{ calcList.remark_data }}</td>
       </tr>
       <tr v-if="detailOrTotal === 'total'"
         v-for="(calcList,index) in calcLists"
