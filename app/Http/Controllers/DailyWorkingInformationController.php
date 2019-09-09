@@ -2790,9 +2790,13 @@ class DailyWorkingInformationController extends Controller
         $temp_calc_model->setWeekdaynameAttribute($result->weekday_name);
         $temp_calc_model->setBusinesskubunAttribute($result->business_kubun);
         $temp_calc_model->setBusinessnameAttribute($result->business_name);
-        $temp_calc_model->setHolidaykubunAttribute($result->holiday_kubun);
+        if (isset($result->holiday_kubun)) {
+            $temp_calc_model->setHolidaykubunAttribute($result->holiday_kubun);
+        } else {
+            $temp_calc_model->setHolidaykubunAttribute($result->user_holiday_kubun);
+        }
         if (isset($result->holiday_name)) {
-            $temp_calc_model->setHolidaynameAttribute($result->holiday_name.'　'.$result->user_holiday_name);
+            $temp_calc_model->setHolidaynameAttribute($result->holiday_name.'  '.$result->user_holiday_name);
         } else {
             $temp_calc_model->setHolidaynameAttribute($result->user_holiday_name);
         }
@@ -2810,14 +2814,46 @@ class DailyWorkingInformationController extends Controller
 
         Log::DEBUG('count($this->array_calc_mode) = '.count($this->array_calc_mode));
         for($i=0;$i<count($this->array_calc_mode);$i++){
-            $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
-            $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
-            $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
-            $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
-            $temp_calc_model->setRecordmonthAttribute($edt_calc_datetime->format('m'));
-            $temp_calc_model->setRecorddateAttribute($edt_calc_datetime->format('Ymd'));
-            $temp_calc_model->setRecordtimeAttribute($edt_calc_datetime->format('His'));
-            $temp_calc_model->setWorkingstatusAttribute($this->array_calc_status[$i]);
+            Log::DEBUG('$result->holiday_kubun = '.$result->holiday_kubun);
+            if (isset($result->holiday_kubun)) {
+                if ($result->holiday_kubun == Config::get('const.C013.morning_off') || $result->holiday_kubun == Config::get('const.C013.afternoon_off')) {
+                    $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
+                    $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
+                    $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
+                    $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
+                    $temp_calc_model->setRecordmonthAttribute($edt_calc_datetime->format('m'));
+                    $temp_calc_model->setRecorddateAttribute($edt_calc_datetime->format('Ymd'));
+                    $temp_calc_model->setRecordtimeAttribute($edt_calc_datetime->format('His'));
+                    $temp_calc_model->setWorkingstatusAttribute($this->array_calc_status[$i]);
+                } elseif ($result->holiday_kubun == Config::get('const.C013.non_set')) {
+                    $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
+                    $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
+                    $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
+                    $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
+                    $temp_calc_model->setRecordmonthAttribute($edt_calc_datetime->format('m'));
+                    $temp_calc_model->setRecorddateAttribute($edt_calc_datetime->format('Ymd'));
+                    $temp_calc_model->setRecordtimeAttribute($edt_calc_datetime->format('His'));
+                    $temp_calc_model->setWorkingstatusAttribute($this->array_calc_status[$i]);
+                } else {
+                    $temp_calc_model->setModeAttribute(null);
+                    $temp_calc_model->setRecorddatetimeAttribute(null);
+                    $edt_calc_datetime = new Carbon($target_date);
+                    $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
+                    $temp_calc_model->setRecordmonthAttribute($edt_calc_datetime->format('m'));
+                    $temp_calc_model->setRecorddateAttribute($edt_calc_datetime->format('Ymd'));
+                    $temp_calc_model->setRecordtimeAttribute($edt_calc_datetime->format('His'));
+                    $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.user_holiday'));
+                }
+            } else {
+                $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
+                $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
+                $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
+                $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
+                $temp_calc_model->setRecordmonthAttribute($edt_calc_datetime->format('m'));
+                $temp_calc_model->setRecorddateAttribute($edt_calc_datetime->format('Ymd'));
+                $temp_calc_model->setRecordtimeAttribute($edt_calc_datetime->format('His'));
+                $temp_calc_model->setWorkingstatusAttribute($this->array_calc_status[$i]);
+            }
             $temp_calc_model->setNoteAttribute($this->array_calc_note[$i]);
             $temp_calc_model->setLateAttribute($this->array_calc_late[$i]);
             $temp_calc_model->setLeaveearlyAttribute($this->array_calc_leave_early[$i]);

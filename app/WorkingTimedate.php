@@ -1325,23 +1325,10 @@ class WorkingTimedate extends Model
 
             $mainquery
                 ->addselect($this->table.'.working_status');
-            $remarks_date_note = 'CASE ifnull('.$this->table.".note,'') WHEN '' THEN "; 
-            $remarks_date_note .= 'CASE ifnull('.$this->table.".late,'') WHEN '1' THEN "; 
-            $remarks_date_note .= 'CASE ifnull('.$this->table.".leave_early,'') WHEN '1' THEN "; 
-            $remarks_date_note .= "'".Config::get('const.REMARKS_DATA.late')."' || '、' || '".Config::get('const.REMARKS_DATA.leaveearly')."' "; 
-            $remarks_date_note .= "ELSE '".Config::get('const.REMARKS_DATA.late'). "' END "; 
-            $remarks_date_note .= 'ELSE CASE ifnull('.$this->table.".leave_early,'') WHEN '1' THEN "; 
-            $remarks_date_note .= "'".Config::get('const.REMARKS_DATA.leaveearly')."' "; 
-            $remarks_date_note .= "ELSE '' END END "; 
-            $remarks_date_note .= 'ELSE '; 
-            $remarks_date_note .= 'CASE ifnull('.$this->table.".late,'') WHEN '1' THEN "; 
-            $remarks_date_note .= 'CASE ifnull('.$this->table.".leave_early,'') WHEN '1' THEN "; 
-            $remarks_date_note .= $this->table.".note || '、' || '".Config::get('const.REMARKS_DATA.late')."' || '、' || '".Config::get('const.REMARKS_DATA.leaveearly')."' "; 
-            $remarks_date_note .= 'ELSE '.$this->table.".note || '、' || '".Config::get('const.REMARKS_DATA.late')."' END ";
-            $remarks_date_note .= 'ELSE ';
-            $remarks_date_note .= 'CASE ifnull('.$this->table.".leave_early,'') WHEN '1' THEN "; 
-            $remarks_date_note .= $this->table.".note || '、' || '".Config::get('const.REMARKS_DATA.leaveearly')."' ";
-            $remarks_date_note .= 'ELSE '.$this->table.".note END END END as remark_data";
+            $remarks_date_note = 'ltrim(concat(ifnull('.$this->table.".note, ''), '  ',"; 
+            $remarks_date_note .= ' CASE ifnull('.$this->table.".late, '') WHEN '1' THEN '".Config::get('const.REMARKS_DATA.late')."' ELSE '' END, '  ',"; 
+            $remarks_date_note .= ' CASE ifnull('.$this->table.".leave_early, '') WHEN '1' THEN '".Config::get('const.REMARKS_DATA.leaveearly')."' ELSE '' END, '  ',"; 
+            $remarks_date_note .= ' CASE ifnull('.$this->table.".holiday_name, '') WHEN '' THEN '' ELSE working_time_dates.holiday_name END)) as remark_data"; 
             $mainquery
                 ->selectRaw('ifnull('.$this->table.".working_status_name,'　')  as working_status_name")
                 ->selectRaw($remarks_date_note);
@@ -1531,8 +1518,11 @@ class WorkingTimedate extends Model
             $case_holiday_kubun .= "WHEN {4} THEN 0 ";
             $case_holiday_kubun .= "ELSE ";
             $case_holiday_kubun .= "  CASE ifnull({5},0) WHEN 0 THEN 0 ";
-            $case_holiday_kubun .= "  WHEN {5} >= {6} and {5} <= {7} THEN {8} ";
-            $case_holiday_kubun .= "ELSE {9} ";
+            $case_holiday_kubun .= "  WHEN {5} = {6} THEN {7} ";
+            $case_holiday_kubun .= "  WHEN {5} = {8} THEN {9} ";
+            $case_holiday_kubun .= "  WHEN {5} = {10} THEN {9} ";
+            $case_holiday_kubun .= "  WHEN {5} >= {11} and {5} <= {12} THEN {7} ";
+            $case_holiday_kubun .= "ELSE {13} ";
             $case_holiday_kubun .= ' END ';
             $case_holiday_kubun .= 'END';
 
@@ -1568,10 +1558,14 @@ class WorkingTimedate extends Model
             $str_replace_holiday_kubun3 =str_replace('{3}', Config::get('const.C012.public_going_out_return'), $str_replace_holiday_kubun2);
             $str_replace_holiday_kubun4 =str_replace('{4}', Config::get('const.C012.continue_work'), $str_replace_holiday_kubun3);
             $str_replace_holiday_kubun5 =str_replace('{5}', $this->table.'.holiday_kubun', $str_replace_holiday_kubun4);
-            $str_replace_holiday_kubun6 =str_replace('{6}', Config::get('const.C013.min_break_value'), $str_replace_holiday_kubun5);
-            $str_replace_holiday_kubun7 =str_replace('{7}', Config::get('const.C013.max_break_value'), $str_replace_holiday_kubun6);
-            $str_replace_holiday_kubun8 =str_replace('{8}', 1, $str_replace_holiday_kubun7);
-            $str_replace_holiday_kubun9 =str_replace('{9}', 0, $str_replace_holiday_kubun8);
+            $str_replace_holiday_kubun6 =str_replace('{6}', Config::get('const.C013.paid_leave'), $str_replace_holiday_kubun5);
+            $str_replace_holiday_kubun7 =str_replace('{7}', 1, $str_replace_holiday_kubun6);
+            $str_replace_holiday_kubun8 =str_replace('{8}', Config::get('const.C013.morning_off'), $str_replace_holiday_kubun7);
+            $str_replace_holiday_kubun9 =str_replace('{9}', 1, $str_replace_holiday_kubun8);
+            $str_replace_holiday_kubun10 =str_replace('{10}', Config::get('const.C013.afternoon_off'), $str_replace_holiday_kubun9);
+            $str_replace_holiday_kubun11 =str_replace('{11}', Config::get('const.C013.min_break_value'), $str_replace_holiday_kubun10);
+            $str_replace_holiday_kubun12 =str_replace('{12}', Config::get('const.C013.max_break_value'), $str_replace_holiday_kubun11);
+            $str_replace_holiday_kubun13 =str_replace('{13}', 0, $str_replace_holiday_kubun12);
 
             $str_replace_absence_kubun0 =str_replace('{0}', 'working_status', $case_absence_kubun);
             $str_replace_absence_kubun1 =str_replace('{1}', Config::get('const.C012.attendance'), $str_replace_absence_kubun0);
@@ -1599,7 +1593,7 @@ class WorkingTimedate extends Model
                 ->selectRaw('sum(ifnull('.$this->table.'.missing_middle_hours, 0)) as missing_middle_hours')
                 ->selectRaw('sum('.$str_replace_working_status4.') as total_working_status')
                 ->selectRaw('sum('.$str_replace_go_out2.') as total_go_out')
-                ->selectRaw('sum('.$str_replace_holiday_kubun9.') as total_holiday_kubun')
+                ->selectRaw('sum('.$str_replace_holiday_kubun13.') as total_holiday_kubun')
                 ->selectRaw('sum('.$str_replace_absence_kubun9.') as total_absence');
             if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
                 $subquery->addselect($this->table.'.working_date');

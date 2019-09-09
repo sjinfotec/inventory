@@ -89,6 +89,7 @@ return [
         'missing_middle_return' => 4,
         'public_going_out' => 5,
         'public_going_out_return' => 6,
+        'user_holiday' => 7,
         'continue_work' => 10,
         'forget' => 90,
         'unknown' => 99
@@ -96,7 +97,8 @@ return [
 
     'C013' => [
         'value' => 'C013',
-        'min_break_value' => 1,
+        'non_set' => 0,
+        'min_break_value' => 4,
         'paid_leave' => 1,
         'morning_off' => 2,
         'afternoon_off' => 3,
@@ -296,9 +298,9 @@ return [
  
     'ALERT_MONTHLY_ITEM' => [
         'items_1' => '45H/月',
-        'items_2' => '81H/2月',
-        'items_3' => '120H/3月',
-        'items_4' => '360H/Year',
+        'items_2' => '81H/2か月',
+        'items_3' => '120H/3か月',
+        'items_4' => '360H/年',
         'items_5' => '45H超計6月',
         'items_6' => '45H超100H/月',
         'items_7' => '2月平均80H以内',
@@ -310,8 +312,8 @@ return [
     ],
  
     'ALERT_INFO_RESULT' => [
-        'OK' => '〇',
-        'NG' => '×'
+        'OK' => 'OK',
+        'NG' => 'NG'
     ],
 
     'MSG_INFO' => [
