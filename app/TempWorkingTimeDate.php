@@ -1018,6 +1018,10 @@ class TempWorkingTimeDate extends Model
                     $join->on('t5.code', '=', 't2.working_status')
                     ->where('t5.identification_id', '=', Config::get('const.C005.value'))
                     ->where('t5.is_deleted', '=', 0);
+                })
+                ->JoinSub($subquery2, 't6', function ($join) { 
+                    $join->on('t6.code', '=', 't1.code');
+                    $join->on('t6.max_apply_term_from', '=', 't1.apply_term_from');
                 });
                         
             if(!empty($this->param_employment_status)){
@@ -1033,11 +1037,8 @@ class TempWorkingTimeDate extends Model
             }
             $result = 
                 $mainquery
-                ->JoinSub($subquery2, 't6', function ($join) { 
-                    $join->on('t6.code', '=', 't1.code');
-                    $join->on('t6.max_apply_term_from', '=', 't1.apply_term_from');
-                })
-                ->get();
+                    ->where('t1.role', '<', 10)
+                    ->get();
             
         }catch(\PDOException $pe){
             Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
