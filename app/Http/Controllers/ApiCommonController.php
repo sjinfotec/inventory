@@ -277,6 +277,7 @@ class ApiCommonController extends Controller
             ->select('code as code')
             ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
             ->where('apply_term_from', '<=',$target_date)
+            ->where('role', '<', 10)
             ->where('is_deleted', '=', 0)
             ->groupBy('code');
         return $subquery;

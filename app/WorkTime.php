@@ -970,6 +970,7 @@ class WorkTime extends Model
                 $query->where('t2.check_result', '>', 0)
                       ->orWhere('t2.check_max_time', '>', 0);
             })
+            ->where('t1.role', '<', 10)
             ->where('t1.is_deleted', '=', 0)
             ->orderBy('t1.department_code', 'asc')
             ->orderBy('t1.employment_status', 'asc')
