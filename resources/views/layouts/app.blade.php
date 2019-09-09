@@ -112,7 +112,7 @@
                     <!-- .panel -->
                     <div class="col-md p-3">
                         <div class="text-center">
-                            <small>© 2019 One Door</small>
+                            <small>© 2019 One Dawn</small>
                         </div>
                     </div>
                     <!-- /.panel -->
