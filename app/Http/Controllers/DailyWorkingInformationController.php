@@ -3905,7 +3905,7 @@ class DailyWorkingInformationController extends Controller
 
         // 中抜け打刻５回までチェック
         $missing_middle_note_set = false;
-        if (!$this->chkWorkingTime($array_add_missing_middle_time,(int)(Config::get('const.ARRAY_MAX_INDEX.array_add_missing_middle_time')) )) {
+        if (!$this->chkWorkingTime($array_add_missing_middle_time,(int)(Config::get('const.ARRAY_MAX_INDEX.missing_middle_time')) )) {
             $note .= Config::get('const.MEMO_DATA.MEMO_DATA_018').' '; 
             $missing_middle_note_set = true;
         }

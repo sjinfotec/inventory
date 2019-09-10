@@ -15,6 +15,7 @@ class WorkTime extends Model
     protected $table_users = 'users';
     protected $table_departments = 'departments';
     protected $table_shift_informations = 'shift_informations';
+    protected $table_user_holiday_kubuns = 'user_holiday_kubuns';
     // protected $guarded = array('id');
 
     //--------------- メンバー属性 -----------------------------------
@@ -649,36 +650,88 @@ class WorkTime extends Model
     public function getBeforeDailyMaxData(){
         // 開始日付直前の打刻時刻を取得
         // sunquery1    work_times
-        $sunquery1 = DB::table($this->table)
-            ->select(
-                $this->table.'.user_code',
-                $this->table.'.department_code',
-                $this->table.'.is_deleted',
-                DB::raw('MAX('.$this->table.'.record_time) as max_record_time')
-                )
-            ->where($this->table.'.user_code', '=', $this->param_user_code)
-            ->where($this->table.'.department_code', '=', $this->param_department_code)
-            ->where($this->table.'.record_time', '<', $this->param_date_from)
-            ->groupBy($this->table.'.user_code', $this->table.'.department_code', $this->table.'.is_deleted');
 
-        // mainqueryにsunqueryを組み込む
-        // sunquery1    t1:work_times
-        $mainquery = DB::table($this->table.' AS t1')
-            ->select(
-                't1.mode as mode',
-                't1.record_time as record_datetime'
-                )
-            ->JoinSub($sunquery1, 't2', function ($join) { 
-                $join->on('t2.user_code', '=', 't1.user_code');
-                $join->on('t2.department_code', '=', 't1.department_code');
-                $join->on('t2.max_record_time', '=', 't1.record_time')
-                ->where('t2.is_deleted', '=', 0);
-            })
-            ->where('t1.is_deleted', '=', 0)
-            ->get();
+        try{
+            $subquery1 = DB::table($this->table)
+                ->select(
+                    $this->table.'.user_code',
+                    $this->table.'.department_code',
+                    $this->table.'.record_time')
+                ->selectRaw('DATE_FORMAT('.$this->table.".record_time, '%Y%m%d') as record_date")
+                ->where($this->table.'.is_deleted', '=', 0);
 
+            $subquery2 = DB::table($this->table_user_holiday_kubuns)
+                ->select(
+                    $this->table_user_holiday_kubuns.'.working_date',
+                    $this->table_user_holiday_kubuns.'.user_code',
+                    $this->table_user_holiday_kubuns.'.department_code')
+                ->selectRaw('ifnull('.$this->table_user_holiday_kubuns.'.holiday_kubun, 0) as holiday_kubun')
+                ->where($this->table_user_holiday_kubuns.'.is_deleted', '=', 0);
 
-        return $mainquery;
+            $subquery11 = $subquery1->toSql();
+
+            $subquery12 = DB::table(DB::raw('('.$subquery11.') AS t1'))
+                ->select(
+                    't1.user_code',
+                    't1.department_code',
+                    't1.record_date',
+                    't1.record_time',
+                    't2.working_date')
+                ->leftJoinSub($subquery2, 't2', function ($join) { 
+                    $join->on('t2.working_date', '=', 't1.record_date');
+                    $join->on('t2.user_code', '=', 't1.user_code');
+                    $join->on('t2.department_code', '=', 't1.department_code')
+                    ->where('t2.holiday_kubun', '>', 0);
+                })
+                ->whereNull('t2.working_date');
+
+            $subquery = $subquery12->toSql();
+
+            $subquery_max = DB::table(DB::raw('('.$subquery.') AS t3'))
+                ->select(
+                    't3.user_code',
+                    't3.department_code')
+                ->selectRaw('max(t3.record_time) as max_record_datetime')
+                ->where('t3.user_code', '=', $this->param_user_code)
+                ->where('t3.department_code', '=', $this->param_department_code)
+                ->where('t3.record_time', '<', $this->param_date_from)
+                ->groupBy('t3.user_code', 't3.department_code');
+
+            $subquery_max->setBindings([
+                0,
+                0,
+                0,
+                $this->param_user_code,
+                $this->param_department_code,
+                $this->param_date_from]);
+    
+            $mainquery  = DB::table($this->table)
+                ->select(
+                    $this->table.'.mode as mode',
+                    $this->table.'.record_time as record_datetime')
+                ->JoinSub($subquery_max, 't3', function ($join) { 
+                    $join->on('t3.user_code', '=', $this->table.'.user_code');
+                    $join->on('t3.department_code', '=', $this->table.'.department_code');
+                    $join->on('t3.max_record_datetime', '=', $this->table.'.record_time');
+                })
+                ->where($this->table.'.is_deleted', '=', 0);
+
+            $mainquery->setBindings([
+                0]);
+
+            $result = $mainquery->get();
+                
+        }catch(\PDOException $pe){
+            Log::error('method = getBeforeDailyMaxData '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('method = getBeforeDailyMaxData '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    
+        return $result;
     }
 
     /**
@@ -690,35 +743,88 @@ class WorkTime extends Model
     public function getAfterDailyMinData(){
         // 開始日付直前の打刻時刻を取得
         // sunquery1    work_times
-        $sunquery1 = DB::table($this->table)
-            ->select(
-                $this->table.'.user_code',
-                $this->table.'.department_code',
-                $this->table.'.is_deleted',
-                DB::raw('MIN('.$this->table.'.record_time) as min_record_time')
-                )
-            ->where($this->table.'.user_code', '=', $this->param_user_code)
-            ->where($this->table.'.department_code', '=', $this->param_department_code)
-            ->where($this->table.'.record_time', '>', $this->param_date_from)
-            ->groupBy($this->table.'.user_code', $this->table.'.department_code', $this->table.'.is_deleted');
+        try{
+            $subquery1 = DB::table($this->table)
+                ->select(
+                    $this->table.'.user_code',
+                    $this->table.'.department_code',
+                    $this->table.'.record_time')
+                ->selectRaw('DATE_FORMAT('.$this->table.".record_time, '%Y%m%d') as record_date")
+                ->where($this->table.'.is_deleted', '=', 0);
 
-        // mainqueryにsunqueryを組み込む
-        // sunquery1    t1:work_times
-        $mainquery = DB::table($this->table.' AS t1')
-            ->select(
-                't1.mode as mode',
-                't1.record_time as record_datetime'
-                )
-            ->JoinSub($sunquery1, 't2', function ($join) { 
-                $join->on('t2.user_code', '=', 't1.user_code');
-                $join->on('t2.department_code', '=', 't1.department_code');
-                $join->on('t2.min_record_time', '=', 't1.record_time')
-                ->where('t2.is_deleted', '=', 0);
-            })
-            ->where('t1.is_deleted', '=', 0)
-            ->get();
+            $subquery2 = DB::table($this->table_user_holiday_kubuns)
+                ->select(
+                    $this->table_user_holiday_kubuns.'.working_date',
+                    $this->table_user_holiday_kubuns.'.user_code',
+                    $this->table_user_holiday_kubuns.'.department_code')
+                ->selectRaw('ifnull('.$this->table_user_holiday_kubuns.'.holiday_kubun, 0) as holiday_kubun')
+                ->where($this->table_user_holiday_kubuns.'.is_deleted', '=', 0);
 
-        return $mainquery;
+            $subquery11 = $subquery1->toSql();
+
+            $subquery12 = DB::table(DB::raw('('.$subquery11.') AS t1'))
+                ->select(
+                    't1.user_code',
+                    't1.department_code',
+                    't1.record_date',
+                    't1.record_time',
+                    't2.working_date')
+                ->leftJoinSub($subquery2, 't2', function ($join) { 
+                    $join->on('t2.working_date', '=', 't1.record_date');
+                    $join->on('t2.user_code', '=', 't1.user_code');
+                    $join->on('t2.department_code', '=', 't1.department_code')
+                    ->where('t2.holiday_kubun', '>', 0);
+                })
+                ->whereNull('t2.working_date');
+
+            $subquery = $subquery12->toSql();
+
+            $subquery_max = DB::table(DB::raw('('.$subquery.') AS t3'))
+                ->select(
+                    't3.user_code',
+                    't3.department_code')
+                ->selectRaw('min(t3.record_time) as min_record_datetime')
+                ->where('t3.user_code', '=', $this->param_user_code)
+                ->where('t3.department_code', '=', $this->param_department_code)
+                ->where('t3.record_time', '>', $this->param_date_from)
+                ->groupBy('t3.user_code', 't3.department_code');
+
+            $subquery_max->setBindings([
+                0,
+                0,
+                0,
+                $this->param_user_code,
+                $this->param_department_code,
+                $this->param_date_from]);
+    
+            $mainquery  = DB::table($this->table)
+                ->select(
+                    $this->table.'.mode as mode',
+                    $this->table.'.record_time as record_datetime')
+                ->JoinSub($subquery_max, 't3', function ($join) { 
+                    $join->on('t3.user_code', '=', $this->table.'.user_code');
+                    $join->on('t3.department_code', '=', $this->table.'.department_code');
+                    $join->on('t3.min_record_datetime', '=', $this->table.'.record_time');
+                })
+                ->where($this->table.'.is_deleted', '=', 0);
+
+            $mainquery->setBindings([
+                0]);
+
+            $result = $mainquery->get();
+                
+        }catch(\PDOException $pe){
+            Log::error('method = getAfterDailyMinData '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('method = getAfterDailyMinData '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    
+        return $result;
+
     }
 
     /**
