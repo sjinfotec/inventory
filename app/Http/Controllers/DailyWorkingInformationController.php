@@ -2795,10 +2795,10 @@ class DailyWorkingInformationController extends Controller
         } else {
             $temp_calc_model->setHolidaykubunAttribute($result->user_holiday_kubun);
         }
-        if (isset($result->holiday_name)) {
-            $temp_calc_model->setHolidaynameAttribute($result->holiday_name.'  '.$result->user_holiday_name);
-        } else {
+        if (isset($result->user_holiday_name)) {
             $temp_calc_model->setHolidaynameAttribute($result->user_holiday_name);
+        } else {
+            $temp_calc_model->setHolidaynameAttribute('');
         }
         $temp_calc_model->setClosingAttribute($result->closing);
         $temp_calc_model->setUplimittimeAttribute($result->uplimit_time);
