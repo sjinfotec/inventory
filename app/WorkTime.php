@@ -428,7 +428,7 @@ class WorkTime extends Model
      *
      * @return sql取得結果
      */
-    public function getWorkTimes($targetdate, $business_kubun){
+    public function getWorkTimes($targetdatefrom, $targetdateto, $business_kubun){
 
         // 日次労働時間取得SQL作成
         // subquery1    work_times
@@ -443,9 +443,9 @@ class WorkTime extends Model
                 $this->table.'.check_max_time as check_max_time',
                 $this->table.'.is_deleted as is_deleted'
             )
-            ->selectRaw('DATE_FORMAT('.$this->table.'.record_time'.",'%Y') as record_year")
-            ->selectRaw('DATE_FORMAT('.$this->table.'.record_time'.",'%m') as record_month")
-            ->selectRaw('DATE_FORMAT('.$this->table.'.record_time'.",'%Y%m%d') as record_date")
+            ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%Y') as record_year")
+            ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%m') as record_month")
+            ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%Y%m%d') as record_date")
             ->selectRaw('DATE_FORMAT('.$this->table.'.record_time'.",'%H%i%s') as record_time");
 
         $record_time = $this->getArrayrecordtimeAttribute();
@@ -469,9 +469,9 @@ class WorkTime extends Model
         // 適用期間日付の取得
         $apicommon = new ApiCommonController();
         // usersの最大適用開始日付subquery
-        $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate);
+        $subquery3 = $apicommon->getUserApplyTermSubquery($targetdateto);
         // departmentsの最大適用開始日付subquery
-        $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
+        $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdateto);
 
         // mainqueryにsunqueryを組み込む
         // mainquery    users

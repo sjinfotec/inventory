@@ -99,7 +99,7 @@ return [
         'value' => 'C013',
         'non_set' => 0,
         'min_break_value' => 4,
-        'paid_leave' => 1,
+        'paid_holiday' => 1,
         'morning_off' => 2,
         'afternoon_off' => 3,
         'substitute_holiday' => 4,
@@ -113,6 +113,9 @@ return [
         'nursing_care_leave' => 12,
         'congratulatory_or_consolatory_leave' => 13,
         'refresh_leave' => 14,
+        'absence_work' => 15,
+        'late_work' => 16,
+        'leave_early_work' => 17,
         'max_break_value' => 14
     ],
 
@@ -234,14 +237,14 @@ return [
 
 
     'MEMO_DATA' => [
-        'MEMO_DATA_001' => '前日退勤打刻ないため二重出勤。',
+        'MEMO_DATA_001' => '前日までに退勤打刻ない。',
         'MEMO_DATA_002' => '当日出勤なし。',
         'MEMO_DATA_003' => '外出状態。',
         'MEMO_DATA_004' => '不明な打刻。',
         'MEMO_DATA_005' => '当日時間計算なし。',
         'MEMO_DATA_006' => '自動設定。',
-        'MEMO_DATA_007' => 'インターバル時間が設定時間より少ない。',
-        'MEMO_DATA_008' => '休暇入力ないため未出勤。',
+        'MEMO_DATA_007' => '退勤と出勤までの時間が不足。',
+        'MEMO_DATA_008' => '休暇または欠勤入力要。',
         'MEMO_DATA_009' => '外出なし。',
         'MEMO_DATA_010' => '部署設定ミス。',
         'MEMO_DATA_011' => '締日設定ミス。',

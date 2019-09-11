@@ -1495,90 +1495,73 @@ class WorkingTimedate extends Model
             \DB::enableQueryLog();
             $case_where = "CASE ifnull({0},0) WHEN 0 THEN '00:00' ";
             $case_where .= "ELSE CONCAT(CONCAT(TRUNCATE({0}, 0),':'),LPAD(TRUNCATE((mod({0} * 100, 100) * 60) / 100, 0) , 2, '0')) ";
-            $case_where .= ' END as {1}';
+            $case_where .= ' END as {1} ';
 
             $case_working_status = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
             $case_working_status .= "WHEN {1} THEN 1 ";
             $case_working_status .= "WHEN {2} THEN 1 ";
             $case_working_status .= "WHEN {3} THEN 1 ";
             $case_working_status .= "WHEN {4} THEN 1 ";
+            $case_working_status .= "WHEN {5} THEN 1 ";
+            $case_working_status .= "WHEN {6} THEN 1 ";
+            $case_working_status .= "WHEN {7} THEN 1 ";
             $case_working_status .= "ELSE 0 ";
-            $case_working_status .= ' END';
+            $case_working_status .= ' END ';
 
             $case_go_out = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
             $case_go_out .= "WHEN {1} THEN 1 ";
             $case_go_out .= "WHEN {2} THEN 1 ";
             $case_go_out .= "ELSE 0 ";
-            $case_go_out .= ' END';
+            $case_go_out .= ' END ';
+
+            $case_paid_holidays = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
+            $case_paid_holidays .= "WHEN {1} THEN 1 ";
+            $case_paid_holidays .= "ELSE 0 ";
+            $case_paid_holidays .= 'END ';
 
             $case_holiday_kubun = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
-            $case_holiday_kubun .= "WHEN {1} THEN 0 ";
-            $case_holiday_kubun .= "WHEN {2} THEN 0 ";
-            $case_holiday_kubun .= "WHEN {3} THEN 0 ";
-            $case_holiday_kubun .= "WHEN {4} THEN 0 ";
-            $case_holiday_kubun .= "ELSE ";
-            $case_holiday_kubun .= "  CASE ifnull({5},0) WHEN 0 THEN 0 ";
-            $case_holiday_kubun .= "  WHEN {5} = {6} THEN {7} ";
-            $case_holiday_kubun .= "  WHEN {5} = {8} THEN {9} ";
-            $case_holiday_kubun .= "  WHEN {5} = {10} THEN {9} ";
-            $case_holiday_kubun .= "  WHEN {5} >= {11} and {5} <= {12} THEN {7} ";
-            $case_holiday_kubun .= "ELSE {13} ";
-            $case_holiday_kubun .= ' END ';
-            $case_holiday_kubun .= 'END';
+            $case_holiday_kubun .= "WHEN {0} = {1} THEN 1 ";
+            $case_holiday_kubun .= "WHEN {0} = {2} THEN 1 ";
+            $case_holiday_kubun .= "WHEN {0} >= {3} and {0} <= {4} THEN 1 ";
+            $case_holiday_kubun .= "ELSE 0 ";
+            $case_holiday_kubun .= 'END ';
 
             $case_absence_kubun = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
-            $case_absence_kubun .= "WHEN {1} THEN 0 ";
-            $case_absence_kubun .= "WHEN {2} THEN 0 ";
-            $case_absence_kubun .= "WHEN {3} THEN 0 ";
-            $case_absence_kubun .= "WHEN {4} THEN 0 ";
-            $case_absence_kubun .= "ELSE ";
-            $case_absence_kubun .= "  CASE ifnull({5},0) WHEN 0 THEN 0 ";
-            $case_absence_kubun .= "  WHEN {5} >= {6} and {5} <= {7} THEN {8} ";
-            $case_absence_kubun .= "  ELSE ";
-            $case_absence_kubun .= "    CASE ifnull(attendance_time_1,0) WHEN 0 THEN ";
-            $case_absence_kubun .= "      CASE ifnull(leaving_time_1,0)  WHEN 0 THEN {9} ELSE {8} END ";
-            $case_absence_kubun .= "    ELSE 0 ";
-            $case_absence_kubun .= '    END ';
-            $case_absence_kubun .= '  END ';
-            $case_absence_kubun .= 'END';
+            $case_absence_kubun .= "WHEN {1} THEN 1 ";
+            $case_absence_kubun .= "ELSE 0 ";
+            $case_absence_kubun .= 'END ';
 
-            $str_replace_working_status0 =str_replace('{0}', 'working_status', $case_working_status);
+            $str_replace_working_status0 =str_replace('{0}', $this->table.'.working_status', $case_working_status);
             $str_replace_working_status1 =str_replace('{1}', Config::get('const.C012.attendance'), $str_replace_working_status0);
-            $str_replace_working_status2 =str_replace('{2}', Config::get('const.C012.missing_middle_return'), $str_replace_working_status1);
-            $str_replace_working_status3 =str_replace('{3}', Config::get('const.C012.public_going_out_return'), $str_replace_working_status2);
-            $str_replace_working_status4 =str_replace('{4}', Config::get('const.C012.continue_work'), $str_replace_working_status3);
+            $str_replace_working_status2 =str_replace('{2}', Config::get('const.C012.leaving'), $str_replace_working_status1);
+            $str_replace_working_status3 =str_replace('{3}', Config::get('const.C012.missing_middle'), $str_replace_working_status2);
+            $str_replace_working_status4 =str_replace('{4}', Config::get('const.C012.missing_middle_return'), $str_replace_working_status3);
+            $str_replace_working_status5 =str_replace('{5}', Config::get('const.C012.public_going_out'), $str_replace_working_status4);
+            $str_replace_working_status6 =str_replace('{6}', Config::get('const.C012.public_going_out_return'), $str_replace_working_status5);
+            $str_replace_working_status7 =str_replace('{7}', Config::get('const.C012.continue_work'), $str_replace_working_status6);
 
-            $str_replace_go_out0 =str_replace('{0}', 'working_status', $case_go_out);
+            $str_replace_go_out0 =str_replace('{0}', $this->table.'.working_status', $case_go_out);
             $str_replace_go_out1 =str_replace('{1}', Config::get('const.C012.missing_middle'), $str_replace_go_out0);
             $str_replace_go_out2 =str_replace('{2}', Config::get('const.C012.public_going_out'), $str_replace_go_out1);
 
-            $str_replace_holiday_kubun0 =str_replace('{0}', 'working_status', $case_holiday_kubun);
-            $str_replace_holiday_kubun1 =str_replace('{1}', Config::get('const.C012.attendance'), $str_replace_holiday_kubun0);
-            $str_replace_holiday_kubun2 =str_replace('{2}', Config::get('const.C012.missing_middle_return'), $str_replace_holiday_kubun1);
-            $str_replace_holiday_kubun3 =str_replace('{3}', Config::get('const.C012.public_going_out_return'), $str_replace_holiday_kubun2);
-            $str_replace_holiday_kubun4 =str_replace('{4}', Config::get('const.C012.continue_work'), $str_replace_holiday_kubun3);
-            $str_replace_holiday_kubun5 =str_replace('{5}', $this->table.'.holiday_kubun', $str_replace_holiday_kubun4);
-            $str_replace_holiday_kubun6 =str_replace('{6}', Config::get('const.C013.paid_leave'), $str_replace_holiday_kubun5);
-            $str_replace_holiday_kubun7 =str_replace('{7}', 1, $str_replace_holiday_kubun6);
-            $str_replace_holiday_kubun8 =str_replace('{8}', Config::get('const.C013.morning_off'), $str_replace_holiday_kubun7);
-            $str_replace_holiday_kubun9 =str_replace('{9}', 1, $str_replace_holiday_kubun8);
-            $str_replace_holiday_kubun10 =str_replace('{10}', Config::get('const.C013.afternoon_off'), $str_replace_holiday_kubun9);
-            $str_replace_holiday_kubun11 =str_replace('{11}', Config::get('const.C013.min_break_value'), $str_replace_holiday_kubun10);
-            $str_replace_holiday_kubun12 =str_replace('{12}', Config::get('const.C013.max_break_value'), $str_replace_holiday_kubun11);
-            $str_replace_holiday_kubun13 =str_replace('{13}', 0, $str_replace_holiday_kubun12);
+            $str_replace_paid_holidays0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_paid_holidays);
+            $str_replace_paid_holidays1 =str_replace('{1}', Config::get('const.C013.paid_holiday'), $str_replace_paid_holidays0);
 
-            $str_replace_absence_kubun0 =str_replace('{0}', 'working_status', $case_absence_kubun);
-            $str_replace_absence_kubun1 =str_replace('{1}', Config::get('const.C012.attendance'), $str_replace_absence_kubun0);
-            $str_replace_absence_kubun2 =str_replace('{2}', Config::get('const.C012.missing_middle_return'), $str_replace_absence_kubun1);
-            $str_replace_absence_kubun3 =str_replace('{3}', Config::get('const.C012.public_going_out_return'), $str_replace_absence_kubun2);
-            $str_replace_absence_kubun4 =str_replace('{4}', Config::get('const.C012.continue_work'), $str_replace_absence_kubun3);
-            $str_replace_absence_kubun5 =str_replace('{5}', $this->table.'.holiday_kubun', $str_replace_absence_kubun4);
-            $str_replace_absence_kubun6 =str_replace('{6}', Config::get('const.C013.min_break_value'), $str_replace_absence_kubun5);
-            $str_replace_absence_kubun7 =str_replace('{7}', Config::get('const.C013.max_break_value'), $str_replace_absence_kubun6);
-            $str_replace_absence_kubun8 =str_replace('{8}', 0, $str_replace_absence_kubun7);
-            $str_replace_absence_kubun9 =str_replace('{9}', 1, $str_replace_absence_kubun8);
+            $str_replace_holiday_kubun0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_holiday_kubun);
+            $str_replace_holiday_kubun1 =str_replace('{1}', Config::get('const.C013.morning_off'), $str_replace_holiday_kubun0);
+            $str_replace_holiday_kubun2 =str_replace('{2}', Config::get('const.C013.afternoon_off'), $str_replace_holiday_kubun1);
+            $str_replace_holiday_kubun3 =str_replace('{3}', Config::get('const.C013.min_break_value'), $str_replace_holiday_kubun2);
+            $str_replace_holiday_kubun4 =str_replace('{4}', Config::get('const.C013.max_break_value'), $str_replace_holiday_kubun3);
 
-            Log::debug('$subquery in '.$dayormonth);
+            $str_replace_leave_early_kubun0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_absence_kubun);
+            $str_replace_leave_early_kubun1 =str_replace('{1}', Config::get('const.C013.leave_early_work'), $str_replace_leave_early_kubun0);
+
+            $str_replace_late_kubun0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_absence_kubun);
+            $str_replace_late_kubun1 =str_replace('{1}', Config::get('const.C013.late_work'), $str_replace_late_kubun0);
+
+            $str_replace_absence_kubun0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_absence_kubun);
+            $str_replace_absence_kubun1 =str_replace('{1}', Config::get('const.C013.absence_work'), $str_replace_absence_kubun0);
+
             $subquery = DB::table($this->table)
                 ->selectRaw('sum(ifnull('.$this->table.'.total_working_times, 0)) as total_working_times')
                 ->selectRaw('sum(ifnull('.$this->table.'.regular_working_times, 0)) as regular_working_times')
@@ -1591,10 +1574,13 @@ class WorkingTimedate extends Model
                 ->selectRaw('sum(ifnull('.$this->table.'.off_hours_working_hours, 0)) as off_hours_working_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.public_going_out_hours, 0)) as public_going_out_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.missing_middle_hours, 0)) as missing_middle_hours')
-                ->selectRaw('sum('.$str_replace_working_status4.') as total_working_status')
+                ->selectRaw('sum('.$str_replace_working_status7.') as total_working_status')
                 ->selectRaw('sum('.$str_replace_go_out2.') as total_go_out')
-                ->selectRaw('sum('.$str_replace_holiday_kubun13.') as total_holiday_kubun')
-                ->selectRaw('sum('.$str_replace_absence_kubun9.') as total_absence');
+                ->selectRaw('sum('.$str_replace_paid_holidays1.') as total_paid_holidays')
+                ->selectRaw('sum('.$str_replace_holiday_kubun4.') as total_holiday_kubun')
+                ->selectRaw('sum('.$str_replace_leave_early_kubun1.') as total_leave_early')
+                ->selectRaw('sum('.$str_replace_late_kubun1.') as total_late')
+                ->selectRaw('sum('.$str_replace_absence_kubun1.') as total_absence');
             if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
                 $subquery->addselect($this->table.'.working_date');
             }
@@ -1671,9 +1657,11 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'missing_middle_hours', str_replace('{0}', 't1.missing_middle_hours', $case_where)))
                 ->selectRaw('ifnull(t1.total_working_status, 0) as total_working_status' )
                 ->selectRaw('ifnull(t1.total_go_out, 0) as total_go_out' )
+                ->selectRaw('ifnull(t1.total_paid_holidays, 0) as total_paid_holidays' )
                 ->selectRaw('ifnull(t1.total_holiday_kubun, 0) as total_holiday_kubun' )
+                ->selectRaw('ifnull(t1.total_leave_early, 0) as total_leave_early' )
+                ->selectRaw('ifnull(t1.total_late, 0) as total_late' )
                 ->selectRaw('ifnull(t1.total_absence, 0) as total_absence' );
-
             if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
                 $mainquery
                     ->selectRaw($case_where_working_time_name)
