@@ -98,6 +98,13 @@
                 </btn-work-time>
                 <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting>
               </div>
+              <div v-if="isswitchvisible" class="col-md-12 pb-2">
+                <btn-work-time
+                  v-on:switchclick-event="switchclick"
+                  v-bind:btn-mode="btnmodeswitch"
+                  v-bind:is-push="isswitchbutton">
+                </btn-work-time>
+              </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
@@ -115,7 +122,7 @@
           <!-- panel header -->
           <daily-working-information-panel-header
             v-bind:headertext1="stringtext"
-            v-bind:headertext2="'虫眼鏡アイコンをクリックすると集計結果が表示されます'"
+            v-bind:headertext2="''"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <!-- panel body -->
@@ -194,6 +201,9 @@ export default {
       predeternighttimename: "",
       messageshowsearch: false,
       issearchbutton: false,
+      btnmodeswitch: "detailswitch",
+      isswitchbutton: false,
+      isswitchvisible: false,
       validate: false,
       initialized: false
     };
@@ -288,6 +298,7 @@ export default {
     // 集計開始ボタンがクリックされた場合の処理
     searchclick: function(e) {
       this.validate = this.checkForm(e);
+      this.isswitchvisible = false;
       console.log("this.valuefromdate" + this.valuefromdate);
       console.log("this.valueemploymentstatus" + this.valueemploymentstatus);
       console.log("this.valuedepartment" + this.valuedepartment);
@@ -322,6 +333,7 @@ export default {
             console.log("sumresults" + Object.keys(this.sumresults).length);
             console.log("messages" + Object.keys(this.messages).length);
             for (var key in this.calcresults) {
+              this.isswitchvisible = true;
               this.predetertimename = this.calcresults[key]['predeter_time_name'];
               this.predeternighttimename = this.calcresults[key]['predeter_night_time_name'];
               break;
@@ -336,6 +348,15 @@ export default {
             alert("日次集計エラー");
           });
       }
+    },
+    // 詳細表示ボタンがクリックされた場合の処理
+    switchclick: function() {
+      if (this.btnmodeswitch == "basicswitch") {
+        this.btnmodeswitch = "detailswitch";
+      } else {
+        this.btnmodeswitch = "basicswitch";
+      }
+
     },
 
     // ----------------- 共通メソッド ----------------------------------
