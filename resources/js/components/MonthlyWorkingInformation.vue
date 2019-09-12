@@ -26,9 +26,13 @@
                       id="basic-addon1"
                     >指定年月<span class="color-red">＊</span></span>
                   </div>
-                  <input-ym v-on:change-event="fromdateChanges"></input-ym>
+                  <input-datepicker
+                    v-bind:default-date="defaultDate"
+                    v-bind:date-format="'yyyy年MM月'"
+                    v-on:change-event="fromdateChanges"
+                  ></input-datepicker>
                 </div>
-                <message-data v-bind:message-datas="messagedatasfromdate"></message-data>
+                <message-data v-bind:message-datas="messagedatasfromdate" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -193,7 +197,6 @@
           <div
             v-for="(calclist,index) in calcresults"
             :key="calclist.user_code"
-            class="card-body mb-3 py-0 pt-4 border-top print-space"
           >
             <!-- panel contents -->
             <!-- .row -->
@@ -264,6 +267,9 @@
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.leaving1 }}</td>
                                 <td class="text-center align-middle"></td>
+                                <td
+                                  class="text-center align-middle"
+                                >{{ calclisttimedate.remark_data }}</td>
                               </tr>
                             </tbody>
                           </div>
