@@ -517,24 +517,31 @@ class DailyWorkingInformationController extends Controller
                         Log::DEBUG('    打刻ないデータはtempに出力 isset($result->record_datetime　＝'.isset($result->record_datetime));
                         if (!isset($result->record_datetime) || isset($user_holiday_kubun)) {
                             Log::DEBUG('    打刻ないデータはtempに出力 '.$result->record_datetime);
-                            // 同じキーの場合
-                            if ($current_date == $before_date &&
-                                $current_department_code == $before_department_code &&
-                                $current_user_code == $before_user_code) {
-                                $noinput_user_cnt++;
-                            } else {
-                                $noinput_user_cnt = 1;
+                            try{
+                                // 同じキーの場合
+                                if ($current_date == $before_date &&
+                                    $current_department_code == $before_department_code &&
+                                    $current_user_code == $before_user_code) {
+                                    $noinput_user_cnt++;
+                                } else {
+                                    $noinput_user_cnt = 1;
+                                }
+                                if ($noinput_user_cnt == 1) {
+                                    $ptn = 0;
+                                } else {
+                                    $ptn = 6;
+                                }
+                                if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
+                                if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
+                                $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name));
+                                // temporaryに登録する
+                                Log::DEBUG('    現データ登録開始 $result->user_code = '.$result->user_code);
+                                $this->insTempCalcItem($target_date, $result);
+                                Log::DEBUG('    現データ登録終了 $result->user_code = '.$result->user_code);
+                            }catch(\PDOException $pe){
+                                $add_results = false;
+                                throw $pe;
                             }
-                            if ($noinput_user_cnt == 1) {
-                                $ptn = 0;
-                            } else {
-                                $ptn = 6;
-                            }
-                            $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name));
-                            // temporaryに登録する
-                            Log::DEBUG('    現データ登録開始 $result->user_code = '.$result->user_code);
-                            $this->insTempCalcItem($target_date, $result);
-                            Log::DEBUG('    現データ登録終了 $result->user_code = '.$result->user_code);
                             // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
                             $before_date = null;
                             $before_user_code = null;
@@ -580,12 +587,14 @@ class DailyWorkingInformationController extends Controller
                             $add_results = false;
                         }
                     }
-                    $ptn = $chk_setting;
-                    $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name));
                     Log::DEBUG('    calcWorkingTimeDate error ptn = '.$ptn.' date = '.$result->record_date.' dapartment = '.$result->department_code.' user = '.$result->user_code);
                     try{
-                        // temporaryに登録する
                         Log::DEBUG('    現データ登録開始 $result->user_code = '.$result->user_code);
+                        // temporaryに登録する
+                        if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
+                        if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
+                        $ptn = $chk_setting;
+                        $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name));
                         $this->insTempCalcItem($result->record_date, $result);
                         Log::DEBUG('    現データ登録開始 $result->user_code = '.$result->user_code);
                     }catch(\PDOException $pe){
@@ -628,16 +637,20 @@ class DailyWorkingInformationController extends Controller
                     }catch(\Exception $e){
                         $add_results = false;
                     }
-                } else {
-                    if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
-                    if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
                 }
                 // 打刻ないデータはtempに出力
                 Log::DEBUG('    打刻ないデータ登録開始 $result->user_code = '.$result->user_code);
-                $ptn = 0;
-                $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name));
-                // temporaryに登録する
-                $this->insTempCalcItem($target_date, $result);
+                try{
+                    $ptn = 0;
+                    if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
+                    if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
+                    $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name));
+                    // temporaryに登録する
+                    $this->insTempCalcItem($target_date, $result);
+                }catch(\PDOException $pe){
+                    $add_results = false;
+                    throw $pe;
+                }
                 Log::DEBUG('    打刻ないデータ登録終了 $result->user_code = '.$result->user_code);
                 // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
                 $before_date = null;
