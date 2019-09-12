@@ -74,10 +74,10 @@ class MonthlyWorkingInformationController extends Controller
                 $workingtimedate_model->setParamUsercodeAttribute($usercode);
                 // 労働時間の集計
                 $working_time_dates = $this->calctWorkingTime($workingtimedate_model);
-                $workingtimedate_model->setParamUsercodeAttribute(null);
+                $workingtimedate_model->setParamEmploymentStatusAttribute($employmentstatus);
+                $workingtimedate_model->setParamDepartmentcodeAttribute($departmentcode);
+                $workingtimedate_model->setParamUsercodeAttribute($usercode);
                 $working_time_sum = $workingtimedate_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
-                Log::debug('$working_model = '.count($working_time_dates));
-                Log::debug('$working_time_sum = '.count($working_time_sum));
                 // 会社名を取得
                 $company_model = new Company();
                 $company_model->setApplytermfromAttribute($workingtimedate_model->getParamdatefromAttribute());
@@ -422,10 +422,11 @@ class MonthlyWorkingInformationController extends Controller
             $workingtimedate_model->setParamEmploymentStatusAttribute($current_employment_status);
             $workingtimedate_model->setParamDepartmentcodeAttribute($current_department_code);
             $workingtimedate_model->setParamUsercodeAttribute($current_user_code);
+            Log::debug('残り $current_employment_status = '.$current_employment_status);
+            Log::debug('残り $current_department_code = '.$current_department_code);
+            Log::debug('残り $current_user_code = '.$current_user_code);
             $working_time_sum = $workingtimedate_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
             $this->setArrayUser($before_result, $working_time_sum);
-            Log::debug('残り $array_date = '.count($this->array_date));
-            Log::debug('残り $array_user = '.count($this->array_user));
         }
 
         return $this->array_user;
@@ -454,7 +455,8 @@ class MonthlyWorkingInformationController extends Controller
             'leaving2' => $result->leaving_time_2,
             'leaving3' => $result->leaving_time_3,
             'leaving4' => $result->leaving_time_4,
-            'leaving5' => $result->leaving_time_5
+            'leaving5' => $result->leaving_time_5,
+            'remark_data' => $result->remark_data
         );
     }
 
@@ -485,9 +487,14 @@ class MonthlyWorkingInformationController extends Controller
                 'out_of_legal_working_times' => $working_time_sum_result->out_of_legal_working_times,
                 'not_employment_working_hours' => $working_time_sum_result->not_employment_working_hours,
                 'off_hours_working_hours' => $working_time_sum_result->off_hours_working_hours,
+                'missing_middle_hours' => $working_time_sum_result->missing_middle_hours,
                 'total_working_status' => $working_time_sum_result->total_working_status,
                 'total_go_out' => $working_time_sum_result->total_go_out,
+                'total_paid_holidays' => $working_time_sum_result->total_paid_holidays,
                 'total_holiday_kubun' => $working_time_sum_result->total_holiday_kubun,
+                'total_leave_early' => $working_time_sum_result->total_leave_early,
+                'total_late' => $working_time_sum_result->total_late,
+                'total_absence' => $working_time_sum_result->total_absence,
                 'date' => $this->array_date
             );
             break;

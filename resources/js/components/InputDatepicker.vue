@@ -2,7 +2,7 @@
   <datepicker 
     :value="this.defaultDate"
     :language="ja"
-    :format="DatePickerFormat"
+    :format="dateFormat"
     :clear-button="true"
     v-model="inputdate"
     v-on:opened="todaySet()"
@@ -21,6 +21,10 @@ export default {
   props: {
     defaultDate: {
       type: Date
+    },
+    dateFormat: {
+      type: String,
+      default: 'yyyy年MM月dd日'
     }
   },
   // マウント時
@@ -30,7 +34,6 @@ export default {
   data: function() {
     return {
       ja:ja,
-      DatePickerFormat: 'yyyy年MM月dd日',
       todaydate: new Date(),
       inputdate:''
     }

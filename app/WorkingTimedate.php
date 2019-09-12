@@ -1325,10 +1325,11 @@ class WorkingTimedate extends Model
 
             $mainquery
                 ->addselect($this->table.'.working_status');
-            $remarks_date_note = 'ltrim(concat(ifnull('.$this->table.".note, ''), '  ',"; 
-            $remarks_date_note .= ' CASE ifnull('.$this->table.".late, '') WHEN '1' THEN '".Config::get('const.REMARKS_DATA.late')."' ELSE '' END, '  ',"; 
-            $remarks_date_note .= ' CASE ifnull('.$this->table.".leave_early, '') WHEN '1' THEN '".Config::get('const.REMARKS_DATA.leaveearly')."' ELSE '' END, '  ',"; 
-            $remarks_date_note .= ' CASE ifnull('.$this->table.".holiday_name, '') WHEN '' THEN '' ELSE working_time_dates.holiday_name END)) as remark_data"; 
+            //$remarks_date_note = 'ltrim(concat(ifnull('.$this->table.".note, ''), '  ',"; 
+            //$remarks_date_note .= ' CASE ifnull('.$this->table.".late, '') WHEN '1' THEN '".Config::get('const.REMARKS_DATA.late')."' ELSE '' END, '  ',"; 
+            //$remarks_date_note .= ' CASE ifnull('.$this->table.".leave_early, '') WHEN '1' THEN '".Config::get('const.REMARKS_DATA.leaveearly')."' ELSE '' END, '  ',"; 
+            //$remarks_date_note .= ' CASE ifnull('.$this->table.".holiday_name, '') WHEN '' THEN '' ELSE working_time_dates.holiday_name END)) as remark_data"; 
+            $remarks_date_note = ' CASE ifnull('.$this->table.".holiday_name, '') WHEN '' THEN '' ELSE working_time_dates.holiday_name END as remark_data"; 
             $mainquery
                 ->selectRaw('ifnull('.$this->table.".working_status_name,'　')  as working_status_name")
                 ->selectRaw($remarks_date_note);
@@ -1440,6 +1441,7 @@ class WorkingTimedate extends Model
                 }
                 $mainquery = $this->setWhereSql($mainquery);
                 $result = $mainquery
+                    ->where($this->table.'.is_deleted', 0)
                     ->orderBy($this->table.'.working_date', 'asc')
                     ->orderBy($this->table.'.employment_status', 'asc')
                     ->orderBy($this->table.'.department_code', 'asc')
@@ -1467,7 +1469,7 @@ class WorkingTimedate extends Model
         \Log::debug(
             'sql_debug_log',
             [
-                'getAlertData' => \DB::getQueryLog()
+                'getWorkingTimeDateTimeFormat' => \DB::getQueryLog()
             ]
         );
 
@@ -1612,7 +1614,6 @@ class WorkingTimedate extends Model
             $case_where_predeter_time_name = "";
             $case_where_predeter_night_time_name = "";
             if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
-                Log::debug('daily_basic');
                 $array_groupby[] = $this->table.'.working_date';
 
                 $case_where_1 = "CASE ifnull({0},{1}) WHEN {1} THEN '{2}' ";
@@ -1754,7 +1755,7 @@ class WorkingTimedate extends Model
      */
     public function getMonthlyTimeSum($targetdate){
 
-        Log::debug('getWorkingTimeDateTimeSum in '.$targetdate);
+        Log::debug('getMonthlyTimeSum in '.$targetdate);
 
         // 日時労働時間合計取得SQL作成
         try{
