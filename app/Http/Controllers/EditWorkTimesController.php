@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use App\WorkTime;
 use App\UserHolidayKubun;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 
 
 class EditWorkTimesController extends Controller
@@ -213,9 +215,25 @@ class EditWorkTimesController extends Controller
                 $record_time = $detail['date']." ".$detail['time'];
                 $work_time->setUsercodeAttribute($detail['user_code']);
                 $work_time->setDepartmentcodeAttribute($detail['department_code']);
-                $work_time->setModeAttribute($detail['mode']);
                 $work_time->setRecordtimeAttribute($record_time);
-
+                $work_time->setModeAttribute($detail['mode']);
+                Log::DEBUG('insertWorkTime  user_holiday_kbn = '.$detail['user_holiday_kbn']);
+                if(isset($detail['user_holiday_kbn'])){         // １日休暇が入っているものはmodeはnullにする
+                    if ($detail['user_holiday_kbn'] == Config::get('const.C013.morning_off')) {
+                        $work_time->setModeAttribute($detail['mode']);
+                    } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.afternoon_off')) {
+                        $work_time->setModeAttribute($detail['mode']);
+                    } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.late_work')) {
+                        $work_time->setModeAttribute($detail['mode']);
+                    } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.leave_early_work')) {
+                        $work_time->setModeAttribute($detail['mode']);
+                    } else {
+                        $work_time->setModeAttribute(null);
+                    }
+                } else {
+                    $work_time->setModeAttribute($detail['mode']);
+                }
+    
                 $work_time->insertWorkTime();
                 if($detail['kbn_flag'] == 1){         // 個人休暇が入っているものはuser_holiday_kubunsへ登録
                     $date = new Carbon($detail['record_time']);

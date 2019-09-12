@@ -23,7 +23,7 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       id="basic-addon1"
-                    >指定年</span>
+                    >指定年<span class="color-red">＊</span></span>
                   </div>
                   <select class="form-control" v-model="year">
                     <option
@@ -42,7 +42,7 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       id="basic-addon1"
-                    >指定月</span>
+                    >指定月<span class="color-red">＊</span></span>
                   </div>
                   <select class="form-control" v-model="month">
                     <option v-for="n in 12" :value="n" v-bind:key="n">{{ n }}月</option>
@@ -86,7 +86,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       for="inputGroupSelect01"
-                    >氏名</label>
+                    >氏名<span class="color-red">＊</span></label>
                   </div>
                   <select-user
                     ref="selectuser"

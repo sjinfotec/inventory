@@ -202,14 +202,12 @@ class WorkTime extends Model
     {
         $date = date_create($value);
         $this->param_date_from = $date->format('Y/m/d').' 00:00:00';
-        Log::debug('$this->param_date_from = '.$this->param_date_from);
     }
 
     public function setParamdatefromNoneditAttribute($value)
     {
         $date = date_create($value);
         $this->param_date_from = $date->format('Y/m/d H:i:s');
-        Log::debug('$this->param_date_from = '.$this->param_date_from);
     }
 
 
