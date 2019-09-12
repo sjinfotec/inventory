@@ -402,6 +402,7 @@ class DailyWorkingInformationController extends Controller
                             // ユーザーが変わった場合
                             Log::DEBUG('    ユーザーが変わった場合 ');
                             // ユーザー労働時間計算(１個前のユーザーを計算する)
+                            Log::DEBUG('    １個前のユーザーを登録開始 $before_user_code = '.$before_user_code.' record_time = '.$before_result->record_datetime);
                             $this->calcWorkingTime(
                                 $before_date,
                                 $before_user_code,
@@ -414,6 +415,7 @@ class DailyWorkingInformationController extends Controller
                                 $add_results = false;
                                 throw $pe;
                             }
+                            Log::DEBUG('    １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
                             // 次データ計算事前処理
                             // beforeArrayWorkingTimeは現データが有効の場合の事前処理
                             $this->beforeArrayWorkingTime($result);
@@ -424,6 +426,7 @@ class DailyWorkingInformationController extends Controller
                             // 部署が変わった場合
                             Log::DEBUG('    部署が変わった場合 ');
                             // ユーザー労働時間計算(１個前のユーザーを計算する)
+                            Log::DEBUG('    １個前のユーザーを登録開始 $before_user_code = '.$before_user_code.' record_time = '.$before_result->record_datetime);
                             $this->calcWorkingTime(
                                 $before_date,
                                 $before_user_code,
@@ -436,6 +439,7 @@ class DailyWorkingInformationController extends Controller
                                 $add_results = false;
                                 throw $pe;
                             }
+                            Log::DEBUG('    １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
                             // 次データ計算事前処理
                             // beforeArrayWorkingTimeは現データが有効の場合の事前処理
                             $this->beforeArrayWorkingTime($result);
@@ -449,12 +453,14 @@ class DailyWorkingInformationController extends Controller
                             Log::DEBUG('    日付が変わった ');
                             try{
                                 // ユーザー労働時間登録(１個前のユーザーを登録する)
+                                Log::DEBUG('    １個前のユーザーを登録開始 $before_user_code = '.$before_user_code.' record_time = '.$before_result->record_datetime);
                                 $add_results = $this->addWorkingTime(
                                     $before_date,
                                     $before_user_code,
                                     $before_department_code,
                                     $before_result,
                                     $business_kubun);
+                                Log::DEBUG('    １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
                                 // 次データ計算事前処理
                                 // beforeArrayWorkingTimeは現データが有効の場合の事前処理
                                 $this->beforeArrayWorkingTime($result);
@@ -479,10 +485,8 @@ class DailyWorkingInformationController extends Controller
                         $user_holiday_kubun = null;
                         $user_holiday_name = null;
                         if (count($this->array_working_mode) > 0) {
-                            if(isset($before_result->user_holiday_kubun)) { $user_holiday_kubun = $before_result->user_holiday_kubun; }
-                            if(isset($before_result->user_holiday_name)) { $user_holiday_name = $before_result->user_holiday_name; }
-                                Log::DEBUG('    前のデータが当日計算対象のため登録 打刻 = '.$before_result->record_datetime);
                             try{
+                                Log::DEBUG('    １個前のユーザーを登録開始 $before_user_code = '.$before_user_code.' record_time = '.$before_result->record_datetime);
                                 // ユーザー労働時間登録(１個前のユーザーを登録する)
                                 $add_results = $this->addWorkingTime(
                                     $before_date,
@@ -491,6 +495,7 @@ class DailyWorkingInformationController extends Controller
                                     $before_result,
                                     $business_kubun);
                                 // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
+                                Log::DEBUG('    １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
                                 $before_date = null;
                                 $before_user_code = null;
                                 $before_department_code = null;
@@ -527,7 +532,9 @@ class DailyWorkingInformationController extends Controller
                             }
                             $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name));
                             // temporaryに登録する
+                            Log::DEBUG('    現データ登録開始 $result->user_code = '.$result->user_code);
                             $this->insTempCalcItem($target_date, $result);
+                            Log::DEBUG('    現データ登録終了 $result->user_code = '.$result->user_code);
                             // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
                             $before_date = null;
                             $before_user_code = null;
@@ -547,9 +554,8 @@ class DailyWorkingInformationController extends Controller
                     $user_holiday_kubun = null;
                     $user_holiday_name = null;
                     if (count($this->array_working_mode) > 0) {
-                        if(isset($before_result->user_holiday_kubun)) { $user_holiday_kubun = $before_result->user_holiday_kubun; }
-                        if(isset($before_result->user_holiday_name)) { $user_holiday_name = $before_result->user_holiday_name; }
                         try{
+                            Log::DEBUG('    １個前のユーザーを登録開始 $before_user_code = '.$before_user_code.' record_time = '.$before_result->record_datetime);
                             // ユーザー労働時間登録(１個前のユーザーを登録する)
                             $add_results = $this->addWorkingTime(
                                 $before_date,
@@ -557,6 +563,7 @@ class DailyWorkingInformationController extends Controller
                                 $before_department_code,
                                 $before_result,
                                 $business_kubun);
+                            Log::DEBUG('    １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
                             // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
                             $before_date = null;
                             $before_user_code = null;
@@ -578,7 +585,9 @@ class DailyWorkingInformationController extends Controller
                     Log::DEBUG('    calcWorkingTimeDate error ptn = '.$ptn.' date = '.$result->record_date.' dapartment = '.$result->department_code.' user = '.$result->user_code);
                     try{
                         // temporaryに登録する
+                        Log::DEBUG('    現データ登録開始 $result->user_code = '.$result->user_code);
                         $this->insTempCalcItem($result->record_date, $result);
+                        Log::DEBUG('    現データ登録開始 $result->user_code = '.$result->user_code);
                     }catch(\PDOException $pe){
                         $add_results = false;
                         throw $pe;
@@ -590,23 +599,21 @@ class DailyWorkingInformationController extends Controller
                     $this->iniArrayCalc();
                 }
             } else {
-                Log::DEBUG('    no input time target_date = '.$target_date.' dapartment = '.$result->department_code.' user = '.$result->user_code);
+                Log::DEBUG('    打刻データなし = '.$target_date.' dapartment = '.$result->department_code.' user = '.$result->user_code);
                 // 前のデータが打刻ありであれば計算する
-                Log::DEBUG('    count($this->array_working_mode)e = '.count($this->array_working_mode));
                 $user_holiday_kubun = null;
                 $user_holiday_name = null;
                 if (count($this->array_working_mode) > 0) {
                     try{
-                        if(isset($before_result->user_holiday_kubun)) { $user_holiday_kubun = $before_result->user_holiday_kubun; }
-                        if(isset($before_result->user_holiday_name)) { $user_holiday_name = $before_result->user_holiday_name; }
-                                Log::DEBUG('    $before_user_code = '.$before_user_code);
                         // ユーザー労働時間登録(１個前のユーザーを登録する)
+                        Log::DEBUG('    １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
                         $add_results = $this->addWorkingTime(
                             $before_date,
                             $before_user_code,
                             $before_department_code,
                             $before_result,
                             $business_kubun);
+                        Log::DEBUG('    １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
                         // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
                         $before_date = null;
                         $before_user_code = null;
@@ -626,10 +633,12 @@ class DailyWorkingInformationController extends Controller
                     if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
                 }
                 // 打刻ないデータはtempに出力
+                Log::DEBUG('    打刻ないデータ登録開始 $result->user_code = '.$result->user_code);
                 $ptn = 0;
                 $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name));
                 // temporaryに登録する
                 $this->insTempCalcItem($target_date, $result);
+                Log::DEBUG('    打刻ないデータ登録終了 $result->user_code = '.$result->user_code);
                 // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
                 $before_date = null;
                 $before_user_code = null;
@@ -643,9 +652,9 @@ class DailyWorkingInformationController extends Controller
             }
         }
 
-        Log::DEBUG('    count($this->array_working_mode) = '.count($this->array_working_mode));
         if (count($this->array_working_mode) > 0) {
             try{
+                Log::DEBUG('    最終残のユーザーを登録開始 $current_user_code = '.$current_user_code.' record_time = '.$current_result->record_datetime);
                 // ユーザー労働時間登録(１個前のユーザーを登録する)
                 $add_results = $this->addWorkingTime(
                     $current_date,
@@ -653,6 +662,7 @@ class DailyWorkingInformationController extends Controller
                     $current_department_code,
                     $current_result,
                     $business_kubun);
+                Log::DEBUG('    最終残のユーザーを登録終了 $current_user_code = '.$current_user_code);
             }catch(\PDOException $pe){
                 $add_results = false;
             }catch(\Exception $e){
@@ -699,7 +709,7 @@ class DailyWorkingInformationController extends Controller
      */
     private function calcWorkingTime($target_date, $target_user_code, $target_department_code, $business_kubun)
     {
-        Log::DEBUG('---------------------- calcWorkingTime in ------------------------ ');
+        Log::DEBUG('---------------------- calcWorkingTime in ---$target_user_code = '.$target_user_code);
         $work_time = new WorkTime();
         $work_time->setParamDepartmentcodeAttribute($target_department_code);
         $work_time->setParamUsercodeAttribute($target_user_code);
