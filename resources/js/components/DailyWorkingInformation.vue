@@ -29,6 +29,7 @@
                     v-on:change-event="fromdateChanges"
                   ></input-datepicker>
                 </div>
+                <message-data v-bind:message-datas="messagedatasfromdate" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -61,8 +62,8 @@
                     v-bind:blank-data="true" v-on:change-event="departmentChanges"
                   ></select-department>
                 </div>
+                <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
               </div>
-              <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
               <!-- /.col -->
               <!-- .col -->
               <div class="col-md-6 pb-2">
@@ -226,14 +227,13 @@ export default {
         this.messagedatasfromdate.push("指定日付は必ず入力してください。");
         this.validate = false;
       }
-      console.log("this.userrole " + this.userrole);
       if (this.userrole < "8") {
         if (!this.valuedepartment) {
-          this.messagedatadepartment.push("所属部署は必ず入力してください。");
+          this.messagedatadepartment.push("一般ユーザーは所属部署は必ず入力してください。");
           this.validate = false;
         }
         if (!this.valueuser) {
-          this.messagedatauser.push("氏名は必ず入力してください。");
+          this.messagedatauser.push("一般ユーザーは氏名は必ず入力してください。");
           this.validate = false;
         }
       }
