@@ -444,6 +444,28 @@ class MonthlyWorkingInformationController extends Controller
         $week = array("日", "月", "火", "水", "木", "金", "土");
         $w = (int)$datetime->format('w');
         $week_data = $week[$w];
+        $remark_data = $result->remark_holiday_name;
+        if (strlen($remark_data) == 0) {
+            $remark_data .= $result->remark_holiday_name;
+        } else {
+            $remark_data .= ' '.$result->remark_holiday_name;
+        }
+        if (strlen($remark_data) == 0) {
+            $remark_data .= $result->remark_check_result;
+        } else {
+            $remark_data .= ' '.$result->remark_check_result;
+        }
+        if (strlen($remark_data) == 0) {
+            $remark_data .= $result->remark_check_max_times;
+        } else {
+            $remark_data .= ' '.$result->remark_check_max_times;
+        }
+        if (strlen($remark_data) == 0) {
+            $remark_data .= $result->remark_check_interval;
+        } else {
+            $remark_data .= ' '.$result->remark_check_interval;
+        }
+
         $this->array_date[] = array(
             'workingdate' => date_format($datetime, 'Y年m月d日').'（'.$week_data.'）',
             'attendance1' => $result->attendance_time_1,
@@ -456,7 +478,7 @@ class MonthlyWorkingInformationController extends Controller
             'leaving3' => $result->leaving_time_3,
             'leaving4' => $result->leaving_time_4,
             'leaving5' => $result->leaving_time_5,
-            'remark_data' => $result->remark_data
+            'remark_data' => $remark_data
         );
     }
 

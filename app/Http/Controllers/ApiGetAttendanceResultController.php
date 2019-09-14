@@ -50,13 +50,8 @@ class ApiGetAttendanceResultController extends Controller
                     if($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.normal')){
                         $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
                     } elseif($array_chkAttendance_result[0] == Config::get('const.C018.forget_stamp')) {
-                        Log::debug('カード情報MODEチェック NG'.Config::get('const.RESULT_CODE.mode_illegal'));
                         $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.mode_illegal'));
-                    } elseif($array_chkAttendance_result[0] == Config::get('const.C018.interval_stamp')) {
-                        Log::debug('カード情報intervalチェック NG'.Config::get('const.RESULT_CODE.interval_stamp'));
-                        $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.interval_stamp'));
                     } else {
-                        Log::debug('カード情報不明 NG'.Config::get('const.RESULT_CODE.unknown'));
                         $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.unknown'));
                     }
                     // 打刻データ登録
@@ -135,6 +130,7 @@ class ApiGetAttendanceResultController extends Controller
         // MAX打刻取得
         $chk_result = Config::get('const.RESULT_CODE.normal');
         $chk_max_times = Config::get('const.RESULT_CODE.normal');
+        $check_interval = Config::get('const.RESULT_CODE.normal');
         $daily_times = $work_time_model->getDailyMaxData();
         if(count($daily_times) > 0){
             $i=0;
@@ -148,7 +144,7 @@ class ApiGetAttendanceResultController extends Controller
                         // 出勤インターバルチェック
                         if ($mode == Config::get('const.C005.attendance_time')) {
                             if ($this->source_mode == Config::get('const.C005.leaving_time')) {
-                                $chk_result = $apicommon->chkInteval($systemdate, $result->record_datetime);
+                                $check_interval = $apicommon->chkInteval($systemdate, $result->record_datetime);
                             }
                         }
                     }
@@ -179,7 +175,7 @@ class ApiGetAttendanceResultController extends Controller
             }
         }
 
-        return array($chk_result,  $chk_max_times);
+        return array($chk_result,  $chk_max_times,  $check_interval);
     }
 
     /**
@@ -199,6 +195,7 @@ class ApiGetAttendanceResultController extends Controller
             $work_time->setModeAttribute($mode);
             $work_time->setCheckresultAttribute($array_check_result[0]);
             $work_time->setCheckmaxtimeAttribute($array_check_result[1]);
+            $work_time->setCheckintervalAttribute($array_check_result[2]);
             $work_time->setCreateduserAttribute($user_data->code);
             $work_time->setSystemDateAttribute($systemdate);
             $work_time->insertWorkTime();

@@ -149,7 +149,16 @@ return [
         'forget_stamp' => 1,
         'interval_stamp' => 2,
         'no_leave_apply' => 3,
-        'max_time_over' => 4
+        'max_time_over' => 9
+    ],
+ 
+    'C018_NAME' => [
+        'value' => 'C018',
+        'normal_stamp' => '',
+        'forget_stamp' => '前回打刻忘れの疑い',
+        'interval_stamp' => '退勤時刻からの時間が短い',
+        'no_leave_apply' => '休暇未入力の疑い',
+        'max_time_over' => '出退勤・外出制限回数オーバー'
     ],
  
     'C019' => [
