@@ -23,8 +23,13 @@
                   <div class="input-group-prepend">
                     <span class="input-group-text font-size-sm line-height-xs label-width-90" id="basic-addon1">指定年月<span class="color-red">＊</span></span>
                   </div>
-                  <input-ym v-on:change-event="fromdateChanges"></input-ym>
+                  <input-datepicker
+                    v-bind:default-date="defaultDate"
+                    v-bind:date-format="'yyyy年MM月'"
+                    v-on:change-event="fromdateChanges"
+                  ></input-datepicker>
                 </div>
+                <message-data v-bind:message-datas="messagedatasfromdate" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -140,6 +145,7 @@
           <monthly-working-alert-table
             v-bind:time-items="timeitems"
             v-bind:time-values="timevalues"
+            v-bind:warning-items="warningitems"
           ></monthly-working-alert-table>
         </div>
         <!-- /panel -->
@@ -173,6 +179,8 @@ export default {
       resresults: [],
       timeitems: [],
       timevalues: [],
+      warningitems: [],
+      warningvalues: [],
       messagedatasserver: [],
       messagedatasfromdate: [],
       messagedatastodate: [],
@@ -308,6 +316,9 @@ export default {
             if (this.resresults.timevalues != null) {
               this.timevalues = this.resresults.timevalues;
             }
+            if (this.resresults.warningitems != null) {
+              this.warningitems = this.resresults.warningitems;
+            }
             if (this.resresults.messagedata != null) {
               this.messagedatasserver = this.resresults.messagedata;
             }
@@ -328,6 +339,8 @@ export default {
       this.resresults = [];
       this.timeitems = [];
       this.timevalues = [];
+      this.warningitems = [];
+      this.warningvalues = [];
       this.messagedatasserver = [];
       this.messagedatasfromdate = [];
       this.messagedatastodate = [];
@@ -372,7 +385,6 @@ export default {
 
     // 集計パネルヘッダ文字列編集処理
     setPanelHeader: function() {
-      console.log("setPanelHeader in "+this.valueym);
       moment.locale("ja");
       if (this.valueym == null || this.valueym == "") {
         this.stringtext = "";
@@ -380,23 +392,32 @@ export default {
         if (this.valuedisplay == null || this.valuedisplay == "") {
           this.stringtext = "";
         } else {
-          if (this.valuedisplay == null || this.valuedisplay == "") {
-            this.stringtext = "";
+          this.valuefromdate = this.valueym;
+          if (
+            moment(this.valuefromdate).format("YYYYMM") !=
+            moment().format("YYYYMM")
+          ) {
+            this.valuefromdate = moment(this.valuefromdate)
+              .endOf("month")
+              .format("YYYYMMDD");
           } else {
-            this.valuefromdate = this.valueym + '-01';
-            if (moment(this.valuefromdate).format("YYYYMM") != moment().format("YYYYMM")) {
-              this.valuefromdate = moment(this.valuefromdate).endOf('month').format("YYYYMMDD");
+            this.valuefromdate = moment().format("YYYYMMDD");
+          }
+          this.datejaFormat = moment(this.valuefromdate).format("YYYY年MM月");
+          if (this.valuedisplay == "1") {
+            this.stringtext = "月次アラート " + this.datejaFormat + "を〆日でアラート検索";
+          } else {
+            if (this.valuedisplay == "2") {
+              this.stringtext = "月次アラート " + this.datejaFormat + "1日からアラート検索";
             } else {
-              this.valuefromdate = moment().format("YYYYMMDD");
-            }
-            this.datejaFormat = moment(this.valuefromdate).format("YYYY年MM月");
-            if (this.valuedisplay == "1") {
-              this.stringtext = "月次アラート " + this.datejaFormat + "を〆日でアラート検索";
-            } else {
-              if (this.valuedisplay == "2") {
-                this.stringtext = "月次アラート " + this.datejaFormat + "1日からアラート検索";
+              if (this.valuedisplay == "3") {
+                this.stringtext = "月次アラート " + this.datejaFormat + "を〆日でアラート検索";
               } else {
-                this.stringtext = "";
+                if (this.valuedisplay == "4") {
+                  this.stringtext = "月次アラート " + this.datejaFormat + "1日からアラート検索";
+                } else {
+                  this.stringtext = "";
+                }
               }
             }
           }

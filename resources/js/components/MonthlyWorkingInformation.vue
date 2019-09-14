@@ -606,7 +606,6 @@ export default {
 
     // 集計パネルヘッダ文字列編集処理
     setPanelHeader: function() {
-      console.log("setPanelHeader in " + this.valueym);
       moment.locale("ja");
       if (this.valueym == null || this.valueym == "") {
         this.stringtext = "";
@@ -614,31 +613,27 @@ export default {
         if (this.valuedisplay == null || this.valuedisplay == "") {
           this.stringtext = "";
         } else {
-          if (this.valuedisplay == null || this.valuedisplay == "") {
-            this.stringtext = "";
+          this.valuefromdate = this.valueym;
+          if (
+            moment(this.valuefromdate).format("YYYYMM") !=
+            moment().format("YYYYMM")
+          ) {
+            this.valuefromdate = moment(this.valuefromdate)
+              .endOf("month")
+              .format("YYYYMMDD");
           } else {
-            this.valuefromdate = this.valueym + "-01";
-            if (
-              moment(this.valuefromdate).format("YYYYMM") !=
-              moment().format("YYYYMM")
-            ) {
-              this.valuefromdate = moment(this.valuefromdate)
-                .endOf("month")
-                .format("YYYYMMDD");
-            } else {
-              this.valuefromdate = moment().format("YYYYMMDD");
-            }
-            this.datejaFormat = moment(this.valuefromdate).format("YYYY年MM月");
-            if (this.valuedisplay == "1") {
+            this.valuefromdate = moment().format("YYYYMMDD");
+          }
+          this.datejaFormat = moment(this.valuefromdate).format("YYYY年MM月");
+          if (this.valuedisplay == "1") {
+            this.stringtext =
+              "月次集計 " + this.datejaFormat + "を〆日で集計";
+          } else {
+            if (this.valuedisplay == "2") {
               this.stringtext =
-                "月次集計 " + this.datejaFormat + "を〆日で集計";
+                "月次集計 " + this.datejaFormat + "1日から月末で集計";
             } else {
-              if (this.valuedisplay == "2") {
-                this.stringtext =
-                  "月次集計 " + this.datejaFormat + "1日から月末で集計";
-              } else {
-                this.stringtext = "";
-              }
+              this.stringtext = "";
             }
           }
         }

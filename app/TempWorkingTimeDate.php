@@ -71,6 +71,7 @@ class TempWorkingTimeDate extends Model
     private $pattern;                       // 打刻パターン
     private $check_result;                  // 打刻チェック結果
     private $check_max_times;               // 打刻回数最大チェック結果
+    private $check_interval;                // インターバルチェック結果
     private $fixedtime;                     // 確定
     private $systemdate;
 
@@ -688,6 +689,17 @@ class TempWorkingTimeDate extends Model
         $this->check_max_times = $value;
     }
 
+    // インターバルチェック結果
+    public function getCheckintervalAttribute()
+    {
+        return $this->check_interval;
+    }
+
+    public function setCheckintervalAttribute($value)
+    {
+        $this->check_interval = $value;
+    }
+
 
     // 確定
     public function getFixedtimeAttribute()
@@ -902,6 +914,7 @@ class TempWorkingTimeDate extends Model
                     $this->table.'.pattern',
                     $this->table.'.check_result',
                     $this->table.'.check_max_times',
+                    $this->table.'.check_interval',
                     $this->table.'.fixedtime');
 
             // 適用期間日付の取得
@@ -998,6 +1011,7 @@ class TempWorkingTimeDate extends Model
                 ->addselect('t2.pattern')
                 ->addselect('t2.check_result')
                 ->addselect('t2.check_max_times')
+                ->addselect('t2.check_interval')
                 ->addselect('t2.fixedtime');
             $mainquery->selectRaw(Auth::user()->id.' as created_user');
             $mainquery->selectRaw('null as updated_user');
@@ -1145,6 +1159,7 @@ class TempWorkingTimeDate extends Model
                     'pattern' => $this->pattern,
                     'check_result' => $this->check_result,
                     'check_max_times' => $this->check_max_times,
+                    'check_interval' => $this->check_interval,
                     'fixedtime' => $this->fixedtime,
                     'created_at'=>$this->systemdate
                 ]

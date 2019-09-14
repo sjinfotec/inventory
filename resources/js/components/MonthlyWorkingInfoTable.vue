@@ -97,7 +97,7 @@ export default {
     },
     calcLists: {
       type: Array
-    }
+    },
   }
 };
 </script>

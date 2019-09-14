@@ -31,7 +31,12 @@ class MonthlyWorkingAlertController extends Controller
      */
     public function show(Request $request){
 
-        Log::debug('monthly show in'.$request->datefrom);
+        Log::debug('---- 月次アラート表示 開始 -------------- ');
+        Log::debug('---- パラメータ　$request->datefrom = '.$request->datefrom);
+        Log::debug('---- パラメータ　$request->displaykbn = '.$request->displaykbn);
+        Log::debug('---- パラメータ　$request->employmentstatus = '.$request->employmentstatus);
+        Log::debug('---- パラメータ　$request->departmentcode = '.$request->departmentcode);
+        Log::debug('---- パラメータ　$request->usercode = '.$request->usercode);
 
         $apicommon = new ApiCommonController();
         // reqestクエリーセット
@@ -103,7 +108,10 @@ class MonthlyWorkingAlertController extends Controller
         );
 
         // 累計時間取得
-        $monthly_alerts = $workingtimedate_model->getMonthlyTimeSum($datefrom.'01');
+        $array_alert_date = $workingtimedate_model->setParamEmploymentStatusAttribute($employmentstatus);
+        $array_alert_date = $workingtimedate_model->setParamDepartmentcodeAttribute($departmentcode);
+        $array_alert_date = $workingtimedate_model->setParamUsercodeAttribute($usercode);
+        $monthly_alerts = $workingtimedate_model->getMonthlyAlertTimeSum($datefrom.'01');
         if (count($monthly_alerts) == 0) {
             Log::debug(Config::get('const.MSG_INFO.no_alert_data'));
             $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_INFO.no_alert_data'));
@@ -305,7 +313,6 @@ class MonthlyWorkingAlertController extends Controller
             Log::debug('manthly_alert_ave_6_chk = '.$manthly_alert_ave_6_chk);
             Log::debug('manthly_alert_warning_720_total_chk = '.$manthly_alert_warning_720_total_chk);
             $working_time_values[] = array(
-                'rowno' => 1,
                 'department_name' => $monthly_alert->department_name,
                 'employment_status_name' => $monthly_alert->employment_status_name,
                 'user_name' => $monthly_alert->user_name,
@@ -322,8 +329,7 @@ class MonthlyWorkingAlertController extends Controller
                 'total_working_times_11' => $monthly_alert->total_working_times_11,
                 'total_working_times_12' => $monthly_alert->total_working_times_12
             );
-            $working_time_values[] = array(
-                'rowno' => 2,
+            $working_warning_items[] = array(
                 'department_name' => '　',
                 'employment_status_name' => '　',
                 'user_name' => '　',
@@ -338,25 +344,19 @@ class MonthlyWorkingAlertController extends Controller
                 'total_working_times_9' => Config::get('const.ALERT_MONTHLY_ITEM.items_9'),
                 'total_working_times_10' => Config::get('const.ALERT_MONTHLY_ITEM.items_10'),
                 'total_working_times_11' => Config::get('const.ALERT_MONTHLY_ITEM.items_11'),
-                'total_working_times_12' => Config::get('const.ALERT_MONTHLY_ITEM.items_12')
-            );
-            $working_time_values[] = array(
-                'rowno' => 3,
-                'department_name' => '　',
-                'employment_status_name' => '　',
-                'user_name' => '　',
-                'total_working_times_1' => $manthly_alert_warning_1_chk,
-                'total_working_times_2' => $manthly_alert_warning_2_chk,
-                'total_working_times_3' => $manthly_alert_warning_3_chk,
-                'total_working_times_4' => $manthly_alert_warning_12_chk,
-                'total_working_times_5' => $month_alert_45_total_cnt_chk,
-                'total_working_times_6' => $manthly_alert_warning_100_total_chk,
-                'total_working_times_7' => $manthly_alert_ave_2_chk,
-                'total_working_times_8' => $manthly_alert_ave_3_chk,
-                'total_working_times_9' => $manthly_alert_ave_4_chk,
-                'total_working_times_10' => $manthly_alert_ave_5_chk,
-                'total_working_times_11' => $manthly_alert_ave_6_chk,
-                'total_working_times_12' => $manthly_alert_warning_720_total_chk,
+                'total_working_times_12' => Config::get('const.ALERT_MONTHLY_ITEM.items_12'),
+                'manthly_alert_warning_1_chk' => $manthly_alert_warning_1_chk,
+                'manthly_alert_warning_2_chk' => $manthly_alert_warning_2_chk,
+                'manthly_alert_warning_3_chk' => $manthly_alert_warning_3_chk,
+                'manthly_alert_warning_12_chk' => $manthly_alert_warning_12_chk,
+                'month_alert_45_total_cnt_chk' => $month_alert_45_total_cnt_chk,
+                'manthly_alert_warning_100_total_chk' => $manthly_alert_warning_100_total_chk,
+                'manthly_alert_ave_2_chk' => $manthly_alert_ave_2_chk,
+                'manthly_alert_ave_3_chk' => $manthly_alert_ave_3_chk,
+                'manthly_alert_ave_4_chk' => $manthly_alert_ave_4_chk,
+                'manthly_alert_ave_5_chk' => $manthly_alert_ave_5_chk,
+                'manthly_alert_ave_6_chk' => $manthly_alert_ave_6_chk,
+                'manthly_alert_warning_720_total_chk' => $manthly_alert_warning_720_total_chk,
                 'user_alert_chk' => $user_alert_chk
             );
         }
@@ -364,6 +364,7 @@ class MonthlyWorkingAlertController extends Controller
         return response()->json([
             'timeitems' => $working_time_items,
             'timevalues' => $working_time_values,
+            'warningitems' => $working_warning_items,
             Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
             ]);
     }

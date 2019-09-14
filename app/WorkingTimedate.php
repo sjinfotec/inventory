@@ -84,6 +84,7 @@ class WorkingTimedate extends Model
     private $pattern;                       // 打刻パターン
     private $check_result;                  // 打刻チェック結果
     private $check_max_times;               // 打刻回数最大チェック結果
+    private $check_interval;                // インターバルチェック結果
     private $fixedtime;                     // 確定
     private $created_user;                  // 作成ユーザー
     private $updated_user;                  // 修正ユーザー
@@ -707,6 +708,17 @@ class WorkingTimedate extends Model
         $this->check_max_times = $value;
     }
 
+    // インターバルチェック結果
+    public function getCheckintervalAttribute()
+    {
+        return $this->check_interval;
+    }
+
+    public function setCheckintervalAttribute($value)
+    {
+        $this->check_interval = $value;
+    }
+
 
     // 確定
     public function getFixedtimeAttribute()
@@ -859,6 +871,7 @@ class WorkingTimedate extends Model
         for ($i=0;$i<12;$i++) {
             $this->array_param_date_from[$i] = null;
         }
+        Log::debug('月次アラート日付設定 = '.$search_kbn);
         $set_from_date_flg = false;
         if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
             $search_kbn == Config::get('const.C022.monthly_alert_begining_month_first') ||
@@ -871,6 +884,7 @@ class WorkingTimedate extends Model
             $set_beginning_or_first_ymd_flg = false;
             $set_from_date_flg = false;
             $set_index = 0;
+            Log::debug('$settings count = '.count($settings));
             foreach($settings as $setting) {
                 if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
                     $search_kbn == Config::get('const.C022.monthly_alert_begining_month_first')) {
@@ -881,6 +895,7 @@ class WorkingTimedate extends Model
                 }
                 if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
                     $search_kbn == Config::get('const.C022.monthly_alert_first_month_closing')) {
+                    Log::debug('isset($setting->closing) = '.isset($setting->closing));
                     if (!isset($setting->closing)) {
                         $this->massegedata[] = array(Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_setting_closing'));
                         break;
@@ -1202,6 +1217,7 @@ class WorkingTimedate extends Model
                     $this->table.'.pattern',
                     $this->table.'.check_result',
                     $this->table.'.check_max_times',
+                    $this->table.'.check_interval',
                     $this->table.'.fixedtime',
                     $this->table.'.created_user',
                     $this->table.'.updated_user',
@@ -1325,14 +1341,25 @@ class WorkingTimedate extends Model
 
             $mainquery
                 ->addselect($this->table.'.working_status');
-            //$remarks_date_note = 'ltrim(concat(ifnull('.$this->table.".note, ''), '  ',"; 
-            //$remarks_date_note .= ' CASE ifnull('.$this->table.".late, '') WHEN '1' THEN '".Config::get('const.REMARKS_DATA.late')."' ELSE '' END, '  ',"; 
-            //$remarks_date_note .= ' CASE ifnull('.$this->table.".leave_early, '') WHEN '1' THEN '".Config::get('const.REMARKS_DATA.leaveearly')."' ELSE '' END, '  ',"; 
-            //$remarks_date_note .= ' CASE ifnull('.$this->table.".holiday_name, '') WHEN '' THEN '' ELSE working_time_dates.holiday_name END)) as remark_data"; 
-            $remarks_date_note = ' CASE ifnull('.$this->table.".holiday_name, '') WHEN '' THEN '' ELSE working_time_dates.holiday_name END as remark_data"; 
+            $remarks_date_holiday_name = ' CASE ifnull('.$this->table.".holiday_name, '') WHEN '' THEN '' ELSE ".$this->table.'.holiday_name END as remark_holiday_name'; 
+            $remarks_date_check_result = ' CASE ifnull('.$this->table.'.check_result, 0)';
+            $remarks_date_check_result .= ' WHEN '.Config::get('const.C018.forget_stamp')." THEN '".Config::get('const.C018_NAME.forget_stamp')."' ";
+            $remarks_date_check_result .= ' WHEN '.Config::get('const.C018.interval_stamp')." THEN '".Config::get('const.C018_NAME.interval_stamp')."' ";
+            $remarks_date_check_result .= ' WHEN '.Config::get('const.C018.no_leave_apply')." THEN '".Config::get('const.C018_NAME.no_leave_apply')."' ";
+            $remarks_date_check_result .= " ELSE '' END as remark_check_result"; 
+            $remarks_date_check_max_times = ' CASE ifnull('.$this->table.'.check_max_times, 0)';
+            $remarks_date_check_max_times .= ' WHEN '.Config::get('const.C018.max_time_over')." THEN '".Config::get('const.C018_NAME.max_time_over')."' ";
+            $remarks_date_check_max_times .= " ELSE '' END as remark_check_max_times"; 
+            $remarks_date_check_interval = ' CASE ifnull('.$this->table.'.check_interval, 0)';
+            $remarks_date_check_interval .= ' WHEN '.Config::get('const.C018.interval_stamp')." THEN '".Config::get('const.C018_NAME.interval_stamp')."' ";
+            $remarks_date_check_interval .= " ELSE '' END as remark_check_interval"; 
+            
             $mainquery
                 ->selectRaw('ifnull('.$this->table.".working_status_name,'　')  as working_status_name")
-                ->selectRaw($remarks_date_note);
+                ->selectRaw($remarks_date_holiday_name)
+                ->selectRaw($remarks_date_check_result)
+                ->selectRaw($remarks_date_check_max_times)
+                ->selectRaw($remarks_date_check_interval);
             $mainquery
                 ->addselect($this->table.'.note')
                 ->addselect($this->table.'.late')
@@ -1364,6 +1391,7 @@ class WorkingTimedate extends Model
                 ->addselect($this->table.'.pattern')
                 ->addselect($this->table.'.check_result')
                 ->addselect($this->table.'.check_max_times')
+                ->addselect($this->table.'.check_interval')
                 ->addselect($this->table.'.fixedtime')
                 ->addselect($this->table.'.created_user')
                 ->addselect($this->table.'.updated_user')
@@ -1753,9 +1781,9 @@ class WorkingTimedate extends Model
      *
      * @return sql取得結果
      */
-    public function getMonthlyTimeSum($targetdate){
+    public function getMonthlyAlertTimeSum($targetdate){
 
-        Log::debug('getMonthlyTimeSum in '.$targetdate);
+        Log::debug('getMonthlyAlertTimeSum in '.$targetdate);
 
         // 日時労働時間合計取得SQL作成
         try{
@@ -1825,6 +1853,18 @@ class WorkingTimedate extends Model
                     $join->on('t23.max_apply_term_from', '=', 't1.apply_term_from');
                 });
 
+            if(!empty($this->param_employment_status)){
+                $mainquery->where('t1.employment_status', $this->param_employment_status);   //employment_status指定
+            }
+            
+            if(!empty($this->param_user_code)){
+                $mainquery->where('t1.user_code', $this->param_user_code);                   //user_code指定
+            }
+            
+            if(!empty($this->param_department_code)){
+                $mainquery->where('t1.department_code', $this->param_department_code);       //department_code指定
+            }
+
             $result = $mainquery
                 ->where('t1.is_deleted', '=', 0)
                 ->orderBy('t1.department_code', 'asc')
@@ -1834,7 +1874,7 @@ class WorkingTimedate extends Model
             \Log::debug(
                 'sql_debug_log',
                 [
-                    'getWorkTimes' => \DB::getQueryLog()
+                    'getMonthlyAlertTimeSum' => \DB::getQueryLog()
                 ]
             );
                 

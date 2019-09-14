@@ -16,6 +16,7 @@ class WorkTime extends Model
     protected $table_departments = 'departments';
     protected $table_shift_informations = 'shift_informations';
     protected $table_user_holiday_kubuns = 'user_holiday_kubuns';
+    protected $table_working_time_dates = 'working_time_dates';
     // protected $guarded = array('id');
 
     //--------------- メンバー属性 -----------------------------------
@@ -27,6 +28,7 @@ class WorkTime extends Model
     private $mode;                          // 打刻モード
     private $check_result;                  // 打刻チェック結果
     private $check_max_time;                // 打刻回数最大チェック結果
+    private $check_interval;                // インターバルチェック結果
     private $created_user;                  // 作成ユーザー
     private $updated_user;                  // 修正ユーザー
     private $is_deleted;                    // 削除フラグ
@@ -112,7 +114,19 @@ class WorkTime extends Model
     {
         $this->check_max_time = $value;
     }
+
     
+    // インターバルチェック結果
+    public function getCheckintervalAttribute()
+    {
+        return $this->check_interval;
+    }
+
+    public function setCheckintervalAttribute($value)
+    {
+        $this->check_interval = $value;
+    }
+
 
     // 作成ユーザー
     public function getCreateduserAttribute()
@@ -337,6 +351,7 @@ class WorkTime extends Model
                 'mode' => $this->mode,
                 'check_result' => $this->check_result,
                 'check_max_time' => $this->check_max_time,
+                'check_interval' => $this->check_interval,
                 'created_user' => $this->created_user,
                 'created_at'=>$this->systemdate
             ]
@@ -439,6 +454,7 @@ class WorkTime extends Model
                 $this->table.'.mode as mode',
                 $this->table.'.check_result as check_result',
                 $this->table.'.check_max_time as check_max_time',
+                $this->table.'.check_interval as check_interval',
                 $this->table.'.is_deleted as is_deleted'
             )
             ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%Y') as record_year")
@@ -491,6 +507,7 @@ class WorkTime extends Model
                 't2.mode as mode',
                 't2.check_result as check_result',
                 't2.check_max_time as check_max_time',
+                't2.check_interval as check_interval',
                 't3.weekday_kubun as weekday_kubun',
                 't11.code_name as weekday_name',
                 't3.business_kubun as business_kubun',
@@ -509,6 +526,7 @@ class WorkTime extends Model
                 't4.interval as interval',
                 't4.year as year',
                 't14.holiday_kubun as user_holiday_kubun',
+                't14.working_date as user_working_date',
                 't15.code_name as user_holiday_name'
             );
         $mainquery
@@ -1001,7 +1019,8 @@ class WorkTime extends Model
             ->addselect($this->table.'.mode as mode');
         $subquery1
             ->selectRaw('case check_result when null then 0 else check_result end as check_result')
-            ->selectRaw('case check_max_time when null then 0 else check_max_time end as check_max_time');
+            ->selectRaw('case check_max_time when null then 0 else check_max_time end as check_max_time')
+            ->selectRaw('case check_interval when null then 0 else check_interval end as check_interval');
         $record_time = $this->getArrayrecordtimeAttribute();
         if(!empty($record_time)){
             $subquery1->where($this->table.'.record_time', '>=', $this->param_date_from);       //record_time範囲指定
@@ -1030,9 +1049,40 @@ class WorkTime extends Model
                 't2.mode as mode',
                 't6.code_name as mode_name',
                 't2.check_result as check_result',
-                't2.check_max_time as check_max_time');
+                't2.check_max_time as check_max_time',
+                't2.check_interval as check_interval',
+                't9.note as note');
+        $alert_memo = '';
+        $alert_memo .= "case t7.code_name is null ";
+        $alert_memo .= "  when 1 then ";
+        $alert_memo .= "    case t8.code_name is null ";
+        $alert_memo .= "      when 1 then ";
+        $alert_memo .= "        case t10.code_name is null ";
+        $alert_memo .= "          when 1 then null ";
+        $alert_memo .= "          else t10.code_name ";
+        $alert_memo .= "        end ";
+        $alert_memo .= "      else ";
+        $alert_memo .= "        case t10.code_name is null ";
+        $alert_memo .= "          when 1 then t8.code_name ";
+        $alert_memo .= "          else t8.code_name || ' ' || t10.code_name ";
+        $alert_memo .= "        end ";
+        $alert_memo .= "    end ";
+        $alert_memo .= "  else ";
+        $alert_memo .= "    case t8.code_name is null ";
+        $alert_memo .= "      when 1 then ";
+        $alert_memo .= "        case t10.code_name is null ";
+        $alert_memo .= "          when 1 then t7.code_name ";
+        $alert_memo .= "          else t7.code_name || ' ' || t10.code_name ";
+        $alert_memo .= "        end ";
+        $alert_memo .= "      else ";
+        $alert_memo .= "        case t10.code_name is null ";
+        $alert_memo .= "          when 1 then t7.code_name || ' ' || t8.code_name ";
+        $alert_memo .= "          else t7.code_name  || ' ' || t8.code_name  || ' ' || t10.code_name ";
+        $alert_memo .= "        end ";
+        $alert_memo .= "    end ";
+        $alert_memo .= "end as alert_memo";
         $mainquery
-            ->selectRaw("case t7.code_name is null when 1 then case t8.code_name is null when 1 then null else t8.code_name end else case t8.code_name is null when 1 then t7.code_name else t7.code_name || ' ' ||t8.code_name end end as alert_memo")
+            ->selectRaw($alert_memo)
             ->leftJoinSub($subquery1, 't2', function ($join) { 
                 $join->on('t2.user_code', '=', 't1.code');
                 $join->on('t2.department_code', '=', 't1.department_code')
@@ -1062,16 +1112,28 @@ class WorkTime extends Model
                 $join->on('t8.code', '=', 't2.check_max_time')
                 ->where('t8.identification_id', '=', Config::get('const.C018.value'))
                 ->where('t8.is_deleted', '=', 0);
+            })
+            ->leftJoin('generalcodes as t10', function ($join) { 
+                $join->on('t10.code', '=', 't2.check_interval')
+                ->where('t10.identification_id', '=', Config::get('const.C018.value'))
+                ->where('t10.is_deleted', '=', 0);
+            })
+            ->leftJoin($this->table_working_time_dates.' as t9', function ($join) { 
+                $join->on('t9.working_date', '=', 't2.record_date');
+                $join->on('t9.employment_status', '=', 't1.employment_status');
+                $join->on('t9.user_code', '=', 't1.code');
+                $join->on('t9.department_code', '=', 't1.department_code')
+                ->where('t9.is_deleted', '=', 0);
             });
 
         if(!empty($this->param_employment_status)){
-            $mainquery->where('t1.employment_status', $this->param_employment_status);  //　雇用形態指定
+            $mainquery->where('t1.employment_status', $this->param_employment_status);      //　雇用形態指定
         }
         if(!empty($this->param_department_code)){
-            $mainquery->where('t1.department_code', $this->param_department_code);      //department_code指定
+            $mainquery->where('t1.department_code', $this->param_department_code);          //department_code指定
         }
         if(!empty($this->param_user_code)){
-            $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
+            $mainquery->where('t1.code', $this->param_user_code);                           //user_code指定
         } else {
             $mainquery->where('t1.role','<',Config::get('const.C017.out_of_user'));
         }
@@ -1083,7 +1145,9 @@ class WorkTime extends Model
         $result = $mainquery
             ->where(function ($query) {
                 $query->where('t2.check_result', '>', 0)
-                      ->orWhere('t2.check_max_time', '>', 0);
+                      ->orWhere('t2.check_max_time', '>', 0)
+                      ->orWhere('t2.check_interval', '>', 0)
+                      ->orWhereNotNull('t9.note');
             })
             ->where('t1.role', '<', 10)
             ->where('t1.is_deleted', '=', 0)

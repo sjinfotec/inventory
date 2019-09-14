@@ -634,6 +634,19 @@ class TempCalcWorkingTime extends Model
         $this->check_max_times = $value;
     }
 
+    private $check_interval;                   // インターバルチェック結果
+
+    // インターバルチェック結果
+    public function getCheckintervalAttribute()
+    {
+        return $this->check_interval;
+    }
+
+    public function setCheckintervalAttribute($value)
+    {
+        $this->check_interval = $value;
+    }
+
     private $systemdate;
 
     public function getSystemDateAttribute()
@@ -749,7 +762,6 @@ class TempCalcWorkingTime extends Model
      * @return void
      */
     public function getTempCalcWorkingtime(){
-        Log::DEBUG('getTempCalcWorkingtime in ');
         \DB::enableQueryLog();
         $mainquery = DB::table($this->table.' AS t1')
             ->select(
@@ -799,7 +811,8 @@ class TempCalcWorkingTime extends Model
                 't1.year as year',
                 't1.pattern as pattern',
                 't1.check_result as check_result',
-                't1.check_max_times as check_max_times'
+                't1.check_max_times as check_max_times',
+                't1.check_interval as check_interval'
             );
 
         if(!empty($this->param_date_from) && !empty($this->param_date_to)){
@@ -896,6 +909,7 @@ class TempCalcWorkingTime extends Model
                     'pattern' => $this->pattern,
                     'check_result' => $this->check_result,
                     'check_max_times' => $this->check_max_times,
+                    'check_interval' => $this->check_interval,
                     'created_at'=>$this->systemdate
                 ]
             );
