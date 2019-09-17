@@ -293,7 +293,7 @@ class DailyWorkingInformationController extends Controller
                         $temp_array = array();
                         foreach($temp_working_time_dates as $working_time_date) {
                             $temp_collect = collect($working_time_date);
-                            $temp_array[] = array($temp_collect->toArray(), 'created_at' => new Carbon());
+                            $temp_array[] = $temp_collect->toArray();
                         } 
                         $working_model->insertWorkingTimeDateFromTemp($temp_array);
                         DB::commit();
