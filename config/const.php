@@ -165,6 +165,26 @@ return [
         'value' => 'C019',
         'max_times' => 5
     ],
+  
+    'C021' => [
+        'value' => 'C021',
+        'manthly_alert_error_1' => 45,
+        'manthly_alert_error_2' => 81,
+        'manthly_alert_error_3' => 120,
+        'manthly_alert_error_4' => 360,
+        'manthly_alert_error_5' => 6,
+        'manthly_alert_error_6' => 100,
+        'manthly_alert_error_7' => 80,
+        'manthly_alert_error_8' => 720
+    ],
+
+    'C022' => [
+        'value' => 'C022',
+        'monthly_alert_begining_month_closing' => 1,
+        'monthly_alert_begining_month_first' => 2,
+        'monthly_alert_first_month_closing' => 3,
+        'monthly_alert_first_month_first' => 4
+    ],
  
     'C023' => [
         'value' => 'C023',
@@ -176,14 +196,6 @@ return [
         'manthly_alert_warning_6' => 80,
         'manthly_alert_warning_7' => 72,
         'manthly_alert_warning_8' => 648
-    ],
- 
-    'C022' => [
-        'value' => 'C022',
-        'monthly_alert_begining_month_closing' => 1,
-        'monthly_alert_begining_month_first' => 2,
-        'monthly_alert_first_month_closing' => 3,
-        'monthly_alert_first_month_first' => 4
     ],
 
     'C999' => [
@@ -309,23 +321,30 @@ return [
     ],
  
     'ALERT_MONTHLY_ITEM' => [
-        'items_1' => '45H/月',
-        'items_2' => '81H/2か月',
-        'items_3' => '120H/3か月',
-        'items_4' => '360H/年',
-        'items_5' => '45H超計6月',
-        'items_6' => '45H超100H/月',
-        'items_7' => '2月平均80H以内',
-        'items_8' => '3月平均80H以内',
-        'items_9' => '4月平均80H以内',
-        'items_10' => '5月平均80H以内',
-        'items_11' => '6月平均80H以内',
-        'items_12' => '720H/年'
+        'items_1' => '45H/M',
+        'items_2' => '81H/2M',
+        'items_3' => '120H/3M',
+        'items_4' => '360H/Y',
+        'items_5' => '45H/6M',
+        'items_6' => '100H/M',
+        'items_7' => 'A80H/2M',
+        'items_8' => 'A80H/3M',
+        'items_9' => 'A80H/4M',
+        'items_10' => 'A80H/5M',
+        'items_11' => 'A80H/6M',
+        'items_12' => '720H/Y'
     ],
  
     'ALERT_INFO_RESULT' => [
         'OK' => 'OK',
+        'WA' => 'WA',
         'NG' => 'NG'
+    ],
+ 
+    'ALERT_INFO_RESULT_NAME' => [
+        'OK' => '正常',
+        'WA' => '警告',
+        'NG' => 'エラー'
     ],
 
     'MSG_INFO' => [

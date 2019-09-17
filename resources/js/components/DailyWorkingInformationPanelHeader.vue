@@ -1,7 +1,7 @@
 <template>
   <div class="card-header bg-transparent pb-2 border-0">
-    <h1 class="float-sm-left font-size-rg mb-0">{{ this.headertext1 }}</h1>
-    <span class="float-sm-right font-size-sm mb-0">{{ this.headertext2 }}</span>
+    <h1 class="float-sm-left font-size-rg mb-0">{{ headerText1 }}</h1>
+    <span class="float-sm-right font-size-sm mb-0">{{ headerText2 }}</span>
   </div>
 </template>
 
@@ -10,11 +10,11 @@
 export default {
   name: "dailyworkingtimePanelHeader",
   props: {
-    headertext1: {
+    headerText1: {
         type: String,
         default: ''
     },
-    headertext2: {
+    headerText2: {
         type: String,
         default: ''
     }

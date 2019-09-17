@@ -1815,7 +1815,8 @@ class WorkingTimedate extends Model
                 ->select(
                     't22.code_name as employment_status_name',
                     't21.name as department_name',
-                    't1.name as user_name'
+                    't1.name as user_name',
+                    't1.code as user_code'
                 );
             for ($i=0;$i<count($this->array_param_date_from);$i++) {
                 $this->as_number = $i+1;
@@ -1866,6 +1867,7 @@ class WorkingTimedate extends Model
             }
 
             $result = $mainquery
+                ->where('t1.role', '<', Config::get('const.C017.out_of_user'))
                 ->where('t1.is_deleted', '=', 0)
                 ->orderBy('t1.department_code', 'asc')
                 ->orderBy('t1.employment_status', 'asc')

@@ -46,16 +46,19 @@ class MonthlyWorkingAlertController extends Controller
         $departmentcode = $apicommon->setRequestQeury($request->departmentcode);
         $usercode = $apicommon->setRequestQeury($request->usercode);
 
+        $alert_result = false;
         $working_time_items = array();
         $working_time_values = array();
+        $working_warning_items = array();
+        $working_warning_values = array();
         $workingtimedate_model = new WorkingTimedate();
         // 日付開始終了の作成
         $workingtimedate_model->setArrayParamdatefromAttribute($datefrom, $displaykbn);
         $array_messagedata = $workingtimedate_model->getMassegedataAttribute();
         if (count($array_messagedata) > 0) {
             return response()->json([
+                'alert_result' => $alert_result,
                 'timeitems' => $working_time_items,
-                'timevalues' => $working_time_values,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
             ]);
         }
@@ -76,36 +79,18 @@ class MonthlyWorkingAlertController extends Controller
         Log::debug('$datefromの6か月前の年月 $date_6before_ym = '.$date_6before_ym);
 
         $w_date = new Carbon($alert_from_ym.'01');
-        $working_date_1 = date_format($w_date, 'Y/m');
-        $working_date_2 = date_format($w_date->addMonthNoOverflow(),'Y/m');
-        $working_date_3 = date_format($w_date->addMonthNoOverflow(),'Y/m');
-        $working_date_4 = date_format($w_date->addMonthNoOverflow(),'Y/m');
-        $working_date_5 = date_format($w_date->addMonthNoOverflow(),'Y/m');
-        $working_date_6 = date_format($w_date->addMonthNoOverflow(),'Y/m');
-        $working_date_7 = date_format($w_date->addMonthNoOverflow(),'Y/m');
-        $working_date_8 = date_format($w_date->addMonthNoOverflow(),'Y/m');
-        $working_date_9 = date_format($w_date->addMonthNoOverflow(),'Y/m');
-        $working_date_10 = date_format($w_date->addMonthNoOverflow(),'Y/m');
-        $working_date_11 = date_format($w_date->addMonthNoOverflow(),'Y/m');
-        $working_date_12 = date_format($w_date->addMonthNoOverflow(),'Y/m');
-
-        $working_time_items[] = array(
-            'department_name' => '部署',
-            'employment_status_name' => '勤務形態',
-            'user_name' => '氏名',
-            'working_date_1' => $working_date_1,
-            'working_date_2' => $working_date_2,
-            'working_date_3' => $working_date_3,
-            'working_date_4' => $working_date_4,
-            'working_date_5' => $working_date_5,
-            'working_date_6' => $working_date_6,
-            'working_date_7' => $working_date_7,
-            'working_date_8' => $working_date_8,
-            'working_date_9' => $working_date_9,
-            'working_date_10' => $working_date_10,
-            'working_date_11' => $working_date_11,
-            'working_date_12' => $working_date_12
-        );
+        $working_date_1 = date_format($w_date, 'Y年m月');
+        $working_date_2 = date_format($w_date->addMonthNoOverflow(),'Y年m月');
+        $working_date_3 = date_format($w_date->addMonthNoOverflow(),'Y年m月');
+        $working_date_4 = date_format($w_date->addMonthNoOverflow(),'Y年m月');
+        $working_date_5 = date_format($w_date->addMonthNoOverflow(),'Y年m月');
+        $working_date_6 = date_format($w_date->addMonthNoOverflow(),'Y年m月');
+        $working_date_7 = date_format($w_date->addMonthNoOverflow(),'Y年m月');
+        $working_date_8 = date_format($w_date->addMonthNoOverflow(),'Y年m月');
+        $working_date_9 = date_format($w_date->addMonthNoOverflow(),'Y年m月');
+        $working_date_10 = date_format($w_date->addMonthNoOverflow(),'Y年m月');
+        $working_date_11 = date_format($w_date->addMonthNoOverflow(),'Y年m月');
+        $working_date_12 = date_format($w_date->addMonthNoOverflow(),'Y年m月');
 
         // 累計時間取得
         $array_alert_date = $workingtimedate_model->setParamEmploymentStatusAttribute($employmentstatus);
@@ -116,17 +101,17 @@ class MonthlyWorkingAlertController extends Controller
             Log::debug(Config::get('const.MSG_INFO.no_alert_data'));
             $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_INFO.no_alert_data'));
             return response()->json([
+                'alert_result' => $alert_result,
                 'timeitems' => $working_time_items,
-                'timevalues' => $working_time_values,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
             ]);
         }
 
         // 計算エリア
         foreach($monthly_alerts as $monthly_alert) {
-            // 項目名称設定（最初のみ）
-            if (count($working_time_items) == 0) {
-            }
+            $working_time_values = array();
+            $working_warning_items = array();
+            $working_warning_values = array();
             $user_alert_chk = true;
             $manthly_alert_warning_1_chk = Config::get('const.ALERT_INFO_RESULT.OK');
             $manthly_alert_warning_2_chk = Config::get('const.ALERT_INFO_RESULT.OK');
@@ -152,10 +137,16 @@ class MonthlyWorkingAlertController extends Controller
             Log::debug('当月index = '.$this_month_index);
             $thisMonth_total = $this->getTotalItemData($monthly_alert, $this_month_index);
             Log::debug('当月total = '.$thisMonth_total);
-            if ($thisMonth_total > Config::get('const.C023.manthly_alert_warning_1')) {
+            $manthly_alert_warning_1_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            if ($thisMonth_total > Config::get('const.C021.manthly_alert_error_1')) {
                 $manthly_alert_warning_1_chk = Config::get('const.ALERT_INFO_RESULT.NG');
+                $manthly_alert_warning_1_chk_time_array = $this->getDiffFormat($thisMonth_total, Config::get('const.C021.manthly_alert_error_1'));
                 $user_alert_chk = false;
-            }
+            } elseif ($thisMonth_total > Config::get('const.C023.manthly_alert_warning_1')) {
+                $manthly_alert_warning_1_chk = Config::get('const.ALERT_INFO_RESULT.WA');
+                $manthly_alert_warning_1_chk_time_array = $this->getDiffFormat($thisMonth_total, Config::get('const.C021.manthly_alert_error_1'));
+                $user_alert_chk = false;
+            }   
             // 81時間/2か月チェック
             if ($this_month_index > 0) {
                 $this_2before_index = $this_month_index - 1;
@@ -169,8 +160,14 @@ class MonthlyWorkingAlertController extends Controller
                 $month_2before_total = $month_2before_total + $w_total;
             }
             Log::debug('2か月total = '.$month_2before_total);
-            if ($month_2before_total > Config::get('const.C023.manthly_alert_warning_2')) {
+            $manthly_alert_warning_2_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            if ($month_2before_total > Config::get('const.C021.manthly_alert_error_2')) {
                 $manthly_alert_warning_2_chk = Config::get('const.ALERT_INFO_RESULT.NG');
+                $manthly_alert_warning_2_chk_time_array = $this->getDiffFormat($month_2before_total, Config::get('const.C021.manthly_alert_error_2'));
+                $user_alert_chk = false;
+            } elseif ($month_2before_total > Config::get('const.C023.manthly_alert_warning_2')) {
+                $manthly_alert_warning_2_chk = Config::get('const.ALERT_INFO_RESULT.WA');
+                $manthly_alert_warning_2_chk_time_array = $this->getDiffFormat($month_2before_total, Config::get('const.C021.manthly_alert_error_2'));
                 $user_alert_chk = false;
             }
             // 120時間/3か月チェック
@@ -186,8 +183,14 @@ class MonthlyWorkingAlertController extends Controller
                 $month_3before_total = $month_3before_total + $w_total;
             }
             Log::debug('3か月total = '.$month_2before_total);
-            if ($month_3before_total > Config::get('const.C023.manthly_alert_warning_3')) {
+            $manthly_alert_warning_3_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            if ($month_3before_total > Config::get('const.C021.manthly_alert_error_3')) {
                 $manthly_alert_warning_3_chk = Config::get('const.ALERT_INFO_RESULT.NG');
+                $manthly_alert_warning_3_chk_time_array = $this->getDiffFormat($month_3before_total, Config::get('const.C021.manthly_alert_error_3'));
+                $user_alert_chk = false;
+            } elseif ($month_3before_total > Config::get('const.C023.manthly_alert_warning_3')) {
+                $manthly_alert_warning_3_chk = Config::get('const.ALERT_INFO_RESULT.WA');
+                $manthly_alert_warning_3_chk_time_array = $this->getDiffFormat($month_3before_total, Config::get('const.C021.manthly_alert_error_3'));
                 $user_alert_chk = false;
             }
             // 360時間/12か月チェック
@@ -203,8 +206,14 @@ class MonthlyWorkingAlertController extends Controller
                 $month_12before_total = $month_12before_total + $w_total;
             }
             Log::debug('12か月total = '.$month_2before_total);
-            if ($month_12before_total > Config::get('const.C023.manthly_alert_warning_4')) {
+            $manthly_alert_warning_12_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            if ($month_12before_total > Config::get('const.C021.manthly_alert_error_4')) {
                 $manthly_alert_warning_12_chk = Config::get('const.ALERT_INFO_RESULT.NG');
+                $manthly_alert_warning_12_chk_time_array = $this->getDiffFormat($month_12before_total, Config::get('const.C021.manthly_alert_error_4'));
+                $user_alert_chk = false;
+            } elseif ($month_12before_total > Config::get('const.C023.manthly_alert_warning_4')) {
+                $manthly_alert_warning_12_chk = Config::get('const.ALERT_INFO_RESULT.WA');
+                $manthly_alert_warning_12_chk_time_array = $this->getDiffFormat($month_12before_total, Config::get('const.C021.manthly_alert_error_4'));
                 $user_alert_chk = false;
             }
             // <特別条項>残業が45時間超えた月が合計6か月に対する警告
@@ -216,13 +225,25 @@ class MonthlyWorkingAlertController extends Controller
                 }
             }
             Log::debug('5時間超えた月が合計6か月 total = '.$month_45_total_cnt);
-            if ($month_45_total_cnt > Config::get('const.C023.manthly_alert_warning_5')) {
+            $month_alert_45_total_cnt_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            if ($month_45_total_cnt > Config::get('const.C021.manthly_alert_error_5')) {
                 $month_alert_45_total_cnt_chk = Config::get('const.ALERT_INFO_RESULT.NG');
+                $month_alert_45_total_cnt_chk_time_array = $this->getDiffFormat($month_45_total_cnt, Config::get('const.C021.manthly_alert_error_5'));
+                $user_alert_chk = false;
+            } elseif ($month_45_total_cnt > Config::get('const.C023.manthly_alert_warning_5')) {
+                $month_alert_45_total_cnt_chk = Config::get('const.ALERT_INFO_RESULT.WA');
+                $month_alert_45_total_cnt_chk_time_array = $this->getDiffFormat($month_45_total_cnt, Config::get('const.C021.manthly_alert_error_5'));
                 $user_alert_chk = false;
             }
             // <特別条項>残業が45時間超えた月が最大100時間を超えないに対する警告
-            if ($thisMonth_total > Config::get('const.C023.manthly_alert_warning_6')) {
+            $manthly_alert_warning_100_total_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            if ($thisMonth_total > Config::get('const.C021.manthly_alert_error_6')) {
                 $manthly_alert_warning_100_total_chk = Config::get('const.ALERT_INFO_RESULT.NG');
+                $manthly_alert_warning_100_total_chk_time_array = $this->getDiffFormat($thisMonth_total, Config::get('const.C021.manthly_alert_error_6'));
+                $user_alert_chk = false;
+            } elseif ($thisMonth_total > Config::get('const.C023.manthly_alert_warning_6')) {
+                $manthly_alert_warning_100_total_chk = Config::get('const.ALERT_INFO_RESULT.WA');
+                $manthly_alert_warning_100_total_chk_time_array = $this->getDiffFormat($thisMonth_total, Config::get('const.C021.manthly_alert_error_6'));
                 $user_alert_chk = false;
             }
             // <特別条項>2ヵ月ないし6か月平均で80時間以内に対する警告
@@ -274,29 +295,65 @@ class MonthlyWorkingAlertController extends Controller
             Log::debug('4か月 total ave = '.$month_4before_total.' '.$month_4before_ave);
             Log::debug('5か月 total ave = '.$month_5before_total.' '.$month_5before_ave);
             Log::debug('6か月 total ave = '.$month_6before_total.' '.$month_6before_ave);
-            if ($month_2before_ave > Config::get('const.C023.manthly_alert_warning_7')) {
+            $manthly_alert_ave_2_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            if ($month_2before_ave > Config::get('const.C021.manthly_alert_error_7')) {
                 $manthly_alert_ave_2_chk = Config::get('const.ALERT_INFO_RESULT.NG');
+                $manthly_alert_ave_2_chk_time_array = $this->getDiffFormat($month_2before_ave, Config::get('const.C021.manthly_alert_error_7'));
+                $user_alert_chk = false;
+            } elseif ($month_2before_ave > Config::get('const.C023.manthly_alert_warning_7')) {
+                $manthly_alert_ave_2_chk = Config::get('const.ALERT_INFO_RESULT.WA');
+                $manthly_alert_ave_2_chk_time_array = $this->getDiffFormat($month_2before_ave, Config::get('const.C021.manthly_alert_error_7'));
                 $user_alert_chk = false;
             }
-            if ($month_3before_ave > Config::get('const.C023.manthly_alert_warning_7')) {
+            $manthly_alert_ave_3_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            if ($month_3before_ave > Config::get('const.C021.manthly_alert_error_7')) {
                 $manthly_alert_ave_3_chk = Config::get('const.ALERT_INFO_RESULT.NG');
+                $manthly_alert_ave_3_chk_time_array = $this->getDiffFormat($month_3before_ave, Config::get('const.C021.manthly_alert_error_7'));
+                $user_alert_chk = false;
+            } elseif ($month_3before_ave > Config::get('const.C023.manthly_alert_warning_7')) {
+                $manthly_alert_ave_3_chk = Config::get('const.ALERT_INFO_RESULT.WA');
+                $manthly_alert_ave_3_chk_time_array = $this->getDiffFormat($month_3before_ave, Config::get('const.C021.manthly_alert_error_7'));
                 $user_alert_chk = false;
             }
-            if ($month_4before_ave > Config::get('const.C023.manthly_alert_warning_7')) {
+            $manthly_alert_ave_4_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            if ($month_4before_ave > Config::get('const.C021.manthly_alert_error_7')) {
                 $manthly_alert_ave_4_chk = Config::get('const.ALERT_INFO_RESULT.NG');
+                $manthly_alert_ave_4_chk_time_array = $this->getDiffFormat($month_4before_ave, Config::get('const.C021.manthly_alert_error_7'));
+                $user_alert_chk = false;
+            } elseif ($month_4before_ave > Config::get('const.C023.manthly_alert_warning_7')) {
+                $manthly_alert_ave_4_chk = Config::get('const.ALERT_INFO_RESULT.WA');
+                $manthly_alert_ave_4_chk_time_array = $this->getDiffFormat($month_4before_ave, Config::get('const.C021.manthly_alert_error_7'));
                 $user_alert_chk = false;
             }
-            if ($month_5before_ave > Config::get('const.C023.manthly_alert_warning_7')) {
+            $manthly_alert_ave_5_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            if ($month_5before_ave > Config::get('const.C021.manthly_alert_error_7')) {
                 $manthly_alert_ave_5_chk = Config::get('const.ALERT_INFO_RESULT.NG');
+                $manthly_alert_ave_5_chk_time_array = $this->getDiffFormat($month_5before_ave, Config::get('const.C021.manthly_alert_error_7'));
+                $user_alert_chk = false;
+            } elseif ($month_5before_ave > Config::get('const.C023.manthly_alert_warning_7')) {
+                $manthly_alert_ave_5_chk = Config::get('const.ALERT_INFO_RESULT.WA');
+                $manthly_alert_ave_5_chk_time_array = $this->getDiffFormat($month_5before_ave, Config::get('const.C021.manthly_alert_error_7'));
                 $user_alert_chk = false;
             }
-            if ($month_6before_ave > Config::get('const.C023.manthly_alert_warning_7')) {
+            $manthly_alert_ave_6_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            if ($month_6before_ave > Config::get('const.C021.manthly_alert_error_7')) {
                 $manthly_alert_ave_6_chk = Config::get('const.ALERT_INFO_RESULT.NG');
+                $manthly_alert_ave_6_chk_time_array = $this->getDiffFormat($month_6before_ave, Config::get('const.C021.manthly_alert_error_7'));
+                $user_alert_chk = false;
+            } elseif ($month_6before_ave > Config::get('const.C023.manthly_alert_warning_7')) {
+                $manthly_alert_ave_6_chk = Config::get('const.ALERT_INFO_RESULT.WA');
+                $manthly_alert_ave_6_chk_time_array = $this->getDiffFormat($month_6before_ave, Config::get('const.C021.manthly_alert_error_7'));
                 $user_alert_chk = false;
             }
             // <特別条項>720時間/年に対する警告
-            if ($month_12before_total > Config::get('const.C023.manthly_alert_warning_8')) {
+            $manthly_alert_warning_720_total_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            if ($month_12before_total > Config::get('const.C021.manthly_alert_error_8')) {
                 $manthly_alert_warning_720_total_chk = Config::get('const.ALERT_INFO_RESULT.NG');
+                $manthly_alert_warning_720_total_chk_time_array = $this->getDiffFormat($month_12before_total, Config::get('const.C021.manthly_alert_error_8'));
+                $user_alert_chk = false;
+            } elseif ($month_12before_total > Config::get('const.C023.manthly_alert_warning_8')) {
+                $manthly_alert_warning_720_total_chk = Config::get('const.ALERT_INFO_RESULT.WA');
+                $manthly_alert_warning_720_total_chk_time_array = $this->getDiffFormat($month_12before_total, Config::get('const.C021.manthly_alert_error_8'));
                 $user_alert_chk = false;
             }
             Log::debug('user_name = '.$monthly_alert->user_name);
@@ -313,58 +370,90 @@ class MonthlyWorkingAlertController extends Controller
             Log::debug('manthly_alert_ave_6_chk = '.$manthly_alert_ave_6_chk);
             Log::debug('manthly_alert_warning_720_total_chk = '.$manthly_alert_warning_720_total_chk);
             $working_time_values[] = array(
-                'department_name' => $monthly_alert->department_name,
                 'employment_status_name' => $monthly_alert->employment_status_name,
-                'user_name' => $monthly_alert->user_name,
-                'total_working_times_1' => $monthly_alert->total_working_times_1,
-                'total_working_times_2' => $monthly_alert->total_working_times_2,
-                'total_working_times_3' => $monthly_alert->total_working_times_3,
-                'total_working_times_4' => $monthly_alert->total_working_times_4,
-                'total_working_times_5' => $monthly_alert->total_working_times_5,
-                'total_working_times_6' => $monthly_alert->total_working_times_6,
-                'total_working_times_7' => $monthly_alert->total_working_times_7,
-                'total_working_times_8' => $monthly_alert->total_working_times_8,
-                'total_working_times_9' => $monthly_alert->total_working_times_9,
-                'total_working_times_10' => $monthly_alert->total_working_times_10,
-                'total_working_times_11' => $monthly_alert->total_working_times_11,
-                'total_working_times_12' => $monthly_alert->total_working_times_12
+                'total_working_times_1' => number_format($monthly_alert->total_working_times_1, 2, '.', ''),
+                'total_working_times_2' => number_format($monthly_alert->total_working_times_2, 2, '.', ''),
+                'total_working_times_3' => number_format($monthly_alert->total_working_times_3, 2, '.', ''),
+                'total_working_times_4' => number_format($monthly_alert->total_working_times_4, 2, '.', ''),
+                'total_working_times_5' => number_format($monthly_alert->total_working_times_5, 2, '.', ''),
+                'total_working_times_6' => number_format($monthly_alert->total_working_times_6, 2, '.', ''),
+                'total_working_times_7' => number_format($monthly_alert->total_working_times_7, 2, '.', ''),
+                'total_working_times_8' => number_format($monthly_alert->total_working_times_8, 2, '.', ''),
+                'total_working_times_9' => number_format($monthly_alert->total_working_times_9, 2, '.', ''),
+                'total_working_times_10' => number_format($monthly_alert->total_working_times_10, 2, '.', ''),
+                'total_working_times_11' => number_format($monthly_alert->total_working_times_11, 2, '.', ''),
+                'total_working_times_12' => number_format($monthly_alert->total_working_times_12, 2, '.', '')
             );
             $working_warning_items[] = array(
-                'department_name' => '　',
-                'employment_status_name' => '　',
-                'user_name' => '　',
-                'total_working_times_1' => Config::get('const.ALERT_MONTHLY_ITEM.items_1'),
-                'total_working_times_2' => Config::get('const.ALERT_MONTHLY_ITEM.items_2'),
-                'total_working_times_3' => Config::get('const.ALERT_MONTHLY_ITEM.items_3'),
-                'total_working_times_4' => Config::get('const.ALERT_MONTHLY_ITEM.items_4'),
-                'total_working_times_5' => Config::get('const.ALERT_MONTHLY_ITEM.items_5'),
-                'total_working_times_6' => Config::get('const.ALERT_MONTHLY_ITEM.items_6'),
-                'total_working_times_7' => Config::get('const.ALERT_MONTHLY_ITEM.items_7'),
-                'total_working_times_8' => Config::get('const.ALERT_MONTHLY_ITEM.items_8'),
-                'total_working_times_9' => Config::get('const.ALERT_MONTHLY_ITEM.items_9'),
-                'total_working_times_10' => Config::get('const.ALERT_MONTHLY_ITEM.items_10'),
-                'total_working_times_11' => Config::get('const.ALERT_MONTHLY_ITEM.items_11'),
-                'total_working_times_12' => Config::get('const.ALERT_MONTHLY_ITEM.items_12'),
-                'manthly_alert_warning_1_chk' => $manthly_alert_warning_1_chk,
-                'manthly_alert_warning_2_chk' => $manthly_alert_warning_2_chk,
-                'manthly_alert_warning_3_chk' => $manthly_alert_warning_3_chk,
-                'manthly_alert_warning_12_chk' => $manthly_alert_warning_12_chk,
-                'month_alert_45_total_cnt_chk' => $month_alert_45_total_cnt_chk,
-                'manthly_alert_warning_100_total_chk' => $manthly_alert_warning_100_total_chk,
-                'manthly_alert_ave_2_chk' => $manthly_alert_ave_2_chk,
-                'manthly_alert_ave_3_chk' => $manthly_alert_ave_3_chk,
-                'manthly_alert_ave_4_chk' => $manthly_alert_ave_4_chk,
-                'manthly_alert_ave_5_chk' => $manthly_alert_ave_5_chk,
-                'manthly_alert_ave_6_chk' => $manthly_alert_ave_6_chk,
-                'manthly_alert_warning_720_total_chk' => $manthly_alert_warning_720_total_chk,
+                'manthly_alert_warning_1_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_1'),
+                'manthly_alert_warning_2_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_2'),
+                'manthly_alert_warning_3_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_3'),
+                'manthly_alert_warning_12_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_4'),
+                'month_alert_45_total_cnt_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_5'),
+                'manthly_alert_warning_100_total_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_6'),
+                'manthly_alert_ave_2_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_7'),
+                'manthly_alert_ave_3_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_8'),
+                'manthly_alert_ave_4_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_9'),
+                'manthly_alert_ave_5_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_10'),
+                'manthly_alert_ave_6_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_11'),
+                'manthly_alert_warning_720_total_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_12'),
+                'manthly_alert_warning_1_chk_value' => $manthly_alert_warning_1_chk,
+                'manthly_alert_warning_2_chk_value' => $manthly_alert_warning_2_chk,
+                'manthly_alert_warning_3_chk_value' => $manthly_alert_warning_3_chk,
+                'manthly_alert_warning_12_chk_value' => $manthly_alert_warning_12_chk,
+                'month_alert_45_total_cnt_chk_value' => $month_alert_45_total_cnt_chk,
+                'manthly_alert_warning_100_total_chk_value' => $manthly_alert_warning_100_total_chk,
+                'manthly_alert_ave_2_chk_value' => $manthly_alert_ave_2_chk,
+                'manthly_alert_ave_3_chk_value' => $manthly_alert_ave_3_chk,
+                'manthly_alert_ave_4_chk_value' => $manthly_alert_ave_4_chk,
+                'manthly_alert_ave_5_chk_value' => $manthly_alert_ave_5_chk,
+                'manthly_alert_ave_6_chk_value' => $manthly_alert_ave_6_chk,
+                'manthly_alert_warning_720_total_chk_value' => $manthly_alert_warning_720_total_chk,
+                'manthly_alert_warning_1_chk_time_array' => $manthly_alert_warning_1_chk_time_array,
+                'manthly_alert_warning_2_chk_time_array' => $manthly_alert_warning_2_chk_time_array,
+                'manthly_alert_warning_3_chk_time_array' => $manthly_alert_warning_3_chk_time_array,
+                'manthly_alert_warning_12_chk_time_array' => $manthly_alert_warning_12_chk_time_array,
+                'month_alert_45_total_cnt_chk_time_array' => $month_alert_45_total_cnt_chk_time_array,
+                'manthly_alert_warning_100_total_chk_time_array' => $manthly_alert_warning_100_total_chk_time_array,
+                'manthly_alert_ave_2_chk_time_array' => $manthly_alert_ave_2_chk_time_array,
+                'manthly_alert_ave_3_chk_time_array' => $manthly_alert_ave_3_chk_time_array,
+                'manthly_alert_ave_4_chk_time_array' => $manthly_alert_ave_4_chk_time_array,
+                'manthly_alert_ave_5_chk_time_array' => $manthly_alert_ave_5_chk_time_array,
+                'manthly_alert_ave_6_chk_time_array' => $manthly_alert_ave_6_chk_time_array,
+                'manthly_alert_warning_720_total_chk_time_array' => $manthly_alert_warning_720_total_chk_time_array,
                 'user_alert_chk' => $user_alert_chk
             );
+
+            // department_name,user_name,user_codeはhtmlテーブル外で表示するので値を設定
+            // employment_status_nameはhtmlテーブルで表示するので項目名を設定、値はworking_time_values
+            if (!$user_alert_chk) {
+                $working_time_items[] = array(
+                    'department_name' => $monthly_alert->department_name,
+                    'user_name' => $monthly_alert->user_name,
+                    'user_code' => $monthly_alert->user_code,
+                    'employment_status_name' => '勤務形態',
+                    'working_date_1' => $working_date_1,
+                    'working_date_2' => $working_date_2,
+                    'working_date_3' => $working_date_3,
+                    'working_date_4' => $working_date_4,
+                    'working_date_5' => $working_date_5,
+                    'working_date_6' => $working_date_6,
+                    'working_date_7' => $working_date_7,
+                    'working_date_8' => $working_date_8,
+                    'working_date_9' => $working_date_9,
+                    'working_date_10' => $working_date_10,
+                    'working_date_11' => $working_date_11,
+                    'working_date_12' => $working_date_12,
+                    'timevalues' => $working_time_values,
+                    'warningitems' => $working_warning_items
+                );
+            }
         }
 
+        $alert_result = true;
         return response()->json([
+            'alert_result' => $alert_result,
             'timeitems' => $working_time_items,
-            'timevalues' => $working_time_values,
-            'warningitems' => $working_warning_items,
             Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
             ]);
     }
@@ -399,6 +488,23 @@ class MonthlyWorkingAlertController extends Controller
             return $monthly_alert->total_working_times_11;
         } elseif ($itemIndex == 11) {
             return $monthly_alert->total_working_times_12;
+        }
+    }
+
+    /**
+     * 月次アラート時間差分format 
+     *
+     * @return void
+     */
+    public function getDiffFormat($target_time, $basic_time){
+        $diff_time = $basic_time - $target_time;
+        if ($target_time > $basic_time) {
+            $diff_time = $target_time - $basic_time;
+            return array('基準値を', number_format($diff_time, 2, '.', '').'時間', 'オーバー');
+        } elseif ($target_time == $basic_time) {
+            return array('基準値到達');
+        } else {
+            return array('基準値', '到達まで', number_format($diff_time, 2, '.', '').'時間');
         }
     }
 

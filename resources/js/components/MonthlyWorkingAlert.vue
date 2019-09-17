@@ -8,8 +8,8 @@
           <!-- panel header -->
           <div class="card-header bg-transparent pb-0 border-0">
             <daily-working-information-panel-header
-              v-bind:headertext1="'期首月または１月（検索区分）から指定年月の間でアラートを表示'"
-              v-bind:headertext2="'雇用形態や所属部署でフィルタリングして表示できます'"
+              v-bind:header-text1="'期首月または１月（検索区分）から指定年月の間でアラートを表示'"
+              v-bind:header-text2="'雇用形態や所属部署でフィルタリングして表示できます'"
             ></daily-working-information-panel-header>
           </div>
           <!-- /.panel header -->
@@ -120,8 +120,8 @@
           <!-- panel header -->
           <div class="card-header bg-transparent pt-3 border-0 print-none">
             <daily-working-information-panel-header
-              v-bind:headertext1="stringtext"
-              v-bind:headertext2="''"
+              v-bind:header-text1="stringtext"
+              v-bind:header-text2="'各月の時間は残業時間合計（深夜含む）です'"
             ></daily-working-information-panel-header>
           </div>
           <!-- /.panel header -->
@@ -142,11 +142,42 @@
           </div>
           <!-- /panel body -->
           <!-- panel body -->
-          <monthly-working-alert-table
-            v-bind:time-items="timeitems"
-            v-bind:time-values="timevalues"
-            v-bind:warning-items="warningitems"
-          ></monthly-working-alert-table>
+          <!-- panel contents -->
+          <!-- .row -->
+          <div
+            v-for="(timeitem,index) in timeitems"
+            :key="timeitem.user_code"
+            class="col-12 p-0"
+          >
+            <div class="row">
+              <!-- col -->
+              <div class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">
+                <a
+                  class="float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg print-none"
+                  data-toggle="collapse"
+                  v-bind:href="'#collapseUser' + index"
+                  role="button"
+                  aria-expanded="true"
+                  v-bind:aria-controls="'collapseUser' + index"
+                >
+                  <img class="icon-size-rg" src="/images/round-search-w.svg" alt />
+                </a>
+                <h1 class="font-size-sm m-0 mb-1">氏名</h1>
+                <p class="font-size-rg font-weight-bold m-0">{{ timeitem.user_name }}</p>
+              </div>
+              <!-- /.col -->
+              <!-- col -->
+              <div class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">
+                <h1 class="font-size-sm m-0 mb-1 text-sm-right">所属部署</h1>
+                <p class="font-size-rg m-0 text-sm-right">{{ timeitem.department_name }}</p>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <monthly-working-alert-table
+              v-bind:time-items="timeitem"
+            ></monthly-working-alert-table>
+          </div>
         </div>
         <!-- /panel -->
       </div>
@@ -310,20 +341,15 @@ export default {
           })
           .then(response => {
             this.resresults = response.data;
-            if (this.resresults.timeitems != null) {
-              this.timeitems = this.resresults.timeitems;
-            }
-            if (this.resresults.timevalues != null) {
-              this.timevalues = this.resresults.timevalues;
-            }
-            if (this.resresults.warningitems != null) {
-              this.warningitems = this.resresults.warningitems;
+            if (this.resresults.alert_result == true) {
+              if (this.resresults.timeitems != null) {
+                this.timeitems = this.resresults.timeitems;
+              }
             }
             if (this.resresults.messagedata != null) {
               this.messagedatasserver = this.resresults.messagedata;
             }
             console.log("timeitems" + Object.keys(this.timeitems).length);
-            console.log("timevalues" + Object.keys(this.timevalues).length);
             console.log("messagedatasserver" + Object.keys(this.messagedatasserver).length);
             this.$forceUpdate();
           })
@@ -405,16 +431,16 @@ export default {
           }
           this.datejaFormat = moment(this.valuefromdate).format("YYYY年MM月");
           if (this.valuedisplay == "1") {
-            this.stringtext = "月次アラート " + this.datejaFormat + "を〆日でアラート検索";
+            this.stringtext = this.datejaFormat + "のアラートを締日集計で検索";
           } else {
             if (this.valuedisplay == "2") {
-              this.stringtext = "月次アラート " + this.datejaFormat + "1日からアラート検索";
+              this.stringtext = this.datejaFormat + "のアラートを月初集計で検索";
             } else {
               if (this.valuedisplay == "3") {
-                this.stringtext = "月次アラート " + this.datejaFormat + "を〆日でアラート検索";
+                this.stringtext = this.datejaFormat + "のアラートを締日集計で検索";
               } else {
                 if (this.valuedisplay == "4") {
-                  this.stringtext = "月次アラート " + this.datejaFormat + "1日からアラート検索";
+                  this.stringtext = this.datejaFormat + "のアラートを月初集計で検索";
                 } else {
                   this.stringtext = "";
                 }
