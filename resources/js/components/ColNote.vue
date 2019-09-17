@@ -1,11 +1,33 @@
 <template>
   <!-- col -->
   <div class="col-12 pb-2 align-self-stretch">
-    <div class="card text-danger border border-danger">
-      <div class="card-body px-3 py-2">
-        <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-error-b.svg" alt=""></span>
-        <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>
-        <p class="font-size-sm my-2">{{ this.itemValue }}</p>
+    <!-- <div v-if="this.itemControl === 'OK'">
+      <div class="card text-success border border-success">
+        <div class="card-body px-3 py-2">
+          <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-error-b.svg" alt=""></span>
+          <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>
+          <p v-for="value in itemNote" class="font-size-sm my-2">{{ value }}</p>
+        </div>
+      </div>
+    </div> -->
+    <div v-if="this.itemControl === 'WA'">
+    <!-- <div v-else-if="this.itemControl === 'WA'"> -->
+      <div class="card text-warning border border-warning">
+        <div class="card-body px-3 py-2">
+          <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-error-b.svg" alt=""></span>
+          <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>
+          <p v-for="value in itemNote" class="font-size-sm my-2">{{ value }}</p>
+        </div>
+      </div>
+    </div>
+    <div v-if="this.itemControl === 'NG'">
+    <!-- <div v-else> -->
+      <div class="card text-danger border border-danger">
+        <div class="card-body px-3 py-2">
+          <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-error-b.svg" alt=""></span>
+          <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>
+          <p v-for="value in itemNote" class="font-size-sm my-2">{{ value }}</p>
+        </div>
       </div>
     </div>
   </div>
@@ -20,47 +42,18 @@ export default {
         type: String,
         default: null
     },
+    itemControl: {
+        type: String,
+        default: null
+    },
     itemNote: {
-        type: String,
-        default: null
-    },
-    itemLate: {
-        type: String,
-        default: null
-    },
-    itemLeaveearly: {
-        type: String,
-        default: null
+        type: Array
     }
   },
   data() {
     return {
       itemValue:''
     };
-  },
-  // マウント時
-  mounted() {
-    this.edtNote();
-  },
-  methods: {
-    edtNote(){
-      this.itemValue = '';
-      if(this.itemNote != null && this.itemNote != ''){
-        this.itemValue = this.itemNote;
-      }
-      if(this.itemLate == '1'){
-        if(this.itemValue != ''){
-          this.itemValue += '、';
-        }
-        this.itemValue += '遅刻';
-      }
-      if(this.itemLeaveearly == '1'){
-        if(this.itemValue != ''){
-          this.itemValue += '、';
-        }
-        this.itemValue += '早退';
-      }
-    }
   }
 };
 </script>

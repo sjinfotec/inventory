@@ -7,8 +7,8 @@
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:headertext1="'日付を指定して集計を表示する'"
-            v-bind:headertext2="'雇用形態や所属部署でフィルタリングして表示できます'"
+            v-bind:header-text1="'日付を指定して集計を表示する'"
+            v-bind:header-text2="'雇用形態や所属部署でフィルタリングして表示できます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="card-body pt-2">
@@ -122,8 +122,8 @@
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:headertext1="stringtext"
-            v-bind:headertext2="''"
+            v-bind:header-text1="stringtext"
+            v-bind:header-text2="''"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <!-- panel body -->
@@ -146,8 +146,8 @@
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:headertext1="'合計'"
-            v-bind:headertext2="'集計日の合計が表示されます'"
+            v-bind:header-text1="'合計'"
+            v-bind:header-text2="'集計日の合計が表示されます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="card-body pt-2">

@@ -7,8 +7,8 @@
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:headertext1="'指定日付から過去１週間以内の警告を表示（確認して勤怠編集で修正入力します）'"
-            v-bind:headertext2="'雇用形態や所属部署でフィルタリングして表示できます'"
+            v-bind:header-text1="'指定日付から過去１週間以内の警告を表示（確認して勤怠編集で修正入力します）'"
+            v-bind:header-text2="'雇用形態や所属部署でフィルタリングして表示できます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="card-body pt-2">
