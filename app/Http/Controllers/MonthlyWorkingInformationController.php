@@ -142,7 +142,7 @@ class MonthlyWorkingInformationController extends Controller
      */
     public function calc(Request $request)
     {
-        Log::debug('monthly calc in');
+        Log::debug('--------------- 最新更新集計 開始 monthly calc in --------------------');
 
         $calc_result = true;
         $working_time_dates = array();

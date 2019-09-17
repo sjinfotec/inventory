@@ -293,7 +293,7 @@ class DailyWorkingInformationController extends Controller
                         $temp_array = array();
                         foreach($temp_working_time_dates as $working_time_date) {
                             $temp_collect = collect($working_time_date);
-                            $temp_array[] = $temp_collect->toArray();
+                            $temp_array[] = array($temp_collect->toArray(), 'created_at' => new Carbon());
                         } 
                         $working_model->insertWorkingTimeDateFromTemp($temp_array);
                         DB::commit();
@@ -354,6 +354,11 @@ class DailyWorkingInformationController extends Controller
         $before_department_code = null;
         $before_result = null;
         $target_date_ymd = date_format(new Carbon($target_date), 'Ymd');
+        // ユーザー休暇区分判定用
+        $before_holiday_date = null;
+        $before_holiday_user_code = null;
+        $before_holiday_department_code = null;
+        $before_holiday_kubun = null;
         // 打刻データ配列の初期化
         $this->iniArrayWorkingTime();
         $add_results = true;
@@ -396,6 +401,11 @@ class DailyWorkingInformationController extends Controller
                         $target_flg = false;
                     }       // 上記以外は$target_flgの内容を継続する
                     if ($target_flg == true) {
+                        // ユーザー休暇区分判定用
+                        $before_holiday_date = null;
+                        $before_holiday_user_code = null;
+                        $before_holiday_department_code = null;
+                        $before_holiday_kubun = null;
                         Log::DEBUG('    当日計算対象データ');
                         // 同じキーの場合
                         if ($current_date == $before_date &&
@@ -551,16 +561,27 @@ class DailyWorkingInformationController extends Controller
                                 if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
                                 if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
                                 if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
-                                $dt = date_format(new Carbon($target_date), 'Ymd');
-                                Log::DEBUG('            ターゲット日付 = '.$dt);
-                                Log::DEBUG('            ユーザー休暇   = '.$user_holiday_name);
-                                Log::DEBUG('            　　　　日付   = '.$user_working_date);
-                                $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date));
-                                // temporaryに登録する
-                                Log::DEBUG('    temp_calc_workingtimesの登録開始');
-                                Log::DEBUG('        現ユーザー = '.$current_user_code.' record_time = '.$result->record_datetime);
-                                $this->insTempCalcItem($target_date, $result);
-                                Log::DEBUG('    temp_calc_workingtimesの登録終了');
+                                if ($before_holiday_department_code != $result->department_code ||
+                                    $before_holiday_user_code != $result->user_code ||
+                                    $before_holiday_date != $result->user_working_date ||
+                                    $before_holiday_kubun != $user_holiday_kubun) {
+                                    Log::DEBUG('    temp_calc_workingtimesの登録開始');
+                                    $dt = date_format(new Carbon($target_date), 'Ymd');
+                                    Log::DEBUG('            ターゲット日付 = '.$dt);
+                                    Log::DEBUG('            ユーザー休暇   = '.$user_holiday_name);
+                                    Log::DEBUG('            　　　　日付   = '.$user_working_date);
+                                    $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date));
+                                    // temporaryに登録する
+                                    Log::DEBUG('    temp_calc_workingtimesの登録開始');
+                                    Log::DEBUG('        現ユーザー = '.$current_user_code.' record_time = '.$result->record_datetime);
+                                    $this->insTempCalcItem($target_date, $result);
+                                    Log::DEBUG('    temp_calc_workingtimesの登録終了');
+                                }
+                                // 日付とユーザー休暇区分を保存
+                                $before_holiday_date = $result->user_working_date;
+                                $before_holiday_user_code = $result->user_code;
+                                $before_holiday_department_code = $result->department_code;
+                                $before_holiday_kubun = $user_holiday_kubun;
                             }catch(\PDOException $pe){
                                 $add_results = false;
                                 throw $pe;
@@ -620,14 +641,25 @@ class DailyWorkingInformationController extends Controller
                         if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
                         if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
                         if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
-                        $dt = date_format(new Carbon($target_date), 'Ymd');
-                        Log::DEBUG('            ターゲット日付 = '.$target_date);
-                        Log::DEBUG('            ユーザー休暇  ='.$user_holiday_name);
-                        Log::DEBUG('        　　　　    日付  = '.$user_working_date);
-                        $ptn = $chk_setting;
-                        $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date));
-                        $this->insTempCalcItem($result->record_date, $result);
-                        Log::DEBUG('    temp_calc_workingtimesの登録終了');
+                        if ($before_holiday_department_code != $result->department_code ||
+                            $before_holiday_user_code != $result->user_code ||
+                            $before_holiday_date != $result->user_working_date ||
+                            $before_holiday_kubun != $user_holiday_kubun) {
+                            Log::DEBUG('    temp_calc_workingtimesの登録開始');
+                            $dt = date_format(new Carbon($target_date), 'Ymd');
+                            Log::DEBUG('            ターゲット日付 = '.$target_date);
+                            Log::DEBUG('            ユーザー休暇  ='.$user_holiday_name);
+                            Log::DEBUG('        　　　　    日付  = '.$user_working_date);
+                            $ptn = $chk_setting;
+                            $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date));
+                            $this->insTempCalcItem($result->record_date, $result);
+                            Log::DEBUG('    temp_calc_workingtimesの登録終了');
+                        }
+                        // 日付とユーザー休暇区分を保存
+                        $before_holiday_date = $result->user_working_date;
+                        $before_holiday_user_code = $result->user_code;
+                        $before_holiday_department_code = $result->department_code;
+                        $before_holiday_kubun = $user_holiday_kubun;
                     }catch(\PDOException $pe){
                         $add_results = false;
                         throw $pe;
@@ -639,7 +671,7 @@ class DailyWorkingInformationController extends Controller
                     $this->iniArrayCalc();
                 }
             } else {
-                Log::DEBUG('        打刻データなし = '.$target_date.' dapartment = '.$result->department_code.' user = '.$result->user_code);
+                Log::DEBUG('        打刻データなし ');
                 // 前のデータが打刻ありであれば計算する
                 $user_holiday_kubun = null;
                 $user_holiday_name = null;
@@ -673,25 +705,36 @@ class DailyWorkingInformationController extends Controller
                     }
                 }
                 // 打刻ないデータはtempに出力
-                Log::DEBUG('    temp_calc_workingtimesの登録開始');
+                // ただし、日付とユーザー休暇区分が１件前と同じ場合は出力しない
                 Log::DEBUG('        打刻ないデータ = '.$result->user_code.' record_time = '.$result->record_datetime);
                 try{
-                    $ptn = 0;
                     if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
                     if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
                     if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
-                    $dt = date_format(new Carbon($target_date), 'Ymd');
-                    Log::DEBUG('            ターゲット日付 = '.$dt);
-                    Log::DEBUG('            ユーザー休暇  = '.$user_holiday_name);
-                    Log::DEBUG('            　　　　日付  = '.$user_working_date);
-                    $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date));
-                    // temporaryに登録する
-                    $this->insTempCalcItem($target_date, $result);
+                    if ($before_holiday_department_code != $result->department_code ||
+                        $before_holiday_user_code != $result->user_code ||
+                        $before_holiday_date != $result->user_working_date ||
+                        $before_holiday_kubun != $user_holiday_kubun) {
+                        Log::DEBUG('    temp_calc_workingtimesの登録開始');
+                        $ptn = 0;
+                        $dt = date_format(new Carbon($target_date), 'Ymd');
+                        Log::DEBUG('            ターゲット日付 = '.$dt);
+                        Log::DEBUG('            ユーザー休暇  = '.$user_holiday_name);
+                        Log::DEBUG('            　　　　日付  = '.$user_working_date);
+                        $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date));
+                        // temporaryに登録する
+                        $this->insTempCalcItem($target_date, $result);
+                        Log::DEBUG('    temp_calc_workingtimesの登録終了');
+                    }
+                    // 日付とユーザー休暇区分を保存
+                    $before_holiday_date = $result->user_working_date;
+                    $before_holiday_user_code = $result->user_code;
+                    $before_holiday_department_code = $result->department_code;
+                    $before_holiday_kubun = $user_holiday_kubun;
                 }catch(\PDOException $pe){
                     $add_results = false;
                     throw $pe;
                 }
-                Log::DEBUG('    temp_calc_workingtimesの登録終了');
                 // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
                 $before_date = null;
                 $before_user_code = null;
