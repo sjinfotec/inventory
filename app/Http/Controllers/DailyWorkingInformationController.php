@@ -3532,19 +3532,9 @@ class DailyWorkingInformationController extends Controller
                     }
                     // １個前のユーザーが休暇設定されていた場合はすでに登録済み
                     Log::DEBUG('        before_holiday_set = '.$before_holiday_set);
-                    Log::DEBUG('        before_holiday_department_code = '.$before_holiday_department_code);
-                    Log::DEBUG('        result->department_code = '.$result->department_code);
-                    Log::DEBUG('        before_holiday_user_code = '.$before_holiday_user_code);
-                    Log::DEBUG('        result->user_code = '.$result->user_code);
-                    Log::DEBUG('        before_holiday_date = '.$before_holiday_date);
-                    Log::DEBUG('        result->working_date = '.$result->working_date);
                     Log::DEBUG('        before_holiday_kubun = '.$before_holiday_kubun);
-                    Log::DEBUG('        user_holiday_kubun = '.$result->holiday_kubun);
-                    if ($before_holiday_set == false &&
-                        ($before_holiday_department_code != $result->department_code ||
-                        $before_holiday_user_code != $result->user_code ||
-                        $before_holiday_date != $result->working_date ||
-                        $before_holiday_kubun != $result->user_holiday_kubun)) {
+                    Log::DEBUG('        result->holiday_kubun = '.$result->holiday_kubun);
+                    if ($before_holiday_set == false) {
                         Log::DEBUG('        temp_working_time_datesデータ作成開始 ');
                         Log::DEBUG('            １個前のユーザーを登録 '.$before_user_code);
                         // ユーザー労働時間登録(１個前のユーザーを登録する)
@@ -3564,9 +3554,9 @@ class DailyWorkingInformationController extends Controller
                             $array_add_missing_middle_return_time,
                             $array_add_public_going_out_time,
                             $array_add_public_going_out_return_time);
-                        $before_holiday_set = false;
                         Log::DEBUG('        temp_working_time_datesデータ作成終了 ');
                     }
+                    $before_holiday_set = false;
                     // 日付とユーザー休暇区分を保存
                     $before_holiday_date = $current_date;
                     $before_holiday_user_code = $current_user_code;
@@ -3755,11 +3745,7 @@ class DailyWorkingInformationController extends Controller
                         $to_be_confirmed = $array_notelateetc[3];
                     }
                     // １個前のユーザーが休暇設定されていた場合はすでに登録済み
-                    if ($before_holiday_set == false &&
-                        ($before_holiday_department_code != $result->department_code ||
-                        $before_holiday_user_code != $result->user_code ||
-                        $before_holiday_date != $result->working_date ||
-                        $before_holiday_kubun != $result->holiday_kubun)) {
+                    if ($before_holiday_set == false) {
                         // ユーザー労働時間登録(１個前のユーザーを登録する)
                         Log::DEBUG('        temp_working_time_datesデータ作成開始 ');
                         Log::DEBUG('            １個前のユーザーを登録 '.$before_user_code);
@@ -3781,6 +3767,7 @@ class DailyWorkingInformationController extends Controller
                             $array_add_public_going_out_return_time);
                         Log::DEBUG('        temp_working_time_datesデータ作成終了 ');
                     }
+                    $before_holiday_set = false;
                     // 日付とユーザー休暇区分を保存
                     $before_holiday_date = $current_date;
                     $before_holiday_user_code = $current_user_code;
@@ -3966,11 +3953,7 @@ class DailyWorkingInformationController extends Controller
                         $to_be_confirmed = $array_notelateetc[3];
                     }
                     // １個前のユーザーが休暇設定されていた場合はすでに登録済み
-                    if ($before_holiday_set == false &&
-                        ($before_holiday_department_code != $result->department_code ||
-                        $before_holiday_user_code != $result->user_code ||
-                        $before_holiday_date != $result->working_date ||
-                        $before_holiday_kubun != $result->holiday_kubun)) {
+                    if ($before_holiday_set == false) {
                         // ユーザー労働時間登録(１個前のユーザーを登録する)
                         Log::DEBUG('        temp_working_time_datesデータ作成開始 ');
                         Log::DEBUG('            １個前のユーザーを登録 '.$before_user_code);
@@ -3992,6 +3975,7 @@ class DailyWorkingInformationController extends Controller
                             $array_add_public_going_out_return_time);
                         Log::DEBUG('        temp_working_time_datesデータ作成終了 ');
                     }
+                    $before_holiday_set = false;
                     // 日付とユーザー休暇区分を保存
                     $before_holiday_date = $current_date;
                     $before_holiday_user_code = $current_user_code;
