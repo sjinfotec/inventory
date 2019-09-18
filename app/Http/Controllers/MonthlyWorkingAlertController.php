@@ -54,8 +54,9 @@ class MonthlyWorkingAlertController extends Controller
         $workingtimedate_model = new WorkingTimedate();
         // 日付開始終了の作成
         $workingtimedate_model->setArrayParamdatefromAttribute($datefrom, $displaykbn);
-        $array_messagedata = array( Config::get('const.RESPONCE_ITEM.message') => $workingtimedate_model->getMassegedataAttribute());
-        if (count($array_messagedata) > 0) {
+        $array_local_msg = $workingtimedate_model->getMassegedataAttribute();
+        if (count($array_local_msg) > 0) {
+            $array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => $array_local_msg);
             return response()->json([
                 'alert_result' => $alert_result,
                 'timeitems' => $working_time_items,
