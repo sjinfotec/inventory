@@ -1011,7 +1011,9 @@ class WorkTime extends Model
         \DB::enableQueryLog();
         $subquery1 = DB::table($this->table)
             ->selectRaw(
-                'concat(DATE_FORMAT('.$this->table.".record_time,'%Y年%m月%d日'),'(',substring('月火水木金土日',convert(DATE_FORMAT(".$this->table.".record_time,'%w'),char),1),')') as record_date ");
+                'DATE_FORMAT('.$this->table.".record_time, '%Y%m%d') as record_date ")
+            ->selectRaw(
+                'concat(DATE_FORMAT('.$this->table.".record_time,'%Y年%m月%d日'),'(',substring('月火水木金土日',convert(DATE_FORMAT(".$this->table.".record_time,'%w'),char),1),')') as record_date_name ");
         $subquery1
             ->addselect($this->table.'.user_code as user_code')
             ->addselect($this->table.'.department_code as department_code')
@@ -1045,40 +1047,26 @@ class WorkTime extends Model
                 't1.department_code as department_code',
                 't3.name as department_name',
                 't2.record_date as record_date',
+                't2.record_date_name as record_date_name',
                 't2.record_time as record_time',
                 't2.mode as mode',
                 't6.code_name as mode_name',
                 't2.check_result as check_result',
                 't2.check_max_time as check_max_time',
-                't2.check_interval as check_interval',
-                't9.note as note');
+                't2.check_interval as unused_check_interval',
+                't9.check_interval as check_interval',
+                't10.code_name as check_interval_name');
         $alert_memo = '';
         $alert_memo .= "case t7.code_name is null ";
         $alert_memo .= "  when 1 then ";
         $alert_memo .= "    case t8.code_name is null ";
-        $alert_memo .= "      when 1 then ";
-        $alert_memo .= "        case t10.code_name is null ";
-        $alert_memo .= "          when 1 then null ";
-        $alert_memo .= "          else t10.code_name ";
-        $alert_memo .= "        end ";
-        $alert_memo .= "      else ";
-        $alert_memo .= "        case t10.code_name is null ";
-        $alert_memo .= "          when 1 then t8.code_name ";
-        $alert_memo .= "          else t8.code_name || ' ' || t10.code_name ";
-        $alert_memo .= "        end ";
+        $alert_memo .= "      when 1 then '' ";
+        $alert_memo .= "      else t8.code_name ";
         $alert_memo .= "    end ";
         $alert_memo .= "  else ";
         $alert_memo .= "    case t8.code_name is null ";
-        $alert_memo .= "      when 1 then ";
-        $alert_memo .= "        case t10.code_name is null ";
-        $alert_memo .= "          when 1 then t7.code_name ";
-        $alert_memo .= "          else t7.code_name || ' ' || t10.code_name ";
-        $alert_memo .= "        end ";
-        $alert_memo .= "      else ";
-        $alert_memo .= "        case t10.code_name is null ";
-        $alert_memo .= "          when 1 then t7.code_name || ' ' || t8.code_name ";
-        $alert_memo .= "          else t7.code_name  || ' ' || t8.code_name  || ' ' || t10.code_name ";
-        $alert_memo .= "        end ";
+        $alert_memo .= "      when 1 then t7.code_name ";
+        $alert_memo .= "      else t7.code_name || ' ' || t8.code_name ";
         $alert_memo .= "    end ";
         $alert_memo .= "end as alert_memo";
         $mainquery
@@ -1113,17 +1101,17 @@ class WorkTime extends Model
                 ->where('t8.identification_id', '=', Config::get('const.C018.value'))
                 ->where('t8.is_deleted', '=', 0);
             })
-            ->leftJoin('generalcodes as t10', function ($join) { 
-                $join->on('t10.code', '=', 't2.check_interval')
-                ->where('t10.identification_id', '=', Config::get('const.C018.value'))
-                ->where('t10.is_deleted', '=', 0);
-            })
             ->leftJoin($this->table_working_time_dates.' as t9', function ($join) { 
                 $join->on('t9.working_date', '=', 't2.record_date');
                 $join->on('t9.employment_status', '=', 't1.employment_status');
                 $join->on('t9.user_code', '=', 't1.code');
                 $join->on('t9.department_code', '=', 't1.department_code')
                 ->where('t9.is_deleted', '=', 0);
+            })
+            ->leftJoin('generalcodes as t10', function ($join) { 
+                $join->on('t10.code', '=', 't9.check_interval')
+                ->where('t10.identification_id', '=', Config::get('const.C018.value'))
+                ->where('t10.is_deleted', '=', 0);
             });
 
         if(!empty($this->param_employment_status)){
@@ -1145,17 +1133,19 @@ class WorkTime extends Model
         $result = $mainquery
             ->where(function ($query) {
                 $query->where('t2.check_result', '>', 0)
-                      ->orWhere('t2.check_max_time', '>', 0)
-                      ->orWhere('t2.check_interval', '>', 0)
-                      ->orWhereNotNull('t9.note');
+                      ->orWhere('t2.check_max_time', '>', 0);
+            })
+            ->orWhere(function ($query) {
+                $query->where('t2.mode', '=', Config::get('const.C005.attendance_time'))
+                      ->Where('t9.check_interval', '>', 0);
             })
             ->where('t1.role', '<', 10)
             ->where('t1.is_deleted', '=', 0)
+            ->orderBy('t2.record_date', 'asc')
+            ->orderBy('t2.record_time', 'asc')
             ->orderBy('t1.department_code', 'asc')
             ->orderBy('t1.employment_status', 'asc')
             ->orderBy('t1.code', 'asc')
-            ->orderBy('t2.record_date', 'asc')
-            ->orderBy('t2.record_time', 'asc')
             ->get();
         \Log::debug(
             'sql_debug_log',

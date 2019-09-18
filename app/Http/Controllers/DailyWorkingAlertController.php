@@ -32,6 +32,13 @@ class DailyWorkingAlertController extends Controller
      */
     public function show(Request $request){
 
+        // パラメータのチェック
+        // datefromとdatetoがあるが、このメソッドではdatefrom=datetoであること
+        Log::debug('------------- 日次アラート表示開始 ----------------');
+        Log::debug('    パラメータ  $request->datefrom = '.$request->datefrom);
+        Log::debug('    パラメータ  $request->employmentstatus = '.$request->employmentstatus);
+        Log::debug('    パラメータ  $request->departmentcode = '.$request->departmentcode);
+        Log::debug('    パラメータ  $request->usercode = '.$request->usercode);
         $calc_result = true;
         $add_result = true;
         // reqestクエリーセット
@@ -43,13 +50,9 @@ class DailyWorkingAlertController extends Controller
         // datetoをdatefromにし、datefromは１週間前に設定する
         $dateto = $datefrom;
         if(isset($datefrom)){
-            Log::debug('    request  datefrom = '.$datefrom);
             $dt = new Carbon($datefrom.' 00:00:00');
-            Log::debug('    dt = '.$dt);
             $dtfrom = date("Y-m-d H:i:s",strtotime($dt."-1 week"));
-            Log::debug('    dtfrom = '.$dtfrom);
             $datefrom = date_format(new Carbon($dtfrom), 'Ymd');
-            Log::debug('    datefrom = '.$datefrom);
         }
         $employmentstatus = null;
         if(isset($request->employmentstatus)){

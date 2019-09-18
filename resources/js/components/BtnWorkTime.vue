@@ -10,7 +10,8 @@
       <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush"><img class="icon-size-sm mr-2 pb-1" src="/images/round-outlined-flag-b.svg" alt="">詳細を表示する</button>
     </div>
     <div v-if="btnMode === 'update'" class="btn-group d-flex" v-on:click="updateclickBtn()">
-      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush"><img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt="">日次集計を指定月日数分行います（数分程度）。終了後は「この条件で表示する」を押下してください</button>
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush"><img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt="">
+        指定年月の全日次集計を行います（数分程度要）。終了後は「この条件で表示する」で表示します。</button>
     </div>
   </div>
 </template>

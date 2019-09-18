@@ -8,8 +8,8 @@
           <!-- panel header -->
           <div class="card-header bg-transparent pb-0 border-0">
             <daily-working-information-panel-header
-              v-bind:headertext1="'年月を指定して集計を表示する'"
-              v-bind:headertext2="'雇用形態や所属部署でフィルタリングして表示できます'"
+              v-bind:header-text1="'年月を指定して集計を表示する'"
+              v-bind:header-text2="'雇用形態や所属部署でフィルタリングして表示できます'"
             ></daily-working-information-panel-header>
           </div>
           <!-- /.panel header -->
@@ -107,6 +107,9 @@
                   <message-data v-bind:message-datas="messagedatauser"></message-data>
                 </div>
               </div>
+              <div class="col-md-6 pb-2">
+                <message-data-server v-bind:message-datas="messagedatasserver" v-bind:message-class="'warning'"></message-data-server>
+              </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
@@ -153,8 +156,8 @@
           <!-- panel header -->
           <div class="card-header bg-transparent pt-3 border-0 print-none">
             <daily-working-information-panel-header
-              v-bind:headertext1="stringtext"
-              v-bind:headertext2="'虫眼鏡アイコンをクリックするとタイムカードが表示されます'"
+              v-bind:header-text1="stringtext"
+              v-bind:header-text2="'虫眼鏡アイコンをクリックするとタイムカードが表示されます'"
             ></daily-working-information-panel-header>
           </div>
           <!-- /.panel header -->
@@ -166,9 +169,12 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <div class="btn-group d-flex">
-                  <button type="button" class="btn btn-success btn-lg font-size-rg w-100"　:disabled="iscsvbutton">
-                    <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt />集計結果をCSVファイルに出力する
-                  </button>
+                  <btn-csv-download
+                    v-bind:csv-data="calcresults"
+                    v-bind:is-csvbutton="iscsvbutton"
+                    v-bind:csv-date="datejaFormat"
+                  >
+                  </btn-csv-download>
                 </div>
               </div>
               <!-- /.col -->
@@ -266,9 +272,8 @@
                                   v-if="calclisttimedate.attendance1 != '00:00' || calclisttimedate.leaving1 != '00:00'"
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.leaving1 }}</td>
-                                <td class="text-center align-middle"></td>
                                 <td
-                                  class="text-center align-middle"
+                                  class="text-left align-middle"
                                 >{{ calclisttimedate.remark_data }}</td>
                               </tr>
                             </tbody>
@@ -297,8 +302,8 @@
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:headertext1="'合計'"
-            v-bind:headertext2="'集計月の合計が表示されます'"
+            v-bind:header-text1="'合計'"
+            v-bind:header-text2="'集計月の合計が表示されます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="card-body pt-2">
@@ -355,7 +360,7 @@ export default {
       messageshowupdate: false,
       issearchbutton: false,
       isupdatebutton: false,
-      iscsvbutton: false,
+      iscsvbutton: true,
       validate: false,
       initialized: false
     };
@@ -488,25 +493,33 @@ export default {
           })
           .then(response => {
             this.resresults = response.data;
-            this.calcresults = this.resresults.calcresults;
-            this.sumresults = this.resresults.sumresults;
+            if (this.resresults.calcresults != null) {
+              this.calcresults = this.resresults.calcresults;
+              if (Object.keys(this.calcresults).length > 0) {
+                this.iscsvbutton = false;
+              }
+            }
+            if (this.resresults.sumresults != null) {
+              this.sumresults = this.resresults.sumresults;
+            }
             this.company_name = this.resresults.company_name;
-            this.dispmessage(this.resresults.massegedata);
-            this.messagedatasserver.length = 0;
+            if (this.resresults.messagedata != null) {
+              this.messagedatasserver = this.resresults.messagedata;
+            }
             console.log("calcresults" + Object.keys(this.calcresults).length);
             console.log("sumresults" + Object.keys(this.sumresults).length);
+            console.log("sumresults" + Object.keys(this.messagedatasserver).length);
             console.log("company_name" + this.company_name);
             this.messageshowsearch = false;
             this.issearchbutton = false;
             this.isupdatebutton = false;
-            this.iscsvbutton = false;
             this.$forceUpdate();
           })
           .catch(reason => {
             this.messageshowsearch = false;
             this.issearchbutton = false;
             this.isupdatebutton = false;
-            this.iscsvbutton = false;
+            this.iscsvbutton = true;
             alert("月次集計エラー");
           });
       }
@@ -534,22 +547,26 @@ export default {
           })
           .then(response => {
             this.resresults = response.data;
-            this.calcresults = this.resresults.calcresults;
-            this.sumresults = this.resresults.sumresults;
+            if (this.resresults.calcresults != null) {
+              this.calcresults = this.resresults.calcresults;
+            }
+            if (this.resresults.sumresults != null) {
+              this.sumresults = this.resresults.sumresults;
+            }
             this.company_name = this.resresults.company_name;
-            this.dispmessage(this.resresults.massegedata);
-            this.messagedatasserver.length = 0;
+            if (this.resresults.messagedata != null) {
+              this.messagedatasserver = this.resresults.messagedata;
+            }
             this.messageshowupdate = false;
             this.issearchbutton = false;
             this.isupdatebutton = false;
-            this.iscsvbutton = false;
             this.$forceUpdate();
           })
           .catch(reason => {
             this.messageshowupdate = false;
             this.issearchbutton = false;
             this.isupdatebutton = false;
-            this.iscsvbutton = false;
+            this.iscsvbutton = true;
             alert("月次集計最新更新エラー");
           });
       }
@@ -638,23 +655,6 @@ export default {
           }
         }
       }
-    },
-    // メッセージ処理
-    dispmessage: function(items) {
-      items.forEach(function(value) {
-        this.messagedatasserver.push(value);
-      });
-    },
-    // メッセージ処理
-    dispmessagevalue: function(value) {
-      this.messagedatasserver.push(value);
-    },
-    // メッセージ処理
-    dispmessage1: function(items) {
-      console.log("dispmessage1 " + Object.keys(items).length);
-      Object.keys(items).forEach(function(value) {
-        console.log(value.messagedata + "はと鳴いた！");
-      });
     }
   }
 };

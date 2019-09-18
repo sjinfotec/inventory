@@ -155,9 +155,9 @@ return [
     'C018_NAME' => [
         'value' => 'C018',
         'normal_stamp' => '',
-        'forget_stamp' => '前回打刻忘れの疑い',
+        'forget_stamp' => '前回打刻忘れの可能性',
         'interval_stamp' => '退勤時刻からの時間が短い',
-        'no_leave_apply' => '休暇未入力の疑い',
+        'no_leave_apply' => '休暇未入力の可能性',
         'max_time_over' => '出退勤・外出制限回数オーバー'
     ],
  
@@ -216,14 +216,14 @@ return [
 
     'WORKING_TIME_NAME' => [
         'basic' => '労働合計時間',
-        'legal_holoday' => '法定休日勤務時間',
-        'legal_out_holoday' => '法定外休日勤務時間'
+        'legal_holoday' => '労働合計時間',
+        'legal_out_holoday' => '労働合計時間'
     ],
 
     'PREDETER_TIME_NAME' => [
         'basic' => '残業時間',
-        'legal_holoday' => '法定休日残業時間',
-        'legal_out_holoday' => '法定外休日残業時間'
+        'legal_holoday' => '法定休日労働時間',
+        'legal_out_holoday' => '法定外休日労働時間'
     ],
 
     'PREDETER_NIGHT_TIME_NAME' => [
@@ -350,7 +350,8 @@ return [
     'MSG_INFO' => [
         'past_closing' => '締日を過ぎていますが、集計しますか？',
         'past_closing_already' => '締日を過ぎていて集計済みですが、再集計しますか？',
-        'no_alert_data' => '警告に該当する打刻内容はありませんでした。'
+        'no_alert_data' => '警告に該当する打刻内容はありませんでした。',
+        'no_monthly_alert_data' => '警告に該当する内容はありませんでした。'
     ],
 
     'MSG_ERROR' => [
