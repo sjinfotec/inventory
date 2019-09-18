@@ -1,5 +1,7 @@
 <template>
-  <button class="btn btn-primary" v-on:click="downloadCSV">集計結果をCSVファイルに出力する</button>
+  <button type="button" class="btn btn-success btn-lg font-size-rg w-100"　:disabled="isCsvbutton" v-on:click="downloadCSV">
+    <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt />集計結果をCSVファイルに出力する
+  </button>
 </template>
 <script>
 export default {
@@ -9,7 +11,11 @@ export default {
       type: Array,
       required: true
     },
-    date: {
+    isCsvbutton: {
+      type: Boolean,
+      required: true
+    },
+    csvDate: {
       type: String,
       required: true
     }
@@ -20,9 +26,10 @@ export default {
     };
   },
   // マウント時
-  mounted() {},
+  mounted() {console.log("btnCsvDownload マウント");},
   methods: {
     downloadCSV() {
+      console.log("downloadCSV");
       var csv = "";
       var user_head = "";
       var user_line = "";
@@ -57,7 +64,7 @@ export default {
           "\n";
         data_head =
           "\ufeff" +
-          "日付,出勤1,出勤2,出勤3,出勤4,出勤5,退勤1,退勤2,退勤3,退勤4,退勤5\n";
+          "日付,出勤1,退勤1,出勤2,退勤2,出勤3,退勤3,出勤4,退勤4,出勤5,退勤5,備考\n";
 
         csv += user_head;
         csv += user_line;
@@ -71,23 +78,25 @@ export default {
             "," +
             record["attendance1"] +
             "," +
-            record["attendance2"] +
-            "," +
-            record["attendance3"] +
-            "," +
-            record["attendance4"] +
-            "," +
-            record["attendance5"] +
-            "," +
             record["leaving1"] +
+            "," +
+            record["attendance2"] +
             "," +
             record["leaving2"] +
             "," +
+            record["attendance3"] +
+            "," +
             record["leaving3"] +
+            "," +
+            record["attendance4"] +
             "," +
             record["leaving4"] +
             "," +
+            record["attendance5"] +
+            "," +
             record["leaving5"] +
+            "," +
+            record["remark_data"] +
             "\n";
           csv += line;
         });
@@ -97,7 +106,7 @@ export default {
       let blob = new Blob([csv], { type: "text/csv" });
       let link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
-      link.download = this.date + "_月次集計.csv";
+      link.download = this.csvDate + "_月次集計.csv";
       link.click();
     }
   }

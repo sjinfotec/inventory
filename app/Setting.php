@@ -330,7 +330,7 @@ class Setting extends Model
                 $this->table.'.is_deleted');
 
         if(!empty($this->param_fiscal_year)){
-        $mainquery->where($this->table.'.fiscal_year', $this->param_fiscal_year);               //年度指定
+            $mainquery->where($this->table.'.fiscal_year', $this->param_fiscal_year);           //年度指定
         }
         
         if(!empty($this->param_fiscal_month)){

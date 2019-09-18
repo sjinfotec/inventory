@@ -22,7 +22,7 @@ class MonthlyWorkingInformationController extends Controller
     private $array_user = array();
     private $array_date = array();
     // メッセージ
-    private $array_massegedata = array();
+    private $array_messagedata = array();
     private $collect_massegedata = null;
 
     /**
@@ -37,13 +37,18 @@ class MonthlyWorkingInformationController extends Controller
 
 
     /**
-     * 集計処理
+     * 月次集計処理
      *
      * @return void
      */
     public function show(Request $request)
     {
-        Log::debug('monthly show in');
+        Log::debug('------------- 月次集計開始 show in----------------');
+        Log::debug('    パラメータ  $request->datefrom= '.$request->datefrom);
+        Log::debug('    パラメータ  $request->displaykbn = '.$request->displaykbn);
+        Log::debug('    パラメータ  $request->employmentstatus = '.$request->employmentstatus);
+        Log::debug('    パラメータ  $request->departmentcode = '.$request->departmentcode);
+        Log::debug('    パラメータ  userc$request->usercodeode = '.$request->usercode);
 
         $apicommon = new ApiCommonController();
         // reqestクエリーセット
@@ -129,8 +134,16 @@ class MonthlyWorkingInformationController extends Controller
                 }
             }
         }
+        
+        if (count($working_time_dates) == 0 ) {
+            $this->array_messagedata[] =  array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_workintime'));
+        }
+        Log::debug('  結果 working_time_dates count = '.count($working_time_dates));
+        Log::debug('  結果 working_time_sum count = '.count($working_time_sum));
+        Log::debug('  結果 $this->array_messagedata count = '.count($this->array_messagedata));
         return response()->json(
-            ['calcresults' => $working_time_dates, 'sumresults' => $working_time_sum, 'company_name' => $company_name, 'massegedata' => $this->array_massegedata]
+            ['calcresults' => $working_time_dates, 'sumresults' => $working_time_sum, 'company_name' => $company_name,
+            Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
         );
     }
 
@@ -173,10 +186,6 @@ class MonthlyWorkingInformationController extends Controller
         $dateto = $workingtimedate_model->getParamdatetoAttribute();
         $datefrom_date = new Carbon($datefrom);
         $dateto_date = new Carbon($dateto);
-        Log::debug('$datefrom = '.$datefrom);
-        Log::debug('$dateto = '.$dateto);
-        Log::debug('$datefrom_date = '.$datefrom_date);
-        Log::debug('$dateto_date = '.$dateto_date);
 
         $work_time = new WorkTime();
         // work_timeのパラメータのチェックを実施する
@@ -221,7 +230,11 @@ class MonthlyWorkingInformationController extends Controller
         }
 
         return response()->json(
-            ['calcresult' => $calc_result,'calcresults' => $working_time_dates, 'sumresults' => $working_time_sum, 'company_name' => $company_name, 'massegedata' => $this->array_massegedata]
+            ['calcresult' => $calc_result,
+                'calcresults' => $working_time_dates,
+                'sumresults' => $working_time_sum,
+                'company_name' => $company_name,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
         );
     }
 
@@ -265,16 +278,12 @@ class MonthlyWorkingInformationController extends Controller
                     $make_fromto = new Carbon($beformonth_fromdate.str_pad($beformonth_closing, 2, 0, STR_PAD_LEFT));
                     $make_todate = new Carbon($dateYm.str_pad($closing, 2, 0, STR_PAD_LEFT));       // 開始は締め日を設定
                 } else {
-                    $this->massegedata[] = array(
-                        'msg' => Config::get('const.MSG_ERROR.not_setting_closing')
-                    );
+                    $this->array_messagedata[] =  array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_setting_closing'));
                     Log::error('makeDateFromTo 前月締め日 '.Config::get('const.MSG_ERROR.not_setting_closing'));
                     return false;
                 }
             } else {
-                $this->massegedata[] = array(
-                    'msg' => Config::get('const.MSG_ERROR.not_setting_closing')
-                );
+                $this->array_messagedata[] =  array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_setting_closing'));
                 Log::error('makeDateFromTo 当月締め日 '.Config::get('const.MSG_ERROR.not_setting_closing'));
                 return false;
             }
@@ -308,7 +317,7 @@ class MonthlyWorkingInformationController extends Controller
      */
     public function calctWorkingTime($workingtimedate_model)
     {
-        Log::debug('calctWorkingTime in');
+        Log::debug('----------- calctWorkingTime in --------------');
         // キーブレーク
         $current_employment_status = null;
         $current_department_code = null;
@@ -445,26 +454,6 @@ class MonthlyWorkingInformationController extends Controller
         $w = (int)$datetime->format('w');
         $week_data = $week[$w];
         $remark_data = $result->remark_holiday_name;
-        if (strlen($remark_data) == 0) {
-            $remark_data .= $result->remark_holiday_name;
-        } else {
-            $remark_data .= ' '.$result->remark_holiday_name;
-        }
-        if (strlen($remark_data) == 0) {
-            $remark_data .= $result->remark_check_result;
-        } else {
-            $remark_data .= ' '.$result->remark_check_result;
-        }
-        if (strlen($remark_data) == 0) {
-            $remark_data .= $result->remark_check_max_times;
-        } else {
-            $remark_data .= ' '.$result->remark_check_max_times;
-        }
-        if (strlen($remark_data) == 0) {
-            $remark_data .= $result->remark_check_interval;
-        } else {
-            $remark_data .= ' '.$result->remark_check_interval;
-        }
 
         $this->array_date[] = array(
             'workingdate' => date_format($datetime, 'Y年m月d日').'（'.$week_data.'）',
@@ -509,6 +498,7 @@ class MonthlyWorkingInformationController extends Controller
                 'out_of_legal_working_times' => $working_time_sum_result->out_of_legal_working_times,
                 'not_employment_working_hours' => $working_time_sum_result->not_employment_working_hours,
                 'off_hours_working_hours' => $working_time_sum_result->off_hours_working_hours,
+                'public_going_out_hours' => $working_time_sum_result->public_going_out_hours,
                 'missing_middle_hours' => $working_time_sum_result->missing_middle_hours,
                 'total_working_status' => $working_time_sum_result->total_working_status,
                 'total_go_out' => $working_time_sum_result->total_go_out,

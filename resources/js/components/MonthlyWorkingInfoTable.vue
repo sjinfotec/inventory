@@ -96,7 +96,8 @@ export default {
       default: 'detail'
     },
     calcLists: {
-      type: Array
+      type: Array,
+      required: true
     },
   }
 };

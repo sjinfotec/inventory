@@ -15,14 +15,14 @@
         v-for="(alertList,index) in alertLists"
         class="card-body mb-3 py-0 pt-4 border-top"
       >
-        <td class="text-align-center">{{ alertList.record_date }}</td>
+        <td class="text-align-center">{{ alertList.record_date_name }}</td>
         <td class="text-align-center">{{ alertList.employment_status_name }}</td>
         <td class="text-align-center">{{ alertList.department_name }}</td>
         <td class="text-align-center">{{ alertList.user_name }}</td>
         <td class="text-align-center">{{ alertList.record_time }}</td>
         <td class="text-align-center">{{ alertList.mode_name }}</td>
+        <td class="text-align-center">{{ alertList.check_interval_name }}</td>
         <td class="text-align-center">{{ alertList.alert_memo }}</td>
-        <td class="text-align-center">{{ alertList.note }}</td>
       </tr>
     </table>
   </div>

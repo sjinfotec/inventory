@@ -891,8 +891,8 @@ class ApiCommonController extends Controller
         // 設定項目よりインターバル時間を取得
         $setting_model = new Setting();
         $dt = new Carbon($target_datetime);
-        $setting_model->setYearAttribute(date_format($dt, 'Y'));
-        $setting_model->setFiscalmonthAttribute(date_format($dt, 'm'));
+        $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
+        $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
         $settings = $setting_model->getSettingDatas();
         $interval = 0;
         foreach($settings as $setting) {
@@ -906,8 +906,6 @@ class ApiCommonController extends Controller
         // $target_datetime - $before_datetime <= $interval であること
         $diffInterval = $this->diffTimeSerial($before_datetime, $target_datetime);
         // $intervalも$diffIntervalもシリアル値
-        Log::DEBUG('chkInteval() $interval = '.$interval);
-        Log::DEBUG('chkInteval() $diffInterval = '.$diffInterval);
         if ($diffInterval < $interval * 60 * 60) {
             return Config::get('const.C018.interval_stamp');
         }

@@ -92,7 +92,9 @@
                   <message-data v-bind:message-datas="messagedatauser"></message-data>
                 </div>
               </div>
-              <message-data-server v-bind:message-datas="messagedatasserver" v-bind:message-class="'warning'"></message-data-server>
+              <div class="col-md-6 pb-2">
+                <message-data-server v-bind:message-datas="messagedatasserver" v-bind:message-class="'warning'"></message-data-server>
+              </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->

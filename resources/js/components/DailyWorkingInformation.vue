@@ -85,8 +85,12 @@
                 <message-data v-bind:message-datas="messagedatauser" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <message-data-server v-bind:message-datas="messagedatasserver" v-bind:message-class="'warning'"></message-data-server>
+              </div>
+              <!-- /.col -->
             </div>
-            <message-data-server v-bind:message-datas="messagedatasserver" v-bind:message-class="'warning'"></message-data-server
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between">
@@ -406,23 +410,6 @@ export default {
       this.messagedatastodate = [];
       this.messagedatadepartment = [];
       this.messagedatauser = [];
-    },
-    // メッセージ処理
-    dispmessage: function(value) {
-      console.log("value " + Object.keys(value).length);
-      //this.messagedatasserver = value;
-      console.log("messagedatasserver " + Object.keys(messagedatasserver).length);
-    },
-    // メッセージ処理
-    dispmessagevalue: function(value) {
-      this.messagedatasserver.push(value);
-    },
-    // メッセージ処理
-    dispmessage1: function(items) {
-      console.log("dispmessage1 " + Object.keys(items).length);
-      Object.keys(items).forEach(function (value) {
-        console.log(value.messagedata + "はと鳴いた！");
-      });
     }
   }
 };
