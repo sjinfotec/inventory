@@ -11,6 +11,7 @@ class Calendar extends Model
 {
     protected $table = 'calendars';
     protected $table_public_holidays = 'public_holidays';
+    protected $table_generalcodes = 'generalcodes';
  
     private $date;                  
     private $weekday_kubun;                  
@@ -242,16 +243,14 @@ class Calendar extends Model
      * @return void
      */
     public function getCalenderDateYear(){
-        Log::debug('getCalenderDateYear in $date = '.$this->date);
-        Log::debug('getCalenderDateYear in $created_user = '.$this->created_user);
 
+        // table_generalcodesはダミーテーブルとして使用
         $result = true;
-        \DB::enableQueryLog();
 
         $subquery1 = DB::table('information_schema.COLUMNS')
             ->selectRaw('@num := @num + 1');
 
-        $subquery2 = DB::table($this->table)
+        $subquery2 = DB::table($this->table_generalcodes)
             ->selectRaw('0 as generate_series')
             ->whereRaw("(@num := 1 - 1) * 0")
             ->unionAll($subquery1)
@@ -263,7 +262,7 @@ class Calendar extends Model
             ->selectRaw("weekday(date_format(date_add('".$this->date."', interval t1.generate_series day), '%Y%m%d')) as we")
             ->toSql();
     
-        $subquery4 = DB::table($this->table)
+        $subquery4 = DB::table($this->table_generalcodes)
             ->selectRaw("date_format(date ('".$this->date."' + interval 1 year), '%Y%m%d') as dt")
             ->limit(1)
             ->toSql();
@@ -297,12 +296,6 @@ class Calendar extends Model
             })
             ->where('t2.dt', '<=', DB::raw('('.$subquery4.')'))
             ->get();
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getCalenderDateYear' => \DB::getQueryLog()
-            ]
-        );
     
         return $mainquery;
     }
