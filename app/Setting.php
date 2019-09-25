@@ -414,6 +414,23 @@ class Setting extends Model
 
     }
 
+    /**
+     * 期首月取得
+     *
+     *      指定した年月度の期首月を取得する
+     *
+     * @return sql取得結果
+     */
+    public function getBeginingMonth(){
+
+        // 取得
+        return $mainquery = DB::table($this->table)
+            ->where($this->table.'.year', $this->param_year)
+            ->where($this->table.'.is_deleted', 0)
+            ->value($this->table.'.beginning_month');
+
+    }
+
     public function insertSettings(){
         DB::table($this->table)->insert(
             [

@@ -4,11 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 
 class Calendar extends Model
 {
     protected $table = 'calendars';
+    protected $table_public_holidays = 'public_holidays';
  
     private $date;                  
     private $weekday_kubun;                  
@@ -175,13 +177,22 @@ class Calendar extends Model
     public function getDetail(){
         $data = DB::table($this->table)
         ->select(
-                'date',
-                'weekday_kubun',
-                'business_kubun',
-                'holiday_kubun'
-        );
+            $this->table.'.date',
+            $this->table.'.weekday_kubun',
+            $this->table.'.business_kubun',
+            $this->table.'.holiday_kubun'
+        )
+        ->selectRaw(
+            "concat(
+                DATE_FORMAT(".$this->table.".date,'%Y年%m月%d日'),'(',substring('月火水木金土日',convert(".$this->table.".weekday_kubun+1,char),1),') '
+            , ifnull(".$this->table_public_holidays.".name, '')) as date_name ");
+        $data->leftJoin($this->table_public_holidays, function ($join) { 
+            $join->on($this->table_public_holidays.'.date', '=', $this->table.'.date')
+            ->where($this->table_public_holidays.'.is_deleted',0);
+        });
+    
         if(isset($this->date)){
-            $data->where('date','LIKE','%'.$this->date.'%');
+            $data->where($this->table.'.date','LIKE','%'.$this->date.'%');
         }
         if(isset($this->business_kubun)){
             $data->where('business_kubun',$this->business_kubun);
@@ -189,7 +200,7 @@ class Calendar extends Model
         if(isset($this->holiday_kubun)){
             $data->where('holiday_kubun',$this->holiday_kubun);
         }
-        $data->where('is_deleted',0);
+        $data->where($this->table.'.is_deleted',0);
         $result = $data->get();
 
 
@@ -222,6 +233,125 @@ class Calendar extends Model
         $result = $data->get();
 
 
+        return $result;
+    }
+
+    /**
+     * 1年分の検索
+     *
+     * @return void
+     */
+    public function getCalenderDateYear(){
+        Log::debug('getCalenderDateYear in $date = '.$this->date);
+        Log::debug('getCalenderDateYear in $created_user = '.$this->created_user);
+
+        $result = true;
+        \DB::enableQueryLog();
+
+        $subquery1 = DB::table('information_schema.COLUMNS')
+            ->selectRaw('@num := @num + 1');
+
+        $subquery2 = DB::table($this->table)
+            ->selectRaw('0 as generate_series')
+            ->whereRaw("(@num := 1 - 1) * 0")
+            ->unionAll($subquery1)
+            ->limit(366)
+            ->toSql();
+
+        $subquery3 = DB::table(DB::raw('('.$subquery2.') AS t1'))
+            ->selectRaw("date_format(date_add('".$this->date."', interval t1.generate_series day), '%Y%m%d') as dt")
+            ->selectRaw("weekday(date_format(date_add('".$this->date."', interval t1.generate_series day), '%Y%m%d')) as we")
+            ->toSql();
+    
+        $subquery4 = DB::table($this->table)
+            ->selectRaw("date_format(date ('".$this->date."' + interval 1 year), '%Y%m%d') as dt")
+            ->limit(1)
+            ->toSql();
+    
+        $subquery5 = DB::table($this->table_public_holidays)
+            ->selectRaw("date_format(".$this->table_public_holidays.".date, '%Y%m%d') as public_holidays_date")
+            ->where($this->table_public_holidays.'.is_deleted', '=', 0);
+
+        $case_sql = ' case ifnull(t3.public_holidays_date, 0) ';
+        $case_sql .= ' when 0 then ';
+        $case_sql .= '   case t2.we ';
+        $case_sql .= '     when 5 then 3 ';
+        $case_sql .= '     when 6 then 2 ';
+        $case_sql .= '     else 1 ';
+        $case_sql .= '   end ';
+        $case_sql .= ' else 3 ';
+        $case_sql .= ' end as business_kubun ';
+
+        Log::debug("'".$this->created_user."' as created_user");
+        $mainquery = DB::table(DB::raw('('.$subquery3.') AS t2'))
+            ->select(
+                't2.dt as date',
+                't2.we as weekday_kubun'
+            )
+            ->selectRaw($case_sql)
+            ->selectRaw('0 as holiday_kubun')
+            ->selectRaw("'".$this->created_user."' as created_user")
+            ->selectRaw('null as updated_user')
+            ->selectRaw('now() as created_at')
+            ->leftJoinSub($subquery5, 't3', function ($join) { 
+                $join->on('t3.public_holidays_date', '=', 't2.dt');
+            })
+            ->where('t2.dt', '<=', DB::raw('('.$subquery4.')'))
+            ->get();
+
+        return $mainquery;
+    }
+
+    /**
+     * 1年分の登録
+     *
+     * @return void
+     */
+    public function insCalenderDateYear($array_subquery){
+        $result = true;
+
+        try{
+            DB::table($this->table)->insert($array_subquery);
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            $result = false;
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error($e->getMessage());
+            $result = false;
+            throw $e;
+        }
+        return $result;
+    }
+
+    /**
+     * 1年分の削除
+     *
+     * @return void
+     */
+    public function delCalenderDateYear($fromdate, $todate){
+        Log::debug('delCalenderDateYear in $fromdate = '.$fromdate);
+        Log::debug('delCalenderDateYear in $todate = '.$todate);
+
+        $result = true;
+
+        try{
+            DB::table($this->table)
+            ->whereBetween('date', [$fromdate, $todate])
+            ->delete();
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            $result = false;
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error($e->getMessage());
+            $result = false;
+            throw $e;
+        }
         return $result;
     }
 

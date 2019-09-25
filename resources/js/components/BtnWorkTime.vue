@@ -13,6 +13,12 @@
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush"><img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt="">
         指定年月の全日次集計を行います（数分程度要）。終了後は「この条件で表示する」で表示します。</button>
     </div>
+    <div v-if="btnMode === 'init'" class="btn-group d-flex" v-on:click="initclickBtn()">
+      <button type="button" class="btn btn-outline-secondary btn-lg font-size-rg w-100" :disabled="isPush"><img class="icon-size-sm mr-2 pb-1" src="/images/round-restore-b.svg" alt="">初期設定をする</button>
+    </div>
+    <div v-if="btnMode === 'store'" class="btn-group d-flex" v-on:click="storeclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100">この内容で登録する</button>
+    </div>
   </div>
 </template>
 <script>
@@ -45,6 +51,14 @@ export default {
     updateclickBtn : function() {
       console.log("updateclickBtn start ");
       this.$emit('updateclick-event',event);
+    },
+    initclickBtn : function() {
+      console.log("initclickBtn start ");
+      this.$emit('initclick-event',event);
+    },
+    storeclickBtn : function() {
+      console.log("storeclickBtn start ");
+      this.$emit('storeclick-event',event);
     }
 
   }
