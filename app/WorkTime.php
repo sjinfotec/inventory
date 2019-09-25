@@ -17,6 +17,8 @@ class WorkTime extends Model
     protected $table_shift_informations = 'shift_informations';
     protected $table_user_holiday_kubuns = 'user_holiday_kubuns';
     protected $table_working_time_dates = 'working_time_dates';
+    protected $table_calendars = 'calendars';
+    protected $table_generalcodes = 'generalcodes';
     // protected $guarded = array('id');
 
     //--------------- メンバー属性 -----------------------------------
@@ -555,7 +557,7 @@ class WorkTime extends Model
                 $join->on('t5.code', '=', 't1.department_code')
                 ->where('t1.is_deleted', '=', 0);
             })
-            ->leftJoin('calendars as t3', function ($join) { 
+            ->leftJoin($this->table_calendars.' as t3', function ($join) { 
                 $join->on('t3.date', '=', 't2.record_date')
                 ->where('t3.is_deleted', '=', 0);
             })
@@ -570,13 +572,13 @@ class WorkTime extends Model
                 ->where('t1.is_deleted', '=', 0)
                 ->where('t6.is_deleted', '=', 0);
             })
-            ->leftJoin('generalcodes as t7', function ($join) { 
+            ->leftJoin($this->table_generalcodes.' as t7', function ($join) { 
                 $join->on('t7.code', '=', 't6.working_time_kubun')
                 ->where('t7.identification_id', '=', Config::get('const.C004.value'))
                 ->where('t6.is_deleted', '=', 0)
                 ->where('t7.is_deleted', '=', 0);
             })
-            ->leftJoin('generalcodes as t8', function ($join) { 
+            ->leftJoin($this->table_generalcodes.' as t8', function ($join) { 
                 $join->on('t8.code', '=', 't1.employment_status')
                 ->where('t8.identification_id', '=', Config::get('const.C001.value'))
                 ->where('t1.is_deleted', '=', 0)
@@ -587,19 +589,19 @@ class WorkTime extends Model
                 ->where('t10.working_time_kubun', '=', Config::get('const.C004.regular_working_time'))
                 ->where('t10.is_deleted', '=', 0);
             })
-            ->leftJoin('generalcodes as t11', function ($join) { 
+            ->leftJoin($this->table_generalcodes.' as t11', function ($join) { 
                 $join->on('t11.code', '=', 't3.weekday_kubun')
                 ->where('t11.identification_id', '=', Config::get('const.C006.value'))
                 ->where('t3.is_deleted', '=', 0)
                 ->where('t11.is_deleted', '=', 0);
             })
-            ->leftJoin('generalcodes as t12', function ($join) { 
+            ->leftJoin($this->table_generalcodes.' as t12', function ($join) { 
                 $join->on('t12.code', '=', 't3.business_kubun')
                 ->where('t12.identification_id', '=', Config::get('const.C007.value'))
                 ->where('t3.is_deleted', '=', 0)
                 ->where('t12.is_deleted', '=', 0);
             })
-            ->leftJoin('generalcodes as t13', function ($join) { 
+            ->leftJoin($this->table_generalcodes.' as t13', function ($join) { 
                 $join->on('t13.code', '=', 't3.holiday_kubun')
                 ->where('t13.identification_id', '=', Config::get('const.C008.value'))
                 ->where('t3.is_deleted', '=', 0)
@@ -612,7 +614,7 @@ class WorkTime extends Model
                 ->where('t1.is_deleted', '=', 0)
                 ->where('t14.is_deleted', '=', 0);
             })
-            ->leftJoin('generalcodes as t15', function ($join) { 
+            ->leftJoin($this->table_generalcodes.' as t15', function ($join) { 
                 $join->on('t15.code', '=', 't14.holiday_kubun')
                 ->where('t15.identification_id', '=', Config::get('const.C013.value'))
                 ->where('t14.is_deleted', '=', 0)
@@ -937,7 +939,7 @@ class WorkTime extends Model
                 $join->on('t2.code', '=', $this->table.'.department_code');
                 // $join->on('t2.max_apply_term_from', '=', $max_department_apply);
             })
-            ->leftJoin('generalcodes as g', function ($join) { 
+            ->leftJoin($this->table_generalcodes.' as g', function ($join) { 
                 $join->on('g.code', '=', $this->table.'.mode')
                 ->where('g.identification_id', '=', Config::get('const.C005.value'));
             })
@@ -1011,9 +1013,7 @@ class WorkTime extends Model
         \DB::enableQueryLog();
         $subquery1 = DB::table($this->table)
             ->selectRaw(
-                'DATE_FORMAT('.$this->table.".record_time, '%Y%m%d') as record_date ")
-            ->selectRaw(
-                'concat(DATE_FORMAT('.$this->table.".record_time,'%Y年%m月%d日'),'(',substring('月火水木金土日',convert(DATE_FORMAT(".$this->table.".record_time,'%w'),char),1),')') as record_date_name ");
+                'DATE_FORMAT('.$this->table.".record_time, '%Y%m%d') as record_date ");
         $subquery1
             ->addselect($this->table.'.user_code as user_code')
             ->addselect($this->table.'.department_code as department_code')
@@ -1047,7 +1047,6 @@ class WorkTime extends Model
                 't1.department_code as department_code',
                 't3.name as department_name',
                 't2.record_date as record_date',
-                't2.record_date_name as record_date_name',
                 't2.record_time as record_time',
                 't2.mode as mode',
                 't6.code_name as mode_name',
@@ -1055,7 +1054,9 @@ class WorkTime extends Model
                 't2.check_max_time as check_max_time',
                 't2.check_interval as unused_check_interval',
                 't9.check_interval as check_interval',
-                't10.code_name as check_interval_name');
+                't10.code_name as check_interval_name')
+            ->selectRaw(
+                "concat(DATE_FORMAT(t2.record_time,'%Y年%m月%d日'),'(',substring('月火水木金土日',convert(t11.weekday_kubun+1,char),1),')') as record_date_name ");
         $alert_memo = '';
         $alert_memo .= "case t7.code_name is null ";
         $alert_memo .= "  when 1 then ";
@@ -1080,23 +1081,23 @@ class WorkTime extends Model
                 $join->on('t3.code', '=', 't1.department_code')
                 ->where('t1.is_deleted', '=', 0);
             })
-            ->leftJoin('generalcodes as t5', function ($join) { 
+            ->leftJoin($this->table_generalcodes.' as t5', function ($join) { 
                 $join->on('t5.code', '=', 't1.employment_status')
                 ->where('t5.identification_id', '=', Config::get('const.C001.value'))
                 ->where('t1.is_deleted', '=', 0)
                 ->where('t5.is_deleted', '=', 0);
             })
-            ->leftJoin('generalcodes as t6', function ($join) { 
+            ->leftJoin($this->table_generalcodes.' as t6', function ($join) { 
                 $join->on('t6.code', '=', 't2.mode')
                 ->where('t6.identification_id', '=', Config::get('const.C005.value'))
                 ->where('t6.is_deleted', '=', 0);
             })
-            ->leftJoin('generalcodes as t7', function ($join) { 
+            ->leftJoin($this->table_generalcodes.' as t7', function ($join) { 
                 $join->on('t7.code', '=', 't2.check_result')
                 ->where('t7.identification_id', '=', Config::get('const.C018.value'))
                 ->where('t7.is_deleted', '=', 0);
             })
-            ->leftJoin('generalcodes as t8', function ($join) { 
+            ->leftJoin($this->table_generalcodes.' as t8', function ($join) { 
                 $join->on('t8.code', '=', 't2.check_max_time')
                 ->where('t8.identification_id', '=', Config::get('const.C018.value'))
                 ->where('t8.is_deleted', '=', 0);
@@ -1108,10 +1109,14 @@ class WorkTime extends Model
                 $join->on('t9.department_code', '=', 't1.department_code')
                 ->where('t9.is_deleted', '=', 0);
             })
-            ->leftJoin('generalcodes as t10', function ($join) { 
+            ->leftJoin($this->table_generalcodes.' as t10', function ($join) { 
                 $join->on('t10.code', '=', 't9.check_interval')
                 ->where('t10.identification_id', '=', Config::get('const.C018.value'))
                 ->where('t10.is_deleted', '=', 0);
+            })
+            ->leftJoin($this->table_calendars.' as t11', function ($join) { 
+                $join->on('t11.date', '=', 't2.record_date')
+                ->where('t11.is_deleted', '=', 0);
             });
 
         if(!empty($this->param_employment_status)){

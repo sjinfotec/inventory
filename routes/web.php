@@ -76,6 +76,7 @@ Route::get('/create_department/get_apply', 'CreateDepartmentController@getDepart
 // カレンダー登録
 Route::get('/create_calendar', 'CreateCalendarController@index')->middleware('auth');
 Route::post('/create_calendar/store', 'CreateCalendarController@store')->middleware('auth');
+Route::post('/create_calendar/init', 'CreateCalendarController@init')->middleware('auth');
 // カレンダー編集
 Route::get('/edit_calendar', 'EditCalendarController@index')->middleware('auth');
 Route::get('/edit_calendar/get', 'EditCalendarController@getDetail')->middleware('auth');

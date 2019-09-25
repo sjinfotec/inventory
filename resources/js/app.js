@@ -138,6 +138,16 @@ Vue.component(
 );
 
 Vue.component(
+    "setting-calendar",
+    require("./components/SettingCalendar.vue").default
+);
+
+Vue.component(
+    "init-calendar",
+    require("./components/InitCalendar.vue").default
+);
+
+Vue.component(
     "edit-work-times",
     require("./components/EditWorkTimes.vue").default
 );

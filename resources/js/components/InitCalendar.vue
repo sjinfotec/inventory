@@ -187,18 +187,21 @@ export default {
     },
     // 設定ボタンがクリックされた場合の処理
     initclick: function(e) {
-      this.$swal({
-        title: "確認",
-        text: "指定年に登録しているデータは消えますが、初期設定してもよろしいですか？",
-        icon: 'info',
-        buttons: true,
-        dangerMode: true
-      }).then(willDelete => {
-        if (willDelete) {
-          this.initProc(e);
-        } else {
-        }
-      });
+      this.validate = this.checkForm(e);
+      if (this.validate) {
+        this.$swal({
+          title: "確認",
+          text: "指定年に登録しているデータは消えますが、初期設定してもよろしいですか？",
+          icon: 'info',
+          buttons: true,
+          dangerMode: true
+        }).then(willDelete => {
+          if (willDelete) {
+            this.initProc(e);
+          } else {
+          }
+        });
+      }
     },
     // 戻るボタンがクリックされた場合の処理
     backclick: function(e) {
@@ -207,33 +210,30 @@ export default {
     },
     // 設定ボタンがクリックされた場合の処理
     initProc: function(e) {
-      this.validate = this.checkForm(e);
       this.valuey = moment(this.valuefromdate).format("YYYY");
-      if (this.validate) {
-        this.ismessageshowsearch = true;
-        this.$axios
-          .post("/create_calendar/init", {
-            datefrom: this.valuey,
-            displaykbn: this.valuedisplay
-          })
-          .then(response => {
-            this.resresults = response.data;
-            if (this.resresults.result == true) {
-              this.$toasted.show("カレンダー初期設定しました。");
-            } else {
-              this.$toasted.show("カレンダー初期設定に失敗しました。");
-            }
-            if (this.resresults.messagedata != null) {
-              this.messagedatasserver = this.resresults.messagedata;
-            }
-            this.ismessageshowsearch = false;
-            this.$forceUpdate();
-          })
-          .catch(reason => {
-            this.ismessageshowsearch = false;
-            this.alert("error", "カレンダー初期設定に失敗しました", "エラー");
-          });
-      }
+      this.ismessageshowsearch = true;
+      this.$axios
+        .post("/create_calendar/init", {
+          datefrom: this.valuey,
+          displaykbn: this.valuedisplay
+        })
+        .then(response => {
+          this.resresults = response.data;
+          if (this.resresults.result == true) {
+            this.$toasted.show("カレンダー初期設定しました。");
+          } else {
+            this.$toasted.show("カレンダー初期設定に失敗しました。");
+          }
+          if (this.resresults.messagedata != null) {
+            this.messagedatasserver = this.resresults.messagedata;
+          }
+          this.ismessageshowsearch = false;
+          this.$forceUpdate();
+        })
+        .catch(reason => {
+          this.ismessageshowsearch = false;
+          this.alert("error", "カレンダー初期設定に失敗しました", "エラー");
+        });
     }
   }
 };

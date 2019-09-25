@@ -37,18 +37,10 @@ class EditCalendarController extends Controller
         $year = $request->year;
         $month = str_pad($request->month,2,0,STR_PAD_LEFT);
         $search_y_m = $year."".$month;
-        $business_kubun = $request->business_kubun;
-        $holiday_kubun = $request->holiday_kubun;
         $calendar = new Calendar();
         $calendar->setDateAttribute($search_y_m);
-        $calendar->setBusinesskubunAttribute($business_kubun);
-        $calendar->setHolidaykubunAttribute($holiday_kubun);
         
         $result = $calendar->getDetail();
-        foreach ($result as $data) {
-            $formated = new Carbon($data->date);
-            $data->date = $formated->format('Y/m/d');
-        }
         return $result;
     }
 

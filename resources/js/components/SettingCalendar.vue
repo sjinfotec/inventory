@@ -85,14 +85,14 @@
                   <table class="table table-striped border-bottom font-size-sm text-nowrap">
                     <thead>
                       <tr>
-                        <td class="text-center align-middle w-30">日付</td>
-                        <td class="text-center align-middle w-35 mw-rem-10">営業日区分</td>
-                        <td class="text-center align-middle w-35 mw-rem-10">休暇区分</td>
+                        <td class="text-left align-middle w-30">日付</td>
+                        <td class="text-left align-middle w-35 mw-rem-10">営業日区分</td>
+                        <td class="text-left align-middle w-35 mw-rem-10">休暇区分</td>
                       </tr>
                     </thead>
                     <tbody>
                       <tr v-for="(item,index) in details" v-bind:key="item.date">
-                        <td class="text-center align-middle">{{item.date_name}}</td>
+                        <td class="text-left align-middle">{{item.date_name}}</td>
                         <td class="text-center align-middle">
                           <select class="custom-select" v-model="business[index]" v-on:change="businessDayChanges(business[index], index)">
                             <option value></option>
@@ -233,7 +233,9 @@ export default {
     },
     backclick: function() {
       this.$modal.hide("setting-calendar_work");
-      this.searchclick();
+      if (this.valueym) {
+        this.searchclick();
+      }
     },
     storeclick() {
       this.$axios

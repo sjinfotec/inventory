@@ -38,7 +38,7 @@
 	<!-- /main contentns row -->
 	@endif
 	@can('admin-higher')
-		<create-calendar></create-calendar>
+		<setting-calendar></setting-calendar>
 	@endcan
 	<!-- /main contentns row -->
 @endsection

@@ -371,6 +371,7 @@ return [
         'data_eror_dailycalc' => '労働時間計算処理にてエラーのため計算できませんでした。',
         'not_setting_calendar' => '{0}のカレンダー設定がされていません。',
         'data_accesee_eror_dailycalc' => '労働時間計算処理にてデータアクセスエラーのため計算できませんでした。',
+        'data_insert_error' => '登録処理に失敗しました。',
         'mismatch_data' => 'データ不整合'
     ],
 
