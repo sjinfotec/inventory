@@ -282,7 +282,6 @@ class Calendar extends Model
         $case_sql .= ' else 3 ';
         $case_sql .= ' end as business_kubun ';
 
-        Log::debug("'".$this->created_user."' as created_user");
         $mainquery = DB::table(DB::raw('('.$subquery3.') AS t2'))
             ->select(
                 't2.dt as date',
@@ -298,7 +297,13 @@ class Calendar extends Model
             })
             ->where('t2.dt', '<=', DB::raw('('.$subquery4.')'))
             ->get();
-
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getCalenderDateYear' => \DB::getQueryLog()
+            ]
+        );
+    
         return $mainquery;
     }
 
@@ -308,6 +313,7 @@ class Calendar extends Model
      * @return void
      */
     public function insCalenderDateYear($array_subquery){
+        Log::debug('insCalenderDateYear in ');
         $result = true;
 
         try{
