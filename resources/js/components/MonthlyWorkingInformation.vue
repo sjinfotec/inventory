@@ -24,7 +24,7 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       id="basic-addon1"
-                    >指定年月<span class="color-red">＊</span></span>
+                    >指定年月<span class="color-red">[*]</span></span>
                   </div>
                   <input-datepicker
                     v-bind:default-date="defaultDate"
@@ -42,7 +42,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       for="inputGroupSelect01"
-                    >集計区分<span class="color-red">＊</span></label>
+                    >集計区分<span class="color-red">[*]</span></label>
                   </div>
                   <general-list
                     v-bind:identification-id="'C016'"
@@ -51,7 +51,7 @@
                     v-on:change-event="displayChange"
                   ></general-list>
                 </div>
-                <message-data v-bind:message-datas="messagedatadisplay"></message-data>
+                <message-data v-bind:message-datas="messagedatadisplay" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -85,8 +85,8 @@
                     v-on:change-event="departmentChanges"
                   ></select-department>
                 </div>
+                <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
               </div>
-              <message-data v-bind:message-datas="messagedatadepartment"></message-data>
               <!-- /.col -->
               <!-- .col -->
               <div class="col-md-6 pb-2">
@@ -104,7 +104,7 @@
                     v-bind:date-value="fromdate"
                     v-on:change-event="userChanges"
                   ></select-user>
-                  <message-data v-bind:message-datas="messagedatauser"></message-data>
+                  <message-data v-bind:message-datas="messagedatauser" v-bind:message-class="'warning'"></message-data>
                 </div>
               </div>
               <div class="col-md-6 pb-2">
@@ -253,9 +253,13 @@
                           <div v-if="calclist.date.length">
                             <thead>
                               <tr>
-                                <td class="text-center align-middle w-20">日付</td>
-                                <td class="text-center align-middle w-20">出勤時間</td>
-                                <td class="text-center align-middle w-20">退勤時間</td>
+                                <td class="text-center align-middle w-15">日付</td>
+                                <td class="text-center align-middle w-15">出勤時間</td>
+                                <td class="text-center align-middle w-15">退勤時間</td>
+                                <td class="text-center align-middle w-15">実働時間</td>
+                                <td class="text-center align-middle w-15">所定時間</td>
+                                <td class="text-center align-middle w-15">残業時間</td>
+                                <td class="text-center align-middle w-15">深夜時間</td>
                                 <td class="text-center align-middle mw-rem-20">備考</td>
                               </tr>
                             </thead>
@@ -272,6 +276,18 @@
                                   v-if="calclisttimedate.attendance1 != '00:00' || calclisttimedate.leaving1 != '00:00'"
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.leaving1 }}</td>
+                                <td
+                                  class="text-center align-middle"
+                                >{{ calclisttimedate.total_working_times }}</td>
+                                <td
+                                  class="text-center align-middle"
+                                >{{ calclisttimedate.regular_working_times }}</td>
+                                <td
+                                  class="text-center align-middle"
+                                >{{ calclisttimedate.off_hours_working_hours }}</td>
+                                <td
+                                  class="text-center align-middle"
+                                >{{ calclisttimedate.late_night_overtime_hours }}</td>
                                 <td
                                   class="text-left align-middle"
                                 >{{ calclisttimedate.remark_data }}</td>
@@ -381,24 +397,22 @@ export default {
       if (!this.valueym) {
         this.messagedatasfromdate.push("指定年月は必ず入力してください。");
         this.validate = false;
-        console.log("指定年月は必ず入力してください。");
       }
       if (!this.valuedisplay) {
         this.messagedatadisplay.push("表示区分は必ず入力してください。");
         this.validate = false;
-        console.log("表示区分は必ず入力してください。");
       }
       if (this.serchorupdate == "update") {
-        if (!this.valuedepartment) {
-          this.messagedatadepartment.push("所属部署は必ず入力してください。");
-          this.validate = false;
-          console.log("所属部署は必ず入力してください。");
+        if (!this.valueuser) {
+          if (!this.valuedepartment) {
+            this.messagedatadepartment.push("所属部署は必ず入力してください。");
+            this.validate = false;
+          }
         }
         if (this.userrole < "8") {
           if (!this.valueuser) {
             this.messagedatauser.push("氏名は必ず入力してください。");
             this.validate = false;
-            console.log("氏名は必ず入力してください。");
           }
         }
       } else {
@@ -406,12 +420,10 @@ export default {
           if (!this.valuedepartment) {
             this.messagedatadepartment.push("所属部署は必ず入力してください。");
             this.validate = false;
-            console.log("所属部署は必ず入力してください。");
           }
           if (!this.valueuser) {
             this.messagedatauser.push("氏名は必ず入力してください。");
             this.validate = false;
-            console.log("氏名は必ず入力してください。");
           }
         }
       }
@@ -419,7 +431,6 @@ export default {
       if (this.validate) {
         return this.validate;
       }
-      console.log("validate = false");
 
       e.preventDefault();
     },
@@ -526,9 +537,13 @@ export default {
     },
     // 最新更新開始ボタンがクリックされた場合の処理
     updateclick: function(e) {
+      this.infoDialog(e, 'update','確認','集計してよろしいですか？');
+    },
+    // 最新更新開始ボタンがクリックされた場合の処理
+    updNew: function(e) {
       this.serchorupdate = "update";
       this.validate = this.checkForm(e);
-      console.log("更新を開始" + this.validate);
+      console.log("validate = " + this.validate);
       if (this.validate) {
         this.issearchbutton = true;
         this.isupdatebutton = true;
@@ -573,6 +588,23 @@ export default {
     },
 
     // ----------------- 共通メソッド ----------------------------------
+    // 確認ダイアログ処理
+    infoDialog: function(e, value, title, text) {
+      this.itemClear();
+      this.$swal({
+        title: title,
+        text: text,
+        icon: 'info',
+        buttons: true,
+        dangerMode: true
+      }).then(willDelete => {
+        if (willDelete) {
+          if (value === 'update') {
+            this.updNew(e);
+          }
+        }
+      });
+    },
     // クリアメソッド
     itemClear: function() {
       this.resresults = [];
@@ -644,11 +676,11 @@ export default {
           this.datejaFormat = moment(this.valuefromdate).format("YYYY年MM月");
           if (this.valuedisplay == "1") {
             this.stringtext =
-              "月次集計 " + this.datejaFormat + "を〆日で集計";
+              "月次集計 " + this.datejaFormat + "分を〆日で集計";
           } else {
             if (this.valuedisplay == "2") {
               this.stringtext =
-                "月次集計 " + this.datejaFormat + "1日から月末で集計";
+                "月次集計 " + this.datejaFormat + "分を1日から月末で集計";
             } else {
               this.stringtext = "";
             }

@@ -1080,6 +1080,9 @@ class TempWorkingTimeDate extends Model
      * @return void
      */
     public function insertTempWorkingTimeDate(){
+        Log::debug('        <<<< insertTempWorkingTimeDate  $this->working_date = '.$this->working_date);
+        Log::debug('        <<<< insertTempWorkingTimeDate  $this->user_code = '.$this->user_code);
+        Log::debug('        <<<< insertTempWorkingTimeDate  $this->user_name = '.$this->user_name);
         try{
             DB::table($this->table)->insert(
                 [

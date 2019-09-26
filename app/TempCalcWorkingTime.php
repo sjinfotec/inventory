@@ -856,6 +856,9 @@ class TempCalcWorkingTime extends Model
      * @return void
      */
     public function insertTempCalcWorkingtime(){
+        Log::debug('        <<<< insertTempCalcWorkingtime  $this->working_date = '.$this->working_date);
+        Log::debug('        <<<< insertTempCalcWorkingtime  $this->user_code = '.$this->user_code);
+        Log::debug('        <<<< insertTempCalcWorkingtime  $this->user_name = '.$this->user_name);
         try{
             // ''をnullにする
             $retValue = (strlen($this->record_datetime) > 0) ? $this->record_datetime : null;

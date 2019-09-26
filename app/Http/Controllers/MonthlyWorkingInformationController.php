@@ -132,6 +132,26 @@ class MonthlyWorkingInformationController extends Controller
                 if(!isset($record['leaving5'])){
                    $working_time_dates[$index1]['date'][$index2]['leaving5'] = "";
                 }
+                if(!isset($record['attendance1'])){
+                    if(!isset($record['total_working_times'])){
+                        $working_time_dates[$index1]['date'][$index2]['total_working_times'] = "";
+                    }
+                }
+                if(!isset($record['attendance1'])){
+                    if(!isset($record['regular_working_times'])){
+                        $working_time_dates[$index1]['date'][$index2]['regular_working_times'] = "";
+                    }
+                }
+                if(!isset($record['attendance1'])){
+                    if(!isset($record['off_hours_working_hours'])){
+                        $working_time_dates[$index1]['date'][$index2]['off_hours_working_hours'] = "";
+                    }
+                }
+                if(!isset($record['attendance1'])){
+                    if(!isset($record['late_night_overtime_hours'])){
+                        $working_time_dates[$index1]['date'][$index2]['late_night_overtime_hours'] = "";
+                    }
+                }
             }
         }
         
@@ -467,6 +487,10 @@ class MonthlyWorkingInformationController extends Controller
             'leaving3' => $result->leaving_time_3,
             'leaving4' => $result->leaving_time_4,
             'leaving5' => $result->leaving_time_5,
+            'total_working_times' => $result->total_working_times,
+            'regular_working_times' => $result->regular_working_times,
+            'off_hours_working_hours' => $result->off_hours_working_hours,
+            'late_night_overtime_hours' => $result->late_night_overtime_hours,
             'remark_data' => $remark_data
         );
     }
