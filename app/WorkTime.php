@@ -637,11 +637,10 @@ class WorkTime extends Model
                 $join->on('t14.code', '=', 't1.code');
                 $join->on('t14.max_apply_term_from', '=', 't1.apply_term_from');
             });
-        if ($business_kubun != Config::get('const.C007.basic')) {
+        /*if ($business_kubun != Config::get('const.C007.basic')) {
             $mainquery->whereNotNull('t2.record_datetime');
-        }
+        }*/
         $result = $mainquery
-            ->where('t1.role', '<', 10)
             ->where('t1.is_deleted', '=', 0)
             ->orderBy('t1.department_code', 'asc')
             ->orderBy('t1.employment_status', 'asc')

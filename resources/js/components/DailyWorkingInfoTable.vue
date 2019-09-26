@@ -20,17 +20,39 @@
                     <td class="text-center align-middle w-15">私用外出</td>
                     <td class="text-center align-middle w-15">私用外出戻り</td>
                     <td class="text-center align-middle w-15">勤務状態</td>
-                    <td class="text-center align-middle w-15">労働合計時間</td>
+                    <td class="text-center align-middle w-15"
+                      data-toggle="tooltip"
+                      data-placement="top"
+                      v-bind:title="edtString"
+                      @mouseover="edttooltips('実働時間','所定労働時間',predeterTimeName,predeterNightTimeName)"
+                    >実働時間</td>
+                    <td class="text-center align-middle w-15">所定労働時間</td>
                     <td class="text-center align-middle w-15">{{ predeterTimeName }}</td>
                     <td class="text-center align-middle w-15">{{ predeterNightTimeName }}</td>
-                    <td class="text-center align-middle w-15">未就労時間</td>
+                    <td class="text-center align-middle w-15"
+                      data-toggle="tooltip"
+                      data-placement="top"
+                      v-bind:title="edtString"
+                      @mouseover="edttooltips('未就労時間','私用外出時間','','')"
+                    >未就労時間</td>
                     <td class="text-center align-middle w-35 mw-rem-20">備考</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'total'">
-                    <td class="text-center align-middle w-15">労働合計時間</td>
+                    <td class="text-center align-middle w-15"
+                      data-toggle="tooltip"
+                      data-placement="top"
+                      v-bind:title="edtString"
+                      @mouseover="edttooltips('実働時間','所定労働時間',predeterTimeName,predeterNightTimeName)"
+                    >実働時間</td>
+                    <td class="text-center align-middle w-15">所定労働時間</td>
                     <td class="text-center align-middle w-15">{{ predeterTimeName }}</td>
                     <td class="text-center align-middle w-15">{{ predeterNightTimeName }}</td>
-                    <td class="text-center align-middle w-15">未就労時間</td>
+                    <td class="text-center align-middle w-15"
+                      data-toggle="tooltip"
+                      data-placement="top"
+                      v-bind:title="edtString"
+                      @mouseover="edttooltips('未就労時間','私用外出時間','','')"
+                    >未就労時間</td>
                     <td class="text-center align-middle w-15">出勤者数</td>
                     <td class="text-center align-middle w-15">外出者数</td>
                     <td class="text-center align-middle w-15">有給休暇者数</td>
@@ -56,6 +78,7 @@
                     <td class="text-center align-middle">{{ calcList.missing_middle_return_time_1 }}</td>
                     <td class="text-center align-middle">{{ calcList.working_status_name }}</td>
                     <td class="text-center align-middle">{{ calcList.total_working_times }}</td>
+                    <td class="text-center align-middle">{{ calcList.regular_working_times }}</td>
                     <td class="text-center align-middle">{{ calcList.off_hours_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.late_night_overtime_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.not_employment_working_hours }}</td>
@@ -65,6 +88,7 @@
                     v-for="(calcList,index) in calcLists"
                   >
                     <td class="text-center align-middle">{{ calcList.total_working_times }}</td>
+                    <td class="text-center align-middle">{{ calcList.regular_working_times }}</td>
                     <td class="text-center align-middle">{{ calcList.off_hours_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.late_night_overtime_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.not_employment_working_hours }}</td>
@@ -111,6 +135,23 @@ export default {
   // マウント時
   mounted() {
     console.log("dailyworkinginfotable  マウント");
+  },
+  data: function() {
+    return {
+      edtString: ""
+    };
+  },
+  methods: {
+    // tooltips
+    edttooltips: function(value1, value2, value3, value4) {
+      if (value1 === '実働時間') {
+        this.edtString = value1 + "=" + value2 + "+" + value3 + "+" + value4;
+      } else {
+        if (value1 === '未就労時間') {
+          this.edtString = value1 + "=" + value2;
+        }
+      }
+    }
   }
 };
 </script>

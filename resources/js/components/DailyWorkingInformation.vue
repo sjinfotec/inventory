@@ -22,7 +22,7 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       for="target_fromdate"
-                    >指定日付<span class="color-red">＊</span></span>
+                    >指定日付<span class="color-red">[*]</span></span>
                   </div>
                   <input-datepicker
                     v-bind:default-Date="defaultDate"

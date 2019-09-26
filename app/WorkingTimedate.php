@@ -1465,7 +1465,13 @@ class WorkingTimedate extends Model
                             $join->on($this->table_temp_working_time_dates.'.employment_status', '=', $this->table.'.employment_status');
                             $join->on($this->table_temp_working_time_dates.'.department_code', '=', $this->table.'.department_code');
                             $join->on($this->table_temp_working_time_dates.'.user_code', '=', $this->table.'.user_code');
-                        });
+                        })
+                        ->orWhereNotNull($this->table_temp_working_time_dates.'.attendance_time_1')
+                        ->orWhereNotNull($this->table_temp_working_time_dates.'.leaving_time_1')
+                        ->orWhereNotNull($this->table_temp_working_time_dates.'.missing_middle_time_1')
+                        ->orWhereNotNull($this->table_temp_working_time_dates.'.missing_middle_return_time_1')
+                        ->orWhereNotNull($this->table_temp_working_time_dates.'.public_going_out_time_1')
+                        ->orWhereNotNull($this->table_temp_working_time_dates.'.public_going_out_return_time_1');
                 }
                 $mainquery = $this->setWhereSql($mainquery);
                 $result = $mainquery
@@ -1520,7 +1526,7 @@ class WorkingTimedate extends Model
 
         Log::debug('getWorkingTimeDateTimeSum in '.$dayormonth);
 
-        // 日時労働時間合計取得SQL作成
+        // 日次労働時間合計取得SQL作成
         try{
             \DB::enableQueryLog();
             $case_where = "CASE ifnull({0},0) WHEN 0 THEN '00:00' ";

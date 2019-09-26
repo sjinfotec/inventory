@@ -11,12 +11,23 @@
                 <thead>
                   <tr v-if="detailOrTotal === 'detail'" bgcolor="#add8e6">
                     <td class="text-center align-middle w-15">雇用形態</td>
-                    <td class="text-center align-middle w-15">労働合計時間</td>
+                    <td class="text-center align-middle w-15"
+                      data-toggle="tooltip"
+                      data-placement="top"
+                      v-bind:title="edtString"
+                      @mouseover="edttooltips('実働時間','所定労働時間','残業時間','深夜残業時間')"
+                    >実働時間</td>
+                    <td class="text-center align-middle w-15">所定労働時間</td>
                     <td class="text-center align-middle w-15">残業時間</td>
                     <td class="text-center align-middle w-15">深夜残業時間</td>
                     <td class="text-center align-middle w-15">公用外出時間</td>
                     <td class="text-center align-middle w-15">私用外出時間</td>
-                    <td class="text-center align-middle w-15">未就労時間</td>
+                    <td class="text-center align-middle w-15"
+                      data-toggle="tooltip"
+                      data-placement="top"
+                      v-bind:title="edtString"
+                      @mouseover="edttooltips('未就労時間','私用外出時間','','')"
+                    >未就労時間</td>
                     <td class="text-center align-middle w-15">出勤日数</td>
                     <td class="text-center align-middle w-15">有給休暇日数</td>
                     <td class="text-center align-middle w-15">特別休暇日数</td>
@@ -26,12 +37,23 @@
                     <td class="text-center align-middle w-35 mw-rem-20">備考</td>
                   </tr>
                   <tr v-if="calcLists.length && detailOrTotal === 'total'" bgcolor="#7fffd4">
-                    <td class="text-center align-middle w-15">労働合計時間</td>
+                    <td class="text-center align-middle w-15"
+                      data-toggle="tooltip"
+                      data-placement="top"
+                      v-bind:title="edtString"
+                      @mouseover="edttooltips('実働時間','所定労働時間','残業時間','深夜残業時間')"
+                    >実働時間</td>
+                    <td class="text-center align-middle w-15">所定労働時間</td>
                     <td class="text-center align-middle w-15">残業時間</td>
                     <td class="text-center align-middle w-15">深夜残業時間</td>
                     <td class="text-center align-middle w-15">公用外出時間</td>
                     <td class="text-center align-middle w-15">私用外出時間</td>
-                    <td class="text-center align-middle w-15">未就労時間</td>
+                    <td class="text-center align-middle w-15"
+                      data-toggle="tooltip"
+                      data-placement="top"
+                      v-bind:title="edtString"
+                      @mouseover="edttooltips('未就労時間','私用外出時間','','')"
+                    >未就労時間</td>
                     <td class="text-center align-middle w-15">出勤日数</td>
                     <td class="text-center align-middle w-15">有給休暇日数</td>
                     <td class="text-center align-middle w-15">特別休暇日数</td>
@@ -46,6 +68,7 @@
                   >
                     <td class="text-align-center">{{ calcLists.employment }}</td>
                     <td class="text-align-right">{{ calcLists.total_working_times }}</td>
+                    <td class="text-align-right">{{ calcLists.regular_working_times }}</td>
                     <td class="text-align-right">{{ calcLists.off_hours_working_hours }}</td>
                     <td class="text-align-right">{{ calcLists.late_night_overtime_hours }}</td>
                     <td class="text-align-right">{{ calcLists.public_going_out_hours }}</td>
@@ -63,6 +86,7 @@
                     v-for="(calcList,index) in calcLists"
                   >
                     <td class="text-align-center">{{ calcList.total_working_times }}</td>
+                    <td class="text-align-center">{{ calcList.regular_working_times }}</td>
                     <td class="text-align-center">{{ calcList.off_hours_working_hours }}</td>
                     <td class="text-align-center">{{ calcList.late_night_overtime_hours }}</td>
                     <td class="text-align-center">{{ calcList.public_going_out_hours }}</td>
@@ -99,6 +123,23 @@ export default {
       type: Array,
       required: true
     },
+  },
+  data: function() {
+    return {
+      edtString: ""
+    };
+  },
+  methods: {
+    // tooltips
+    edttooltips: function(value1, value2, value3, value4) {
+      if (value1 === '実働時間') {
+        this.edtString = value1 + "=" + value2 + "+" + value3 + "+" + value4;
+      } else {
+        if (value1 === '未就労時間') {
+          this.edtString = value1 + "=" + value2;
+        }
+      }
+    }
   }
 };
 </script>
