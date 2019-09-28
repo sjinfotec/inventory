@@ -136,6 +136,7 @@
             v-bind:calc-lists="calcresults"
             v-bind:predeter-time-name="predetertimename"
             v-bind:predeter-night-time-name="predeternighttimename"
+            v-bind:btn-mode="btnmodeswitch"
           ></daily-working-info-table>
           <!-- /panel body -->
         </div>
@@ -204,9 +205,10 @@ export default {
       messagedatauser: [],
       predetertimename: "",
       predeternighttimename: "",
+      dateName: "",
       messageshowsearch: false,
       issearchbutton: false,
-      btnmodeswitch: "detailswitch",
+      btnmodeswitch: "basicswitch",
       isswitchbutton: false,
       isswitchvisible: false,
       validate: false,
@@ -220,7 +222,6 @@ export default {
   methods: {
     // バリデーション
     checkForm: function(e) {
-      console.log("checkForm in ");
       this.validate = true;
       this.messagedatasserver = [];
       this.messagedatasfromdate = [];
@@ -241,7 +242,6 @@ export default {
           this.validate = false;
         }
       }
-      console.log("validate = true");
 
       if (this.validate) {
         return this.validate;
@@ -330,11 +330,16 @@ export default {
             if (this.resresults.sumresults != null) {
               this.sumresults = this.resresults.sumresults;
             }
+            if (this.resresults.datename != null) {
+              this.dateName = this.resresults.datename;
+              this.stringtext = "日次集計 " + this.dateName;
+            }
             if (this.resresults.messagedata != null) {
               this.messagedatasserver = this.resresults.messagedata;
             }
             console.log("calcresults" + Object.keys(this.calcresults).length);
             console.log("sumresults" + Object.keys(this.sumresults).length);
+            console.log("dateName" + this.dateName);
             console.log("messages" + Object.keys(this.messages).length);
             for (var key in this.calcresults) {
               this.isswitchvisible = true;

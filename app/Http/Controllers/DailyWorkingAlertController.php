@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\WorkTime;
+use App\Calendar;
 
 class DailyWorkingAlertController extends Controller
 {
@@ -100,7 +101,24 @@ class DailyWorkingAlertController extends Controller
             $this->array_messagedata[] = $work_time->getMassegedataAttribute();
         }
 
-        return response()->json(['alertresults' => $working_time_alerts, Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
+        $date_name = '';
+        $calender_model = new Calendar();
+        $calender_model->setDateAttribute(date_format(new Carbon($datefrom), 'Ymd'));
+        $calendars = $calender_model->getCalenderDate();
+        if (count($calendars) > 0) {
+            foreach ($calendars as $result) {
+                if (isset($result->date_name)) {
+                    $date_name = $result->date_name;
+                }
+                break;
+            }
+        }
+
+
+        return response()->json([
+            'alertresults' => $working_time_alerts,
+            'datename' => $date_name,
+            Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
     }
 
 }

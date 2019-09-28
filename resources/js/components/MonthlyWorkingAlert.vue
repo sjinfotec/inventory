@@ -6,12 +6,10 @@
       <div class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
-          <div class="card-header bg-transparent pb-0 border-0">
-            <daily-working-information-panel-header
-              v-bind:header-text1="'期首月または１月（検索区分）から指定年月の間でアラートを表示'"
-              v-bind:header-text2="'雇用形態や所属部署でフィルタリングして表示できます'"
-            ></daily-working-information-panel-header>
-          </div>
+          <daily-working-information-panel-header
+            v-bind:header-text1="'期首月または１月（検索区分）から指定年月の間でアラートを表示'"
+            v-bind:header-text2="'雇用形態や所属部署でフィルタリングして表示できます'"
+          ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="card-body pt-2">
             <!-- panel contents -->
@@ -21,7 +19,7 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <span class="input-group-text font-size-sm line-height-xs label-width-90" id="basic-addon1">指定年月<span class="color-red">＊</span></span>
+                    <span class="input-group-text font-size-sm line-height-xs label-width-90" id="basic-addon1">指定年月<span class="color-red">[*]</span></span>
                   </div>
                   <input-datepicker
                     v-bind:default-date="defaultDate"
@@ -36,7 +34,7 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <label class="input-group-text font-size-sm line-height-xs label-width-90" for="inputGroupSelect01">検索区分<span class="color-red">＊</span></label>
+                    <label class="input-group-text font-size-sm line-height-xs label-width-90" for="inputGroupSelect01">検索区分<span class="color-red">[*]</span></label>
                   </div>
                   <general-list
                     v-bind:identification-id="'C022'"
