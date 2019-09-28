@@ -237,14 +237,12 @@ class WorkTime extends Model
     {
         $date = date_create($value);
         $this->param_date_to = $date->format('Y/m/d').' 23:59:59';
-        Log::debug('$this->param_date_to = '.$this->param_date_to);
     }
 
     public function setParamdatetoNoneditAttribute($value)
     {
         $date = date_create($value);
         $this->param_date_to = $date->format('Y/m/d H:i:s');
-        Log::debug('$this->param_date_to = '.$this->param_date_to);
     }
 
     // 雇用形態
@@ -1007,9 +1005,9 @@ class WorkTime extends Model
      * @return void
      */
     public function getAlertData($targetdate){
+        \DB::enableQueryLog();
         // 日次労働時間取得SQL作成
         // subquery1    work_times
-        \DB::enableQueryLog();
         $subquery1 = DB::table($this->table)
             ->selectRaw(
                 'DATE_FORMAT('.$this->table.".record_time, '%Y%m%d') as record_date ");
@@ -1053,20 +1051,21 @@ class WorkTime extends Model
                 't2.check_max_time as check_max_time',
                 't2.check_interval as unused_check_interval',
                 't9.check_interval as check_interval',
+                't9.note as note',
                 't10.code_name as check_interval_name')
             ->selectRaw(
                 "concat(DATE_FORMAT(t2.record_time,'%Y年%m月%d日'),'(',substring('月火水木金土日',convert(t11.weekday_kubun+1,char),1),')') as record_date_name ");
         $alert_memo = '';
-        $alert_memo .= "case t7.code_name is null ";
-        $alert_memo .= "  when 1 then ";
-        $alert_memo .= "    case t8.code_name is null ";
-        $alert_memo .= "      when 1 then '' ";
-        $alert_memo .= "      else t8.code_name ";
+        $alert_memo .= "case ifnull(t7.code_name,'') ";
+        $alert_memo .= "  when '' then ";
+        $alert_memo .= "    case ifnull(t8.code_name ,'')  ";
+        $alert_memo .= "      when '' then ltrim(concat('',' ',t9.note)) ";
+        $alert_memo .= "      else ltrim(concat(t8.code_name, ' ', t9.note)) ";
         $alert_memo .= "    end ";
         $alert_memo .= "  else ";
-        $alert_memo .= "    case t8.code_name is null ";
-        $alert_memo .= "      when 1 then t7.code_name ";
-        $alert_memo .= "      else t7.code_name || ' ' || t8.code_name ";
+        $alert_memo .= "    case ifnull(t8.code_name ,'') ";
+        $alert_memo .= "      when '' then ltrim(concat(t7.code_name, ' ', t9.note)) ";
+        $alert_memo .= "      else ltrim(concat(t7.code_name, ' ', t8.code_name, ' ', t9.note)) ";
         $alert_memo .= "    end ";
         $alert_memo .= "end as alert_memo";
         $mainquery
@@ -1134,15 +1133,18 @@ class WorkTime extends Model
                 $join->on('t4.code', '=', 't1.code');
                 $join->on('t4.max_apply_term_from', '=', 't1.apply_term_from');
             });
-        $result = $mainquery
+
+        $mainquery
             ->where(function ($query) {
                 $query->where('t2.check_result', '>', 0)
-                      ->orWhere('t2.check_max_time', '>', 0);
-            })
-            ->orWhere(function ($query) {
-                $query->where('t2.mode', '=', Config::get('const.C005.attendance_time'))
-                      ->Where('t9.check_interval', '>', 0);
-            })
+                      ->orWhere('t2.check_max_time', '>', 0)
+                      ->orWhere('t9.note', '<>', '')
+                      ->orWhere(function ($query) {
+                        $query->Where('t2.mode', '=', Config::get('const.C005.attendance_time'))
+                              ->Where('t9.check_interval', '>', 0);
+                        });
+            });
+        $result = $mainquery
             ->where('t1.role', '<', 10)
             ->where('t1.is_deleted', '=', 0)
             ->orderBy('t2.record_date', 'asc')
@@ -1152,10 +1154,10 @@ class WorkTime extends Model
             ->orderBy('t1.code', 'asc')
             ->get();
         \Log::debug(
-            'sql_debug_log',
-            [
-                'getAlertData' => \DB::getQueryLog()
-            ]
+          'sql_debug_log',
+          [
+              'getAlertData' => \DB::getQueryLog()
+          ]
         );
 
         return $result;

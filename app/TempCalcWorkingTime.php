@@ -286,13 +286,11 @@ class TempCalcWorkingTime extends Model
     // 打刻時刻
     public function getRecordtimeAttribute()
     {
-        Log::DEBUG('getRecordtimeAttribute '.$this->record_time);
         return $this->record_time;
     }
 
     public function setRecordtimeAttribute($value)
     {
-        Log::DEBUG('setRecordtimeAttribute '.$value);
         $this->record_time = $value;
     }
 

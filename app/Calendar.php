@@ -215,22 +215,31 @@ class Calendar extends Model
      */
     public function getCalenderDate(){
         $data = DB::table($this->table)
-        ->select(
-                'date',
-                'weekday_kubun',
-                'business_kubun',
-                'holiday_kubun'
-        );
+            ->select(
+                $this->table.'.date',
+                $this->table.'.weekday_kubun',
+                $this->table.'.business_kubun',
+                $this->table.'.holiday_kubun'
+            )
+            ->selectRaw(
+                "concat(
+                    DATE_FORMAT(".$this->table.".date,'%Y年%m月%d日'),'(',substring('月火水木金土日',convert(".$this->table.".weekday_kubun+1,char),1),') '
+                , ifnull(".$this->table_public_holidays.".name, '')) as date_name ");
+
+        $data->leftJoin($this->table_public_holidays, function ($join) { 
+            $join->on($this->table_public_holidays.'.date', '=', $this->table.'.date')
+                ->where($this->table_public_holidays.'.is_deleted',0);
+        });
         if(isset($this->date)){
-            $data->where('date', $this->date);
+            $data->where($this->table.'.date', $this->date);
         }
         if(isset($this->business_kubun)){
-            $data->where('business_kubun',$this->business_kubun);
+            $data->where($this->table.'.business_kubun',$this->business_kubun);
         }
         if(isset($this->holiday_kubun)){
-            $data->where('holiday_kubun',$this->holiday_kubun);
+            $data->where($this->table.'.holiday_kubun',$this->holiday_kubun);
         }
-        $data->where('is_deleted',0);
+        $data->where($this->table.'.is_deleted',0);
         $result = $data->get();
 
 
@@ -331,8 +340,6 @@ class Calendar extends Model
      * @return void
      */
     public function delCalenderDateYear($fromdate, $todate){
-        Log::debug('delCalenderDateYear in $fromdate = '.$fromdate);
-        Log::debug('delCalenderDateYear in $todate = '.$todate);
 
         $result = true;
 

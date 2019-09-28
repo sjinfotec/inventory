@@ -6,12 +6,10 @@
       <div class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
-          <div class="card-header bg-transparent pb-0 border-0">
-            <daily-working-information-panel-header
-              v-bind:header-text1="'年月を指定して集計を表示する'"
-              v-bind:header-text2="'雇用形態や所属部署でフィルタリングして表示できます'"
-            ></daily-working-information-panel-header>
-          </div>
+          <daily-working-information-panel-header
+            v-bind:header-text1="'年月を指定して集計を表示する'"
+            v-bind:header-text2="'雇用形態や所属部署でフィルタリングして表示できます'"
+          ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="card-body pt-2">
             <!-- panel contents -->

@@ -29,8 +29,6 @@ class ApiCommonController extends Controller
      */
     public function getUserList(Request $request){
 
-        Log::DEBUG('$getUserList param= $request->getdo '.$request->getdo);
-        Log::DEBUG('$getUserList param= $request->targetdate '.$request->targetdate);
         // パラメータチェック　getdoは必須
         if (!isset($request->getdo)) { return null; }
         $getdo = $request->getdo;
@@ -254,7 +252,6 @@ class ApiCommonController extends Controller
             ->value('role');
         if(!isset($userrole)) { return null; }
 
-        Log::DEBUG('$getUserRole end '.$userrole);
         return $userrole;
     }
         
@@ -319,9 +316,7 @@ class ApiCommonController extends Controller
      * @return list statuses
      */
     public function getEmploymentStatusList(){
-        Log::DEBUG('$getEmploymentStatusList in ');
         $statuses = DB::table($this->table_generalcodes)->where('identification_id', Config::get('const.C001.value'))->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
-        Log::DEBUG('$getEmploymentStatusList end ');
         return $statuses;
     }
 
@@ -403,7 +398,6 @@ class ApiCommonController extends Controller
      */
     public function getRequestGeneralList(Request $request){
         // パラメータチェック
-        Log::DEBUG('$getRequestGeneralList in '.$request->identificationid);
         if (!isset($request->identificationid)) { return null; }
         return $this->getGeneralList($request->identificationid);
     }
@@ -476,14 +470,14 @@ class ApiCommonController extends Controller
      * @return 
      */
     public function analyzeTimeTable($timetables, $working_time_kubun, $working_timetable_no){
-        Log::DEBUG('analyzeTimeTable in $working_time_kubun = '.$working_time_kubun);
-        Log::DEBUG('analyzeTimeTable in $working_timetable_no = '.$working_timetable_no);
+        Log::DEBUG('        タイムテーブルの分解 analyzeTimeTable in $working_time_kubun = '.$working_time_kubun);
+        Log::DEBUG('        タイムテーブルの分解 analyzeTimeTable in $working_timetable_no = '.$working_timetable_no);
         $array_times = array();
         if ($working_time_kubun != Config::get('const.C004.out_of_regular_working_time')) {
             $filtered = $timetables->where('no', $working_timetable_no)->where('working_time_kubun', $working_time_kubun);
             foreach($filtered as $result_time) {
-                Log::DEBUG('$filtered from_time = '. $result_time->from_time);
-                Log::DEBUG('$filtered to_time = '.$result_time->to_time);
+                Log::DEBUG('            $filtered from_time = '. $result_time->from_time);
+                Log::DEBUG('            $filtered to_time = '.$result_time->to_time);
                 if (isset($result_time->from_time) && isset($result_time->to_time)) {
                     $array_times[] = array('from_time' => $result_time->from_time , 'to_time' => $result_time->to_time);
                 }
@@ -502,18 +496,18 @@ class ApiCommonController extends Controller
                 ->sortBy('from_time');
             foreach($filtered as $result_time) {
                 if (isset($result_time->from_time) && isset($result_time->to_time)) {
-                    Log::DEBUG('analyzeTimeTable $result_time->from_time = '.$result_time->from_time);
-                    Log::DEBUG('analyzeTimeTable $result_time->to_time = '.$result_time->to_time);
+                    Log::DEBUG('            analyzeTimeTable $result_time->from_time = '.$result_time->from_time);
+                    Log::DEBUG('            analyzeTimeTable $result_time->to_time = '.$result_time->to_time);
                     $dt = new Carbon('2019-08-01 '.$result_time->from_time);
                     $check_from_hour = date_format($dt, 'H');
                     $check_from_minute = date_format($dt, 'i');
                     $dt = new Carbon('2019-08-01 '.$result_time->to_time);
                     $check_to_hour = date_format($dt, 'H');
                     $check_to_minute = date_format($dt, 'i');
-                    Log::DEBUG('analyzeTimeTable check_from_hour = '.$check_from_hour);
-                    Log::DEBUG('analyzeTimeTable check_from_minute = '.$check_from_minute);
-                    Log::DEBUG('analyzeTimeTable check_to_hour = '.$check_to_hour);
-                    Log::DEBUG('analyzeTimeTable check_to_minute = '.$check_to_hour);
+                    Log::DEBUG('            analyzeTimeTable check_from_hour = '.$check_from_hour);
+                    Log::DEBUG('            analyzeTimeTable check_from_minute = '.$check_from_minute);
+                    Log::DEBUG('            analyzeTimeTable check_to_hour = '.$check_to_hour);
+                    Log::DEBUG('            analyzeTimeTable check_to_minute = '.$check_to_hour);
                     if ($result_time->from_time < $result_time->to_time) {
                         for ($i=(int)$check_from_hour;$i<=$check_to_hour;$i++) {
                             if ($i == (int)$check_from_hour) {      // １回目
@@ -604,8 +598,8 @@ class ApiCommonController extends Controller
             $array_times = $temp_times;
         }
         foreach($array_times as $item) {
-            Log::DEBUG(' result --- analyzeTimeTable in $array_time from_time = '.$item['from_time']);
-            Log::DEBUG(' result --- analyzeTimeTable in $array_time to_time = '.$item['to_time']);
+            Log::DEBUG('             タイムテーブルの分解 result --- analyzeTimeTable in $array_time from_time = '.$item['from_time']);
+            Log::DEBUG('             タイムテーブルの分解 result --- analyzeTimeTable in $array_time to_time = '.$item['to_time']);
         }
         return $array_times;
     }
@@ -654,19 +648,14 @@ class ApiCommonController extends Controller
      */
     public function convTimeToDate($target_time, $basic_time, $basic_date){
         // 日付付与
-        Log::DEBUG('convTimeToDate $target_time = '.$target_time);
-        Log::DEBUG('convTimeToDate $basic_time = '.$basic_time);
-        Log::DEBUG('convTimeToDate $basic_date = '.$basic_date);
         $convDateTime = null;
         $dt = new Carbon($basic_time);
         if ($target_time < date_format($dt, 'H:i:s')) {
             $dt = new Carbon($target_time);
             $convDateTime = $this->getNextDay($basic_date, 'Y-m-d').' '.date_format($dt, 'H:i:s');
-            Log::DEBUG('convTimeToDate next day  = '.$convDateTime);
         } else {
             $dt = new Carbon($basic_date);
             $convDateTime = date_format($dt, 'Y-m-d').' '.$target_time;
-            Log::DEBUG('convTimeToDate current day  = '.$convDateTime);
         }
 
         return $convDateTime;
@@ -681,18 +670,12 @@ class ApiCommonController extends Controller
      */
     public function convTimeToDateTarget($target_time, $basic_from_time, $basic_to_time){
         // 日付付与
-        Log::DEBUG('convTimeToDateTarget $target_time = '.$target_time);
-        Log::DEBUG('convTimeToDateTarget $basic_from_time = '.$basic_from_time);
-        Log::DEBUG('convTimeToDateTarget $basic_to_time = '.$basic_to_time);
         $dt_from = new Carbon($basic_from_time);
         $dt_from_ymd = date_format($dt_from, 'Y-m-d');
         $dt_from23 = new Carbon($dt_from_ymd.' 23:59:59');
         $dt_from24 = $dt_from23->addSecond();
         $dt_target_time = new Carbon($dt_from_ymd.' '.$target_time);
-        Log::DEBUG('convTimeToDateTarget from $dt_from = '.$dt_from);
-        Log::DEBUG('convTimeToDateTarget from $dt_from24 = '.$dt_from24);
         if ($dt_target_time >= $dt_from && $dt_target_time <= $dt_from24) {
-            Log::DEBUG('convTimeToDateTarget from $dt_target_time = '.$dt_target_time);
             return $dt_target_time;
         }
 
@@ -700,10 +683,7 @@ class ApiCommonController extends Controller
         $dt_from_ymd = date_format($dt_from, 'Y-m-d');
         $dt_from00 = new Carbon($dt_from_ymd.' 00:00:00');
         $dt_target_time = new Carbon($dt_from_ymd.' '.$target_time);
-        Log::DEBUG('convTimeToDateTarget from $dt_from00 = '.$dt_from00);
-        Log::DEBUG('convTimeToDateTarget from $dt_from = '.$dt_from);
         if ($dt_target_time >= $dt_from00 && $dt_target_time <= $dt_from) {
-            Log::DEBUG('convTimeToDateTarget to $dt_target_time = '.$dt_target_time);
             return $dt_target_time;
         }
 
@@ -859,7 +839,6 @@ class ApiCommonController extends Controller
         $from = new Carbon($from);
         $to   = new Carbon($to); 
         $interval = $from->diff($to);
-        Log::DEBUG('diffTimeTime interval = '.$interval);
         // 時間単位の差
         $dif_time = $interval->format('%H:%I:%S');
         return $dif_time;
@@ -873,10 +852,7 @@ class ApiCommonController extends Controller
     public function diffTimeSerial($time_from, $time_to){
         $from = strtotime(date('Y-m-d H:i:00',strtotime($time_from)));
         $to   = strtotime(date('Y-m-d H:i:00',strtotime($time_to))); 
-        Log::DEBUG('diffTimeSerial() from = '.$from);
-        Log::DEBUG('diffTimeSerial() to = '.$to);
         $interval = $to - $from;
-        Log::DEBUG('diffTimeSerial() interval = '.$interval);
         return $interval;
     }
     
@@ -1172,11 +1148,8 @@ class ApiCommonController extends Controller
         } elseif ($time_unit == Config::get('const.C010.non')) {
             // なし
             $result_round_time = $round_time / 60;
-            Log::DEBUG('$round_time'.$round_time);
-            Log::DEBUG('$result_round_time'.$result_round_time);
         } else {
             $result_round_time = $round_time / 60;
-            Log::DEBUG(Config::get('const.LOG_MSG.not_set_time_rounding'));
         }
 
         return $result_round_time;

@@ -22,7 +22,7 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       for="target_fromdate"
-                    >指定日付<span class="color-red">＊</span></span>
+                    >指定日付<span class="color-red">[*]</span></span>
                   </div>
                   <input-datepicker
                     v-bind:default-Date="defaultDate"
@@ -144,6 +144,7 @@ export default {
       defaultDate: new Date(),
       datejaFormat: "",
       hrefindex: "",
+      dateName: "",
       resresults: [],
       alertresults: [],
       messagedatasserver: [],
@@ -254,6 +255,10 @@ export default {
             this.resresults = response.data;
             if (this.resresults.alertresults != null) {
               this.alertresults = this.resresults.alertresults;
+            }
+            if (this.resresults.datename != null) {
+              this.dateName = this.resresults.datename;
+              this.stringtext = this.dateName;
             }
             if (this.resresults.messagedata != null) {
               this.messagedatasserver = this.resresults.messagedata;
