@@ -123,6 +123,15 @@
                 <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting>
               </div>
               <!-- /.col -->
+              <!-- col -->
+              <div v-if="isswitchvisible" class="col-md-12 pb-2">
+                <btn-work-time
+                  v-on:switchclick-event="switchclick"
+                  v-bind:btn-mode="btnmodeswitch"
+                  v-bind:is-push="isswitchbutton">
+                </btn-work-time>
+              </div>
+              <!-- /.col -->
             </div>
             <!-- /.row -->
             <!-- .row -->
@@ -375,6 +384,9 @@ export default {
       issearchbutton: false,
       isupdatebutton: false,
       iscsvbutton: true,
+      btnmodeswitch: "basicswitch",
+      isswitchbutton: false,
+      isswitchvisible: false,
       validate: false,
       initialized: false
     };
@@ -480,9 +492,10 @@ export default {
     userChanges: function(value) {
       this.valueuser = value;
     },
-    // 集計開始ボタンがクリックされた場合の処理
+    // 表示ボタンがクリックされた場合の処理
     searchclick: function(e) {
       this.serchorupdate = "search";
+      this.isswitchvisible = false;
       this.validate = this.checkForm(e);
       if (this.validate) {
         this.issearchbutton = true;
@@ -506,6 +519,7 @@ export default {
               this.calcresults = this.resresults.calcresults;
               if (Object.keys(this.calcresults).length > 0) {
                 this.iscsvbutton = false;
+                this.isswitchvisible = true;
               }
             }
             if (this.resresults.sumresults != null) {
@@ -532,6 +546,15 @@ export default {
             alert("月次集計エラー");
           });
       }
+    },
+    // 詳細表示ボタンがクリックされた場合の処理
+    switchclick: function() {
+      if (this.btnmodeswitch == "basicswitch") {
+        this.btnmodeswitch = "detailswitch";
+      } else {
+        this.btnmodeswitch = "basicswitch";
+      }
+
     },
     // 最新更新開始ボタンがクリックされた場合の処理
     updateclick: function(e) {
@@ -588,7 +611,6 @@ export default {
     // ----------------- 共通メソッド ----------------------------------
     // 確認ダイアログ処理
     infoDialog: function(e, value, title, text) {
-      this.itemClear();
       this.$swal({
         title: title,
         text: text,
@@ -598,6 +620,7 @@ export default {
       }).then(willDelete => {
         if (willDelete) {
           if (value === 'update') {
+            this.itemClear();
             this.updNew(e);
           }
         }

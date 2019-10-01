@@ -103,6 +103,8 @@
                 </btn-work-time>
                 <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting>
               </div>
+              <!-- /.col -->
+              <!-- col -->
               <div v-if="isswitchvisible" class="col-md-12 pb-2">
                 <btn-work-time
                   v-on:switchclick-event="switchclick"
@@ -163,6 +165,7 @@
               v-bind:calc-lists="sumresults"
               v-bind:predeter-time-name="predetertimename"
               v-bind:predeter-night-time-name="predeternighttimename"
+              v-bind:btn-mode="btnmodeswitch"
             ></daily-working-info-table>
             <!-- /.row -->
             <!-- /panel contents -->
@@ -301,8 +304,8 @@ export default {
     },
     // 集計開始ボタンがクリックされた場合の処理
     searchclick: function(e) {
-      this.validate = this.checkForm(e);
       this.isswitchvisible = false;
+      this.validate = this.checkForm(e);
       console.log("this.valuefromdate" + this.valuefromdate);
       console.log("this.valueemploymentstatus" + this.valueemploymentstatus);
       console.log("this.valuedepartment" + this.valuedepartment);
