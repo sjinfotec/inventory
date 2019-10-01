@@ -176,6 +176,11 @@ class MonthlyWorkingInformationController extends Controller
     public function calc(Request $request)
     {
         Log::debug('--------------- 最新更新集計 開始 monthly calc in --------------------');
+        Log::debug('    パラメータ  $request->datefrom= '.$request->datefrom);
+        Log::debug('    パラメータ  $request->displaykbn = '.$request->displaykbn);
+        Log::debug('    パラメータ  $request->employmentstatus = '.$request->employmentstatus);
+        Log::debug('    パラメータ  $request->departmentcode = '.$request->departmentcode);
+        Log::debug('    パラメータ  userc$request->usercodeode = '.$request->usercode);
 
         $calc_result = true;
         $working_time_dates = array();
@@ -190,11 +195,6 @@ class MonthlyWorkingInformationController extends Controller
         $employmentstatus = $apicommon->setRequestQeury($request->employmentstatus);
         $departmentcode = $apicommon->setRequestQeury($request->departmentcode);
         $usercode = $apicommon->setRequestQeury($request->usercode);
-        Log::debug('$datefrom = '.$datefrom);
-        Log::debug('$displaykbn = '.$displaykbn);
-        Log::debug('$employmentstatus = '.$employmentstatus);
-        Log::debug('$departmentcode = '.$departmentcode);
-        Log::debug('$usercode = '.$usercode);
 
         // メッセージ設定collect
         $this->collect_massegedata = collect();
@@ -216,14 +216,10 @@ class MonthlyWorkingInformationController extends Controller
         $work_time->setParamUsercodeAttribute($usercode);
         $chk_result = $work_time->chkWorkingTimeData();
         if ($chk_result) {
-            Log::debug('work_timeのパラメータのチェック OK ');
             // 日次集計の計算を呼ぶ
             $daily_controller = new DailyWorkingInformationController();
             $calc_date = $datefrom_date;
-            Log::debug('first $calc_date = '.$calc_date);
             while (true) {
-                Log::debug('$calc_date = '.$calc_date);
-                Log::debug('$dateto_date = '.$dateto_date);
                 if ($calc_date > $dateto_date) { break; }
                 // 打刻時刻を取得
                 $work_time->setParamDatefromAttribute($calc_date);
@@ -233,6 +229,11 @@ class MonthlyWorkingInformationController extends Controller
                 $work_time->setParamUsercodeAttribute($usercode);
                 // 休日判定
                 $business_kubun = $apicommon->jdgBusinessKbn($calc_date);
+                Log::debug('        addDailyCalc パラメータ   Datefrom,Dateto = '.$calc_date);
+                Log::debug('        addDailyCalc パラメータ   employmentstatus = '.$employmentstatus);
+                Log::debug('        addDailyCalc パラメータ   Departmentcode = '.$departmentcode);
+                Log::debug('        addDailyCalc パラメータ   Usercode = '.$usercode);
+                Log::debug('        addDailyCalc パラメータ   business_kubun = '.$business_kubun);
                 $calc_result = $daily_controller->addDailyCalc(
                     $work_time,
                     $calc_date,
@@ -243,7 +244,6 @@ class MonthlyWorkingInformationController extends Controller
                     $business_kubun
                 );
                 $calc_date = $calc_date->addDay(1);
-                Log::debug('$calc_date = '.$calc_date);
             }
         } else {
             $calc_result = false;
