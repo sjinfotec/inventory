@@ -242,6 +242,7 @@
             <monthly-working-info-table
               v-bind:detail-or-total="'detail'"
               v-bind:calc-lists="calclist"
+              v-bind:btn-mode="btnmodeswitch"
             ></monthly-working-info-table>
             <!-- /.row -->
             <!-- /.panel contents -->
@@ -276,13 +277,13 @@
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.workingdate }}</td>
                                 <td
-                                  v-if="calclisttimedate.attendance1 != '00:00' || calclisttimedate.leaving1 != '00:00'"
+                                  v-if="calclisttimedate.attendance != '00:00' || calclisttimedate.leaving != '00:00'"
                                   class="text-center align-middle"
-                                >{{ calclisttimedate.attendance1 }}</td>
+                                >{{ calclisttimedate.attendance }}</td>
                                 <td
-                                  v-if="calclisttimedate.attendance1 != '00:00' || calclisttimedate.leaving1 != '00:00'"
+                                  v-if="calclisttimedate.attendance != '00:00' || calclisttimedate.leaving != '00:00'"
                                   class="text-center align-middle"
-                                >{{ calclisttimedate.leaving1 }}</td>
+                                >{{ calclisttimedate.leaving }}</td>
                                 <td
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.total_working_times }}</td>
@@ -335,6 +336,7 @@
             <monthly-working-info-table
               v-bind:detail-or-total="'total'"
               v-bind:calc-lists="sumresults"
+              v-bind:btn-mode="btnmodeswitch"
             ></monthly-working-info-table>
             <!-- /.row -->
             <!-- /panel contents -->
