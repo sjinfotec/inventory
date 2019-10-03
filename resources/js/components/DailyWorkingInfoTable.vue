@@ -26,6 +26,11 @@
                       v-bind:title="edtString"
                       @mouseover="edttooltips('実働時間 = 所定時間 + ',predeterTimeName,predeterNightTimeName,'')"
                     >実働時間</td>
+                    <!--  <td class="text-center align-middle css-fukidashi"
+                      @mouseover="edttooltips('実働時間 = 所定時間 + ',predeterTimeName,predeterNightTimeName,'')">
+                      <span class="text">実働時間</span>
+                      <span class="fukidashi">{{ edtString }}</span>
+                    </td> -->
                     <td class="text-center align-middle w-15">所定時間</td>
                     <td class="text-center align-middle w-15">{{ predeterTimeName }}</td>
                     <td class="text-center align-middle w-15">{{ predeterNightTimeName }}</td>
@@ -51,7 +56,7 @@
                     <td class="text-center align-middle w-15 color-royalblue"
                       data-toggle="tooltip"
                       data-placement="top"
-                      v-bind:title="edtString"
+                      v-bind:title="edtString1"
                       @mouseover="edttooltips('実働時間 = 所定時間 + ',predeterTimeName,predeterNightTimeName,'')"
                     >実働時間</td>
                     <td class="text-center align-middle w-15">所定時間</td>
@@ -73,8 +78,9 @@
                       data-toggle="tooltip"
                       data-placement="top"
                       v-bind:title="edtString"
+                      @click="edttooltips('実働時間 = 所定時間 + ',predeterTimeName,predeterNightTimeName,'')"
                       @mouseover="edttooltips('実働時間 = 所定時間 + ',predeterTimeName,predeterNightTimeName,'')"
-                    >実働時間</td>
+                    >実働時間?</td>
                     <td class="text-center align-middle w-15">所定時間</td>
                     <td class="text-center align-middle w-15">{{ predeterTimeName }}</td>
                     <td class="text-center align-middle w-15">{{ predeterNightTimeName }}</td>
@@ -244,7 +250,13 @@ export default {
   },
   data: function() {
     return {
-      edtString: ""
+      edtString: "",
+      edtString1: "",
+      tipStyle: {  // 後述のスタイル用オブジェクト
+          position: 'absolute',
+          top: '0px',
+          left: '0px',
+      }
     };
   },
   methods: {

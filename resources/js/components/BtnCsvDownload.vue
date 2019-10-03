@@ -4,6 +4,8 @@
   </button>
 </template>
 <script>
+import moment from "moment";
+
 export default {
   name: "btnCsvDownload",
   props: {
@@ -11,12 +13,12 @@ export default {
       type: Array,
       required: true
     },
-    isCsvbutton: {
-      type: Boolean,
-      required: true
-    },
     csvDate: {
       type: String,
+      required: ""
+    },
+    isCsvbutton: {
+      type: Boolean,
       required: true
     }
   },
@@ -43,7 +45,7 @@ export default {
 
         user_head =
           "\ufeff" +
-          "社員名,部署,雇用形態,勤務時間,所定労働時間,所定外労働時間,残業時間,深夜残業時間\n";
+          "社員名,部署,雇用形態\n";
 
         user_line =
           user["user_name"] +
@@ -51,20 +53,10 @@ export default {
           user["department"] +
           "," +
           user["employment"] +
-          "," +
-          user["total_working_times"] +
-          "," +
-          user["regular_working_times"] +
-          "," +
-          user["out_of_regular_working_times"] +
-          "," +
-          user["overtime_hours"] +
-          "," +
-          user["late_night_overtime_hours"] +
           "\n";
         data_head =
           "\ufeff" +
-          "日付,出勤1,退勤1,出勤2,退勤2,出勤3,退勤3,出勤4,退勤4,出勤5,退勤5,備考\n";
+          "日付,出勤,退勤,実働時間,所定時間,残業時間,深夜時間,備考\n";
 
         csv += user_head;
         csv += user_line;
@@ -76,37 +68,43 @@ export default {
           line =
             record["workingdate"] +
             "," +
-            record["attendance1"] +
+            record["attendance"] +
             "," +
-            record["leaving1"] +
+            record["leaving"] +
             "," +
-            record["attendance2"] +
+            record["total_working_times"] +
             "," +
-            record["leaving2"] +
+            record["regular_working_times"] +
             "," +
-            record["attendance3"] +
+            record["off_hours_working_hours"] +
             "," +
-            record["leaving3"] +
-            "," +
-            record["attendance4"] +
-            "," +
-            record["leaving4"] +
-            "," +
-            record["attendance5"] +
-            "," +
-            record["leaving5"] +
+            record["late_night_overtime_hours"] +
             "," +
             record["remark_data"] +
             "\n";
           csv += line;
         });
-        csv += "\n";
-        line = "";
+        user_line =
+          '合　　計' +
+          "," +
+          '' +
+          "," +
+          '' +
+          "," +
+          user["total_working_times"] +
+          "," +
+          user["regular_working_times"] +
+          "," +
+          user["off_hours_working_hours"] +
+          "," +
+          user["late_night_overtime_hours"] +
+          "\n\n";
+        csv += user_line;
       });
       let blob = new Blob([csv], { type: "text/csv" });
       let link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
-      link.download = this.csvDate + "_月次集計.csv";
+      link.download = moment().format('YYYYMMDDhhmmss') + "_" + this.csvDate + "次集計" + ".csv";
       link.click();
     }
   }

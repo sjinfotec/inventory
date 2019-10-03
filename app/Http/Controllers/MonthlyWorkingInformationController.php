@@ -102,54 +102,46 @@ class MonthlyWorkingInformationController extends Controller
         // CSV出力用　null → ""
         foreach ($working_time_dates as $index1 => $date) {
             foreach ($date['date'] as $index2 => $record) {
-                if(!isset($record['attendance1'])){
-                   $working_time_dates[$index1]['date'][$index2]['attendance1'] = "";
+                if(!isset($record['attendance'])){
+                   $working_time_dates[$index1]['date'][$index2]['attendance'] = "";
                 }
-                if(!isset($record['attendance2'])){
-                   $working_time_dates[$index1]['date'][$index2]['attendance2'] = "";
+                if(!isset($record['leaving'])){
+                   $working_time_dates[$index1]['date'][$index2]['leaving'] = "";
                 }
-                if(!isset($record['attendance3'])){
-                   $working_time_dates[$index1]['date'][$index2]['attendance3'] = "";
-                }
-                if(!isset($record['attendance4'])){
-                   $working_time_dates[$index1]['date'][$index2]['attendance4'] = "";
-                }
-                if(!isset($record['attendance5'])){
-                   $working_time_dates[$index1]['date'][$index2]['attendance5'] = "";
-                }
-                if(!isset($record['leaving1'])){
-                   $working_time_dates[$index1]['date'][$index2]['leaving1'] = "";
-                }
-                if(!isset($record['leaving2'])){
-                   $working_time_dates[$index1]['date'][$index2]['leaving2'] = "";
-                }
-                if(!isset($record['leaving3'])){
-                   $working_time_dates[$index1]['date'][$index2]['leaving3'] = "";
-                }
-                if(!isset($record['leaving4'])){
-                   $working_time_dates[$index1]['date'][$index2]['leaving4'] = "";
-                }
-                if(!isset($record['leaving5'])){
-                   $working_time_dates[$index1]['date'][$index2]['leaving5'] = "";
-                }
-                if(!isset($record['attendance1'])){
+                if(!isset($record['attendance']) && !isset($record['leaving'])){
                     if(!isset($record['total_working_times'])){
                         $working_time_dates[$index1]['date'][$index2]['total_working_times'] = "";
+                    } else{
+                        if($record['total_working_times'] == "00:00"){
+                            $working_time_dates[$index1]['date'][$index2]['total_working_times'] = "";
+                        }
                     }
                 }
-                if(!isset($record['attendance1'])){
+                if(!isset($record['attendance']) && !isset($record['leaving'])){
                     if(!isset($record['regular_working_times'])){
                         $working_time_dates[$index1]['date'][$index2]['regular_working_times'] = "";
+                    } else{
+                        if($record['regular_working_times'] == "00:00"){
+                            $working_time_dates[$index1]['date'][$index2]['regular_working_times'] = "";
+                        }
                     }
                 }
-                if(!isset($record['attendance1'])){
+                if(!isset($record['attendance']) && !isset($record['leaving'])){
                     if(!isset($record['off_hours_working_hours'])){
                         $working_time_dates[$index1]['date'][$index2]['off_hours_working_hours'] = "";
+                    } else{
+                        if($record['off_hours_working_hours'] == "00:00"){
+                            $working_time_dates[$index1]['date'][$index2]['off_hours_working_hours'] = "";
+                        }
                     }
                 }
-                if(!isset($record['attendance1'])){
+                if(!isset($record['attendance']) && !isset($record['leaving'])){
                     if(!isset($record['late_night_overtime_hours'])){
                         $working_time_dates[$index1]['date'][$index2]['late_night_overtime_hours'] = "";
+                    } else{
+                        if($record['late_night_overtime_hours'] == "00:00"){
+                            $working_time_dates[$index1]['date'][$index2]['late_night_overtime_hours'] = "";
+                        }
                     }
                 }
             }
@@ -473,26 +465,81 @@ class MonthlyWorkingInformationController extends Controller
         $week = array("日", "月", "火", "水", "木", "金", "土");
         $w = (int)$datetime->format('w');
         $week_data = $week[$w];
-        $remark_data = $result->remark_holiday_name;
-
+        $remark_data = '';
+        $remark_data .= $result->remark_holiday_name;
+        if (strlen($remark_data) == 0) {
+            $remark_data .= $result->remark_check_result;
+        } else {
+            $remark_data .= ' '.$result->remark_check_result;
+        }
+        if (strlen($remark_data) == 0) {
+            $remark_data .= $result->remark_check_max_times;
+        } else {
+            $remark_data .= ' '.$result->remark_check_max_times;
+        }
+        if (strlen($remark_data) == 0) {
+            $remark_data .= $result->remark_check_interval;
+        } else {
+            $remark_data .= ' '.$result->remark_check_interval;
+        }
         $this->array_date[] = array(
             'workingdate' => date_format($datetime, 'Y年m月d日').'（'.$week_data.'）',
-            'attendance1' => $result->attendance_time_1,
-            'attendance2' => $result->attendance_time_2,
-            'attendance3' => $result->attendance_time_3,
-            'attendance4' => $result->attendance_time_4,
-            'attendance5' => $result->attendance_time_5,
-            'leaving1' => $result->leaving_time_1,
-            'leaving2' => $result->leaving_time_2,
-            'leaving3' => $result->leaving_time_3,
-            'leaving4' => $result->leaving_time_4,
-            'leaving5' => $result->leaving_time_5,
+            'attendance' => $result->attendance_time_1,
+            'leaving' => $result->leaving_time_1,
             'total_working_times' => $result->total_working_times,
             'regular_working_times' => $result->regular_working_times,
             'off_hours_working_hours' => $result->off_hours_working_hours,
             'late_night_overtime_hours' => $result->late_night_overtime_hours,
             'remark_data' => $remark_data
         );
+        if (isset($result->attendance_time_2) || isset($result->leaving_time_2)) {
+            $this->array_date[] = array(
+                'workingdate' => '',
+                'attendance' => $result->attendance_time_2,
+                'leaving' => $result->leaving_time_2,
+                'total_working_times' => '',
+                'regular_working_times' => '',
+                'off_hours_working_hours' => '',
+                'late_night_overtime_hours' => '',
+                'remark_data' => ''
+            );
+        }
+        if (isset($result->attendance_time_3) || isset($result->leaving_time_3)) {
+            $this->array_date[] = array(
+                'workingdate' => '',
+                'attendance' => $result->attendance_time_3,
+                'leaving' => $result->leaving_time_3,
+                'total_working_times' => '',
+                'regular_working_times' => '',
+                'off_hours_working_hours' => '',
+                'late_night_overtime_hours' => '',
+                'remark_data' => ''
+            );
+        }
+        if (isset($result->attendance_time_4) || isset($result->leaving_time_4)) {
+            $this->array_date[] = array(
+                'workingdate' => '',
+                'attendance' => $result->attendance_time_4,
+                'leaving' => $result->leaving_time_4,
+                'total_working_times' => '',
+                'regular_working_times' => '',
+                'off_hours_working_hours' => '',
+                'late_night_overtime_hours' => '',
+                'remark_data' => ''
+            );
+        }
+        if (isset($result->attendance_time_5) || isset($result->leaving_time_5)) {
+            $this->array_date[] = array(
+                'workingdate' => '',
+                'attendance' => $result->attendance_time_5,
+                'leaving' => $result->leaving_time_5,
+                'total_working_times' => '',
+                'regular_working_times' => '',
+                'off_hours_working_hours' => '',
+                'late_night_overtime_hours' => '',
+                'remark_data' => ''
+            );
+        }
     }
 
     /**
