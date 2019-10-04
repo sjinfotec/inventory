@@ -76,7 +76,7 @@
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-120"
                         id="basic-addon1"
-                      >社員名</span>
+                      >社員名<span class="color-red">[*]</span></span>
                     </div>
                     <fvl-input
                       type="text"
@@ -112,14 +112,17 @@
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-120"
                         id="basic-addon1"
-                      >ログインID</span>
+                        data-toggle="tooltip"
+                        data-placement="top"
+                        v-bind:title="'登録は管理者が（半角英数字4-10文字）で決定入力します。'"
+                      >ログインID<span class="color-red">[*]</span></span>
                     </div>
                     <fvl-input
                       type="text"
                       class="form-control p-0"
                       :value.sync="form.code"
                       name="code"
-                      title="半角英数字4-10文字"
+                      title="登録は管理者が（半角英数字4-10文字）で決定入力します。"
                       pattern="^[a-zA-Z0-9]{4,10}$"
                     />
                   </div>
@@ -132,14 +135,17 @@
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-120"
                         id="basic-addon1"
-                      >パスワード</span>
+                        data-toggle="tooltip"
+                        data-placement="top"
+                        v-bind:title="'管理者が初期パスワードを（半角英数字6-12文字）で決定入力します。'"
+                      >パスワード<span class="color-red">[*]</span></span>
                     </div>
                     <fvl-input
                       type="text"
                       class="form-control p-0"
                       :value.sync="form.password"
                       name="password"
-                      title="半角英数字6-12文字"
+                      title="管理者が初期パスワードを（半角英数字6-12文字）で決定入力します。"
                       pattern="^[a-zA-Z0-9]{6,12}$"
                     />
                   </div>
@@ -191,7 +197,7 @@
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-120"
                         id="basic-addon1"
-                      >雇用形態</span>
+                      >雇用形態<span class="color-red">[*]</span></span>
                     </div>
                     <fvl-search-select
                       :selected.sync="form.status"
@@ -212,16 +218,41 @@
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-120"
                         id="basic-addon1"
+                        data-toggle="tooltip"
+                        data-placement="top"
+                        v-bind:title="'入力ない場合は「勤務時間設定」で登録した「タイムテーブルNO」が[1]の時間で登録します。'"
                       >通常勤務時間</span>
                     </div>
                     <fvl-search-select
                       :selected.sync="form.table_no"
                       class="p-0"
                       name="table_no"
+                      title="入力ない場合は「勤務時間設定」で登録した「タイムテーブルNO」が[1]の時間で登録します。"
                       :options="timeTableList"
                       :search-keys="['name']"
                       option-key="no"
                       option-value="name"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2" v-if="userCode=='' || userCode==null ">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <label
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        for="inputGroupSelect01"
+                      >勤怠権限<span class="color-red">[*]</span></label>
+                    </div>
+                    <fvl-search-select
+                      :selected.sync="form.role"
+                      class="p-0"
+                      name="role"
+                      :options="generalList"
+                      :search-keys="['code']"
+                      option-key="code"
+                      option-value="code_name"
                     />
                   </div>
                 </div>
@@ -294,7 +325,11 @@
                             </thead>
                             <tbody>
                               <tr v-for="(item,index) in userDetails" v-bind:key="item.id">
-                                <td class="text-center align-middle">
+                                <td class="text-center align-middle"
+                                  data-toggle="tooltip"
+                                  data-placement="top"
+                                  v-bind:title="'この行の情報を適用する有効開始日付'"
+                                >
                                   <div class>
                                     <input
                                       type="date"
@@ -568,7 +603,8 @@ export default {
         password: "",
         status: "",
         table_no: "",
-        departmentCode: ""
+        departmentCode: "",
+        role: ""
       },
       valuedepartment: "",
       departmentList: [],
@@ -576,6 +612,7 @@ export default {
       timeTableList: [],
       userList: [],
       userDetails: [],
+      generalList: [],
       userCode: "",
       departmentCode: "",
       enterPass: "",
@@ -595,6 +632,7 @@ export default {
     this.getEmploymentStatusList();
     this.getTimeTableList();
     this.getUserList(1, null);
+    this.getGeneralList("C017");
   },
   watch: {
     userCode: function(val, oldVal) {
@@ -839,7 +877,7 @@ export default {
           console.log("部署リスト取得");
         })
         .catch(reason => {
-          alert("error");
+          this.alert("error", "部署リスト取得に失敗しました", "エラー");
         });
     },
     getEmploymentStatusList() {
@@ -850,7 +888,7 @@ export default {
           console.log("雇用形態リスト取得");
         })
         .catch(reason => {
-          alert("error");
+          this.alert("error", "雇用形態リスト取得に失敗しました", "エラー");
         });
     },
     getTimeTableList() {
@@ -861,7 +899,21 @@ export default {
           console.log("タイムテーブルリスト取得");
         })
         .catch(reason => {
-          alert("error");
+          this.alert("error", "タイムテーブルリスト取得に失敗しました", "エラー");
+        });
+    },
+    getGeneralList(value) {
+      this.$axios
+        .get("/get_general_list", {
+          params: {
+            identificationid: value
+          }
+        })
+        .then(response => {
+          this.generalList = response.data;
+        })
+        .catch(reason => {
+          this.alert("error", "勤怠権限リスト取得に失敗しました", "エラー");
         });
     },
     addSuccess() {
@@ -900,6 +952,7 @@ export default {
       this.form.departmentCode = "";
       this.form.status = "";
       this.form.table_no = "";
+      this.form.role = "";
       this.userCode = "";
       this.userDetails = [];
     },
