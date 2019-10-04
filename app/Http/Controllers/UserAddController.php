@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreUserPost;
 use Illuminate\Support\Facades\Auth;
 use App\UserModel;
@@ -32,6 +33,8 @@ class UserAddController extends Controller
      * @return void
      */
     public function store(StoreUserPost $request){
+        Log::debug('$request->departmentCode = '.$request->departmentCode);
+        Log::debug('$request->role = '.$request->role);
         $department_code = $request->departmentCode;
         $kana = $request->kana;
         $code = $request->code;
@@ -40,13 +43,15 @@ class UserAddController extends Controller
         $status = $request->status;
         $table_no = $request->table_no;
         $password = bcrypt($request->password);
+        $role = $request->role;
+        Log::debug('$role = '.$role);
         $from = "20000101";         // 有効期間 初期値
 
         if(isset($request->id)){    // UPDATE
             // $id = $request->id;
             // $result = $this->updateUser($id,$code,$kana,$department_code,$name,$password,$email,$status,$table_no);
         }else{                      // INSERT
-            $result = $this->insertNewUser($code,$kana,$department_code,$name,$password,$email,$status,$table_no,$from);
+            $result = $this->insertNewUser($code,$kana,$department_code,$name,$password,$email,$status,$table_no,$from,$role);
         }
         if($result){
         }else{
@@ -67,7 +72,7 @@ class UserAddController extends Controller
      * @param [type] $table_no
      * @return void
      */
-    private function insertNewUser($code,$kana,$department_code,$name,$password,$email,$status,$table_no,$from){
+    private function insertNewUser($code,$kana,$department_code,$name,$password,$email,$status,$table_no,$from,$role){
         $users = new UserModel();
         $systemdate = Carbon::now();
         $user = Auth::user();
@@ -83,6 +88,8 @@ class UserAddController extends Controller
         $users->setWorkingtimetablenoAttribute($table_no);
         $users->setCreatedatAttribute($systemdate);
         $users->setCreateduserAttribute($user_code);
+        $users->setRoleAttribute($role);
+        Log::debug('$role = '.$role);
         
         DB::beginTransaction();
         try{
@@ -141,6 +148,7 @@ class UserAddController extends Controller
                 $user_model->setEmailAttribute($detail['email']);
                 $user_model->setWorkingtimetablenoAttribute($detail['working_timetable_no']);
                 $user_model->setPasswordAttribute($pass_word);
+                $user_model->setRoleAttribute($role);
                 
                 // idもっているかどうか
                 if(isset($detail['id'])){     // idもっている→UPDATE

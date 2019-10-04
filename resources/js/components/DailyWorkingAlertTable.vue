@@ -8,8 +8,16 @@
         <th>氏名</th>
         <th>打刻時刻</th>
         <th>打刻モード</th>
-        <th>法定警告内容</th>
-        <th>打刻警告内容</th>
+        <th
+          data-toggle="tooltip"
+          data-placement="top"
+          v-bind:title="'出退勤間インターバル時間警告の法定警告'"
+        >法定警告内容</th>
+        <th
+          data-toggle="tooltip"
+          data-placement="top"
+          v-bind:title="'カード打刻内容の確認'"
+        >打刻内容確認</th>
       </tr>
       <tr
         v-for="(alertList,index) in alertLists"
@@ -21,8 +29,16 @@
         <td class="text-align-center">{{ alertList.user_name }}</td>
         <td class="text-align-center">{{ alertList.record_time }}</td>
         <td class="text-align-center">{{ alertList.mode_name }}</td>
-        <td class="text-align-center">{{ alertList.check_interval_name }}</td>
-        <td class="text-align-center">{{ alertList.alert_memo }}</td>
+        <td class="text-align-center"
+          data-toggle="tooltip"
+          data-placement="top"
+          v-bind:title="'出退勤間インターバル時間警告の法定警告'"
+        >{{ alertList.check_interval_name }}</td>
+        <td class="text-align-center"
+          data-toggle="tooltip"
+          data-placement="top"
+          v-bind:title="'カード打刻内容の確認'"
+        >{{ alertList.alert_memo }}</td>
       </tr>
     </table>
   </div>

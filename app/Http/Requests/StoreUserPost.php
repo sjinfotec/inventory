@@ -27,12 +27,13 @@ class StoreUserPost extends FormRequest
     {
         return [
             'name' => 'required|string|max:30',
-            'kana' => 'required|max:30',
-            'table_no' => 'required',
+            'kana' => 'max:30',
+            //'table_no' => 'required',
             'email' => 'required|email|max:191',
             'status' => 'required',
             'code' => ['required',Rule::unique('users')->ignore($this->id),'max:10'],
             'password' => 'required|max:191',
+            'role' => 'required',
         ];
     }
 
@@ -56,6 +57,7 @@ class StoreUserPost extends FormRequest
             'code.max'  => 'ログインIDの最大文字数は 10 です',
             'password.required'  => 'パスワードを入力してください',
             'password.max'  => 'パスワードの最大文字数は 191 です',
+            'role.required' => '勤怠権限を選択してください',
         ];
     }
 }

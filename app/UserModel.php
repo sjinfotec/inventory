@@ -24,6 +24,7 @@ class UserModel extends Model
     private $email;                  
     private $employment_status;                  
     private $working_timetable_no;
+    private $roe;                           // 権限
     private $is_deleted;                 // 削除フラグ
     private $updated_user;                 // 修正ユーザー
     private $created_user;                 // 作成ユーザー
@@ -128,6 +129,9 @@ class UserModel extends Model
 
     public function setWorkingtimetablenoAttribute($value)
     {
+        if ($value == 0) {
+            $value = 1;
+        }
         $this->working_timetable_no = $value;
     }
 
@@ -175,6 +179,17 @@ class UserModel extends Model
         $this->updated_user = $value;
     }
 
+    // 権限
+    public function getRoleAttribute()
+    {
+        return $this->role;
+    }
+
+    public function setRoleAttribute($value)
+    {
+        $this->role = $value;
+    }
+
     // 削除フラグ
     public function getIsdeletedAttribute()
     {
@@ -205,7 +220,8 @@ class UserModel extends Model
                 'email' => $this->email,
                 'password' => $this->password,
                 'created_user'=>$this->created_user,
-                'created_at'=>$this->created_at
+                'created_at'=>$this->created_at,
+                'role' => $this->role
             ]
         );
     }
@@ -228,7 +244,8 @@ class UserModel extends Model
                 'working_timetable_no' => $this->working_timetable_no,
                 'email' => $this->email,
                 'updated_user'=>$this->updated_user,
-                'updated_at' => $this->updated_at
+                'updated_at' => $this->updated_at,
+                'role' => $this->role
                 ]
             );
     }
@@ -260,6 +277,7 @@ class UserModel extends Model
                 $this->table.'.working_timetable_no',
                 $this->table.'.email',
                 $this->table.'.password',
+                $this->table.'.role',
                 't1.card_idm'
             )
             ->where($this->table.'.code', $this->code)
