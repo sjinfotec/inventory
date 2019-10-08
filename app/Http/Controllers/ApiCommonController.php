@@ -63,10 +63,10 @@ class ApiCommonController extends Controller
                         })
                         ->where('users.department_code', $request->code)
                         ->where('users.employment_status', $request->employment);
-                    if($role < Config::get('const.C017.out_of_user')){
+                    if($role == Config::get('const.C025.general_user')){
                         $mainQuery->where('users.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where('users.role','<',Config::get('const.C017.out_of_user'));
+                        $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
                     }
                     $users = $mainQuery->where('users.is_deleted', 0)
                         ->orderby('users.code','asc')
@@ -78,10 +78,10 @@ class ApiCommonController extends Controller
                             $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
                         })
                         ->where('users.department_code', $request->code);
-                    if($role < Config::get('const.C017.out_of_user')){
+                    if($role == Config::get('const.C025.general_user')){
                         $mainQuery->where('users.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where('users.role','<',Config::get('const.C017.out_of_user'));
+                        $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
                     }
                     $users = $mainQuery->where('users.is_deleted', 0)
                         ->orderby('users.code','asc')
@@ -95,10 +95,10 @@ class ApiCommonController extends Controller
                             $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
                         })
                         ->where('users.employment_status', $request->employment);
-                    if($role < Config::get('const.C017.out_of_user')){
+                    if($role == Config::get('const.C025.general_user')){
                         $mainQuery->where('users.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where('users.role','<',Config::get('const.C017.out_of_user'));
+                        $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
                     }
                     $users = $mainQuery->where('users.is_deleted', 0)
                         ->orderby('users.code','asc')
@@ -109,10 +109,10 @@ class ApiCommonController extends Controller
                             $join->on('t1.code', '=', 'users.code');
                             $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
                         });
-                    if($role < Config::get('const.C017.out_of_user')){
+                    if($role == Config::get('const.C025.general_user')){
                         $mainQuery->where('users.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where('users.role','<',Config::get('const.C017.out_of_user'));
+                        $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
                     }
                     $users = $mainQuery->where('users.is_deleted', 0)->get();
                 }
@@ -178,7 +178,7 @@ class ApiCommonController extends Controller
             ->where('is_deleted', '=', 0)
             ->groupBy('code');
 
-        if($role < Config::get('const.C017.out_of_user')){
+        if($role == Config::get('const.C025.general_user')){
             $departments = DB::table('departments')
                 ->JoinSub($subquery1, 't1', function ($join) { 
                     $join->on('t1.code', '=', 'departments.code');
@@ -255,6 +255,40 @@ class ApiCommonController extends Controller
         return $userrole;
     }
         
+    /** ユーザー勤怠管理取得
+     *
+     * @return list departments
+     */
+    public function getUserManagement($user_id, $target_date){
+        // ユーザの権限取得
+        $dt = null;
+        if (isset($target_date)) {
+            $dt = new Carbon($target_date);
+        } else {
+            $dt = new Carbon();
+        }
+        $target_date = $dt->format('Ymd');
+        $subquery1 = DB::table('users')
+            ->selectRaw('code as code')
+            ->selectRaw('department_code as department_code')
+            ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+            ->where('apply_term_from', '<=',$target_date)
+            ->where('is_deleted', '=', 0)
+            ->groupBy('code', 'department_code');
+        $usermanagement = DB::table('users')
+            ->JoinSub($subquery1, 't1', function ($join) { 
+                $join->on('t1.code', '=', 'users.code');
+                $join->on('t1.department_code', '=', 'users.department_code');
+                $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+            })
+            ->where('users.code', $user_id)
+            ->where('users.is_deleted', 0)
+            ->value('management');
+        if(!isset($usermanagement)) { return null; }
+
+        return $usermanagement;
+    }
+        
     /** ユーザー適用期間開始サブクエリー作成
      *
      * @return string サブクエリー
@@ -274,7 +308,7 @@ class ApiCommonController extends Controller
             ->select('code as code')
             ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
             ->where('apply_term_from', '<=',$target_date)
-            ->where('role', '<', 10)
+            ->where('role', '<', Config::get('const.C017.admin_user'))
             ->where('is_deleted', '=', 0)
             ->groupBy('code');
         return $subquery;

@@ -24,6 +24,7 @@ class UserModel extends Model
     private $email;                  
     private $employment_status;                  
     private $working_timetable_no;
+    private $management;                    // 勤怠管理対象
     private $roe;                           // 権限
     private $is_deleted;                 // 削除フラグ
     private $updated_user;                 // 修正ユーザー
@@ -179,6 +180,17 @@ class UserModel extends Model
         $this->updated_user = $value;
     }
 
+    // 勤怠管理対象
+    public function getManagementAttribute()
+    {
+        return $this->management;
+    }
+
+    public function setManagementAttribute($value)
+    {
+        $this->management = $value;
+    }
+
     // 権限
     public function getRoleAttribute()
     {
@@ -208,22 +220,29 @@ class UserModel extends Model
      * @return void
      */
     public function insertNewUser(){
-        DB::table($this->table)->insert(
-            [
-                'apply_term_from' => $this->apply_term_from,
-                'code' => $this->code,
-                'employment_status' => $this->employment_status,
-                'department_code' => $this->department_code,
-                'name' => $this->name,
-                'kana' => $this->kana,
-                'working_timetable_no' => $this->working_timetable_no,
-                'email' => $this->email,
-                'password' => $this->password,
-                'created_user'=>$this->created_user,
-                'created_at'=>$this->created_at,
-                'role' => $this->role
-            ]
-        );
+        try {
+            DB::table($this->table)->insert(
+                [
+                    'apply_term_from' => $this->apply_term_from,
+                    'code' => $this->code,
+                    'employment_status' => $this->employment_status,
+                    'department_code' => $this->department_code,
+                    'name' => $this->name,
+                    'kana' => $this->kana,
+                    'working_timetable_no' => $this->working_timetable_no,
+                    'email' => $this->email,
+                    'password' => $this->password,
+                    'created_user'=>$this->created_user,
+                    'created_at'=>$this->created_at,
+                    'management' => $this->management,
+                    'role' => $this->role
+                ]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            throw $e;
+        }
     }
 
     /**
@@ -232,7 +251,8 @@ class UserModel extends Model
      * @return void
      */
     public function updateUser(){
-        DB::table($this->table)
+        try {
+            DB::table($this->table)
             ->where('id', $this->id)
             ->update([
                 'apply_term_from' => $this->apply_term_from,
@@ -245,9 +265,15 @@ class UserModel extends Model
                 'email' => $this->email,
                 'updated_user'=>$this->updated_user,
                 'updated_at' => $this->updated_at,
+                'management' => $this->management,
                 'role' => $this->role
                 ]
             );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            throw $e;
+        }
     }
 
     /**
@@ -256,33 +282,40 @@ class UserModel extends Model
      * @return void
      */
     public function getUserDetails(){
-        $subquery = DB::table($this->table_card_infomations)
-            ->selectRaw('id')
-            ->selectRaw('user_code')
-            ->selectRaw('card_idm')
-            ->where('is_deleted', '=', 0);
+        try {
+            $subquery = DB::table($this->table_card_infomations)
+                ->selectRaw('id')
+                ->selectRaw('user_code')
+                ->selectRaw('card_idm')
+                ->where('is_deleted', '=', 0);
     
-        $data = DB::table($this->table)
-            ->leftJoinSub($subquery, 't1', function ($join) { 
-                $join->on('t1.user_code', '=', $this->table.'.code');
-            })
-            ->select(
-                $this->table.'.id',
-                $this->table.'.apply_term_from',
-                $this->table.'.code',
-                $this->table.'.employment_status',
-                $this->table.'.department_code',
-                $this->table.'.name',
-                $this->table.'.kana',
-                $this->table.'.working_timetable_no',
-                $this->table.'.email',
-                $this->table.'.password',
-                $this->table.'.role',
-                't1.card_idm'
-            )
-            ->where($this->table.'.code', $this->code)
-            ->where($this->table.'.is_deleted', 0)
-            ->get();
+            $data = DB::table($this->table)
+                ->leftJoinSub($subquery, 't1', function ($join) { 
+                    $join->on('t1.user_code', '=', $this->table.'.code');
+                })
+                ->select(
+                    $this->table.'.id',
+                    $this->table.'.apply_term_from',
+                    $this->table.'.code',
+                    $this->table.'.employment_status',
+                    $this->table.'.department_code',
+                    $this->table.'.name',
+                    $this->table.'.kana',
+                    $this->table.'.working_timetable_no',
+                    $this->table.'.email',
+                    $this->table.'.password',
+                    $this->table.'.management',
+                    $this->table.'.role',
+                    't1.card_idm'
+                )
+                ->where($this->table.'.code', $this->code)
+                ->where($this->table.'.is_deleted', 0)
+                ->get();
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            throw $e;
+        }
 
         return $data;
     }
@@ -293,13 +326,17 @@ class UserModel extends Model
      * @return void
      */
     public function updatePassWord(){
-        DB::table($this->table)
+        try {
+            DB::table($this->table)
             ->where('code', $this->code)
             ->update([
                 'password' => $this->password,
                 'updated_user'=>$this->updated_user,
                 'updated_at' => $this->updated_at
             ]);
+        }catch(\PDOException $pe){
+            throw $pe;
+        }
     }
 
     /**

@@ -61,10 +61,12 @@ Route::get('/user_add/get', 'UserAddController@getUserDetails')->middleware('aut
 Route::post('/user_add/del', 'UserAddController@del')->middleware('auth');
 Route::post('/user_add/edit', 'UserAddController@edit')->middleware('auth');
 Route::post('/user_add/fix', 'UserAddController@fixUser')->middleware('auth');
-Route::post('/user_add/passchange', 'UserAddController@passChange')->middleware('auth');
 Route::post('/user_add/release_card_info', 'UserAddController@releaseCardInfo')->middleware('auth');
 // ユーザー権限取得
 Route::get('/get_login_user_role', 'ApiCommonController@getLoginUserRole')->middleware('auth');
+// ユーザーパスワード変更
+Route::get('/user_pass', 'UserPassController@index')->middleware('auth');
+Route::post('/user_pass/passchange', 'UserPassController@passChange')->middleware('auth');
 // 部署
 Route::get('/create_department', 'CreateDepartmentController@index')->middleware('auth');
 Route::get('/create_department/get', 'CreateDepartmentController@getDetails')->middleware('auth');
@@ -107,4 +109,10 @@ Route::get('/get_time_rounding_list', 'ApiCommonController@getTimeRoundingList')
 Route::get('/get_user_leave_kbn', 'ApiCommonController@getUserLeaveKbnList')->middleware('auth');
 Route::get('/get_mode_list', 'ApiCommonController@getModeList')->middleware('auth');
 Route::get('/get_general_list', 'ApiCommonController@getRequestGeneralList')->middleware('auth');
+// 申請
+Route::get('/demand', 'DemandController@index')->middleware('auth');
+Route::get('/demand/make_demand', 'DemandController@makeDemand')->middleware('auth');
+// 承認設定
+Route::get('/confirm', 'ConfirmController@index')->middleware('auth');
+Route::get('/confirm/setting_root', 'ConfirmController@settingRoot')->middleware('auth');
 
