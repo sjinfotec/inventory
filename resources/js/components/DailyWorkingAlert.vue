@@ -64,7 +64,7 @@
                     ref="selectdepartment"
                     v-bind:blank-data="true" v-on:change-event="departmentChanges"
                   ></select-department>
-                  <message-data v-bind:message-datas="messagedatadepartment"></message-data>
+                  <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
                 </div>
               </div>
               <!-- /.col -->
@@ -84,7 +84,7 @@
                     v-bind:date-value="fromdate"
                     v-on:change-event="userChanges"
                   ></select-user>
-                  <message-data v-bind:message-datas="messagedatauser"></message-data>
+                  <message-data v-bind:message-datas="messagedatauser" v-bind:message-class="'warning'"></message-data>
                 </div>
               </div>
               <!-- /.col -->

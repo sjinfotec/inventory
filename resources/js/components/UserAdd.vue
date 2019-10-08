@@ -220,14 +220,14 @@
                         id="basic-addon1"
                         data-toggle="tooltip"
                         data-placement="top"
-                        v-bind:title="'入力ない場合は「勤務時間設定」で登録した「タイムテーブルNO」が[1]の時間で登録します。'"
-                      >通常勤務時間</span>
+                        v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
+                      >タイムテーブル<span class="color-red">[*]</span></span>
                     </div>
                     <fvl-search-select
                       :selected.sync="form.table_no"
                       class="p-0"
                       name="table_no"
-                      title="入力ない場合は「勤務時間設定」で登録した「タイムテーブルNO」が[1]の時間で登録します。"
+                      title="「勤務時間設定」で登録したタイムテーブルのリストから選択します。"
                       :options="timeTableList"
                       :search-keys="['name']"
                       option-key="no"
@@ -243,13 +243,34 @@
                       <label
                         class="input-group-text font-size-sm line-height-xs label-width-120"
                         for="inputGroupSelect01"
-                      >勤怠権限<span class="color-red">[*]</span></label>
+                      >勤怠管理<span class="color-red">[*]</span></label>
+                    </div>
+                    <fvl-search-select
+                      :selected.sync="form.management"
+                      class="p-0"
+                      name="management"
+                      :options="generalList_m"
+                      :search-keys="['code']"
+                      option-key="code"
+                      option-value="code_name"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2" v-if="userCode=='' || userCode==null ">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <label
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        for="inputGroupSelect02"
+                      >権限<span class="color-red">[*]</span></label>
                     </div>
                     <fvl-search-select
                       :selected.sync="form.role"
                       class="p-0"
                       name="role"
-                      :options="generalList"
+                      :options="generalList_r"
                       :search-keys="['code']"
                       option-key="code"
                       option-value="code_name"
@@ -312,14 +333,25 @@
                           <table class="table table-striped border-bottom font-size-sm text-nowrap">
                             <thead>
                               <tr>
-                                <td class="text-center align-middle w-30">有効期間</td>
-                                <td class="text-center align-middle w-35 mw-rem-10">社員名</td>
+                                <td class="text-center align-middle w-35">有効期間</td>
+                                <td class="text-center align-middle w-35 mw-rem-10">社員名<span class="color-red">[*]</span></td>
                                 <td class="text-center align-middle w-35 mw-rem-10">ふりがな</td>
                                 <td class="text-center align-middle w-35 mw-rem-10">メールアドレス</td>
                                 <td class="text-center align-middle w-35 mw-rem-10">部署</td>
-                                <td class="text-center align-middle w-35 mw-rem-10">雇用形態</td>
-                                <td class="text-center align-middle w-35 mw-rem-10">労働時間</td>
+                                <td class="text-center align-middle w-35 mw-rem-10">雇用形態<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-35 mw-rem-10"
+                                  data-toggle="tooltip"
+                                  data-placement="top"
+                                  v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
+                                >タイムテーブル<span class="color-red">[*]</span></td>
                                 <td class="text-center align-middle w-35 mw-rem-10">ログインID(編集不可)</td>
+                                <td class="text-center align-middle w-35 mw-rem-10"
+                                  data-toggle="tooltip"
+                                  data-placement="top"
+                                  v-bind:title="'管理者が初期パスワードを（半角英数字6-12文字）で決定入力します。'"
+                                >パスワード(追加時必須)<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-35 mw-rem-10">勤怠管理<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-35 mw-rem-10">権限<span class="color-red">[*]</span></td>
                                 <td class="text-center align-middle w-35 mw-rem-10">操作</td>
                               </tr>
                             </thead>
@@ -403,6 +435,9 @@
                                     <select
                                       class="custom-select"
                                       v-model="userDetails[index].working_timetable_no"
+                                      data-toggle="tooltip"
+                                      data-placement="top"
+                                      v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
                                     >
                                       <option value></option>
                                       <option
@@ -421,6 +456,56 @@
                                       readonly="true"
                                       v-model="userDetails[index].code"
                                     />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                  <div class="input-group" v-if="userDetails[index].id === ''">
+                                    <input
+                                      type="text"
+                                      class="form-control"
+                                      v-model="userDetails[index].password"
+                                      data-toggle="tooltip"
+                                      data-placement="top"
+                                      v-bind:title="'管理者が初期パスワードを（半角英数字6-12文字）で決定入力します。'"
+                                    />
+                                  </div>
+                                  <div class="input-group" v-else>
+                                    <input
+                                      type="password"
+                                      class="form-control"
+                                      readonly="true"
+                                      v-model="userDetails[index].password"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <select
+                                      class="custom-select"
+                                      v-model="userDetails[index].management"
+                                    >
+                                      <option value></option>
+                                      <option
+                                        v-for="mlist in generalList_m"
+                                        :value="mlist.code"
+                                        v-bind:key="mlist.code"
+                                      >{{ mlist.code_name }}</option>
+                                    </select>
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <select
+                                      class="custom-select"
+                                      v-model="userDetails[index].role"
+                                    >
+                                      <option value></option>
+                                      <option
+                                        v-for="rlist in generalList_r"
+                                        :value="rlist.code"
+                                        v-bind:key="rlist.code"
+                                      >{{ rlist.code_name }}</option>
+                                    </select>
                                   </div>
                                 </td>
                                 <td class="text-center align-middle">
@@ -463,107 +548,8 @@
               </div>
               <!-- /.col -->
             </div>
-            <!-- .row -->
-            <div class="row justify-content-between" v-if="userCode != ''">
-              <!-- col -->
-              <div class="col-md-12 pb-2">
-                <div class="btn-group d-flex">
-                  <button class="btn btn-primary" v-on:click="show">パスワード変更</button>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.col -->
           </div>
           <!-- /.row -->
-          <!-- modal -->
-          <modal name="password-change" :width="800" v-model="userCode">
-            <div class="card">
-              <div class="card-header">パスワード変更</div>
-              <div class="card-body">
-                <!-- .row -->
-                <div class="row justify-content-between" v-if="errors.length">
-                  <!-- col -->
-                  <div class="col-md-12 pb-2">
-                    <ul class="error-red color-red">
-                      <li v-for="(error,index) in errors" v-bind:key="index">{{ error }}</li>
-                    </ul>
-                  </div>
-                  <!-- /.col -->
-                </div>
-                <!-- /.row -->
-                <!-- .row -->
-                <div class="row justify-content-between">
-                  <!-- col -->
-                  <div class="col-md-12 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-xs line-height-xs label-width-150"
-                        >新しいパスワード</span>
-                      </div>
-                      <input
-                        class="form-control"
-                        v-model="enterPass"
-                        maxlength="12"
-                        type="password"
-                        title="半角英数字12文字以内"
-                        pattern="^[a-zA-Z0-9]{6,12}$"
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- col -->
-                  <div class="col-md-12 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-xs line-height-xs label-width-150"
-                        >新しいパスワード（再入力）</span>
-                      </div>
-                      <input
-                        class="form-control"
-                        v-model="reEnterPass"
-                        maxlength="12"
-                        type="password"
-                        title="半角英数字12文字以内"
-                        pattern="^[a-zA-Z0-9]{6,12}$"
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                </div>
-                <!-- /.row -->
-                <!-- .row -->
-                <div class="row justify-content-between">
-                  <!-- col -->
-                  <div class="col-md-12 pb-2">
-                    <div class="btn-group d-flex">
-                      <button
-                        type="button"
-                        class="btn btn-primary btn-lg font-size-rg w-100"
-                        v-on:click="alertPassConf('warning')"
-                      >パスワードを変更</button>
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- col -->
-                  <div class="col-md-12 pb-2">
-                    <div class="btn-group d-flex">
-                      <button
-                        type="button"
-                        class="btn btn-warning btn-lg font-size-rg w-100"
-                        v-on:click="hide"
-                      >キャンセル</button>
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                </div>
-                <!-- /.row -->
-              </div>
-            </div>
-          </modal>
-          <!-- /modal -->
         </div>
       </div>
     </div>
@@ -604,6 +590,7 @@ export default {
         status: "",
         table_no: "",
         departmentCode: "",
+        management: "",
         role: ""
       },
       valuedepartment: "",
@@ -612,11 +599,10 @@ export default {
       timeTableList: [],
       userList: [],
       userDetails: [],
-      generalList: [],
+      generalList_m: [],
+      generalList_r: [],
       userCode: "",
       departmentCode: "",
-      enterPass: "",
-      reEnterPass: "",
       validate: false,
       errors: [],
       oldCode: "",
@@ -633,11 +619,10 @@ export default {
     this.getTimeTableList();
     this.getUserList(1, null);
     this.getGeneralList("C017");
+    this.getGeneralList("C025");
   },
   watch: {
     userCode: function(val, oldVal) {
-      console.log(this.userCode);
-      console.log(val + " " + oldVal);
       if (this.userCode != "") {
         this.$axios
           .get("/user_add/get", {
@@ -646,15 +631,20 @@ export default {
             }
           })
           .then(response => {
-            this.userDetails = response.data;
-            if (this.userDetails.length > 0) {
-              console.log("length > 0");
-              this.cardId = this.userDetails[0].card_idm;
+            var res = response.data;
+            console.log("res.result" + res.result);
+            if (res.result == 0) {
+              this.userDetails = res.details;
+              if (this.userDetails.length > 0) {
+                this.cardId = this.userDetails[0].card_idm;
+              }
+            } else {
+              this.alert("error", "ユーザー情報取得に失敗しました", "エラー");
             }
             console.log("ユーザー詳細情報取得");
           })
           .catch(reason => {
-            alert("error");
+            alert("ユーザー詳細情報取得エラー");
           });
       } else {
         this.inputClear();
@@ -673,6 +663,7 @@ export default {
   methods: {
     append: function() {
       this.userDetails.push({
+        id: "",
         apply_term_from: "",
         code: this.userCode,
         department_code: "",
@@ -680,32 +671,14 @@ export default {
         kana: "",
         working_timetable_no: "",
         employment_status: "",
-        name: ""
+        name: "",
+        password: "",
+        management: "",
+        role: ""
       });
     },
     alert: function(state, message, title) {
       this.$swal(title, message, state);
-    },
-    show: function() {
-      this.$modal.show("password-change");
-    },
-    hide: function() {
-      this.$modal.hide("password-change");
-      this.inputPassClear();
-    },
-    alertPassConf: function(state) {
-      this.$swal({
-        title: "確認",
-        text: "パスワードを変更しますか？",
-        icon: state,
-        buttons: true,
-        dangerMode: true
-      }).then(willDelete => {
-        if (willDelete) {
-          this.passChange();
-        } else {
-        }
-      });
     },
     alertDelConf: function(state, id, index) {
       if (id >= 0) {
@@ -736,6 +709,8 @@ export default {
           .then(response => {
             var res = response.data;
             this.alert("success", "修正をしました", "修正完了");
+            this.userCode = "";
+            this.getUserList(1, null);
           })
           .catch(reason => {
             this.alert("error", "修正に失敗しました", "エラー");
@@ -781,7 +756,7 @@ export default {
         .then(response => {
           var res = response.data;
           if (res.result == 0) {
-            this.alert("success", " ユーザーを削除しました", "削除成功");
+            this.alert("success", " 行削除しました", "削除成功");
             // this.getDepartmentList();
           } else {
           }
@@ -802,70 +777,36 @@ export default {
           this.errors.push("社員名を入力してください");
           flag = false;
         }
-        if (element.department_code == "") {
+        /*if (element.department_code == "") {
           this.errors.push("部署を選択してください");
           flag = false;
-        }
+        } */
         if (element.employment_status == "") {
           this.errors.push("雇用形態を選択してください");
           flag = false;
         }
         if (element.working_timetable_no == "") {
-          this.errors.push("労働時間を選択してください");
+          this.errors.push("タイムテーブルを選択してください");
           flag = false;
         }
-        if (element.kana == "") {
+        if (element.password == "") {
+          this.errors.push("パスワードを入力してください");
+          flag = false;
+        }
+        if (element.management == "") {
+          this.errors.push("勤怠管理を選択してください");
+          flag = false;
+        }
+        if (element.role == "") {
+          this.errors.push("権限を選択してください");
+          flag = false;
+        }
+        /*if (element.kana == "") {
           this.errors.push("ふりがなを入力してください");
           flag = false;
-        }
+        }*/
       });
       return flag;
-    },
-    checkFormPass: function() {
-      var flag = false;
-      this.errors = [];
-
-      if (this.reEnterPass && this.enterPass) {
-        if (this.reEnterPass != this.enterPass) {
-          flag = false;
-          this.errors.push("入力したパスワードが一致していません");
-        } else {
-          flag = true;
-        }
-        return flag;
-      } else {
-        if (!this.enterPass) {
-          flag = false;
-          this.errors.push("新しいパスワードを入力してください");
-        }
-        if (!this.reEnterPass) {
-          flag = false;
-          this.errors.push("新しいパスワード（再入力）を入力してください");
-        }
-        return flag;
-      }
-    },
-    passChange: function() {
-      this.validate = this.checkFormPass();
-      if (this.validate) {
-        this.$axios
-          .post("/user_add/passchange", {
-            user_code: this.userCode,
-            password: this.enterPass
-          })
-          .then(response => {
-            var res = response.data;
-            if (res.result == 0) {
-              this.alert("success", "パスワードを変更しました", "変更完了");
-              this.hide();
-            } else {
-            }
-          })
-          .catch(reason => {
-            this.alert("error", "パスワード変更に失敗しました", "エラー");
-          });
-      } else {
-      }
     },
     getDepartmentList() {
       this.$axios
@@ -910,7 +851,12 @@ export default {
           }
         })
         .then(response => {
-          this.generalList = response.data;
+          if (value == "C017") {
+            this.generalList_m = response.data;
+          }
+          if (value == "C025") {
+            this.generalList_r = response.data;
+          }
         })
         .catch(reason => {
           this.alert("error", "勤怠権限リスト取得に失敗しました", "エラー");
@@ -919,6 +865,8 @@ export default {
     addSuccess() {
       this.getUserList(1, null);
       this.$toasted.show("登録しました");
+      this.getUserList(1, null);
+      this.userCode = "";
     },
     getUserList(getdovalue, value) {
       console.log("getdovalue = " + getdovalue);
@@ -936,7 +884,7 @@ export default {
           console.log("ユーザーリスト取得");
         })
         .catch(reason => {
-          alert("error");
+          alert("ユーザーリスト取得エラー");
         });
     },
     error() {
@@ -952,80 +900,12 @@ export default {
       this.form.departmentCode = "";
       this.form.status = "";
       this.form.table_no = "";
+      this.form.management = "";
       this.form.role = "";
       this.userCode = "";
       this.userDetails = [];
-    },
-    inputPassClear() {
-      this.enterPass = "";
-      this.reEnterPass = "";
     }
   }
 };
 </script>
-<style scoped>
-.modal-mask {
-  position: fixed;
-  z-index: 9998;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: table;
-  transition: opacity 0.3s ease;
-}
-
-.modal-wrapper {
-  display: table-cell;
-  vertical-align: middle;
-}
-
-.modal-container {
-  width: 300px;
-  margin: 0px auto;
-  padding: 20px 30px;
-  background-color: #fff;
-  border-radius: 2px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
-  transition: all 0.3s ease;
-  font-family: Helvetica, Arial, sans-serif;
-}
-
-.modal-header h3 {
-  margin-top: 0;
-  color: #42b983;
-}
-
-.modal-body {
-  margin: 20px 0;
-}
-
-.modal-default-button {
-  float: right;
-}
-
-/*
-  * The following styles are auto-applied to elements with
-  * transition="modal" when their visibility is toggled
-  * by Vue.js.
-  *
-  * You can easily play with the modal transition by editing
-  * these styles.
-  */
-
-.modal-enter {
-  opacity: 0;
-}
-
-.modal-leave-active {
-  opacity: 0;
-}
-
-.modal-enter .modal-container,
-.modal-leave-active .modal-container {
-  -webkit-transform: scale(1.1);
-  transform: scale(1.1);
-}
-</style>
 

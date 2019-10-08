@@ -43,15 +43,15 @@ class UserAddController extends Controller
         $status = $request->status;
         $table_no = $request->table_no;
         $password = bcrypt($request->password);
+        $management = $request->management;
         $role = $request->role;
-        Log::debug('$role = '.$role);
         $from = "20000101";         // 有効期間 初期値
 
         if(isset($request->id)){    // UPDATE
             // $id = $request->id;
             // $result = $this->updateUser($id,$code,$kana,$department_code,$name,$password,$email,$status,$table_no);
         }else{                      // INSERT
-            $result = $this->insertNewUser($code,$kana,$department_code,$name,$password,$email,$status,$table_no,$from,$role);
+            $result = $this->insertNewUser($code,$kana,$department_code,$name,$password,$email,$status,$table_no,$from,$management,$role);
         }
         if($result){
         }else{
@@ -72,7 +72,7 @@ class UserAddController extends Controller
      * @param [type] $table_no
      * @return void
      */
-    private function insertNewUser($code,$kana,$department_code,$name,$password,$email,$status,$table_no,$from,$role){
+    private function insertNewUser($code,$kana,$department_code,$name,$password,$email,$status,$table_no,$from,$management,$role){
         $users = new UserModel();
         $systemdate = Carbon::now();
         $user = Auth::user();
@@ -88,6 +88,7 @@ class UserAddController extends Controller
         $users->setWorkingtimetablenoAttribute($table_no);
         $users->setCreatedatAttribute($systemdate);
         $users->setCreateduserAttribute($user_code);
+        $users->setManagementAttribute($management);
         $users->setRoleAttribute($role);
         Log::debug('$role = '.$role);
         
@@ -147,8 +148,8 @@ class UserAddController extends Controller
                 $user_model->setEmploymentstatusAttribute($detail['employment_status']);
                 $user_model->setEmailAttribute($detail['email']);
                 $user_model->setWorkingtimetablenoAttribute($detail['working_timetable_no']);
-                $user_model->setPasswordAttribute($pass_word);
-                $user_model->setRoleAttribute($role);
+                $user_model->setManagementAttribute($detail['management']);
+                $user_model->setRoleAttribute($detail['role']);
                 
                 // idもっているかどうか
                 if(isset($detail['id'])){     // idもっている→UPDATE
@@ -157,7 +158,8 @@ class UserAddController extends Controller
                     $user_model->setUpdateduserAttribute($user_code);   
                     $user_model->updateUser();
                 }else{                      // idもっていない→INSERT
-                    $user_model->setCreatedatAttribute($systemdate);
+                    $pass_word = bcrypt($detail['password']);
+                    $user_model->setPasswordAttribute($pass_word);
                     $user_model->setCreatedatAttribute($systemdate);
                     $user_model->setCreateduserAttribute($user_code);
                     $user_model->insertNewUser();
@@ -166,7 +168,11 @@ class UserAddController extends Controller
             DB::commit();
             return true;
 
-        }catch(\PDOException $e){
+        }catch(\PDOException $pe){
+            Log::error($pe->getMessage());
+            DB::rollBack();
+            return false;
+        }catch(\Exception $e){
             Log::error($e->getMessage());
             DB::rollBack();
             return false;
@@ -218,52 +224,30 @@ class UserAddController extends Controller
      * @return list results
      */
     public function getUserDetails(Request $request){
-        $code = $request->code;
-        $users = new UserModel();
-        $users->setCodeAttribute($code);
-        $details = $users->getUserDetails();
-        foreach ($details as $detail) {
-            if(isset($detail->apply_term_from)){
-                // yyyy-mm-ddに変換
-                $carbon = new Carbon($detail->apply_term_from);
-                $detail->apply_term_from = $carbon->copy()->format("Y-m-d");
-
-            }
-        }
-        return $details;
-    }
-
-    /**
-     * パスワード変更
-     *
-     * @return void
-     */
-    public function passChange(Request $request){
-        $code = $request->user_code;
-        $pass_word = bcrypt($request->password);
         $response = collect();
-        $systemdate = Carbon::now();
-        $user = Auth::user();
-        $user_code = $user->code;
-
-        // パスワード変更
-        DB::beginTransaction();
         try{
+            $code = $request->code;
             $users = new UserModel();
             $users->setCodeAttribute($code);
-            $users->setPasswordAttribute($pass_word);
-            $users->setUpdateduserAttribute($user_code);
-            $users->setUpdatedatAttribute($systemdate);
-            $users->updatePassWord();
-            DB::commit();
+            $details = $users->getUserDetails();
+            foreach ($details as $detail) {
+                if(isset($detail->apply_term_from)){
+                    // yyyy-mm-ddに変換
+                    $carbon = new Carbon($detail->apply_term_from);
+                    $detail->apply_term_from = $carbon->copy()->format("Y-m-d");
+    
+                }
+            }
             $response->put('result',self::SUCCESS);
-
-        }catch(\PDOException $e){
-            DB::rollBack();
+        }catch(\PDOException $pe){
+            Log::error($pe->getMessage());
+            $response->put('result',self::FAILED);
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
             $response->put('result',self::FAILED);
         }
+        $response->put('details',$details);
         return $response;
-
     }
 
     public function releaseCardInfo(Request $request){

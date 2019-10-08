@@ -197,7 +197,13 @@ return [
         'manthly_alert_warning_7' => 72,
         'manthly_alert_warning_8' => 648
     ],
-
+ 
+    'C025' => [
+        'value' => 'C025',
+        'general_user' => 1,
+        'admin_user' => 10
+    ],
+ 
     'C999' => [
         'value' => 'C999',
         'init_setting_code' => '9999',

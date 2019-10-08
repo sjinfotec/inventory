@@ -117,6 +117,8 @@ Vue.component("input-ym", require("./components/InputDateYm.vue").default);
 
 Vue.component("user-add", require("./components/UserAdd.vue").default);
 
+Vue.component("user-pass", require("./components/UserPass.vue").default);
+
 Vue.component(
     "create-department",
     require("./components/CreateDepartment.vue").default
@@ -231,6 +233,11 @@ Vue.component(
 Vue.component(
     "message-data-server",
     require("./components/MessageDataServer.vue").default
+);
+
+Vue.component(
+    "setting-root",
+    require("./components/SettingRoot.vue").default
 );
 
 /**
