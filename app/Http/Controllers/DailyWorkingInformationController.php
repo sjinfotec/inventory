@@ -156,7 +156,8 @@ class DailyWorkingInformationController extends Controller
                 // 集計結果
                 $working_time_dates = 
                     $working_model->getWorkingTimeDateTimeFormat(
-                        Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'), $business_kubun);
+                        Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'),
+                        $working_model->getParamdatefromAttribute(), $business_kubun);
                 // 合計結果
                 if (count($working_time_dates) > 0) {
                     $working_time_sum = $working_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'));

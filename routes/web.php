@@ -114,5 +114,6 @@ Route::get('/demand', 'DemandController@index')->middleware('auth');
 Route::get('/demand/make_demand', 'DemandController@makeDemand')->middleware('auth');
 // 承認設定
 Route::get('/confirm', 'ConfirmController@index')->middleware('auth');
-Route::get('/confirm/setting_root', 'ConfirmController@settingRoot')->middleware('auth');
+Route::get('/confirm/show', 'ConfirmController@show')->middleware('auth');
+Route::post('/confirm/store', 'ConfirmController@store')->middleware('auth');
 

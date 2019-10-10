@@ -204,6 +204,12 @@ return [
         'admin_user' => 10
     ],
  
+    'C027' => [
+        'value' => 'C027',
+        'main' => 1,
+        'sub' => 2
+    ],
+ 
     'C999' => [
         'value' => 'C999',
         'init_setting_code' => '9999',
@@ -260,6 +266,11 @@ return [
     'REMARKS_DATA' => [
         'late' => '遅刻',
         'leaveearly' => '早退'
+    ],
+
+    'CONFIRM_SEQ' => [
+        'not_final_confirm' => '0',
+        'final_confirm' => '99'
     ],
 
 
@@ -357,7 +368,8 @@ return [
         'past_closing' => '締日を過ぎていますが、集計しますか？',
         'past_closing_already' => '締日を過ぎていて集計済みですが、再集計しますか？',
         'no_alert_data' => '警告に該当する打刻内容はありませんでした。',
-        'no_monthly_alert_data' => '警告に該当する内容はありませんでした。'
+        'no_monthly_alert_data' => '警告に該当する内容はありませんでした。',
+        'no_confirm_data' => '登録している承認者はありませんでした。新規に登録してください。'
     ],
 
     'MSG_ERROR' => [
@@ -377,6 +389,7 @@ return [
         'data_eror_dailycalc' => '労働時間計算処理にてエラーのため計算できませんでした。',
         'not_setting_calendar' => '{0}のカレンダー設定がされていません。',
         'data_accesee_eror_dailycalc' => '労働時間計算処理にてデータアクセスエラーのため計算できませんでした。',
+        'data_accesee_eror' => 'データアクセスエラーのため取得できませんでした。',
         'data_insert_error' => '登録処理に失敗しました。',
         'mismatch_data' => 'データ不整合'
     ],
@@ -385,6 +398,7 @@ return [
         'data_eror_dailycalc' => 'data_error_dailycalc not calc',
         'data_select_erorr' => 'データselectエラー table = [{0}]',
         'data_insert_erorr' => 'データinsertエラー table = [{0}]',
+        'data_update_erorr' => 'データupdateエラー table = [{0}]',
         'data_delete_erorr' => 'データdeleteエラー table = [{0}]',
         'data_exists_erorr' => 'データexistsエラー table = [{0}]',
         'mismatch_data' => 'データ不整合',

@@ -1,5 +1,5 @@
 <template>
-  <select class="form-control" v-model="selectedUser" v-on:change="selChanges(selectedUser)" placeholder="社員を選択してください">
+  <select class="form-control" v-model="selectedusercode" v-on:change="selChanges(selectedusercode,rowIndex)" placeholder="社員を選択してください">
     <option v-if="this.blankData" value=""></option>
     <option v-for="users in userList" v-bind:value="users.code">
       {{ users.name }}
@@ -7,6 +7,7 @@
   </select>
 </template>
 <script>
+import moment from "moment";
 
 export default {
   name: "selectUser",
@@ -19,6 +20,18 @@ export default {
         type: Number,
         default: 1
     },
+    selectedUser: {
+        type: String,
+        default: ''
+    },
+    selectedDepartment: {
+        type: String,
+        default: ''
+    },
+    rowIndex: {
+        type: Number,
+        default: 0
+    },
     dateValue: {
         type: String,
         default: ''
@@ -26,18 +39,26 @@ export default {
   },
   data() {
     return {
-      selectedUser:'',
+      selectedusercode: '',
+      dateApllyValue: '',
       userList:[]
     };
   },
   // マウント時
   mounted() {
     console.log("UserList マウント ");
-    this.getUserList(this.getDo, '');
+    this.selectedusercode = this.selectedUser;
+    if (this.dateValue == '') {
+      this.dateApllyValue = moment(new Date()).format("YYYYMMDD");
+    }
+    if (this.selectedDepartment == '') {
+      this.getUserList(this.getDo, this.dateApllyValue);
+    } else {
+      this.getUserListByDepartment(this.getDo, this.selectedDepartment, this.dateApllyValue);
+    }
   },
   methods: {
     getUserList(getdovalue, datevalue){
-      this.selectedUser ='';
       this.userList = [];
       this.$axios
         .get("/get_user_list", {
@@ -54,7 +75,6 @@ export default {
         });
     },
     getUserListByDepartment(getdovalue, value, datevalue){
-      this.selectedUser ='';
       this.userList = [];
       this.$axios
         .get("/get_user_list", {
@@ -72,7 +92,6 @@ export default {
         });
     },
     getUserListByEmployment(getdovalue, empvalue, datevalue){
-      this.selectedUser ='';
       this.userList = [];
       this.$axios
         .get("/get_user_list", {
@@ -90,7 +109,6 @@ export default {
         });
     },
     getUserListByDepartmentEmployment(getdovalue, value, empvalue, datevalue){
-      this.selectedUser ='';
       this.userList = [];
       this.$axios
         .get("/get_user_list", {
@@ -109,9 +127,9 @@ export default {
         });
     },
     // 選択が変更された場合、親コンポーネントに選択値を返却
-    selChanges : function(value) {
+    selChanges : function(value, index) {
 
-        this.$emit('change-event', value);
+        this.$emit('change-event', value, index);
 
     }
 

@@ -1269,7 +1269,8 @@ class WorkingTimedate extends Model
      *
      * @return sql取得結果
      */
-    public function getWorkingTimeDateTimeFormat($dayormonth, $business_kubun){
+    public function getWorkingTimeDateTimeFormat($dayormonth, $targetdate, $business_kubun){
+        Log::debug('-------getWorkingTimeDateTimeFormat targetdate = '.$targetdate );
 
 
         // 日次労働時間取得SQL作成
@@ -1287,10 +1288,14 @@ class WorkingTimedate extends Model
                     $this->table.'.employment_status',
                     $this->table.'.department_code',
                     $this->table.'.user_code');
-            $mainquery
+            /*$mainquery
                 ->selectRaw('ifnull('.$this->table.".employment_status_name,'　')  as employment_status_name")
                 ->selectRaw('ifnull('.$this->table.".department_name,'　')  as department_name")
-                ->selectRaw('ifnull('.$this->table.".user_name,'　')  as user_name");
+                ->selectRaw('ifnull('.$this->table.".user_name,'　')  as user_name"); */
+            $mainquery
+                ->selectRaw('ifnull('.$this->table.".employment_status_name,'　')  as employment_status_name")
+                ->selectRaw("ifnull(t21.name,'　')  as department_name")
+                ->selectRaw("ifnull(".$this->table_users.".name,'　')  as user_name");
             $mainquery
                 ->addselect($this->table.'.working_timetable_no');
             $mainquery
@@ -1437,6 +1442,15 @@ class WorkingTimedate extends Model
                 ->selectRaw($case_where_working_time_name)
                 ->selectRaw($case_where_predeter_time_name)
                 ->selectRaw($case_where_predeter_night_time_name);
+
+            // 適用期間日付の取得
+            $apicommon = new ApiCommonController();
+            // usersの最大適用開始日付subquery
+            $subquery1 = $apicommon->getUserApplyTermSubquery($targetdate);
+            // departmentsの最大適用開始日付subquery
+            $subquery2 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
+
+
             $mainquery
                 ->leftJoin($this->table_user_holiday_kubuns, function ($join) { 
                     $join->on($this->table.'.working_date', '=', $this->table_user_holiday_kubuns.'.working_date');
@@ -1455,6 +1469,22 @@ class WorkingTimedate extends Model
                     $join->on($this->table.'.working_date', '=', $this->table_calendars.'.date')
                     ->where($this->table.'.is_deleted', '=', 0)
                     ->where($this->table_calendars.'.is_deleted', '=', 0);
+                })
+                ->leftJoin($this->table_users, function ($join) { 
+                    $join->on($this->table.'.user_code', '=', $this->table_users.'.code')
+                    ->where($this->table.'.is_deleted', '=', 0)
+                    ->where($this->table_users.'.is_deleted', '=', 0);
+                });
+
+            $mainquery
+                ->leftJoinSub($subquery2, 't21', function ($join) { 
+                    $join->on('t21.code', '=', $this->table_users.'.department_code')
+                    ->where($this->table_users.'.is_deleted', '=', 0);
+                });
+            $mainquery
+                ->JoinSub($subquery1, 't23', function ($join) { 
+                    $join->on('t23.code', '=', $this->table_users.'.code');
+                    $join->on('t23.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                 });
 
             if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
