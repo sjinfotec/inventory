@@ -6,16 +6,49 @@
       <div class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
-          <div
-            class="card-header bg-transparent pb-0 border-0"
-          >
-            <h1 class="float-sm-left font-size-rg">各種申請の承認者ルート設定</h1>
-            <span class="float-sm-right font-size-sm">承認者と最終承認者を登録します。</span>
-          </div>
+          <daily-working-information-panel-header
+            v-bind:header-text1="'各種申請の承認者ルート設定'"
+            v-bind:header-text2="'各部署ごとに承認者と最終承認者を登録します。'"
+          ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="card-body pt-2">
-            <!-- main contentns row -->
+            <!-- panel contentns row -->
+            <!-- .row -->
             <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label class="input-group-text font-size-sm line-height-xs label-width-90" for="inputGroupSelect01">部署</label>
+                  </div>
+                  <select-department
+                    ref="selectdepartment"
+                    v-bind:blank-data="true"
+                    v-on:change-event="departmentChanges"
+                  ></select-department>
+                  <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
+                </div>
+              </div>
+              <div class="col-md-6 pb-2" v-if="show_result">
+                <message-data-server v-bind:message-datas="messagedatasserver" v-bind:message-class="'info'"></message-data-server>
+              </div>
+              <div class="col-md-6 pb-2" v-else>
+                <message-data-server v-bind:message-datas="messagedatasserver" v-bind:message-class="'warning'"></message-data-server>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <btn-work-time v-bind:btn-mode="'search'" v-on:searchclick-event="searchclick"></btn-work-time>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- /.panel contents -->
+            <div class="row justify-content-between" v-if="show_result">
               <!-- .panel -->
               <div class="col-md pt-3 align-self-stretch">
                 <div class="card shadow-pl">
@@ -27,8 +60,12 @@
                       </span>
                       承認者情報
                     </h1>
-                    <span class="float-sm-right font-size-sm">登録済みの承認者情報を編集できます</span>
+                    <span class="float-sm-right font-size-sm">「＋」アイコンをクリックすることで承認者情報を追加できます</span>
                   </div>
+                  <daily-working-information-panel-header
+                    v-bind:header-text1="'承認順番は行順とします。'"
+                    v-bind:header-text2="''"
+                  ></daily-working-information-panel-header>
                   <!-- /.panel header -->
                   <!-- panel body -->
                   <!-- .row -->
@@ -51,81 +88,73 @@
                           <table class="table table-striped border-bottom font-size-sm text-nowrap">
                             <thead>
                               <tr>
-                                <td class="text-center align-middle w-35 mw-rem-10">部署</td>
+                                <td class="text-center align-middle w-35 mw-rem-10">部署<span class="color-red">[*]</span></td>
                                 <td class="text-center align-middle w-35 mw-rem-10">社員名<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-35">順番<span class="color-red">[*]</span></td>
                                 <td class="text-center align-middle w-35 mw-rem-10"
                                   data-toggle="tooltip"
                                   data-placement="top"
-                                  v-bind:title="'正の承認者と代理承認者となる副の承認者の区分を選択します。'"
+                                  v-bind:title="'正の承認者と直前の正の代理承認者となる副の承認者の区別を選択します。'"
                                 >正副区分<span class="color-red">[*]</span></td>
                                 <td class="text-center align-middle w-35 mw-rem-10">操作</td>
                               </tr>
                             </thead>
                             <tbody>
-                              <tr v-for="(item,index) in userDetails" v-bind:key="item.id">
+                              <tr v-for="(item,index) in confirms" v-bind:key="item.id">
                                 <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <select-department
+                                      ref="selectdepartment"
+                                      v-bind:blank-data="true"
+                                      v-bind:selected-department="confirms[index].confirm_department_code"
+                                      v-bind:row-index="index"
+                                      v-on:change-event="departmentChangesConfirm"
+                                    ></select-department>
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <select-user
+                                      ref="selectuser"
+                                      v-bind:blank-data="true"
+                                      v-bind:get-Do="'1'"
+                                      v-bind:date-value="fromdate"
+                                      v-bind:selected-user="confirms[index].user_code"
+                                      v-bind:selected-department="confirms[index].confirm_department_code"
+                                      v-bind:row-index="index"
+                                      v-on:change-event="userChanges"
+                                    ></select-user>
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-toggle="tooltip"
+                                  data-placement="top"
+                                  v-bind:title="'正の承認者と直前の正の代理承認者となる副の承認者の区別を選択します。'"
+                                >
                                   <div class="input-group">
                                     <select
                                       class="custom-select"
-                                      v-model="userDetails[index].department_code"
+                                      v-model="confirms[index].main_sub"
                                     >
                                       <option value></option>
                                       <option
-                                        v-for="dlist in departmentList"
-                                        :value="dlist.code"
-                                        v-bind:key="dlist.code"
-                                      >{{ dlist.name }}</option>
+                                        v-for="glist in generalList"
+                                        :value="glist.code"
+                                        v-bind:key="glist.code"
+                                      >{{ glist.code_name }}</option>
                                     </select>
                                   </div>
                                 </td>
-                                <td class="text-center align-middle">
-                                  <div class="input-group">
-                                    <select
-                                      class="custom-select"
-                                      v-model="userDetails[index].user_code"
-                                    >
-                                      <option value></option>
-                                      <option
-                                        v-for="dlist in departmentList"
-                                        :value="dlist.code"
-                                        v-bind:key="dlist.code"
-                                      >{{ dlist.name }}</option>
-                                    </select>
-                                  </div>
-                                </td>
-                                <td class="text-center align-middle">
-                                  <div class="input-group">
-                                    <input
-                                      type="text"
-                                      maxlength="30"
-                                      class="form-control"
-                                      v-model="userDetails[index].kana"
-                                    />
-                                  </div>
-                                </td>
-                                <td class="text-center align-middle">
-                                  <div class="input-group">
-                                    <select
-                                      class="custom-select"
-                                      v-model="userDetails[index].management"
-                                    >
-                                      <option value></option>
-                                      <option
-                                        v-for="mlist in generalList_m"
-                                        :value="mlist.code"
-                                        v-bind:key="mlist.code"
-                                      >{{ mlist.code_name }}</option>
-                                    </select>
-                                  </div>
-                                </td>
-                                <td class="text-center align-middle">
+                                <td class="text-center align-middle"
+                                  data-toggle="tooltip"
+                                  data-placement="top"
+                                  v-bind:title="'データは削除されません。「この内容で登録する」押下で削除されます。'"
+                                >
                                   <div class="btn-group">
                                     <button
                                       type="button"
                                       class="btn btn-danger btn-lg font-size-rg"
                                       @click="alertDelConf('info',item.id,index)"
-                                    >削除</button>
+                                    >行削除</button>
                                   </div>
                                 </td>
                               </tr>
@@ -140,24 +169,135 @@
                   <!-- /panel body -->
                 </div>
               </div>
-              <!-- col -->
-              <div class="col-md-12 pb-2" v-if="cardId">
-                <div class="btn-group d-flex">
-                  <button
-                    class="btn btn-warning"
-                    @click="ReleaseCardInfo('warning')"
-                    v-if="userCode != ''"
-                  >ICカード情報を削除する</button>
+              <!-- .panel -->
+              <div class="col-md pt-3 align-self-stretch">
+                <div class="card shadow-pl">
+                  <!-- panel header -->
+                  <div class="card-header bg-transparent pt-3 border-0">
+                    <h1 class="float-sm-left font-size-rg">
+                      <span>
+                        <button class="btn btn-success btn-lg font-size-rg" @click="appendFinal">+</button>
+                      </span>
+                      最終承認者情報
+                    </h1>
+                    <span class="float-sm-right font-size-sm">「＋」アイコンをクリックすることで最終承認者情報を追加できます</span>
+                  </div>
+                  <daily-working-information-panel-header
+                    v-bind:header-text1="'承認順番は行順とします。'"
+                    v-bind:header-text2="''"
+                  ></daily-working-information-panel-header>
+                  <!-- /.panel header -->
+                  <!-- panel body -->
+                  <!-- .row -->
+                  <div class="row justify-content-between" v-if="finalerrors.length">
+                    <!-- col -->
+                    <div class="col-md-12 pb-2">
+                      <ul class="error-red color-red">
+                        <li v-for="(error,index) in finalerrors" v-bind:key="index">{{ error }}</li>
+                      </ul>
+                    </div>
+                    <!-- /.col -->
+                  </div>
+                  <!-- /.row -->
+                  <div class="card-body mb-3 p-0 border-top">
+                    <!-- panel contents -->
+                    <!-- .row -->
+                    <div class="row">
+                      <div class="col-12">
+                        <div class="table-responsive">
+                          <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                            <thead>
+                              <tr>
+                                <td class="text-center align-middle w-35 mw-rem-10">部署<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-35 mw-rem-10">社員名<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-35 mw-rem-10"
+                                  data-toggle="tooltip"
+                                  data-placement="top"
+                                  v-bind:title="'正の承認者と直前の正の代理承認者となる副の承認者の区別を選択します。'"
+                                >正副区分<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-35 mw-rem-10">操作</td>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr v-for="(item,index) in final_confirms" v-bind:key="item.id">
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <select-department
+                                      ref="selectdepartment2"
+                                      v-bind:blank-data="true"
+                                      v-bind:selected-department="final_confirms[index].confirm_department_code"
+                                      v-bind:row-index="index"
+                                      v-on:change-event="departmentChangesFinalConfirm"
+                                    ></select-department>
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <select-user
+                                      ref="selectuser2"
+                                      v-bind:blank-data="true"
+                                      v-bind:get-Do="'1'"
+                                      v-bind:date-value="fromdate"
+                                      v-bind:selected-user="final_confirms[index].user_code"
+                                      v-bind:selected-department="final_confirms[index].confirm_department_code"
+                                      v-bind:row-index="index"
+                                      v-on:change-event="userFinalChanges"
+                                    ></select-user>
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-toggle="tooltip"
+                                  data-placement="top"
+                                  v-bind:title="'正の承認者と直前の正の代理承認者となる副の承認者の区別を選択します。'"
+                                >
+                                  <div class="input-group">
+                                    <select
+                                      class="custom-select"
+                                      v-model="final_confirms[index].main_sub"
+                                    >
+                                      <option value></option>
+                                      <option
+                                        v-for="glist in generalList"
+                                        :value="glist.code"
+                                        v-bind:key="glist.code"
+                                      >{{ glist.code_name }}</option>
+                                    </select>
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-toggle="tooltip"
+                                  data-placement="top"
+                                  v-bind:title="'データは削除されません。「この内容で登録する」押下で削除されます。'"
+                                >
+                                  <div class="btn-group">
+                                    <button
+                                      type="button"
+                                      class="btn btn-danger btn-lg font-size-rg"
+                                      @click="alertFinalDelConf('info',item.id,index)"
+                                    >行削除</button>
+                                  </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /.row -->
+                    <!-- /.panel contents -->
+                  </div>
+                  <!-- /panel body -->
                 </div>
               </div>
-              <!-- /.col -->
+            </div>
+            <div class="row justify-content-between" v-if="show_result">
+              <!-- .row -->
               <!-- col -->
               <div class="col-md-12 pb-2">
-                <div class="btn-group d-flex">
-                  <button class="btn btn-success" @click="FixUser()" v-if="userCode != ''">修正する</button>
-                </div>
+                <btn-work-time v-bind:btn-mode="'store'" v-on:storeclick-event="storeclick"></btn-work-time>
               </div>
               <!-- /.col -->
+              <!-- /.row -->
             </div>
           </div>
           <!-- /.row -->
@@ -170,288 +310,246 @@
 </template>
 <script>
 import toasted from "vue-toasted";
-import {
-  FvlForm,
-  FvlInput,
-  FvlSelect,
-  FvlSearchSelect,
-  FvlSubmit
-} from "formvuelar";
 
 export default {
-  name: "UserAdd",
-  components: {
-    FvlForm,
-    FvlInput,
-    FvlSelect,
-    FvlSearchSelect,
-    FvlSubmit,
-    FvlSelect,
-    getDo: 1
-  },
+  name: "SettingRoot",
   data() {
     return {
-      form: {
-        id: "",
-        name: "",
-        kana: "",
-        email: "",
-        code: "",
-        password: "",
-        status: "",
-        table_no: "",
-        departmentCode: "",
-        management: "",
-        role: ""
-      },
       valuedepartment: "",
+      messagedatadepartment: [],
       departmentList: [],
-      employStatusList: [],
-      timeTableList: [],
       userList: [],
-      userDetails: [],
-      generalList_m: [],
-      generalList_r: [],
+      confirms: [],
+      final_confirms: [],
+      generalList: [],
       userCode: "",
       departmentCode: "",
       validate: false,
+      show_result: false,
+      messagedatasserver: [],
+      fromdate : '',
+      getDo : 1,
       errors: [],
-      oldCode: "",
-      cardId: "",
-      oldPass: ""
+      finalerrors: []
     };
   },
   // マウント時
   mounted() {
-    this.userDetails = [];
-    console.log("UserAdd Component mounted.");
+    this.confirms = [];
     this.getDepartmentList();
-    this.getEmploymentStatusList();
-    this.getTimeTableList();
     this.getUserList(1, null);
-    this.getGeneralList("C017");
-    this.getGeneralList("C025");
+    this.getGeneralList("C027");
   },
-  watch: {
-    userCode: function(val, oldVal) {
-      if (this.userCode != "") {
+  methods: {
+    // 検索部署選択が変更された場合の処理
+    departmentChanges: function(value) {
+      this.valuedepartment = value;
+    },
+    // 承認者部署選択が変更された場合の処理
+    departmentChangesConfirm: function(value, index) {
+      this.confirms[index].confirm_department_code = value;
+      // ユーザー選択コンポーネントの取得メソッドを実行
+      this.getDo = 1;
+      this.getUserSelected(value, index);
+    },
+    // 最終承認者部署選択が変更された場合の処理
+    departmentChangesFinalConfirm: function(value, index) {
+      this.final_confirms[index].confirm_department_code = value;
+      // ユーザー選択コンポーネントの取得メソッドを実行
+      this.getDo = 1;
+      this.getUserSelectedFinal(value, index);
+    },
+    // 承認者ユーザー選択が変更された場合の処理
+    userChanges: function(value, index) {
+      this.confirms[index].user_code = value;
+    },
+    // 最終承認者ユーザー選択が変更された場合の処理
+    userFinalChanges: function(value, index) {
+      this.final_confirms[index].user_code = value;
+    },
+    // 検索開始ボタンがクリックされた場合の処理
+    searchclick: function(e) {
+      this.show_result = false;
+      this.validate = this.checkFormMain(e);
+      if (this.validate) {
+        this.itemClear();
         this.$axios
-          .get("/user_add/get", {
+          .get("/confirm/show", {
             params: {
-              code: this.userCode
+              departmentcode: this.valuedepartment,
             }
           })
           .then(response => {
-            var res = response.data;
-            console.log("res.result" + res.result);
-            if (res.result == 0) {
-              this.userDetails = res.details;
-              if (this.userDetails.length > 0) {
-                this.cardId = this.userDetails[0].card_idm;
+            this.resresults = response.data;
+            this.show_result = this.resresults.show_result;
+            if (this.show_result == true) {
+              if (this.resresults.confirms != null) {
+                this.confirms = this.resresults.confirms;
               }
-            } else {
-              this.alert("error", "ユーザー情報取得に失敗しました", "エラー");
+              if (this.resresults.final_confirms != null) {
+                this.final_confirms = this.resresults.final_confirms;
+              }
             }
-            console.log("ユーザー詳細情報取得");
+            if (this.resresults.messagedata != null) {
+              this.messagedatasserver = this.resresults.messagedata;
+            }
+            this.$forceUpdate();
           })
           .catch(reason => {
-            alert("ユーザー詳細情報取得エラー");
+            alert("承認者情報取得エラー");
           });
-      } else {
-        this.inputClear();
       }
     },
-    departmentCode: function(val, oldVal) {
-      if (this.departmentCode != "") {
-        this.getUserList(1, this.departmentCode);
-      } else {
-        this.userCode = "";
-        this.getUserList(1, null);
-      }
-      console.log("ユーザー再取得");
-    }
-  },
-  methods: {
     append: function() {
-      this.userDetails.push({
+      this.confirms.push({
         id: "",
-        apply_term_from: "",
-        code: this.userCode,
         department_code: "",
-        email: "",
-        kana: "",
-        working_timetable_no: "",
-        employment_status: "",
-        name: "",
-        password: "",
-        management: "",
-        role: ""
+        user_code: "",
+        main_sub: ""
+      });
+    },
+    appendFinal: function() {
+      this.final_confirms.push({
+        id: "",
+        department_code: "",
+        user_code: "",
+        main_sub: ""
       });
     },
     alert: function(state, message, title) {
       this.$swal(title, message, state);
     },
     alertDelConf: function(state, id, index) {
-      if (id >= 0) {
+      if (this.confirms[index].confirm_department_code ||
+          this.confirms[index].user_code ||
+          this.confirms[index].main_sub) {
         this.$swal({
           title: "確認",
-          text: "削除しますか？",
+          text: "行削除しますか？",
           icon: state,
           buttons: true,
           dangerMode: true
         }).then(willDelete => {
           if (willDelete) {
-            this.del(id, index);
+            this.confirms.splice(index, 1);
           } else {
           }
         });
       } else {
-        this.userDetails.splice(index, 1);
+        this.confirms.splice(index, 1);
       }
     },
-    FixUser() {
-      this.validate = this.checkForm();
-      if (this.validate) {
-        this.$axios
-          .post("/user_add/fix", {
-            details: this.userDetails,
-            pass: this.oldPass
-          })
-          .then(response => {
-            var res = response.data;
-            this.alert("success", "修正をしました", "修正完了");
-            this.userCode = "";
-            this.getUserList(1, null);
-          })
-          .catch(reason => {
-            this.alert("error", "修正に失敗しました", "エラー");
-          });
-      } else {
-        console.log("fix error");
-      }
-    },
-    ReleaseCardInfo: function(state) {
-      this.$swal({
-        title: "ユーザーに紐づいているICカードを解除します",
-        text: "解除しますか？",
-        icon: state,
-        buttons: true,
-        dangerMode: true
-      }).then(willDelete => {
-        if (willDelete) {
-          this.$axios
-            .post("/user_add/release_card_info", {
-              card_idm: this.cardId
-            })
-            .then(response => {
-              var res = response.data;
-              if (res.result == 0) {
-                this.alert("success", "カードを解除しました", "解除完了");
-                this.cardId = "";
-                // this.get;
-              } else {
-              }
-            })
-            .catch(reason => {});
-        } else {
-        }
-      });
-    },
-    // 削除
-    del: function(id, index) {
-      this.userDetails.splice(index, 1);
-      this.$axios
-        .post("/user_add/del", {
-          id: id
-        })
-        .then(response => {
-          var res = response.data;
-          if (res.result == 0) {
-            this.alert("success", " 行削除しました", "削除成功");
-            // this.getDepartmentList();
+    alertFinalDelConf: function(state, id, index) {
+      if (this.final_confirms[index].confirm_department_code ||
+          this.final_confirms[index].user_code ||
+          this.final_confirms[index].main_sub) {
+        this.$swal({
+          title: "確認",
+          text: "行削除しますか？",
+          icon: state,
+          buttons: true,
+          dangerMode: true
+        }).then(willDelete => {
+          if (willDelete) {
+            this.final_confirms.splice(index, 1);
           } else {
           }
-        })
-        .catch(reason => {});
+        });
+      } else {
+        this.final_confirms.splice(index, 1);
+      }
+    },
+    storeclick: function(e) {
+      this.validate = this.checkForm(e);
+      if (this.validate) {
+        this.$axios
+          .post("/confirm/store", {
+            departmentcode: this.valuedepartment,
+            confirms: this.confirms,
+            final_confirms: this.final_confirms
+          })
+          .then(response => {
+            this.resresults = response.data;
+            this.store_result = this.resresults.store_result;
+            if (this.store_result == true) {
+              this.alert("success", "登録しました", "登録完了");
+            } else {
+            this.alert("error", "登録に失敗しました", "エラー");
+            }
+            if (this.resresults.messagedata != null) {
+              this.messagedatasserver = this.resresults.messagedata;
+            }
+            this.$forceUpdate();
+          })
+          .catch(reason => {
+            this.alert("error", "登録に失敗しました", "エラー");
+          });
+      }
     },
     // バリデーション
-    checkForm: function() {
-      var flag = false;
+    checkFormMain: function(e) {
+      var flag = true;
+      this.messagedatadepartment = [];
+      if (!this.valuedepartment) {
+        this.messagedatadepartment.push("部署を選択してください");
+        flag = false;
+      }
+
+      if (flag) {
+        return flag;
+      }
+      e.preventDefault();
+    },
+    checkForm: function(e) {
+      var flag = true;
       this.errors = [];
-      this.userDetails.forEach(element => {
-        flag = true;
-        if (element.apply_term_from == "") {
-          this.errors.push("有効期間を入力してください");
+      this.finalerrors = [];
+      var cnt = 0;
+      this.confirms.forEach(element => {
+        cnt++;
+        if (!element.confirm_department_code) {
+          this.errors.push("部署を選択してください (" + cnt + "行目）");
           flag = false;
         }
-        if (element.name == "") {
-          this.errors.push("社員名を入力してください");
+        if (!element.user_code) {
+          this.errors.push("社員を入力してください (" + cnt + "行目）");
           flag = false;
         }
-        /*if (element.department_code == "") {
-          this.errors.push("部署を選択してください");
-          flag = false;
-        } */
-        if (element.employment_status == "") {
-          this.errors.push("雇用形態を選択してください");
+        if (!element.main_sub) {
+          this.errors.push("正副区分を選択してください (" + cnt + "行目）");
           flag = false;
         }
-        if (element.working_timetable_no == "") {
-          this.errors.push("タイムテーブルを選択してください");
-          flag = false;
-        }
-        if (element.password == "") {
-          this.errors.push("パスワードを入力してください");
-          flag = false;
-        }
-        if (element.management == "") {
-          this.errors.push("勤怠管理を選択してください");
-          flag = false;
-        }
-        if (element.role == "") {
-          this.errors.push("権限を選択してください");
-          flag = false;
-        }
-        /*if (element.kana == "") {
-          this.errors.push("ふりがなを入力してください");
-          flag = false;
-        }*/
       });
-      return flag;
+      cnt = 0;
+      this.final_confirms.forEach(element => {
+        cnt++;
+        if (!element.confirm_department_code) {
+          this.finalerrors.push("部署を選択してください (" + cnt + "行目）");
+          flag = false;
+        }
+        if (!element.user_code) {
+          this.finalerrors.push("社員を入力してください (" + cnt + "行目）");
+          flag = false;
+        }
+        if (!element.main_sub) {
+          this.finalerrors.push("正副区分を選択してください (" + cnt + "行目");
+          flag = false;
+        }
+      });
+
+      if (flag) {
+        return flag;
+      }
+      e.preventDefault();
     },
     getDepartmentList() {
       this.$axios
         .get("/get_departments_list")
         .then(response => {
           this.departmentList = response.data;
-          this.object = { code: "", name: "未選択" };
-          this.departmentList.unshift(this.object);
-          console.log("部署リスト取得");
         })
         .catch(reason => {
           this.alert("error", "部署リスト取得に失敗しました", "エラー");
-        });
-    },
-    getEmploymentStatusList() {
-      this.$axios
-        .get("/get_employment_status_list")
-        .then(response => {
-          this.employStatusList = response.data;
-          console.log("雇用形態リスト取得");
-        })
-        .catch(reason => {
-          this.alert("error", "雇用形態リスト取得に失敗しました", "エラー");
-        });
-    },
-    getTimeTableList() {
-      this.$axios
-        .get("/get_time_table_list")
-        .then(response => {
-          this.timeTableList = response.data;
-          console.log("タイムテーブルリスト取得");
-        })
-        .catch(reason => {
-          this.alert("error", "タイムテーブルリスト取得に失敗しました", "エラー");
         });
     },
     getGeneralList(value) {
@@ -462,11 +560,8 @@ export default {
           }
         })
         .then(response => {
-          if (value == "C017") {
-            this.generalList_m = response.data;
-          }
-          if (value == "C025") {
-            this.generalList_r = response.data;
+          if (value == "C027") {
+            this.generalList = response.data;
           }
         })
         .catch(reason => {
@@ -474,13 +569,10 @@ export default {
         });
     },
     addSuccess() {
-      this.getUserList(1, null);
       this.$toasted.show("登録しました");
-      this.getUserList(1, null);
-      this.userCode = "";
+      this.itemClear();
     },
     getUserList(getdovalue, value) {
-      console.log("getdovalue = " + getdovalue);
       this.$axios
         .get("/get_user_list", {
           params: {
@@ -490,9 +582,6 @@ export default {
         })
         .then(response => {
           this.userList = response.data;
-          this.object = { code: "", name: "新規登録" };
-          this.userList.unshift(this.object);
-          console.log("ユーザーリスト取得");
         })
         .catch(reason => {
           alert("ユーザーリスト取得エラー");
@@ -501,20 +590,40 @@ export default {
     error() {
       this.alert("error", "登録に失敗しました", "エラー");
     },
-    inputClear() {
-      this.form.id = "";
-      this.form.name = "";
-      this.form.kana = "";
-      this.form.code = "";
-      this.form.password = "";
-      this.form.email = "";
-      this.form.departmentCode = "";
-      this.form.status = "";
-      this.form.table_no = "";
-      this.form.management = "";
-      this.form.role = "";
-      this.userCode = "";
-      this.userDetails = [];
+    itemClear() {
+      this.messagedatadepartment = [];
+      this.messagedatasserver = [];
+      this.errors = [];
+      this.confirms = [];
+      this.final_confirms = [];
+    },
+    // ユーザー選択コンポーネント取得メソッド
+    getUserSelected: function(departmentvalue, index) {
+      this.getDo = 1;
+      this.fromdate = ""
+      if (!departmentvalue) {
+        this.$refs.selectuser[index].getUserList(this.getDo, this.fromdate);
+      } else {
+        this.$refs.selectuser[index].getUserListByDepartment(
+          this.getDo,
+          departmentvalue,
+          this.fromdate
+        );
+      }
+    },
+    // 最終承認者ユーザー選択コンポーネント取得メソッド
+    getUserSelectedFinal: function(departmentvalue, index) {
+      this.getDo = 1;
+      this.fromdate = ""
+      if (!departmentvalue) {
+        this.$refs.selectuser2[index].getUserList(this.getDo, this.fromdate);
+      } else {
+        this.$refs.selectuser2[index].getUserListByDepartment(
+          this.getDo,
+          departmentvalue,
+          this.fromdate
+        );
+      }
     }
   }
 };

@@ -34,7 +34,6 @@
                     <td class="text-center align-middle w-15">早退日数</td>
                     <td class="text-center align-middle w-15">遅刻日数</td>
                     <td class="text-center align-middle w-15">欠勤日数</td>
-                    <td class="text-center align-middle w-35 mw-rem-20">備考</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'">
                     <td class="text-center align-middle w-15">雇用形態</td>
@@ -64,7 +63,6 @@
                     <td class="text-center align-middle w-15">早退日数</td>
                     <td class="text-center align-middle w-15">遅刻日数</td>
                     <td class="text-center align-middle w-15">欠勤日数</td>
-                    <td class="text-center align-middle w-35 mw-rem-20">備考</td>
                   </tr>
                   <tr v-if="calcLists.length && detailOrTotal === 'total' && btnMode ==='basicswitch'" bgcolor="#7fffd4">
                     <td class="text-center align-middle w-15"
@@ -90,7 +88,6 @@
                     <td class="text-center align-middle w-15">早退日数</td>
                     <td class="text-center align-middle w-15">遅刻日数</td>
                     <td class="text-center align-middle w-15">欠勤日数</td>
-                    <td class="text-center align-middle w-35 mw-rem-20">備考</td>
                   </tr>
                   <tr v-if="calcLists.length && detailOrTotal === 'total' && btnMode ==='detailswitch'" bgcolor="#7fffd4">
                     <td class="text-center align-middle w-15"
@@ -119,7 +116,6 @@
                     <td class="text-center align-middle w-15">早退日数</td>
                     <td class="text-center align-middle w-15">遅刻日数</td>
                     <td class="text-center align-middle w-15">欠勤日数</td>
-                    <td class="text-center align-middle w-35 mw-rem-20">備考</td>
                   </tr>
                 </thead>
                 <tbody>
@@ -149,7 +145,6 @@
                     <td class="text-align-right">{{ calcLists.total_leave_early }} 日</td>
                     <td class="text-align-right">{{ calcLists.total_late }} 日</td>
                     <td class="text-align-right">{{ calcLists.total_absence }} 日</td>
-                    <td class="text-align-left"> </td>
                   </tr>
                   <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'"
                   >
@@ -180,7 +175,6 @@
                     <td class="text-align-right">{{ calcLists.total_leave_early }} 日</td>
                     <td class="text-align-right">{{ calcLists.total_late }} 日</td>
                     <td class="text-align-right">{{ calcLists.total_absence }} 日</td>
-                    <td class="text-align-left"> </td>
                   </tr>
                   <tr v-if="detailOrTotal === 'total' && btnMode ==='basicswitch'"
                     v-for="(calcList,index) in calcLists"
@@ -208,7 +202,6 @@
                     <td class="text-align-center">{{ calcList.total_leave_early }} 日</td>
                     <td class="text-align-center">{{ calcList.total_late }} 日</td>
                     <td class="text-align-center">{{ calcList.total_absence }} 日</td>
-                    <td class="text-align-center"> </td>
                   </tr>
                   <tr v-if="detailOrTotal === 'total' && btnMode ==='detailswitch'"
                     v-for="(calcList,index) in calcLists"
@@ -239,7 +232,6 @@
                     <td class="text-align-center">{{ calcList.total_leave_early }} 日</td>
                     <td class="text-align-center">{{ calcList.total_late }} 日</td>
                     <td class="text-align-center">{{ calcList.total_absence }} 日</td>
-                    <td class="text-align-center"> </td>
                   </tr>
                 </tbody>
               </table>

@@ -1,5 +1,5 @@
 <template>
-  <select class="form-control" v-model="selectedDepartment" v-on:change="selChanges(selectedDepartment)" placeholder="部署を選択してください">
+  <select class="form-control" v-model="selecteddepartmentcode" v-on:change="selChanges(selecteddepartmentcode,rowIndex)" placeholder="部署を選択してください">
     <option v-if="this.blankData" value=""></option>
     <option v-for="departments in departmentList" v-bind:value="departments.code">
       {{ departments.name }}
@@ -7,6 +7,7 @@
   </select>
 </template>
 <script>
+import moment from "moment";
 
 export default {
   name: "selectDepartment",
@@ -14,17 +15,34 @@ export default {
     blankData: {
       type: Boolean,
       default: false
+    },
+    selectedDepartment: {
+        type: String,
+        default: ''
+    },
+    dateValue: {
+        type: String,
+        default: ''
+    },
+    rowIndex: {
+        type: Number,
+        default: 0
     }
   },
   data() {
     return {
-      selectedDepartment: '',
+      selecteddepartmentcode: '',
+      dateApllyValue: '',
       departmentList: []
     };
   },
   // マウント時
   mounted() {
-    this.getDepartmentList('');
+    this.selecteddepartmentcode = this.selectedDepartment;
+    if (this.dateValue == '') {
+      this.dateApllyValue = moment(new Date()).format("YYYYMMDD");
+    }
+    this.getDepartmentList(this.dateApllyValue);
   },
   methods: {
     getDepartmentList(datevalue){
@@ -42,10 +60,9 @@ export default {
         });
     },
     // 選択が変更された場合、親コンポーネントに選択値を返却
-    selChanges : function(value) {
+    selChanges : function(value, index) {
 
-        console.log("selectdepartment = ["+ value + ']');
-        this.$emit('change-event', value);
+        this.$emit('change-event', value, index);
 
     }
 
