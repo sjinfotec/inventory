@@ -1895,7 +1895,7 @@ class WorkingTimedate extends Model
             }
             
             if(!empty($this->param_user_code)){
-                $mainquery->where('t1.user_code', $this->param_user_code);                   //user_code指定
+                $mainquery->where('t1.code', $this->param_user_code);                   //user_code指定
             }
             
             if(!empty($this->param_department_code)){

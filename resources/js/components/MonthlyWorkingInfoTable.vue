@@ -121,117 +121,117 @@
                 <tbody>
                   <tr v-if="detailOrTotal === 'detail' && btnMode ==='basicswitch'"
                   >
-                    <td class="text-align-center">{{ calcLists.employment }}</td>
-                    <td class="text-align-right"
+                    <td class="text-center align-middle">{{ calcLists.employment }}</td>
+                    <td class="text-center align-middle"
                       data-toggle="tooltip"
                       data-placement="top"
                       v-bind:title="edtString"
                       @mouseover="edttooltips('実働時間 = 所定時間 + 残業時間 + 深夜残業時間', '')"
                     >{{ calcLists.total_working_times }}</td>
-                    <td class="text-align-right">{{ calcLists.regular_working_times }}</td>
-                    <td class="text-align-right">{{ calcLists.off_hours_working_hours }}</td>
-                    <td class="text-align-right">{{ calcLists.late_night_overtime_hours }}</td>
-                    <td class="text-align-right">{{ calcLists.public_going_out_hours }}</td>
-                    <td class="text-align-right">{{ calcLists.missing_middle_hours }}</td>
-                    <td class="text-align-right"
+                    <td class="text-center align-middle">{{ calcLists.regular_working_times }}</td>
+                    <td class="text-center align-middle">{{ calcLists.off_hours_working_hours }}</td>
+                    <td class="text-center align-middle">{{ calcLists.late_night_overtime_hours }}</td>
+                    <td class="text-center align-middle">{{ calcLists.public_going_out_hours }}</td>
+                    <td class="text-center align-middle">{{ calcLists.missing_middle_hours }}</td>
+                    <td class="text-center align-middle"
                       data-toggle="tooltip"
                       data-placement="top"
                       v-bind:title="edtString"
                       @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','')"
                     >{{ calcLists.not_employment_working_hours }}</td>
-                    <td class="text-align-right">{{ calcLists.total_working_status }} 日</td>
-                    <td class="text-align-right">{{ calcLists.total_paid_holidays }} 日</td>
-                    <td class="text-align-right">{{ calcLists.total_holiday_kubun }} 日</td>
-                    <td class="text-align-right">{{ calcLists.total_leave_early }} 日</td>
-                    <td class="text-align-right">{{ calcLists.total_late }} 日</td>
-                    <td class="text-align-right">{{ calcLists.total_absence }} 日</td>
+                    <td class="text-center align-middle">{{ calcLists.total_working_status }} 日</td>
+                    <td class="text-center align-middle">{{ calcLists.total_paid_holidays }} 日</td>
+                    <td class="text-center align-middle">{{ calcLists.total_holiday_kubun }} 日</td>
+                    <td class="text-center align-middle">{{ calcLists.total_leave_early }} 日</td>
+                    <td class="text-center align-middle">{{ calcLists.total_late }} 日</td>
+                    <td class="text-center align-middle">{{ calcLists.total_absence }} 日</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'"
                   >
-                    <td class="text-align-center">{{ calcLists.employment }}</td>
-                    <td class="text-align-right"
+                    <td class="text-center align-middle">{{ calcLists.employment }}</td>
+                    <td class="text-center align-middle"
                       data-toggle="tooltip"
                       data-placement="top"
                       v-bind:title="edtString"
                       @mouseover="edttooltips('実働時間 = 所定時間 + 残業時間 + 深夜残業時間', '')"
                     >{{ calcLists.total_working_times }}</td>
-                    <td class="text-align-right">{{ calcLists.regular_working_times }}</td>
-                    <td class="text-align-right">{{ calcLists.out_of_regular_working_times }}</td>
-                    <td class="text-align-right">{{ calcLists.off_hours_working_hours }}</td>
-                    <td class="text-align-right">{{ calcLists.late_night_overtime_hours }}</td>
-                    <td class="text-align-right">{{ calcLists.legal_working_times }}</td>
-                    <td class="text-align-right">{{ calcLists.out_of_legal_working_times }}</td>
-                    <td class="text-align-right">{{ calcLists.public_going_out_hours }}</td>
-                    <td class="text-align-right">{{ calcLists.missing_middle_hours }}</td>
-                    <td class="text-align-right"
+                    <td class="text-center align-middle">{{ calcLists.regular_working_times }}</td>
+                    <td class="text-center align-middle">{{ calcLists.out_of_regular_working_times }}</td>
+                    <td class="text-center align-middle">{{ calcLists.off_hours_working_hours }}</td>
+                    <td class="text-center align-middle">{{ calcLists.late_night_overtime_hours }}</td>
+                    <td class="text-center align-middle">{{ calcLists.legal_working_times }}</td>
+                    <td class="text-center align-middle">{{ calcLists.out_of_legal_working_times }}</td>
+                    <td class="text-center align-middle">{{ calcLists.public_going_out_hours }}</td>
+                    <td class="text-center align-middle">{{ calcLists.missing_middle_hours }}</td>
+                    <td class="text-center align-middle"
                       data-toggle="tooltip"
                       data-placement="top"
                       v-bind:title="edtString"
                       @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','')"
                     >{{ calcLists.not_employment_working_hours }}</td>
-                    <td class="text-align-right">{{ calcLists.total_working_status }} 日</td>
-                    <td class="text-align-right">{{ calcLists.total_paid_holidays }} 日</td>
-                    <td class="text-align-right">{{ calcLists.total_holiday_kubun }} 日</td>
-                    <td class="text-align-right">{{ calcLists.total_leave_early }} 日</td>
-                    <td class="text-align-right">{{ calcLists.total_late }} 日</td>
-                    <td class="text-align-right">{{ calcLists.total_absence }} 日</td>
+                    <td class="text-center align-middle">{{ calcLists.total_working_status }} 日</td>
+                    <td class="text-center align-middle">{{ calcLists.total_paid_holidays }} 日</td>
+                    <td class="text-center align-middle">{{ calcLists.total_holiday_kubun }} 日</td>
+                    <td class="text-center align-middle">{{ calcLists.total_leave_early }} 日</td>
+                    <td class="text-center align-middle">{{ calcLists.total_late }} 日</td>
+                    <td class="text-center align-middle">{{ calcLists.total_absence }} 日</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'total' && btnMode ==='basicswitch'"
                     v-for="(calcList,index) in calcLists"
                   >
-                    <td class="text-align-center"
+                    <td class="text-center align-middle"
                       data-toggle="tooltip"
                       data-placement="top"
                       v-bind:title="edtString"
                       @mouseover="edttooltips('実働時間 = 所定時間 + 残業時間 + 深夜残業時間', '')"
                     >{{ calcList.total_working_times }}</td>
-                    <td class="text-align-center">{{ calcList.regular_working_times }}</td>
-                    <td class="text-align-center">{{ calcList.off_hours_working_hours }}</td>
-                    <td class="text-align-center">{{ calcList.late_night_overtime_hours }}</td>
-                    <td class="text-align-center">{{ calcList.public_going_out_hours }}</td>
-                    <td class="text-align-center">{{ calcList.missing_middle_hours }}</td>
-                    <td class="text-align-center"
+                    <td class="text-center align-middle">{{ calcList.regular_working_times }}</td>
+                    <td class="text-center align-middle">{{ calcList.off_hours_working_hours }}</td>
+                    <td class="text-center align-middle">{{ calcList.late_night_overtime_hours }}</td>
+                    <td class="text-center align-middle">{{ calcList.public_going_out_hours }}</td>
+                    <td class="text-center align-middle">{{ calcList.missing_middle_hours }}</td>
+                    <td class="text-center align-middle"
                       data-toggle="tooltip"
                       data-placement="top"
                       v-bind:title="edtString"
                       @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','')"
                     >{{ calcList.not_employment_working_hours }}</td>
-                    <td class="text-align-center">{{ calcList.total_working_status }} 日</td>
-                    <td class="text-align-center">{{ calcList.total_paid_holidays }} 日</td>
-                    <td class="text-align-center">{{ calcList.total_holiday_kubun }} 日</td>
-                    <td class="text-align-center">{{ calcList.total_leave_early }} 日</td>
-                    <td class="text-align-center">{{ calcList.total_late }} 日</td>
-                    <td class="text-align-center">{{ calcList.total_absence }} 日</td>
+                    <td class="text-center align-middle">{{ calcList.total_working_status }} 日</td>
+                    <td class="text-center align-middle">{{ calcList.total_paid_holidays }} 日</td>
+                    <td class="text-center align-middle">{{ calcList.total_holiday_kubun }} 日</td>
+                    <td class="text-center align-middle">{{ calcList.total_leave_early }} 日</td>
+                    <td class="text-center align-middle">{{ calcList.total_late }} 日</td>
+                    <td class="text-center align-middle">{{ calcList.total_absence }} 日</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'total' && btnMode ==='detailswitch'"
                     v-for="(calcList,index) in calcLists"
                   >
-                    <td class="text-align-center"
+                    <td class="text-center align-middle"
                       data-toggle="tooltip"
                       data-placement="top"
                       v-bind:title="edtString"
                       @mouseover="edttooltips('実働時間 = 所定時間 + 残業時間 + 深夜残業時間', '')"
                     >{{ calcList.total_working_times }}</td>
-                    <td class="text-align-center">{{ calcList.regular_working_times }}</td>
-                    <td class="text-align-center">{{ calcList.out_of_regular_working_times }}</td>
-                    <td class="text-align-center">{{ calcList.off_hours_working_hours }}</td>
-                    <td class="text-align-center">{{ calcList.late_night_overtime_hours }}</td>
-                    <td class="text-align-center">{{ calcList.legal_working_times }}</td>
-                    <td class="text-align-center">{{ calcList.out_of_legal_working_times }}</td>
-                    <td class="text-align-center">{{ calcList.public_going_out_hours }}</td>
-                    <td class="text-align-center">{{ calcList.missing_middle_hours }}</td>
-                    <td class="text-align-center"
+                    <td class="text-center align-middle">{{ calcList.regular_working_times }}</td>
+                    <td class="text-center align-middle">{{ calcList.out_of_regular_working_times }}</td>
+                    <td class="text-center align-middle">{{ calcList.off_hours_working_hours }}</td>
+                    <td class="text-center align-middle">{{ calcList.late_night_overtime_hours }}</td>
+                    <td class="text-center align-middle">{{ calcList.legal_working_times }}</td>
+                    <td class="text-center align-middle">{{ calcList.out_of_legal_working_times }}</td>
+                    <td class="text-center align-middle">{{ calcList.public_going_out_hours }}</td>
+                    <td class="text-center align-middle">{{ calcList.missing_middle_hours }}</td>
+                    <td class="text-center align-middle"
                       data-toggle="tooltip"
                       data-placement="top"
                       v-bind:title="edtString"
                       @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','')"
                     >{{ calcList.not_employment_working_hours }}</td>
-                    <td class="text-align-center">{{ calcList.total_working_status }} 日</td>
-                    <td class="text-align-center">{{ calcList.total_paid_holidays }} 日</td>
-                    <td class="text-align-center">{{ calcList.total_holiday_kubun }} 日</td>
-                    <td class="text-align-center">{{ calcList.total_leave_early }} 日</td>
-                    <td class="text-align-center">{{ calcList.total_late }} 日</td>
-                    <td class="text-align-center">{{ calcList.total_absence }} 日</td>
+                    <td class="text-center align-middle">{{ calcList.total_working_status }} 日</td>
+                    <td class="text-center align-middle">{{ calcList.total_paid_holidays }} 日</td>
+                    <td class="text-center align-middle">{{ calcList.total_holiday_kubun }} 日</td>
+                    <td class="text-center align-middle">{{ calcList.total_leave_early }} 日</td>
+                    <td class="text-center align-middle">{{ calcList.total_late }} 日</td>
+                    <td class="text-center align-middle">{{ calcList.total_absence }} 日</td>
                   </tr>
                 </tbody>
               </table>

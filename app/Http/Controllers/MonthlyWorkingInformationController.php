@@ -23,7 +23,6 @@ class MonthlyWorkingInformationController extends Controller
     private $array_date = array();
     // メッセージ
     private $array_messagedata = array();
-    private $collect_massegedata = null;
 
     /**
      * 初期処理
@@ -57,9 +56,6 @@ class MonthlyWorkingInformationController extends Controller
         $employmentstatus = $apicommon->setRequestQeury($request->employmentstatus);
         $departmentcode = $apicommon->setRequestQeury($request->departmentcode);
         $usercode = $apicommon->setRequestQeury($request->usercode);
-
-        // メッセージ設定collect
-        $this->collect_massegedata = collect();
 
         $working_time_dates = array();
         $working_time_sum = array();
@@ -187,9 +183,6 @@ class MonthlyWorkingInformationController extends Controller
         $employmentstatus = $apicommon->setRequestQeury($request->employmentstatus);
         $departmentcode = $apicommon->setRequestQeury($request->departmentcode);
         $usercode = $apicommon->setRequestQeury($request->usercode);
-
-        // メッセージ設定collect
-        $this->collect_massegedata = collect();
 
         $workingtimedate_model = new WorkingTimedate();
         // 日付開始終了の作成
@@ -491,6 +484,7 @@ class MonthlyWorkingInformationController extends Controller
             'regular_working_times' => $result->regular_working_times,
             'off_hours_working_hours' => $result->off_hours_working_hours,
             'late_night_overtime_hours' => $result->late_night_overtime_hours,
+            'remark_holiday_name' => $result->remark_holiday_name,
             'remark_data' => $remark_data
         );
         if (isset($result->attendance_time_2) || isset($result->leaving_time_2)) {
@@ -502,6 +496,7 @@ class MonthlyWorkingInformationController extends Controller
                 'regular_working_times' => '',
                 'off_hours_working_hours' => '',
                 'late_night_overtime_hours' => '',
+                'remark_holiday_name' => '',
                 'remark_data' => ''
             );
         }
@@ -514,6 +509,7 @@ class MonthlyWorkingInformationController extends Controller
                 'regular_working_times' => '',
                 'off_hours_working_hours' => '',
                 'late_night_overtime_hours' => '',
+                'remark_holiday_name' => '',
                 'remark_data' => ''
             );
         }
@@ -526,6 +522,7 @@ class MonthlyWorkingInformationController extends Controller
                 'regular_working_times' => '',
                 'off_hours_working_hours' => '',
                 'late_night_overtime_hours' => '',
+                'remark_holiday_name' => '',
                 'remark_data' => ''
             );
         }
@@ -538,6 +535,7 @@ class MonthlyWorkingInformationController extends Controller
                 'regular_working_times' => '',
                 'off_hours_working_hours' => '',
                 'late_night_overtime_hours' => '',
+                'remark_holiday_name' => '',
                 'remark_data' => ''
             );
         }

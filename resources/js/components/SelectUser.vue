@@ -46,19 +46,20 @@ export default {
   },
   // マウント時
   mounted() {
-    console.log("UserList マウント ");
     this.selectedusercode = this.selectedUser;
     if (this.dateValue == '') {
       this.dateApllyValue = moment(new Date()).format("YYYYMMDD");
     }
     if (this.selectedDepartment == '') {
-      this.getUserList(this.getDo, this.dateApllyValue);
+      this.getUserList(this.getDo, this.selectedusercode, this.dateApllyValue);
     } else {
-      this.getUserListByDepartment(this.getDo, this.selectedDepartment, this.dateApllyValue);
+      this.getUserListByDepartment(this.getDo, this.selectedDepartment, this.selectedusercode, this.dateApllyValue);
     }
   },
   methods: {
-    getUserList(getdovalue, datevalue){
+    getUserList(getdovalue, value, datevalue){
+      this.selectedusercode = value;
+      this.rowIndex = 0;
       this.userList = [];
       this.$axios
         .get("/get_user_list", {
@@ -74,7 +75,9 @@ export default {
           alert("社員選択リスト作成エラー");
         });
     },
-    getUserListByDepartment(getdovalue, value, datevalue){
+    getUserListByDepartment(getdovalue, value, uservalue, datevalue){
+      this.selectedusercode = uservalue;
+      this.rowIndex = 0;
       this.userList = [];
       this.$axios
         .get("/get_user_list", {
@@ -91,7 +94,9 @@ export default {
           alert("社員選択リスト作成エラー");
         });
     },
-    getUserListByEmployment(getdovalue, empvalue, datevalue){
+    getUserListByEmployment(getdovalue, empvalue, uservalue, datevalue){
+      this.selectedusercode = uservalue;
+      this.rowIndex = 0;
       this.userList = [];
       this.$axios
         .get("/get_user_list", {
@@ -108,7 +113,9 @@ export default {
           alert("社員選択リスト作成エラー");
         });
     },
-    getUserListByDepartmentEmployment(getdovalue, value, empvalue, datevalue){
+    getUserListByDepartmentEmployment(getdovalue, value, empvalue, uservalue, datevalue){
+      this.selectedusercode = uservalue;
+      this.rowIndex = 0;
       this.userList = [];
       this.$axios
         .get("/get_user_list", {
@@ -128,8 +135,7 @@ export default {
     },
     // 選択が変更された場合、親コンポーネントに選択値を返却
     selChanges : function(value, index) {
-
-        this.$emit('change-event', value, index);
+      this.$emit('change-event', value, index);
 
     }
 

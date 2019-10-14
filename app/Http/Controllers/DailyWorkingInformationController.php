@@ -29,10 +29,12 @@ class DailyWorkingInformationController extends Controller
     private $array_check_result = array();
     private $array_check_max_times = array();
     private $array_check_interval = array();
+    private $array_working_timetable_no = array();
     // 計算用配列
     private $array_calc_mode = array();
+    private $array_calc_working_timetable_no = array();
     private $array_calc_time = array();
-    private $array_calc_statu = array();
+    private $array_calc_status = array();
     private $array_calc_note = array();
 
     private $array_calc_late = array();
@@ -100,10 +102,10 @@ class DailyWorkingInformationController extends Controller
         $work_time = new WorkTime();
 
         $business_kubun = "";
-        $working_time_dates = null;
+        $working_time_dates = new collection();
         $array_working_time_dates = array();
         $array_working_time_attendances = array();
-        $working_time_sum = null;
+        $working_time_sum = new collection();
 
         // 打刻時刻を取得
         $work_time->setParamDatefromAttribute($datefrom);
@@ -381,8 +383,8 @@ class DailyWorkingInformationController extends Controller
         }
 
         // 出勤・退勤データtempから登録
-        $working_time_dates = null;
-        $working_time_sum = null;
+        $working_time_dates = new Collection();
+        $working_time_sum = new Collection();
         if ($add_result) {
             $temp_working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
             $temp_working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
@@ -487,27 +489,21 @@ class DailyWorkingInformationController extends Controller
         foreach ($worktimes as $result) {
             // 打刻データありの場合
             Log::DEBUG('----日次労働時間取得 code = '.$result->user_code.' '.$result->user_name. ' 開始   計算ターゲット日付'.$target_date_ymd.' ------------------------ ');
-            Log::DEBUG('        部署     = '.$result->department_name);
-            Log::DEBUG('        打刻時刻 = '.$result->record_datetime);
-            Log::DEBUG('        モード   = '.$result->mode);
-            Log::DEBUG('        打刻日   = '.$result->record_date);
-            Log::DEBUG('        モード   = '.$result->mode);
+            Log::DEBUG('        部署  $result->department_name   = '.$result->department_name);
+            Log::DEBUG('        打刻時刻 $result->record_datetime = '.$result->record_datetime);
+            Log::DEBUG('        打刻日  $result->record_date = '.$result->record_date);
+            Log::DEBUG('        モード  $result->mode = '.$result->mode);
             if (isset($before_result)) {
-                Log::DEBUG('        　前回モード   = '.$before_result->mode);
+                Log::DEBUG('        　前回モード $before_result->mode  = '.$before_result->mode);
             } else {
                 Log::DEBUG('        　前回モード   なし');
             }
-            Log::DEBUG('        出勤区分 = '.$result->business_kubun);
-            Log::DEBUG('                = '.$result->business_name);
-            Log::DEBUG('        ユーザー休暇区分 = '.$result->user_holiday_kubun);
-            Log::DEBUG('                        = '.$result->user_holiday_name);
-            Log::DEBUG('        タイムテーブル　開始時刻　= '.$result->working_timetable_from_time);
-            Log::DEBUG('        タイムテーブル　終了時刻　= '.$result->working_timetable_to_time);
-            if ($target_flg) {
-                Log::DEBUG('        集計対象 target_flg = true');
-            } else {
-                Log::DEBUG('        集計対象 target_flg = false');
-            }
+            Log::DEBUG('        出勤区分 $result->business_kubun = '.$result->business_kubun);
+            Log::DEBUG('                $result->business_name  = '.$result->business_name);
+            Log::DEBUG('        ユーザー休暇区分 $result->user_holiday_kubun = '.$result->user_holiday_kubun);
+            Log::DEBUG('                        $result->user_holiday_name  = '.$result->user_holiday_name);
+            Log::DEBUG('        タイムテーブル　開始時刻　$result->working_timetable_from_time = '.$result->working_timetable_from_time);
+            Log::DEBUG('        タイムテーブル　終了時刻　result->working_timetable_to_time    = '.$result->working_timetable_to_time);
             if ($result->record_datetime != null && $result->mode != null) {
                 // 設定値確認
                 $chk_setting = $this->chkSettingData($result);
@@ -519,10 +515,6 @@ class DailyWorkingInformationController extends Controller
                     $current_department_code = $result->department_code;
                     $current_user_code = $result->user_code;
                     $current_result = $result;
-                    if ($before_date == null) {$before_date = $current_date;}
-                    if ($before_department_code == null) {$before_department_code = $current_department_code;}
-                    if ($before_user_code == null) {$before_user_code = $current_user_code;}
-                    if ($before_result == null) {$before_result = $result;}
                     // 指定日付<=であれば集計対象、>であれば打刻なしとして登録
                     if ($target_flg) {
                         if ($result->record_date > $target_date_ymd) {
@@ -534,10 +526,37 @@ class DailyWorkingInformationController extends Controller
                                     if ($before_result->mode != Config::get('const.C012.attendance')) {
                                         $target_flg = false;
                                     } 
+                                } else {
+                                    $target_flg = false;
                                 }
                             }
                         }
                     }
+                    // 20191012 start
+                    if ($result->record_date == $target_date_ymd) {
+                        if ($result->mode == Config::get('const.C012.attendance')) {
+                            $target_flg = true;
+                        } else {
+                            // 出勤ではない場合は直前のモードが出勤していなければ対象外
+                            if (isset($before_result->mode)) {
+                                if ($before_result->mode != Config::get('const.C012.attendance')) {
+                                    $target_flg = false;
+                                } 
+                            } else {
+                                $target_flg = false;
+                            }
+                        }
+                    }
+                    if ($target_flg) {
+                        Log::DEBUG('        集計対象 target_flg = true');
+                    } else {
+                        Log::DEBUG('        集計対象 target_flg = false');
+                    }
+                    // 20191012 end
+                    if ($before_date == null) {$before_date = $current_date;}
+                    if ($before_department_code == null) {$before_department_code = $current_department_code;}
+                    if ($before_user_code == null) {$before_user_code = $current_user_code;}
+                    if ($before_result == null) {$before_result = $result;}
                     if ($target_flg == true) {
                         Log::DEBUG('        打刻あり、当日計算対象データ');
                         // ユーザー休暇区分判定用
@@ -558,14 +577,19 @@ class DailyWorkingInformationController extends Controller
                             Log::DEBUG('    ユーザーが変わった場合 ');
                             // ユーザー労働時間計算(１個前のユーザーを計算する)
                             Log::DEBUG('        temp_calc_workingtimesの登録開始');
-                            Log::DEBUG('            １個前のユーザー = '.$before_user_code.' record_time = '.$before_result->record_datetime);
+                            Log::DEBUG('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
+                            Log::DEBUG('            部署     = '.$before_result->department_name);
+                            Log::DEBUG('            打刻時刻 = '.$before_result->record_datetime);
+                            Log::DEBUG('            モード   = '.$before_result->mode);
+                            Log::DEBUG('            打刻日   = '.$before_result->record_date);
                             $this->calcWorkingTime(
                                 $before_date,
                                 $before_user_code,
                                 $before_department_code,
                                 $business_kubun,
                                 $before_result->interval,
-                                $before_result->user_holiday_kubun);
+                                $before_result->user_holiday_kubun
+                            );
                             try{
                                 // temporaryに登録する
                                 $this->insTempCalcItem($before_date, $before_result);
@@ -579,7 +603,6 @@ class DailyWorkingInformationController extends Controller
                             $this->beforeArrayWorkingTime($result);
                             // ユーザーを同じく設定
                             $before_user_code = $current_user_code;
-                            $before_result = $result;
                             $before_out_flg = true;
                             $target_flg = true;
                         } elseif ($current_date == $before_date) {
@@ -587,14 +610,19 @@ class DailyWorkingInformationController extends Controller
                             Log::DEBUG('    部署が変わった場合 ');
                             // ユーザー労働時間計算(１個前のユーザーを計算する)
                             Log::DEBUG('    temp_calc_workingtimesの登録開始');
-                            Log::DEBUG('        １個前のユーザー = '.$before_user_code.' record_time = '.$before_result->record_datetime);
+                            Log::DEBUG('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
+                            Log::DEBUG('            部署     = '.$before_result->department_name);
+                            Log::DEBUG('            打刻時刻 = '.$before_result->record_datetime);
+                            Log::DEBUG('            モード   = '.$before_result->mode);
+                            Log::DEBUG('            打刻日   = '.$before_result->record_date);
                             $this->calcWorkingTime(
                                 $before_date,
                                 $before_user_code,
                                 $before_department_code,
                                 $business_kubun,
                                 $before_result->interval,
-                                $before_result->user_holiday_kubun);
+                                $before_result->user_holiday_kubun
+                            );
                             try{
                                 // temporaryに登録する
                                 $this->insTempCalcItem($before_date, $before_result);
@@ -610,7 +638,6 @@ class DailyWorkingInformationController extends Controller
                             $before_department_code = $current_department_code;
                             // ユーザーを同じく設定
                             $before_user_code = $current_user_code;
-                            $before_result = $result;
                             $before_out_flg = true;
                             $target_flg = true;
                         } else {
@@ -618,7 +645,11 @@ class DailyWorkingInformationController extends Controller
                             Log::DEBUG('    日付が変わった ');
                             try{
                                 // ユーザー労働時間登録(１個前のユーザーを登録する)
-                                Log::DEBUG('    １個前のユーザーを登録開始 $before_user_code = '.$before_user_code.' record_time = '.$before_result->record_datetime);
+                                Log::DEBUG('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
+                                Log::DEBUG('            部署     = '.$before_result->department_name);
+                                Log::DEBUG('            打刻時刻 = '.$before_result->record_datetime);
+                                Log::DEBUG('            モード   = '.$before_result->mode);
+                                Log::DEBUG('            打刻日   = '.$before_result->record_date);
                                 $add_results = $this->addWorkingTime(
                                     $before_date,
                                     $before_user_code,
@@ -637,7 +668,6 @@ class DailyWorkingInformationController extends Controller
                                 $before_department_code = $current_department_code;
                                 // ユーザーを同じく設定
                                 $before_user_code = $current_user_code;
-                                $before_result = $result;
                                 $before_out_flg = true;
                                 $target_flg = true;
                             }catch(\PDOException $pe){
@@ -692,11 +722,14 @@ class DailyWorkingInformationController extends Controller
                         Log::DEBUG('        打刻ないデータはtempに出力するか判定 $current_date = '.$current_date);
                         Log::DEBUG('            $before_date = '.$before_date);
                         Log::DEBUG('            打刻時刻      = '.$result->record_datetime);
+                        Log::DEBUG('            打刻日付      = '.$result->record_date);
+                        Log::DEBUG('            ターゲット日付   = '.$target_date_ymd);
                         Log::DEBUG('            ユーザー休暇   = '.$user_holiday_kubun);
                         Log::DEBUG('            1件前出力      = '.$before_out_flg);
                         // 1件前の日付がnullである場合、いきなり対象日付がないということなので出力
                         //if (!isset($result->record_datetime) || isset($user_holiday_kubun)) {
                         if (!$before_out_flg || isset($user_holiday_kubun)) {
+                        //if ($temp_out_flg ) {   // 20191012
                             try{
                                 Log::DEBUG('        打刻ないデータはtempに出力 $current_date = ');
                                 // 同じキーの場合
@@ -724,7 +757,7 @@ class DailyWorkingInformationController extends Controller
                                     Log::DEBUG('            ターゲット日付 = '.$dt);
                                     Log::DEBUG('            ユーザー休暇   = '.$user_holiday_name);
                                     Log::DEBUG('            　　　　日付   = '.$user_working_date);
-                                    $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date));
+                                    $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date, $result->working_timetable_no));
                                     // temporaryに登録する
                                     Log::DEBUG('    temp_calc_workingtimesの登録開始');
                                     Log::DEBUG('        現ユーザー = '.$current_user_code.' record_time = '.$result->record_datetime);
@@ -765,7 +798,11 @@ class DailyWorkingInformationController extends Controller
                     $user_working_date = null;
                     if (count($this->array_working_mode) > 0) {
                         try{
-                            Log::DEBUG('    １個前のユーザーを登録開始 $before_user_code = '.$before_user_code.' record_time = '.$before_result->record_datetime);
+                            Log::DEBUG('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
+                            Log::DEBUG('            部署     = '.$before_result->department_name);
+                            Log::DEBUG('            打刻時刻 = '.$before_result->record_datetime);
+                            Log::DEBUG('            モード   = '.$before_result->mode);
+                            Log::DEBUG('            打刻日   = '.$before_result->record_date);
                             // ユーザー労働時間登録(１個前のユーザーを登録する)
                             $add_results = $this->addWorkingTime(
                                 $before_date,
@@ -775,7 +812,7 @@ class DailyWorkingInformationController extends Controller
                                 $business_kubun,
                                 $before_result->interval,
                                 $before_result->user_holiday_kubun);
-                            Log::DEBUG('    １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
+                                Log::DEBUG('    １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
                             // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
                             $before_date = null;
                             $before_user_code = null;
@@ -811,7 +848,7 @@ class DailyWorkingInformationController extends Controller
                             Log::DEBUG('            ユーザー休暇  ='.$user_holiday_name);
                             Log::DEBUG('        　　　　    日付  = '.$user_working_date);
                             $ptn = $chk_setting;
-                            $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date));
+                            $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date, $result->working_timetable_no));
                             $this->insTempCalcItem($result->record_date, $result);
                             Log::DEBUG('    temp_calc_workingtimesの登録終了');
                         }
@@ -840,6 +877,10 @@ class DailyWorkingInformationController extends Controller
                     try{
                         // ユーザー労働時間登録(１個前のユーザーを登録する)
                         Log::DEBUG('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
+                        Log::DEBUG('            部署     = '.$before_result->department_name);
+                        Log::DEBUG('            打刻時刻 = '.$before_result->record_datetime);
+                        Log::DEBUG('            モード   = '.$before_result->mode);
+                        Log::DEBUG('            打刻日   = '.$before_result->record_date);
                         $add_results = $this->addWorkingTime(
                             $before_date,
                             $before_user_code,
@@ -848,7 +889,7 @@ class DailyWorkingInformationController extends Controller
                             $business_kubun,
                             $before_result->interval,
                             $before_result->user_holiday_kubun);
-                        Log::DEBUG('        １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
+                            Log::DEBUG('        １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
                         // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
                         $before_date = null;
                         $before_user_code = null;
@@ -891,7 +932,7 @@ class DailyWorkingInformationController extends Controller
                         Log::DEBUG('            ターゲット日付 = '.$dt);
                         Log::DEBUG('            ユーザー休暇  = '.$user_holiday_name);
                         Log::DEBUG('            　　　　日付  = '.$user_working_date);
-                        $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date));
+                        $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date, $result->working_timetable_no));
                         // temporaryに登録する
                         $this->insTempCalcItem($target_date, $result);
                         Log::DEBUG('    temp_calc_workingtimesの登録終了');
@@ -918,6 +959,7 @@ class DailyWorkingInformationController extends Controller
                 // 計算用配列の初期化
                 $this->iniArrayCalc();
             }
+            $before_result = $result;
         }
 
         if (count($this->array_working_mode) > 0) {
@@ -931,8 +973,8 @@ class DailyWorkingInformationController extends Controller
                     $current_result,
                     $business_kubun,
                     $current_result->interval,
-                    $before_result->user_holiday_kubun);
-                // 次データ計算事前処理
+                    $current_result->user_holiday_kubun);
+                    // 次データ計算事前処理
                 // 打刻データ配列の初期化
                 $this->iniArrayWorkingTime();
                 // 計算用配列の初期化
@@ -956,7 +998,8 @@ class DailyWorkingInformationController extends Controller
      *
      * @return 登録結果
      */
-    private function addWorkingTime($target_date, $target_user_code, $target_department_code, $target_result, $business_kubun, $interval, $user_holiday_kubun)
+    private function addWorkingTime(
+        $target_date, $target_user_code, $target_department_code, $target_result, $business_kubun, $interval, $user_holiday_kubun)
     {
         Log::DEBUG('---------------------- addWorkingTime in ------------------------ ');
         Log::DEBUG('    temp_calc_workingtimesの登録開始');
@@ -968,7 +1011,8 @@ class DailyWorkingInformationController extends Controller
             $target_department_code,
             $business_kubun,
             $interval,
-            $user_holiday_kubun);
+            $user_holiday_kubun
+        );
         // temporaryに登録する
         try{
             $this->insTempCalcItem($target_date, $target_result);
@@ -987,7 +1031,8 @@ class DailyWorkingInformationController extends Controller
      *
      * @return 労働時間計算結果
      */
-    private function calcWorkingTime($target_date, $target_user_code, $target_department_code, $business_kubun, $interval, $user_holiday_kubun)
+    private function calcWorkingTime(
+        $target_date, $target_user_code, $target_department_code, $business_kubun, $interval, $user_holiday_kubun)
     {
         Log::DEBUG('---------------------- calcWorkingTime in ---$target_user_code = '.$target_user_code);
         $work_time = new WorkTime();
@@ -995,7 +1040,6 @@ class DailyWorkingInformationController extends Controller
         $work_time->setParamUsercodeAttribute($target_user_code);
         $work_time->setParamDatefromAttribute($target_date);
         $work_time->setParamDatetoAttribute($target_date);
-        $collect_calc_times = collect();
         $attendance_time = null;
         $leaving_time = null;
         $missing_middle_time = null;
@@ -1026,6 +1070,11 @@ class DailyWorkingInformationController extends Controller
         $cnt = 0;
         // 前提 count($array_working_mode) = count($array_working_datetime)
         Log::DEBUG('        array_working_mode count = '.count($this->array_working_mode));
+        // working_timetable_noは出勤時刻のworking_timetable_noとする（日付が変わって退勤などがあるとworking_timetable_noが異なっている場合があるため）
+        // また出勤時刻のworking_timetable_noがない場合はresultのworking_timetable_noとする
+        $working_timetable_no_set = false;
+        $attendance_time_index = -1;
+        $value_working_timetable_no = 0;
         for($i=0;$i<count($this->array_working_mode);$i++){
             $value_mode = $this->array_working_mode[$i];
             $value_record_datetime = $this->array_working_datetime[$i];
@@ -1034,6 +1083,8 @@ class DailyWorkingInformationController extends Controller
             $value_check_result = $this->array_check_result[$i];
             $value_check_max_times = $this->array_check_max_times[$i];
             $value_check_interval = $this->array_check_interval[$i];
+            $dt = new Carbon($value_record_datetime);
+            $record_date = date_format($dt, 'Ymd');
             Log::DEBUG('        ユーザー労働時間計算 cnt = '.$cnt);
             Log::DEBUG('        ユーザー労働時間計算 value_mode = '.$value_mode);
             Log::DEBUG('        ユーザー労働時間計算 value_record_datetime = '.$value_record_datetime);
@@ -1042,8 +1093,13 @@ class DailyWorkingInformationController extends Controller
             Log::DEBUG('        ユーザー労働時間計算 value_check_result = '.$value_check_result);
             Log::DEBUG('        ユーザー労働時間計算 value_check_max_times = '.$value_check_max_times);
             Log::DEBUG('        ユーザー労働時間計算 value_check_interval = '.$value_check_interval);
+            Log::DEBUG('        ユーザー労働時間計算 value_working_timetable_no = '.$value_working_timetable_no);
+            Log::DEBUG('        ユーザー労働時間計算 target_date = '.$target_date);
+            Log::DEBUG('        ユーザー労働時間計算 record_date = '.$record_date);
             // 出勤打刻の場合
             if ($value_mode == Config::get('const.C005.attendance_time')) {
+                $value_working_timetable_no = $this->array_working_timetable_no[$i];
+                $working_timetable_no_set = true;
                 $this->setAttendancetime(
                     $cnt,
                     $work_time,
@@ -1057,9 +1113,16 @@ class DailyWorkingInformationController extends Controller
                     $before_value_datetime,
                     $business_kubun,
                     $interval,
-                    $user_holiday_kubun
+                    $user_holiday_kubun,
+                    $value_working_timetable_no
                 );
+                if ($target_date == $record_date) {
+                    $attendance_time_index = $i;
+                }
             } elseif ($value_mode == Config::get('const.C005.leaving_time')) {      // 退勤の場合
+                if (!$working_timetable_no_set) {
+                    $value_working_timetable_no = $this->array_working_timetable_no[$i];
+                }
                 $this->setLeavingtime(
                     $cnt,
                     $work_time,
@@ -1071,9 +1134,15 @@ class DailyWorkingInformationController extends Controller
                     $before_value_mode,
                     $before_value_datetime,
                     $business_kubun,
-                    $user_holiday_kubun
+                    $user_holiday_kubun,
+                    $value_working_timetable_no,
+                    $attendance_time_index
                 );
+                $working_timetable_no_set = false;
             } elseif ($value_mode == Config::get('const.C005.missing_middle_time')) {       // 私用外出の場合
+                if (!$working_timetable_no_set) {
+                    $value_working_timetable_no = $this->array_working_timetable_no[$i];
+                }
                 $this->setMissingMiddleTime(
                     $cnt,
                     $work_time,
@@ -1083,9 +1152,14 @@ class DailyWorkingInformationController extends Controller
                     $value_check_result,
                     $value_check_max_times,
                     $before_value_mode,
-                    $before_value_datetime
+                    $before_value_datetime,
+                    $value_working_timetable_no,
+                    $attendance_time_index
                 );
             } elseif ($value_mode == Config::get('const.C005.missing_middle_return_time')) {        // 私用外出戻りの場合
+                if (!$working_timetable_no_set) {
+                    $value_working_timetable_no = $this->array_working_timetable_no[$i];
+                }
                 $this->setMissingMiddleReturnTime(
                     $cnt,
                     $work_time,
@@ -1095,9 +1169,14 @@ class DailyWorkingInformationController extends Controller
                     $value_check_result,
                     $value_check_max_times,
                     $before_value_mode,
-                    $before_value_datetime
+                    $before_value_datetime,
+                    $value_working_timetable_no,
+                    $attendance_time_index
                 );
             } elseif ($value_mode == Config::get('const.C005.public_going_out_time')) {             // 公用外出の場合
+                if (!$working_timetable_no_set) {
+                    $value_working_timetable_no = $this->array_working_timetable_no[$i];
+                }
                 $this->setPubliGoingOutTime(
                     $cnt,
                     $work_time,
@@ -1107,9 +1186,14 @@ class DailyWorkingInformationController extends Controller
                     $value_check_result,
                     $value_check_max_times,
                     $before_value_mode,
-                    $before_value_datetime
+                    $before_value_datetime,
+                    $value_working_timetable_no,
+                    $attendance_time_index
                 );
             } elseif ($value_mode == Config::get('const.C005.public_going_out_return_time')) {      // 公用外出戻りの場合
+                if (!$working_timetable_no_set) {
+                    $value_working_timetable_no = $this->array_working_timetable_no[$i];
+                }
                 $this->setPublicGoingOutReturnTime(
                     $cnt,
                     $work_time,
@@ -1119,7 +1203,9 @@ class DailyWorkingInformationController extends Controller
                     $value_check_result,
                     $value_check_max_times,
                     $before_value_mode,
-                    $before_value_datetime
+                    $before_value_datetime,
+                    $value_working_timetable_no,
+                    $attendance_time_index
                 );
             }
             $before_value_mode = $value_mode;
@@ -1141,7 +1227,8 @@ class DailyWorkingInformationController extends Controller
      */
     private function setAttendancetime($cnt, $work_time,
         $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $value_check_interval, $before_value_mode, $before_value_datetime, $business_kubun, $interval, $user_holiday_kubun)
+        $value_check_result, $value_check_max_times, $value_check_interval, $before_value_mode,
+        $before_value_datetime, $business_kubun, $interval, $user_holiday_kubun, $working_timetable_no)
     {
 
         Log::DEBUG('---------------------- setAttendancetime in ------------------------ ');
@@ -1379,7 +1466,8 @@ class DailyWorkingInformationController extends Controller
                 $value_check_max_times,
                 $value_check_interval,
                 $business_kubun,
-                $user_holiday_kubun));
+                $user_holiday_kubun,
+                $working_timetable_no));
         } else {
             // 不明データとして作成する
             $this->pushArrayCalc($this->setAttendanceCollectPtn(
@@ -1389,7 +1477,8 @@ class DailyWorkingInformationController extends Controller
                 $value_check_max_times,
                 $value_check_interval,
                 $business_kubun,
-                $user_holiday_kubun));
+                $user_holiday_kubun,
+                $working_timetable_no));
         }
         Log::DEBUG('---------------------- setAttendancetime end ------------------------ ');
             
@@ -1413,14 +1502,16 @@ class DailyWorkingInformationController extends Controller
      * @return テーブル
      */
     private function setAttendanceCollectPtn(
-        $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_check_interval, $business_kubun, $user_holiday_kubun)
+        $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_check_interval, $business_kubun, $user_holiday_kubun, $working_timetable_no)
     {
         Log::DEBUG('---------------------- setAttendanceCollectPtn in -- 出勤 ptn = '.$ptn.' ---------------------- '.$record_datetime);
+        Log::DEBUG('                                                  -- working_timetable_no = '.$working_timetable_no);
         $temp_calc_model = new TempCalcWorkingTime();
 
         if ($ptn == '1') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
@@ -1434,6 +1525,7 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_001'));
             $temp_calc_model->setLateAttribute('0');
@@ -1447,6 +1539,7 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '3') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             // 遅刻の設定値（休日は"0"）
@@ -1470,6 +1563,7 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '4') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_001'));
             // 遅刻の設定値（休日は"0"）
@@ -1493,6 +1587,7 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '5') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_003'));
             $temp_calc_model->setLateAttribute('0');
@@ -1506,6 +1601,7 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '6') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_001'));
             $temp_calc_model->setLateAttribute('0');
@@ -1520,6 +1616,7 @@ class DailyWorkingInformationController extends Controller
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
             $temp_calc_model->setLateAttribute('0');
@@ -1547,7 +1644,8 @@ class DailyWorkingInformationController extends Controller
      */
     private function setLeavingtime($cnt, $work_time,
         $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime, $business_kubun, $user_holiday_kubun)
+        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime,
+        $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setLeavingtime in ------------------------ ');
         Log::DEBUG('        退勤打刻処理 start');
@@ -1598,7 +1696,9 @@ class DailyWorkingInformationController extends Controller
                         // パターン２３４
                         $ptn = '2';
                         $this->pushArrayCalc(
-                            $this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun, $user_holiday_kubun));
+                            $this->setLeavingCollectPtn(
+                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                         /*$ptn = '3';
                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                         // パターン4は下で設定
@@ -1610,7 +1710,9 @@ class DailyWorkingInformationController extends Controller
                         // パターン２３５
                         $ptn = '2';
                         $this->pushArrayCalc(
-                            $this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun, $user_holiday_kubun));
+                            $this->setLeavingCollectPtn(
+                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                         /*$ptn = '3';
                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                         // パターン5は下で設定
@@ -1621,7 +1723,9 @@ class DailyWorkingInformationController extends Controller
                         // パターン２３５
                         $ptn = '2';
                         $this->pushArrayCalc(
-                            $this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun, $user_holiday_kubun));
+                            $this->setLeavingCollectPtn(
+                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                         /*$ptn = '3';
                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                         // パターン5は下で設定
@@ -1731,7 +1835,9 @@ class DailyWorkingInformationController extends Controller
                                         // パターン２３４
                                         $ptn = '2';
                                         $this->pushArrayCalc(
-                                            $this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun, $user_holiday_kubun));
+                                            $this->setLeavingCollectPtn(
+                                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                                $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                                         /*$ptn = '3';
                                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                                         // パターン4は下で設定
@@ -1740,7 +1846,9 @@ class DailyWorkingInformationController extends Controller
                                         // パターン２３５
                                         $ptn = '2';
                                         $this->pushArrayCalc(
-                                            $this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun, $user_holiday_kubun));
+                                            $this->setLeavingCollectPtn(
+                                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                                $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                                         /*$ptn = '3';
                                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                                         // パターン5は下で設定
@@ -1753,7 +1861,9 @@ class DailyWorkingInformationController extends Controller
                             // パターン２３４
                             $ptn = '2';
                             $this->pushArrayCalc(
-                                $this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun, $user_holiday_kubun));
+                                $this->setLeavingCollectPtn(
+                                    $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                    $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                             /*$ptn = '3';
                             $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                             // パターン4は下で設定
@@ -1772,7 +1882,9 @@ class DailyWorkingInformationController extends Controller
                                         // パターン２３５
                                         $ptn = '2';
                                         $this->pushArrayCalc(
-                                            $this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun, $user_holiday_kubun));
+                                            $this->setLeavingCollectPtn(
+                                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                                $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                                         /*$ptn = '3';
                                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                                         // パターン5は下で設定
@@ -1788,7 +1900,9 @@ class DailyWorkingInformationController extends Controller
                             // パターン２３５
                             $ptn = '2';
                             $this->pushArrayCalc(
-                                $this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun, $user_holiday_kubun));
+                                $this->setLeavingCollectPtn(
+                                    $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                    $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                             /*$ptn = '3';
                             $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                             // パターン5は下で設定
@@ -1804,7 +1918,9 @@ class DailyWorkingInformationController extends Controller
                                     // パターン２３５
                                     $ptn = '2';
                                     $this->pushArrayCalc(
-                                        $this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun, $user_holiday_kubun));
+                                        $this->setLeavingCollectPtn(
+                                            $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                            $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                                     /*$ptn = '3';
                                     $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                                     // パターン5は下で設定
@@ -1820,7 +1936,9 @@ class DailyWorkingInformationController extends Controller
                         // パターン２３５
                         $ptn = '2';
                         $this->pushArrayCalc(
-                            $this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun, $user_holiday_kubun));
+                            $this->setLeavingCollectPtn(
+                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                         /*$ptn = '3';
                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                         // パターン5は下で設定
@@ -1844,11 +1962,15 @@ class DailyWorkingInformationController extends Controller
 
         if ($ptn != null) {
             $this->pushArrayCalc(
-                $this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun, $user_holiday_kubun));
+                $this->setLeavingCollectPtn(
+                    $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                    $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
         } else {
             // 不明データとして作成する
             $this->pushArrayCalc(
-                $this->setLeavingCollectPtn('', $record_datetime, $value_check_result, $value_check_max_times, $business_kubun, $user_holiday_kubun));
+                $this->setLeavingCollectPtn(
+                    '', $record_datetime, $value_check_result, $value_check_max_times, 
+                    $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
         }
         Log::DEBUG('        退勤打刻処理 end');
         Log::DEBUG('---------------------- setLeavingtime end ------------------------ ');
@@ -1872,19 +1994,27 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun, $user_holiday_kubun)
+    private function setLeavingCollectPtn($ptn, $record_datetime, $value_check_result,
+         $value_check_max_times, $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setLeavingCollectPtn in -- 退勤 ptn = '.$ptn.' ---------------------- '.$record_datetime);
+        Log::DEBUG('                                                  -- working_timetable_no = '.$working_timetable_no);
+        Log::DEBUG('                                                  -- attendance_time_index = '.$attendance_time_index);
         $temp_calc_model = new TempCalcWorkingTime();
 
         if ($ptn == '1') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -1893,11 +2023,16 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -1907,11 +2042,16 @@ class DailyWorkingInformationController extends Controller
             // 自動設定はなしにする
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
             $temp_calc_model->setNoteAttribute('');
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -1921,6 +2061,7 @@ class DailyWorkingInformationController extends Controller
             // なしにする
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
@@ -1935,7 +2076,11 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setLeaveearlyAttribute('0');
             }
-            $temp_calc_model->setCurrentcalcAttribute('1');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -1944,11 +2089,16 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '5') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('1');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -1957,11 +2107,16 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '6') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -1970,11 +2125,16 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '7') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_003'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -1983,11 +2143,16 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '8') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('1');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -1997,11 +2162,16 @@ class DailyWorkingInformationController extends Controller
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2023,7 +2193,7 @@ class DailyWorkingInformationController extends Controller
      */
     private function setMissingMiddleTime($cnt, $work_time,
         $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime)
+        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setMissingMiddleTime in ------------------------ ');
         Log::DEBUG('        私用外出打刻処理');
@@ -2132,7 +2302,8 @@ class DailyWorkingInformationController extends Controller
                 $before_value_mode == Config::get('const.C005.public_going_out_time')) {    // １個前のモードが私用外出
                 if ($record_before_datetime >= $attendance_from_date) {                     // 出勤1日のはじめ <= １個前の打刻時刻
                     // 不明データとして作成する
-                    $collect_working_times = $this->setMissingmiddleCollectPtn('', $record_datetime, $value_check_result, $value_check_max_times);
+                    $collect_working_times = $this->setMissingmiddleCollectPtn(
+                        '', $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index);
                     return $collect_working_times;
                 }
             } else {                                                                        // １個前のモードがない
@@ -2145,10 +2316,12 @@ class DailyWorkingInformationController extends Controller
         }
 
         if ($ptn != null) {
-            $this->pushArrayCalc($this->setMissingmiddleCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times));
+            $this->pushArrayCalc($this->setMissingmiddleCollectPtn(
+                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
         } else {
             // 不明データとして作成する
-            $this->pushArrayCalc($this->setMissingmiddleCollectPtn('', $record_datetime, $value_check_result, $value_check_max_times));
+            $this->pushArrayCalc($this->setMissingmiddleCollectPtn(
+                '', $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
         }
         Log::DEBUG('---------------------- setMissingMiddleTime end ------------------------ ');
         Log::DEBUG('        私用外出打刻処理 end');
@@ -2172,7 +2345,7 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setMissingmiddleCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times)
+    private function setMissingmiddleCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setMissingmiddleCollectPtn in ------------------------ ');
         $temp_calc_model = new TempCalcWorkingTime();
@@ -2180,11 +2353,16 @@ class DailyWorkingInformationController extends Controller
         if ($ptn == '1') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.missing_middle'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('1');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2193,11 +2371,16 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_008'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2206,11 +2389,16 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '3') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_003'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2220,11 +2408,16 @@ class DailyWorkingInformationController extends Controller
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2247,7 +2440,7 @@ class DailyWorkingInformationController extends Controller
      */
     private function setMissingMiddleReturnTime($cnt, $work_time,
         $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime)
+        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setMissingMiddleReturnTime in ------------------------ ');
         Log::DEBUG('        私用外出戻り打刻処理');
@@ -2361,10 +2554,12 @@ class DailyWorkingInformationController extends Controller
         }
 
         if ($ptn != null) {
-            $this->pushArrayCalc($this->setMissingmiddleReturnCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times));
+            $this->pushArrayCalc($this->setMissingmiddleReturnCollectPtn(
+                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
         } else {
             // 不明データとして作成する
-            $this->pushArrayCalc($this->setMissingmiddleReturnCollectPtn('', $record_datetime, $value_check_result, $value_check_max_times));
+            $this->pushArrayCalc($this->setMissingmiddleReturnCollectPtn(
+                '', $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
         }
         Log::DEBUG('        私用外出戻り打刻処理 end');
         Log::DEBUG('---------------------- setMissingMiddleReturnTime end ------------------------ ');
@@ -2388,7 +2583,7 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setMissingmiddleReturnCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times)
+    private function setMissingmiddleReturnCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setMissingmiddleReturnCollectPtn in ------------------------ ');
         $temp_calc_model = new TempCalcWorkingTime();
@@ -2396,11 +2591,16 @@ class DailyWorkingInformationController extends Controller
         if ($ptn == '1') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_return_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_009'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2409,11 +2609,16 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_return_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.missing_middle_return'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('1');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2423,11 +2628,16 @@ class DailyWorkingInformationController extends Controller
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_return_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2450,7 +2660,7 @@ class DailyWorkingInformationController extends Controller
      */
     private function setPubliGoingOutTime($cnt, $work_time,
         $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime)
+        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setPubliGoingOutTime in ------------------------ ');
         Log::DEBUG('        公用外出打刻処理');
@@ -2559,7 +2769,8 @@ class DailyWorkingInformationController extends Controller
                 $before_value_mode == Config::get('const.C005.public_going_out_time')) {    // １個前のモードが私用外出
                 if ($record_before_datetime >= $attendance_from_date) {                     // 出勤1日のはじめ <= １個前の打刻時刻
                     // 不明データとして作成する
-                    $collect_working_times = $this->setPublicGoingOutCollectPtn('', $record_datetime, $value_check_result, $value_check_max_times);
+                    $collect_working_times = $this->setPublicGoingOutCollectPtn(
+                        '', $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index);
                     return $collect_working_times;
                 }
             } else {                                                                        // １個前のモードがない
@@ -2572,10 +2783,12 @@ class DailyWorkingInformationController extends Controller
         }
 
         if ($ptn != null) {
-            $this->pushArrayCalc($this->setPublicGoingOutCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times));
+            $this->pushArrayCalc($this->setPublicGoingOutCollectPtn(
+                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
         } else {
             // 不明データとして作成する
-            $this->pushArrayCalc($this->setPublicGoingOutCollectPtn('', $record_datetime, $value_check_result, $value_check_max_times));
+            $this->pushArrayCalc($this->setPublicGoingOutCollectPtn(
+                '', $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
         }
 
         Log::DEBUG('---------------------- setPubliGoingOutTime end ------------------------ ');
@@ -2600,7 +2813,7 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setPublicGoingOutCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times)
+    private function setPublicGoingOutCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setPublicGoingOutCollectPtn in ------------------------ ');
         $temp_calc_model = new TempCalcWorkingTime();
@@ -2608,11 +2821,16 @@ class DailyWorkingInformationController extends Controller
         if ($ptn == '1') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.public_going_out'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('1');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2621,11 +2839,16 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_008'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2634,11 +2857,16 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '3') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_003'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2648,11 +2876,16 @@ class DailyWorkingInformationController extends Controller
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2675,7 +2908,7 @@ class DailyWorkingInformationController extends Controller
      */
     private function setPublicGoingOutReturnTime($cnt, $work_time,
         $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime)
+        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setPublicGoingOutReturnTime in ------------------------ ');
         Log::DEBUG('        公用外出戻り打刻処理');
@@ -2788,10 +3021,12 @@ class DailyWorkingInformationController extends Controller
         }
 
         if ($ptn != null) {
-            $this->pushArrayCalc($this->setPublicGoingOutReturnCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times));
+            $this->pushArrayCalc($this->setPublicGoingOutReturnCollectPtn(
+                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
         } else {
             // 不明データとして作成する
-            $this->pushArrayCalc($this->setPublicGoingOutReturnCollectPtn('', $record_datetime, $value_check_result, $value_check_max_times));
+            $this->pushArrayCalc($this->setPublicGoingOutReturnCollectPtn(
+                '', $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
         }
         Log::DEBUG('        公用外出戻り打刻処理 end');
         Log::DEBUG('---------------------- setPublicGoingOutReturnTime end ------------------------ ');
@@ -2815,7 +3050,7 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setPublicGoingOutReturnCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times)
+    private function setPublicGoingOutReturnCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setPublicGoingOutReturnCollectPtn in ------------------------ ');
         $temp_calc_model = new TempCalcWorkingTime();
@@ -2823,11 +3058,16 @@ class DailyWorkingInformationController extends Controller
         if ($ptn == '1') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_return_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_009'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2836,11 +3076,16 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_return_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.public_going_out_return'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('1');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2850,11 +3095,16 @@ class DailyWorkingInformationController extends Controller
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_return_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            if ($attendance_time_index >= 0) {
+                $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
+            } else {
+                $temp_calc_model->setCurrentcalcAttribute('0');
+            }
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2884,7 +3134,7 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setNoInputTimePtn($ptn, $user_holiday_name, $target_date, $hpliday_date)
+    private function setNoInputTimePtn($ptn, $user_holiday_name, $target_date, $hpliday_date, $working_time_no)
     {
         Log::DEBUG('---------------------- setNoInputTimePtn in ------------------------ ');
         $temp_calc_model = new TempCalcWorkingTime();
@@ -2896,6 +3146,7 @@ class DailyWorkingInformationController extends Controller
         if ($ptn == '0') {
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
             $temp_calc_model->setWorkingstatusAttribute('0');
             if (isset($user_holiday_name) && $user_holiday_name != '') {
                 $temp_calc_model->setNoteAttribute('');
@@ -2917,11 +3168,12 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '1') {    // 設定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
             $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_010'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setCurrentcalcAttribute('1');
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
@@ -2929,11 +3181,12 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '2') {    // 設定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
             $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_011'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setCurrentcalcAttribute('1');
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
@@ -2941,11 +3194,12 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '3') {    // 設定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
             $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_012'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setCurrentcalcAttribute('1');
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
@@ -2953,23 +3207,25 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '4') {    // 設定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
             $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_013'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setCurrentcalcAttribute('1');
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
-        } elseif ($ptn == '5') {    // 設定ミス
+        } elseif ($ptn == '5') {    // ���定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
             $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_014'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setCurrentcalcAttribute('1');
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
@@ -2977,11 +3233,12 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '6') {    // ptn=1のnoteなし
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
             $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute('');
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setCurrentcalcAttribute('1');
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
@@ -2990,11 +3247,12 @@ class DailyWorkingInformationController extends Controller
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
+            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setCurrentcalcAttribute('1');
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
@@ -3093,6 +3351,7 @@ class DailyWorkingInformationController extends Controller
         $this->array_check_result = array();
         $this->array_check_max_times = array();
         $this->array_check_interval = array();
+        $this->array_working_timetable_no = array();
         Log::DEBUG('---------------------- iniArrayWorkingTime end ------------------------ ');
     }
 
@@ -3124,6 +3383,12 @@ class DailyWorkingInformationController extends Controller
         } else {
             $this->array_check_interval[] = 0;
         }
+        if (isset($result->working_timetable_no)) {
+            $this->array_working_timetable_no[] = $result->working_timetable_no;
+        } else {
+            $this->array_working_timetable_no[] = 0;
+        }
+        
         Log::DEBUG('---------------------- pushArrayWorkingTime end ------------------------ ');
     }
 
@@ -3137,6 +3402,7 @@ class DailyWorkingInformationController extends Controller
         Log::DEBUG('---------------------- iniArrayCalc in ------------------------ ');
         // 計算用配列
         $this->array_calc_mode = array();
+        $this->array_calc_working_timetable_no = array();
         $this->array_calc_time = array();
         $this->array_calc_status = array();
         $this->array_calc_note = array();
@@ -3161,9 +3427,11 @@ class DailyWorkingInformationController extends Controller
         Log::DEBUG('---------------------- pushArrayCalc in ------------------------ ');
         // 計算用配列配列
         $this->array_calc_mode[] = $temp_calc_model->getModeAttribute();
+        $this->array_calc_working_timetable_no[] = $temp_calc_model->getWorkingtimetablenoAttribute();
+        Log::DEBUG('      ◇◇◇◇◇◇◇◇◇◇◇ getWorkingtimetablenoAttribute '.$temp_calc_model->getWorkingtimetablenoAttribute());
         $this->array_calc_time[] = $temp_calc_model->getRecorddatetimeAttribute();
         $this->array_calc_status[] = $temp_calc_model->getWorkingstatusAttribute();
-        Log::DEBUG('      ◇◇◇◇◇◇◇◇◇◇◇ '.$temp_calc_model->getWorkingstatusAttribute());
+        Log::DEBUG('      ◇◇◇◇◇◇◇◇◇◇◇ getWorkingstatusAttribute '.$temp_calc_model->getWorkingstatusAttribute());
         $this->array_calc_note[] = $temp_calc_model->getNoteAttribute();
         $this->array_calc_late[] = $temp_calc_model->getLateAttribute();
         $this->array_calc_leave_early[] = $temp_calc_model->getLeaveearlyAttribute();
@@ -3195,7 +3463,6 @@ class DailyWorkingInformationController extends Controller
         $temp_calc_model->setEmploymentstatusnameAttribute($result->employment_status_name);
         $temp_calc_model->setDepartmentnameAttribute($result->department_name);
         $temp_calc_model->setUsernameAttribute($result->user_name);
-        $temp_calc_model->setWorkingtimetablenoAttribute($result->working_timetable_no);
         $temp_calc_model->setWorkingtimetablenameAttribute($result->working_timetable_name);
         $temp_calc_model->setWorkingtimetablefromtimeAttribute($result->working_timetable_from_time);
         $temp_calc_model->setWorkingtimetabletotimeAttribute($result->working_timetable_to_time);
@@ -3234,14 +3501,18 @@ class DailyWorkingInformationController extends Controller
         $temp_calc_model->setSystemDateAttribute(Carbon::now());
 
         Log::DEBUG('    登録処理　：　登録件数 count($this->array_calc_mode) = '.count($this->array_calc_mode));
+        $i=0;
         for($i=0;$i<count($this->array_calc_mode);$i++){
+            $temp_calc_model->setSeqAttribute($i+1);
             Log::DEBUG('        $result->holiday_kubun = '.$result->holiday_kubun);
             Log::DEBUG('        $this->array_calc_time[$i] = '.$this->array_calc_time[$i]);
             Log::DEBUG('        $this->array_calc_status[$i] = '.$this->array_calc_status[$i]);
+            Log::DEBUG('        $this->array_calc_working_timetable_no[$i] = '.$this->array_calc_working_timetable_no[$i]);
             if (isset($result->holiday_kubun)) {
                 if ($result->holiday_kubun == Config::get('const.C013.morning_off') || $result->holiday_kubun == Config::get('const.C013.afternoon_off')) {
                     $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
                     $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
+                    $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
                     if (isset($this->array_calc_time[$i])) {
                         $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
                         $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
@@ -3258,6 +3529,7 @@ class DailyWorkingInformationController extends Controller
                 } elseif ($result->holiday_kubun == Config::get('const.C013.non_set')) {
                     $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
                     $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
+                    $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
                     if (isset($this->array_calc_time[$i])) {
                         $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
                         $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
@@ -3274,6 +3546,7 @@ class DailyWorkingInformationController extends Controller
                 } else {
                     $temp_calc_model->setModeAttribute(null);
                     $temp_calc_model->setRecorddatetimeAttribute(null);
+                    $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
                     if (isset($this->array_calc_time[$i])) {
                         $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
                         $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
@@ -3291,6 +3564,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
                 $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
+                $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
                 if (isset($this->array_calc_time[$i]) && $this->array_calc_time[$i] != '') {
                     Log::DEBUG('isset($this->array_calc_time[$i]) = '.$this->array_calc_time[$i]);
                     $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
@@ -3957,7 +4231,7 @@ class DailyWorkingInformationController extends Controller
                 try{
                     if ($working_status == 0 ) {
                         Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
-                        Log::DEBUG('当日分　勤務状態 現在時刻 =  '.$dtNow);
+                        Log::DEBUG('当日分　勤務状態 現在���刻 =  '.$dtNow);
                         if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
                             $working_status = $before_result->working_status;
                         }
@@ -4776,6 +5050,7 @@ class DailyWorkingInformationController extends Controller
         $temp_working_model->setEmploymentstatusAttribute($target_result->employment_status);
         $temp_working_model->setDepartmentcodeAttribute($target_department_code);
         $temp_working_model->setUsercodeAttribute($target_user_code);
+        $temp_working_model->setSeqAttribute(1);
         $temp_working_model->setEmploymentstatusnameAttribute($target_result->employment_status_name);
         $temp_working_model->setDepartmentnameAttribute($target_result->department_name);
         $temp_working_model->setUsernameAttribute($target_result->user_name);
@@ -5115,6 +5390,7 @@ class DailyWorkingInformationController extends Controller
 
         $calc_time = round($apicommon->roundTime($calc_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
         $temp_working_model->setPublicgoingouthoursAttribute($calc_time);
+        $temp_working_model->setWorkingtimetablenoAttribute($target_result->working_timetable_no);
         $temp_working_model->setWorkingstatusAttribute($working_status);
         $temp_working_model->setNoteAttribute($note);
         $temp_working_model->setLateAttribute($target_result->late);

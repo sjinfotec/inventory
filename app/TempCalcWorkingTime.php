@@ -73,6 +73,19 @@ class TempCalcWorkingTime extends Model
         $this->user_code = $value;
     }
 
+    private $seq;                 // 順位
+
+    // 順位
+    public function getSeqAttribute()
+    {
+        return $this->seq;
+    }
+
+    public function setSeqAttribute($value)
+    {
+        $this->seq = $value;
+    }
+
     private $employment_status_name;                 // 雇用形態名称
 
     // 雇用形態名称
@@ -767,6 +780,7 @@ class TempCalcWorkingTime extends Model
                 't1.employment_status as employment_status',
                 't1.department_code as department_code',
                 't1.user_code as user_code',
+                't1.seq as seq',
                 't1.employment_status_name as employment_status_name',
                 't1.department_name as department_name',
                 't1.user_name as user_name',
@@ -835,7 +849,7 @@ class TempCalcWorkingTime extends Model
             ->orderBy('t1.working_date','asc')
             ->orderBy('t1.department_code','asc')
             ->orderBy('t1.user_code','asc')
-            ->orderBy('t1.record_datetime','asc')
+            ->orderBy('t1.seq','asc')
             ->get();
 
         \Log::debug(
@@ -867,6 +881,7 @@ class TempCalcWorkingTime extends Model
                     'employment_status' => $this->employment_status,
                     'department_code' => $this->department_code,
                     'user_code' => $this->user_code,
+                    'seq' => $this->seq,
                     'employment_status_name' => $this->employment_status_name,
                     'department_name' => $this->department_name,
                     'user_name' => $this->user_name,
