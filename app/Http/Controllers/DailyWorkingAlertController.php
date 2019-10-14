@@ -69,7 +69,7 @@ class DailyWorkingAlertController extends Controller
         }
         $this->collect_massegedata = collect();
 
-        $working_time_alerts = null;
+        $working_time_alerts = new Collection();
         $work_time_model = new WorkTime();
 
         // 打刻時刻を取得

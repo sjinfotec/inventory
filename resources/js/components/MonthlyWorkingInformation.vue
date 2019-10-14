@@ -298,7 +298,7 @@
                                 >{{ calclisttimedate.late_night_overtime_hours }}</td>
                                 <td
                                   class="text-left align-middle"
-                                >{{ calclisttimedate.remark_data }}</td>
+                                >{{ calclisttimedate.remark_holiday_name }}</td>
                               </tr>
                             </tbody>
                           </div>
@@ -643,6 +643,7 @@ export default {
     },
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
+      this.valueuser = "";
       this.getDo = 1;
       this.fromdate = "";
       if (this.valuefromdate) {
@@ -650,11 +651,12 @@ export default {
       }
       if (this.valueemploymentstatus == "") {
         if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserList(this.getDo, this.fromdate);
+          this.$refs.selectuser.getUserList(this.getDo, this.valueuser, this.fromdate);
         } else {
           this.$refs.selectuser.getUserListByDepartment(
             this.getDo,
             this.valuedepartment,
+            this.valueuser,
             this.fromdate
           );
         }
@@ -663,6 +665,7 @@ export default {
           this.$refs.selectuser.getUserListByEmployment(
             this.getDo,
             this.valueemploymentstatus,
+            this.valueuser,
             this.fromdate
           );
         } else {
@@ -670,6 +673,7 @@ export default {
             this.getDo,
             this.valuedepartment,
             this.valueemploymentstatus,
+            this.valueuser,
             this.fromdate
           );
         }

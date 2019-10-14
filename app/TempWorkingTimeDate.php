@@ -23,6 +23,7 @@ class TempWorkingTimeDate extends Model
     private $employment_status;             // 雇用形態
     private $department_code;               // 部署ID
     private $user_code;                     // ユーザー
+    private $seq;                           // 順位
     private $employment_status_name;        // 雇用形態名称
     private $department_name;               // 部署名称
     private $user_name;                     // ユーザー名称
@@ -110,8 +111,6 @@ class TempWorkingTimeDate extends Model
         $this->department_code = $value;
     }
 
-
-
     // ユーザー
     public function getUsercodeAttribute()
     {
@@ -121,6 +120,17 @@ class TempWorkingTimeDate extends Model
     public function setUsercodeAttribute($value)
     {
         $this->user_code = $value;
+    }
+
+    // ユーザー
+    public function getSeqAttribute()
+    {
+        return $this->seq;
+    }
+
+    public function setSeqAttribute($value)
+    {
+        $this->seq = $value;
     }
 
     // 雇用形態名称
@@ -842,6 +852,7 @@ class TempWorkingTimeDate extends Model
                     $this->table.'.employment_status',
                     $this->table.'.department_code',
                     $this->table.'.user_code',
+                    $this->table.'.seq',
                     $this->table.'.employment_status_name',
                     $this->table.'.department_name',
                     $this->table.'.user_name',
@@ -1090,6 +1101,7 @@ class TempWorkingTimeDate extends Model
                     'employment_status' => $this->employment_status,
                     'department_code' => $this->department_code,
                     'user_code' => $this->user_code,
+                    'seq' => $this->seq,
                     'employment_status_name' => $this->employment_status_name,
                     'department_name' => $this->department_name,
                     'user_name' => $this->user_name,
