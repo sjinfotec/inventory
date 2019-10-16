@@ -38,7 +38,10 @@
                       for="inputGroupSelect01"
                     >所属部署</label>
                   </div>
-                  <select-department v-bind:blank-data="true" v-on:change-event="departmentChanges"></select-department>
+                  <select-department
+                    v-bind:blank-data="true"
+                    v-on:change-event="departmentChanges"
+                  ></select-department>
                 </div>
               </div>
               <!-- /.col -->
@@ -410,28 +413,39 @@ export default {
     // 部署選択が変更された場合の処理
     departmentChanges: function(value) {
       this.valuedepartment = value;
-      // ユーザー選択コンポーネントの取得メソッドを実行
+      console.log("部署選択が変更された" + this.valuedepartment);
+      this.valueuser = "";
       this.getDo = 1;
+      this.fromdate = ""
+      if (this.from) {
+        this.fromdate = moment(this.from).format("YYYYMMDD");
+      }
       if (this.valueemploymentstatus == "") {
         if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserList(this.getDo);
+          this.$refs.selectuser.getUserList(this.getDo, this.valueuser, this.fromdate);
         } else {
           this.$refs.selectuser.getUserListByDepartment(
             this.getDo,
-            this.valuedepartment
+            this.valuedepartment,
+            this.valueuser,
+            this.fromdate
           );
         }
       } else {
         if (this.valuedepartment == "") {
           this.$refs.selectuser.getUserListByEmployment(
             this.getDo,
-            this.valueemploymentstatus
+            this.valueemploymentstatus,
+            this.valueuser,
+            this.fromdate
           );
         } else {
           this.$refs.selectuser.getUserListByDepartmentEmployment(
             this.getDo,
             this.valuedepartment,
-            this.valueemploymentstatus
+            this.valueemploymentstatus,
+            this.valueuser,
+            this.fromdate
           );
         }
       }

@@ -29,6 +29,9 @@ class ApiCommonController extends Controller
      */
     public function getUserList(Request $request){
 
+        Log::DEBUG(' --------- getUserList iin ----------- $request->targetdate = '.$request->targetdate);
+        Log::DEBUG(' --------- getUserList iin ----------- $$request->code = '.$request->code);
+        Log::DEBUG(' --------- getUserList iin ----------- $request->employment = '.$request->employment);
         // パラメータチェック　getdoは必須
         if (!isset($request->getdo)) { return null; }
         $getdo = $request->getdo;
