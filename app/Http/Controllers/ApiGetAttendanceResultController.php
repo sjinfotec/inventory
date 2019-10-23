@@ -163,8 +163,8 @@ class ApiGetAttendanceResultController extends Controller
             $chk_result = $apicommon->chkMode($mode, '');
         }
 
-        // 各モード1日最大5回まで
-        $work_time_model->setParamDepartmentcodeAttribute($user_data->department_code);
+        // 各モード1日最大5回まで(ToDo チェック保留 SQL修正必要)
+        /*$work_time_model->setParamDepartmentcodeAttribute($user_data->department_code);
         $work_time_model->setParamUsercodeAttribute($user_data->code);
         $work_time_model->setParamModeAttribute($mode);
         $value_count = $work_time_model->getModeCount();
@@ -173,7 +173,7 @@ class ApiGetAttendanceResultController extends Controller
             if ($value_count >= Config::get('const.C019.max_times')) {
                 $chk_max_times = Config::get('const.RESULT_CODE.max_times');
             }
-        }
+        } */
 
         return array($chk_result,  $chk_max_times,  $check_interval);
     }

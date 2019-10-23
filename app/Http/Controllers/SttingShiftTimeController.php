@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\ShiftInformation;
 
@@ -70,6 +71,9 @@ class SttingShiftTimeController extends Controller
      * @return void
      */
     public function store(Request $request){
+        Log::debug('---------- シフト登録 in $request->user_code = '.$request->user_code );
+        Log::debug('---------- シフト登録 in $request->time_table_no = '.$request->time_table_no );
+        Log::debug('---------- シフト登録 in $request->department_code = '.$request->department_code );
         $response = collect();
         $code = $request->user_code;
         $time_table_no = $request->time_table_no;

@@ -240,6 +240,16 @@ Vue.component(
     require("./components/SettingRoot.vue").default
 );
 
+Vue.component(
+    "make-demand",
+    require("./components/MakeDemand.vue").default
+);
+
+Vue.component(
+    "select-demandno",
+    require("./components/SelectDemandNo.vue").default
+);
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application

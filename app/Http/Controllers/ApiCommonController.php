@@ -13,6 +13,7 @@ use App\ShiftInformation;
 use App\WorkingTimeTable;
 use App\Calendar;
 use App\Setting;
+use App\Demand;
 
 
 
@@ -32,10 +33,13 @@ class ApiCommonController extends Controller
         Log::DEBUG(' --------- getUserList iin ----------- $request->targetdate = '.$request->targetdate);
         Log::DEBUG(' --------- getUserList iin ----------- $$request->code = '.$request->code);
         Log::DEBUG(' --------- getUserList iin ----------- $request->employment = '.$request->employment);
-        // パラメータチェック　getdoは必須
-        if (!isset($request->getdo)) { return null; }
-        $getdo = $request->getdo;
-        if (!isset($getdo)) { return null; }
+        // パラメータチェック
+        if (isset($request->getdo)) {
+            $getdo = $request->getdo;
+            if ($getdo != 1) { return null; }
+        } else {
+            $getdo = 1;
+        }
         // 適用期間日付の取得
         $dt = null;
         if (isset($request->targetdate)) {
@@ -56,74 +60,70 @@ class ApiCommonController extends Controller
             ->where('is_deleted', '=', 0)
             ->groupBy('code');
 
-        if ($getdo == 1) {
-            if (isset($request->code)) {
-                if (isset($request->employment)) {
-                    $mainQuery = DB::table('users')
-                        ->JoinSub($subquery1, 't1', function ($join) { 
-                            $join->on('t1.code', '=', 'users.code');
-                            $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
-                        })
-                        ->where('users.department_code', $request->code)
-                        ->where('users.employment_status', $request->employment);
-                    if($role == Config::get('const.C025.general_user')){
-                        $mainQuery->where('users.code','=',$chk_user_id);
-                    } else {
-                        $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
-                    }
-                    $users = $mainQuery->where('users.is_deleted', 0)
-                        ->orderby('users.code','asc')
-                        ->get();
+        if (isset($request->code)) {
+            if (isset($request->employment)) {
+                $mainQuery = DB::table('users')
+                    ->JoinSub($subquery1, 't1', function ($join) { 
+                        $join->on('t1.code', '=', 'users.code');
+                        $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                    })
+                    ->where('users.department_code', $request->code)
+                    ->where('users.employment_status', $request->employment);
+                if($role == Config::get('const.C025.general_user')){
+                    $mainQuery->where('users.code','=',$chk_user_id);
                 } else {
-                    $mainQuery = DB::table('users')
-                        ->JoinSub($subquery1, 't1', function ($join) { 
-                            $join->on('t1.code', '=', 'users.code');
-                            $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
-                        })
-                        ->where('users.department_code', $request->code);
-                    if($role == Config::get('const.C025.general_user')){
-                        $mainQuery->where('users.code','=',$chk_user_id);
-                    } else {
-                        $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
-                    }
-                    $users = $mainQuery->where('users.is_deleted', 0)
-                        ->orderby('users.code','asc')
-                        ->get();
+                    $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
                 }
+                $users = $mainQuery->where('users.is_deleted', 0)
+                    ->orderby('users.code','asc')
+                    ->get();
             } else {
-                if (isset($request->employment)) {
-                    $mainQuery = DB::table('users')
-                        ->JoinSub($subquery1, 't1', function ($join) { 
-                            $join->on('t1.code', '=', 'users.code');
-                            $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
-                        })
-                        ->where('users.employment_status', $request->employment);
-                    if($role == Config::get('const.C025.general_user')){
-                        $mainQuery->where('users.code','=',$chk_user_id);
-                    } else {
-                        $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
-                    }
-                    $users = $mainQuery->where('users.is_deleted', 0)
-                        ->orderby('users.code','asc')
-                        ->get();
+                $mainQuery = DB::table('users')
+                    ->JoinSub($subquery1, 't1', function ($join) { 
+                        $join->on('t1.code', '=', 'users.code');
+                        $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                    })
+                    ->where('users.department_code', $request->code);
+                if($role == Config::get('const.C025.general_user')){
+                    $mainQuery->where('users.code','=',$chk_user_id);
                 } else {
-                    $mainQuery = DB::table('users')
-                        ->JoinSub($subquery1, 't1', function ($join) { 
-                            $join->on('t1.code', '=', 'users.code');
-                            $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
-                        });
-                    if($role == Config::get('const.C025.general_user')){
-                        $mainQuery->where('users.code','=',$chk_user_id);
-                    } else {
-                        $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
-                    }
-                    $users = $mainQuery->where('users.is_deleted', 0)->get();
+                    $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
                 }
+                $users = $mainQuery->where('users.is_deleted', 0)
+                    ->orderby('users.code','asc')
+                    ->get();
             }
         } else {
-            return null;
+            if (isset($request->employment)) {
+                $mainQuery = DB::table('users')
+                    ->JoinSub($subquery1, 't1', function ($join) { 
+                        $join->on('t1.code', '=', 'users.code');
+                        $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                    })
+                    ->where('users.employment_status', $request->employment);
+                if($role == Config::get('const.C025.general_user')){
+                    $mainQuery->where('users.code','=',$chk_user_id);
+                } else {
+                    $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
+                }
+                $users = $mainQuery->where('users.is_deleted', 0)
+                    ->orderby('users.code','asc')
+                    ->get();
+            } else {
+                $mainQuery = DB::table('users')
+                    ->JoinSub($subquery1, 't1', function ($join) { 
+                        $join->on('t1.code', '=', 'users.code');
+                        $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                    });
+                if($role == Config::get('const.C025.general_user')){
+                    $mainQuery->where('users.code','=',$chk_user_id);
+                } else {
+                    $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
+                }
+                $users = $mainQuery->where('users.is_deleted', 0)->get();
+            }
         }
-    
+
         return $users;
     }
 
@@ -448,7 +448,6 @@ class ApiCommonController extends Controller
         $codeList = DB::table($this->table_generalcodes)->where('identification_id', $identification_id)->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
         return $codeList;
     }
-    
 
     /**
      * 曜日取得

@@ -37,6 +37,7 @@ class EditWorkTimesController extends Controller
         $code = $request->code;
         $year = $request->year;
         $month = $request->month;
+        // ToDO closingがないとき
         $closing = DB::table('settings')->where('fiscal_year', $year)->where('fiscal_month', $month)->where('is_deleted', 0)->value('closing');
         $ymd_start = $year."/".$month."/".$closing." 00:00:00";
         $ymd_end = $year."/".$month."/".$closing." 23:59:59";

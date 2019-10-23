@@ -189,6 +189,7 @@ class MonthlyWorkingInformationController extends Controller
         $chk_result = $this->makeDateFromTo($displaykbn,  $datefrom, $workingtimedate_model);
         $datefrom = $workingtimedate_model->getParamdatefromAttribute();
         $dateto = $workingtimedate_model->getParamdatetoAttribute();
+        // $dateto = "20190108";
         $datefrom_date = new Carbon($datefrom);
         $dateto_date = new Carbon($dateto);
 
