@@ -209,7 +209,6 @@ class Confirm extends Model
      */
     public function insertConfirm(){
         try {
-            Log::error('$this->main_sub = '.$this->main_sub);
             DB::table($this->table)->insert(
                 [
                     'department_code' => $this->department_code,

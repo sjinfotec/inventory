@@ -1,7 +1,7 @@
 <template>
-  <select class="form-control" v-model="selectGenerallist" v-on:change="selChanges(selectGenerallist)" placeholder="placeholderData">
-    <option v-if="this.blankData" value=""></option>
-    <option v-for="generallists in generalList" v-bind:value="generallists.code">
+  <select class="form-control" v-model="selectedvalue" v-on:change="selChanges(selectedvalue)">
+    <option selected v-if="this.blankData" value="" disabled selected>＜{{ placeholderData }}＞</option>
+    <option v-for="(generallists, index) in generalList" v-bind:value="generallists.code">
       {{ generallists.code_name }}
     </option>
   </select>
@@ -26,18 +26,17 @@ export default {
   },
   data() {
     return {
-      selectGenerallist: '',
+      selectedvalue: '',
+      selectedname: '',
       generalList: []
     };
   },
   // マウント時
   mounted() {
-    console.log("SelectGeneralList mounted ");
     this.getGeneralList();
   },
   methods: {
     getGeneralList(){
-      console.log("getGeneralList in ");
       this.$axios
         .get("/get_general_list", {
           params: {
@@ -53,9 +52,20 @@ export default {
     },
     // 選択が変更された場合、親コンポーネントに選択値を返却
     selChanges : function(value) {
+      this.selectedname = this.getText(value);
+      this.$emit('change-event', value, this.selectedname);
 
-        this.$emit('change-event', value);
-
+    },
+    // 選択テキスト取得
+    getText : function(value) {
+      name = "";
+      this.generalList.forEach(function (item) {
+        if (item.code === value) {
+          name = item.code_name;
+          return name;
+        }
+      });
+      return name;
     }
 
   }

@@ -132,8 +132,10 @@ class MonthlyWorkingAlertController extends Controller
             $this_6before_index = 0;
             $this_12before_index = 0;
             // 45時間/月チェック
-            $dt_alert_from_ym = new Carbon($alert_from_ym.'01');
-            $dt_datefrom = new Carbon($datefrom.'01');
+            Log::debug('当月alert_from_ym = '.$alert_from_ym);
+            Log::debug('当月datefrom = '.$datefrom);
+            $dt_alert_from_ym = new Carbon($alert_from_ym.'15');
+            $dt_datefrom = new Carbon($datefrom.'15');
             $this_month_index = $dt_alert_from_ym->diffInMonths($dt_datefrom);
             Log::debug('当月index = '.$this_month_index);
             $thisMonth_total = $this->getTotalItemData($monthly_alert, $this_month_index);

@@ -109,9 +109,11 @@ Route::get('/get_time_rounding_list', 'ApiCommonController@getTimeRoundingList')
 Route::get('/get_user_leave_kbn', 'ApiCommonController@getUserLeaveKbnList')->middleware('auth');
 Route::get('/get_mode_list', 'ApiCommonController@getModeList')->middleware('auth');
 Route::get('/get_general_list', 'ApiCommonController@getRequestGeneralList')->middleware('auth');
+Route::get('/get_demand_list', 'ApiCommonController@getDemandList')->middleware('auth');
 // 申請
 Route::get('/demand', 'DemandController@index')->middleware('auth');
-Route::get('/demand/make_demand', 'DemandController@makeDemand')->middleware('auth');
+Route::get('/demand/list_demand', 'DemandController@listDemand')->middleware('auth');
+Route::post('/demand/make_demand', 'DemandController@makeDemand')->middleware('auth');
 // 承認設定
 Route::get('/confirm', 'ConfirmController@index')->middleware('auth');
 Route::get('/confirm/show', 'ConfirmController@show')->middleware('auth');

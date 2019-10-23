@@ -1,14 +1,26 @@
 <template>
   <div id="btnworktime">
     <div v-if="btnMode ==='search'" class="btn-group d-flex" v-on:click="searchclickBtn()">
-      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush"><img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt="">この条件で表示する</button>
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
+        <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt="">この条件で表示する</button> -->
+        この条件で表示する</button>
     </div>
     <div v-if="btnMode === 'basicswitch'" class="btn-group d-flex" v-on:click="switchclickBtn()">
-      <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush"><img class="icon-size-sm mr-2 pb-1" src="/images/round-outlined-flag-b.svg" alt="">詳細を表示する</button>
+      <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
+        <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-outlined-flag-b.svg" alt="">詳細を表示する</button> -->
+        詳細を表示する</button>
     </div>
     <div v-if="btnMode === 'detailswitch'" class="btn-group d-flex" v-on:click="switchclickBtn()">
-      <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush"><img class="icon-size-sm mr-2 pb-1" src="/images/round-outlined-flag-b.svg" alt="">詳細を非表示にする</button>
+      <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
+        <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-outlined-flag-b.svg" alt="">詳細を非表示にする</button> -->
+        詳細を非表示にする</button>
     </div>
+    <div v-if="btnMode ==='listdemand'" class="btn-group d-flex" v-on:click="listdemandclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
+        <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt="">申請一覧を表示する（直近10件）</button> -->
+        申請一覧を表示する（直近10件）</button>
+    </div>
+
     <div v-if="btnMode === 'update'" class="btn-group d-flex" v-on:click="updateclickBtn()">
       <button type="button" 
         class="btn btn-success btn-lg font-size-rg w-100"
@@ -18,14 +30,47 @@
         v-bind:title="edtString"
         @mouseover="edttooltips('update')"
       >
-        <img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt="">
-        全日分日次集計</button>
+        <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt=""> -->
+        指定年月締め一括集計</button>
     </div>
     <div v-if="btnMode === 'init'" class="btn-group d-flex" v-on:click="initclickBtn()">
-      <button type="button" class="btn btn-outline-secondary btn-lg font-size-rg w-100" :disabled="isPush"><img class="icon-size-sm mr-2 pb-1" src="/images/round-restore-b.svg" alt="">初期設定をする</button>
+      <button type="button" class="btn btn-outline-secondary btn-lg font-size-rg w-100" :disabled="isPush">
+        <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-restore-b.svg" alt="">初期設定をする</button> -->
+        初期設定をする</button>
     </div>
     <div v-if="btnMode === 'store'" class="btn-group d-flex" v-on:click="storeclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100">この内容で登録する</button>
+    </div>
+    <div v-if="btnMode === 'makedemand'" class="btn-group d-flex" v-on:click="makedemandclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+        <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-restore-b.svg" alt="">新規作成する</button> -->
+        新規作成する</button>
+    </div>
+    <div v-if="btnMode === 'editcopy'" class="btn-group d-flex" v-on:click="editcopyclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+        選択した行を複写して作成する</button>
+    </div>
+    <div v-if="btnMode === 'editfix'" class="btn-group d-flex" v-on:click="editfixclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+        この内容で編集を確定する</button>
+    </div>
+    <div v-if="btnMode === 'editdemand'" class="btn-group d-flex" v-on:click="editdemandclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+        <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-restore-w.svg" alt="">申請を編集する</button> -->
+        申請を編集する</button>
+    </div>
+    <div v-if="btnMode === 'dodemand'" class="btn-group d-flex" v-on:click="dodemandclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+        この内容で申請する</button>
+    </div>
+
+    <div v-if="btnMode === 'discharge'" class="btn-group d-flex" v-on:click="dischargeclickBtn()">
+      <button type="button" class="btn btn-warning btn-lg font-size-rg w-100" :disabled="isPush">
+        申請を取り下げる</button>
+    </div>
+    <div v-if="btnMode === 'back'" class="btn-group d-flex" v-on:click="backclickBtn()">
+      <button type="button" class="btn btn-outline-warning btn-lg font-size-rg w-100" :disabled="isPush">
+        戻る</button>
     </div>
   </div>
 </template>
@@ -67,6 +112,30 @@ export default {
     },
     storeclickBtn : function() {
       this.$emit('storeclick-event',event);
+    },
+    makedemandclickBtn : function() {
+      this.$emit('makedemandclick-event',event);
+    },
+    editdemandclickBtn : function() {
+      this.$emit('editdemandclick-event',event);
+    },
+    editcopyclickBtn : function() {
+      this.$emit('editcopyclick-event',event);
+    },
+    dodemandclickBtn : function() {
+      this.$emit('dodemandclick-event',event);
+    },
+    editfixclickBtn : function() {
+      this.$emit('editfixclick-event',event);
+    },
+    dischargeclickBtn : function() {
+      this.$emit('dischargeclick-event',event);
+    },
+    backclickBtn : function() {
+      this.$emit('backclick-event',event);
+    },
+    listdemandclickBtn : function() {
+      this.$emit('listdemandclick-event',event);
     },
     // tooltips
     edttooltips: function(value1) {

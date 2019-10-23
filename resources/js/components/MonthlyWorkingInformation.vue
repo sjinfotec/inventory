@@ -411,13 +411,13 @@ export default {
         this.validate = false;
       }
       if (!this.valuedisplay) {
-        this.messagedatadisplay.push("表示区分は必ず入力してください。");
+        this.messagedatadisplay.push("集計区分は必ず入力してください。");
         this.validate = false;
       }
       if (this.serchorupdate == "update") {
         if (!this.valueuser) {
           if (!this.valuedepartment) {
-            this.messagedatadepartment.push("所属部署は必ず入力してください。");
+            this.messagedatadepartment.push("指定年月締め一括集計の場合は所属部署は必ず入力してください。");
             this.validate = false;
           }
         }
@@ -472,7 +472,7 @@ export default {
       this.getUserSelected();
     },
     // 表示区分が変更された場合の処理
-    displayChange: function(value) {
+    displayChange: function(value, name) {
       this.valuedisplay = value;
       this.setPanelHeader();
     },

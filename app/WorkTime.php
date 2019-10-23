@@ -292,6 +292,7 @@ class WorkTime extends Model
     // 日付範囲配列
     public function getArrayrecordtimeAttribute()
     {
+        Log::debug(' worktime  getArrayrecordtimeAttribute = ');
         return $this->array_record_time;
     }
 
@@ -299,6 +300,7 @@ class WorkTime extends Model
     {
         $this->array_record_time = array();       //初期化
         $this->array_record_time = array($valuefrom, $valueto);
+        Log::debug(' worktime  setArrayrecordtimeAttribute = '.$valuefrom);
     }
 
     // メッセージ
@@ -665,6 +667,9 @@ class WorkTime extends Model
     public function getBeforeDailyMaxData(){
         // 開始日付直前の打刻時刻を取得
         // sunquery1    work_times
+        Log::debug('getBeforeDailyMaxData $this->param_user_code '.$this->param_user_code);
+        Log::debug('getBeforeDailyMaxData $this->param_department_code '.$this->param_department_code);
+        Log::debug('getBeforeDailyMaxData $this->param_start_date '.$this->param_start_date);
 
         try{
             $subquery1 = DB::table($this->table)
@@ -709,7 +714,7 @@ class WorkTime extends Model
                 ->selectRaw('max(t3.record_time) as max_record_datetime')
                 ->where('t3.user_code', '=', $this->param_user_code)
                 ->where('t3.department_code', '=', $this->param_department_code)
-                ->where('t3.record_time', '<', $this->param_date_from)
+                ->where('t3.record_time', '<', $this->param_start_date)
                 ->groupBy('t3.user_code', 't3.department_code');
 
             $subquery_max->setBindings([
@@ -718,7 +723,7 @@ class WorkTime extends Model
                 0,
                 $this->param_user_code,
                 $this->param_department_code,
-                $this->param_date_from]);
+                $this->param_start_date]);
     
             $mainquery  = DB::table($this->table)
                 ->select(
@@ -801,7 +806,7 @@ class WorkTime extends Model
                 ->selectRaw('min(t3.record_time) as min_record_datetime')
                 ->where('t3.user_code', '=', $this->param_user_code)
                 ->where('t3.department_code', '=', $this->param_department_code)
-                ->where('t3.record_time', '>', $this->param_date_from)
+                ->where('t3.record_time', '>', $this->param_start_date)
                 ->groupBy('t3.user_code', 't3.department_code');
 
             $subquery_max->setBindings([
@@ -810,7 +815,7 @@ class WorkTime extends Model
                 0,
                 $this->param_user_code,
                 $this->param_department_code,
-                $this->param_date_from]);
+                $this->param_start_date]);
     
             $mainquery  = DB::table($this->table)
                 ->select(
@@ -990,8 +995,10 @@ class WorkTime extends Model
         $users = DB::table($this->table)
             ->where($this->table.'.user_code', '=', $this->param_user_code)
             ->where($this->table.'.department_code', '=', $this->param_department_code)
-            ->where($this->table.'.mode', '<', $this->param_mode)
+            ->where($this->table.'.record_time', '<=', $this->param_date_from)
+            ->where($this->table.'.mode', '=', $this->param_mode)
             ->where('is_deleted', 0)
+            ->limit(5)
             ->count();
 
         return $users;
@@ -1144,8 +1151,11 @@ class WorkTime extends Model
                               ->Where('t9.check_interval', '>', 0);
                         });
             });
+        if(!empty($this->param_user_code)){
+            $mainquery
+                ->where('t1.role', '<', 10);
+        }
         $result = $mainquery
-            ->where('t1.role', '<', 10)
             ->where('t1.is_deleted', '=', 0)
             ->orderBy('t2.record_date', 'asc')
             ->orderBy('t2.record_time', 'asc')

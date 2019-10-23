@@ -39,6 +39,7 @@
                     >所属部署</label>
                   </div>
                   <select-department
+                    ref="selectdepartment"
                     v-bind:blank-data="true"
                     v-on:change-event="departmentChanges"
                   ></select-department>
@@ -57,8 +58,8 @@
                   </div>
                   <select-user
                     ref="selectuser"
-                    class="p-0"
-                    v-bind:get-do="getDo"
+                    v-bind:blank-data="true"
+                    v-bind:get-Do="getDo"
                     v-on:change-event="userChanges"
                   ></select-user>
                 </div>
@@ -244,7 +245,7 @@ export default {
       errors: [],
       valuedepartment: "",
       valueemploymentstatus: "",
-      getDo: 0,
+      getDo: 1,
       valueuser: "",
       validate: false
     };

@@ -266,7 +266,6 @@ export default {
           }
         }
       }
-      console.log("validate = true");
 
       if (this.validate) {
         return this.validate;
@@ -301,7 +300,7 @@ export default {
       this.getUserSelected();
     },
     // 表示区分が変更された場合の処理
-    displayChange: function(value) {
+    displayChange: function(value, name) {
       this.valuedisplay = value;
       this.setPanelHeader();
     },

@@ -204,16 +204,53 @@ return [
         'admin_user' => 10
     ],
  
+    'C026' => [
+        'value' => 'C026',
+        'overtime_demand' => 1,
+        'holidaywork_demand' => 2,
+        'holidaytransfer_demand' => 3,
+        'submission_demand' => 4,
+        'shiftchange_demand' => 5,
+        'paidholiday_demand' => 6,
+        'late_demand' => 7,
+        'earlyleave_demand' => 8,
+        'goingout_demand' => 9,
+        'absence_demand' => 10
+    ],
+ 
     'C027' => [
         'value' => 'C027',
         'main' => 1,
         'sub' => 2
     ],
  
+    'C028' => [
+        'value' => 'C028',
+        'making' => '10',
+        'applying' => '20',
+        'approving' => '30',
+        'send_back' => '40',
+        'final_approved' => '50',
+        'unknown' => '90',
+        'breaking' => '91'
+    ],
+ 
+    'C029' => [
+        'value' => 'C029',
+        'before' => 1,
+        'after' => 2
+    ],
+ 
+    'C030' => [
+        'value' => 'C030',
+        'already' => 1,
+        'notyet' => 2
+    ],
+ 
     'C999' => [
         'value' => 'C999',
-        'init_setting_code' => '9999',
-        'init_setting_user' => 'systemuser'
+        'main' => 1,
+        'sub' => 2
     ],
 
     'WEEK_KANJI' => [

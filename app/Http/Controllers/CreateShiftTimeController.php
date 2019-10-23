@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\ShiftTime;
 
@@ -32,6 +33,7 @@ class CreateShiftTimeController extends Controller
      * @return void
      */
     public function store(Request $request){
+        Log::DEBUG('-------------------- シフト時間作成 in '.$request->start.'  '.$request->end);
         $shift_start_time = $request->start;
         $shift_end_time = $request->end;
         
