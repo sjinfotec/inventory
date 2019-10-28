@@ -15,7 +15,7 @@ use App\DemandsDetail;
 use App\Approval;
 use App\Confirm;
 
-class DemandController extends Controller
+class ApprovalController extends Controller
 {
     private $array_messagedata = array();
 
@@ -26,22 +26,24 @@ class DemandController extends Controller
      */
     public function index()
     {
-        return view('demand');
+        return view('approval');
     }
 
     /**
-     * 申請一覧取得処理
+     * 承認一覧取得処理
      *
      * @return void
      */
-    public function listDemand(Request $request)
+    public function listApproval(Request $request)
     {
-        Log::debug('---- 申請一覧取得処理 開始 -------------- ');
+        Log::debug('---- 承認一覧取得処理 開始 -------------- ');
+        Log::debug('---- パラメータ　$request->situation = '.$request->situation);
         Log::debug('---- パラメータ　$request->doc_code = '.$request->doccode);
         Log::debug('---- パラメータ　$request->usercode = '.$request->usercode);
 
         $apicommon = new ApiCommonController();
         // reqestクエリーセット
+        $situation = $apicommon->setRequestQeury($request->situation);
         $doc_code = $apicommon->setRequestQeury($request->doccode);
         $usercode = $apicommon->setRequestQeury($request->usercode);
         if ($usercode == null || $usercode == "") {
@@ -57,14 +59,13 @@ class DemandController extends Controller
         $get_demandsdetail = array();
         try {
             // パラメータ設定
-            $demand_model = new Demand();
-            $demand_model->setParamDoccodeAttribute($doc_code);
-            $demand_model->setParamUsercodeAttribute($usercode);
-            // $demand_model->setParamLimitAttribute(10);
+            $approval_model = new Approval();
+            $approval_model->setParamDoccodeAttribute($doc_code);
+            $approval_model->setParamUsercodeAttribute($usercode);
             // 適用期間日付の取得
             $dt = new Carbon();
             $target_date = $dt->format('Ymd');
-            $array_result = $demand_model->getDemandList($target_date);
+            $array_result = $approval_model->getDemandList($target_date, $situation);
             $before_no = null;
             $id_cnt = 0;
             $data_cnt = 0;
@@ -169,44 +170,156 @@ class DemandController extends Controller
     }
 
     /**
-     * 申請処理
+     * 承認処理
      *
      * @return void
      */
-    public function makeDemand(Request $request)
+    public function makeApproval(Request $request)
     {
-        Log::debug('---- 申請処理 開始 -------------- ');
+        Log::debug('---- 承認処理 開始 -------------- ');
+        Log::debug('---- パラメータ $request->doccode = '.$request->doccode);
+        Log::debug('---- パラメータ $request->kbn = '.$request->kbn);
+        Log::debug('---- パラメータ demandno = '.$request->demandedit["demandno"]);
         $apicommon = new ApiCommonController();
         // reqestクエリーセット
         $doc_code = $apicommon->setRequestQeury($request->doccode);
         $demandedit = $apicommon->setRequestQeury($request->demandedit);
-        $demanddetails = $apicommon->setRequestQeury($request->demanddetail);
         $demandkbn = $apicommon->setRequestQeury($request->kbn);
         $store_result = true;
         $already_demandno = "";
-        // 申請状況確認
-        $demand_model = new Demand();
+        if (isset($demandedit["demandno"])) {
+            if ($demandedit["demandno"] != "") {
+                $already_demandno = $demandedit["demandno"];
+            } else {
+                $store_result = false;
+            }
+        } else {
+            $store_result = false;
+        }
+        $demand_now = "";
+        if (isset($demandedit["demand_now"])) {
+            if ($demandedit["demand_now"] != "") {
+                $demand_now = $demandedit["demand_now"];
+            }
+        }
+        $demanddate = "";
+        if (isset($demandedit["demanddate"])) {
+            if ($demandedit["demanddate"] != "") {
+                $demanddate = $demandedit["demanddate"];
+            } else {
+                $store_result = false;
+            }
+        } else {
+            $store_result = false;
+        }
+        $getperiodfrom = "";
+        if (isset($demandedit["getperiodfrom"])) {
+            if ($demandedit["getperiodfrom"] != "") {
+                $getperiodfrom = $demandedit["getperiodfrom"];
+            }
+        }
+        $getperiodto = "";
+        if (isset($demandedit["getperiodto"])) {
+            if ($demandedit["getperiodto"] != "") {
+                $getperiodto = $demandedit["getperiodto"];
+            }
+        }
+        $demandreason = "";
+        if (isset($demandedit["demandreason"])) {
+            if ($demandedit["demandreason"] != "") {
+                $demandreason = $demandedit["demandreason"];
+            }
+        }
+        $sendbackreason = "";
+        if (isset($demandedit["sendbackreason"])) {
+            if ($demandedit["sendbackreason"] != "") {
+                $sendbackreason = $demandedit["sendbackreason"];
+            }
+        }
+        $confirm_user_code = "";
+        if (isset($demandedit["confirm"])) {
+            if ($demandedit["confirm"] != "") {
+                $confirm_user_code = $demandedit["confirm"];
+            }
+        }
+        $confirmfinal_user_code = "";
+        if (isset($demandedit["confirmfinal"])) {
+            if ($demandedit["confirmfinal"] != "") {
+                $confirmfinal_user_code = $demandedit["confirmfinal"];
+            }
+        }
+        $target_seq = 0;
+        if ($confirm_user_code == "" && $confirmfinal_user_code != "") {
+            $target_seq = Config::get('const.CONFIRM_SEQ.final_confirm');
+            $confirm_user_code = $confirmfinal_user_code;
+        }
+        if ($store_result == false) {
+            return response()->json(
+                ['result' => $store_result,
+                    'department_name' => '',
+                    'user_name' => '',
+                    'demandno' => $already_demandno,
+                    'toaddress' => '',
+                    'ccaddress' => '',
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
+        }
+        return response()->json(
+            ['result' => $store_result,
+                'department_name' => '人事課',
+                'user_name' => '社員　九朗',
+                'demandno' => $already_demandno,
+                'toaddress' => 'takeda@ssjjoo.com',
+                'ccaddress' => ['shindo@ssjjoo.com'],
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
+    // 申請状況確認
+        $approval_model = new Approval();
         try {
-            if (isset($demandedit["demandno"])) {
-                if ($demandedit["demandno"] != "") {
-                    $already_demandno = $demandedit["demandno"];
-                    $demand_model->setParamNoAttribute($already_demandno);
-                    $result = $demand_model->getDemandfromNo();
-                    foreach ($result as $item) {
-                        if (isset($item->status)) {
-                            if ($item->status == Config::get('const.C028.approving') ||
-                                $item->status == Config::get('const.C028.final_approved')) {
-                                $this->array_messagedata[] = 
-                                    array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.rounding_not_demand'));
-                                $store_result = false;
-                                return response()->json(
-                                    ['result' => $store_result,
-                                        'demandno' => $demandedit["demandno"],
-                                        Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
-                            }
+            // 承認データ
+            $approval_model->setParamNoAttribute($already_demandno);
+            $approval_model->setParamUsercodeAttribute($confirm_user_code);
+            if ($target_seq == Config::get('const.CONFIRM_SEQ.final_confirm')) {
+                $approval_model->setParamSeqAttribute($target_seq);
+            }
+            $result = $approval_model->getDemandfromNo();
+            foreach ($result as $item) {
+                $approval_model->setNoAttribute($item->no);
+                $approval_model->setDoccodeAttribute($item->doc_code);
+                $approval_model->setSeqAttribute($item->seq);
+                $approval_model->setLognoAttribute($item->log_no);
+                $approval_model->setStatusAttribute($item->status);
+                $approval_model->setDepartmentcodeAttribute($item->department_code);
+                $approval_model->setUsercodeAttribute($item->user_code);
+                $approval_model->setApprovaldateAttribute($item->approval_date);
+                $approval_model->setRemandreasonAttribute($item->remand_reason);
+                $approval_model->setMailresultAttribute($item->mail_result);
+                $approval_model->setMailaddressAttribute($item->mail_address);
+                $approval_model->setNmaildepartmentcodeAttribute($item->nmail_department_code);
+                $approval_model->setNmailusercodeAttribute($item->nmail_user_code);
+                if (isset($demandkbn)) {
+                    if ($demandkbn == Config::get('const.DEMAND_KBN.store')) {
+                        if ($item->status == Config::get('const.C028.making') ||
+                            $item->status == Config::get('const.C028.final_approved')) {
+                            $this->array_messagedata[] = 
+                                array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.making_or_final'));
+                            $store_result = false;
+                            return response()->json(
+                                ['result' => $store_result,
+                                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
+                        }
+                    } elseif ($demandkbn == Config::get('const.DEMAND_KBN.sendback')) {
+                        if ($item->status == Config::get('const.C028.making') ||
+                            $item->status == Config::get('const.C028.send_back') ||
+                            $item->status == Config::get('const.C028.final_approved')) {
+                            $this->array_messagedata[] = 
+                                array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.alreadymaking_or_final'));
+                            $store_result = false;
+                            return response()->json(
+                                ['result' => $store_result,
+                                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
                         }
                     }
                 }
+                break;
             }
             $usercode = Auth::user()->code;
             // 部署取得
@@ -228,19 +341,6 @@ class DemandController extends Controller
                 }
                 break;
             }
-            $confirm_user_code = "";
-            if (isset($demandedit["confirm"])) {
-                if ($demandedit["confirm"] != "") {
-                    $confirm_user_code = $demandedit["confirm"];
-                }
-            }
-            if ($confirm_user_code == "") {
-                if (isset($demandedit["confirmfinal"])) {
-                    if ($demandedit["confirmfinal"] != "") {
-                        $confirm_user_code = $demandedit["confirmfinal"];
-                    }
-                }
-            }
             $result = $apicommon->getUserDepartment($confirm_user_code, $target_date);
             $confirm_departmentcode = "";
             foreach($result as $item) {
@@ -250,7 +350,6 @@ class DemandController extends Controller
                 }
                 break;
             }
-            Log::debug('$confirm_departmentcode =  '.$confirm_departmentcode);
             // メールアドレス取得
             $confirm_email = $apicommon->getUserMailAddress($confirm_user_code, $target_date);
         }catch(\PDOException $pe){
@@ -269,32 +368,16 @@ class DemandController extends Controller
                 ['result' => $store_result,
                     'department_name' => $department_name,
                     'user_name' => $user_name,
-                    'demandno' => $demandedit["demandno"],
+                    'demandno' => $already_demandno,
                     'toaddress' => $confirm_email,
                     'ccaddress' => array(),
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
         }
         
         // 申請追加
-        // 申請番号作成
-        $demand_model->setParamDoccodeAttribute($doc_code);
-        $maxseq = 0;
-        Log::debug("---- already_demandno = ".$already_demandno);
-        if ($already_demandno == "") {
-            $maxseq = $demand_model->getMaxSeq($target_date);
-            Log::debug("---- maxseq = ".$maxseq);
-            if (isset($maxseq)) {
-                if ($maxseq == "") {
-                    $maxseq = 0;
-                }
-            } else {
-                $maxseq = 0;
-            }
-            $maxseq++;
-            $target_demand_no = str_pad($doc_code, 2, 0, STR_PAD_LEFT).substr($target_date, 2).str_pad($maxseq, 6, 0, STR_PAD_LEFT);
-            Log::debug("---- target_demand_no = ".$target_demand_no);
-            $logno = 1;
-        } else {
+        try {
+            DB::beginTransaction();
+            // 申請項目設定
             $maxlogno = $demand_model->getMaxLogno($already_demandno);
             if (isset($maxlogno)) {
                 if ($maxlogno == "") {
@@ -306,56 +389,49 @@ class DemandController extends Controller
             $logno = $maxlogno + 1;
             $target_demand_no = $already_demandno;
             $maxseq = 1;
-        }
-        // 申請追加
-        try {
-            DB::beginTransaction();
-            // 申請項目設定
-            $demand_model->setNoAttribute($target_demand_no);
-            $demand_model->setDoccodeAttribute($doc_code);
-            $demand_model->setDemandnowAttribute($target_date);
-            $demand_model->setLognoAttribute($logno);
-            $demand_model->setSeqAttribute($maxseq);
-            if ($demandkbn == Config::get('const.DEMAND_KBN.store')) {
-                $demand_model->setStatusAttribute(Config::get('const.C028.applying'));
-            } elseif ($demandkbn == Config::get('const.DEMAND_KBN.discharge')) {
-                $demand_model->setStatusAttribute(Config::get('const.C028.making'));
+            $approval_model->setNoAttribute($target_demand_no);
+            $approval_model->setDoccodeAttribute($doc_code);
+            $approval_model->setDemandnowAttribute($demand_now);
+            $approval_model->setLognoAttribute($logno);
+            $approval_model->setSeqAttribute($maxseq);
+            if ($target_seq == Config::get('const.CONFIRM_SEQ.final_confirm')) {
+                $approval_model->setStatusAttribute(Config::get('const.C028.final_approved'));
             } else {
-                $demand_model->setStatusAttribute(Config::get('const.C028.unknown'));
+                $approval_model->setStatusAttribute(Config::get('const.C028.approving'));
             }
-            $demand_model->setDepartmentcodeAttribute($departmentcode);
-            $demand_model->setUsercodeAttribute($usercode);
+            $approval_model->setDepartmentcodeAttribute($departmentcode);
+            $approval_model->setUsercodeAttribute($usercode);
             $dt = new Carbon($demandedit["demanddate"]);
             $demanddate = $dt->format('Ymd');
-            $demand_model->setDemanddateAttribute($demanddate);
+            $approval_model->setDemanddateAttribute($demanddate);
             $dt = new Carbon($demandedit["getperiodfrom"]);
             $dt_date_from = $dt->format('Ymd');
-            $demand_model->setDatefromAttribute($dt_date_from);
+            $approval_model->setDatefromAttribute($dt_date_from);
             if (isset($demandedit["getperiodto"])) {
                 if ($demandedit["getperiodto"] == "") {
-                    $demand_model->setDatetoAttribute($dt_date_from);
+                    $approval_model->setDatetoAttribute($dt_date_from);
                 } else {
                     $dt = new Carbon($demandedit["getperiodto"]);
                     $dt_date = $dt->format('Ymd');
-                    $demand_model->setDatetoAttribute($dt_date);
+                    $approval_model->setDatetoAttribute($dt_date);
                 }
             } else {
-                $demand_model->setDatetoAttribute($dt_date_from);
+                $approval_model->setDatetoAttribute($dt_date_from);
             }
-            $demand_model->setDemandreasonAttribute($demandedit["demandreason"]);
+            $approval_model->setDemandreasonAttribute($demandedit["demandreason"]);
             if ($demanddate <= $dt_date_from) {
-                $demand_model->setBeforeafterAttribute(Config::get('const.C029.before'));
+                $approval_model->setBeforeafterAttribute(Config::get('const.C029.before'));
             } else {
-                $demand_model->setBeforeafterAttribute(Config::get('const.C029.after'));
+                $approval_model->setBeforeafterAttribute(Config::get('const.C029.after'));
             }
-            $demand_model->setMailresultAttribute(Config::get('const.C030.notyet'));
-            $demand_model->setMailaddressAttribute($confirm_email);
-            $demand_model->setNmailDepartmentCodeAttribute($confirm_departmentcode);
-            $demand_model->setNmailUserCodeAttribute($confirm_user_code);
-            $demand_model->setCreateduserAttribute($usercode);
+            $approval_model->setMailresultAttribute(Config::get('const.C030.notyet'));
+            $approval_model->setMailaddressAttribute($confirm_email);
+            $approval_model->setNmailDepartmentCodeAttribute($confirm_departmentcode);
+            $approval_model->setNmailUserCodeAttribute($confirm_user_code);
+            $approval_model->setCreateduserAttribute($usercode);
             $systemdate = Carbon::now();
-            $demand_model->setCreatedatAttribute($systemdate);
-            $demand_model->insertDemand();
+            $approval_model->setCreatedatAttribute($systemdate);
+            $approval_model->insertDemand();
             // 申請明細項目設定
             $demandsdetail_model = new DemandsDetail();
             $rowno = 0;
@@ -417,15 +493,6 @@ class DemandController extends Controller
             $approval_model->setCreateduserAttribute($usercode);
             $approval_model->setCreatedatAttribute($systemdate);
             $approval_model->insertApproval();
-            // 適用期間日付の取得
-            $demand_model->setParamNoAttribute($target_demand_no);
-            $dt = new Carbon();
-            $target_date = $dt->format('Ymd');
-            $getmails = $demand_model->getMailAddress($target_date);
-            $array_Ccaddress = array();
-            foreach ($getmails as $item) {
-                $array_Ccaddress[] = $item->email;
-            }
             DB::commit();
             $store_result = true;
         }catch(\PDOException $pe){
@@ -439,122 +506,16 @@ class DemandController extends Controller
             $store_result = false;
             Log::error($e->getMessage());
         }
-        return response()->json(
-            ['result' => $store_result,
-                'department_name' => $department_name,
-                'user_name' => $user_name,
-                'demandno' => $target_demand_no,
-                'toaddress' => $confirm_email,
-                'ccaddress' => $array_Ccaddress,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
-    }
 
-    /**
-     * メールアドレス取得処理
-     *
-     * @return void
-     */
-    public function getMail($target_date, $doc_code, $target_demand_no, $user_code, $user_name, $department_name, $demanddate)
-    {
-        Log::debug('---- メール送信処理 開始 -------------- ');
-        Log::debug('---- パラメータ　$target_date = '.$target_date);
-        Log::debug('---- パラメータ　$rdoc_code = '.$doc_code);
-        Log::debug('---- パラメータ　$target_demand_no = '.$target_demand_no);
-        Log::debug('---- パラメータ　$user_code = '.$user_code);
-        Log::debug('---- パラメータ　$user_name = '.$user_name);
-        Log::debug('---- パラメータ　$department_name = '.$department_name);
-        Log::debug('---- パラメータ　$demanddate = '.$demanddate);
-
-        // メールアドレス取得（正副）
-        $demand_model = new Demand();
-        $apicommon = new ApiCommonController();
-
-        try {
-            mb_language("Japanese"); 
-            mb_internal_encoding("UTF-8");
-            // Fromメールアドレス取得
-            $from_email = $apicommon->getUserMailAddress($user_code, $target_date);
-            $pfrom = "-f $from_email";
-            // 適用期間日付の取得
-            $demand_model->setParamNoAttribute($target_demand_no);
-            $dt = new Carbon();
-            $target_date = $dt->format('Ymd');
-            $getmails = $demand_model->getMailAddress($target_date);
-            $to = "";
-            $headers = "From: ".$from_email;
-            foreach ($getmails as $item) {
-                if ($item->main_sub == Config::get('const.C027.main')) {
-                    if (strlen($to) == 0) {
-                        $to .= $item->email;
-                    } else {
-                        $to .= "\r\n";
-                        $to .= "Cc: ".$item->email;
-                    }
-                } else {
-                    $headers .= "\r\n";
-                    $headers .= "Cc: ".$item->email;
-                }
-            }
-            $subject = "";
-            switch ($doc_code){
-                case Config::get('const.C026.overtime_demand'):
-                    $subject = Config::get('const.C026_NAME.overtime_demand');
-                    break;
-                case Config::get('const.C026.holidaywork_demand'):
-                    $subject = Config::get('const.C026_NAME.holidaywork_demand');
-                    break;
-                case Config::get('const.C026.holidaytransfer_demand'):
-                    $subject = Config::get('const.C026_NAME.holidaytransfer_demand');
-                    break;
-                case Config::get('const.C026.submission_demand'):
-                    $subject = Config::get('const.C026_NAME.submission_demand');
-                    break;
-                case Config::get('const.C026.shiftchange_demand'):
-                    $subject = Config::get('const.C026_NAME.shiftchange_demand');
-                    break;
-                case Config::get('const.C026.paidholiday_demand'):
-                    $subject = Config::get('const.C026_NAME.paidholiday_demand');
-                    break;
-                case Config::get('const.C026.late_demand'):
-                    $subject = Config::get('const.C026_NAME.late_demand');
-                    break;
-                case Config::get('const.C026.earlyleave_demand'):
-                    $subject = Config::get('const.C026_NAME.earlyleave_demand');
-                    break;
-                case Config::get('const.C026.goingout_demand'):
-                    $subject = Config::get('const.C026_NAME.goingout_demand');
-                    break;
-                case Config::get('const.C026.absence_demand'):
-                    $subject = Config::get('const.C026_NAME.absence_demand');
-                    break;
-                default:
-                    break;
-            }
-            $subject .= "承認依頼";
-            $message = "申請番号：".$target_demand_no;
-            $dt = new Carbon($demanddate);
-            $message .= "\r\n"."申請日：".$dt->format('Y年m月d日');
-            $message .= "\r\n"."申請者：（部署）".$department_name."（氏名）".$user_name;
-            Log::debug('$to = '.$to);
-            Log::debug('$subject = '.$subject);
-            Log::debug('$message = '.$message);
-            Log::debug('$headers = '.$headers);
-            Log::debug('$pfrom = '.$pfrom);
-            $header = "MIME-Version: 1.0\n";
-            $header .= "Content-Transfer-Encoding: 7bit\n";
-            $header .= "Content-Type: text/plain; charset=ISO-2022-JP\n";
-            //$header .= "Message-Id: <" . md5(uniqid(microtime())) . "@【ドメイン名】>\n";
-            $header .= "from: takeda@ssjjoo.com\n";
-            $header .= "Reply-To: 【takeda@ssjjoo.com\n";
-            $header .= "Return-Path:【takeda@ssjjoo.com\n";
-            $header .= "X-Mailer: PHP/". phpversion();
-            //https://qiita.com/ShibuyaKosuke/items/309c0a7d969baf0ea8d1
-            //mb_send_mail('shindo@ssjjoo.com', $subject, $message, $header, "-f takeda@ssjjoo.com");
-            //mb_send_mail($to, $subject, $message, $headers, $pfrom);
-        }catch(\Exception $e){
-            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.mail_send_eror'));
-            Log::error($e->getMessage());
+        if (!$store_result) {
+            return response()->json(
+                ['result' => $store_result,
+                    'department_name' => $department_name,
+                    'user_name' => $user_name,
+                    'demandno' => $already_demandno,
+                    'toaddress' => $confirm_email,
+                    'ccaddress' => array(),
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
         }
     }
-
 }

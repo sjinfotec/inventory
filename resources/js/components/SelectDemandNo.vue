@@ -52,12 +52,12 @@ export default {
     if (this.dateValue == '') {
       this.dateApllyValue = moment(new Date()).format("YYYYMMDD");
     }
-    this.getDemandList(this.getDo, this.selecteddemand, this.dateApllyValue);
+    this.getDemandList(this.getDo, this.selecteddemand, this.dateApllyValue, this.demandno);
   },
   methods: {
-    getDemandList(getdovalue, demandvalue, datevalue, value){
+    getDemandList(getdovalue, demandvalue, datevalue, demandnovalue){
       this.demand = demandvalue;
-      this.demandno = value;
+      this.demandno = demandnovalue;
       this.demandList = [];
       this.$axios
         .get("/get_demand_list", {

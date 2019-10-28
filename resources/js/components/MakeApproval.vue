@@ -7,7 +7,7 @@
         <div  v-if="this.displayphase === ''" class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:header-text1="'申請する申請書を選択する'"
+            v-bind:header-text1="'承認する申請書を選択する'"
             v-bind:header-text2="''"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
@@ -20,9 +20,30 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
+                      class="input-group-text font-size-sm line-height-xs label-width-100"
+                      for="inputGroupSelect01"
+                    >申請状況指定</label>
+                  </div>
+                  <general-list
+                    v-bind:identification-id="'C031'"
+                    v-bind:placeholder-data="'申請状況を選択してください'"
+                    v-bind:blank-data="true"
+                    v-bind:selected-value="valueselectedsituation"
+                    v-on:change-event="situationChange"
+                  ></general-list>
+                </div>
+                <message-data v-bind:message-datas="messagedatadoccode" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
                       class="input-group-text font-size-sm line-height-xs label-width-90"
                       for="inputGroupSelect01"
-                    >申請書類<span class="color-red">[*]</span></label>
+                    >申請書類</label>
                   </div>
                   <general-list
                     v-bind:identification-id="'C026'"
@@ -47,9 +68,11 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
-                  v-on:makedemandclick-event="makedemandclick"
-                  v-bind:btn-mode="'makedemand'">
+                  v-on:searchclick-event="searchclick"
+                  v-bind:btn-mode="'search'"
+                  v-bind:is-push="issearchbutton">
                 </btn-work-time>
+                <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting>
               </div>
               <!-- /.col -->
             </div>
@@ -69,7 +92,7 @@
           <!-- panel header -->
           <daily-working-information-panel-header
             v-bind:header-text1="'申請一覧表示'"
-            v-bind:header-text2="'直近１０件の申請書を表示。修正またはコピーで作成できます。'"
+            v-bind:header-text2="'承認する申請を選択します。申請日の古い順で表示しています。'"
           ></daily-working-information-panel-header>
           <div class="col-md-6 pb-2">
             <message-data v-bind:message-datas="messagedatascopy" v-bind:message-class="'warning'"></message-data>
@@ -121,22 +144,9 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
-                  v-on:editdemandclick-event="editdemandclick"
-                  v-bind:btn-mode="'editdemand'"
+                  v-on:checkdemandclick-event="checkdemandclick"
+                  v-bind:btn-mode="'checkdemand'"
                   v-bind:is-push="iseditdemandpush">
-                </btn-work-time>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- col -->
-              <div class="col-md-12 pb-2">
-                <btn-work-time
-                  v-on:editcopyclick-event="editcopyclick"
-                  v-bind:btn-mode="'editcopy'"
-                  v-bind:is-push="iseditcopypush">
                 </btn-work-time>
               </div>
               <!-- /.col -->
@@ -151,14 +161,14 @@
     </div>
     <!-- /list contentns row -->
     <!-- main contentns row -->
-    <div v-if="this.displayphase != ''" class="row justify-content-between">
+    <div v-if="this.displayphase !== ''" class="row justify-content-between">
       <!-- .panel -->
       <div class="col-md pt-3 align-self-stretch">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
             v-bind:header-text1="valueselecteddocname"
-            v-bind:header-text2="'下記の通り、残業申請致します。'"
+            v-bind:header-text2="''"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="col-md-6 pb-2">
@@ -192,19 +202,16 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputDemanddate"
-                    >申請日<span class="color-red">[*]</span></label>
+                    >申請日</label>
                   </div>
-                  <input v-model="edit.demanddate" type="date" class="form-control" id="inputDemanddate">
+                  <input v-model="edit.demanddate" type="date" readonly="readonly" class="form-control" id="inputDemanddate">
                 </div>
-              </div>
-              <div class="col-md-6 pb-2">
-                <message-data v-bind:message-datas="messageeditdemanddate" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valueselecteddoccode === 1" class="row justify-content-between">
+            <div v-if="valuedisplayddoccode === '1'" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -212,19 +219,16 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputOvertimedate"
-                    >残業日<span class="color-red">[*]</span></label>
+                    >残業日</label>
                   </div>
-                  <input v-model="edit.getperiodfrom" type="date" class="form-control" id="inputOvertimedate">
+                  <input v-model="edit.getperiodfrom" type="date" readonly="readonly" class="form-control" id="inputOvertimedate">
                 </div>
-              </div>
-              <div class="col-md-6 pb-2">
-                <message-data v-bind:message-datas="messageeditgetperiodfrom" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valueselecteddoccode !== 1" class="row justify-content-between">
+            <div v-if="valuedisplayddoccode !== '1'" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -232,13 +236,10 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGetperiodfrom"
-                    >取得期間開始<span class="color-red">[*]</span></label>
+                    >取得期間開始</label>
                   </div>
-                  <input v-model="edit.getperiodfrom" type="date" class="form-control" id="inputGetperiodfrom">
+                  <input v-model="edit.getperiodfrom" type="date" readonly="readonly" class="form-control" id="inputGetperiodfrom">
                 </div>
-              </div>
-              <div class="col-md-6 pb-2">
-                <message-data v-bind:message-datas="messageeditgetperiodfrom" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -248,20 +249,17 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGetperiodto"
-                    >取得期間終了<span class="color-red">[*]</span></label>
+                    >取得期間終了</label>
                   </div>
-                  <input v-model="edit.getperiodto" type="date" class="form-control" id="inputGetperiodto">
+                  <input v-model="edit.getperiodto" type="date" readonly="readonly" class="form-control" id="inputGetperiodto">
                 </div>
-              </div>
-              <div class="col-md-6 pb-2">
-                <message-data v-bind:message-datas="messageeditgetperiodto" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
             <!-- .row -->
             <!-- /.panel contents -->
-            <div v-if="valueselecteddoccode === 1" class="row justify-content-between">
+            <div v-if="valuedisplayddoccode === '1'" class="row justify-content-between">
               <!-- .panel -->
               <div class="col-md pt-3 align-self-stretch">
                 <div class="card shadow-pl">
@@ -269,14 +267,11 @@
                   <div class="card-header bg-transparent pt-3 border-0">
                     <h1 class="float-sm-left font-size-rg">
                       <span>
-                        <button class="btn btn-success btn-lg font-size-rg" @click="appendRow">+</button>
+                        <button class="btn btn-success btn-lg font-size-rg">+</button>
                       </span>
                       予定時間入力
                     </h1>
-                    <span class="float-sm-right font-size-sm">「＋」アイコンをクリックすることで申請情報を追加できます</span>
-                  </div>
-                  <div class="col-md-6 pb-2">
-                    <message-data v-bind:message-datas="messagedatadetail" v-bind:message-class="'warning'"></message-data>
+                    <span class="float-sm-right font-size-sm"></span>
                   </div>
                   <!-- /.panel header -->
                   <!-- panel body -->
@@ -291,12 +286,11 @@
                           <table class="table table-striped border-bottom font-size-sm text-nowrap">
                             <thead>
                               <tr>
-                                <td class="text-center align-middle w-15">作業項目<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-10">残業時間開始<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-10">残業時間終了<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-10">予定時間<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-165">申請理由<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-15">操作</td>
+                                <td class="text-center align-middle w-15">作業項目</td>
+                                <td class="text-center align-middle w-10">残業時間開始</td>
+                                <td class="text-center align-middle w-10">残業時間終了</td>
+                                <td class="text-center align-middle w-10">予定時間</td>
+                                <td class="text-center align-middle w-165">申請理由</td>
                               </tr>
                             </thead>
                             <tbody>
@@ -307,6 +301,7 @@
                                   <div class>
                                     <textarea
                                       v-model="item.working_item"
+                                      readonly="readonly"
                                       class="font-size-sm form-control"
                                       rows="3"
                                        id="inputSummary">
@@ -319,6 +314,7 @@
                                   <div class>
                                     <input
                                       type="time"
+                                      readonly="readonly"
                                       class="font-size-sm form-control"
                                       v-model="demandDetails[index].time_from_name"
                                     />
@@ -330,6 +326,7 @@
                                   <div class>
                                     <input
                                       type="time"
+                                      readonly="readonly"
                                       class="font-size-sm form-control"
                                       v-model="demandDetails[index].time_to_name"
                                     />
@@ -341,6 +338,7 @@
                                   <div class>
                                     <input
                                       type="text"
+                                      readonly="readonly"
                                       class="font-size-sm form-control"
                                       v-model="demandDetails[index].scheduled_time"
                                     />
@@ -351,6 +349,7 @@
                                 >
                                   <div class>
                                     <textarea
+                                      readonly="readonly"
                                       v-model="demandDetails[index].demand_reason"
                                       class="font-size-sm form-control"
                                       rows="3"
@@ -358,11 +357,6 @@
                                     </textarea>
                                   </div>
                                 </td>
-                                <rowbtn-work-time
-                                  v-on:rowdelclick-event="alertDelConf('info',item.id,index)"
-                                  v-bind:btn-mode="'rowdel'"
-                                  v-bind:is-push="false">
-                                </rowbtn-work-time>
                               </tr>
                             </tbody>
                           </table>
@@ -375,26 +369,40 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valueselecteddoccode !== 1" class="row justify-content-between">
+            <div v-if="valuedisplayddoccode !== '1'" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div :class="errorClassObject('summary')" class="input-group">
                   <div class="input-group-prepend">
-                    <label for="inputDemandreason" class="control-label">申請理由<span class="color-red">[*]</span></label>
+                    <label for="inputDemandreason" class="control-label">申請理由</label>
                   </div>
                 </div>
                 <div>
-                  <textarea v-model="edit.demandreason" class="form-control" rows="3" id="inputDemandreason" placeholder="申請理由"></textarea>
+                  <textarea readonly="readonly" v-model="edit.demandreason" class="form-control" rows="3" id="inputDemandreason" placeholder="申請理由"></textarea>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div :class="errorClassObject('summary')" class="input-group">
+                  <div class="input-group-prepend">
+                    <label for="inputSendbackreason" class="control-label">差し戻し理由</label>
+                  </div>
+                </div>
+                <div>
+                  <textarea v-model="edit.sendbackreason" class="form-control" rows="3" id="inputSendbackreason" placeholder="差し戻し理由"></textarea>
                 </div>
               </div>
               <div class="col-md-6 pb-2">
-                <message-data v-bind:message-datas="messageeditdemandreason" v-bind:message-class="'warning'"></message-data>
+                <message-data v-bind:message-datas="messageeditsendbackreason" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div v-if="valueseq !== '99'" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -453,8 +461,8 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
-                    v-on:dodemandclick-event="dodemandclick"
-                    v-bind:btn-mode="'dodemand'">
+                    v-on:doapprovalclick-event="doapprovalclick"
+                    v-bind:btn-mode="'doapproval'">
                 </btn-work-time>
               </div>
               <!-- /.col -->
@@ -465,9 +473,8 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
-                    v-on:dischargeclick-event="dischargeclick"
-                    v-on:is-push="isdischargepush"
-                    v-bind:btn-mode="'discharge'">
+                    v-on:sendbackclick-event="sendbackclick"
+                    v-bind:btn-mode="'sendback'">
                 </btn-work-time>
               </div>
               <!-- /.col -->
@@ -484,10 +491,10 @@
               </div>
               <!-- /.col -->
             </div>
+            <!-- /.row -->
             <div>
               <button id='mail' style="display:none">メール送信</button>
             </div>
-            <!-- /.row -->
           </div>
           <!-- /.panel contents -->
         </div>
@@ -511,12 +518,15 @@ export default {
   data() {
     return {
       getdo: 0,
+      valueselectedsituation: "",
       valueselecteddoccode: "",
+      valuedisplayddoccode: "",
       fromdate: "",
       valueselecteddocname: "",
+      valueseq: "",
       validate: false,
       displayphase: "",
-      isdischargepush: true,
+      issendbackpush: true,
       iseditcopypush: true,
       iseditdemandpush: true,
       resresults: [],
@@ -524,22 +534,18 @@ export default {
       array_demand: [],
       array_demanddeatail: [],
       confirmlist: [],
-      department_name : "",
-      user_name : "",
-      toaddress : "",
-      array_ccaddress: [],
       edit: {
         demandno : "",
+        demand_now : "",
         demanddate  : "",
         getperiodfrom   : "",
         getperiodto   : "",
         demandreason   : "",
+        sendbackreason   : "",
         confirm : "",
         confirmfinal : ""
       },
-      edit_demanddeatail: [],
-      maxstrLength: 191,
-      maxdemandreasonLength: 256,
+      demandDetails: [],
       valueselectedconfirm: "",
       valueselectedconfirmfinal: "",
       messagedatadoccode: [],
@@ -547,7 +553,7 @@ export default {
       messageeditdemanddate: [],
       messageeditgetperiodfrom: [],
       messageeditgetperiodto: [],
-      messageeditdemandreason: [],
+      messageeditsendbackreason: [],
       messagedataconfirm: [],
       messagedataconfirmfinal: [],
       messagedatadetail: [],
@@ -555,12 +561,16 @@ export default {
       messageshowsearch: false,
       messageconfirmkbn: "warning",
       selecttedrowindex: -1,
-      demandDetails: []
+      issearchbutton: false
     };
   },
   // マウント時
   mounted() {
     console.log("MakeDemand Component mounted.");
+    this.valueselectedsituation = "1";
+    this.valueselecteddoccode = "";
+    this.valuedisplayddoccode = "";
+    this.getDemandList();
   },
   computed: {
     validation() {
@@ -584,11 +594,10 @@ export default {
     checkForm: function(e) {
       this.validate = true;
       this.messagedataClear();
-      if (!this.valueselecteddoccode) {
-        this.messagedatadoccode.push("申請書類は必ず選択してください。");
+      if (this.array_demand.length > 0 && this.selecttedrowindex == -1) {
+        this.messagedatascopy.push("承認する申請を選択してください。");
         this.validate = false;
       }
-
       if (this.validate) {
         return this.validate;
       }
@@ -599,90 +608,13 @@ export default {
       this.messageconfirmkbn = "warning";
       this.validate = true;
       this.messagedataClear();
-      console.log("checkFormDetail");
-      if (!this.edit.demanddate) {
-        this.messageeditdemanddate.push("申請日は必ず入力してください。");
-        this.validate = false;
-      } else {
-        if (!dateRE.test(this.edit.demanddate)) {
-          this.messageeditdemanddate.push("申請日に正しい日付を入力してください。");
+
+      if (this.valueseq != '99') {
+        if (!this.valueselectedconfirm && !this.valueselectedconfirmfinal) {
+          this.messagedataconfirm.push("承認者または最終承認者は必ず入力してください。");
+          this.messagedataconfirmfinal.push("承認者または最終承認者は必ず入力してください。");
           this.validate = false;
         }
-      }
-      if (this.valueselecteddoccode == 1) {
-        if (!this.edit.getperiodfrom) {
-          this.messageeditgetperiodfrom.push("残業日は必ず入力してください。");
-          this.validate = false;
-        } else {
-          if (!dateRE.test(this.edit.getperiodfrom)) {
-            this.messageeditgetperiodfrom.push("残業日に正しい日付を入力してください。");
-            this.validate = false;
-          }
-        }
-        if (this.demandDetails.length == 0) {
-          this.messagedatadetail.push("予定時間が入力されていません。");
-          this.validate = false;
-        }
-        console.log("this.demandDetails.length " + this.demandDetails.length);
-        for (var i = 0; i < this.demandDetails.length; i++) {
-          console.log("this.demandDetails[i].working_item" + this.demandDetails[i].working_item);
-          if (!this.isRowInput(i)) {
-            console.log("this.demandDetails[i].working_item" + this.demandDetails[i].working_item);
-            this.messagedatadetail.push(i+1 + "行めの入力がありません。");
-            this.validate = false;
-          } else {
-            if (this.demandDetails[i].working_item == "") {
-              this.messagedatadetail.push(i+1 + "行めの作業項目に入力がありません。");
-              this.validate = false;
-            } else {
-              if (this.demandDetails[i].working_item.length > this.maxstrLength) {
-                this.messagedatadetail.push(i+1 + "行めの作業項目は" + this.maxstrLength + "文字以内で入力してください。");
-                this.validate = false;
-              }
-            }
-            if (this.demandDetails[i].time_from_name == "") {
-              this.messagedatadetail.push(i+1 + "行めの残業時間開始に入力がありません。");
-              this.validate = false;
-            } else {
-              console.log(this.demandDetails[i].time_from_name);
-              if (!timeRE.test(this.demandDetails[i].time_from_name)) {
-                this.messagedatadetail.push(i+1 + "行めの残業時間開始に正しい時刻を入力してください。");
-                this.validate = false;
-              }
-            }
-            if (this.demandDetails[i].time_to_name == "") {
-              this.messagedatadetail.push(i+1 + "行めの残業時間終了に入力がありません。");
-              this.validate = false;
-            } else {
-              if (!timeRE.test(this.demandDetails[i].time_to_name)) {
-                this.messagedatadetail.push(i+1 + "行めの残業時間終了に正しい時刻を入力してください。");
-                this.validate = false;
-              }
-            }
-            if (this.demandDetails[i].scheduled_time == "") {
-              this.messagedatadetail.push(i+1 + "行めの予定時間に入力がありません。");
-              this.validate = false;
-            } else {
-              if (!timecountRE.test(this.demandDetails[i].scheduled_time)) {
-                this.messagedatadetail.push(i+1 + "行めの予定時間は整数部3桁小数部2桁以内で入力してください。");
-                this.validate = false;
-              }
-            }
-            if (this.demandDetails[i].demand_reason == "") {
-              this.messagedatadetail.push(i+1 + "行めの申請理由に入力がありません。");
-              this.validate = false;
-            } else {
-              if (this.demandDetails[i].demand_reason.length > this.maxdemandreasonLength) {
-                this.messagedatadetail.push(i+1 + "行めの申請理由は" + this.maxdemandreasonLength + "文字以内で入力してください。");
-                this.validate = false;
-              }
-            }
-          }
-        }
-      }
-      if (!this.valueselectedconfirm && !this.valueselectedconfirmfinal) {
-        this.messagedataconfirm.push("承認者または最終承認者は必ず入力してください。");
-        this.messagedataconfirmfinal.push("承認者または最終承認者は必ず入力してください。");
       }
 
       if (this.validate) {
@@ -691,89 +623,90 @@ export default {
 
       e.preventDefault();
     },
-    // 申請書類選択が変更された場合の処理
-    doccodeChange: function(value, name) {
-      this.array_demandresult = [];
-      this.array_demand = [];
-      this.array_demanddeatail = [];
-      this.demandDetails = [];
-      this.valueselecteddoccode = value;
-      this.valueselecteddocname = name;
-      this.getDo = 1;
-      // 申請一覧取得
-      if (this.valueselecteddoccode) {
-        this.getDemandList();
+    checkFormSendback: function(e) {
+      this.messageconfirmkbn = "warning";
+      this.validate = true;
+      this.messagedataClear();
+
+      if (!this.edit.sendbackreason) {
+        this.messageeditsendbackreason.push("差し戻し理由は必ず入力してください。");
+        this.validate = false;
       }
+      if (this.valueseq != '99') {
+        if (!this.valueselectedconfirm && !this.valueselectedconfirmfinal) {
+          this.messagedataconfirm.push("承認者または最終承認者は必ず入力してください。");
+          this.messagedataconfirmfinal.push("承認者または最終承認者は必ず入力してください。");
+          this.validate = false;
+        }
+      }
+
+      if (this.validate) {
+        return this.validate;
+      }
+
+      e.preventDefault();
+    },
+    // 承認状況選択が変更された場合の処理
+    situationChange: function(value) {
+      this.valueselectedsituation = value;
+    },
+    // 申請書類選択が変更された場合の処理
+    doccodeChange: function(value) {
+      this.valueselecteddoccode = value;
+      this.valuedisplayddoccode = value;
     },
     // 承認者選択が変更された場合の処理
     confirmChange: function(value) {
       this.valueselectedconfirm = value;
     },
     // 最終承認者選択が変更された場合の処理
-    confirmfinalChange: function(value, name) {
+    confirmfinalChange: function(value) {
       this.valueselectedconfirmfinal = value;
     },
-    // 新規作成ボタンがクリックされた場合の処理
-    makedemandclick: function(e) {
+    // 表示ボタンがクリックされた場合の処理
+    searchclick: function(e) {
+      this.messagedataClear();
+      this.getDemandList();
+    },
+    // 申請確認ボタンがクリックされた場合の処理
+    checkdemandclick: function(e) {
       this.messagedataClear();
       this.validate = this.checkForm(e);
       if (this.validate) {
-        this.demanditemClear();
-        this.displayphase = "make";
-        this.isdischargepush = false;
+        this.displayphase = "check";
+        this.issendbackpush = true;
       }
     },
-    // 編集ボタンがクリックされた場合の処理
-    editdemandclick: function(e) {
-      this.messagedataClear();
-      this.validate = this.checkForm(e);
-      if (this.validate) {
-        this.displayphase = "edit";
-        this.isdischargepush = true;
-      }
-    },
-    // 複写作成ボタンがクリックされた場合の処理
-    editcopyclick: function(e) {
-      this.messagedataClear();
-      if (this.selecttedrowindex < 0) {
-          this.messagedatascopy.push("複写する行が選択されていません。");
-      } else {
-        this.validate = this.checkForm(e);
-        if (this.validate) {
-          this.edit.demandno = "";
-          this.edit.demanddate = "";
-          this.edit.getperiodfrom = "";
-          this.edit.getperiodto = "";
-          this.displayphase = "copy";
-          this.isdischargepush = false;
-        }
-      }
-    },
-    // 申請ボタンがクリックされた場合の処理
-    dodemandclick: function(e) {
+    // 承認ボタンがクリックされた場合の処理
+    doapprovalclick: function(e) {
       this.checkFormDetail(e);
       if (this.validate) {
         this.alertstoreConf("info");
       }
     },
-    // 取り下げボタンがクリックされた場合の処理
-    dischargeclick: function(e) {
+    //差し戻しボタンがクリックされた場合の処理
+    sendbackclick: function(e) {
+      this.checkFormSendback(e);
       if (this.validate) {
-        this.alertdischargeConf("info");
+        this.alertsendbackConf("info");
       }
     },
     // 戻るボタンがクリックされた場合の処理
     backclick: function(e) {
       this.displayphase = "";
+      this.valuedisplayddoccode = "";
       this.demanditemClear();
-      this.doccodeChange(this.valueselecteddoccode, this.valueselecteddocname);
+      if (this.valueselecteddoccode.length > 0) {
+        this.doccodeChange(this.valueselecteddoccode);
+      }
     },
     // ラジオボタンがクリックされた場合の処理
     radiochange: function(index) {
+      this.valueselecteddocname = this.array_demandresult[index].array_demand[0].doc_code_name;
       // editセット
       this.selecttedrowindex = index;
       this.edit.demandno = this.array_demandresult[index].array_demand[0].no;
-      this.edit.demandno = this.array_demandresult[index].array_demand[0].no;
+      this.edit.demand_now = this.array_demandresult[index].array_demand[0].demand_now;
       this.dateFormat = moment(this.array_demandresult[index].array_demand[0].demand_date).format("YYYY-MM-DD");
       this.edit.demanddate = this.dateFormat;
       this.dateFormat = moment(this.array_demandresult[index].array_demand[0].date_from).format("YYYY-MM-DD");
@@ -782,7 +715,7 @@ export default {
       this.edit.getperiodto = this.dateFormat;
       this.edit.demandreason = this.array_demandresult[index].array_demand[0].demand_reason;
       this.edit.confirm = this.array_demandresult[index].array_demand[0].nmail_user_code;
-      this.valueselectedconfirm = this.edit.confirm;
+      this.valueselectedconfirm = "";
       this.edit.confirmfinal = "";
       // 明細
       for ( var i=0; i<this.array_demandresult[index].array_demandDeatail.length; i++ ) {
@@ -795,12 +728,18 @@ export default {
           demand_reason: this.array_demandresult[index].array_demandDeatail[i].detail_demand_reason
         });
       }
+      this.valuedisplayddoccode = this.array_demandresult[index].array_demand[0].doc_code;
+      this.valueseq = this.array_demandresult[index].array_demand[0].seq;
     },
     // 申請一覧取得
     getDemandList() {
+      this.array_demandresult = [];
+      this.array_demand = [];
+      this.array_demanddetail = [];
       this.$axios
-        .get("/demand/list_demand", {
+        .get("/approval/list_approval", {
           params: {
+            situation: this.valueselectedsituation,
             doccode: this.valueselecteddoccode,
             usercode: "",
             getdo: 1
@@ -808,6 +747,7 @@ export default {
         })
         .then(response => {
           this.resresults = response.data;
+          console.log("getDemandList response ")
           if (this.resresults.array_demandresult != null) {
             this.array_demandresult = this.resresults.array_demandresult;
           }
@@ -824,6 +764,7 @@ export default {
             this.iseditcopypush = true;
             this.iseditdemandpush = true;
           }
+          console.log("getDemandList get ")
           if (this.resresults.messagedata != null) {
             this.messagedatasserver = this.resresults.messagedata;
           }
@@ -837,20 +778,10 @@ export default {
         'has-error': (this.validation[key] == false)
       }
     },
-    appendRow: function() {
-      this.demandDetails.push({
-        id: "",
-        working_item: "",
-        time_from_name: "",
-        time_to_name: "",
-        scheduled_time: "",
-        demand_reason: ""
-      });
-    },
     alertstoreConf: function(state) {
       this.$swal({
         title: "確認",
-        text: "この内容で申請しますか？",
+        text: "この内容で承認しますか？",
         icon: state,
         buttons: true,
         dangerMode: true
@@ -860,78 +791,61 @@ export default {
         }
       });
     },
-    alertdischargeConf: function(state) {
+    alertsendbackConf: function(state) {
       this.$swal({
         title: "確認",
-        text: "申請を取り下げしますか？",
+        text: "申請を差し戻ししますか？",
         icon: state,
         buttons: true,
         dangerMode: true
       }).then(willDelete => {
         if (willDelete) {
-          this.store("discharge");
+          this.store("sendback");
         }
       });
-    },
-    alertDelConf: function(state, id, index) {
-      if (this.isRowInput(index)) {
-        this.$swal({
-          title: "確認",
-          text: "削除しますか？",
-          icon: state,
-          buttons: true,
-          dangerMode: true
-        }).then(willDelete => {
-          if (willDelete) {
-            this.demandDetails.splice(index, 1);
-          }
-        });
-      } else {
-        this.demandDetails.splice(index, 1);
-      }
     },
     alert: function(state, message, title) {
       this.$swal(title, message, state);
     },
-    // 申請処理
+    // 承認処理
     store: function(kbn) {
       this.edit.confirm = this.valueselectedconfirm;
       this.edit.confirmfinal = this.valueselectedconfirmfinal;
       this.$axios
-        .post("/demand/make_demand", {
-          doccode: this.valueselecteddoccode,
+        .post("/approval/make_approval", {
+          doccode: this.valuedisplayddoccode,
           demandedit: this.edit,
-          demanddetail: this.demandDetails,
           kbn: kbn
         })
         .then(response => {
           this.resresults = response.data;
           this.store_result = this.resresults.result;
-          this.msg = "";
+          this.msg = '';
           if (kbn == "store") {
-            this.msg = "申請";
-          } else if(kbn == "discharge") {
-            this.msg = "申請取り下げ";
+            this.msg = "承認";
+          } else if(kbn == "sendback") {
+            this.msg = "申請差し戻し";
           }
           if (this.store_result == true) {
             this.department_name = this.resresults.department_name;
             this.user_name = this.resresults.user_name;
             this.toaddress = this.resresults.toaddress;
             this.array_ccaddress = this.resresults.ccaddress;
-            this.alert("success", this.msg + "しました", "申請完了");
+            this.alert("success", this.msg + "しました", "承認完了");
             this.isdischargepush = true;
-            this.demandMailSend();
+            // 申請者あて
+            this.approvalMailSend(kbn);
+            console.log('end');
           } else {
             this.alert("error", this.msg + "に失敗しました", "エラー");
           }
-          this.edit.demandno = this.resresults.demandno;
           if (this.resresults.messagedata != null) {
             this.messagedatasserver = this.resresults.messagedata;
           }
           this.$forceUpdate();
         })
         .catch(reason => {
-          this.alert("error", "申請に失敗しました", "エラー");
+          this.alert("error", "承認に失敗しました", "エラー");
         });
     },
     // クリアメソッド
@@ -939,12 +853,16 @@ export default {
     },
     // 申請項目クリアメソッド
     demanditemClear: function() {
+      this.selecttedrowindex = -1;
       this.demandDetails = [];
       this.edit.demandno = "";
+      this.edit.demand_now = "";
       this.edit.demanddate = "";
       this.edit.getperiodfrom = "";
       this.edit.getperiodto = "";
       this.edit.demandreason = "";
+      this.edit.sendbackreason = "";
+      this.edit.checkreason = "";
       this.edit.confirm = "";
       this.edit.confirmfinal = "";
     },
@@ -953,7 +871,7 @@ export default {
       this.messageeditdemanddate = [];
       this.messageeditgetperiodfrom = [];
       this.messageeditgetperiodto = [];
-      this.messageeditdemandreason = [];
+      this.messageeditsendbackreason = [];
       this.messagedatadetail = [];
       this.messagedataconfirm = [];
       this.messagedataconfirmfinal = [];
@@ -961,65 +879,55 @@ export default {
       this.messagedatadoccode = [];
       this.messagedatascopy = [];
     },
-    // 申請明細で入力されているか
-    isRowInput: function(index) {
-      if (this.demandDetails[index].working_item != "" ||
-        this.demandDetails[index].time_from_name != "" ||
-        this.demandDetails[index].time_to_name != "" ||
-        this.demandDetails[index].scheduled_time != "" ||
-        this.demandDetails[index].demand_reason != "") {
-        return true;
-      }
-      return false;
-    },
-    // 申請メール
-    demandMailSend: function(index) {
+    approvalMailSend: function(kbn) {
       var address, ccAddress, subject, body, hiddenData;
       var sendmail = document.getElementById('mail');
       subject = '件名：';
-      if (this.valueselecteddoccode == 1){
+      if (this.valuedisplayddoccode == 1){
         subject += '残業申請';
-      } else if (this.valueselecteddoccode == 2){
+      } else if (this.valuedisplayddoccode == 2){
         subject += '休日出勤申請';
-      } else if (this.valueselecteddoccode == 3){
+      } else if (this.valuedisplayddoccode == 3){
         subject += '休日振替申請';
-      } else if (this.valueselecteddoccode == 4){
+      } else if (this.valuedisplayddoccode == 4){
         subject += '代休申請';
-      } else if (this.valueselecteddoccode == 5){
+      } else if (this.valuedisplayddoccode == 5){
         subject += 'シフト変更申請';
-      } else if (this.valueselecteddoccode == 6){
+      } else if (this.valuedisplayddoccode == 6){
         subject += '有給休暇申請';
-      } else if (this.valueselecteddoccode == 7){
+      } else if (this.valuedisplayddoccode == 7){
         subject += '遅刻申請';
-      } else if (this.valueselecteddoccode == 8){
+      } else if (this.valuedisplayddoccode == 8){
         subject += '早退申請';
-      } else if (this.valueselecteddoccode == 9){
+      } else if (this.valuedisplayddoccode == 9){
         subject += '外出申請書';
-      } else if (this.valueselecteddoccode == 10){
+      } else if (this.valuedisplayddoccode == 10){
         subject += '欠勤申請';
       }
-      subject += '承認依頼';
-      body = '以下の申請の承認を依頼します。';
+      subject += '承認';
+      body = '';
+      if (kbn == "store") {
+        body += "依頼のあった以下の申請を承認しました。";
+        body += '%0D%0A' + "次の承認者に承認を依頼します。";
+      } else if(kbn == "sendback") {
+        body += "依頼のあった以下の申請を差し戻ししました。";
+      }
       body += '%0D%0A' + '%0D%0A' + '申請番号：' + this.edit.demandno;
       this.dateFormat = moment(this.edit.demanddate).format("YYYY年MM月DD日");
       body += '%0D%0A' + '申請日：' + this.dateFormat;
-      body += '%0D%0A' + '申請者：（部署）' + this.department_name + '（氏名）' + this.user_name;
-      console.log("demandMailSend 3");
+      body += '%0D%0A' + '承認者：（部署）' + this.department_name + '（氏名）' + this.user_name;
+      body += '%0D%0A' + '承認日：' + this.dateFormat;
       address = this.toaddress;
       ccAddress = "";
-      console.log("this.array_ccaddress = " + this.array_ccaddress.length);
       for ( var i=0; i<this.array_ccaddress.length; i++ ) {
-        console.log("this.array_ccaddress = " + this.array_ccaddress[i]);
         if (ccAddress.length == 0) {
           ccAddress += this.array_ccaddress[i];
         } else {
           ccAddress += "," + this.array_ccaddress[i];
         }
       }
-      console.log("demandMailSend 4");
 
       location.href = 'mailto:' + address + '?cc=' + ccAddress + '&subject=' + subject + '&body=' + body;
-      console.log("demandMailSend end");
     }
   }
 };

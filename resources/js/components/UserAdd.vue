@@ -508,15 +508,11 @@
                                     </select>
                                   </div>
                                 </td>
-                                <td class="text-center align-middle">
-                                  <div class="btn-group">
-                                    <button
-                                      type="button"
-                                      class="btn btn-danger btn-lg font-size-rg"
-                                      @click="alertDelConf('info',item.id,index)"
-                                    >削除</button>
-                                  </div>
-                                </td>
+                                <rowbtn-work-time
+                                  v-on:rowdelclick-event="alertDelConf('info',item.id,index)"
+                                  v-bind:btn-mode="'rowdel'"
+                                  v-bind:is-push="false">
+                                </rowbtn-work-time>
                               </tr>
                             </tbody>
                           </table>

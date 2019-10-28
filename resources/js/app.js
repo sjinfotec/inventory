@@ -246,8 +246,23 @@ Vue.component(
 );
 
 Vue.component(
+    "make-approval",
+    require("./components/MakeApproval.vue").default
+);
+
+Vue.component(
     "select-demandno",
     require("./components/SelectDemandNo.vue").default
+);
+
+Vue.component(
+    "select-comfirm",
+    require("./components/SelectConfirm.vue").default
+);
+
+Vue.component(
+    "rowbtn-work-time",
+    require("./components/RowBtnWorkTime.vue").default
 );
 
 /**

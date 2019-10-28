@@ -1,6 +1,7 @@
 <template>
   <select class="form-control" v-model="selectedvalue" v-on:change="selChanges(selectedvalue)">
-    <option selected v-if="this.blankData" value="" disabled selected>＜{{ placeholderData }}＞</option>
+    <!--< option selected v-if="this.blankData" value="" disabled selected>＜{{ placeholderData }}＞</option> -->
+    <option selected v-if="this.blankData" value="">＜{{ placeholderData }}＞</option>
     <option v-for="(generallists, index) in generalList" v-bind:value="generallists.code">
       {{ generallists.code_name }}
     </option>
@@ -22,6 +23,10 @@ export default {
     blankData: {
         type: Boolean,
         default: false
+    },
+    selectedValue: {
+        type: String,
+        default: ''
     }
   },
   data() {
@@ -33,6 +38,7 @@ export default {
   },
   // マウント時
   mounted() {
+    this.selectedvalue = this.selectedValue;
     this.getGeneralList();
   },
   methods: {

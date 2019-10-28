@@ -35,9 +35,11 @@
                             </h3>
                             <ul class="collapse show list-unstyled" id="collapseAggregate">
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/demand') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">各種申請作成</a></li>
-                                @can('admin-higher')
-                                <li><a class="px-3 py-1 text-white d-block" href="{{ url('/demand') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">各種申請承認</a></li>
-                                    <li><a class="px-3 py-1 text-white d-block" href="{{ url('/confirm') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">承認者ルート設定</a></li>
+                                @can('admin-midle')
+                                    <li><a class="px-3 py-1 text-white d-block" href="{{ url('/approval') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">各種申請承認</a></li>
+                                    @can('admin-higher')
+                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/confirm') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">承認者ルート設定</a></li>
+                                    @endcan
                                 @endcan
                             </ul>
                             <h3 class="side-head p-3 font-size-rg">

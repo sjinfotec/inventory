@@ -195,7 +195,8 @@ return [
         'manthly_alert_warning_5' => 5,
         'manthly_alert_warning_6' => 80,
         'manthly_alert_warning_7' => 72,
-        'manthly_alert_warning_8' => 648
+        'manthly_alert_warning_8' => 648,
+        'manthly_alert_warning_9' => 45
     ],
  
     'C025' => [
@@ -216,6 +217,20 @@ return [
         'earlyleave_demand' => 8,
         'goingout_demand' => 9,
         'absence_demand' => 10
+    ],
+ 
+    'C026_NAME' => [
+        'value' => 'C026_NAME',
+        'overtime_demand' => "残業申請",
+        'holidaywork_demand' => "休日出勤申請",
+        'holidaytransfer_demand' => "休日振替申請",
+        'submission_demand' => "代休申請",
+        'shiftchange_demand' => "シフト変更申請",
+        'paidholiday_demand' => "有給休暇申請",
+        'late_demand' => "遅刻申請",
+        'earlyleave_demand' => "早退申請",
+        'goingout_demand' => "外出申請書",
+        'absence_demand' => "欠勤申請"
     ],
  
     'C027' => [
@@ -245,6 +260,12 @@ return [
         'value' => 'C030',
         'already' => 1,
         'notyet' => 2
+    ],
+ 
+    'C031' => [
+        'value' => 'C031',
+        'approval_requesting' => 1,
+        'approvaled' => 2
     ],
  
     'C999' => [
@@ -308,6 +329,12 @@ return [
     'CONFIRM_SEQ' => [
         'not_final_confirm' => '0',
         'final_confirm' => '99'
+    ],
+
+    'DEMAND_KBN' => [
+        'store' => 'store',
+        'discharge' => 'discharge',
+        'sendback' => 'sendback'
     ],
 
 
@@ -375,18 +402,18 @@ return [
     ],
  
     'ALERT_MONTHLY_ITEM' => [
-        'items_1' => '45H/M',
-        'items_2' => '81H/2M',
-        'items_3' => '120H/3M',
-        'items_4' => '360H/Y',
-        'items_5' => '45H/6M',
-        'items_6' => '100H/M',
-        'items_7' => 'A80H/2M',
-        'items_8' => 'A80H/3M',
-        'items_9' => 'A80H/4M',
-        'items_10' => 'A80H/5M',
-        'items_11' => 'A80H/6M',
-        'items_12' => '720H/Y'
+        'items_1' => '<月45時間>',
+        'items_2' => '<2か月81時間>',
+        'items_3' => '<3か月120時間>',
+        'items_4' => '<年360時間>',
+        'items_5' => '<45時間超えた月数が6まで>',
+        'items_6' => '<月100時間未満>',
+        'items_7' => '<2か月平均80時間>',
+        'items_8' => '<3か月平均80時間>',
+        'items_9' => '<4か月平均80時間>',
+        'items_10' => '<5か月平均80時間>',
+        'items_11' => '<6か月平均80時間>',
+        'items_12' => '<年720時間>'
     ],
  
     'ALERT_INFO_RESULT' => [
@@ -428,7 +455,11 @@ return [
         'data_accesee_eror_dailycalc' => '労働時間計算処理にてデータアクセスエラーのため計算できませんでした。',
         'data_accesee_eror' => 'データアクセスエラーのため取得できませんでした。',
         'data_insert_error' => '登録処理に失敗しました。',
-        'mismatch_data' => 'データ不整合'
+        'mismatch_data' => 'データ不整合',
+        'rounding_not_demand' => '承認回覧中のため、申請できません。',
+        'making_or_final' => '取り下げまたは最終承認済みのため、承認できません。',
+        'alreadymaking_or_final' => 'すでに取り下げているかまたは最終承認済みのため、取り下げできません。',
+        'mail_send_eror' => 'メール送信異常のため送信できませんでした。'
     ],
 
     'LOG_MSG' => [
@@ -440,7 +471,9 @@ return [
         'data_exists_erorr' => 'データexistsエラー table = [{0}]',
         'mismatch_data' => 'データ不整合',
         'not_set_time_rounding ' => '時間の端数処理が設定されていない',
-        'not_setting_timetable' => '期間内に該当する勤務時間がないかまたはタイムテーブルが設定されていません。',
+        'not_setting_timetable' => '期間内に該当する勤務時間がないかまたはタイムテーブルが設定されていない。',
+        'non_approval_demandno' => '承認する申請番号なし。',
+        'non_approval_demanddate' => '承認する申請日なし。'
     ]
 
 ];
