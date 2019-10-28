@@ -14,6 +14,7 @@ use App\WorkingTimeTable;
 use App\Calendar;
 use App\Setting;
 use App\Demand;
+use App\Confirm;
 
 
 
@@ -21,6 +22,7 @@ class ApiCommonController extends Controller
 {
 
     protected $table_generalcodes = 'generalcodes';
+    protected $table_confirms = 'confirms';
 
     /**
      * ユーザーリスト取得
@@ -30,9 +32,6 @@ class ApiCommonController extends Controller
      */
     public function getUserList(Request $request){
 
-        Log::DEBUG(' --------- getUserList iin ----------- $request->targetdate = '.$request->targetdate);
-        Log::DEBUG(' --------- getUserList iin ----------- $$request->code = '.$request->code);
-        Log::DEBUG(' --------- getUserList iin ----------- $request->employment = '.$request->employment);
         // パラメータチェック
         if (isset($request->getdo)) {
             $getdo = $request->getdo;
@@ -292,6 +291,84 @@ class ApiCommonController extends Controller
         return $usermanagement;
     }
         
+    /** ユーザー部署取得
+     *
+     * @return list departments
+     */
+    public function getUserDepartment($user_id, $target_date){
+        $dt = null;
+        if (isset($target_date)) {
+            $dt = new Carbon($target_date);
+        } else {
+            $dt = new Carbon();
+        }
+        $target_date = $dt->format('Ymd');
+        // usersの最大適用開始日付subquery
+        $subquery3 = $this->getUserApplyTermSubquery($target_date);
+        // departmentsの最大適用開始日付subquery
+        $subquery4 = $this->getDepartmentApplyTermSubquery($target_date);
+        \DB::enableQueryLog();
+        $mainquery = DB::table('users')
+            ->select(
+                'users.code as code',
+                'users.name as name',
+                'users.department_code as department_code',
+                't2.name as department_name')
+            ->JoinSub($subquery3, 't1', function ($join) { 
+                $join->on('t1.code', '=', 'users.code');
+                $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+            })
+            ->JoinSub($subquery4, 't2', function ($join) { 
+                $join->on('t2.code', '=', 'users.department_code');
+            })
+            ->where('users.code', $user_id)
+            ->where('users.is_deleted', 0)
+            ->get();
+
+        \Log::debug(
+            'sql_debug_log',
+            [
+                'getUserDepartment' => \DB::getQueryLog()
+            ]
+            );
+    
+        return $mainquery;
+    }
+        
+    /** ユーザーメールアドレス取得
+     *
+     * @return list departments
+     */
+    public function getUserMailAddress($user_id, $target_date){
+        // ユーザの権限取得
+        $dt = null;
+        if (isset($target_date)) {
+            $dt = new Carbon($target_date);
+        } else {
+            $dt = new Carbon();
+        }
+        $target_date = $dt->format('Ymd');
+        $subquery1 = DB::table('users')
+            ->selectRaw('code as code')
+            ->selectRaw('department_code as department_code')
+            ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+            ->where('apply_term_from', '<=',$target_date)
+            ->where('is_deleted', '=', 0)
+            ->groupBy('code', 'department_code');
+        $useremail = DB::table('users')
+            ->JoinSub($subquery1, 't1', function ($join) { 
+                $join->on('t1.code', '=', 'users.code');
+                $join->on('t1.department_code', '=', 'users.department_code');
+                $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+            })
+            ->where('users.code', $user_id)
+            ->where('users.is_deleted', 0)
+            ->value('users.email');
+        if(!isset($useremail)) { return null; }
+
+        return $useremail;
+    }
+        
     /** ユーザー適用期間開始サブクエリー作成
      *
      * @return string サブクエリー
@@ -446,6 +523,44 @@ class ApiCommonController extends Controller
      */
     public function getGeneralList($identification_id){
         $codeList = DB::table($this->table_generalcodes)->where('identification_id', $identification_id)->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+        return $codeList;
+    }
+
+    /**
+     * 承認者リスト取得
+     *
+     * @return list
+     */
+    public function getConfirmlList(Request $request){
+        // パラメータチェック
+        if (isset($request->getdo)) {
+            $getdo = $request->getdo;
+        } else {
+            $getdo = 1;
+        }
+        if ($getdo != 1) { return null; }
+
+        $dt = null;
+        if (isset($targetdate)) {
+            $dt = new Carbon($targetdate);
+        } else {
+            $dt = new Carbon();
+        }
+        $target_date = $dt->format('Ymd');
+        if (isset($request->orFinal)) {
+            $orFinal = $request->orFinal;
+        } else {
+            $orFinal = "";
+        }
+        if (isset($request->mainorsub)) {
+            $mainorsub = $request->mainorsub;
+        } else {
+            $mainorsub = "";
+        }
+        $confirm_model = new Confirm();
+        $confirm_model->setParamSeqAttribute($orFinal);
+        $confirm_model->setParamMainsubAttribute($mainorsub);
+        $codeList = $confirm_model->selectConfirmList($target_date);
         return $codeList;
     }
 

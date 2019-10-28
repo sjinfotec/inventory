@@ -59,14 +59,26 @@
         <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-restore-w.svg" alt="">申請を編集する</button> -->
         申請を編集する</button>
     </div>
+    <div v-if="btnMode === 'checkdemand'" class="btn-group d-flex" v-on:click="checkdemandclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+        申請を確認する</button>
+    </div>
     <div v-if="btnMode === 'dodemand'" class="btn-group d-flex" v-on:click="dodemandclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
         この内容で申請する</button>
+    </div>
+    <div v-if="btnMode === 'doapproval'" class="btn-group d-flex" v-on:click="doapprovalclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+        この申請を承認する</button>
     </div>
 
     <div v-if="btnMode === 'discharge'" class="btn-group d-flex" v-on:click="dischargeclickBtn()">
       <button type="button" class="btn btn-warning btn-lg font-size-rg w-100" :disabled="isPush">
         申請を取り下げる</button>
+    </div>
+    <div v-if="btnMode === 'sendback'" class="btn-group d-flex" v-on:click="sendbackclickBtn()">
+      <button type="button" class="btn btn-warning btn-lg font-size-rg w-100" :disabled="isPush">
+        申請を差し戻し</button>
     </div>
     <div v-if="btnMode === 'back'" class="btn-group d-flex" v-on:click="backclickBtn()">
       <button type="button" class="btn btn-outline-warning btn-lg font-size-rg w-100" :disabled="isPush">
@@ -119,17 +131,26 @@ export default {
     editdemandclickBtn : function() {
       this.$emit('editdemandclick-event',event);
     },
+    checkdemandclickBtn : function() {
+      this.$emit('checkdemandclick-event',event);
+    },
     editcopyclickBtn : function() {
       this.$emit('editcopyclick-event',event);
     },
     dodemandclickBtn : function() {
       this.$emit('dodemandclick-event',event);
     },
+    doapprovalclickBtn : function() {
+      this.$emit('doapprovalclick-event',event);
+    },
     editfixclickBtn : function() {
       this.$emit('editfixclick-event',event);
     },
     dischargeclickBtn : function() {
       this.$emit('dischargeclick-event',event);
+    },
+    sendbackclickBtn : function() {
+      this.$emit('sendbackclick-event',event);
     },
     backclickBtn : function() {
       this.$emit('backclick-event',event);

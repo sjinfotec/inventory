@@ -223,11 +223,11 @@ class MonthlyWorkingAlertController extends Controller
             $month_45_total_cnt = 0;
             for ($i=0;$i<=$this_month_index;$i++) {
                 $w_total = $this->getTotalItemData($monthly_alert, $i);
-                if ($w_total > Config::get('const.C023.manthly_alert_warning_1')) {
+                if ($w_total > Config::get('const.C023.manthly_alert_warning_9')) {
                     $month_45_total_cnt++;
                 }
             }
-            Log::debug('5時間超えた月が合計6か月 total = '.$month_45_total_cnt);
+            Log::debug('45時間超えた月が合計6か月 total = '.$month_45_total_cnt);
             $month_alert_45_total_cnt_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
             if ($month_45_total_cnt > Config::get('const.C021.manthly_alert_error_5')) {
                 $month_alert_45_total_cnt_chk = Config::get('const.ALERT_INFO_RESULT.NG');
@@ -513,11 +513,19 @@ class MonthlyWorkingAlertController extends Controller
         $diff_time = $basic_time - $target_time;
         if ($target_time > $basic_time) {
             $diff_time = $target_time - $basic_time;
-            return array('基準値を', number_format($diff_time, 2, '.', '').'時間', 'オーバー');
+            if ($basic_time != Config::get('const.C021.manthly_alert_error_5')) {
+                return array('基準値を', number_format($diff_time, 2, '.', '').'時間', 'オーバー');
+            } else {
+                return array('基準値を', number_format($diff_time, 0, '.', '').'ヶ月', 'オーバー');
+            }
         } elseif ($target_time == $basic_time) {
             return array('基準値到達');
         } else {
-            return array('基準値', '到達まで', number_format($diff_time, 2, '.', '').'時間');
+            if ($basic_time != Config::get('const.C021.manthly_alert_error_5')) {
+                return array('基準値', '到達まで', number_format($diff_time, 2, '.', '').'時間');
+            } else {
+                return array('基準値', '到達まで', number_format($diff_time, 0, '.', '').'ヶ月');
+            }
         }
     }
 
