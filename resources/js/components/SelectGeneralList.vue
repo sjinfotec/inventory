@@ -25,13 +25,13 @@ export default {
         default: false
     },
     selectedValue: {
-        type: String,
+        type: Number,
         default: ''
     }
   },
   data() {
     return {
-      selectedvalue: '',
+      selectedvalue: 0,
       selectedname: '',
       generalList: []
     };

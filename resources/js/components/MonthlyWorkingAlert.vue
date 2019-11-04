@@ -40,6 +40,7 @@
                     v-bind:identification-id="'C022'"
                     v-bind:placeholder-data="'検索区分を選択してください'"
                     v-bind:blank-data="false"
+                    v-bind:selected-value="valuedisplay"
                     v-on:change-event="displayChange"
                   ></general-list>
                 </div>
@@ -153,14 +154,9 @@
               <!-- col -->
               <div class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">
                 <a
-                  class="float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg print-none"
-                  data-toggle="collapse"
-                  v-bind:href="'#collapseUser' + index"
-                  role="button"
-                  aria-expanded="true"
-                  v-bind:aria-controls="'collapseUser' + index"
+                  class="float-left mr-2 px-2 py-2 font-size-rg btn-lg print-none"
                 >
-                  <img class="icon-size-rg" src="/images/round-search-w.svg" alt />
+                  <img class="icon-size-rg"/>
                 </a>
                 <h1 class="font-size-sm m-0 mb-1">氏名</h1>
                 <p class="font-size-rg font-weight-bold m-0">{{ timeitem.user_name }}</p>
@@ -195,7 +191,7 @@ export default {
       placeholderdata: "",
       company_name: "",
       valueym: "",
-      valuedisplay: "",
+      valuedisplay: 0,
       valuedepartment: "",
       valueemploymentstatus: "",
       getDo: 1,
@@ -240,6 +236,9 @@ export default {
         this.validate = false;
       }
       if (!this.valuedisplay) {
+        this.messagedatadisplay.push("表示区分は必ず入力してください。");
+        this.validate = false;
+      } else if (this.valuedisplay == 0) {
         this.messagedatadisplay.push("表示区分は必ず入力してください。");
         this.validate = false;
       }
@@ -418,7 +417,7 @@ export default {
       if (this.valueym == null || this.valueym == "") {
         this.stringtext = "";
       } else {
-        if (this.valuedisplay == null || this.valuedisplay == "") {
+        if (this.valuedisplay == null || this.valuedisplay == "" || this.valuedisplay == 0) {
           this.stringtext = "";
         } else {
           this.valuefromdate = this.valueym;
@@ -433,16 +432,16 @@ export default {
             this.valuefromdate = moment().format("YYYYMMDD");
           }
           this.datejaFormat = moment(this.valuefromdate).format("YYYY年MM月");
-          if (this.valuedisplay == "1") {
+          if (this.valuedisplay == 1) {
             this.stringtext = this.datejaFormat + "のアラートを締日集計で検索";
           } else {
-            if (this.valuedisplay == "2") {
+            if (this.valuedisplay == 2) {
               this.stringtext = this.datejaFormat + "のアラートを月初集計で検索";
             } else {
-              if (this.valuedisplay == "3") {
+              if (this.valuedisplay == 3) {
                 this.stringtext = this.datejaFormat + "のアラートを締日集計で検索";
               } else {
-                if (this.valuedisplay == "4") {
+                if (this.valuedisplay == 4) {
                   this.stringtext = this.datejaFormat + "のアラートを月初集計で検索";
                 } else {
                   this.stringtext = "";

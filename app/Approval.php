@@ -323,174 +323,211 @@ class Approval extends Model
      * @return void
      */
     public function getDemandList($targetdate, $situation){
-        \DB::enableQueryLog();
 
-        // 適用期間日付の取得
-        $apicommon = new ApiCommonController();
-        // usersの最大適用開始日付subquery
-        $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate);
-        // departmentsの最大適用開始日付subquery
-        $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
+        try {
+            \DB::enableQueryLog();
+            // 適用期間日付の取得
+            $apicommon = new ApiCommonController();
+            // usersの最大適用開始日付subquery
+            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate);
+            // departmentsの最大適用開始日付subquery
+            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
 
-        $subquery5 = DB::table($this->table)
-            ->select(
-                $this->table.'.no',
-                $this->table.'.doc_code',
-                $this->table.'.department_code',
-                $this->table.'.user_code');
-        $subquery5
-            ->selectRaw('MAX('.$this->table.'.log_no) as log_no')
-            ->where($this->table.'.user_code', '=', $this->param_user_code)
-            ->where($this->table.'.status', '<', Config::get('const.C028.unknown'))
-            ->groupBy($this->table.'.no', $this->table.'.doc_code', $this->table.'.department_code', $this->table.'.user_code');
+            $subquery5 = DB::table($this->table)
+                ->select(
+                    $this->table.'.no',
+                    $this->table.'.doc_code',
+                    $this->table.'.seq',
+                    $this->table.'.department_code',
+                    $this->table.'.user_code');
+            $subquery5
+                ->selectRaw('MAX('.$this->table.'.log_no) as log_no')
+                ->where($this->table.'.user_code', '=', $this->param_user_code)
+                ->groupBy($this->table.'.no',
+                    $this->table.'.doc_code',
+                    $this->table.'.seq',
+                    $this->table.'.department_code',
+                    $this->table.'.user_code');
 
-        $subquery6 = DB::table($this->table_demands)
-            ->select(
-                $this->table_demands.'.no',
-                $this->table_demands.'.doc_code',
-                $this->table_demands.'.department_code',
-                $this->table_demands.'.user_code');
-        $subquery6
-            ->selectRaw('MAX('.$this->table_demands.'.log_no) as log_no')
-            ->where($this->table_demands.'.status', '<', Config::get('const.C028.unknown'))
-            ->groupBy($this->table_demands.'.no', $this->table_demands.'.doc_code', $this->table_demands.'.department_code', $this->table_demands.'.user_code');
+            $subquery6 = DB::table($this->table_demands)
+                ->select(
+                    $this->table_demands.'.no',
+                    $this->table_demands.'.doc_code',
+                    $this->table_demands.'.nmail_department_code',
+                    $this->table_demands.'.nmail_user_code',
+                    $this->table_demands.'.nmail_seq');
+            $subquery6
+                ->selectRaw('MAX('.$this->table_demands.'.log_no) as log_no')
+                ->where($this->table_demands.'.nmail_user_code', '=', $this->param_user_code)
+                ->groupBy($this->table_demands.'.no',
+                    $this->table_demands.'.doc_code',
+                    $this->table_demands.'.nmail_department_code',
+                    $this->table_demands.'.nmail_user_code',
+                    $this->table_demands.'.nmail_seq');
 
-        // mainqueryにsunqueryを組み込む
-        $mainquery = DB::table($this->table_users.' AS t1')
-            ->select(
-                't6.id as id',
-                't1.department_code as department_code',
-                't3.name as department_name',
-                't1.code as user_code',
-                't1.name as user_name',
-                't6.no',
-                't6.doc_code',
-                't9.code_name as doc_code_name',
-                't6.log_no',
-                't6.seq',
-                't6.status',
-                't12.code_name as status_name',
-                't8.demand_date',
-                't8.date_from',
-                't8.date_to'
-                );
-        $mainquery
-            ->selectRaw("DATE_FORMAT(t8.demand_date,'%Y年%m月%d日') as demand_date_name")
-            ->selectRaw("DATE_FORMAT(t8.date_from,'%Y年%m月%d日') as date_from_name")
-            ->selectRaw("DATE_FORMAT(t8.date_to,'%Y年%m月%d日') as date_to_name");
-        $mainquery
-            ->addselect('t8.demand_reason')
-            ->addselect('t8.before_after')
-            ->addselect('t10.code_name as before_after_name')
-            ->addselect('t6.mail_result')
-            ->addselect('t11.code_name as mail_result_name')
-            ->addselect('t6.mail_address')
-            ->addselect('t6.nmail_department_code')
-            ->addselect('t13.name as nmail_department_name')
-            ->addselect('t6.nmail_user_code')
-            ->addselect('t15.name as nmail_user_name')
-            ->addselect('t16.row_no as detail_row_no')
-            ->addselect('t16.working_item as detail_working_item')
-            ->addselect('t16.date_from as detail_date_from')
-            ->addselect('t16.time_from as detail_time_from')
-            ->addselect('t16.date_to as detail_date_to')
-            ->addselect('t16.time_to as detail_time_to')
-            ->addselect('t16.scheduled_time as detail_scheduled_time')
-            ->addselect('t16.demand_reason as detail_demand_reason');
-        $mainquery
-            ->JoinSub($subquery4, 't3', function ($join) { 
-                $join->on('t3.code', '=', 't1.department_code');
-            })
-            ->JoinSub($subquery3, 't4', function ($join) { 
-                $join->on('t4.code', '=', 't1.code');
-                $join->on('t4.max_apply_term_from', '=', 't1.apply_term_from');
-            })
-            ->JoinSub($subquery5, 't5', function ($join) { 
-                $join->on('t5.department_code', '=', 't1.department_code');
-                $join->on('t5.user_code', '=', 't1.code');
-            })
-            ->Join($this->table.' as t6', function ($join) { 
-                $join->on('t6.no', '=', 't5.no');
-                $join->on('t6.log_no', '=', 't5.log_no')
-                ->where('t6.is_deleted', '=', 0);
-            })
-            ->JoinSub($subquery6, 't7', function ($join) { 
-                $join->on('t7.no', '=', 't6.no');
-            })
-            ->Join($this->table_demands.' as t8', function ($join) { 
-                $join->on('t8.no', '=', 't7.no');
-                $join->on('t8.log_no', '=', 't7.log_no')
-                ->where('t8.is_deleted', '=', 0);
-            })
-            ->leftJoin($this->table_generalcodes.' as t9', function ($join) { 
-                $join->on('t9.code', '=', 't6.doc_code')
-                ->where('t9.identification_id', '=', Config::get('const.C026.value'))
-                ->where('t9.is_deleted', '=', 0);
-            })
-            ->leftJoin($this->table_generalcodes.' as t10', function ($join) { 
-                $join->on('t10.code', '=', 't8.before_after')
-                ->where('t10.identification_id', '=', Config::get('const.C029.value'))
-                ->where('t10.is_deleted', '=', 0);
-            })
-            ->leftJoin($this->table_generalcodes.' as t11', function ($join) { 
-                $join->on('t11.code', '=', 't6.mail_result')
-                ->where('t11.identification_id', '=', Config::get('const.C030.value'))
-                ->where('t11.is_deleted', '=', 0);
-            })
-            ->leftJoin($this->table_generalcodes.' as t12', function ($join) { 
-                $join->on('t12.code', '=', 't6.status')
-                ->where('t12.identification_id', '=', Config::get('const.C028.value'))
-                ->where('t12.is_deleted', '=', 0);
-            })
-            ->JoinSub($subquery4, 't13', function ($join) { 
-                $join->on('t13.code', '=', 't8.nmail_department_code');
-            })
-            ->JoinSub($subquery3, 't14', function ($join) { 
-                $join->on('t14.code', '=', 't8.nmail_user_code');
-            })
-            ->Join($this->table_users.' as t15', function ($join) { 
-                $join->on('t15.code', '=', 't8.nmail_user_code');
-                $join->on('t15.apply_term_from', '=', 't14.max_apply_term_from')
-                ->where('t15.is_deleted', '=', 0);
-            })
-            ->leftJoin($this->table_demand_details.' as t16', function ($join) { 
-                $join->on('t16.no', '=', 't8.no');
-                $join->on('t16.log_no', '=', 't8.log_no')
-                ->where('t16.is_deleted', '=', 0);
-            });
-        $mainquery
-            ->where('t1.code', '=', $this->param_user_code);
-    
-        if (isset($this->param_doc_code)) {
+            // mainqueryにsunqueryを組み込む
+            $mainquery = DB::table($this->table_users.' AS t1')
+                ->select(
+                    't6.id as id',
+                    't1.department_code as department_code',
+                    't3.name as department_name',
+                    't1.code as user_code',
+                    't1.name as user_name',
+                    't6.no',
+                    't6.doc_code',
+                    't9.code_name as doc_code_name',
+                    't6.log_no',
+                    't6.seq',
+                    't6.status',
+                    't12.code_name as status_name',
+                    't8.demand_date',
+                    't8.date_from',
+                    't8.date_to'
+                    );
             $mainquery
-                ->where('t5.doc_code', '=', $this->param_doc_code);
-        }
-    
-        if (isset($situation)) {
-            if ($situation == Config::get('const.C031.approval_requesting')) {
+                ->selectRaw("DATE_FORMAT(t8.demand_date,'%Y年%m月%d日') as demand_date_name")
+                ->selectRaw("DATE_FORMAT(t8.date_from,'%Y年%m月%d日') as date_from_name")
+                ->selectRaw("DATE_FORMAT(t8.date_to,'%Y年%m月%d日') as date_to_name");
+            $mainquery
+                ->addselect('t8.demand_reason')
+                ->addselect('t8.before_after')
+                ->addselect('t10.code_name as before_after_name')
+                ->addselect('t6.mail_result')
+                ->addselect('t11.code_name as mail_result_name')
+                ->addselect('t6.mail_address')
+                ->addselect('t6.nmail_department_code')
+                ->addselect('t13.name as nmail_department_name')
+                ->addselect('t6.nmail_user_code')
+                ->addselect('t15.name as nmail_user_name')
+                ->addselect('t8.department_code')
+                ->addselect('t17.name as demand_department_name')
+                ->addselect('t8.user_code')
+                ->addselect('t19.name as demand_user_name')
+                ->addselect('t16.row_no as detail_row_no')
+                ->addselect('t16.working_item as detail_working_item')
+                ->addselect('t16.date_from as detail_date_from')
+                ->addselect('t16.time_from as detail_time_from')
+                ->addselect('t16.date_to as detail_date_to')
+                ->addselect('t16.time_to as detail_time_to')
+                ->addselect('t16.scheduled_time as detail_scheduled_time')
+                ->addselect('t16.demand_reason as detail_demand_reason');
+            $mainquery
+                ->JoinSub($subquery4, 't3', function ($join) { 
+                    $join->on('t3.code', '=', 't1.department_code');
+                })
+                ->JoinSub($subquery3, 't4', function ($join) { 
+                    $join->on('t4.code', '=', 't1.code');
+                    $join->on('t4.max_apply_term_from', '=', 't1.apply_term_from');
+                })
+                ->JoinSub($subquery5, 't5', function ($join) { 
+                    $join->on('t5.department_code', '=', 't1.department_code');
+                    $join->on('t5.user_code', '=', 't1.code');
+                })
+                ->Join($this->table.' as t6', function ($join) { 
+                    $join->on('t6.no', '=', 't5.no');
+                    $join->on('t6.seq', '=', 't5.seq');
+                    $join->on('t6.log_no', '=', 't5.log_no');
+                })
+                ->JoinSub($subquery6, 't7', function ($join) { 
+                    $join->on('t7.no', '=', 't6.no');
+                    $join->on('t7.doc_code', '=', 't6.doc_code');
+                    $join->on('t7.nmail_seq', '=', 't6.seq');
+                })
+                ->Join($this->table_demands.' as t8', function ($join) { 
+                    $join->on('t8.no', '=', 't7.no');
+                    $join->on('t8.nmail_department_code', '=', 't7.nmail_department_code');
+                    $join->on('t8.nmail_user_code', '=', 't7.nmail_user_code');
+                    $join->on('t8.nmail_seq', '=', 't7.nmail_seq');
+                    $join->on('t8.log_no', '=', 't7.log_no');
+                })
+                ->leftJoin($this->table_generalcodes.' as t9', function ($join) { 
+                    $join->on('t9.code', '=', 't6.doc_code')
+                    ->where('t9.identification_id', '=', Config::get('const.C026.value'))
+                    ->where('t9.is_deleted', '=', 0);
+                })
+                ->leftJoin($this->table_generalcodes.' as t10', function ($join) { 
+                    $join->on('t10.code', '=', 't8.before_after')
+                    ->where('t10.identification_id', '=', Config::get('const.C029.value'))
+                    ->where('t10.is_deleted', '=', 0);
+                })
+                ->leftJoin($this->table_generalcodes.' as t11', function ($join) { 
+                    $join->on('t11.code', '=', 't6.mail_result')
+                    ->where('t11.identification_id', '=', Config::get('const.C030.value'))
+                    ->where('t11.is_deleted', '=', 0);
+                })
+                ->leftJoin($this->table_generalcodes.' as t12', function ($join) { 
+                    $join->on('t12.code', '=', 't6.status')
+                    ->where('t12.identification_id', '=', Config::get('const.C028.value'))
+                    ->where('t12.is_deleted', '=', 0);
+                })
+                ->JoinSub($subquery4, 't13', function ($join) { 
+                    $join->on('t13.code', '=', 't8.nmail_department_code');
+                })
+                ->JoinSub($subquery3, 't14', function ($join) { 
+                    $join->on('t14.code', '=', 't8.nmail_user_code');
+                })
+                ->Join($this->table_users.' as t15', function ($join) { 
+                    $join->on('t15.code', '=', 't8.nmail_user_code');
+                    $join->on('t15.apply_term_from', '=', 't14.max_apply_term_from')
+                    ->where('t15.is_deleted', '=', 0);
+                })
+                ->leftJoin($this->table_demand_details.' as t16', function ($join) { 
+                    $join->on('t16.no', '=', 't8.no');
+                    $join->on('t16.log_no', '=', 't8.log_no');
+                })
+                ->JoinSub($subquery4, 't17', function ($join) { 
+                    $join->on('t17.code', '=', 't8.department_code');
+                })
+                ->JoinSub($subquery3, 't18', function ($join) { 
+                    $join->on('t18.code', '=', 't8.user_code');
+                })
+                ->Join($this->table_users.' as t19', function ($join) { 
+                    $join->on('t19.code', '=', 't8.user_code');
+                    $join->on('t19.apply_term_from', '=', 't18.max_apply_term_from')
+                    ->where('t19.is_deleted', '=', 0);
+                });
+            $mainquery
+                ->where('t1.code', '=', $this->param_user_code);
+        
+            if (isset($this->param_doc_code)) {
                 $mainquery
-                    ->whereIn('t6.status', [Config::get('const.C028.applying') , Config::get('const.C028.approving')]);
+                    ->where('t5.doc_code', '=', $this->param_doc_code);
             }
-        }
-        $mainquery
-            ->where('t1.is_deleted', '=', 0)
-            ->where('t15.is_deleted', '=', 0)
-            ->orderBy('t8.demand_date', 'asc')
-            ->orderBy('t8.no', 'asc');
-
-        if (isset($this->param_limit)) {
+        
+            if (isset($situation)) {
+                if ($situation == Config::get('const.C031.approval_requesting')) {
+                    $mainquery
+                        ->whereBetween('t6.status', [Config::get('const.C028.applying') , Config::get('const.C028.approving')]);
+                }
+            }
             $mainquery
-                ->limit($this->param_limit);
-        }
-        $result = $mainquery
-            ->get();
+                ->where('t1.is_deleted', '=', 0)
+                ->where('t15.is_deleted', '=', 0)
+                ->where('t19.is_deleted', '=', 0)
+                ->orderBy('t8.demand_date', 'asc')
+                ->orderBy('t8.no', 'asc');
 
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getDemandList' => \DB::getQueryLog()
-            ]
+            if (isset($this->param_limit)) {
+                $mainquery
+                    ->limit($this->param_limit);
+            }
+            $result = $mainquery
+                ->get();
+
+            \Log::debug(
+                'sql_debug_log',
+                [
+                    'getDemandList' => \DB::getQueryLog()
+                ]
             );
+    
+        }catch(\PDOException $pe){
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            throw $e;
+        }
         return $result;
     }
 

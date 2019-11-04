@@ -871,7 +871,8 @@ class WorkingTimedate extends Model
         for ($i=0;$i<12;$i++) {
             $this->array_param_date_from[$i] = null;
         }
-        Log::debug('月次アラート日付設定 = '.$search_kbn);
+        Log::debug('月次アラート日付設定 $value = '.$value);
+        Log::debug('月次アラート日付設定 $search_kbn = '.$search_kbn);
         $set_from_date_flg = false;
         if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
             $search_kbn == Config::get('const.C022.monthly_alert_begining_month_first') ||
@@ -880,7 +881,12 @@ class WorkingTimedate extends Model
             $dt_first = null;
             $setting_model = new Setting();
             $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
-            $settings = $setting_model->getSettingDatasYearOrderBy();
+            if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
+                $search_kbn == Config::get('const.C022.monthly_alert_begining_month_first')) {
+                $settings = $setting_model->getSettingDatasYearOrderBy(1);
+            } elseif ($search_kbn == Config::get('const.C022.monthly_alert_first_month_closing')) {
+                $settings = $setting_model->getSettingDatasYearOrderBy(2);
+            }
             $set_beginning_or_first_ymd_flg = false;
             $set_from_date_flg = false;
             $set_index = 0;
@@ -900,24 +906,42 @@ class WorkingTimedate extends Model
                         $this->massegedata[] = array(Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_setting_closing'));
                         break;
                     }
+                    Log::debug('$setting->closing = '.$setting->closing);
                 }
                 if (!isset($setting->fiscal_month)) {
                     $this->massegedata[] = array(Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_setting_fiscal_month'));
                     break;
                 }
+                $ymd_year = 0;
+                if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
+                    $search_kbn == Config::get('const.C022.monthly_alert_begining_month_first')) {
+                    $ymd_year = $setting->year;
+                } elseif ($search_kbn == Config::get('const.C022.monthly_alert_first_month_closing')) {
+                    $ymd_year = $setting->fiscal_year;
+                }
                 // 開始年月の設定
-                $settings_ymd = new Carbon($setting->year.str_pad($setting->fiscal_month, 2, 0, STR_PAD_LEFT).'01');
+                $settings_ymd = new Carbon($ymd_year.str_pad($setting->fiscal_month, 2, 0, STR_PAD_LEFT).'01');
                 $settings_ym = date_format($settings_ymd,'Ym');
                 if (!$set_beginning_or_first_ymd_flg) {
-                    $beginning_ymd = new Carbon($setting->year.str_pad($setting->beginning_month, 2, 0, STR_PAD_LEFT).'01');
-                    $first_ymd = new Carbon($setting->year.str_pad(1, 2, 0, STR_PAD_LEFT).'01');
+                    $beginning_ymd = new Carbon($ymd_year.str_pad($setting->beginning_month, 2, 0, STR_PAD_LEFT).'01');
+                    if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
+                        $search_kbn == Config::get('const.C022.monthly_alert_begining_month_first')) {
+                        $first_ymd = new Carbon($ymd_year.str_pad(1, 2, 0, STR_PAD_LEFT).'01');
+                    } elseif ($search_kbn == Config::get('const.C022.monthly_alert_first_month_closing')) {
+                        $first_ymd = new Carbon($setting->fiscal_year.str_pad(1, 2, 0, STR_PAD_LEFT).'01');
+                        Log::debug('$first_ymd = '.$first_ymd);
+                    }
                     $beginning_ym = date_format($beginning_ymd,'Ym');
                     $first_ym = date_format($first_ymd,'Ym');
                     $set_beginning_or_first_ymd_flg = true;
-                }
+                    Log::debug('$settings_ym = '.$settings_ym);
+                    Log::debug('$first_ym = '.$first_ym);
+                    }
                 if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing')) {
+                    Log::debug('monthly_alert_begining_month_closing $settings_ym = '.$settings_ym);
+                    Log::debug('monthly_alert_begining_month_closing $first_ym = '.$first_ym);
                     if ($settings_ym == $beginning_ym) {
-                        $begining_closing_ymd = new Carbon($setting->year.str_pad($setting->beginning_month, 2, 0, STR_PAD_LEFT).str_pad($setting->closing, 2, 0, STR_PAD_LEFT));
+                        $begining_closing_ymd = new Carbon($ymd_year.str_pad($setting->beginning_month, 2, 0, STR_PAD_LEFT).str_pad($setting->closing, 2, 0, STR_PAD_LEFT));
                         $closing_from_ymd = new Carbon($begining_closing_ymd);
                         $date_from = $closing_from_ymd->subMonthNoOverflow()->addDay();
                         $date_from_ym = date_format(new Carbon($date_from),'Ym');
@@ -929,8 +953,10 @@ class WorkingTimedate extends Model
                     }
                 }
                 if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_first')) {
+                    Log::debug('monthly_alert_begining_month_first $settings_ym = '.$settings_ym);
+                    Log::debug('monthly_alert_begining_month_first $first_ym = '.$first_ym);
                     if ($settings_ym == $beginning_ym) {
-                        $begining_first_ymd = new Carbon($setting->year.str_pad($setting->beginning_month, 2, 0, STR_PAD_LEFT).'01');
+                        $begining_first_ymd = new Carbon($ymd_year.str_pad($setting->beginning_month, 2, 0, STR_PAD_LEFT).'01');
                         $date_from_ym = date_format(new Carbon($begining_first_ymd),'Ym');
                         $closing_to_ymd = new Carbon($date_from_ym.'01');
                         $date_to = $closing_to_ymd->addYear();
@@ -940,9 +966,11 @@ class WorkingTimedate extends Model
                     }
                 }
                 if ($search_kbn == Config::get('const.C022.monthly_alert_first_month_closing')) {
+                    Log::debug('monthly_alert_first_month_closing $settings_ym = '.$settings_ym);
+                    Log::debug('monthly_alert_first_month_closing $first_ym = '.$first_ym);
                     if ($settings_ym == $first_ym) {
                         Log::debug('set_from_date_flg = true'.$settings_ym.' '.$first_ym);
-                        $first_closing_ymd = new Carbon($setting->year.str_pad(1, 2, 0, STR_PAD_LEFT).str_pad($setting->closing, 2, 0, STR_PAD_LEFT));
+                        $first_closing_ymd = new Carbon($ymd_year.str_pad(1, 2, 0, STR_PAD_LEFT).str_pad($setting->closing, 2, 0, STR_PAD_LEFT));
                         $closing_from_ymd = new Carbon($first_closing_ymd);
                         $date_from = $closing_from_ymd->subMonthNoOverflow()->addDay();
                         $date_from_ym = date_format(new Carbon($date_from),'Ym');
@@ -956,17 +984,17 @@ class WorkingTimedate extends Model
                 // 開始終了日付設定された場合
                 if ($set_from_date_flg) {
                     if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing')) {
-                        $begining_closing_ymd = new Carbon($setting->year.str_pad($setting->fiscal_month, 2, 0, STR_PAD_LEFT).str_pad($setting->closing, 2, 0, STR_PAD_LEFT));
+                        $begining_closing_ymd = new Carbon($ymd_year.str_pad($setting->fiscal_month, 2, 0, STR_PAD_LEFT).str_pad($setting->closing, 2, 0, STR_PAD_LEFT));
                         $set_closing_ymd = new Carbon($begining_closing_ymd);
                         $this->array_param_date_from[$set_index] = date_format($set_closing_ymd->subMonthNoOverflow()->addDay(),'Ymd');
                         Log::debug('setArrayParamdatetoAttribute  darray_param_date_from = '.$set_index.' '.$this->array_param_date_from[$set_index]);
                     }
                     if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_first')) {
-                        $begining_first_ymd = new Carbon($setting->year.str_pad($setting->fiscal_month, 2, 0, STR_PAD_LEFT).'01');
+                        $begining_first_ymd = new Carbon($ymd_year.str_pad($setting->fiscal_month, 2, 0, STR_PAD_LEFT).'01');
                         $this->array_param_date_from[$set_index] = date_format($begining_first_ymd,'Ymd');
                     }
                     if ($search_kbn == Config::get('const.C022.monthly_alert_first_month_closing')) {
-                        $first_closing_ymd = new Carbon($setting->year.str_pad($setting->fiscal_month, 2, 0, STR_PAD_LEFT).str_pad($setting->closing, 2, 0, STR_PAD_LEFT));
+                        $first_closing_ymd = new Carbon($ymd_year.str_pad($setting->fiscal_month, 2, 0, STR_PAD_LEFT).str_pad($setting->closing, 2, 0, STR_PAD_LEFT));
                         $set_closing_ymd = new Carbon($first_closing_ymd);
                         $this->array_param_date_from[$set_index] = date_format($set_closing_ymd->subMonthNoOverflow()->addDay(),'Ymd');
                     }
@@ -1496,7 +1524,7 @@ class WorkingTimedate extends Model
                             $join->on($this->table_temp_working_time_dates.'.department_code', '=', $this->table.'.department_code');
                             $join->on($this->table_temp_working_time_dates.'.user_code', '=', $this->table.'.user_code');
                         })
-                        ->orWhereNotNull($this->table_temp_working_time_dates.'.attendance_time_1')
+                        ->WhereNotNull($this->table_temp_working_time_dates.'.attendance_time_1')
                         ->orWhereNotNull($this->table_temp_working_time_dates.'.leaving_time_1')
                         ->orWhereNotNull($this->table_temp_working_time_dates.'.missing_middle_time_1')
                         ->orWhereNotNull($this->table_temp_working_time_dates.'.missing_middle_return_time_1')
@@ -1507,8 +1535,8 @@ class WorkingTimedate extends Model
                 $result = $mainquery
                     ->where($this->table.'.is_deleted', 0)
                     ->orderBy($this->table.'.working_date', 'asc')
-                    ->orderBy($this->table.'.employment_status', 'asc')
                     ->orderBy($this->table.'.department_code', 'asc')
+                    ->orderBy($this->table.'.employment_status', 'asc')
                     ->orderBy($this->table.'.user_code', 'asc')
                     ->get();
             } elseif ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic')) {

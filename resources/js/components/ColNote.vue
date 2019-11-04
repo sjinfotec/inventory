@@ -12,7 +12,7 @@
     </div> -->
     <div v-if="this.itemControl === 'WA'">
     <!-- <div v-else-if="this.itemControl === 'WA'"> -->
-      <div class="card text-warning border border-warning">
+      <div class="card text-success border border-success">
         <div class="card-body px-3 py-2">
           <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-error-b.svg" alt=""></span>
           <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>

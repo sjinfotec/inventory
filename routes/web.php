@@ -64,6 +64,8 @@ Route::post('/user_add/fix', 'UserAddController@fixUser')->middleware('auth');
 Route::post('/user_add/release_card_info', 'UserAddController@releaseCardInfo')->middleware('auth');
 // ユーザー権限取得
 Route::get('/get_login_user_role', 'ApiCommonController@getLoginUserRole')->middleware('auth');
+// ユーザー部署権限取得
+Route::get('/get_login_user_department', 'ApiCommonController@getLoginUserDepartment')->middleware('auth');
 // ユーザーパスワード変更
 Route::get('/user_pass', 'UserPassController@index')->middleware('auth');
 Route::post('/user_pass/passchange', 'UserPassController@passChange')->middleware('auth');

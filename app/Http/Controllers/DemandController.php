@@ -117,6 +117,8 @@ class DemandController extends Controller
                 }
                 $get_demandsdetail[] = array(
                     'detail_row_no' => $item->detail_row_no,
+                    'detail_department_code' => $item->detail_department_code,
+                    'detail_user_code' => $item->detail_user_code,
                     'detail_working_item' => $item->detail_working_item,
                     'detail_date_from' => $item->detail_date_from,
                     'detail_time_from' => $item->detail_time_from,
@@ -184,6 +186,7 @@ class DemandController extends Controller
         $demandkbn = $apicommon->setRequestQeury($request->kbn);
         $store_result = true;
         $already_demandno = "";
+        $justbefore_result = null;
         // 申請状況確認
         $demand_model = new Demand();
         try {
@@ -191,7 +194,7 @@ class DemandController extends Controller
                 if ($demandedit["demandno"] != "") {
                     $already_demandno = $demandedit["demandno"];
                     $demand_model->setParamNoAttribute($already_demandno);
-                    $result = $demand_model->getDemandfromNo();
+                    $justbefore_result = $demand_model->getDemandfromNo();
                     foreach ($result as $item) {
                         if (isset($item->status)) {
                             if ($item->status == Config::get('const.C028.approving') ||
@@ -205,6 +208,7 @@ class DemandController extends Controller
                                         Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
                             }
                         }
+                        break;
                     }
                 }
             }
@@ -352,6 +356,20 @@ class DemandController extends Controller
             $demand_model->setMailaddressAttribute($confirm_email);
             $demand_model->setNmailDepartmentCodeAttribute($confirm_departmentcode);
             $demand_model->setNmailUserCodeAttribute($confirm_user_code);
+            // 承認者の承認順番を取得
+            $confirm_model = new Confirm();
+            $confirm_model->setParamConfirmdepartmentcodeAttribute($confirm_departmentcode);
+            $confirm_model->setParamUsercodeAttribute($confirm_user_code);
+            Log::debug('    $confirm_departmentcode = '.$confirm_departmentcode);
+            Log::debug('    $confirm_user_code = '.$confirm_user_code);
+            $confirms = $confirm_model->selectConfirm();
+            $confirm_seq = 0;
+            foreach($confirms as $item) {
+                if (isset($item->seq)) {
+                    $confirm_seq = $item->seq;
+                }
+            }
+            $demand_model->setNmailseqAttribute($confirm_seq);
             $demand_model->setCreateduserAttribute($usercode);
             $systemdate = Carbon::now();
             $demand_model->setCreatedatAttribute($systemdate);
@@ -365,6 +383,8 @@ class DemandController extends Controller
                 $demandsdetail_model->setLognoAttribute($logno);
                 $rowno++;
                 $demandsdetail_model->setRownoAttribute($rowno);
+                $demandsdetail_model->setDepartmentcodeAttribute($departmentcode);
+                $demandsdetail_model->setUsercodeAttribute($result["user_code"]);
                 $demandsdetail_model->setWorkingitemAttribute($result["working_item"]);
                 $demandsdetail_model->setDatefromAttribute($dt_date_from);
                 $demandsdetail_model->setTimefromAttribute($result["time_from_name"]);
@@ -386,17 +406,6 @@ class DemandController extends Controller
             $approval_model = new Approval();
             $approval_model->setNoAttribute($target_demand_no);
             $approval_model->setDoccodeAttribute($doc_code);
-            // 承認者の承認順番を取得
-            $confirm_model = new Confirm();
-            $confirm_model->setParamConfirmdepartmentcodeAttribute($confirm_departmentcode);
-            $confirm_model->setParamUsercodeAttribute($confirm_user_code);
-            $confirms = $confirm_model->selectConfirm();
-            $confirm_seq = 0;
-            foreach($confirms as $item) {
-                if (isset($item->seq)) {
-                    $confirm_seq = $item->seq;
-                }
-            }
             $approval_model->setSeqAttribute($confirm_seq);
             $approval_model->setLognoAttribute($logno);
             if ($demandkbn == Config::get('const.DEMAND_KBN.store')) {

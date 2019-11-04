@@ -189,7 +189,6 @@ class MonthlyWorkingInformationController extends Controller
         $chk_result = $this->makeDateFromTo($displaykbn,  $datefrom, $workingtimedate_model);
         $datefrom = $workingtimedate_model->getParamdatefromAttribute();
         $dateto = $workingtimedate_model->getParamdatetoAttribute();
-        // $dateto = "20190108";
         $datefrom_date = new Carbon($datefrom);
         $dateto_date = new Carbon($dateto);
 
@@ -461,6 +460,7 @@ class MonthlyWorkingInformationController extends Controller
         $w = (int)$datetime->format('w');
         $week_data = $week[$w];
         $remark_data = '';
+        $remark_data1 = mb_convert_encoding($result->remark_holiday_name, "UTF-8", "UTF-8");
         $remark_data .= $result->remark_holiday_name;
         if (strlen($remark_data) == 0) {
             $remark_data .= $result->remark_check_result;
@@ -478,68 +478,14 @@ class MonthlyWorkingInformationController extends Controller
             $remark_data .= ' '.$result->remark_check_interval;
         }
         $this->array_date[] = array(
-            'workingdate' => date_format($datetime, 'Y年m月d日').'（'.$week_data.'）',
+            'user_code' => $result->user_code,
+            'workingdate' => date_format($datetime, 'Ymd'),
             'attendance' => $result->attendance_time_1,
             'leaving' => $result->leaving_time_1,
-            'total_working_times' => $result->total_working_times,
-            'regular_working_times' => $result->regular_working_times,
-            'off_hours_working_hours' => $result->off_hours_working_hours,
-            'late_night_overtime_hours' => $result->late_night_overtime_hours,
-            'remark_holiday_name' => $result->remark_holiday_name,
-            'remark_data' => $remark_data
+            'public_going_out_hours' => $result->public_going_out_hours,
+            'missing_middle_hours' => $result->missing_middle_hours,
+            'remark_holiday_name' => $remark_data1
         );
-        if (isset($result->attendance_time_2) || isset($result->leaving_time_2)) {
-            $this->array_date[] = array(
-                'workingdate' => '',
-                'attendance' => $result->attendance_time_2,
-                'leaving' => $result->leaving_time_2,
-                'total_working_times' => '',
-                'regular_working_times' => '',
-                'off_hours_working_hours' => '',
-                'late_night_overtime_hours' => '',
-                'remark_holiday_name' => '',
-                'remark_data' => ''
-            );
-        }
-        if (isset($result->attendance_time_3) || isset($result->leaving_time_3)) {
-            $this->array_date[] = array(
-                'workingdate' => '',
-                'attendance' => $result->attendance_time_3,
-                'leaving' => $result->leaving_time_3,
-                'total_working_times' => '',
-                'regular_working_times' => '',
-                'off_hours_working_hours' => '',
-                'late_night_overtime_hours' => '',
-                'remark_holiday_name' => '',
-                'remark_data' => ''
-            );
-        }
-        if (isset($result->attendance_time_4) || isset($result->leaving_time_4)) {
-            $this->array_date[] = array(
-                'workingdate' => '',
-                'attendance' => $result->attendance_time_4,
-                'leaving' => $result->leaving_time_4,
-                'total_working_times' => '',
-                'regular_working_times' => '',
-                'off_hours_working_hours' => '',
-                'late_night_overtime_hours' => '',
-                'remark_holiday_name' => '',
-                'remark_data' => ''
-            );
-        }
-        if (isset($result->attendance_time_5) || isset($result->leaving_time_5)) {
-            $this->array_date[] = array(
-                'workingdate' => '',
-                'attendance' => $result->attendance_time_5,
-                'leaving' => $result->leaving_time_5,
-                'total_working_times' => '',
-                'regular_working_times' => '',
-                'off_hours_working_hours' => '',
-                'late_night_overtime_hours' => '',
-                'remark_holiday_name' => '',
-                'remark_data' => ''
-            );
-        }
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 
 /**
@@ -25,10 +26,16 @@ class Setting extends Model
     private $statutory_uplimit_time;        // 法定上限残業時間
     private $time_unit;                     // 時間単位
     private $time_rounding;                 // 時間の丸め
+    private $calc_auto_time;                // 集計自動起動時刻
+    private $max_1month_total;              // １ヶ月累計
+    private $max_2month_total;              // ２ヶ月累計
     private $max_3month_total;              // ３ヶ月累計
     private $max_6month_total;              // ６ヶ月累計
     private $max_12month_total;             // １年間累計
-    private $interval;                      // インターバル
+    private $ave_2_6_time_sp;               // ２－６ヶ月平均（特別条項）
+    private $max_12month_total_sp;          // １２ヶ月累計（特別条項）
+    private $max_1month_total_sp;           // １ヶ月累計（特別条項）
+    private $interval;                      // 勤務間インターバル
     private $beginning_month;               // 期首月
     private $year;                          // 年
     private $created_user;                  // 作成ユーザー
@@ -120,6 +127,40 @@ class Setting extends Model
     }
 
 
+    // 集計自動起動時刻
+    public function getCalcautotimeAttribute()
+    {
+        return $this->calc_auto_time;
+    }
+
+    public function setCalcautotimeAttribute($value)
+    {
+        $this->calc_auto_time = $value;
+    }
+
+
+    // １ヶ月累計
+    public function getMax1MonthtotalAttribute()
+    {
+        return $this->max_1month_total;
+    }
+
+    public function setMax1MonthtotalAttribute($value)
+    {
+        $this->max_1month_total = $value;
+    }
+
+    // ２ヶ月累計
+    public function getMax2MonthtotalAttribute()
+    {
+        return $this->max_2month_total;
+    }
+
+    public function setMax2MonthtotalAttribute($value)
+    {
+        $this->max_2month_total = $value;
+    }
+
     // ３ヶ月累計
     public function getMax3MonthtotalAttribute()
     {
@@ -153,6 +194,42 @@ class Setting extends Model
     public function setMax12MonthtotalAttribute($value)
     {
         $this->max_12month_total = $value;
+    }
+
+
+    // ２－６ヶ月平均（特別条項）
+    public function getAve26timespAttribute()
+    {
+        return $this->ave_2_6_time_sp;
+    }
+
+    public function setAve26timespAttribute($value)
+    {
+        $this->ave_2_6_time_sp = $value;
+    }
+
+
+    // １２ヶ月累計（特別条項）
+    public function getMax12MonthtotalspAttribute()
+    {
+        return $this->max_12month_total_sp;
+    }
+
+    public function setMax12MonthtotalspAttribute($value)
+    {
+        $this->max_12month_total_sp = $value;
+    }
+
+
+    // １ヶ月累計（特別条項）
+    public function getMax1MonthtotalspAttribute()
+    {
+        return $this->max_1month_total_sp;
+    }
+
+    public function setMax1MonthtotalspAttribute($value)
+    {
+        $this->max_1month_total_sp = $value;
     }
 
     // インターバル
@@ -321,9 +398,15 @@ class Setting extends Model
                 $this->table.'.statutory_uplimit_time',
                 $this->table.'.time_unit',
                 $this->table.'.time_rounding',
+                $this->table.'.calc_auto_time',
+                $this->table.'.max_1month_total',
+                $this->table.'.max_2month_total',
                 $this->table.'.max_3month_total',
                 $this->table.'.max_6month_total',
                 $this->table.'.max_12month_total',
+                $this->table.'.ave_2_6_time_sp',
+                $this->table.'.max_12month_total_sp',
+                $this->table.'.max_1month_total_sp',
                 $this->table.'.beginning_month',
                 $this->table.'.interval',
                 $this->table.'.year',
@@ -354,8 +437,7 @@ class Setting extends Model
      *
      * @return sql取得結果
      */
-    public function getSettingDatasYearOrderBy(){
-
+    public function getSettingDatasYearOrderBy($orderby){
 
         // 取得SQL作成
         $sunquery1 = DB::table($this->table)
@@ -378,9 +460,15 @@ class Setting extends Model
                 $this->table.'.statutory_uplimit_time',
                 $this->table.'.time_unit',
                 $this->table.'.time_rounding',
+                $this->table.'.calc_auto_time',
+                $this->table.'.max_1month_total',
+                $this->table.'.max_2month_total',
                 $this->table.'.max_3month_total',
                 $this->table.'.max_6month_total',
                 $this->table.'.max_12month_total',
+                $this->table.'.ave_2_6_time_sp',
+                $this->table.'.max_12month_total_sp',
+                $this->table.'.max_1month_total_sp',
                 $this->table.'.beginning_month',
                 $this->table.'.interval',
                 $this->table.'.year',
@@ -388,12 +476,21 @@ class Setting extends Model
             ->JoinSub($sunquery1, 't2', function ($join) { 
                 $join->on('t2.fiscal_year', '=', $this->table.'.fiscal_year');
             })
-            ->where($this->table.'.is_deleted', '=', 0)
-            ->orderBy($this->table.'.year', 'asc')
+            ->where($this->table.'.is_deleted', '=', 0);
+
+        if (isset($orderby)) {
+            if ($orderby == 1) {
+                $mainquery
+                    ->orderBy($this->table.'.year', 'asc');
+            } else {
+                $mainquery
+                    ->orderBy($this->table.'.fiscal_year', 'asc');
+            }
+        }
+        $get = $mainquery
             ->orderBy($this->table.'.fiscal_month', 'asc')
             ->get();
-
-        return $mainquery;
+        return $get;
     }
 
     /**
@@ -440,9 +537,15 @@ class Setting extends Model
                 'uplimit_time' => $this->uplimit_time,
                 'time_unit' => $this->time_unit,
                 'time_rounding' => $this->time_rounding,
+                'calc_auto_time' => $this->calc_auto_time,
+                'max_1month_total' => $this->max_1month_total,
+                'max_2month_total' => $this->max_2month_total,
                 'max_3month_total' => $this->max_3month_total,
                 'max_6month_total' => $this->max_6month_total,
                 'max_12month_total' => $this->max_12month_total,
+                'ave_2_6_time_sp' => $this->ave_2_6_time_sp,
+                'max_12month_total_sp' => $this->max_12month_total_sp,
+                'max_1month_total_sp' => $this->max_1month_total_sp,
                 'beginning_month' => $this->beginning_month,
                 'interval' => $this->interval,
                 'year' => $this->year,

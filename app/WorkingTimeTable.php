@@ -347,7 +347,6 @@ class WorkingTimeTable extends Model
      * @return void
      */
     public function getWorkingTimeTableJoin(){
-        \DB::enableQueryLog();
         // sunquery1    日次タイムレコード
         $sunquery1 = DB::table($this->table_temp_calc_workingtimes)
             ->select(
@@ -389,12 +388,6 @@ class WorkingTimeTable extends Model
             ->orderBy('t1.no','asc')
             ->orderBy('t1.working_time_kubun','asc')
             ->get();
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getWorkingTimeTableJoin' => \DB::getQueryLog()
-            ]
-        );
     
         return $results;
     }
