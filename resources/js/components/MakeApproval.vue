@@ -110,6 +110,8 @@
                       <thead>
                         <tr>
                           <td class="text-center align-middle w-5">選択</td>
+                          <td class="text-center align-middle w-15">申請者</td>
+                          <td class="text-center align-middle w-15">申請部署</td>
                           <td class="text-center align-middle w-15">申請日</td>
                           <td class="text-center align-middle w-15">申請番号</td>
                           <td class="text-center align-middle w-15">申請書類</td>
@@ -124,6 +126,8 @@
                               <input name="'radio' + index" type="radio" class="form-control" v-on:change="radiochange(index)"/>
                             </div>
                           </td>
+                          <td class="text-center align-middle">{{item.demand_user_name}}</td>
+                          <td class="text-center align-middle">{{item.demand_department_name}}</td>
                           <td class="text-center align-middle">{{item.demand_date_name}}</td>
                           <td class="text-center align-middle">{{item.no}}</td>
                           <td class="text-center align-middle">{{item.doc_code_name}}</td>
@@ -228,7 +232,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valuedisplayddoccode !== '1'" class="row justify-content-between">
+            <div v-if="valuedisplayddoccode !== 1" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -259,7 +263,7 @@
             <!-- /.row -->
             <!-- .row -->
             <!-- /.panel contents -->
-            <div v-if="valuedisplayddoccode === '1'" class="row justify-content-between">
+            <div v-if="valuedisplayddoccode === 1" class="row justify-content-between">
               <!-- .panel -->
               <div class="col-md pt-3 align-self-stretch">
                 <div class="card shadow-pl">
@@ -369,7 +373,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valuedisplayddoccode !== '1'" class="row justify-content-between">
+            <div v-if="valuedisplayddoccode !== 1" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div :class="errorClassObject('summary')" class="input-group">
@@ -518,9 +522,12 @@ export default {
   data() {
     return {
       getdo: 0,
-      valueselectedsituation: "",
-      valueselecteddoccode: "",
-      valuedisplayddoccode: "",
+      valueselectedsituation: 0,
+      valueselecteddoccode: 0,
+      valuedisplayddoccode: 0,
+      servervalueselectedsituation: "",
+      servervalueselecteddoccode: "",
+      servervaluedisplayddoccode: "",
       fromdate: "",
       valueselecteddocname: "",
       valueseq: "",
@@ -567,9 +574,9 @@ export default {
   // マウント時
   mounted() {
     console.log("MakeDemand Component mounted.");
-    this.valueselectedsituation = "1";
-    this.valueselecteddoccode = "";
-    this.valuedisplayddoccode = "";
+    this.valueselectedsituation = 1;
+    this.valueselecteddoccode = 0;
+    this.valuedisplayddoccode = 0;
     this.getDemandList();
   },
   computed: {
@@ -694,7 +701,7 @@ export default {
     // 戻るボタンがクリックされた場合の処理
     backclick: function(e) {
       this.displayphase = "";
-      this.valuedisplayddoccode = "";
+      this.valuedisplayddoccode = 0;
       this.demanditemClear();
       if (this.valueselecteddoccode.length > 0) {
         this.doccodeChange(this.valueselecteddoccode);
@@ -736,18 +743,29 @@ export default {
       this.array_demandresult = [];
       this.array_demand = [];
       this.array_demanddetail = [];
+      this.messageshowsearch = true;
+      this.issearchbutton = true;
+      if (this.valueselectedsituation == 0) {
+        this.servervalueselectedsituation = "";
+      } else {
+        this.servervalueselectedsituation = this.valueselectedsituation;
+      }
+      if (this.valueselecteddoccode == 0) {
+        this.servervalueselecteddoccode = "";
+      } else {
+        this.servervalueselecteddoccode = this.valueselecteddoccode;
+      }
       this.$axios
         .get("/approval/list_approval", {
           params: {
-            situation: this.valueselectedsituation,
-            doccode: this.valueselecteddoccode,
+            situation: this.servervalueselectedsituation,
+            doccode: this.servervalueselecteddoccode,
             usercode: "",
             getdo: 1
           }
         })
         .then(response => {
           this.resresults = response.data;
-          console.log("getDemandList response ")
           if (this.resresults.array_demandresult != null) {
             this.array_demandresult = this.resresults.array_demandresult;
           }
@@ -764,13 +782,16 @@ export default {
             this.iseditcopypush = true;
             this.iseditdemandpush = true;
           }
-          console.log("getDemandList get ")
           if (this.resresults.messagedata != null) {
             this.messagedatasserver = this.resresults.messagedata;
           }
+          this.messageshowsearch = false;
+          this.issearchbutton = false;
         })
         .catch(reason => {
           this.alert("error", "申請一覧取得に失敗しました", "エラー");
+          this.issearchbutton = false;
+          this.messageshowsearch = false;
         });
     },
     errorClassObject(key) {
@@ -811,9 +832,14 @@ export default {
     store: function(kbn) {
       this.edit.confirm = this.valueselectedconfirm;
       this.edit.confirmfinal = this.valueselectedconfirmfinal;
+      if (this.valuedisplayddoccode == 0) {
+        this.servervaluedisplayddoccode = "";
+      } else {
+        this.servervaluedisplayddoccode = this.valuedisplayddoccode;
+      }
       this.$axios
         .post("/approval/make_approval", {
-          doccode: this.valuedisplayddoccode,
+          doccode: this.servervaluedisplayddoccode,
           demandedit: this.edit,
           kbn: kbn
         })
@@ -915,8 +941,8 @@ export default {
       body += '%0D%0A' + '%0D%0A' + '申請番号：' + this.edit.demandno;
       this.dateFormat = moment(this.edit.demanddate).format("YYYY年MM月DD日");
       body += '%0D%0A' + '申請日：' + this.dateFormat;
-      body += '%0D%0A' + '承認者：（部署）' + this.department_name + '（氏名）' + this.user_name;
       body += '%0D%0A' + '承認日：' + this.dateFormat;
+      body += '%0D%0A' + '次承認者：（部署）' + this.department_name + '（氏名）' + this.user_name;
       address = this.toaddress;
       ccAddress = "";
       for ( var i=0; i<this.array_ccaddress.length; i++ ) {

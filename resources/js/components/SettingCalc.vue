@@ -14,7 +14,7 @@
           >
             <!-- panel header -->
             <div class="card-header clearfix bg-transparent pb-0 border-0">
-              <h1 class="float-sm-left font-size-rg">年度指定</h1>
+              <h1 class="float-sm-left font-size-rg">◆年度指定</h1>
               <span class="float-sm-right font-size-sm">設定する年度を指定できます</span>
             </div>
             <!-- /.panel header -->
@@ -51,7 +51,7 @@
               <div class="row justify-content-between">
                 <!-- panel header -->
                 <div class="card-header col-12 bg-transparent pb-2 border-0">
-                  <h1 class="float-sm-left font-size-rg">基本設定</h1>
+                  <h1 class="float-sm-left font-size-rg">◆基本設定</h1>
                   <span class="float-sm-right font-size-sm">決算月と次の勤務と見なすまでの時間インターバルを設定できます</span>
                 </div>
                 <!-- /.panel header -->
@@ -108,8 +108,8 @@
               <div class="row justify-content-between">
                 <!-- panel header -->
                 <div class="card-header col-12 bg-transparent pb-2 border-0">
-                  <h1 class="float-sm-left font-size-rg">累計設定</h1>
-                  <span class="float-sm-right font-size-sm">アラートを表示する累計時間を設定できます</span>
+                  <h1 class="float-sm-left font-size-rg">◆集計自動起動設定</h1>
+                  <span class="float-sm-right font-size-sm">設定した時刻に自動でその時刻までの時間集計を行います。</span>
                 </div>
                 <!-- /.panel header -->
               </div>
@@ -123,16 +123,53 @@
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
-                      >３ヶ月累計</span>
+                      >自動起動時刻</span>
                     </div>
-                    <fvl-input
-                      class="form-control p-0"
-                      :value.sync="form.threeMonthTotal"
-                      name="threeMonthTotal"
-                      type="number"
-                      :max="99999.99"
-                      :step="0.01"
-                    />
+                    <div class="form-control p-0">
+                      <input
+                        type="time"
+                        class="form-control"
+                        v-model="form.calc_auto_time"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+              <!-- /.panel contents -->
+              <!-- .row -->
+              <div class="row justify-content-between">
+                <!-- panel header -->
+                <div class="card-header col-12 bg-transparent pb-2 border-0">
+                  <h1 class="float-sm-left font-size-rg">◆36協定特別条項設定</h1>
+                  <span class="float-sm-right font-size-sm">特別条項を適用する場合は時間を設定します。</span>
+                </div>
+                <!-- /.panel header -->
+              </div>
+              <!-- /.row -->
+              <!-- .row -->
+              <div class="row justify-content-between">
+                <!-- .col -->
+                <div class="col-12 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-180"
+                        id="basic-addon1"
+                      >１ヶ月累計（100時間未満）　　　　</span>
+                    </div>
+                    <div class="form-control p-0">
+                      <input
+                        type="number"
+                        title="100時間未満"
+                        max="100.00"
+                        min="00.00"
+                        step="0.50"
+                        class="form-control"
+                        v-model="form.oneMonthTotal"
+                      />
+                    </div>
                   </div>
                 </div>
                 <!-- /.col -->
@@ -141,38 +178,43 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
-                        class="input-group-text font-size-sm line-height-xs label-width-150"
+                        class="input-group-text font-size-sm line-height-xs label-width-180"
                         id="basic-addon1"
-                      >６ヶ月累計</span>
+                      >１年累計（720時間以内）　　　　　</span>
                     </div>
-                    <fvl-input
-                      class="form-control p-0"
-                      :value.sync="form.sixMonthTotal"
-                      name="sixMonthTotal"
-                      type="number"
-                      :max="99999.99"
-                      :step="0.01"
-                    />
+                    <div class="form-control p-0">
+                      <input
+                        type="number"
+                        title="100時間未満"
+                        max="720.00"
+                        min="00.50"
+                        step="0.01"
+                        class="form-control"
+                        v-model="form.yearTotal"
+                      />
+                    </div>
                   </div>
                 </div>
-                <!-- /.col -->
                 <!-- .col -->
                 <div class="col-12 pb-2">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
-                        class="input-group-text font-size-sm line-height-xs label-width-150"
+                        class="input-group-text font-size-sm line-height-xs label-width-180"
                         id="basic-addon1"
-                      >１２ヶ月累計</span>
+                      >2～6ヵ月の平均時間 （80時間以内）</span>
                     </div>
-                    <fvl-input
-                      class="form-control p-0"
-                      :value.sync="form.yaerTotal"
-                      name="yaerTotal"
-                      type="number"
-                      :max="99999.99"
-                      :step="0.01"
-                    />
+                    <div class="form-control p-0">
+                      <input
+                        type="number"
+                        title="80時間以内"
+                        max="80.00"
+                        min="00.50"
+                        step="0.01"
+                        class="form-control"
+                        v-model="form.ave_2_6"
+                      />
+                    </div>
                   </div>
                 </div>
                 <!-- /.col -->
@@ -186,7 +228,7 @@
               <div class="row justify-content-between px-3">
                 <!-- panel header -->
                 <div class="card-header col-12 bg-transparent pb-2 border-0">
-                  <h1 class="float-sm-left font-size-rg">月別設定</h1>
+                  <h1 class="float-sm-left font-size-rg">◆月別設定</h1>
                   <span class="float-sm-right font-size-sm">月ごとに締日と時間に関する設定ができます</span>
                 </div>
                 <!-- /.panel header -->
@@ -225,10 +267,10 @@
                             <td class="text-center align-middle">
                               <div class="input-group">
                                 <input
-                                  title="整数４桁少数２桁まで"
+                                  title="36協定特別条項設定の場合は１ヶ月累計時間未満、設定ない場合は45時間以内"
                                   type="number"
-                                  max="9999.99"
-                                  step="0.01"
+                                  max="99.99"
+                                  step="0.50"
                                   class="form-control"
                                   v-model="form.upTime[index]"
                                 />
@@ -319,9 +361,11 @@ export default {
       bMonth: "",
       form: {
         year: "",
-        threeMonthTotal: "",
-        sixMonthTotal: "",
-        yaerTotal: "",
+        biginningMonth: "",
+        calc_auto_time: "",
+        oneMonthTotal: "",
+        yearTotal: "",
+        ave_2_6: "",
         interval: "",
         closingDate: [{}],
         upTime: [{}],
@@ -357,14 +401,12 @@ export default {
     year: function(val, oldVal) {
       this.form.year = this.year;
       this.getDetail(this.form.year);
-      console.log(val + " " + oldVal);
     },
     bMonth: function(val, oldVal) {
       this.form.biginningMonth = this.bMonth;
       this.hidden = "GET";
     },
     details: function(val, oldVal) {
-      console.log("各配列振り分け　開始");
       this.details.forEach((detail, i) => {
         if (detail.closing != null) {
           this.form.closingDate[i] = detail.closing.toString();
@@ -405,7 +447,6 @@ export default {
         var target_month = index + 1;
         this.monthList[index] = { code: code, name: target_month };
       }
-      console.log("年度更新");
     },
     get_years: function() {
       for (let index = 0; index < 30; index++) {
@@ -413,7 +454,6 @@ export default {
         var target_year = this.baseYear + index;
         this.yearList[index] = { code: code, name: target_year };
       }
-      console.log("年度更新");
     },
     getDetail(year) {
       this.$axios
@@ -427,21 +467,22 @@ export default {
             this.details = response.data;
             this.form.year = this.details[0].fiscal_year;
             this.form.biginningMonth = this.details[0].beginning_month;
-            if (this.details[0].max_3month_total != null) {
-              this.form.threeMonthTotal = this.details[0].max_3month_total.toString();
+            if (this.details[0].calc_auto_time != null) {
+              this.form.calc_auto_time = this.details[0].calc_auto_time.toString();
             }
-            if (this.details[0].max_6month_total != null) {
-              this.form.sixMonthTotal = this.details[0].max_6month_total.toString();
+            if (this.details[0].max_1month_total_sp != null) {
+              this.form.oneMonthTotal = this.details[0].max_1month_total_sp.toString();
             }
-            if (this.details[0].max_12month_total != null) {
-              this.form.yaerTotal = this.details[0].max_12month_total.toString();
+            if (this.details[0].ave_2_6_time_sp != null) {
+              this.form.ave_2_6 = this.details[0].ave_2_6_time_sp.toString();
+            }
+            if (this.details[0].max_12month_total_sp != null) {
+              this.form.yearTotal = this.details[0].max_12month_total_sp.toString();
             }
             this.form.interval = this.details[0].interval.toString();
           } else {
             this.inputClear();
           }
-
-          console.log("詳細取得");
         })
         .catch(reason => {
           alert("詳細取得エラー");
@@ -459,7 +500,6 @@ export default {
         .get("/get_time_unit_list")
         .then(response => {
           this.TimeUnitList = response.data;
-          console.log("時間単位リスト取得");
         })
         .catch(reason => {
           alert("error");
@@ -470,7 +510,6 @@ export default {
         .get("/get_time_rounding_list", {})
         .then(response => {
           this.TimeRoundingList = response.data;
-          console.log("時間の丸めリスト取得");
         })
         .catch(reason => {
           alert("error");
@@ -481,15 +520,17 @@ export default {
     },
     inputClear() {
       // alert("clear");
-      this.form.threeMonthTotal = "";
-      this.form.sixMonthTotal = "";
-      this.form.yaerTotal = "";
+      this.form.calc_auto_time = "";
+      this.form.oneMonthTotal = "";
+      this.form.ave_2_6 = "";
+      this.form.yearTotal = "";
       this.form.interval = "";
       this.form.biginningMonth = "";
       this.form.closingDate = [];
       this.form.upTime = [];
       this.form.timeunit = [];
       this.form.timeround = [];
+      this.bMonth = this.form.biginningMonth;
     }
   }
 };
@@ -497,10 +538,5 @@ export default {
 <style scoped>
 .width15 {
   width: 15%;
-}
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
 }
 </style>

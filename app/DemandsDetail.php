@@ -19,6 +19,8 @@ class DemandsDetail extends Model
     private $doc_code;                  // 申請書類コード
     private $log_no;                    // 履歴番号
     private $row_no;                    // 行番号
+    private $department_code;           // 部署
+    private $user_code;                 // 氏名
     private $working_item;              // 作業項目
     private $date_from;                 // 作業期間開始日付
     private $time_from;                 // 作業期間開始時刻
@@ -78,6 +80,30 @@ class DemandsDetail extends Model
     public function setRownoAttribute($value)
     {
         $this->row_no = $value;
+    }
+
+
+    // 部署
+    public function getDepartmentcodeAttribute()
+    {
+        return $this->department_code;
+    }
+
+    public function setDepartmentcodeAttribute($value)
+    {
+        $this->department_code = $value;
+    }
+
+
+    // 氏名
+    public function getUsercodeAttribute()
+    {
+        return $this->user_code;
+    }
+
+    public function setUsercodeAttribute($value)
+    {
+        $this->user_code = $value;
     }
 
 
@@ -330,6 +356,8 @@ class DemandsDetail extends Model
                     'doc_code' => $this->doc_code,
                     'log_no' => $this->log_no,
                     'row_no' => $this->row_no,
+                    'department_code' => $this->department_code,
+                    'user_code' => $this->user_code,
                     'working_item' => $this->working_item,
                     'date_from' => $this->date_from,
                     'time_from' => $this->time_from,

@@ -103,6 +103,8 @@ class ApprovalController extends Controller
                         'demand_date_name' => $item->demand_date_name,
                         'date_from_name' => $item->date_from_name,
                         'date_to_name' => $item->date_to_name,
+                        'demand_department_name' => $item->demand_department_name,
+                        'demand_user_name' => $item->demand_user_name,
                         'demand_reason' => $item->demand_reason,
                         'before_after' => $item->before_after,
                         'before_after_name' => $item->before_after_name,
@@ -271,7 +273,7 @@ class ApprovalController extends Controller
                 'toaddress' => 'takeda@ssjjoo.com',
                 'ccaddress' => ['shindo@ssjjoo.com'],
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
-    // 申請状況確認
+        // 申請状況確認
         $approval_model = new Approval();
         try {
             // 承認データ

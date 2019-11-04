@@ -226,8 +226,8 @@ class Confirm extends Model
                     $mainquery->whereNotIn($this->table.'.seq', [Config::get('const.CONFIRM_SEQ.final_confirm')]);
                 }
             }
-            if (isset($this->param_user_code)) {
-                $mainquery->where($this->table.'.main_sub', $this->param_user_code);
+            if (isset($this->param_main_sub)) {
+                $mainquery->where($this->table.'.main_sub', $this->param_main_sub);
             }
             $result = $mainquery
                 ->where($this->table.'.is_deleted', 0)

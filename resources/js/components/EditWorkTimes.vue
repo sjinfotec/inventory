@@ -135,7 +135,7 @@
         <div class="card shadow-pl">
           <!-- panel header -->
           <div class="card-header bg-transparent pt-3 border-0 print-none">
-            <h1 class="float-md-left font-size-rg">{{ year }}年 {{ month }} 月 〆日から表示</h1>
+            <h1 class="float-md-left font-size-rg">{{ year }}年 {{ month }} 月 〆分を表示</h1>
             <span class="float-md-right font-size-sm">勤務時間や休暇区分などを変更できます</span>
           </div>
           <!-- /.panel header -->

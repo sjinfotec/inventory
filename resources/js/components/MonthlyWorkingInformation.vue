@@ -166,6 +166,10 @@
               v-bind:header-text1="stringtext"
               v-bind:header-text2="'虫眼鏡アイコンをクリックするとタイムカードが表示されます'"
             ></daily-working-information-panel-header>
+            <daily-working-information-panel-header
+              v-bind:header-text1="''"
+              v-bind:header-text2="'タイムカードを印刷する場合は Ctrl+P で印刷してください。'"
+            ></daily-working-information-panel-header>
           </div>
           <!-- /.panel header -->
           <!-- panel body -->

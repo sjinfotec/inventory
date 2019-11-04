@@ -33,6 +33,7 @@ class Demand extends Model
     private $mail_address;              // メール宛先
     private $nmail_department_code;     // メール宛先者部署
     private $nmail_user_code;           // メール宛先者
+    private $nmail_seq;                 // 承認者シーケンス
     private $created_user;    
     private $updated_user;                  
     private $created_at;                  
@@ -239,6 +240,17 @@ class Demand extends Model
         $this->nmail_user_code = $value;
     }
 
+    // 承認者シーケンス
+    public function getNmailseqAttribute()
+    {
+        return $this->nmail_seq;
+    }
+
+    public function setNmailseqAttribute($value)
+    {
+        $this->nmail_seq = $value;
+    }
+
     // 作成ユーザー
     public function getCreateduserAttribute()
     {
@@ -418,7 +430,10 @@ class Demand extends Model
             ->addselect('t11.name as nmail_department_name')
             ->addselect('t6.nmail_user_code')
             ->addselect('t13.name as nmail_user_name')
+            ->addselect('t6.nmail_seq')
             ->addselect('t14.row_no as detail_row_no')
+            ->addselect('t14.department_code as detail_department_code')
+            ->addselect('t14.user_code as detail_user_code')
             ->addselect('t14.working_item as detail_working_item')
             ->addselect('t14.date_from as detail_date_from')
             ->addselect('t14.time_from as detail_time_from')
@@ -439,9 +454,10 @@ class Demand extends Model
                 $join->on('t5.user_code', '=', 't1.code');
             })
             ->Join($this->table.' as t6', function ($join) { 
-                $join->on('t6.department_code', '=', 't1.department_code');
-                $join->on('t6.user_code', '=', 't1.code');
+                $join->on('t6.department_code', '=', 't5.department_code');
+                $join->on('t6.user_code', '=', 't5.user_code');
                 $join->on('t6.no', '=', 't5.no');
+                $join->on('t6.doc_code', '=', 't5.doc_code');
                 $join->on('t6.log_no', '=', 't5.log_no');
             })
             ->leftJoin($this->table_generalcodes.' as t7', function ($join) { 
@@ -550,6 +566,7 @@ class Demand extends Model
                 $join->on('t3.department_code', '=', 't1.department_code');
                 $join->on('t3.confirm_department_code', '=', 't1.nmail_department_code');
                 $join->on('t3.user_code', '=', 't1.nmail_user_code');
+                $join->on('t3.seq', '=', 't1.nmail_seq');
             })
             ->Join($this->table_confirms.' as t4', function ($join) { 
                 $join->on('t4.department_code', '=', 't3.department_code');
@@ -589,6 +606,7 @@ class Demand extends Model
 
         $mainquery = DB::table($this->table)
             ->where($this->table.'.no', '=', $this->param_no)
+            ->orderBy($this->table.'.log_no', 'desc')
             ->get();
         return $mainquery;
     }
@@ -652,6 +670,7 @@ class Demand extends Model
                     'mail_address' => $this->mail_address,
                     'nmail_department_code' => $this->nmail_department_code,
                     'nmail_user_code' => $this->nmail_user_code,
+                    'nmail_seq' => $this->nmail_seq,
                     'created_user' => $this->created_user,
                     'created_at'=>$this->created_at
                 ]

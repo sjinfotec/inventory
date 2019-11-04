@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Setting;
 use Illuminate\Support\Facades\Auth;
@@ -47,9 +49,10 @@ class SettingCalcController extends Controller
         // request
         $fiscal_year = $request->year;
         $b_month = $request->biginningMonth;
-        $three_month_total = $request->threeMonthTotal;
-        $six_month_total = $request->sixMonthTotal;
-        $year_total = $request->yaerTotal;
+        $calc_auto_time = $request->calc_auto_time;
+        $oneMonthTotal = $request->oneMonthTotal;
+        $ave_2_6 = $request->ave_2_6;
+        $year_total = $request->yearTotal;
         $interval = $request->interval;
         $up_times = $request->upTime;
         $closing_date = $request->closingDate;
@@ -58,7 +61,7 @@ class SettingCalcController extends Controller
         $converts = array();
         $response = collect();
     
-        $result = $this->insert($fiscal_year,$b_month,$three_month_total,$six_month_total,$year_total,
+        $result = $this->insert($fiscal_year,$b_month,$calc_auto_time,$oneMonthTotal,$year_total,$ave_2_6,
                                 $interval,$up_times,$closing_date,$time_rounds,$time_units);
 
         if($result){
@@ -73,9 +76,10 @@ class SettingCalcController extends Controller
      *
      * @param [type] $year
      * @param [type] $b_month
-     * @param [type] $three_month_total
-     * @param [type] $six_month_total
+     * @param [type] $calc_auto_time
+     * @param [type] $oneMonthTotal
      * @param [type] $year_total
+     * @param [type] $ave_2_6
      * @param [type] $interval
      * @param [type] $up_times
      * @param [type] $closing_date
@@ -83,7 +87,7 @@ class SettingCalcController extends Controller
      * @param [type] $time_units
      * @return void
      */
-    private function insert($fiscal_year,$b_month,$three_month_total,$six_month_total,$year_total,
+    private function insert($fiscal_year,$b_month,$calc_auto_time,$oneMonthTotal,$year_total,$ave_2_6,
                                 $interval,$up_times,$closing_date,$time_rounds,$time_units){
         $setting = new Setting();
         $systemdate = Carbon::now();
@@ -98,9 +102,18 @@ class SettingCalcController extends Controller
             if($is_exists){
                 $setting->delSetting();
             }
-            $setting->setMax3MonthtotalAttribute($three_month_total);
-            $setting->setMax6MonthtotalAttribute($six_month_total);
-            $setting->setMax12MonthtotalAttribute($year_total);
+            Log::DEBUG('  $year_total = '.$year_total);
+            Log::DEBUG('  $calc_auto_time = '.$calc_auto_time);
+            Log::DEBUG('  $calc_auto_time = '.date_format(new Carbon('2019/10/31 '.$calc_auto_time), 'His'));
+            $setting->setCalcautotimeAttribute($calc_auto_time);
+            $setting->setMax1MonthtotalAttribute(Config::get('const.C021.manthly_alert_error_1'));
+            $setting->setMax2MonthtotalAttribute(Config::get('const.C021.manthly_alert_error_2'));
+            $setting->setMax3MonthtotalAttribute(Config::get('const.C021.manthly_alert_error_3'));
+            $setting->setMax6MonthtotalAttribute(0);    // 未使用
+            $setting->setMax12MonthtotalAttribute(Config::get('const.C021.manthly_alert_error_4'));
+            $setting->setAve26timespAttribute($ave_2_6);
+            $setting->setMax12MonthtotalspAttribute($year_total);
+            $setting->setMax1MonthtotalspAttribute($oneMonthTotal);
             $setting->setBeginningmonthAttribute($b_month);
             $setting->setIntervalAttribute($interval);
             $setting->setCreateduserAttribute($user_code);

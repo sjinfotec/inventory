@@ -17,7 +17,7 @@
             <div class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
-                <div class="input-group">
+                <div v-if="this.identification_id" class="input-group">
                   <div class="input-group-prepend">
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-90"
@@ -25,7 +25,7 @@
                     >申請書類<span class="color-red">[*]</span></label>
                   </div>
                   <general-list
-                    v-bind:identification-id="'C026'"
+                    v-bind:identification-id="this.identification_id"
                     v-bind:placeholder-data="'申請書類を選択してください'"
                     v-bind:blank-data="true"
                     v-bind:selected-value="valueselecteddoccode"
@@ -158,7 +158,7 @@
           <!-- panel header -->
           <daily-working-information-panel-header
             v-bind:header-text1="valueselecteddocname"
-            v-bind:header-text2="'下記の通り、残業申請致します。'"
+            v-bind:header-text2="'下記の通り、' + valueselecteddocname + '致します。'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="col-md-6 pb-2">
@@ -184,7 +184,25 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div v-if="valueselecteddoccode === 7 || valueselecteddoccode === 8 || valueselecteddoccode === 9" class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      for="inputDemanddate"
+                    >申請日<span class="color-red">[*]</span></label>
+                  </div>
+                  <input v-model="edit.demanddate" type="date" class="form-control" id="inputDemanddate">
+                </div>
+              </div>
+              <div class="col-md-6 pb-2">
+                <message-data v-bind:message-datas="messageeditdemanddate" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <!-- /.col -->
+            </div>
+            <div v-else class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -224,7 +242,99 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valueselecteddoccode !== 1" class="row justify-content-between">
+            <div v-if="valueselecteddoccode === 2" class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      for="inputHolidaydate"
+                    >取得日<span class="color-red">[*]</span></label>
+                  </div>
+                  <input v-model="edit.getperiodfrom" type="date" class="form-control" id="inputHolidaydate">
+                </div>
+              </div>
+              <div class="col-md-6 pb-2">
+                <message-data v-bind:message-datas="messageeditgetperiodfrom" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div v-if="valueselecteddoccode === 3" class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      for="inputGetperiodfrom"
+                    >振替休暇日<span class="color-red">[*]</span></label>
+                  </div>
+                  <input v-model="edit.getperiodfrom" type="date" class="form-control" id="inputGetperiodfrom">
+                </div>
+              </div>
+              <div class="col-md-6 pb-2">
+                <message-data v-bind:message-datas="messageeditgetperiodfrom" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      for="inputGetperiodto"
+                    >休日出勤日<span class="color-red">[*]</span></label>
+                  </div>
+                  <input v-model="edit.getperiodto" type="date" class="form-control" id="inputGetperiodto">
+                </div>
+              </div>
+              <div class="col-md-6 pb-2">
+                <message-data v-bind:message-datas="messageeditgetperiodto" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div v-if="valueselecteddoccode === 4" class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      for="inputGetperiodfrom"
+                    >休日出勤日<span class="color-red">[*]</span></label>
+                  </div>
+                  <input v-model="edit.getperiodfrom" type="date" class="form-control" id="inputGetperiodfrom">
+                </div>
+              </div>
+              <div class="col-md-6 pb-2">
+                <message-data v-bind:message-datas="messageeditgetperiodfrom" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      for="inputGetperiodto"
+                    >代休日<span class="color-red">[*]</span></label>
+                  </div>
+                  <input v-model="edit.getperiodto" type="date" class="form-control" id="inputGetperiodto">
+                </div>
+              </div>
+              <div class="col-md-6 pb-2">
+                <message-data v-bind:message-datas="messageeditgetperiodto" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div v-if="valueselecteddoccode === 6" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -260,6 +370,62 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
+            <div v-if="valueselecteddoccode === 7 || valueselecteddoccode === 8 || valueselecteddoccode === 9" class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      for="inputGetperiodfrom"
+                    >取得日<span class="color-red">[*]</span></label>
+                  </div>
+                  <input v-model="edit.getperiodfrom" type="date" class="form-control" id="inputGetperiodfrom">
+                </div>
+              </div>
+              <div class="col-md-6 pb-2">
+                <message-data v-bind:message-datas="messageeditgetperiodfrom" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div v-if="valueselecteddoccode === 10" class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-130"
+                      for="inputGetperiodfrom"
+                    >欠勤取得期間開始<span class="color-red">[*]</span></label>
+                  </div>
+                  <input v-model="edit.getperiodfrom" type="date" class="form-control" id="inputGetperiodfrom">
+                </div>
+              </div>
+              <div class="col-md-6 pb-2">
+                <message-data v-bind:message-datas="messageeditgetperiodfrom" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-130"
+                      for="inputGetperiodto"
+                    >欠勤取得期間終了<span class="color-red">[*]</span></label>
+                  </div>
+                  <input v-model="edit.getperiodto" type="date" class="form-control" id="inputGetperiodto">
+                </div>
+              </div>
+              <div class="col-md-6 pb-2">
+                <message-data v-bind:message-datas="messageeditgetperiodto" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
             <!-- /.panel contents -->
             <div v-if="valueselecteddoccode === 1" class="row justify-content-between">
               <!-- .panel -->
@@ -271,7 +437,7 @@
                       <span>
                         <button class="btn btn-success btn-lg font-size-rg" @click="appendRow">+</button>
                       </span>
-                      予定時間入力
+                      取得者及び予定時間入力
                     </h1>
                     <span class="float-sm-right font-size-sm">「＋」アイコンをクリックすることで申請情報を追加できます</span>
                   </div>
@@ -291,6 +457,7 @@
                           <table class="table table-striped border-bottom font-size-sm text-nowrap">
                             <thead>
                               <tr>
+                                <td class="text-center align-middle w-15">氏名<span class="color-red">[*]</span></td>
                                 <td class="text-center align-middle w-15">作業項目<span class="color-red">[*]</span></td>
                                 <td class="text-center align-middle w-10">残業時間開始<span class="color-red">[*]</span></td>
                                 <td class="text-center align-middle w-10">残業時間終了<span class="color-red">[*]</span></td>
@@ -301,12 +468,27 @@
                             </thead>
                             <tbody>
                               <tr v-for="(item,index) in demandDetails" v-bind:key="item.id">
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <select
+                                      class="custom-select"
+                                      v-model="demandDetails[index].user_code"
+                                    >
+                                      <option value></option>
+                                      <option
+                                        v-for="ulist in userList"
+                                        :value="ulist.code"
+                                        v-bind:key="ulist.code"
+                                      >{{ ulist.name }}</option>
+                                    </select>
+                                  </div>
+                                </td>
                                 <td class="text-center align-middle"
                                   data-placement="top"
                                 >
                                   <div class>
                                     <textarea
-                                      v-model="item.working_item"
+                                      v-model="demandDetails[index].working_item"
                                       class="font-size-sm form-control"
                                       rows="3"
                                        id="inputSummary">
@@ -343,6 +525,353 @@
                                       type="text"
                                       class="font-size-sm form-control"
                                       v-model="demandDetails[index].scheduled_time"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-placement="top"
+                                >
+                                  <div class>
+                                    <textarea
+                                      v-model="demandDetails[index].demand_reason"
+                                      class="font-size-sm form-control"
+                                      rows="3"
+                                       id="inputSummary">
+                                    </textarea>
+                                  </div>
+                                </td>
+                                <rowbtn-work-time
+                                  v-on:rowdelclick-event="alertDelConf('info',item.id,index)"
+                                  v-bind:btn-mode="'rowdel'"
+                                  v-bind:is-push="false">
+                                </rowbtn-work-time>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /.row -->
+            <!-- /.panel contents -->
+            <div v-if="valueselecteddoccode === 2" class="row justify-content-between">
+              <!-- .panel -->
+              <div class="col-md pt-3 align-self-stretch">
+                <div class="card shadow-pl">
+                  <!-- panel header -->
+                  <div class="card-header bg-transparent pt-3 border-0">
+                    <h1 class="float-sm-left font-size-rg">
+                      <span>
+                        <button class="btn btn-success btn-lg font-size-rg" @click="appendRow">+</button>
+                      </span>
+                      取得者及び予定時間入力
+                    </h1>
+                    <span class="float-sm-right font-size-sm">「＋」アイコンをクリックすることで申請情報を追加できます</span>
+                  </div>
+                  <div class="col-md-6 pb-2">
+                    <message-data v-bind:message-datas="messagedatadetail" v-bind:message-class="'warning'"></message-data>
+                  </div>
+                  <!-- /.panel header -->
+                  <!-- panel body -->
+                  <!-- .row -->
+                  <!-- /.row -->
+                  <div class="card-body mb-3 p-0 border-top" v-if="demandDetails.length">
+                    <!-- panel contents -->
+                    <!-- .row -->
+                    <div class="row">
+                      <div class="col-12">
+                        <div class="table-responsive">
+                          <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                            <thead>
+                              <tr>
+                                <td class="text-center align-middle w-15">氏名<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-15">作業項目<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-10">時間開始<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-10">時間終了<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-10">出勤時間<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-165">申請理由<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-15">操作</td>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr v-for="(item,index) in demandDetails" v-bind:key="item.id">
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <select
+                                      class="custom-select"
+                                      v-model="demandDetails[index].user_code"
+                                    >
+                                      <option value></option>
+                                      <option
+                                        v-for="ulist in userList"
+                                        :value="ulist.code"
+                                        v-bind:key="ulist.code"
+                                      >{{ ulist.name }}</option>
+                                    </select>
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-placement="top"
+                                >
+                                  <div class>
+                                    <textarea
+                                      v-model="demandDetails[index].working_item"
+                                      class="font-size-sm form-control"
+                                      rows="3"
+                                       id="inputSummary">
+                                    </textarea>
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-placement="top"
+                                >
+                                  <div class>
+                                    <input
+                                      type="time"
+                                      class="font-size-sm form-control"
+                                      v-model="demandDetails[index].time_from_name"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-placement="top"
+                                >
+                                  <div class>
+                                    <input
+                                      type="time"
+                                      class="font-size-sm form-control"
+                                      v-model="demandDetails[index].time_to_name"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-placement="top"
+                                >
+                                  <div class>
+                                    <input
+                                      type="text"
+                                      class="font-size-sm form-control"
+                                      v-model="demandDetails[index].scheduled_time"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-placement="top"
+                                >
+                                  <div class>
+                                    <textarea
+                                      v-model="demandDetails[index].demand_reason"
+                                      class="font-size-sm form-control"
+                                      rows="3"
+                                       id="inputSummary">
+                                    </textarea>
+                                  </div>
+                                </td>
+                                <rowbtn-work-time
+                                  v-on:rowdelclick-event="alertDelConf('info',item.id,index)"
+                                  v-bind:btn-mode="'rowdel'"
+                                  v-bind:is-push="false">
+                                </rowbtn-work-time>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /.row -->
+            <div v-if="valueselecteddoccode === 5" class="row justify-content-between">
+              <!-- .panel -->
+              <div class="col-md pt-3 align-self-stretch">
+                <div class="card shadow-pl">
+                  <!-- panel header -->
+                  <div class="card-header bg-transparent pt-3 border-0">
+                    <h1 class="float-sm-left font-size-rg">
+                      <span>
+                        <button class="btn btn-success btn-lg font-size-rg" @click="appendRow">+</button>
+                      </span>
+                      担当者及び時間変更入力
+                    </h1>
+                    <span class="float-sm-right font-size-sm">「＋」アイコンをクリックすることで申請情報を追加できます</span>
+                  </div>
+                  <div class="col-md-6 pb-2">
+                    <message-data v-bind:message-datas="messagedatadetail" v-bind:message-class="'warning'"></message-data>
+                  </div>
+                  <!-- /.panel header -->
+                  <!-- panel body -->
+                  <!-- .row -->
+                  <!-- /.row -->
+                  <div class="card-body mb-3 p-0 border-top" v-if="demandDetails.length">
+                    <!-- panel contents -->
+                    <!-- .row -->
+                    <div class="row">
+                      <div class="col-12">
+                        <div class="table-responsive">
+                          <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                            <thead>
+                              <tr>
+                                <td class="text-center align-middle w-15">氏名<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-10">期間開始<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-10">期間終了<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-10">始業時間<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-10">終業時間<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-165">申請理由<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-15">操作</td>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr v-for="(item,index) in demandDetails" v-bind:key="item.id">
+                                <td class="text-center align-middle">
+                                  <div class="input-group">
+                                    <select
+                                      class="custom-select"
+                                      v-model="demandDetails[index].user_code"
+                                    >
+                                      <option value></option>
+                                      <option
+                                        v-for="ulist in userList"
+                                        :value="ulist.code"
+                                        v-bind:key="ulist.code"
+                                      >{{ ulist.name }}</option>
+                                    </select>
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-placement="top"
+                                >
+                                  <div class>
+                                    <input
+                                      type="date"
+                                      class="font-size-sm form-control"
+                                      v-model="demandDetails[index].date_from"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-placement="top"
+                                >
+                                  <div class>
+                                    <input
+                                      type="date"
+                                      class="font-size-sm form-control"
+                                      v-model="demandDetails[index].date_to"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-placement="top"
+                                >
+                                  <div class>
+                                    <input
+                                      type="time"
+                                      class="font-size-sm form-control"
+                                      v-model="demandDetails[index].time_from"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-placement="top"
+                                >
+                                  <div class>
+                                    <input
+                                      type="time"
+                                      class="font-size-sm form-control"
+                                      v-model="demandDetails[index].time_to"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-placement="top"
+                                >
+                                  <div class>
+                                    <textarea
+                                      v-model="demandDetails[index].demand_reason"
+                                      class="font-size-sm form-control"
+                                      rows="3"
+                                       id="inputSummary">
+                                    </textarea>
+                                  </div>
+                                </td>
+                                <rowbtn-work-time
+                                  v-on:rowdelclick-event="alertDelConf('info',item.id,index)"
+                                  v-bind:btn-mode="'rowdel'"
+                                  v-bind:is-push="false">
+                                </rowbtn-work-time>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div v-if="valueselecteddoccode === 7 || valueselecteddoccode === 8 || valueselecteddoccode === 9" class="row justify-content-between">
+              <!-- .panel -->
+              <div class="col-md pt-3 align-self-stretch">
+                <div class="card shadow-pl">
+                  <!-- panel header -->
+                  <div class="card-header bg-transparent pt-3 border-0">
+                    <h1 class="float-sm-left font-size-rg">
+                      <span>
+                        <button class="btn btn-success btn-lg font-size-rg" @click="appendRow">+</button>
+                      </span>
+                      取得期間入力
+                    </h1>
+                    <span class="float-sm-right font-size-sm">「＋」アイコンをクリックすることで申請情報を追加できます</span>
+                  </div>
+                  <div class="col-md-6 pb-2">
+                    <message-data v-bind:message-datas="messagedatadetail" v-bind:message-class="'warning'"></message-data>
+                  </div>
+                  <!-- /.panel header -->
+                  <!-- panel body -->
+                  <!-- .row -->
+                  <!-- /.row -->
+                  <div class="card-body mb-3 p-0 border-top" v-if="demandDetails.length">
+                    <!-- panel contents -->
+                    <!-- .row -->
+                    <div class="row">
+                      <div class="col-12">
+                        <div class="table-responsive">
+                          <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                            <thead>
+                              <tr>
+                                <td class="text-center align-middle w-10">取得開始時間<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-10">取得終了時間<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-165">申請理由<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-15">操作</td>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr v-for="(item,index) in demandDetails" v-bind:key="item.id">
+                                <td class="text-center align-middle"
+                                  data-placement="top"
+                                >
+                                  <div class>
+                                    <input
+                                      type="time"
+                                      class="font-size-sm form-control"
+                                      v-model="demandDetails[index].time_from"
+                                    />
+                                  </div>
+                                </td>
+                                <td class="text-center align-middle"
+                                  data-placement="top"
+                                >
+                                  <div class>
+                                    <input
+                                      type="time"
+                                      class="font-size-sm form-control"
+                                      v-model="demandDetails[index].time_to"
                                     />
                                   </div>
                                 </td>
@@ -511,7 +1040,7 @@ export default {
   data() {
     return {
       getdo: 0,
-      valueselecteddoccode: "",
+      valueselecteddoccode: 0,
       fromdate: "",
       valueselecteddocname: "",
       validate: false,
@@ -555,12 +1084,18 @@ export default {
       messageshowsearch: false,
       messageconfirmkbn: "warning",
       selecttedrowindex: -1,
-      demandDetails: []
+      demandDetails: [],
+      userroleList: [],
+      userrole: "",
+      userdepartment_code: "",
+      identification_id: '',
+      generalList_m: [],
+      userList: []
     };
   },
   // マウント時
   mounted() {
-    console.log("MakeDemand Component mounted.");
+    this.getUserDepartmentRole();
   },
   computed: {
     validation() {
@@ -599,7 +1134,6 @@ export default {
       this.messageconfirmkbn = "warning";
       this.validate = true;
       this.messagedataClear();
-      console.log("checkFormDetail");
       if (!this.edit.demanddate) {
         this.messageeditdemanddate.push("申請日は必ず入力してください。");
         this.validate = false;
@@ -623,14 +1157,15 @@ export default {
           this.messagedatadetail.push("予定時間が入力されていません。");
           this.validate = false;
         }
-        console.log("this.demandDetails.length " + this.demandDetails.length);
         for (var i = 0; i < this.demandDetails.length; i++) {
-          console.log("this.demandDetails[i].working_item" + this.demandDetails[i].working_item);
           if (!this.isRowInput(i)) {
-            console.log("this.demandDetails[i].working_item" + this.demandDetails[i].working_item);
             this.messagedatadetail.push(i+1 + "行めの入力がありません。");
             this.validate = false;
           } else {
+            if (this.demandDetails[i].user_code == "") {
+              this.messagedatadetail.push(i+1 + "行めの氏名に入力がありません。");
+              this.validate = false;
+            }
             if (this.demandDetails[i].working_item == "") {
               this.messagedatadetail.push(i+1 + "行めの作業項目に入力がありません。");
               this.validate = false;
@@ -644,7 +1179,6 @@ export default {
               this.messagedatadetail.push(i+1 + "行めの残業時間開始に入力がありません。");
               this.validate = false;
             } else {
-              console.log(this.demandDetails[i].time_from_name);
               if (!timeRE.test(this.demandDetails[i].time_from_name)) {
                 this.messagedatadetail.push(i+1 + "行めの残業時間開始に正しい時刻を入力してください。");
                 this.validate = false;
@@ -788,6 +1322,8 @@ export default {
       for ( var i=0; i<this.array_demandresult[index].array_demandDeatail.length; i++ ) {
         this.demandDetails.push({
           id: this.array_demandresult[index].array_demandDeatail[i].detail_row_no,
+          department_code: this.array_demandresult[index].array_demandDeatail[i].detail_department_code,
+          user_code: this.array_demandresult[index].array_demandDeatail[i].detail_user_code,
           working_item: this.array_demandresult[index].array_demandDeatail[i].detail_working_item,
           time_from_name: this.array_demandresult[index].array_demandDeatail[i].detail_time_from,
           time_to_name: this.array_demandresult[index].array_demandDeatail[i].detail_time_to,
@@ -795,6 +1331,58 @@ export default {
           demand_reason: this.array_demandresult[index].array_demandDeatail[i].detail_demand_reason
         });
       }
+    },
+    // ログインユーザーの権限を取得
+    getUserDepartmentRole: function() {
+      this.$axios
+        .get("/get_login_user_department", {
+        })
+        .then(response => {
+          this.userroleList = response.data;
+          for ( var i=0; i<this.userroleList.length; i++ ) {
+              this.userdepartment_code = this.userroleList[i]["department_code"];
+              this.userrole = this.userroleList[i]["role"];
+          }
+          this.getUserList(1, this.userdepartment_code);
+          if (this.userrole == "1") {
+            this.identification_id = "C032";
+          } else {
+            this.identification_id = "C026";
+          }
+          this.getGeneralList(this.identification_id);
+        })
+        .catch(reason => {
+          alert("ログインユーザー権限取得エラー");
+        });
+    },
+    getUserList(getdovalue, value) {
+      this.$axios
+        .get("/get_user_list", {
+          params: {
+            getdo: getdovalue,
+            code: value
+          }
+        })
+        .then(response => {
+          this.userList = response.data;
+        })
+        .catch(reason => {
+          alert("ユーザーリスト取得エラー");
+        });
+    },
+    getGeneralList(value) {
+      this.$axios
+        .get("/get_general_list", {
+          params: {
+            identificationid: value
+          }
+        })
+        .then(response => {
+          this.generalList_m = response.data;
+        })
+        .catch(reason => {
+          this.alert("error", "勤怠権限リスト取得に失敗しました", "エラー");
+        });
     },
     // 申請一覧取得
     getDemandList() {
@@ -840,6 +1428,8 @@ export default {
     appendRow: function() {
       this.demandDetails.push({
         id: "",
+        department_code: "",
+        user_code: "",
         working_item: "",
         time_from_name: "",
         time_to_name: "",
@@ -920,11 +1510,12 @@ export default {
             this.array_ccaddress = this.resresults.ccaddress;
             this.alert("success", this.msg + "しました", "申請完了");
             this.isdischargepush = true;
+            this.edit.demandno = this.resresults.demandno;
             this.demandMailSend();
           } else {
+            this.edit.demandno = "";
             this.alert("error", this.msg + "に失敗しました", "エラー");
           }
-          this.edit.demandno = this.resresults.demandno;
           if (this.resresults.messagedata != null) {
             this.messagedatasserver = this.resresults.messagedata;
           }
@@ -963,7 +1554,8 @@ export default {
     },
     // 申請明細で入力されているか
     isRowInput: function(index) {
-      if (this.demandDetails[index].working_item != "" ||
+      if (this.demandDetails[index].user_code != "" ||
+        this.demandDetails[index].working_item != "" ||
         this.demandDetails[index].time_from_name != "" ||
         this.demandDetails[index].time_to_name != "" ||
         this.demandDetails[index].scheduled_time != "" ||

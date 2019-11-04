@@ -49,6 +49,7 @@ class DailyWorkingInformationController extends Controller
 
     private $not_employment_working = 0;
     private $user_temp_seq = 0;
+    private $check_interval2 = 0;
 
     private $array_messagedata = array();
 
@@ -387,14 +388,17 @@ class DailyWorkingInformationController extends Controller
         $working_time_dates = new Collection();
         $working_time_sum = new Collection();
         if ($add_result) {
+            Log::debug(' ---- datefrom = '.$datefrom);
+            Log::debug(' ---- dateto = '.$dateto);
             $temp_working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
             $temp_working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
             $temp_working_model->setParamEmploymentStatusAttribute($employmentstatus);
             $temp_working_model->setParamDepartmentcodeAttribute($departmentcode);
             $temp_working_model->setParamUsercodeAttribute($usercode);
             try{
-                Log::debug('getTempWorkingTimeDateUserJoin ');
+                Log::debug('出勤・退勤データtempから登録 ');
                 $temp_working_time_dates = $temp_working_model->getTempWorkingTimeDateUserJoin($dateto);
+                Log::debug('temp_working_time_dates =  '.count($temp_working_time_dates));
                 if (count($temp_working_time_dates) > 0) {
                     Log::debug('isset $temp_working_time_dates true ');
                     $working_model = new WorkingTimedate();
@@ -911,10 +915,10 @@ class DailyWorkingInformationController extends Controller
                             $before_result->user_holiday_kubun);
                             Log::DEBUG('        １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
                         // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
-                        $before_date = null;
+                        /*$before_date = null;
                         $before_user_code = null;
                         $before_department_code = null;
-                        $before_result = null;
+                        $before_result = null;*/
                         $before_out_flg = true;
                         $target_flg = false;
                         if ($target_flg) {
@@ -939,11 +943,19 @@ class DailyWorkingInformationController extends Controller
                 if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
                 if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
                 if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
-                if ($before_holiday_department_code != $result->department_code ||
-                    $before_holiday_user_code != $result->user_code ||
-                    $before_holiday_date != $result->user_working_date ||
-                    $before_holiday_kubun != $user_holiday_kubun) {
-                    $temp_non_date_flg = true;
+                if (isset($before_result)) {
+                    if ($before_result->department_code != $result->department_code ||
+                        $before_result->user_code != $result->user_code ||
+                        $before_result->user_working_date != $result->user_working_date ||
+                        $before_holiday_kubun != $user_holiday_kubun) {
+                        if (!$before_out_flg) {
+                            $temp_non_date_flg = true;
+                        }
+                    } else {
+                        if (!$before_out_flg) {
+                            $temp_non_date_flg = true;
+                        }
+                    }
                 }
                 // 1件前の日付がnullである場合、いきなり対象日付がないということなので出力
                 if (!$before_out_flg) {
@@ -1510,6 +1522,7 @@ class DailyWorkingInformationController extends Controller
                 $user_holiday_kubun,
                 $working_timetable_no));
         }
+        $this->check_interval2 = $value_check_interval;
         Log::DEBUG('---------------------- setAttendancetime end ------------------------ ');
             
     }
@@ -3765,6 +3778,7 @@ class DailyWorkingInformationController extends Controller
                     $working_status = $result->working_status;
                 }
                 // 労働時間の計算
+                $set_calcTimes_flg = false;
                 if ($result->current_calc == '1') {     // 当日分である場合
                     // ユーザー休暇区分判定用
                     $before_holiday_date = null;
@@ -3772,7 +3786,6 @@ class DailyWorkingInformationController extends Controller
                     $before_holiday_department_code = null;
                     $before_holiday_kubun = null;
                     // 計算セットフラグ　　calcTimes実行ならtrueにする
-                    $set_calcTimes_flg = false;
                     // ----------------------- 私用外出 -------------------------------------------
                     // 私用外出は複数ある可能性があるので私用外出計算は戻り時点で計算する。
                     Log::DEBUG('        私用外出 $missing_middle_time = '.$missing_middle_time);
@@ -3896,6 +3909,8 @@ class DailyWorkingInformationController extends Controller
                     // 出勤していなく１日休暇設定されていればデータ作成
                     // 出勤していなく休暇設定されていなければデータ作成
                     //if (!$set_calcTimes_flg && isset($result->holiday_kubun)) {
+                    Log::DEBUG('        temp_working_time_datesデータ作成事前条件チェック $set_calcTimes_flg = '.$set_calcTimes_flg);
+                    Log::DEBUG('        temp_working_time_datesデータ作成事前条件チェック $mode_chk = '.$mode_chk);
                     if (!$set_calcTimes_flg && !$mode_chk) {
                         Log::DEBUG('        temp_working_time_datesデータ作成開始 ');
                         Log::DEBUG('            calcTimes計算対象外データ作成 =  '.$current_user_code);
@@ -4021,6 +4036,30 @@ class DailyWorkingInformationController extends Controller
                     Log::DEBUG('    退勤打刻時刻 = '.$leaving_time);
                     if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                         $array_add_leaving_time[] = $leaving_time;
+                    }
+                    // 前のデータが計算対象であれば出力する
+                    // 計算セットフラグ
+                    if ($set_calcTimes_flg) {
+                        Log::DEBUG('        temp_working_time_datesデータ作成開始 ');
+                        Log::DEBUG('            １個前のユーザーを登録 '.$before_user_code);
+                        // ユーザー労働時間登録(１個前のユーザーを登録する)
+                        $add_result = $this->addTempWorkingTimeDate(
+                            $before_date,
+                            $before_user_code,
+                            $before_department_code,
+                            $before_result,
+                            $note,
+                            $working_status,
+                            $array_calc_time,
+                            $array_missing_middle_time,
+                            $array_public_going_out_time,
+                            $array_add_attendance_time,
+                            $array_add_leaving_time,
+                            $array_add_missing_middle_time,
+                            $array_add_missing_middle_return_time,
+                            $array_add_public_going_out_time,
+                            $array_add_public_going_out_return_time);
+                        Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$before_user_code);
                     }
                 }
             } elseif ($current_date == $before_date &&
@@ -5446,7 +5485,8 @@ class DailyWorkingInformationController extends Controller
         $temp_working_model->setBeginningmonthAttribute($target_result->beginning_month);
         $temp_working_model->setCheckresultAttribute($target_result->check_result);
         $temp_working_model->setCheckmaxtimesAttribute($target_result->check_max_times);
-        $temp_working_model->setCheckintervalAttribute($target_result->check_interval);
+        $temp_working_model->setCheckintervalAttribute($this->check_interval2);
+        $this->check_interval2 = 0;
         $temp_working_model->setYearAttribute($target_result->year);
         $temp_working_model->setPatternAttribute($target_result->pattern);
         $temp_working_model->setFixedtimeAttribute('0');

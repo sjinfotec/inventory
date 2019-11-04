@@ -209,6 +209,17 @@ class ApiCommonController extends Controller
         return $departments;
     }
         
+    /** ユーザー部署ロール取得（画面から）
+     *
+     * @return list departments
+     */
+    public function getLoginUserDepartment(){
+        // ログインユーザの権限取得
+        $chk_user_id = Auth::user()->code;
+        $mainquery = $this->getUserDepartment($chk_user_id, null);
+        return $mainquery;
+    }
+        
     /** ユーザー権限取得（画面から）
      *
      * @return list departments
@@ -307,13 +318,13 @@ class ApiCommonController extends Controller
         $subquery3 = $this->getUserApplyTermSubquery($target_date);
         // departmentsの最大適用開始日付subquery
         $subquery4 = $this->getDepartmentApplyTermSubquery($target_date);
-        \DB::enableQueryLog();
         $mainquery = DB::table('users')
             ->select(
                 'users.code as code',
                 'users.name as name',
                 'users.department_code as department_code',
-                't2.name as department_name')
+                't2.name as department_name',
+                'users.role as role')
             ->JoinSub($subquery3, 't1', function ($join) { 
                 $join->on('t1.code', '=', 'users.code');
                 $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
@@ -324,14 +335,7 @@ class ApiCommonController extends Controller
             ->where('users.code', $user_id)
             ->where('users.is_deleted', 0)
             ->get();
-
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getUserDepartment' => \DB::getQueryLog()
-            ]
-            );
-    
+            
         return $mainquery;
     }
         
