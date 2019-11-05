@@ -109,38 +109,38 @@
               <tr
                 bgcolor="#add8e6"
               >
-                <td class="text-center align-middle w-15">{{ timeItems.employment_status_name }}</td>
-                <td class="text-center align-middle w-15">{{ timeItems.working_date_1 }}</td>
-                <td class="text-center align-middle w-15">{{ timeItems.working_date_2 }}</td>
-                <td class="text-center align-middle w-15">{{ timeItems.working_date_3 }}</td>
-                <td class="text-center align-middle w-15">{{ timeItems.working_date_4 }}</td>
-                <td class="text-center align-middle w-15">{{ timeItems.working_date_5 }}</td>
-                <td class="text-center align-middle w-15">{{ timeItems.working_date_6 }}</td>
-                <td class="text-center align-middle w-15">{{ timeItems.working_date_7 }}</td>
-                <td class="text-center align-middle w-15">{{ timeItems.working_date_8 }}</td>
-                <td class="text-center align-middle w-15">{{ timeItems.working_date_9 }}</td>
-                <td class="text-center align-middle w-15">{{ timeItems.working_date_10 }}</td>
-                <td class="text-center align-middle w-15">{{ timeItems.working_date_11 }}</td>
-                <td class="text-center align-middle w-15">{{ timeItems.working_date_12 }}</td>
+                <td class="text-center align-middle">{{ timeItems.employment_status_name }}</td>
+                <td class="text-center align-middle">{{ timeItems.working_date_1 }}</td>
+                <td class="text-center align-middle">{{ timeItems.working_date_2 }}</td>
+                <td class="text-center align-middle">{{ timeItems.working_date_3 }}</td>
+                <td class="text-center align-middle">{{ timeItems.working_date_4 }}</td>
+                <td class="text-center align-middle">{{ timeItems.working_date_5 }}</td>
+                <td class="text-center align-middle">{{ timeItems.working_date_6 }}</td>
+                <td class="text-center align-middle">{{ timeItems.working_date_7 }}</td>
+                <td class="text-center align-middle">{{ timeItems.working_date_8 }}</td>
+                <td class="text-center align-middle">{{ timeItems.working_date_9 }}</td>
+                <td class="text-center align-middle">{{ timeItems.working_date_10 }}</td>
+                <td class="text-center align-middle">{{ timeItems.working_date_11 }}</td>
+                <td class="text-center align-middle">{{ timeItems.working_date_12 }}</td>
               </tr>
             </thead>
             <tbody>
               <tr
                 v-for="(timevalue,index) in timeItems.timevalues"
               >
-                <td class="text-center align-middle w-15">{{ timevalue.employment_status_name }}</td>
-                <td class="text-center align-middle w-15">{{ timevalue.total_working_times_1 }}</td>
-                <td class="text-center align-middle w-15">{{ timevalue.total_working_times_2 }}</td>
-                <td class="text-center align-middle w-15">{{ timevalue.total_working_times_3 }}</td>
-                <td class="text-center align-middle w-15">{{ timevalue.total_working_times_4 }}</td>
-                <td class="text-center align-middle w-15">{{ timevalue.total_working_times_5 }}</td>
-                <td class="text-center align-middle w-15">{{ timevalue.total_working_times_6 }}</td>
-                <td class="text-center align-middle w-15">{{ timevalue.total_working_times_7 }}</td>
-                <td class="text-center align-middle w-15">{{ timevalue.total_working_times_8 }}</td>
-                <td class="text-center align-middle w-15">{{ timevalue.total_working_times_9 }}</td>
-                <td class="text-center align-middle w-15">{{ timevalue.total_working_times_10 }}</td>
-                <td class="text-center align-middle w-15">{{ timevalue.total_working_times_11 }}</td>
-                <td class="text-center align-middle w-15">{{ timevalue.total_working_times_12 }}</td>
+                <td class="text-center align-middle">{{ timevalue.employment_status_name }}</td>
+                <td class="text-center align-middle">{{ timevalue.total_working_times_1 }}</td>
+                <td class="text-center align-middle">{{ timevalue.total_working_times_2 }}</td>
+                <td class="text-center align-middle">{{ timevalue.total_working_times_3 }}</td>
+                <td class="text-center align-middle">{{ timevalue.total_working_times_4 }}</td>
+                <td class="text-center align-middle">{{ timevalue.total_working_times_5 }}</td>
+                <td class="text-center align-middle">{{ timevalue.total_working_times_6 }}</td>
+                <td class="text-center align-middle">{{ timevalue.total_working_times_7 }}</td>
+                <td class="text-center align-middle">{{ timevalue.total_working_times_8 }}</td>
+                <td class="text-center align-middle">{{ timevalue.total_working_times_9 }}</td>
+                <td class="text-center align-middle">{{ timevalue.total_working_times_10 }}</td>
+                <td class="text-center align-middle">{{ timevalue.total_working_times_11 }}</td>
+                <td class="text-center align-middle">{{ timevalue.total_working_times_12 }}</td>
               </tr>
             </tbody>
           </table>
