@@ -195,7 +195,7 @@
           </div>
           <!-- /panel body -->
           <!-- panel body -->
-          <div class="card-body mb-3 py-0 pt-4 border-top print-only print-space">
+          <div class="card-body mb-3 py-0 pt-4 border-top print-none">
             <!-- panel contents -->
             <!-- .row -->
             <div class="row">
@@ -217,6 +217,22 @@
           >
             <!-- panel contents -->
             <!-- .row -->
+            <div class="row">
+              <div class="card-body mb-3 py-0 pt-4 border-top print-only print-space">
+                <!-- panel contents -->
+                <!-- .row -->
+                <div class="row">
+                  <!-- col -->
+                  <div class="col-md-12 pb-2">
+                    <h1 class="float-md-left font-size-rg">{{ company_name }}</h1>
+                    <span class="float-md-right font-size-sm">{{ datejaFormat }}</span>
+                  </div>
+                  <!-- /.col -->
+                </div>
+                <!-- /.row -->
+                <!-- /.panel contents -->
+              </div>
+            </div>
             <div class="row">
               <!-- col -->
               <div class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">

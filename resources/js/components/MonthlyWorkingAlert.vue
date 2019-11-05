@@ -436,13 +436,13 @@ export default {
             this.stringtext = this.datejaFormat + "のアラートを締日集計で検索";
           } else {
             if (this.valuedisplay == 2) {
-              this.stringtext = this.datejaFormat + "のアラートを月初集計で検索";
+              this.stringtext = this.datejaFormat + "のアラートを１か月集計で検索";
             } else {
               if (this.valuedisplay == 3) {
                 this.stringtext = this.datejaFormat + "のアラートを締日集計で検索";
               } else {
                 if (this.valuedisplay == 4) {
-                  this.stringtext = this.datejaFormat + "のアラートを月初集計で検索";
+                  this.stringtext = this.datejaFormat + "のアラートを１か月集計で検索";
                 } else {
                   this.stringtext = "";
                 }
