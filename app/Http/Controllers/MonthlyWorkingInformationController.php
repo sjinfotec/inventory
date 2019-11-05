@@ -484,7 +484,11 @@ class MonthlyWorkingInformationController extends Controller
             'leaving' => $result->leaving_time_1,
             'public_going_out_hours' => $result->public_going_out_hours,
             'missing_middle_hours' => $result->missing_middle_hours,
-            'remark_holiday_name' => $remark_data1
+            'remark_holiday_name' => $remark_data1,
+            'total_working_times' => $result->total_working_times,
+            'regular_working_times' => $result->regular_working_times,
+            'off_hours_working_hours' => $result->off_hours_working_hours,
+            'late_night_overtime_hours' => $result->late_night_overtime_hours
         );
     }
 
