@@ -8,7 +8,7 @@
     v-on:opened="todaySet()"
     v-on:closed="dateselected()"
     v-on:cleared="clearDate()"
-    placeholder="日付を選択してください">
+    :placeholder="placeHolder">
   </datepicker>
 </template>
 
@@ -21,6 +21,10 @@ export default {
   props: {
     defaultDate: {
       type: Date
+    },
+    placeHolder: {
+      type: String,
+      default: '日付を選択してください'
     },
     dateFormat: {
       type: String,

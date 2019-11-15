@@ -265,6 +265,11 @@ Vue.component(
     require("./components/RowBtnWorkTime.vue").default
 );
 
+Vue.component(
+    "working-chart",
+    require("./components/WorkingChart.vue").default
+);
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application

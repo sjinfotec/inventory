@@ -35,8 +35,9 @@ class Setting extends Model
     private $ave_2_6_time_sp;               // ２－６ヶ月平均（特別条項）
     private $max_12month_total_sp;          // １２ヶ月累計（特別条項）
     private $max_1month_total_sp;           // １ヶ月累計（特別条項）
-    private $interval;                      // 勤務間インターバル
+    private $count_sp;                      // 特別条項の回数
     private $beginning_month;               // 期首月
+    private $interval;                      // 勤務間インターバル
     private $year;                          // 年
     private $created_user;                  // 作成ユーザー
     private $updated_user;                  // 修正ユーザー
@@ -232,15 +233,15 @@ class Setting extends Model
         $this->max_1month_total_sp = $value;
     }
 
-    // インターバル
-    public function getIntervalAttribute()
+    // 特別条項の回数
+    public function getCountspAttribute()
     {
-        return $this->interval;
+        return $this->count_sp;
     }
 
-    public function setIntervalAttribute($value)
+    public function setCountspAttribute($value)
     {
-        $this->interval = $value;
+        $this->count_sp = $value;
     }
 
 
@@ -253,6 +254,17 @@ class Setting extends Model
     public function setBeginningmonthAttribute($value)
     {
         $this->beginning_month = $value;
+    }
+
+    // インターバル
+    public function getIntervalAttribute()
+    {
+        return $this->interval;
+    }
+
+    public function setIntervalAttribute($value)
+    {
+        $this->interval = $value;
     }
 
 
@@ -407,6 +419,7 @@ class Setting extends Model
                 $this->table.'.ave_2_6_time_sp',
                 $this->table.'.max_12month_total_sp',
                 $this->table.'.max_1month_total_sp',
+                $this->table.'.count_sp',
                 $this->table.'.beginning_month',
                 $this->table.'.interval',
                 $this->table.'.year',
@@ -469,6 +482,7 @@ class Setting extends Model
                 $this->table.'.ave_2_6_time_sp',
                 $this->table.'.max_12month_total_sp',
                 $this->table.'.max_1month_total_sp',
+                $this->table.'.count_sp',
                 $this->table.'.beginning_month',
                 $this->table.'.interval',
                 $this->table.'.year',
@@ -546,6 +560,7 @@ class Setting extends Model
                 'ave_2_6_time_sp' => $this->ave_2_6_time_sp,
                 'max_12month_total_sp' => $this->max_12month_total_sp,
                 'max_1month_total_sp' => $this->max_1month_total_sp,
+                'count_sp' => $this->count_sp,
                 'beginning_month' => $this->beginning_month,
                 'interval' => $this->interval,
                 'year' => $this->year,
