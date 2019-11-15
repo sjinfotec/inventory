@@ -1,6 +1,6 @@
 <template>
   <div v-if="workingtimedates.length ">
-    <table class="table table-striped table-bordered">
+    <table class="table table-striped table-bordered text-nowrap">
       <thead>
         <tr>
           <th>部署</th>

@@ -480,6 +480,7 @@ class MonthlyWorkingInformationController extends Controller
         $this->array_date[] = array(
             'user_code' => $result->user_code,
             'workingdate' => date_format($datetime, 'Ymd'),
+            'workingdatename' => date_format($datetime, 'Y年m月d日')."（".$week_data."）",
             'attendance' => $result->attendance_time_1,
             'leaving' => $result->leaving_time_1,
             'public_going_out_hours' => $result->public_going_out_hours,

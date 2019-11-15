@@ -167,7 +167,7 @@
               v-bind:header-text2="'虫眼鏡アイコンをクリックするとタイムカードが表示されます'"
             ></daily-working-information-panel-header>
             <daily-working-information-panel-header
-              v-bind:header-text1="''"
+              v-bind:header-text1="stringtext2"
               v-bind:header-text2="'タイムカードを印刷する場合は Ctrl+P で印刷してください。'"
             ></daily-working-information-panel-header>
           </div>
@@ -235,7 +235,7 @@
             </div>
             <div class="row">
               <!-- col -->
-              <div class="col-sm-2 col-md-2 col-lg-2 pb-2 align-self-stretch">
+              <div class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">
                 <a
                   class="float-left mr-2 px-2 py-2 font-size-rg btn btn-primary btn-lg print-none"
                   data-toggle="collapse"
@@ -251,16 +251,16 @@
               </div>
               <!-- /.col -->
               <!-- col -->
-              <div class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">
+              <!-- <div class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">
                 <working-chart
                   v-on:label-data="'残業時間＋深夜残業時間'"
                   v-on:chart-data="'36.5'"
                 >
                 </working-chart>
-              </div>
+              </div> -->
               <!-- /.col -->
               <!-- col -->
-              <div class="col-sm-4 col-md-4 col-lg-4 pb-2 align-self-stretch">
+              <div class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">
                 <h1 class="font-size-sm m-0 mb-1 text-sm-right">所属部署</h1>
                 <p class="font-size-rg m-0 text-sm-right">{{ calclist.department }}</p>
               </div>
@@ -304,7 +304,7 @@
                               <tr v-for="calclisttimedate in calclist.date">
                                 <td
                                   class="text-center align-middle"
-                                >{{ calclisttimedate.workingdate }}</td>
+                                >{{ calclisttimedate.workingdatename }}</td>
                                 <td
                                   v-if="calclisttimedate.attendance != '00:00' || calclisttimedate.leaving != '00:00'"
                                   class="text-center align-middle"
@@ -398,6 +398,7 @@ export default {
       userrole: "",
       defaultDate: new Date(),
       stringtext: "",
+      stringtext2: "",
       datejaFormat: "",
       hrefindex: "",
       resresults: [],
