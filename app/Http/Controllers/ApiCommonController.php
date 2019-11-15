@@ -1012,6 +1012,33 @@ class ApiCommonController extends Controller
     }
     
     /**
+     * インターバル時間を取得して分に変換する
+     * 
+     *  設定する時刻はDATEで
+     *
+     * @return インターバル時間 (H:i:s)
+     */
+    public function getIntevalMinute($target_date){
+        // 設定項目よりインターバル時間を取得
+        $setting_model = new Setting();
+        $dt = new Carbon($target_date);
+        $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
+        $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
+        $settings = $setting_model->getSettingDatas();
+        $interval = 0;
+        foreach($settings as $setting) {
+            if (isset($setting->interval)) {
+                $interval = $setting->interval;
+                break;
+            }
+        }
+        $hh = floor($interval);
+        $mm = ($interval - floor($interval)) * 60;
+        Log::DEBUG('インターバル時間 = '.str_pad($hh, 2 , '0', STR_PAD_LEFT).":".str_pad($mm, 2 , '0', STR_PAD_LEFT).":00");
+        return str_pad($hh, 2 , '0', STR_PAD_LEFT).":".str_pad($mm, 2 , '0', STR_PAD_LEFT).":00";
+    }
+    
+    /**
      * 出勤時間差をチェック
      * 
      *  設定する時刻はDATETIMEで

@@ -42,27 +42,44 @@ class SettingCalcController extends Controller
     /**
      * 登録
      *
-     * @param StoreSettingPost $request
+     * @param Request $request
      * @return void
      */
-    public function store(StoreSettingPost $request){
+  public function store(Request $request){
         // request
-        $fiscal_year = $request->year;
-        $b_month = $request->biginningMonth;
-        $calc_auto_time = $request->calc_auto_time;
-        $oneMonthTotal = $request->oneMonthTotal;
-        $ave_2_6 = $request->ave_2_6;
-        $year_total = $request->yearTotal;
-        $interval = $request->interval;
-        $up_times = $request->upTime;
-        $closing_date = $request->closingDate;
-        $time_rounds = $request->timeround;
-        $time_units = $request->timeunit;
+        $fiscal_year = $request->settings["year"];
+        $b_month = $request->settings["biginningMonth"];
+        $calc_auto_time = $request->settings["calc_auto_time"];
+        $oneMonthTotal = $request->settings["oneMonthTotal"];
+        $year_total = $request->settings["yearTotal"];
+        $oneMonthTotal_sp = $request->settings["sp_oneMonthTotal"];
+        $year_total_sp = $request->settings["sp_yearTotal"];
+        $ave_2_6 = $request->settings["sp_ave_2_6"];
+        $interval = $request->settings["sp_interval"];
+        $count_sp = $request->settings["sp_count"];
+        $up_times = $request->settings["upTime"];
+        $closing_date = $request->settings["closingDate"];
+        $time_rounds = $request->settings["timeround"];
+        $time_units = $request->settings["timeunit"];
         $converts = array();
         $response = collect();
     
-        $result = $this->insert($fiscal_year,$b_month,$calc_auto_time,$oneMonthTotal,$year_total,$ave_2_6,
-                                $interval,$up_times,$closing_date,$time_rounds,$time_units);
+        $result = $this->insert(
+            $fiscal_year,
+            $b_month,
+            $calc_auto_time,
+            $oneMonthTotal,
+            $year_total,
+            $oneMonthTotal_sp,
+            $year_total_sp,
+            $ave_2_6,
+            $interval,
+            $count_sp,
+            $up_times,
+            $closing_date,
+            $time_rounds,
+            $time_units
+        );
 
         if($result){
         }else{
@@ -87,8 +104,22 @@ class SettingCalcController extends Controller
      * @param [type] $time_units
      * @return void
      */
-    private function insert($fiscal_year,$b_month,$calc_auto_time,$oneMonthTotal,$year_total,$ave_2_6,
-                                $interval,$up_times,$closing_date,$time_rounds,$time_units){
+    private function insert(
+        $fiscal_year,
+        $b_month,
+        $calc_auto_time,
+        $oneMonthTotal,
+        $year_total,
+        $oneMonthTotal_sp,
+        $year_total_sp,
+        $ave_2_6,
+        $interval,
+        $count_sp,
+        $up_times,
+        $closing_date,
+        $time_rounds,
+        $time_units
+    ){
         $setting = new Setting();
         $systemdate = Carbon::now();
         $user = Auth::user();
@@ -102,19 +133,17 @@ class SettingCalcController extends Controller
             if($is_exists){
                 $setting->delSetting();
             }
-            Log::DEBUG('  $year_total = '.$year_total);
-            Log::DEBUG('  $calc_auto_time = '.$calc_auto_time);
-            Log::DEBUG('  $calc_auto_time = '.date_format(new Carbon('2019/10/31 '.$calc_auto_time), 'His'));
             $setting->setCalcautotimeAttribute($calc_auto_time);
-            $setting->setMax1MonthtotalAttribute(Config::get('const.C021.manthly_alert_error_1'));
-            $setting->setMax2MonthtotalAttribute(Config::get('const.C021.manthly_alert_error_2'));
-            $setting->setMax3MonthtotalAttribute(Config::get('const.C021.manthly_alert_error_3'));
+            $setting->setMax1MonthtotalAttribute($oneMonthTotal);
+            $setting->setMax2MonthtotalAttribute(Config::get('const.C021.manthly_alert_error_2'));    // 未使用
+            $setting->setMax3MonthtotalAttribute(Config::get('const.C021.manthly_alert_error_3'));    // 未使用
             $setting->setMax6MonthtotalAttribute(0);    // 未使用
-            $setting->setMax12MonthtotalAttribute(Config::get('const.C021.manthly_alert_error_4'));
+            $setting->setMax12MonthtotalAttribute($year_total);
             $setting->setAve26timespAttribute($ave_2_6);
-            $setting->setMax12MonthtotalspAttribute($year_total);
-            $setting->setMax1MonthtotalspAttribute($oneMonthTotal);
+            $setting->setMax12MonthtotalspAttribute($year_total_sp);
+            $setting->setMax1MonthtotalspAttribute($oneMonthTotal_sp);
             $setting->setBeginningmonthAttribute($b_month);
+            $setting->setCountspAttribute($count_sp);
             $setting->setIntervalAttribute($interval);
             $setting->setCreateduserAttribute($user_code);
             $setting->setCreatedatAttribute($systemdate);

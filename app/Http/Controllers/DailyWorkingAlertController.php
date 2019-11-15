@@ -78,6 +78,8 @@ class DailyWorkingAlertController extends Controller
         $work_time_model->setParamemploymentstatusAttribute($employmentstatus);
         $work_time_model->setParamDepartmentcodeAttribute($departmentcode);
         $work_time_model->setParamUsercodeAttribute($usercode);
+        $work_time_model->setParamStartDateAttribute($datefrom);
+        $work_time_model->setParamEndDateAttribute($dateto);
         // パラメータのチェック
         // datefromとdatetoがあるが、このメソッドではdatefrom=datetoであること
         Log::debug('------------- パラメータのチェック ----------------');
@@ -89,7 +91,8 @@ class DailyWorkingAlertController extends Controller
         $chk_work_time = $work_time_model->chkWorkingTimeData();
         if ($chk_work_time) {
             Log::debug('------------- アラート開始　------------------');
-            $working_time_alerts = $work_time_model->getAlertData($dateto);
+            //$working_time_alerts = $work_time_model->getAlertData($dateto);
+            $working_time_alerts = $work_time_model->getdailyAlertData($dateto);
             if (count($working_time_alerts) == 0) {
                 $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_INFO.no_alert_data'));
             }
@@ -113,10 +116,11 @@ class DailyWorkingAlertController extends Controller
                 break;
             }
         }
-
+        $result_working = $working_time_alerts->where('business_kubun', Config::get('const.C007.basic'));
+        Log::debug('  $result_working count = '.count($result_working));
 
         return response()->json([
-            'alertresults' => $working_time_alerts,
+            'alertresults' => $working_time_alerts ,
             'datename' => $date_name,
             Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
     }

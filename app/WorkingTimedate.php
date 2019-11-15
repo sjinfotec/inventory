@@ -1847,7 +1847,6 @@ class WorkingTimedate extends Model
      */
     public function getMonthlyAlertTimeSum($targetdate){
 
-        Log::debug('getMonthlyAlertTimeSum in '.$targetdate);
 
         // 日時労働時間合計取得SQL作成
         try{
