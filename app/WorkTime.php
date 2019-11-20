@@ -476,9 +476,9 @@ class WorkTime extends Model
                 $this->table_shift_informations.'.user_code as user_code',
                 $this->table_shift_informations.'.department_code as department_code',
                 $this->table_shift_informations.'.working_timetable_no as shift_no',
+                $this->table_shift_informations.'.target_date as target_date',
                 $this->table_shift_informations.'.is_deleted as is_deleted'
-                )
-            ->selectRaw('DATE_FORMAT('.$this->table_shift_informations.'.target_date'.",'%Y%m%d') as target_date");
+            );
         $subquery2->where($this->table_shift_informations.'.is_deleted', '=', 0);
 
         // 適用期間日付の取得
@@ -1169,6 +1169,7 @@ class WorkTime extends Model
               'getAlertData' => \DB::getQueryLog()
           ]
         );
+        \DB::disableQueryLog();
 
         return $result;
     }
@@ -1589,6 +1590,7 @@ class WorkTime extends Model
               'getdailyAlertData' => \DB::getQueryLog()
           ]
         );
+        \DB::disableQueryLog();
 
         return $result;
     }

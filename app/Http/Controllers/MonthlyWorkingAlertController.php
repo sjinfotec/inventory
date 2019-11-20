@@ -33,11 +33,6 @@ class MonthlyWorkingAlertController extends Controller
     public function show(Request $request){
 
         Log::debug('---- 月次アラート表示 開始 -------------- ');
-        Log::debug('---- パラメータ　$request->datefrom = '.$request->datefrom);
-        Log::debug('---- パラメータ　$request->displaykbn = '.$request->displaykbn);
-        Log::debug('---- パラメータ　$request->employmentstatus = '.$request->employmentstatus);
-        Log::debug('---- パラメータ　$request->departmentcode = '.$request->departmentcode);
-        Log::debug('---- パラメータ　$request->usercode = '.$request->usercode);
 
         $apicommon = new ApiCommonController();
         // reqestクエリーセット
@@ -75,16 +70,19 @@ class MonthlyWorkingAlertController extends Controller
         $setting->setFiscalyearAttribute($target_year);
         $setting_details = $setting->getDetails();
         $sp_chk = false;
-        $array_month_limit = array();
         $ave_2_6_time_sp = 0;
         $max_12month_total_sp = 0;
         $max_1month_total_sp = 0;
         $this_month_uplimit_time = 0;
+        $two_month_uplimit_time = 0;
+        $three_month_uplimit_time = 0;
         $max_12month_total = 0;
         $count_sp = 0;
+        $limit_ymd = new Carbon($datefrom.'15');
+        $limit_month = date_format($limit_ymd, 'm');
         foreach($setting_details as $item) {
             if (isset($item->uplimit_time) && isset($item->fiscal_month)) {
-                if ($item->fiscal_month = $target_month) {
+                if ($item->fiscal_month == $limit_month) {
                     $this_month_uplimit_time = $item->uplimit_time;
                 }
             }
@@ -94,8 +92,11 @@ class MonthlyWorkingAlertController extends Controller
                 }
                 $ave_2_6_time_sp = $item->ave_2_6_time_sp;
             }
-            if (isset($item->max_1month_total)) {
-                $array_month_limit = $item->max_1month_total;
+            if (isset($item->max_2month_total)) {
+                $two_month_uplimit_time = $item->max_2month_total;
+            }
+            if (isset($item->max_3month_total)) {
+                $three_month_uplimit_time = $item->max_3month_total;
             }
             if (isset($item->max_12month_total)) {
                 $max_12month_total = $item->max_12month_total;
@@ -110,7 +111,6 @@ class MonthlyWorkingAlertController extends Controller
                 $count_sp = $item->count_sp;
             }
         }
-        Log::debug("当月上限時間　= ".$this_month_uplimit_time);
         // $datefromの６か月前の年月を求める
         $w_dt2 = new Carbon($datefrom);
         $w_dt3 = new Carbon($datefrom);
@@ -181,19 +181,17 @@ class MonthlyWorkingAlertController extends Controller
             $dt_datefrom = new Carbon($datefrom.'15');
             $this_month_index = $dt_alert_from_ym->diffInMonths($dt_datefrom);
             Log::debug('当月index = '.$this_month_index);
-            $thisMonth_total = $this->getTotalItemData($monthly_alert, $this_month_index);
-            Log::debug('当月total = '.$thisMonth_total);
-            $manthly_alert_warning_1_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            $thisMonth_total_noholiday = $this->getNoHolidayTotalItemData($monthly_alert, $this_month_index);
+            Log::debug('当月total = '.$thisMonth_total_noholiday);
+            $manthly_alert_warning_1_chk_time_array = array();
+            $manthly_alert_warning_1_chk_time_array = $this->getDiffFormat(
+                    $thisMonth_total_noholiday, $this_month_uplimit_time, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_1'));
             if ($sp_chk != true) {
-                if ($thisMonth_total > $this_month_uplimit_time) {
+                if ($thisMonth_total_noholiday > $this_month_uplimit_time) {
                     $manthly_alert_warning_1_chk = Config::get('const.ALERT_INFO_RESULT.NG');
-                    $manthly_alert_warning_1_chk_time_array = 
-                        $this->getDiffFormat($thisMonth_total, $this_month_uplimit_time, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_1'));
                     $user_alert_chk = false;
-                } elseif ($thisMonth_total > $this_month_uplimit_time * 0.8) {
+                } elseif ($thisMonth_total_noholiday > $this_month_uplimit_time * 0.8) {
                     $manthly_alert_warning_1_chk = Config::get('const.ALERT_INFO_RESULT.WA');
-                    $manthly_alert_warning_1_chk_time_array = 
-                        $this->getDiffFormat($thisMonth_total, $this_month_uplimit_time * 0.8, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_1'));
                     $user_alert_chk = false;
                 }   
             }
@@ -203,25 +201,22 @@ class MonthlyWorkingAlertController extends Controller
             } else {
                 $this_2before_index = 0;
             }
-            Log::debug('2か月index = '.$this_2before_index);
-            $month_2before_total = 0;
+            $month_2before_total_noholiday = 0;
             for ($i=$this_2before_index;$i<=$this_month_index;$i++) {
-                $w_total = $this->getTotalItemData($monthly_alert, $i);
-                $month_2before_total = $month_2before_total + $w_total;
+                $w_total = $this->getNoHolidayTotalItemData($monthly_alert, $i);
+                $month_2before_total_noholiday = $month_2before_total_noholiday + $w_total;
             }
-            Log::debug('2か月total = '.$month_2before_total);
-            $manthly_alert_warning_2_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            Log::debug('2か月total = '.$month_2before_total_noholiday);
+            $manthly_alert_warning_2_chk_time_array = array();
             $dt_datefrom = new Carbon($datefrom.'15');
+            $manthly_alert_warning_2_chk_time_array = $this->getDiffFormat(
+                $month_2before_total_noholiday, $two_month_uplimit_time, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_2'));
             if ($sp_chk != true) {
-                if ($month_2before_total > Config::get('const.C021.manthly_alert_error_2')) {
+                if ($month_2before_total_noholiday > $two_month_uplimit_time) {
                     $manthly_alert_warning_2_chk = Config::get('const.ALERT_INFO_RESULT.NG');
-                    $manthly_alert_warning_2_chk_time_array = 
-                        $this->getDiffFormat($month_2before_total, Config::get('const.C021.manthly_alert_error_2'), $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_2'));
                     $user_alert_chk = false;
-                } elseif ($month_2before_total > Config::get('const.C023.manthly_alert_warning_2')) {
+                } elseif ($month_2before_total_noholiday > $two_month_uplimit_time * 0.8) {
                     $manthly_alert_warning_2_chk = Config::get('const.ALERT_INFO_RESULT.WA');
-                    $manthly_alert_warning_2_chk_time_array = 
-                        $this->getDiffFormat($month_2before_total, Config::get('const.C021.manthly_alert_error_2'), $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_2'));
                     $user_alert_chk = false;
                 }
             }
@@ -232,24 +227,22 @@ class MonthlyWorkingAlertController extends Controller
                 $this_3before_index = 0;
             }
             Log::debug('3か月index = '.$this_3before_index);
-            $month_3before_total = 0;
+            $month_3before_total_noholiday = 0;
             for ($i=$this_3before_index;$i<=$this_month_index;$i++) {
-                $w_total = $this->getTotalItemData($monthly_alert, $i);
-                $month_3before_total = $month_3before_total + $w_total;
+                $w_total = $this->getNoHolidayTotalItemData($monthly_alert, $i);
+                $month_3before_total_noholiday = $month_3before_total_noholiday + $w_total;
             }
-            Log::debug('3か月total = '.$month_2before_total);
-            $manthly_alert_warning_3_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            Log::debug('3か月total = '.$month_3before_total_noholiday);
+            $manthly_alert_warning_3_chk_time_array = array();
             $dt_datefrom = new Carbon($datefrom.'15');
+            $manthly_alert_warning_3_chk_time_array = $this->getDiffFormat(
+                $month_3before_total_noholiday, $three_month_uplimit_time, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_3'));
             if ($sp_chk != true) {
-                if ($month_3before_total > Config::get('const.C021.manthly_alert_error_3')) {
+                if ($month_3before_total_noholiday > $three_month_uplimit_time) {
                     $manthly_alert_warning_3_chk = Config::get('const.ALERT_INFO_RESULT.NG');
-                    $manthly_alert_warning_3_chk_time_array = 
-                        $this->getDiffFormat($month_3before_total, Config::get('const.C021.manthly_alert_error_3'), $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_3'));
                     $user_alert_chk = false;
-                } elseif ($month_3before_total > Config::get('const.C023.manthly_alert_warning_3')) {
+                } elseif ($month_3before_total_noholiday > $three_month_uplimit_time * 0.8) {
                     $manthly_alert_warning_3_chk = Config::get('const.ALERT_INFO_RESULT.WA');
-                    $manthly_alert_warning_3_chk_time_array = 
-                        $this->getDiffFormat($month_3before_total, Config::get('const.C021.manthly_alert_error_3'), $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_3'));
                     $user_alert_chk = false;
                 }
             }
@@ -260,64 +253,59 @@ class MonthlyWorkingAlertController extends Controller
                 $this_12before_index = 0;
             }
             Log::debug('12か月index = '.$this_12before_index);
-            $month_12before_total = 0;
+            $month_12before_total_noholiday = 0;
             for ($i=$this_12before_index;$i<=$this_month_index;$i++) {
-                $w_total = $this->getTotalItemData($monthly_alert, $i);
-                $month_12before_total = $month_12before_total + $w_total;
+                $w_total = $this->getNoHolidayTotalItemData($monthly_alert, $i);
+                $month_12before_total_noholiday = $month_12before_total_noholiday + $w_total;
             }
-            Log::debug('12か月total = '.$month_2before_total);
-            $manthly_alert_warning_12_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            Log::debug('12か月total = '.$month_12before_total_noholiday);
+            $manthly_alert_warning_12_chk_time_array = array();
             $dt_datefrom = new Carbon($datefrom.'15');
+            $manthly_alert_warning_12_chk_time_array = $this->getDiffFormat(
+                $month_12before_total_noholiday, $max_12month_total, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_4'));
             if ($sp_chk != true) {
-                if ($month_12before_total > $max_12month_total) {
+                if ($month_12before_total_noholiday > $max_12month_total) {
                     $manthly_alert_warning_12_chk = Config::get('const.ALERT_INFO_RESULT.NG');
-                    $manthly_alert_warning_12_chk_time_array = 
-                        $this->getDiffFormat($month_12before_total, $max_12month_total, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_4'));
                     $user_alert_chk = false;
-                } elseif ($month_12before_total > $max_12month_total * 0.8) {
+                } elseif ($month_12before_total_noholiday > $max_12month_total * 0.8) {
                     $manthly_alert_warning_12_chk = Config::get('const.ALERT_INFO_RESULT.WA');
-                    $manthly_alert_warning_12_chk_time_array = 
-                        $this->getDiffFormat($month_12before_total, $max_12month_total, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_4'));
                     $user_alert_chk = false;
                 }
             }
             // <特別条項>残業が45時間超えた月が合計6か月に対する警告
-            $month_45_total_cnt = 0;
+            $month_45_total_cnt_noholiday = 0;
             for ($i=0;$i<=$this_month_index;$i++) {
-                $w_total = $this->getTotalItemData($monthly_alert, $i);
+                $w_total = $this->getNoHolidayTotalItemData($monthly_alert, $i);
                 if ($w_total > Config::get('const.C023.manthly_alert_warning_9')) {
-                    $month_45_total_cnt++;
+                    $month_45_total_cnt_noholiday++;
                 }
             }
-            Log::debug('45時間超えた月が合計6か月 total = '.$month_45_total_cnt);
-            $month_alert_45_total_cnt_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            Log::debug('45時間超えた月が合計6か月 total = '.$month_45_total_cnt_noholiday);
+            $month_alert_45_total_cnt_chk_time_array = array();
             $dt_datefrom = new Carbon($datefrom.'15');
+            $month_alert_45_total_cnt_chk_time_array = $this->getDiffFormat(
+                $month_45_total_cnt_noholiday, $count_sp, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_5'));
             if ($sp_chk == true) {
-                if ($month_45_total_cnt > $count_sp) {
+                if ($month_45_total_cnt_noholiday > $count_sp) {
                     $month_alert_45_total_cnt_chk = Config::get('const.ALERT_INFO_RESULT.NG');
-                    $month_alert_45_total_cnt_chk_time_array = 
-                        $this->getDiffFormat($month_45_total_cnt, $count_sp, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_5'));
                     $user_alert_chk = false;
-                } elseif ($month_45_total_cnt > $count_sp * 0.8) {
+                } elseif ($month_45_total_cnt_noholiday > $count_sp * 0.8) {
                     $month_alert_45_total_cnt_chk = Config::get('const.ALERT_INFO_RESULT.WA');
-                    $month_alert_45_total_cnt_chk_time_array = 
-                        $this->getDiffFormat($month_45_total_cnt, $count_sp, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_5'));
                     $user_alert_chk = false;
                 }
             }
             // <特別条項>残業が45時間超えた月が最大100時間を超えないに対する警告
-            $manthly_alert_warning_100_total_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            $manthly_alert_warning_100_total_chk_time_array = array();
             $dt_datefrom = new Carbon($datefrom.'15');
+            $thisMonth_total = $this->getTotalItemData($monthly_alert, $this_month_index);
+            $manthly_alert_warning_100_total_chk_time_array = $this->getDiffFormat(
+                $thisMonth_total, $this_month_uplimit_time, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_6'));
             if ($sp_chk == true) {
                 if ($thisMonth_total > $this_month_uplimit_time) {
                     $manthly_alert_warning_100_total_chk = Config::get('const.ALERT_INFO_RESULT.NG');
-                    $manthly_alert_warning_100_total_chk_time_array = 
-                        $this->getDiffFormat($thisMonth_total, $this_month_uplimit_time, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_6'));
                     $user_alert_chk = false;
                 } elseif ($thisMonth_total > $this_month_uplimit_time * 0.8) {
                     $manthly_alert_warning_100_total_chk = Config::get('const.ALERT_INFO_RESULT.WA');
-                    $manthly_alert_warning_100_total_chk_time_array = 
-                        $this->getDiffFormat($thisMonth_total, $this_month_uplimit_time, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_6'));
                     $user_alert_chk = false;
                 }
             }
@@ -333,7 +321,7 @@ class MonthlyWorkingAlertController extends Controller
             $month_4before_total = 0;
             $month_5before_total = 0;
             $month_6before_total = 0;
-            $month_12before_total = 0;
+            $w_total_noholiday = 0;
             for ($i=$this_6before_index;$i<=$this_month_index;$i++) {
                 $w_total = $this->getTotalItemData($monthly_alert, $i);
                 $diffindex = $this_month_index - $i;
@@ -359,102 +347,89 @@ class MonthlyWorkingAlertController extends Controller
                 } elseif ($diffindex <= 5) {
                     $month_6before_total = $month_6before_total + $w_total;
                 }
-                $month_12before_total = $month_12before_total + $w_total;
             }
             $month_2before_ave = $month_2before_total / 2;
             $month_3before_ave = $month_3before_total / 3;
             $month_4before_ave = $month_4before_total / 4;
             $month_5before_ave = $month_5before_total / 5;
             $month_6before_ave = $month_6before_total / 6;
-            $manthly_alert_ave_2_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            $manthly_alert_ave_2_chk_time_array = array();
             $dt_datefrom = new Carbon($datefrom.'15');
+            $manthly_alert_ave_2_chk_time_array = $this->getDiffFormat(
+                $month_2before_total, $ave_2_6_time_sp * 2, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_7'));
             if ($sp_chk == true) {
                 if ($month_2before_total > $ave_2_6_time_sp * 2) {
                     $manthly_alert_ave_2_chk = Config::get('const.ALERT_INFO_RESULT.NG');
-                    $manthly_alert_ave_2_chk_time_array = 
-                        $this->getDiffFormat($month_2before_total, $ave_2_6_time_sp * 2, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_7'));
                     $user_alert_chk = false;
                 } elseif ($month_2before_total > $ave_2_6_time_sp * 2 * 0.8) {
                     $manthly_alert_ave_2_chk = Config::get('const.ALERT_INFO_RESULT.WA');
-                    $manthly_alert_ave_2_chk_time_array = 
-                        $this->getDiffFormat($month_2before_total, $ave_2_6_time_sp * 2, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_7'));
                     $user_alert_chk = false;
                 }
             }
-            $manthly_alert_ave_3_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            $manthly_alert_ave_3_chk_time_array = array();
             $dt_datefrom = new Carbon($datefrom.'15');
+            $manthly_alert_ave_3_chk_time_array = $this->getDiffFormat(
+                $month_3before_total, $ave_2_6_time_sp * 3, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_8'));
             if ($sp_chk == true) {
                 Log::debug('3か月total = '.$month_3before_total);
                 if ($month_3before_total > $ave_2_6_time_sp * 3) {
                     $manthly_alert_ave_3_chk = Config::get('const.ALERT_INFO_RESULT.NG');
-                    $manthly_alert_ave_3_chk_time_array = 
-                        $this->getDiffFormat($month_3before_total, $ave_2_6_time_sp * 3, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_8'));
                     $user_alert_chk = false;
                 } elseif ($month_3before_total > $ave_2_6_time_sp * 3 * 0.8) {
                     $manthly_alert_ave_3_chk = Config::get('const.ALERT_INFO_RESULT.WA');
-                    $manthly_alert_ave_3_chk_time_array = 
-                        $this->getDiffFormat($month_3before_total, $ave_2_6_time_sp * 3, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_8'));
                     $user_alert_chk = false;
                 }
             }
-            $manthly_alert_ave_4_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            $manthly_alert_ave_4_chk_time_array = array();
             $dt_datefrom = new Carbon($datefrom.'15');
+            $manthly_alert_ave_4_chk_time_array = $this->getDiffFormat(
+                $month_4before_total, $ave_2_6_time_sp * 4, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_9'));
             if ($sp_chk == true) {
                 if ($month_4before_total > $ave_2_6_time_sp * 4) {
                     $manthly_alert_ave_4_chk = Config::get('const.ALERT_INFO_RESULT.NG');
-                    $manthly_alert_ave_4_chk_time_array = 
-                        $this->getDiffFormat($month_4before_total, $ave_2_6_time_sp * 4, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_9'));
                     $user_alert_chk = false;
                 } elseif ($month_4before_total > $ave_2_6_time_sp * 4 * 0.8) {
                     $manthly_alert_ave_4_chk = Config::get('const.ALERT_INFO_RESULT.WA');
-                    $manthly_alert_ave_4_chk_time_array = 
-                        $this->getDiffFormat($month_4before_total, $ave_2_6_time_sp * 4, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_9'));
                     $user_alert_chk = false;
                 }
             }
-            $manthly_alert_ave_5_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            $manthly_alert_ave_5_chk_time_array = array();
             $dt_datefrom = new Carbon($datefrom.'15');
+            $manthly_alert_ave_5_chk_time_array = $this->getDiffFormat(
+                $month_5before_total, $ave_2_6_time_sp * 5, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_10'));
             if ($sp_chk == true) {
                 if ($month_5before_total > $ave_2_6_time_sp * 5) {
                     $manthly_alert_ave_5_chk = Config::get('const.ALERT_INFO_RESULT.NG');
-                    $manthly_alert_ave_5_chk_time_array = 
-                        $this->getDiffFormat($month_5before_total, $ave_2_6_time_sp * 5, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_10'));
                     $user_alert_chk = false;
                 } elseif ($month_5before_total > $ave_2_6_time_sp * 5 * 0.8) {
                     $manthly_alert_ave_5_chk = Config::get('const.ALERT_INFO_RESULT.WA');
-                    $manthly_alert_ave_5_chk_time_array = 
-                        $this->getDiffFormat($month_5before_total, $ave_2_6_time_sp * 5, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_10'));
                     $user_alert_chk = false;
                 }
             }
             $dt_datefrom = new Carbon($datefrom.'15');
-            $manthly_alert_ave_6_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            $manthly_alert_ave_6_chk_time_array = array();
+            $manthly_alert_ave_6_chk_time_array = $this->getDiffFormat(
+                $month_6before_total, $ave_2_6_time_sp * 6, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_11'));
             if ($sp_chk == true) {
                 if ($month_6before_total > $ave_2_6_time_sp * 6) {
                     $manthly_alert_ave_6_chk = Config::get('const.ALERT_INFO_RESULT.NG');
-                    $manthly_alert_ave_6_chk_time_array = 
-                        $this->getDiffFormat($month_6before_total, $ave_2_6_time_sp * 6, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_11'));
                     $user_alert_chk = false;
                 } elseif ($month_6before_total > $ave_2_6_time_sp * 6 * 0.8) {
                     $manthly_alert_ave_6_chk = Config::get('const.ALERT_INFO_RESULT.WA');
-                    $manthly_alert_ave_6_chk_time_array = 
-                        $this->getDiffFormat($month_6before_total, $ave_2_6_time_sp * 6, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_11'));
                     $user_alert_chk = false;
                 }
             }
             // <特別条項>720時間/年に対する警告
-            $manthly_alert_warning_720_total_chk_time_array = array(Config::get('const.ALERT_INFO_RESULT_NAME.OK'));
+            $manthly_alert_warning_720_total_chk_time_array = array();
             $dt_datefrom = new Carbon($datefrom.'15');
+            $manthly_alert_warning_720_total_chk_time_array =$this->getDiffFormat(
+                $month_12before_total_noholiday, $max_12month_total_sp, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_12'));
             if ($sp_chk == true) {
-                if ($month_12before_total > $max_12month_total_sp) {
+                if ($month_12before_total_noholiday > $max_12month_total_sp) {
                     $manthly_alert_warning_720_total_chk = Config::get('const.ALERT_INFO_RESULT.NG');
-                    $manthly_alert_warning_720_total_chk_time_array =
-                        $this->getDiffFormat($month_12before_total, $max_12month_total_sp, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_12'));
                     $user_alert_chk = false;
-                } elseif ($month_12before_total > $max_12month_total_sp * 0.8) {
+                } elseif ($month_12before_total_noholiday > $max_12month_total_sp * 0.8) {
                     $manthly_alert_warning_720_total_chk = Config::get('const.ALERT_INFO_RESULT.WA');
-                    $manthly_alert_warning_720_total_chk_time_array = 
-                        $this->getDiffFormat($month_12before_total, $max_12month_total_sp, $dt_datefrom, $alert_from_ym, Config::get('const.ALERT_MONTHLY_ITEM.items_12'));
                     $user_alert_chk = false;
                 }
             }
@@ -472,7 +447,8 @@ class MonthlyWorkingAlertController extends Controller
             Log::debug('manthly_alert_ave_6_chk = '.$manthly_alert_ave_6_chk);
             Log::debug('manthly_alert_warning_720_total_chk = '.$manthly_alert_warning_720_total_chk);
             $working_time_values[] = array(
-                'employment_status_name' => $monthly_alert->employment_status_name,
+                'type1' => '（休日労働含む）',
+                'type2' => '（休日労働含めない）',
                 'total_working_times_1' => number_format($monthly_alert->total_working_times_1, 2, '.', ''),
                 'total_working_times_2' => number_format($monthly_alert->total_working_times_2, 2, '.', ''),
                 'total_working_times_3' => number_format($monthly_alert->total_working_times_3, 2, '.', ''),
@@ -484,7 +460,19 @@ class MonthlyWorkingAlertController extends Controller
                 'total_working_times_9' => number_format($monthly_alert->total_working_times_9, 2, '.', ''),
                 'total_working_times_10' => number_format($monthly_alert->total_working_times_10, 2, '.', ''),
                 'total_working_times_11' => number_format($monthly_alert->total_working_times_11, 2, '.', ''),
-                'total_working_times_12' => number_format($monthly_alert->total_working_times_12, 2, '.', '')
+                'total_working_times_12' => number_format($monthly_alert->total_working_times_12, 2, '.', ''),
+                'total_noholiday_working_times_1' => number_format($monthly_alert->total_noholiday_working_times_1, 2, '.', ''),
+                'total_noholiday_working_times_2' => number_format($monthly_alert->total_noholiday_working_times_2, 2, '.', ''),
+                'total_noholiday_working_times_3' => number_format($monthly_alert->total_noholiday_working_times_3, 2, '.', ''),
+                'total_noholiday_working_times_4' => number_format($monthly_alert->total_noholiday_working_times_4, 2, '.', ''),
+                'total_noholiday_working_times_5' => number_format($monthly_alert->total_noholiday_working_times_5, 2, '.', ''),
+                'total_noholiday_working_times_6' => number_format($monthly_alert->total_noholiday_working_times_6, 2, '.', ''),
+                'total_noholiday_working_times_7' => number_format($monthly_alert->total_noholiday_working_times_7, 2, '.', ''),
+                'total_noholiday_working_times_8' => number_format($monthly_alert->total_noholiday_working_times_8, 2, '.', ''),
+                'total_noholiday_working_times_9' => number_format($monthly_alert->total_noholiday_working_times_9, 2, '.', ''),
+                'total_noholiday_working_times_10' => number_format($monthly_alert->total_noholiday_working_times_10, 2, '.', ''),
+                'total_noholiday_working_times_11' => number_format($monthly_alert->total_noholiday_working_times_11, 2, '.', ''),
+                'total_noholiday_working_times_12' => number_format($monthly_alert->total_noholiday_working_times_12, 2, '.', '')
             );
             $working_warning_items[] = array(
                 'manthly_alert_warning_1_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_1'),
@@ -493,12 +481,24 @@ class MonthlyWorkingAlertController extends Controller
                 'manthly_alert_warning_12_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_4'),
                 'month_alert_45_total_cnt_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_5'),
                 'manthly_alert_warning_100_total_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_6'),
-                'manthly_alert_ave_2_chk_itm' => "<法定：2か月平均".Config::get('const.C021.manthly_alert_error_7')."時間以内>",
-                'manthly_alert_ave_3_chk_itm' => "<法定：3か月平均".Config::get('const.C021.manthly_alert_error_7')."時間以内>",
-                'manthly_alert_ave_4_chk_itm' => "<法定：4か月平均".Config::get('const.C021.manthly_alert_error_7')."時間以内>",
-                'manthly_alert_ave_5_chk_itm' => "<法定：5か月平均".Config::get('const.C021.manthly_alert_error_7')."時間以内>",
-                'manthly_alert_ave_6_chk_itm' => "<法定：6か月平均".Config::get('const.C021.manthly_alert_error_7')."時間以内>",
-                'manthly_alert_warning_720_total_chk_itm' => "<法定：年間".Config::get('const.C021.manthly_alert_error_8')."時間>",
+                'manthly_alert_ave_2_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_7'),
+                'manthly_alert_ave_3_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_8'),
+                'manthly_alert_ave_4_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_9'),
+                'manthly_alert_ave_5_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_10'),
+                'manthly_alert_ave_6_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_11'),
+                'manthly_alert_warning_720_total_chk_itm' => Config::get('const.ALERT_MONTHLY_ITEM.items_12'),
+                'manthly_alert_warning_1_chk_setteing' => '月'.$this_month_uplimit_time.'時間',
+                'manthly_alert_warning_2_chk_setteing' => '2ヶ月'.$two_month_uplimit_time.'時間',
+                'manthly_alert_warning_3_chk_setteing' => '3ヶ月'.$three_month_uplimit_time.'時間',
+                'manthly_alert_warning_12_chk_setteing' => '年'.$max_12month_total.'時間',
+                'month_alert_45_total_cnt_chk_setteing' => '年間'.$count_sp.'ヶ月',
+                'manthly_alert_warning_100_total_chk_setteing' => '月'.$this_month_uplimit_time.'時間',
+                'manthly_alert_ave_2_chk_setteing' => '2か月平均'.$ave_2_6_time_sp.'時間',
+                'manthly_alert_ave_3_chk_setteing' => '3か月平均'.$ave_2_6_time_sp.'時間',
+                'manthly_alert_ave_4_chk_setteing' => '4か月平均'.$ave_2_6_time_sp.'時間',
+                'manthly_alert_ave_5_chk_setteing' => '5か月平均'.$ave_2_6_time_sp.'時間',
+                'manthly_alert_ave_6_chk_setteing' => '6か月平均'.$ave_2_6_time_sp.'時間',
+                'manthly_alert_warning_720_total_chk_setteing' => '年'.$max_12month_total_sp.'時間',
                 'manthly_alert_warning_1_chk_value' => $manthly_alert_warning_1_chk,
                 'manthly_alert_warning_2_chk_value' => $manthly_alert_warning_2_chk,
                 'manthly_alert_warning_3_chk_value' => $manthly_alert_warning_3_chk,
@@ -511,6 +511,42 @@ class MonthlyWorkingAlertController extends Controller
                 'manthly_alert_ave_5_chk_value' => $manthly_alert_ave_5_chk,
                 'manthly_alert_ave_6_chk_value' => $manthly_alert_ave_6_chk,
                 'manthly_alert_warning_720_total_chk_value' => $manthly_alert_warning_720_total_chk,
+                'manthly_alert_warning_1_chk_period' => $manthly_alert_warning_1_chk_time_array[0],
+                'manthly_alert_warning_2_chk_period' => $manthly_alert_warning_2_chk_time_array[0],
+                'manthly_alert_warning_3_chk_period' => $manthly_alert_warning_3_chk_time_array[0],
+                'manthly_alert_warning_12_chk_period' => $manthly_alert_warning_12_chk_time_array[0],
+                'month_alert_45_total_cnt_chk_period' => $month_alert_45_total_cnt_chk_time_array[0],
+                'manthly_alert_warning_100_total_chk_period' => $manthly_alert_warning_100_total_chk_time_array[0],
+                'manthly_alert_ave_2_chk_period' => $manthly_alert_ave_2_chk_time_array[0],
+                'manthly_alert_ave_3_chk_period' => $manthly_alert_ave_3_chk_time_array[0],
+                'manthly_alert_ave_4_chk_period' => $manthly_alert_ave_4_chk_time_array[0],
+                'manthly_alert_ave_5_chk_period' => $manthly_alert_ave_5_chk_time_array[0],
+                'manthly_alert_ave_6_chk_period' => $manthly_alert_ave_6_chk_time_array[0],
+                'manthly_alert_warning_720_total_chk_period' => $manthly_alert_warning_720_total_chk_time_array[0],
+                'manthly_alert_warning_1_work_value' => $thisMonth_total_noholiday.'時間',
+                'manthly_alert_warning_2_work_value' => $month_2before_total_noholiday.'時間',
+                'manthly_alert_warning_3_work_value' => $month_3before_total_noholiday.'時間',
+                'manthly_alert_warning_12_work_value' => $month_12before_total_noholiday.'時間',
+                'month_alert_45_total_cnt_work_value' => $month_45_total_cnt_noholiday.'ヶ月',
+                'manthly_alert_warning_100_total_work_value' => $thisMonth_total.'時間',
+                'manthly_alert_ave_2_work_value' => '月平均'.number_format($month_2before_ave, 2, '.', '').'時間',
+                'manthly_alert_ave_3_work_value' => '月平均'.number_format($month_3before_ave, 2, '.', '').'時間',
+                'manthly_alert_ave_4_work_value' => '月平均'.number_format($month_4before_ave, 2, '.', '').'時間',
+                'manthly_alert_ave_5_work_value' => '月平均'.number_format($month_5before_ave, 2, '.', '').'時間',
+                'manthly_alert_ave_6_work_value' => '月平均'.number_format($month_6before_ave, 2, '.', '').'時間',
+                'manthly_alert_warning_720_total_work_value' => $month_12before_total_noholiday.'時間',
+                'manthly_alert_warning_1_chk_result' => $manthly_alert_warning_1_chk_time_array[1].$manthly_alert_warning_1_chk_time_array[2],
+                'manthly_alert_warning_2_chk_result' => $manthly_alert_warning_2_chk_time_array[1].$manthly_alert_warning_2_chk_time_array[2],
+                'manthly_alert_warning_3_chk_result' => $manthly_alert_warning_3_chk_time_array[1].$manthly_alert_warning_3_chk_time_array[2],
+                'manthly_alert_warning_12_chk_result' => $manthly_alert_warning_12_chk_time_array[1].$manthly_alert_warning_12_chk_time_array[2],
+                'month_alert_45_total_cnt_chk_result' => $month_alert_45_total_cnt_chk_time_array[1].$month_alert_45_total_cnt_chk_time_array[2],
+                'manthly_alert_warning_100_total_chk_result' => $manthly_alert_warning_100_total_chk_time_array[1].$manthly_alert_warning_100_total_chk_time_array[2],
+                'manthly_alert_ave_2_chk_result' => $manthly_alert_ave_2_chk_time_array[1].$manthly_alert_ave_2_chk_time_array[2],
+                'manthly_alert_ave_3_chk_result' => $manthly_alert_ave_3_chk_time_array[1].$manthly_alert_ave_3_chk_time_array[2],
+                'manthly_alert_ave_4_chk_result' => $manthly_alert_ave_4_chk_time_array[1].$manthly_alert_ave_4_chk_time_array[2],
+                'manthly_alert_ave_5_chk_result' => $manthly_alert_ave_5_chk_time_array[1].$manthly_alert_ave_5_chk_time_array[2],
+                'manthly_alert_ave_6_chk_result' => $manthly_alert_ave_6_chk_time_array[1].$manthly_alert_ave_6_chk_time_array[2],
+                'manthly_alert_warning_720_total_chk_result' => $manthly_alert_warning_720_total_chk_time_array[1].$manthly_alert_warning_720_total_chk_time_array[2],
                 'manthly_alert_warning_1_chk_time_array' => $manthly_alert_warning_1_chk_time_array,
                 'manthly_alert_warning_2_chk_time_array' => $manthly_alert_warning_2_chk_time_array,
                 'manthly_alert_warning_3_chk_time_array' => $manthly_alert_warning_3_chk_time_array,
@@ -533,7 +569,8 @@ class MonthlyWorkingAlertController extends Controller
                     'department_name' => $monthly_alert->department_name,
                     'user_name' => $monthly_alert->user_name,
                     'user_code' => $monthly_alert->user_code,
-                    'employment_status_name' => '勤務形態',
+                    'employment_status_name' => $monthly_alert->employment_status_name,
+                    'type' => '種別',
                     'working_date_1' => $working_date_1,
                     'working_date_2' => $working_date_2,
                     'working_date_3' => $working_date_3,
@@ -571,7 +608,7 @@ class MonthlyWorkingAlertController extends Controller
     }
 
     /**
-     * 月次アラート項目特定 
+     * 月次アラート項目特定（休日労働含む）
      *
      * @return void
      */
@@ -604,6 +641,39 @@ class MonthlyWorkingAlertController extends Controller
     }
 
     /**
+     * 月次アラート項目特定 （休日労働除く）
+     *
+     * @return void
+     */
+    public function getNoHolidayTotalItemData($monthly_alert, $itemIndex){
+        if ($itemIndex == 0) {
+            return $monthly_alert->total_noholiday_working_times_1;
+        } elseif ($itemIndex == 1) {
+            return $monthly_alert->total_noholiday_working_times_2;
+        } elseif ($itemIndex == 2) {
+            return $monthly_alert->total_noholiday_working_times_3;
+        } elseif ($itemIndex == 3) {
+            return $monthly_alert->total_noholiday_working_times_4;
+        } elseif ($itemIndex == 4) {
+            return $monthly_alert->total_noholiday_working_times_5;
+        } elseif ($itemIndex == 5) {
+            return $monthly_alert->total_noholiday_working_times_6;
+        } elseif ($itemIndex == 6) {
+            return $monthly_alert->total_noholiday_working_times_7;
+        } elseif ($itemIndex == 7) {
+            return $monthly_alert->total_noholiday_working_times_8;
+        } elseif ($itemIndex == 8) {
+            return $monthly_alert->total_noholiday_working_times_9;
+        } elseif ($itemIndex == 9) {
+            return $monthly_alert->total_noholiday_working_times_10;
+        } elseif ($itemIndex == 10) {
+            return $monthly_alert->total_noholiday_working_times_11;
+        } elseif ($itemIndex == 11) {
+            return $monthly_alert->total_noholiday_working_times_12;
+        }
+    }
+
+    /**
      * 月次アラート時間差分format 
      *
      * @return void
@@ -626,77 +696,77 @@ class MonthlyWorkingAlertController extends Controller
                 return array($dt2.'～'.$dt1, '設定値'.number_format($basic_time, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間オーバー');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_5')) {
                 $dt2 = date_format(new Carbon($alert_from_ym.'15'), 'Y年m月');
-                return array($dt2.'～'.$dt1, '設定値'.$basic_time.'月数を', number_format($diff_time, 0, '.', '').'月数オーバー');
+                return array($dt2.'～'.$dt1, '設定値'.$basic_time.'ヶ月を', number_format($diff_time, 0, '.', '').'ヶ月オーバー');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_6')) {
                 return array(date_format($dt_datefrom, 'Y年m月'), '設定値'.number_format($basic_time, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間オーバー');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_7')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間', 'オーバー');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 2, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間オーバー');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_8')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(2), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間', 'オーバー');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 3, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間オーバー');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_9')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(3), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間', 'オーバー');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 4, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間オーバー');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_10')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(4), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間', 'オーバー');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 5, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間オーバー');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_11')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(5), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間', 'オーバー');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 6, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間オーバー');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_12')) {
                 $dt2 = date_format(new Carbon($alert_from_ym.'15'), 'Y年m月');
-                return array($dt2.'～'.$dt1, '設定値'.number_format($basic_time, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間', 'オーバー');
+                return array($dt2.'～'.$dt1, '設定値'.number_format($basic_time, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間オーバー');
             } else {
-                return array('設定値'.number_format($basic_time, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間', 'オーバー');
+                return array('設定値'.number_format($basic_time, 2, '.', '').'時間を', number_format($diff_time, 2, '.', '').'時間オーバー');
             }
         } elseif ($target_time == $basic_time) {
             if ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_1')) {
-                return array(date_format($dt_datefrom, 'Y年m月'), '設定値'.number_format($basic_time, 2, '.', '').'時間到達');
+                return array(date_format($dt_datefrom, 'Y年m月'), '設定値'.number_format($basic_time, 2, '.', '').'時間に到達', '');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_2')) {
                 $dt2 = date_format($dt_datefrom->subMonth(), 'Y年m月');
-                return array($dt2.'～'.$dt1, '設定値'.number_format($basic_time, 2, '.', '').'時間到達');
+                return array($dt2.'～'.$dt1, '設定値'.number_format($basic_time, 2, '.', '').'時間に到達', '');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_3')) {
                 $dt2 = date_format($dt_datefrom->subMonth(2), 'Y年m月');
-                return array($dt2.'～'.$dt1, '設定値'.number_format($basic_time, 2, '.', '').'時間到達');
+                return array($dt2.'～'.$dt1, '設定値'.number_format($basic_time, 2, '.', '').'時間に到達', '');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_4')) {
                 $dt2 = date_format(new Carbon($alert_from_ym.'15'), 'Y年m月');
-                return array($dt2.'～'.$dt1, '設定値'.number_format($basic_time, 2, '.', '').'時間到達');
+                return array($dt2.'～'.$dt1, '設定値'.number_format($basic_time, 2, '.', '').'時間に到達', '');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_5')) {
                 $dt2 = date_format(new Carbon($alert_from_ym.'15'), 'Y年m月');
-                return array($dt2.'～'.$dt1, '設定値'.$basic_time.'月数到達');
+                return array($dt2.'～'.$dt1, '設定値'.$basic_time.'ヶ月に到達', '');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_6')) {
-                return array(date_format($dt_datefrom, 'Y年m月'), '設定値'.number_format($basic_time, 2, '.', '').'時間到達');
+                return array(date_format($dt_datefrom, 'Y年m月'), '設定値'.number_format($basic_time, 2, '.', '').'時間に到達', '');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_7')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間到達');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 2, 2, '.', '').'時間に到達', '');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_8')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(2), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間到達');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 3, 2, '.', '').'時間に到達', '');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_9')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(3), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間到達');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 4, 2, '.', '').'時間に到達', '');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_10')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(4), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間到達');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 5, 2, '.', '').'時間に到達', '');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_11')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(5), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間到達');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 6, 2, '.', '').'時間に到達', '');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_12')) {
                 $dt2 = date_format(new Carbon($alert_from_ym.'15'), 'Y年m月');
-                return array($dt2.'～'.$dt1, '設定値'.number_format($basic_time, 2, '.', '').'時間到達');
+                return array($dt2.'～'.$dt1, '設定値'.number_format($basic_time, 2, '.', '').'時間に到達', '');
             } else {
-                return array('設定値'.number_format($basic_time, 2, '.', '').'.到達');
+                return array('設定値'.number_format($basic_time, 2, '.', '').'.時間に到達', '');
             }
         } else {
             if ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_1')) {
@@ -712,29 +782,29 @@ class MonthlyWorkingAlertController extends Controller
                 return array($dt2.'～'.$dt1, '設定値'.number_format($basic_time, 2, '.', '').'時間まで', 'あと'.number_format($diff_time, 2, '.', '').'時間');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_5')) {
                 $dt2 = date_format(new Carbon($alert_from_ym.'15'), 'Y年m月');
-                return array($dt2.'～'.$dt1, '設定値'.$basic_time.'月数まで', 'あと'.number_format($diff_time, 0, '.', '').'月数');
+                return array($dt2.'～'.$dt1, '設定値'.$basic_time.'ヶ月まで', 'あと'.number_format($diff_time, 0, '.', '').'ヶ月');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_6')) {
                 return array(date_format($dt_datefrom, 'Y年m月'), '設定値'.number_format($basic_time, 2, '.', '').'時間まで', 'あと'.number_format($diff_time, 2, '.', '').'時間');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_7')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間まで', 'あと'.number_format($diff_time, 2, '.', '').'時間');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 2, 2, '.', '').'時間まで', 'あと'.number_format($diff_time, 2, '.', '').'時間');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_8')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(2), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間まで', 'あと'.number_format($diff_time, 2, '.', '').'時間');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 3, 2, '.', '').'時間まで', 'あと'.number_format($diff_time, 2, '.', '').'時間');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_9')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(3), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間まで', 'あと'.number_format($diff_time, 2, '.', '').'時間');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 4, 2, '.', '').'時間まで', 'あと'.number_format($diff_time, 2, '.', '').'時間');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_10')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(4), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間まで', 'あと'.number_format($diff_time, 2, '.', '').'時間');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 5, 2, '.', '').'時間まで', 'あと'.number_format($diff_time, 2, '.', '').'時間');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_11')) {
                 $dt2 = date_format($dt_datefrom->copy()->subMonth(5), 'Y年m月');
                 $dt3 = date_format($dt_datefrom, 'Y年m月');
-                return array($dt2.'～'.$dt3, '設定値'.number_format($basic_time, 2, '.', '').'時間まで', 'あと'.number_format($diff_time, 2, '.', '').'時間');
+                return array($dt2.'～'.$dt3, '設定値月平均'.number_format($basic_time / 6, 2, '.', '').'時間まで', 'あと'.number_format($diff_time, 2, '.', '').'時間');
             } elseif ($items == Config::get('const.ALERT_MONTHLY_ITEM.items_12')) {
                 $dt2 = date_format(new Carbon($alert_from_ym.'15'), 'Y年m月');
                 return array($dt2.'～'.$dt1, '設定値'.number_format($basic_time, 2, '.', '').'時間まで', 'あと'.number_format($diff_time, 2, '.', '').'時間');

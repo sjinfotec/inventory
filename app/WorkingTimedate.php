@@ -58,6 +58,8 @@ class WorkingTimedate extends Model
     private $off_hours_working_hours;       // 時間外労働時間
     private $missing_middle_hours;          // 私用外出時間
     private $public_going_out_hours;        // 公用外出時間
+    private $out_of_legal_working_holiday_hours;    // 法定外休日労働時間
+    private $legal_working_holiday_hours;   // 法定休日労働時間
     private $working_status;                // 勤務状態
     private $working_status_name;           // 勤務状態名称
     private $note;                          // メモ
@@ -395,6 +397,28 @@ class WorkingTimedate extends Model
     public function setPublicgoingouthoursAttribute($value)
     {
         $this->public_going_out_hours = $value;
+    }
+
+    // 法定外休日労働時間
+    public function getOutoflegalworkingholidayhoursAttribute()
+    {
+        return $this->out_of_legal_working_holiday_hours;
+    }
+
+    public function setOutoflegalworkingholidayhoursAttribute($value)
+    {
+        $this->out_of_legal_working_holiday_hours = $value;
+    }
+
+    // 法定休日労働時間
+    public function getLegalworkingholidayhoursAttribute()
+    {
+        return $this->legal_working_holiday_hours;
+    }
+
+    public function setLegalworkingholidayhoursAttribute($value)
+    {
+        $this->legal_working_holiday_hours = $value;
     }
 
 
@@ -1219,6 +1243,8 @@ class WorkingTimedate extends Model
                     $this->table.'.off_hours_working_hours',
                     $this->table.'.public_going_out_hours',
                     $this->table.'.missing_middle_hours',
+                    $this->table.'.out_of_legal_working_holiday_hours',
+                    $this->table.'.legal_working_holiday_hours',
                     $this->table.'.working_status',
                     $this->table.'.working_status_name',
                     $this->table.'.note',
@@ -1370,7 +1396,9 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'not_employment_working_hours', str_replace('{0}', $this->table.'.not_employment_working_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'off_hours_working_hours', str_replace('{0}', $this->table.'.off_hours_working_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'public_going_out_hours', str_replace('{0}', $this->table.'.public_going_out_hours', $case_where)))
-                ->selectRaw(str_replace('{1}', 'missing_middle_hours', str_replace('{0}', $this->table.'.missing_middle_hours', $case_where)));
+                ->selectRaw(str_replace('{1}', 'missing_middle_hours', str_replace('{0}', $this->table.'.missing_middle_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'out_of_legal_working_holiday_hours', str_replace('{0}', $this->table.'.out_of_legal_working_holiday_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'legal_working_holiday_hours', str_replace('{0}', $this->table.'.legal_working_holiday_hours', $case_where)));
 
             $mainquery
                 ->addselect($this->table.'.working_status');
@@ -1687,6 +1715,8 @@ class WorkingTimedate extends Model
                 ->selectRaw('sum(ifnull('.$this->table.'.off_hours_working_hours, 0)) as off_hours_working_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.public_going_out_hours, 0)) as public_going_out_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.missing_middle_hours, 0)) as missing_middle_hours')
+                ->selectRaw('sum(ifnull('.$this->table.'.out_of_legal_working_holiday_hours, 0)) as out_of_legal_working_holiday_hours')
+                ->selectRaw('sum(ifnull('.$this->table.'.legal_working_holiday_hours, 0)) as legal_working_holiday_hours')
                 ->selectRaw('sum('.$str_replace_working_status7.') as total_working_status')
                 ->selectRaw('sum('.$str_replace_go_out2.') as total_go_out')
                 ->selectRaw('sum('.$str_replace_paid_holidays1.') as total_paid_holidays')
@@ -1767,6 +1797,8 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'off_hours_working_hours', str_replace('{0}', 't1.off_hours_working_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'public_going_out_hours', str_replace('{0}', 't1.public_going_out_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'missing_middle_hours', str_replace('{0}', 't1.missing_middle_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'out_of_legal_working_holiday_hours', str_replace('{0}', 't1.out_of_legal_working_holiday_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'legal_working_holiday_hours', str_replace('{0}', 't1.legal_working_holiday_hours', $case_where)))
                 ->selectRaw('ifnull(t1.total_working_status, 0) as total_working_status' )
                 ->selectRaw('ifnull(t1.total_go_out, 0) as total_go_out' )
                 ->selectRaw('ifnull(t1.total_paid_holidays, 0) as total_paid_holidays' )
@@ -1819,6 +1851,7 @@ class WorkingTimedate extends Model
                     'getWorkingTimeDateTimeSum' => \DB::getQueryLog()
                 ]
             );
+            \DB::disableQueryLog();
                 
         }catch(\PDOException $pe){
             Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
@@ -1860,7 +1893,11 @@ class WorkingTimedate extends Model
                         $this->table.'.department_code as department_code',
                         $this->table.'.user_code as user_code')
                     ->selectRaw('DATE_FORMAT(MAX('.$this->table.".working_date), '%Y年%m月') as working_date")
-                    ->selectRaw('SUM('.$this->table.'.overtime_hours + '.$this->table.'.late_night_overtime_hours) as total_working_times')
+                    ->selectRaw('SUM(IFNULL('.$this->table.'.overtime_hours, 0) + IFNULL('.$this->table.'.late_night_overtime_hours, 0)) as total_working_times')
+                    ->selectRaw(
+                        'SUM(IFNULL('.$this->table.'.overtime_hours, 0) + IFNULL('.$this->table.'.late_night_overtime_hours, 0)
+                            - IFNULL('.$this->table.'.legal_working_holiday_hours, 0) - IFNULL('.$this->table.'.out_of_legal_working_holiday_hours, 0)) as total_noholiday_working_times'
+                        )
                     ->where($this->table.'.working_date', '>=', $this->array_param_date_from[$i])
                     ->where($this->table.'.working_date', '<=', $this->array_param_date_to[$i])
                     ->where($this->table.'.is_deleted', '=', 0)
@@ -1887,7 +1924,8 @@ class WorkingTimedate extends Model
                 $mainquery
                     ->addselect('t'.$this->arias_number.'.working_date as working_date_'.$this->as_number);
                 $mainquery
-                    ->selectRaw('IFNULL(t'.$this->arias_number.'.total_working_times, 0) as total_working_times_'.$this->as_number);
+                    ->selectRaw('IFNULL(t'.$this->arias_number.'.total_working_times, 0) as total_working_times_'.$this->as_number)
+                    ->selectRaw('IFNULL(t'.$this->arias_number.'.total_noholiday_working_times, 0) as total_noholiday_working_times_'.$this->as_number);
             }
             for ($i=0;$i<count($this->array_param_date_from);$i++) {
                 $this->arias_number = $i+2;
@@ -1942,6 +1980,7 @@ class WorkingTimedate extends Model
                     'getMonthlyAlertTimeSum' => \DB::getQueryLog()
                 ]
             );
+            \DB::disableQueryLog();
                 
         }catch(\PDOException $pe){
             Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');

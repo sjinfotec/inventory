@@ -46,6 +46,8 @@ class TempWorkingTimeDate extends Model
     private $off_hours_working_hours;       // 時間外労働時間
     private $missing_middle_hours;          // 私用外出時間
     private $public_going_out_hours;        // 公用外出時間
+    private $out_of_legal_working_holiday_hours;    // 法定外休日労働時間
+    private $legal_working_holiday_hours;   // 法定休日労働時間
     private $working_status;                // 勤務状態
     private $working_status_name;           // 勤務状態名称
     private $note;                          // メモ
@@ -386,6 +388,28 @@ class TempWorkingTimeDate extends Model
     public function setPublicgoingouthoursAttribute($value)
     {
         $this->public_going_out_hours = $value;
+    }
+
+    // 法定外休日労働時間
+    public function getOutoflegalworkingholidayhoursAttribute()
+    {
+        return $this->out_of_legal_working_holiday_hours;
+    }
+
+    public function setOutoflegalworkingholidayhoursAttribute($value)
+    {
+        $this->out_of_legal_working_holiday_hours = $value;
+    }
+
+    // 法定休日労働時間
+    public function getLegalworkingholidayhoursAttribute()
+    {
+        return $this->legal_working_holiday_hours;
+    }
+
+    public function setLegalworkingholidayhoursAttribute($value)
+    {
+        $this->legal_working_holiday_hours = $value;
     }
 
 
@@ -899,6 +923,8 @@ class TempWorkingTimeDate extends Model
                     $this->table.'.off_hours_working_hours',
                     $this->table.'.public_going_out_hours',
                     $this->table.'.missing_middle_hours',
+                    $this->table.'.out_of_legal_working_holiday_hours',
+                    $this->table.'.legal_working_holiday_hours',
                     $this->table.'.working_status',
                     $this->table.'.working_status_name',
                     $this->table.'.note',
@@ -996,6 +1022,8 @@ class TempWorkingTimeDate extends Model
                 ->addselect('t2.off_hours_working_hours')
                 ->addselect('t2.public_going_out_hours')
                 ->addselect('t2.missing_middle_hours')
+                ->addselect('t2.out_of_legal_working_holiday_hours')
+                ->addselect('t2.legal_working_holiday_hours')
                 ->addselect('t2.working_status')
                 ->addselect('t5.code_name as working_status_name')
                 ->addselect('t2.note')
@@ -1148,6 +1176,8 @@ class TempWorkingTimeDate extends Model
                     'off_hours_working_hours' => $this->off_hours_working_hours,
                     'public_going_out_hours' => $this->public_going_out_hours,
                     'missing_middle_hours' => $this->missing_middle_hours,
+                    'out_of_legal_working_holiday_hours' => $this->out_of_legal_working_holiday_hours,
+                    'legal_working_holiday_hours' => $this->legal_working_holiday_hours,
                     'working_status' => $this->working_status,
                     'working_status_name' => $this->working_status_name,
                     'note' => $this->note,

@@ -122,7 +122,7 @@
           <div class="card-header bg-transparent pt-3 border-0 print-none">
             <daily-working-information-panel-header
               v-bind:header-text1="stringtext"
-              v-bind:header-text2="'各月の時間は残業時間合計（深夜含む）です'"
+              v-bind:header-text2="'各月の時間は残業時間合計（深夜時間含む）です'"
             ></daily-working-information-panel-header>
           </div>
           <!-- /.panel header -->
@@ -148,7 +148,7 @@
           <div
             v-for="(timeitem,index) in timeitems"
             :key="timeitem.user_code"
-            class="col-12 p-0"
+            class="col-12 p-0 border-secondary"
           >
             <div class="row">
               <!-- col -->
@@ -156,16 +156,16 @@
                 <a
                   class="float-left mr-2 px-2 py-2 font-size-rg btn-lg print-none"
                 >
-                  <img class="icon-size-rg"/>
+                  <img class="icon-size-rg" src="/images/round-person-b.svg" alt />
                 </a>
                 <h1 class="font-size-sm m-0 mb-1">氏名</h1>
-                <p class="font-size-rg font-weight-bold m-0">{{ timeitem.user_name }}</p>
+                <p class="font-size-rg font-weight-bold m-0">{{ timeitem.user_name }}（{{ timeitem.employment_status_name }}）</p>
               </div>
               <!-- /.col -->
               <!-- col -->
               <div class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">
-                <h1 class="font-size-sm m-0 mb-1 text-sm-right">所属部署</h1>
-                <p class="font-size-rg m-0 text-sm-right">{{ timeitem.department_name }}</p>
+                <h1 class="font-size-sm m-0 mb-1 text-sm-right">所属部署　</h1>
+                <p class="font-size-rg m-0 text-sm-right">{{ timeitem.department_name }}　</p>
               </div>
               <!-- /.col -->
             </div>

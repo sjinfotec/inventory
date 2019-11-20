@@ -5248,6 +5248,8 @@ class DailyWorkingInformationController extends Controller
         // 平日は時間外労働時間＝残業時間
         // ---- 取り消し--休日は所定労働時間+時間外労働時間>8の場合、所定労働時間+時間外労働時間-8=残業時間
         // 休日は残業時間は単価は1.25で休日の労働時間同じなので休日の労働時間に加算
+        $out_of_legal_working_holiday_hours = 0;        // 法定外休日労働時間
+        $legal_working_holiday_hours = 0;               // 法定休日労働時間
         if ($target_result->business_kubun == Config::get('const.C007.basic')) {
             $temp_working_model->setOffhoursworkinghoursAttribute($calc_time);
         } else {
@@ -5262,6 +5264,13 @@ class DailyWorkingInformationController extends Controller
                 $calc_time = 0;
             } */
             $temp_working_model->setOffhoursworkinghoursAttribute($temp_calc);
+            if ($target_result->business_kubun == Config::get('const.C007.legal_holoday')) {
+                $legal_working_holiday_hours = $temp_calc;
+                $temp_working_model->setLegalworkingholidayhoursAttribute($legal_working_holiday_hours);
+            } elseif($target_result->business_kubun == Config::get('const.C007.legal_out_holoday')) {
+                $out_of_legal_working_holiday_hours = $temp_calc;
+                $temp_working_model->setOutoflegalworkingholidayhoursAttribute($out_of_legal_working_holiday_hours);
+            }
         }
         $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);   // 所定労働時間
         $total_time = $total_time + $regular_calc_time;
@@ -5677,6 +5686,8 @@ class DailyWorkingInformationController extends Controller
                     'off_hours_working_hours' => $working_time->off_hours_working_hours,
                     'public_going_out_hours' => $working_time->public_going_out_hours,
                     'missing_middle_hours' => $working_time->missing_middle_hours,
+                    'out_of_legal_working_holiday_hours' => $working_time->out_of_legal_working_holiday_hours,
+                    'legal_working_holiday_hours' => $working_time->legal_working_holiday_hours,
                     'working_status' => $working_time->working_status,
                     'working_status_name' => $working_time->working_status_name,
                     'remark_holiday_name' => $working_time->remark_holiday_name,
@@ -5744,6 +5755,8 @@ class DailyWorkingInformationController extends Controller
                     'off_hours_working_hours' => '',
                     'public_going_out_hours' => '',
                     'missing_middle_hours' => '',
+                    'out_of_legal_working_holiday_hours' => '',
+                    'legal_working_holiday_hours' => '',
                     'working_status' => '',
                     'working_status_name' => '',
                     'remark_holiday_name' => '',

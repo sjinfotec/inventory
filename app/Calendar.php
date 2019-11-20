@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 
 
 class Calendar extends Model
@@ -12,6 +13,7 @@ class Calendar extends Model
     protected $table = 'calendars';
     protected $table_public_holidays = 'public_holidays';
     protected $table_generalcodes = 'generalcodes';
+    protected $table_working_timetables = 'working_timetables';
  
     private $date;                  
     private $weekday_kubun;                  
@@ -112,6 +114,29 @@ class Calendar extends Model
     public function setIsdeletedAttribute($value)
     {
         $this->is_deleted = $value;
+    }
+
+    private $paramfromdate;                  
+    private $paramtodate;                  
+     
+    public function getParamfromdateAttribute()
+    {
+        return $this->paramfromdate;
+    }
+
+    public function setParamfromdateAttribute($value)
+    {
+        $this->paramfromdate = $value;
+    }
+     
+    public function getParamtodateAttribute()
+    {
+        return $this->paramtodate;
+    }
+
+    public function setParamtodateAttribute($value)
+    {
+        $this->paramtodate = $value;
     }
 
     /**
@@ -241,6 +266,53 @@ class Calendar extends Model
         }
         $data->where($this->table.'.is_deleted',0);
         $result = $data->get();
+
+
+        return $result;
+    }
+
+    /**
+     * シフト編集用検索
+     *
+     * @return void
+     */
+    public function getShiftCalenderDate($WorkingTime_name){
+        try {
+            \DB::enableQueryLog();
+            $data = DB::table($this->table)
+                ->select(
+                    $this->table.'.date as target_date')
+                ->selectRaw(' null as department_code')    
+                ->selectRaw(' null as user_code')    
+                ->selectRaw(' 1 as working_timetable_no')    
+                ->selectRaw(
+                    "concat(
+                        DATE_FORMAT(".$this->table.".date,'%Y年%m月%d日'),'(',substring('月火水木金土日',convert(".$this->table.".weekday_kubun+1,char),1),')') as date_name ");
+            $data->selectRaw("concat('<', '".$WorkingTime_name."', '> 勤務') as working_timetable_name");
+            if(isset($this->paramfromdate)){
+                $data->where($this->table.'.date', '>=', $this->paramfromdate);
+            }
+            if(isset($this->paramtodate)){
+                $data->where($this->table.'.date', '<=', $this->paramtodate);
+            }
+            $data->where($this->table.'.is_deleted',0);
+            $result = $data->get();
+            \Log::debug(
+                'sql_debug_log',
+                [
+                    'getShiftCalenderDate' => \DB::getQueryLog()
+                ]
+                );
+                \DB::disableQueryLog();
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
 
 
         return $result;

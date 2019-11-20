@@ -36,7 +36,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGroupSelect01"
-                    >所属部署</label>
+                    >所属部署<span class="color-red">[*]</span></label>
                   </div>
                   <select-department
                     ref="selectdepartment"
@@ -54,7 +54,7 @@
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       id="basic-addon1"
                       for="shift_start"
-                    >社員名</span>
+                    >社員名<span class="color-red">[*]</span></span>
                   </div>
                   <select-user
                     ref="selectuser"
@@ -66,26 +66,6 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-12 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span
-                      class="input-group-text font-size-sm line-height-xs label-width-120"
-                      id="basic-addon1"
-                      for="shift_start"
-                    >シフト選択</span>
-                  </div>
-                  <select class="form-control" v-model="timeTable">
-                    <option
-                      v-for="option in timeTableList"
-                      v-bind:value="{no: option.no, name: option.name,apply_term_from:option.apply_term_from}"
-                      v-bind:key="option.no"
-                    >{{ option.name }}</option>
-                  </select>
-                </div>
-              </div>
-              <!-- /.col -->
-              <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
@@ -93,7 +73,7 @@
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       id="basic-addon1"
                       for="shift_end"
-                    >開始日付</span>
+                    >開始日付<span class="color-red">[*]</span></span>
                   </div>
                   <datepicker
                     :language="ja"
@@ -112,7 +92,7 @@
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       id="basic-addon1"
                       for="shift_end"
-                    >終了日付</span>
+                    >終了日付<span class="color-red">[*]</span></span>
                   </div>
                   <datepicker
                     :language="ja"
@@ -120,6 +100,27 @@
                     :format="DatePickerFormat"
                     v-model="to"
                   ></datepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      id="basic-addon1"
+                      for="shift_start"
+                    >シフト選択</span>
+                  </div>
+                  <select class="form-control" v-model="timeTable">
+                    <option></option>
+                    <option
+                      v-for="option in timeTableList"
+                      v-bind:value="{no: option.no, name: option.name,apply_term_from:option.apply_term_from}"
+                      v-bind:key="option.no"
+                    >{{ option.name }}</option>
+                  </select>
                 </div>
               </div>
               <!-- /.col -->
@@ -146,7 +147,7 @@
                   >指定した期間のシフトを表示する</button>
                 </div>
               </div>
-              <div class="col-md-12 pb-2">
+              <!-- <div class="col-md-12 pb-2">
                 <div class="btn-group d-flex">
                   <button
                     type="button"
@@ -154,7 +155,7 @@
                     @click="alertRangeDelConf('info')"
                   >指定した期間を削除する</button>
                 </div>
-              </div>
+              </div> -->
               <!-- /.col -->
             </div>
             <!-- /.row -->
@@ -188,22 +189,13 @@
                       <tr>
                         <td class="text-center align-middle">日付</td>
                         <td class="text-center align-middle">タイムテーブル</td>
-                        <td class="text-center align-middle">操作</td>
                       </tr>
                     </thead>
                     <tbody>
                       <tr v-for="item in shiftInfo" v-bind:key="item.id">
                         <input type="hidden" v-model="item.id" />
-                        <td class="text-center align-middle">{{item.target_date}}</td>
-                        <td class="text-center align-middle">{{item.name}}</td>
-                        <td class="text-center align-middle">
-                          <div class="btn-group d-flex">
-                            <button
-                              class="font-size-sm btn btn-danger btn-sm w-100"
-                              @click="alertDelConf('info',item.id)"
-                            >削除</button>
-                          </div>
-                        </td>
+                        <td class="text-center align-middle">{{item.date_name}}</td>
+                        <td class="text-center align-middle">{{item.working_timetable_name}}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -223,6 +215,7 @@
 </template>
 <script>
 import toasted from "vue-toasted";
+import moment from "moment";
 import Datepicker from "vuejs-datepicker";
 import { ja } from "vuejs-datepicker/dist/locale";
 
@@ -231,8 +224,8 @@ export default {
   data() {
     return {
       ja: ja,
-      default: "2019/10/24",
-      DatePickerFormat: "yyyy/MM/dd",
+      default: new Date(),
+      DatePickerFormat: "yyyy年MM月dd日",
       from: "",
       to: "",
       shiftTimes: [],
@@ -262,60 +255,70 @@ export default {
   methods: {
     // バリデーション
     checkForm: function() {
-      var flag = false;
-      if (this.selectedUser && this.timeTable.no && this.from && this.to) {
-        flag = true;
-        return flag;
-      } else {
-        this.errors = [];
+      var flag = true;
+      this.errors = [];
 
-        if (!this.selectedUser) {
-          flag = false;
-          this.errors.push("ユーザーを選択してください");
-        }
-        if (!this.timeTable.no) {
-          flag = false;
-          this.errors.push("シフトを選択をしてください");
-        }
-        if (!this.from) {
-          flag = false;
-          this.errors.push("開始日を入力してください");
-        }
-        if (!this.to) {
-          flag = false;
-          this.errors.push("終了日を入力してください");
-        }
-        return flag;
+      if (!this.valuedepartment) {
+        flag = false;
+        this.errors.push("部署を選択してください");
       }
+      if (!this.selectedUser) {
+        flag = false;
+        this.errors.push("社員を選択してください");
+      }
+      if (!this.timeTable.no) {
+        flag = false;
+        this.errors.push("シフトを選択をしてください");
+      }
+      if (!this.from) {
+        flag = false;
+        this.errors.push("開始日を入力してください");
+      }
+      if (!this.to) {
+        flag = false;
+        this.errors.push("終了日を入力してください");
+      }
+      if (flag) {
+        if (this.from > this.to) {
+          flag = false;
+          this.errors.push("開始日＞終了日となっています");
+        }
+      }
+      return flag;
     },
     // 検索・削除のバリデーション
     checkFormSearch: function() {
-      var flag = false;
-      if (this.selectedUser && this.from && this.to) {
-        flag = true;
-        return flag;
-      } else {
-        this.errors = [];
+      var flag = true;
+      this.errors = [];
 
-        if (!this.selectedUser) {
-          flag = false;
-          this.errors.push("ユーザーを選択してください");
-        }
-        if (!this.from) {
-          flag = false;
-          this.errors.push("開始日を入力してください");
-        }
-        if (!this.to) {
-          flag = false;
-          this.errors.push("終了日を入力してください");
-        }
-        return flag;
+      if (!this.valuedepartment) {
+        flag = false;
+        this.errors.push("部署を選択してください");
       }
+      if (!this.selectedUser) {
+        flag = false;
+        this.errors.push("社員を選択してください");
+      }
+      if (!this.from) {
+        flag = false;
+        this.errors.push("開始日付を入力してください");
+      }
+      if (!this.to) {
+        flag = false;
+        this.errors.push("終了日付を入力してください");
+      }
+      if (flag) {
+        if (this.from > this.to) {
+          flag = false;
+          this.errors.push("開始日＞終了日となっています");
+        }
+      }
+      return flag;
     },
     alert: function(state, message, title) {
       this.$swal(title, message, state);
     },
-    alertRangeDelConf: function(state) {
+    /*alertRangeDelConf: function(state) {
       this.validate = this.checkFormSearch();
       if (this.validate) {
         this.$swal({
@@ -332,7 +335,7 @@ export default {
         });
       } else {
       }
-    },
+    }, */
     alertDelConf: function(state, id) {
       this.$swal({
         title: "確認",
@@ -351,14 +354,22 @@ export default {
     StoreShiftTime() {
       this.validate = this.checkForm();
       if (this.validate) {
+        this.fromdate = ""
+        if (this.from) {
+          this.fromdate = moment(this.from).format("YYYYMMDD");
+        }
+        this.todate = ""
+        if (this.to) {
+          this.todate = moment(this.to).format("YYYYMMDD");
+        }
         this.$axios
           .post("/setting_shift_time/store", {
             user_code: this.selectedUser,
             department_code: this.valuedepartment,
             time_table_no: this.timeTable.no,
             apply_term_from: this.timeTable.apply_term_from,
-            from: this.from,
-            to: this.to
+            from: this.fromdate,
+            to: this.todate
           })
           .then(response => {
             var res = response.data;
@@ -381,12 +392,12 @@ export default {
     getUserList() {
       this.$refs.selectuser.getUserList(this.getDo, "");
     },
+    // タイムテーブルリスト
     getTimeTableList() {
       this.$axios
         .get("/get_time_table_list")
         .then(response => {
           this.timeTableList = response.data;
-          console.log("タイムテーブルリスト取得");
         })
         .catch(reason => {
           alert("error");
@@ -396,15 +407,24 @@ export default {
     getUserShift: function() {
       this.validate = this.checkFormSearch();
       if (this.validate) {
+        this.fromdate = ""
+        if (this.from) {
+          this.fromdate = moment(this.from).format("YYYYMMDD");
+        }
+        this.todate = ""
+        if (this.to) {
+          this.todate = moment(this.to).format("YYYYMMDD");
+        }
         this.$axios
           .post("/get_user_shift", {
             code: this.selectedUser,
-            from: this.from,
-            to: this.to,
+            from: this.fromdate,
+            to: this.todate,
             no: this.timeTable.no
           })
           .then(response => {
             this.shiftInfo = response.data;
+            console.log("this.shiftInfo length = " + this.shiftInfo.length);
             this.errors = [];
           })
           .catch(reason => {});
@@ -414,7 +434,6 @@ export default {
     // 部署選択が変更された場合の処理
     departmentChanges: function(value) {
       this.valuedepartment = value;
-      console.log("部署選択が変更された" + this.valuedepartment);
       this.valueuser = "";
       this.getDo = 1;
       this.fromdate = ""
@@ -474,7 +493,7 @@ export default {
         .catch(reason => {});
     },
     // 範囲削除
-    rangeDell: function() {
+    /*rangeDell: function() {
       this.$axios
         .post("/setting_shift_time/range_del", {
           user_code: this.selectedUser,
@@ -496,7 +515,7 @@ export default {
           }
         })
         .catch(reason => {});
-    },
+    }, */
     // ユーザー選択が変更された場合の処理
     userChanges: function(value) {
       this.selectedUser = value;

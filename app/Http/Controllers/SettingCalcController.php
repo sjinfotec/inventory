@@ -51,6 +51,8 @@ class SettingCalcController extends Controller
         $b_month = $request->settings["biginningMonth"];
         $calc_auto_time = $request->settings["calc_auto_time"];
         $oneMonthTotal = $request->settings["oneMonthTotal"];
+        $twoMonthTotal = $request->settings["twoMonthTotal"];
+        $threeMonthTotal = $request->settings["threeMonthTotal"];
         $year_total = $request->settings["yearTotal"];
         $oneMonthTotal_sp = $request->settings["sp_oneMonthTotal"];
         $year_total_sp = $request->settings["sp_yearTotal"];
@@ -69,6 +71,8 @@ class SettingCalcController extends Controller
             $b_month,
             $calc_auto_time,
             $oneMonthTotal,
+            $twoMonthTotal,
+            $threeMonthTotal,
             $year_total,
             $oneMonthTotal_sp,
             $year_total_sp,
@@ -109,6 +113,8 @@ class SettingCalcController extends Controller
         $b_month,
         $calc_auto_time,
         $oneMonthTotal,
+        $twoMonthTotal,
+        $threeMonthTotal,
         $year_total,
         $oneMonthTotal_sp,
         $year_total_sp,
@@ -135,8 +141,8 @@ class SettingCalcController extends Controller
             }
             $setting->setCalcautotimeAttribute($calc_auto_time);
             $setting->setMax1MonthtotalAttribute($oneMonthTotal);
-            $setting->setMax2MonthtotalAttribute(Config::get('const.C021.manthly_alert_error_2'));    // 未使用
-            $setting->setMax3MonthtotalAttribute(Config::get('const.C021.manthly_alert_error_3'));    // 未使用
+            $setting->setMax2MonthtotalAttribute($twoMonthTotal);
+            $setting->setMax3MonthtotalAttribute($threeMonthTotal);
             $setting->setMax6MonthtotalAttribute(0);    // 未使用
             $setting->setMax12MonthtotalAttribute($year_total);
             $setting->setAve26timespAttribute($ave_2_6);
