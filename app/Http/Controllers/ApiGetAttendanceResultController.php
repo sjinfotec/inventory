@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use App\User;
 use App\WorkTime;
+use App\WorkTimeLog;
 use App\Http\Controllers\ApiCommonController;
 use Carbon\Carbon;
 
@@ -57,7 +58,7 @@ class ApiGetAttendanceResultController extends Controller
                     // 打刻データ登録
                     DB::beginTransaction();
                     try{
-                        $ins_result = $this->insertTime($user_data, $mode, $array_chkAttendance_result, $systemdate);
+                        $ins_result = $this->insertTime($user_data, $mode, $card_id, $array_chkAttendance_result, $systemdate);
                         $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
                         $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
                         $response->put(Config::get('const.PUT_ITEM.record_time'),$systemdate->format('H:i:s'));
@@ -185,7 +186,7 @@ class ApiGetAttendanceResultController extends Controller
      * @param [type] $id
      * @return void
      */
-    public function insertTime($user_data, $mode, $array_check_result, $systemdate) {
+    public function insertTime($user_data, $mode, $card_id, $array_check_result, $systemdate) {
 
         try{
             $work_time = new WorkTime();
@@ -199,6 +200,17 @@ class ApiGetAttendanceResultController extends Controller
             $work_time->setCreateduserAttribute($user_data->code);
             $work_time->setSystemDateAttribute($systemdate);
             $work_time->insertWorkTime();
+
+            $work_time_log = new WorkTimeLog();
+            $work_time_log->setUsercodeAttribute($user_data->code);
+            $work_time_log->setDepartmentcodeAttribute($user_data->department_code);
+            $work_time_log->setEmploymentstatusAttribute($user_data->employment_status);
+            $work_time_log->setRecordtimeAttribute($systemdate);
+            $work_time_log->setModeAttribute($mode);
+            $work_time_log->setCardidmAttribute($card_id);
+            $work_time_log->setCreateduserAttribute($user_data->code);
+            $work_time_log->setSystemDateAttribute($systemdate);
+            $work_time_log->insertWorkTimeLog();
 
             return true;
 

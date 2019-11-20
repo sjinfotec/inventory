@@ -53,6 +53,7 @@ class User extends Authenticatable
             ->select(
                 'users.id',
                 'users.department_code as department_code',
+                'users.employment_status',
                 'users.name',
                 'users.code',
                 'card_informations.card_idm'

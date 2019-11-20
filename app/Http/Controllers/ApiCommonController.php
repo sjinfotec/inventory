@@ -23,6 +23,7 @@ class ApiCommonController extends Controller
 
     protected $table_generalcodes = 'generalcodes';
     protected $table_confirms = 'confirms';
+    protected $table_working_timetables = 'working_timetables';
 
     /**
      * ユーザーリスト取得
@@ -145,14 +146,45 @@ class ApiCommonController extends Controller
         $shift_info->setWorkingtimetablenoAttribute($no);
         $shift_info->setStarttargetdateAttribute($from);
         $shift_info->setEndtargetdateAttribute($to);
-        $results = $shift_info->getUserShift();
-        foreach ($results as $item) {
+        $shift_results = $shift_info->getUserShift();
+        $last_date = "";
+        foreach ($shift_results as $item) {
             if(isset($item->target_date)){
-                $date = new Carbon($item->target_date);
-                $item->target_date = $date->format('Y/m/d');
+                $last_date = $item->target_date;
             }
         }
-
+        $to = new Carbon($request->to);
+        $check_to = $to->format("Ymd");
+        if ($check_to > $last_date || $last_date == "") {
+            // カレンダー設定よりNO＝1で設定
+            $WorkingTimeTable_model = new WorkingTimeTable();
+            $WorkingTimeTable_model->setNoAttribute(1);
+            $WorkingTimeTables = $WorkingTimeTable_model->getDetail();
+            $WorkingTime_name = "";
+            foreach ($WorkingTimeTables as $item) {
+                if(isset($item->name)){
+                    $WorkingTime_name = $item->name;
+                    break;
+                }
+            }
+            if ($last_date == "") {
+                $from = new Carbon($request->from);
+                $from = $from->format("Ymd");
+            } else {
+                $from = new Carbon($last_date);
+                $from = $from->addDay()->format("Ymd");
+            }
+            $to = new Carbon($request->to);
+            $to = $to->format("Ymd");
+            $calender_model = new Calendar();
+            $calender_model->setParamfromdateAttribute($from);
+            $calender_model->setParamtodateAttribute($to);
+            $calender_results = $calender_model->getShiftCalenderDate($WorkingTime_name);
+            $results = $shift_results->merge($calender_results);
+        } else {
+            $results = $shift_results;
+        }
+  
         return $results;
     }
         

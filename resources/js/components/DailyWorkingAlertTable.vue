@@ -10,10 +10,10 @@
                 <td class="text-center align-middle w-15">雇用形態</td>
                 <td class="text-center align-middle w-15">部署</td>
                 <td class="text-center align-middle w-15">氏名</td>
-                <td class="text-center align-middle w-15">前回打刻時刻</td>
-                <td class="text-center align-middle w-15">前回打刻モード</td>
                 <td class="text-center align-middle w-15">打刻時刻</td>
                 <td class="text-center align-middle w-15">打刻モード</td>
+                <td class="text-center align-middle w-15">直前打刻時刻</td>
+                <td class="text-center align-middle w-15">直前打刻モード</td>
                 <td
                   class="text-center align-middle w-15"
                   data-toggle="tooltip"
@@ -37,10 +37,10 @@
                 <td class="text-center align-middle">{{ alertList.employment_status_name }}</td>
                 <td class="text-center align-middle">{{ alertList.department_name }}</td>
                 <td class="text-center align-middle">{{ alertList.user_name }}</td>
-                <td class="text-center align-middle">{{ alertList.before_record_time }}</td>
-                <td class="text-center align-middle">{{ alertList.before_mode_name }}</td>
                 <td class="text-center align-middle">{{ alertList.current_record_time }}</td>
                 <td class="text-center align-middle">{{ alertList.current_mode_name }}</td>
+                <td class="text-center align-middle">{{ alertList.before_record_time }}</td>
+                <td class="text-center align-middle">{{ alertList.before_mode_name }}</td>
                 <td
                   class="text-center align-middle"
                   data-toggle="tooltip"
@@ -67,8 +67,15 @@
                   data-toggle="tooltip"
                   data-placement="top"
                   v-if="alertList.holiday_alert === 1"
-                  v-bind:title="'出勤日にカード打刻していない'"
-                >打刻忘れ（出勤日）</td>
+                  v-bind:title="'出勤日にカード打刻なし'"
+                >打刻なし（出勤日）</td>
+                <td
+                  class="text-center align-middle"
+                  data-toggle="tooltip"
+                  data-placement="top"
+                  v-if="alertList.hit_alert !== 1 && alertList.holiday_alert !== 1"
+                  v-bind:title="'カード打刻内容の確認'"
+                ></td>
               </tr>
             </tbody>
           </table>

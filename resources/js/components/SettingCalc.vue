@@ -105,6 +105,56 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-230"
                       id="basic-addon1"
+                    >２ヶ月累計（81時間以内）</span>
+                  </div>
+                  <div class="form-control p-0">
+                    <input
+                      type="number"
+                      title="２ヶ月累計（81時間以内）"
+                      max="81.00"
+                      min="00.00"
+                      step="0.01"
+                      class="form-control"
+                      :value="valuetwoMonthTotal"
+                      @change="twoMonthTotalChanges"
+                    />
+                  </div>
+                </div>
+                <message-data v-bind:message-datas="messagedatatwoMonthTotal" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-12 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-230"
+                      id="basic-addon1"
+                    >３ヶ月累計（120時間以内）</span>
+                  </div>
+                  <div class="form-control p-0">
+                    <input
+                      type="number"
+                      title="３ヶ月累計（120時間以内）"
+                      max="120.00"
+                      min="00.00"
+                      step="0.01"
+                      class="form-control"
+                      :value="valuethreeMonthTotal"
+                      @change="threeMonthTotalChanges"
+                    />
+                  </div>
+                </div>
+                <message-data v-bind:message-datas="messagedatathreeMonthTotal" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-12 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-230"
+                      id="basic-addon1"
                     >１年累計（年360時間以内）</span>
                   </div>
                   <div class="form-control p-0">
@@ -359,7 +409,8 @@
                               <input
                                 title="36協定特別条項設定の場合は１ヶ月累計時間未満、設定ない場合は36協定設定１ヶ月累計時間以内"
                                 type="number"
-                                max="100.00"
+                                v-bind:max="limit_valueoneMonthTotal"
+                                min="0.00"
                                 step="0.50"
                                 class="form-control"
                                 v-model="form.upTime[index]"
@@ -453,12 +504,19 @@ export default {
       bMonth: "",
       valueymd: "",
       valueoneMonthTotal: "",
+      valuetwoMonthTotal: "",
+      valuethreeMonthTotal: "",
       valuesp_oneMonthTotal: "",
+      before_valueoneMonthTotal: "",
+      before_valuesp_oneMonthTotal: "",
+      limit_valueoneMonthTotal: 100,
       form: {
         year: "",
         biginningMonth: "",
         calc_auto_time: "",
         oneMonthTotal: "",
+        twoMonthTotal: "",
+        threeMonthTotal: "",
         yearTotal: "",
         sp_oneMonthTotal: "",
         sp_yearTotal: "",
@@ -480,6 +538,8 @@ export default {
       messagedatayear: [],
       messagedatabiginningMonth: [],
       messagedataoneMonthTotal: [],
+      messagedatatwoMonthTotal: [],
+      messagedatathreeMonthTotal: [],
       messagedatayearTotal: [],
       messagedatasponeMonthTotal: [],
       messagedataspyearTotal: [],
@@ -547,6 +607,8 @@ export default {
       this.messagedataoneMonthTotal = [];
       this.messagedatayearTotal = [];
       this.messagedatasponeMonthTotal = [];
+      this.messagedatasptwoMonthTotal = [];
+      this.messagedataspthreeMonthTotal = [];
       this.messagedataspyearTotal = [];
       this.messagedataspave_2_6 = [];
       this.messagedataspcount = [];
@@ -572,6 +634,18 @@ export default {
       if (this.form.oneMonthTotal != "") {
         if (parseFloat(this.form.oneMonthTotal) < 1 || parseFloat(this.form.oneMonthTotal) > 45) {
           this.messagedataoneMonthTotal.push("1~45の範囲で入力してください");
+          flag = false;
+        }
+      }
+      if (this.form.twoMonthTotal != "") {
+        if (parseFloat(this.form.twoMonthTotal) < 1 || parseFloat(this.form.twoMonthTotal) > 81) {
+          this.messagedatatwoMonthTotal.push("1~81の範囲で入力してください");
+          flag = false;
+        }
+      }
+      if (this.form.threeMonthTotal != "") {
+        if (parseFloat(this.form.threeMonthTotal) < 1 || parseFloat(this.form.threeMonthTotal) > 120) {
+          this.messagedatathreeMonthTotal.push("1~120の範囲で入力してください");
           flag = false;
         }
       }
@@ -626,13 +700,13 @@ export default {
           flag = false;
         } else {
           if (this.form.sp_oneMonthTotal != "") {
-            if (parseFloat(this.form.upTime[index]) > parseFloat(this.form.sp_oneMonthTotal)) {
+            if (parseFloat(this.form.upTime[index]) < 1 || parseFloat(this.form.upTime[index]) > parseFloat(this.form.sp_oneMonthTotal)) {
               this.messagedataupTime.push(index+1 + "月の上限残業時間は1~" + this.form.sp_oneMonthTotal + "の範囲で入力してください");
               flag = false;
             }
           } else {
             if (this.form.oneMonthTotal != "") {
-              if (parseFloat(this.form.upTime[index])> parseFloat(this.form.oneMonthTotal)) {
+              if (parseFloat(this.form.upTime[index]) < 1 || parseFloat(this.form.upTime[index])> parseFloat(this.form.oneMonthTotal)) {
                 this.messagedataupTime.push(index+1 + "月の上限残業時間は1~" + this.form.oneMonthTotal + "の範囲で入力してください");
                 flag = false;
               }
@@ -666,20 +740,56 @@ export default {
       this.bMonth = moment(this.valueymd).format("MM");
     },
     oneMonthTotalChanges: function(event) {
+      this.before_valueoneMonthTotal = this.valueoneMonthTotal;
       this.valueoneMonthTotal = event.target.value;
       this.form.oneMonthTotal = this.valueoneMonthTotal;
-      for (let index = 0; index < this.form.upTime.length; index++) {
-        if (this.form.upTime[index] == "") {
-          this.form.upTime[index] = this.valueoneMonthTotal;
+      if (this.valueoneMonthTotal > 0) {
+        if (this.valuesp_oneMonthTotal == "" || this.valuesp_oneMonthTotal == 0) {
+          this.limit_valueoneMonthTotal = this.valueoneMonthTotal;
+          for (let index = 0; index < this.form.upTime.length; index++) {
+            if (this.form.upTime[index] == "" || this.form.upTime[index] > this.valueoneMonthTotal) {
+              this.form.upTime[index] = this.valueoneMonthTotal;
+            }
+          }
+        }
+      } else if(this.valueoneMonthTotal == "" || this.valueoneMonthTotal == 0) {
+        if (this.valuesp_oneMonthTotal == "" || this.valuesp_oneMonthTotal == 0) {
+          this.limit_valueoneMonthTotal = 0;
+          for (let index = 0; index < this.form.upTime.length; index++) {
+            if (this.form.upTime[index] == this.before_valueoneMonthTotal) {
+              this.form.upTime[index] = "";
+            }
+          }
         }
       }
     },
+    twoMonthTotalChanges: function(event) {
+      this.valuetwoMonthTotal = event.target.value;
+      this.form.twoMonthTotal = this.valuetwoMonthTotal;
+    },
+    threeMonthTotalChanges: function(event) {
+      this.valuethreeMonthTotal = event.target.value;
+      this.form.threeMonthTotal = this.valuethreeMonthTotal;
+    },
     oneSpMonthTotalChanges: function(event) {
+      this.before_valuesp_oneMonthTotal = this.valuesp_oneMonthTotal;
       this.valuesp_oneMonthTotal = event.target.value;
       this.form.sp_oneMonthTotal = this.valuesp_oneMonthTotal;
-      for (let index = 0; index < this.form.upTime.length; index++) {
-        if (this.form.upTime[index] == "") {
-          this.form.upTime[index] = this.valuesp_oneMonthTotal;
+      if (this.valuesp_oneMonthTotal > 0) {
+        this.limit_valueoneMonthTotal = this.valuesp_oneMonthTotal;
+        for (let index = 0; index < this.form.upTime.length; index++) {
+          if (this.form.upTime[index] == "" || this.form.upTime[index] > this.valuesp_oneMonthTotal) {
+            this.form.upTime[index] = this.valuesp_oneMonthTotal;
+          }
+        }
+      } else if(this.valuesp_oneMonthTotal == "" || this.valuesp_oneMonthTotal == 0) {
+        if (this.valueoneMonthTotal == "" || this.valueoneMonthTotal == 0) {
+          this.limit_valueoneMonthTotal = 0;
+          for (let index = 0; index < this.form.upTime.length; index++) {
+            if (this.form.upTime[index] == this.before_valuesp_oneMonthTotal) {
+              this.form.upTime[index] = "";
+            }
+          }
         }
       }
     },
@@ -711,6 +821,8 @@ export default {
       this.messagedatayear = [];
       this.messagedatabiginningMonth = [];
       this.messagedataoneMonthTotal = [];
+      this.messagedatatwoMonthTotal = [];
+      this.messagedatathreeMonthTotal = [];
       this.messagedatayearTotal = [];
       this.messagedatasponeMonthTotal = [];
       this.messagedataspyearTotal = [];
@@ -739,6 +851,15 @@ export default {
             if (this.details[0].max_1month_total != null) {
               this.form.oneMonthTotal = this.details[0].max_1month_total.toString();
               this.valueoneMonthTotal = this.details[0].max_1month_total.toString();
+              this.limit_valueoneMonthTotal = this.details[0].max_1month_total;
+            }
+            if (this.details[0].max_2month_total != null) {
+              this.form.twoMonthTotal = this.details[0].max_2month_total.toString();
+              this.valuetwoMonthTotal = this.details[0].max_2month_total.toString();
+            }
+            if (this.details[0].max_3month_total != null) {
+              this.form.threeMonthTotal = this.details[0].max_3month_total.toString();
+              this.valuethreeMonthTotal = this.details[0].max_3month_total.toString();
             }
             if (this.details[0].max_12month_total != null) {
               this.form.yearTotal = this.details[0].max_12month_total.toString();
@@ -746,6 +867,7 @@ export default {
             if (this.details[0].max_1month_total_sp != null) {
               this.form.sp_oneMonthTotal = this.details[0].max_1month_total_sp.toString();
               this.valuesp_oneMonthTotal = this.details[0].max_1month_total_sp.toString();
+              this.limit_valueoneMonthTotal = this.details[0].max_1month_total_sp;
             }
             if (this.details[0].ave_2_6_time_sp != null) {
               this.form.sp_ave_2_6 = this.details[0].ave_2_6_time_sp.toString();
@@ -796,7 +918,11 @@ export default {
       this.form.biginningMonth = "";
       this.form.calc_auto_time = "";
       this.form.oneMonthTotal = "";
+      this.form.twoMonthTotal = "";
+      this.form.threeMonthTotal = "";
       this.valueoneMonthTotal = "";
+      this.valuetwoMonthTotal = "";
+      this.valuethreeMonthTotal = "";
       this.form.yearTotal = "";
       this.form.sp_oneMonthTotal = "";
       this.valuesp_oneMonthTotal = "";

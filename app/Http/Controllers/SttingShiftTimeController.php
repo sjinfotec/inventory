@@ -71,18 +71,13 @@ class SttingShiftTimeController extends Controller
      * @return void
      */
     public function store(Request $request){
-        Log::debug('---------- シフト登録 in $request->user_code = '.$request->user_code );
-        Log::debug('---------- シフト登録 in $request->time_table_no = '.$request->time_table_no );
-        Log::debug('---------- シフト登録 in $request->department_code = '.$request->department_code );
         $response = collect();
         $code = $request->user_code;
         $time_table_no = $request->time_table_no;
         $department_code = $request->department_code;
             
         $from = new Carbon($request->from);
-        // $from = $from->format("Y/m/d");
         $to = new Carbon($request->to);
-        // $to = $to->format("Y/m/d");
 
         $result = $this->dbConnectInsert($code,$department_code,$time_table_no,$from,$to);
         if($result){
@@ -110,15 +105,17 @@ class SttingShiftTimeController extends Controller
             $shift_info = new ShiftInformation();
             $shift_info->setUsercodeAttribute($code);
             $shift_info->setDepartmentcodeAttribute($department_code);
-            $shift_info->setWorkingtimetablenoAttribute($time_table_no);
-            $shift_info->setCreatedatAttribute($systemdate);
+            $shift_info->setStarttargetdateAttribute($from);
+            $shift_info->setEndtargetdateAttribute($to);
             $is_exists = $shift_info->isExistsShiftInfo();
             if($is_exists){
                $shift_info->delShiftInfo();
             }
+            $shift_info->setWorkingtimetablenoAttribute($time_table_no);
+            $shift_info->setCreatedatAttribute($systemdate);
             // from -> to までtarget_date登録する
             for ($i=$from; $i->lte($to); $i->addDay()) {
-                $target_date = $from->copy()->format("Y/m/d"); 
+                $target_date = $i->format("Ymd"); 
                 $shift_info->setTargetdateAttribute($target_date);
                 $shift_info->insertUserShift();
             }
