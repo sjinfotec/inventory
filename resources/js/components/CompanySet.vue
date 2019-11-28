@@ -13,6 +13,7 @@ export default {
   },
   // マウント時
   mounted() {
+    console.log('CompanySet mounted. ');
     this.getCompanyItem();
   },
   methods: {
