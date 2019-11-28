@@ -28,7 +28,7 @@ export default {
         },
         plotOptions: {
           bar: {
-            horizontal: true,
+            horizontal: false,
           },
 
         },
@@ -41,7 +41,7 @@ export default {
           text: ''
         },
         xaxis: {
-          categories: ['2019年10月'],
+          categories: ['2019年10月', '2019年11月'],
           labels: {
             formatter: function (val) {
               return val + "時間"

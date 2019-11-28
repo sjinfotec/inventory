@@ -1,5 +1,5 @@
 <template>
-  <div class="card-header bg-transparent pb-2 border-0">
+  <div :class="classText">
     <h1 class="float-sm-left font-size-rg mb-0">{{ headerText1 }}</h1>
     <span class="float-sm-right font-size-sm mb-0">{{ headerText2 }}</span>
   </div>
@@ -17,6 +17,10 @@ export default {
     headerText2: {
         type: String,
         default: ''
+    },
+    classText: {
+        type: String,
+        default: 'card-header bg-transparent pb-2 border-0'
     }
   }
 };

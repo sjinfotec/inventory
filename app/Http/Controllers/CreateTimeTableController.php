@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreTimeTablePost;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,8 @@ class CreateTimeTableController extends Controller
 {
     const SUCCESS = 0;
     const FAILED = 1;
+    // メッセージ
+    private $array_messagedata = array();
 
     /**
      * 初期処理
@@ -275,26 +278,15 @@ class CreateTimeTableController extends Controller
      * @return void
      */
     public function getDetail(Request $request){
-        $carbon = new Carbon();
-        $no = $request->no;
-        $time_table = new WorkingTimeTable();
-        $time_table->setNoAttribute($no);
-        $result = $time_table->getDetail();
-        foreach ($result as $item) {
-            if(isset($item->from_time)){
-                $from_time = new Carbon($item->from_time);
-                $item->from_time = $from_time->format('H:i');
-            }
-            if(isset($item->to_time)){
-                $to_time = new Carbon($item->to_time);
-                $item->to_time = $to_time->format('H:i');
-            }
-            if(isset($item->apply_term_from)){
-                // yyyy-mm-ddに変換
-                $convert_date = new Carbon($item->apply_term_from);
-                $item->apply_term_from = $convert_date->copy()->format("Y-m-d");
-
-            }
+        try{
+            $no = $request->no;
+            $time_table = new WorkingTimeTable();
+            $time_table->setNoAttribute($no);
+            $result = $time_table->getDetail();
+        }catch(\PDOException $pe){
+            return null;
+        }catch(\Exception $e){
+            return null;
         }
         return $result;
     }

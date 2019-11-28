@@ -113,6 +113,9 @@ Route::get('/get_mode_list', 'ApiCommonController@getModeList')->middleware('aut
 Route::get('/get_general_list', 'ApiCommonController@getRequestGeneralList')->middleware('auth');
 Route::get('/get_demand_list', 'ApiCommonController@getDemandList')->middleware('auth');
 Route::get('/get_confirm_list', 'ApiCommonController@getConfirmlList')->middleware('auth');
+Route::get('/get_company_info_apply', 'ApiCommonController@getCompanyInfoApply')->middleware('auth');
+// 締日取得
+Route::get('/get_closing_day', 'ApiCommonController@getClosingDay')->middleware('auth');
 // 申請
 Route::get('/demand', 'DemandController@index')->middleware('auth');
 Route::get('/demand/list_demand', 'DemandController@listDemand')->middleware('auth');

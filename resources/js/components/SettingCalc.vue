@@ -363,8 +363,8 @@
             <div class="row justify-content-between px-3">
               <!-- panel header -->
               <div class="card-header col-12 bg-transparent pb-2 border-0">
-                <h1 class="float-sm-left font-size-rg">◆月別設定</h1>
-                <span class="float-sm-right font-size-sm">月ごとに締日と時間に関する設定ができます</span>
+                <h1 class="float-sm-left font-size-rg">◆月度別設定</h1>
+                <span class="float-sm-right font-size-sm">月度ごとに締日と時間に関する設定ができます</span>
               </div>
               <!-- /.panel header -->
               <message-data v-bind:message-datas="messagedataclosing" v-bind:message-class="'warning'"></message-data>
@@ -381,9 +381,14 @@
                     <table class="table table-striped border-bottom font-size-sm text-nowrap">
                       <thead>
                         <tr>
-                          <td class="text-center align-middle w-10">月<span class="color-red">[*]</span></td>
+                          <td class="text-center align-middle w-10">月度<span class="color-red">[*]</span></td>
                           <td class="text-center align-middle w-20 mw-rem-10">締日<span class="color-red">[*]</span></td>
-                          <td class="text-center align-middle w-20 mw-rem-10">上限残業時間<span class="color-red">[*]</span></td>
+                          <td class="text-center align-middle w-20 mw-rem-10"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            v-bind:title="edtString"
+                            @mouseover="edttooltips('36協定特別条項適用しない場合は36協定設定の１ヶ月累計時間以内、適用の場合は36協定特別条項設定の１ヶ月累計時間以内','')"
+                          >上限残業時間<span class="color-red">[*]</span></td>
                           <td class="text-center align-middle w-20 mw-rem-15">時間単位<span class="color-red">[*]</span></td>
                           <td class="text-center align-middle w-20 mw-rem-15">時間の丸め<span class="color-red">[*]</span></td>
                           <td class="text-center align-middle"></td>
@@ -407,7 +412,7 @@
                           <td class="text-center align-middle">
                             <div class="input-group">
                               <input
-                                title="36協定特別条項設定の場合は１ヶ月累計時間未満、設定ない場合は36協定設定１ヶ月累計時間以内"
+                                title="36協定特別条項適用しない場合は36協定設定の１ヶ月累計時間以内、適用の場合は36協定特別条項設定の１ヶ月累計時間以内"
                                 type="number"
                                 v-bind:max="limit_valueoneMonthTotal"
                                 min="0.00"
@@ -528,6 +533,7 @@ export default {
         timeunit: [{}],
         timeround: [{}]
       },
+      edtString: "",
       TimeUnitList: [],
       TimeRoundingList: [],
       days_max: [{}],
@@ -935,6 +941,15 @@ export default {
         this.form.upTime[index] = "";
         this.form.timeunit[index] = "";
         this.form.timeround[index] = "";
+      }
+    },
+    // tooltips
+    edttooltips: function(value1, value2) {
+      if (value1.length > 0) {
+        this.edtString = value1;
+      }
+      if (value2.length > 0) {
+        this.edtString = this.edtString + '\n' + value2;
       }
     }
   }

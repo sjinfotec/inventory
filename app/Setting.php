@@ -515,7 +515,7 @@ class Setting extends Model
      * @return sql取得結果
      */
     public function getMonthClosing(){
-
+        
         // 取得
         return $mainquery = DB::table($this->table)
             ->where($this->table.'.year', $this->param_year)

@@ -446,7 +446,6 @@ class WorkTime extends Model
 
         // 日次労働時間取得SQL作成
         // subquery1    work_times
-        \DB::enableQueryLog();
         $subquery1 = DB::table($this->table)
             ->select(
                 $this->table.'.user_code as user_code',
@@ -487,6 +486,8 @@ class WorkTime extends Model
         $subquery3 = $apicommon->getUserApplyTermSubquery($targetdateto);
         // departmentsの最大適用開始日付subquery
         $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdateto);
+        // working_timetablesの最大適用開始日付subquery
+        $subquery5 = $apicommon->getTimetableApplyTermSubquery($targetdateto);
 
         // mainqueryにsunqueryを組み込む
         // mainquery    users
@@ -565,16 +566,14 @@ class WorkTime extends Model
                 $join->on('t4.fiscal_month', '=', 't2.record_month')
                 ->where('t4.is_deleted', '=', 0);
             })
-            ->leftJoin('working_timetables as t6', function ($join) { 
+            ->leftJoinSub($subquery5, 't6', function ($join) { 
                 $join->on('t6.no', '=', 't1.working_timetable_no')
                 ->where('t6.working_time_kubun', '=', Config::get('const.C004.regular_working_time'))
-                ->where('t1.is_deleted', '=', 0)
-                ->where('t6.is_deleted', '=', 0);
+                ->where('t1.is_deleted', '=', 0);
             })
             ->leftJoin($this->table_generalcodes.' as t7', function ($join) { 
                 $join->on('t7.code', '=', 't6.working_time_kubun')
                 ->where('t7.identification_id', '=', Config::get('const.C004.value'))
-                ->where('t6.is_deleted', '=', 0)
                 ->where('t7.is_deleted', '=', 0);
             })
             ->leftJoin($this->table_generalcodes.' as t8', function ($join) { 
@@ -583,10 +582,9 @@ class WorkTime extends Model
                 ->where('t1.is_deleted', '=', 0)
                 ->where('t8.is_deleted', '=', 0);
             })
-            ->leftJoin('working_timetables as t10', function ($join) { 
+            ->leftJoinSub($subquery5, 't10', function ($join) { 
                 $join->on('t10.no', '=', 't9.shift_no')
-                ->where('t10.working_time_kubun', '=', Config::get('const.C004.regular_working_time'))
-                ->where('t10.is_deleted', '=', 0);
+                ->where('t10.working_time_kubun', '=', Config::get('const.C004.regular_working_time'));
             })
             ->leftJoin($this->table_generalcodes.' as t11', function ($join) { 
                 $join->on('t11.code', '=', 't3.weekday_kubun')
@@ -647,12 +645,6 @@ class WorkTime extends Model
             ->orderBy('t2.record_date', 'asc')
             ->orderBy('t2.record_datetime', 'asc')
             ->get();
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getWorkTimes' => \DB::getQueryLog()
-            ]
-        );
 
         return $result;
     }

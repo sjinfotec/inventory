@@ -15,6 +15,7 @@ use App\Calendar;
 use App\Setting;
 use App\Demand;
 use App\Confirm;
+use App\Company;
 
 
 
@@ -22,6 +23,7 @@ class ApiCommonController extends Controller
 {
 
     protected $table_generalcodes = 'generalcodes';
+    protected $table_companies = 'companies';
     protected $table_confirms = 'confirms';
     protected $table_working_timetables = 'working_timetables';
 
@@ -147,45 +149,8 @@ class ApiCommonController extends Controller
         $shift_info->setStarttargetdateAttribute($from);
         $shift_info->setEndtargetdateAttribute($to);
         $shift_results = $shift_info->getUserShift();
-        $last_date = "";
-        foreach ($shift_results as $item) {
-            if(isset($item->target_date)){
-                $last_date = $item->target_date;
-            }
-        }
-        $to = new Carbon($request->to);
-        $check_to = $to->format("Ymd");
-        if ($check_to > $last_date || $last_date == "") {
-            // カレンダー設定よりNO＝1で設定
-            $WorkingTimeTable_model = new WorkingTimeTable();
-            $WorkingTimeTable_model->setNoAttribute(1);
-            $WorkingTimeTables = $WorkingTimeTable_model->getDetail();
-            $WorkingTime_name = "";
-            foreach ($WorkingTimeTables as $item) {
-                if(isset($item->name)){
-                    $WorkingTime_name = $item->name;
-                    break;
-                }
-            }
-            if ($last_date == "") {
-                $from = new Carbon($request->from);
-                $from = $from->format("Ymd");
-            } else {
-                $from = new Carbon($last_date);
-                $from = $from->addDay()->format("Ymd");
-            }
-            $to = new Carbon($request->to);
-            $to = $to->format("Ymd");
-            $calender_model = new Calendar();
-            $calender_model->setParamfromdateAttribute($from);
-            $calender_model->setParamtodateAttribute($to);
-            $calender_results = $calender_model->getShiftCalenderDate($WorkingTime_name);
-            $results = $shift_results->merge($calender_results);
-        } else {
-            $results = $shift_results;
-        }
   
-        return $results;
+        return $shift_results;
     }
         
     /** 部署リスト取得
@@ -405,6 +370,17 @@ class ApiCommonController extends Controller
         return $useremail;
     }
         
+    /** 会社情報取得
+     *
+     * @return list departments
+     */
+    public function getCompanyInfoApply(Request $request){
+
+        $company_model = new Company();
+        $results = $company_model->getCompanyInfoApply();
+        return $results;
+    }
+        
     /** ユーザー適用期間開始サブクエリー作成
      *
      * @return string サブクエリー
@@ -459,6 +435,60 @@ class ApiCommonController extends Controller
             })
             ->where('t1.is_deleted', '=', 0);
         return $subquery2;
+    }
+        
+    /** タイムテーブル適用期間開始サブクエリー作成
+     *
+     * @return string サブクエリー
+     */
+    public function getTimetableApplyTermSubquery($targetdate){
+        // 適用期間日付の取得
+        $dt = null;
+        if (isset($targetdate)) {
+            $dt = new Carbon($targetdate);
+        } else {
+            $dt = new Carbon();
+        }
+        $target_date = $dt->format('Ymd');
+
+        // departmentsの最大適用開始日付subquery
+        $subquery1 = DB::table($this->table_working_timetables)
+            ->select('no as no')
+            ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+            ->where('apply_term_from', '<=',$target_date)
+            ->where('is_deleted', '=', 0)
+            ->groupBy('no');
+        $subquery2 = DB::table($this->table_working_timetables.' as t1')
+            ->select(
+                't1.no as no',
+                't1.name as name',
+                't1.from_time as from_time',
+                't1.to_time as to_time',
+                't1.working_time_kubun as working_time_kubun'
+            )
+            ->JoinSub($subquery1, 't2', function ($join) { 
+                $join->on('t1.no', '=', 't2.no');
+                $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
+            })
+            ->where('t1.is_deleted', '=', 0);
+        return $subquery2;
+    }
+
+    /**
+     * 指定月締日取得
+     *
+     * @return list
+     */
+    public function getClosingDay(Request $request){
+        Log::DEBUG(' getClosingDay $request->target_date = '.$request->target_date);
+        // 設定マスタより締め日取得
+        $target_date = $this->setRequestQeury($request->target_date);
+        $setting_model = new Setting();
+        $target_dateYmd = new Carbon($target_date.'15');
+        $setting_model->setParamFiscalmonthAttribute(date_format($target_dateYmd, 'm'));
+        $setting_model->setParamYearAttribute(date_format($target_dateYmd, 'Y'));
+        $closing = $setting_model->getMonthClosing();
+        return $closing;
     }
 
     /** 雇用形態リスト取得

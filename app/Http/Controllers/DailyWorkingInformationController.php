@@ -19,7 +19,6 @@ use App\Http\Controllers\ApiCommonController;
 
 class DailyWorkingInformationController extends Controller
 {
-    protected $table_working_timetables = 'working_timetables';
 
     // 打刻データ配列
     private $array_working_mode = array();
@@ -338,6 +337,7 @@ class DailyWorkingInformationController extends Controller
                         $timetable_model->setParamemploymentstatusAttribute($employmentstatus);
                         $timetable_model->setParamDepartmentcodeAttribute($departmentcode);
                         $timetables = $timetable_model->getWorkingTimeTableJoin();
+                        Log::DEBUG('        $getWorkingTimeTableJoin  count = '.count($timetables));
                         if (count($timetables) > 0) {
                             Log::debug('---------------- 日次集計登録(temp_working_time_dates) start -----------------------');
                             // 日次集計
