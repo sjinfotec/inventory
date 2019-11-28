@@ -1024,7 +1024,7 @@
           <!-- /.row -->
         </div>
       </div>
-    </modal> -->
+    </modal>
     <!-- /modal -->
   </div>
 </template>
