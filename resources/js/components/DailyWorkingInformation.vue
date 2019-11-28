@@ -340,10 +340,6 @@ export default {
             if (this.resresults.messagedata != null) {
               this.messagedatasserver = this.resresults.messagedata;
             }
-            console.log("calcresults" + Object.keys(this.calcresults).length);
-            console.log("sumresults" + Object.keys(this.sumresults).length);
-            console.log("dateName" + this.dateName);
-            console.log("messages" + Object.keys(this.messages).length);
             for (var key in this.calcresults) {
               this.isswitchvisible = true;
               this.predetertimename = this.calcresults[key]['predeter_time_name'];

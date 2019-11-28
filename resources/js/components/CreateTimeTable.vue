@@ -3,87 +3,349 @@
     <!-- main contentns row -->
     <div class="row justify-content-between">
       <!-- .panel -->
-      <div class="col-md pt-3">
+      <div class="col-md-12 pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
-          <div class="card-header clearfix bg-transparent pb-0 border-0">
-            <h1 class="float-sm-left font-size-rg">タイムテーブルを設定する</h1>
-            <span class="float-sm-right font-size-sm">複数の勤務時間を設定することでシフト登録ができます</span>
-          </div>
+          <daily-working-information-panel-header
+            v-bind:header-text1="'タイムテーブルを設定する'"
+            v-bind:header-text2="'複数の勤務時間を設定することでシフト編集ができます'"
+          ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="card-body pt-2">
             <!-- panel contents -->
-            <fvl-form
-              method="post"
-              :data="form"
-              url="/create_time_table/store"
-              @success="addSuccess()"
-              @error="error()"
-            >
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-12 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      id="basic-addon1"
+                    >タイムテーブル選択</span>
+                  </div>
+                  <select-timetablelist v-if="showtimetablelist"
+                    :placeholder-data="'タイムテーブルを選択すると編集モードになります'"
+                    :blank-data="true"
+                    v-on:change-event="timetableChanges"
+                  >
+                  </select-timetablelist>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- .row -->
+          </div>
+        </div>
+      </div>
+      <!-- .panel -->
+      <div class="col-md-12 pt-3" v-if="selectMode=='NEW'">
+        <div class="card shadow-pl">
+          <!-- panel header -->
+          <daily-working-information-panel-header
+            v-bind:header-text1="'◆タイムテーブル名'"
+            v-bind:header-text2="'一覧選択などでわかりやすい名称を入力します'"
+          ></daily-working-information-panel-header>
+          <!-- /.panel header -->
+          <div class="card-body pt-2">
+            <!-- panel contents -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      id="basic-addon1"
+                    >タイムテーブル名</span>
+                  </div>
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model="form.name"
+                    name="name"
+                  />
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- panel header -->
+              <div class="card-header col-12 bg-transparent pb-2 border-0">
+                <h1 class="float-sm-left font-size-rg">◆所定労働時間設定</h1>
+              </div>
+              <!-- /.panel header -->
+            </div>
+            <!-- /.row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <input-timetablepicker
+                    v-bind:title-data="'所定労働開始時間'"
+                    v-bind:place-holder="'開始時刻を入力します'"
+                    v-bind:value-data="form.regularFrom"
+                    v-on:change-event="timeChanges($event, '1')">
+                  ></input-timetablepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <input-timetablepicker
+                    v-bind:title-data="'所定労働終了時間'"
+                    v-bind:place-holder="'終了時刻を入力します'"
+                    v-bind:value-data="form.regularTo"
+                    v-on:change-event="timeChanges($event, '2')">
+                  ></input-timetablepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- panel header -->
+              <daily-working-information-panel-header
+                v-bind:header-text1="'◆休憩時間設定'"
+                v-bind:header-text2="'5パターンまで設定できます'"
+                v-bind:class-text="'card-header col-12 bg-transparent pb-2 border-0'"
+              ></daily-working-information-panel-header>
+              <!-- /.panel header -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <input-timetablepicker
+                    v-bind:title-data="'休憩開始時間 A'"
+                    v-bind:place-holder="'開始時刻を入力します'"
+                    v-bind:value-data="form.regularRestFrom1"
+                    v-on:change-event="timeChanges($event, '3')">
+                  ></input-timetablepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <input-timetablepicker
+                    v-bind:title-data="'休憩終了時間 A'"
+                    v-bind:place-holder="'終了時刻を入力します'"
+                    v-bind:value-data="form.regularRestTo1"
+                    v-on:change-event="timeChanges($event, '4')">
+                  ></input-timetablepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <input-timetablepicker
+                    v-bind:title-data="'休憩開始時間 B'"
+                    v-bind:place-holder="'開始時刻を入力します'"
+                    v-bind:value-data="form.regularRestFrom2"
+                    v-on:change-event="timeChanges($event, '5')">
+                  ></input-timetablepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <input-timetablepicker
+                    v-bind:title-data="'休憩終了時間 B'"
+                    v-bind:place-holder="'終了時刻を入力します'"
+                    v-bind:value-data="form.regularRestTo2"
+                    v-on:change-event="timeChanges($event, '6')">
+                  ></input-timetablepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <input-timetablepicker
+                    v-bind:title-data="'休憩開始時間 C'"
+                    v-bind:place-holder="'開始時刻を入力します'"
+                    v-bind:value-data="form.regularRestFrom3"
+                    v-on:change-event="timeChanges($event, '7')">
+                  ></input-timetablepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <input-timetablepicker
+                    v-bind:title-data="'休憩終了時間 C'"
+                    v-bind:place-holder="'終了時刻を入力します'"
+                    v-bind:value-data="form.regularRestTo3"
+                    v-on:change-event="timeChanges($event, '8')">
+                  ></input-timetablepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <input-timetablepicker
+                    v-bind:title-data="'休憩開始時間 D'"
+                    v-bind:place-holder="'開始時刻を入力します'"
+                    v-bind:value-data="form.regularRestFrom4"
+                    v-on:change-event="timeChanges($event, '9')">
+                  ></input-timetablepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <input-timetablepicker
+                    v-bind:title-data="'休憩終了時間 D'"
+                    v-bind:place-holder="'終了時刻を入力します'"
+                    v-bind:value-data="form.regularRestTo4"
+                    v-on:change-event="timeChanges($event, '10')">
+                  ></input-timetablepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <input-timetablepicker
+                    v-bind:title-data="'休憩開始時間 E'"
+                    v-bind:place-holder="'開始時刻を入力します'"
+                    v-bind:value-data="form.regularRestFrom5"
+                    v-on:change-event="timeChanges($event, '11')">
+                  ></input-timetablepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <input-timetablepicker
+                    v-bind:title-data="'休憩終了時間 E'"
+                    v-bind:place-holder="'終了時刻を入力します'"
+                    v-bind:value-data="form.regularRestTo5"
+                    v-on:change-event="timeChanges($event, '12')">
+                  ></input-timetablepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- panel header -->
+              <daily-working-information-panel-header
+                v-bind:header-text1="'◆深夜残業時間設定'"
+                v-bind:header-text2="''"
+                v-bind:class-text="'card-header col-12 bg-transparent pb-2 border-0'"
+              ></daily-working-information-panel-header>
+              <!-- /.panel header -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <input-timetablepicker
+                    v-bind:title-data="'深夜残業開始時間'"
+                    v-bind:place-holder="'開始時刻を入力します'"
+                    v-bind:value-data="form.irregularMidNightFrom"
+                    v-on:change-event="timeChanges($event, '13')">
+                  ></input-timetablepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <input-timetablepicker
+                    v-bind:title-data="'深夜残業終了時間'"
+                    v-bind:place-holder="'終了時刻を入力します'"
+                    v-bind:value-data="form.irregularMidNightTo"
+                    v-on:change-event="timeChanges($event, '14')">
+                  ></input-timetablepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <btn-work-time
+                  v-on:storeclick-event="storeclick"
+                  v-bind:btn-mode="'store'"
+                  v-bind:is-push="true">
+                </btn-work-time>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+          </div>
+          <!-- /.panel contents -->
+        </div>
+      </div>
+      <!-- .panel -->
+      <div class="col-md-12 pt-3" v-if="selectMode=='EDT'">
+        <div class="card shadow-pl">
+          <!-- panel header -->
+          <div class="card-header bg-transparent pt-3 border-0">
+            <h1 class="float-sm-left font-size-rg">
+              <span>
+                <!-- <button class="btn btn-success btn-lg font-size-rg" v-on:click="show">+</button> -->
+                <button class="btn btn-success btn-lg font-size-rg" v-on:click="appendRow">+</button>
+              </span>
+              タイムテーブル一覧
+            </h1>
+            <span class="float-sm-right font-size-sm">「＋」アイコンで新たに追加することができます</span>
+          </div>
+          <!-- /.panel header -->
+          <!-- panel header -->
+          <!-- /.panel header -->
+          <div class="card-body pt-2" v-if="details.length">
+            <!-- panel contents -->
+            <div v-for="n in count" v-bind:key="n">
+              <!-- .row -->
+              <div class="row justify-content-between" v-if="details[(n-1) * 7].result == 1">
+                <!-- panel header -->
+                <div class="col-md-2 pb-2">
+                  <col-note
+                    v-bind:item-name="'現在適用中'"
+                    v-bind:item-control="'PRIMARY'"
+                    v-bind:item-note="''"
+                  ></col-note>
+                </div>
+                <!-- /.panel header -->
+              </div>
+              <div class="row justify-content-between" v-else>
+                <!-- panel header -->
+                <div class="col-md-2 pb-2">
+                  <col-note
+                    v-bind:item-name="'No.' + n"
+                    v-bind:item-control="'SECONDARY'"
+                    v-bind:item-note="''"
+                  ></col-note>
+                </div>
+                <!-- /.panel header -->
+              </div>
+              <!-- /row -->
               <!-- .row -->
               <div class="row justify-content-between">
                 <!-- .col -->
-                <div class="col-12 pb-2">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span
-                        class="input-group-text font-size-sm line-height-xs label-width-150"
-                        id="basic-addon1"
-                      >タイムテーブル</span>
-                    </div>
-                    <fvl-search-select
-                      :selected.sync="selectId"
-                      class="p-0"
-                      name="selectId"
-                      :options="timeTableList"
-                      placeholder="タイムテーブルを選択すると編集モードになります"
-                      :allowEmpty="true"
-                      :search-keys="['no']"
-                      option-key="no"
-                      option-value="name"
-                    />
-                  </div>
-                </div>
-                <!-- /.col -->
-                <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span
-                        class="input-group-text font-size-sm line-height-xs label-width-150"
-                        id="basic-addon1"
-                      >タイムテーブルNO</span>
-                    </div>
-                    <fvl-input
-                      type="text"
-                      class="form-control p-0"
-                      :value.sync="form.no"
-                      name="no"
-                    />
-                  </div>
-                </div>
-                <!-- /.col -->
-                <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId != ''">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span
-                        class="input-group-text font-size-sm line-height-xs label-width-150"
-                        id="basic-addon1"
-                      >タイムテーブルNO</span>
-                    </div>
-                    <input
-                      type="text"
-                      class="form-control"
-                      :value.sync="selectId"
-                      name="no"
-                      readonly="true"
-                    />
-                  </div>
-                </div>
-                <!-- /.col -->
-                <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
+                <div class="col-md-6 pb-2">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
@@ -91,35 +353,45 @@
                         id="basic-addon1"
                       >タイムテーブル名</span>
                     </div>
-                    <fvl-input
+                    <input
                       type="text"
-                      class="form-control p-0"
-                      :value.sync="form.name"
+                      class="form-control"
+                      v-model="details[(n-1) * 7].name"
                       name="name"
                     />
                   </div>
                 </div>
                 <!-- /.col -->
                 <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
+                <div class="col-md-6 pb-2">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
-                      >所定労働開始時間</span>
+                      >有効期間</span>
                     </div>
-                    <fvl-input
-                      type="time"
-                      class="form-control p-0"
-                      :value.sync="form.regularFrom"
-                      name="syoteifrom"
+                    <input
+                      type="date"
+                      class="form-control"
+                      v-model="details[(n-1) * 7].apply_term_from"
+                      name="term"
                     />
                   </div>
                 </div>
                 <!-- /.col -->
                 <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
+                <div class="col-md-6 pb-2">
+                  <input-timetablepicker
+                    v-bind:title-data="'所定労働開始時間'"
+                    v-bind:place-holder="'開始時刻を入力します'"
+                    v-bind:value-data="details[(n-1) * 7].from_time"
+                    v-on:change-event="timeDetailChanges1($event, n)">
+                  ></input-timetablepicker>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
@@ -127,10 +399,10 @@
                         id="basic-addon1"
                       >所定労働終了時間</span>
                     </div>
-                    <fvl-input
+                    <input
                       type="time"
-                      class="form-control p-0"
-                      :value.sync="form.regularTo"
+                      class="form-control"
+                      v-model="details[(n-1) * 7].to_time"
                       name="syoteito"
                     />
                   </div>
@@ -139,7 +411,7 @@
               </div>
               <!-- /.row -->
               <!-- .row -->
-              <div class="row justify-content-between" v-if="selectId=='' || selectId==null ">
+              <div class="row justify-content-between">
                 <!-- panel header -->
                 <div class="card-header col-12 bg-transparent pb-2 border-0">
                   <h1 class="float-sm-left font-size-rg">休憩時間設定</h1>
@@ -149,7 +421,7 @@
               </div>
               <!-- /.row -->
               <!-- .row -->
-              <div class="row justify-content-between" v-if="selectId=='' || selectId==null ">
+              <div class="row justify-content-between">
                 <!-- .col -->
                 <div class="col-md-6 pb-2">
                   <div class="input-group">
@@ -159,190 +431,15 @@
                         id="basic-addon1"
                       >休憩開始時間 A</span>
                     </div>
-                    <fvl-input
-                      class="form-control p-0"
+                    <input
+                      class="form-control"
                       type="time"
-                      :value.sync="form.regularRestFrom1"
+                      v-model="details[(n-1) * 7 + 1].from_time"
                       name="syoteifrom"
                     />
                   </div>
                 </div>
                 <!-- /.col -->
-                <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span
-                        class="input-group-text font-size-sm line-height-xs label-width-150"
-                        id="basic-addon1"
-                      >休憩終了時間 A</span>
-                    </div>
-                    <fvl-input
-                      class="form-control p-0"
-                      type="time"
-                      :value.sync="form.regularRestTo1"
-                      name="syoteito"
-                    />
-                  </div>
-                </div>
-                <!-- /.col -->
-                <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span
-                        class="input-group-text font-size-sm line-height-xs label-width-150"
-                        id="basic-addon1"
-                      >休憩開始時間 B</span>
-                    </div>
-                    <fvl-input
-                      type="time"
-                      class="form-control p-0"
-                      :value.sync="form.regularRestFrom2"
-                      name="syoteifrom"
-                    />
-                  </div>
-                </div>
-                <!-- /.col -->
-                <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span
-                        class="input-group-text font-size-sm line-height-xs label-width-150"
-                        id="basic-addon1"
-                      >休憩終了時間 B</span>
-                    </div>
-                    <fvl-input
-                      type="time"
-                      class="form-control p-0"
-                      :value.sync="form.regularRestTo2"
-                      name="syoteito"
-                    />
-                  </div>
-                </div>
-                <!-- /.col -->
-                <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span
-                        class="input-group-text font-size-sm line-height-xs label-width-150"
-                        id="basic-addon1"
-                      >休憩開始時間 C</span>
-                    </div>
-                    <fvl-input
-                      type="time"
-                      class="form-control p-0"
-                      :value.sync="form.regularRestFrom3"
-                      name="syoteifrom"
-                    />
-                  </div>
-                </div>
-                <!-- /.col -->
-                <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span
-                        class="input-group-text font-size-sm line-height-xs label-width-150"
-                        id="basic-addon1"
-                      >休憩終了時間 C</span>
-                    </div>
-                    <fvl-input
-                      type="time"
-                      class="form-control p-0"
-                      :value.sync="form.regularRestTo3"
-                      name="syoteito"
-                    />
-                  </div>
-                </div>
-                <!-- /.col -->
-                <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span
-                        class="input-group-text font-size-sm line-height-xs label-width-150"
-                        id="basic-addon1"
-                      >休憩開始時間 D</span>
-                    </div>
-                    <fvl-input
-                      type="time"
-                      class="form-control p-0"
-                      :value.sync="form.regularRestFrom4"
-                      name="syoteifrom"
-                    />
-                  </div>
-                </div>
-                <!-- /.col -->
-                <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span
-                        class="input-group-text font-size-sm line-height-xs label-width-150"
-                        id="basic-addon1"
-                      >休憩終了時間 D</span>
-                    </div>
-                    <fvl-input
-                      type="time"
-                      class="form-control p-0"
-                      :value.sync="form.regularRestTo4"
-                      name="syoteito"
-                    />
-                  </div>
-                </div>
-                <!-- /.col -->
-                <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span
-                        class="input-group-text font-size-sm line-height-xs label-width-150"
-                        id="basic-addon1"
-                      >休憩開始時間 E</span>
-                    </div>
-                    <fvl-input
-                      type="time"
-                      class="form-control p-0"
-                      :value.sync="form.regularRestFrom5"
-                      name="syoteifrom"
-                    />
-                  </div>
-                </div>
-                <!-- /.col -->
-                <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
-                  <div class="input-group">
-                    <div class="input-group-prepend">
-                      <span
-                        class="input-group-text font-size-sm line-height-xs label-width-150"
-                        id="basic-addon1"
-                      >休憩終了時間 E</span>
-                    </div>
-                    <fvl-input
-                      type="time"
-                      class="form-control p-0"
-                      :value.sync="form.regularRestTo5"
-                      name="syoteito"
-                    />
-                  </div>
-                </div>
-                <!-- /.col -->
-              </div>
-              <!-- /.row -->
-              <!-- .row -->
-              <div class="row justify-content-between" v-if="selectId=='' || selectId==null ">
-                <!-- panel header -->
-                <div class="card-header bg-transparent pb-2 border-0">
-                  <h1 class="float-sm-left font-size-rg">深夜残業時間設定</h1>
-                </div>
-                <!-- /.panel header -->
-              </div>
-              <!-- /.row -->
-              <!-- .row -->
-              <div class="row justify-content-between" v-if="selectId=='' || selectId==null ">
                 <!-- .col -->
                 <div class="col-md-6 pb-2">
                   <div class="input-group">
@@ -350,30 +447,156 @@
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
-                      >深夜残業開始時間</span>
+                      >休憩終了時間 A</span>
                     </div>
-                    <fvl-input
+                    <input
+                      class="form-control"
                       type="time"
-                      class="form-control p-0"
-                      :value.sync="form.irregularMidNightFrom"
+                      v-model="details[(n-1) * 7 + 1].to_time"
+                      name="syoteito"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
+                        id="basic-addon1"
+                      >休憩開始時間 B</span>
+                    </div>
+                    <input
+                      type="time"
+                      class="form-control"
+                      v-model="details[(n-1) * 7 + 2].from_time"
                       name="syoteifrom"
                     />
                   </div>
                 </div>
                 <!-- /.col -->
                 <!-- .col -->
-                <div class="col-md-6 pb-2" v-if="selectId=='' || selectId==null ">
+                <div class="col-md-6 pb-2">
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
                         class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
-                      >深夜残業終了時間</span>
+                      >休憩終了時間 B</span>
                     </div>
-                    <fvl-input
+                    <input
                       type="time"
-                      class="form-control p-0"
-                      :value.sync="form.irregularMidNightTo"
+                      class="form-control"
+                      v-model="details[(n-1) * 7 + 2].to_time"
+                      name="syoteito"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
+                        id="basic-addon1"
+                      >休憩開始時間 C</span>
+                    </div>
+                    <input
+                      type="time"
+                      class="form-control"
+                      v-model="details[(n-1) * 7 + 3].from_time"
+                      name="syoteifrom"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
+                        id="basic-addon1"
+                      >休憩終了時間 C</span>
+                    </div>
+                    <input
+                      type="time"
+                      class="form-control"
+                      v-model="details[(n-1) * 7 + 3].to_time"
+                      name="syoteito"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
+                        id="basic-addon1"
+                      >休憩開始時間 D</span>
+                    </div>
+                    <input
+                      type="time"
+                      class="form-control"
+                      v-model="details[(n-1) * 7 + 4].from_time"
+                      name="syoteifrom"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
+                        id="basic-addon1"
+                      >休憩終了時間 D</span>
+                    </div>
+                    <input
+                      type="time"
+                      class="form-control"
+                      v-model="details[(n-1) * 7 + 4].to_time"
+                      name="syoteito"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
+                        id="basic-addon1"
+                      >休憩開始時間 E</span>
+                    </div>
+                    <input
+                      type="time"
+                      class="form-control"
+                      v-model="details[(n-1) * 7 + 5].from_time"
+                      name="syoteifrom"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
+                        id="basic-addon1"
+                      >休憩終了時間 E</span>
+                    </div>
+                    <input
+                      type="time"
+                      class="form-control"
+                      v-model="details[(n-1) * 7 + 5].to_time"
                       name="syoteito"
                     />
                   </div>
@@ -383,397 +606,84 @@
               <!-- /.row -->
               <!-- .row -->
               <div class="row justify-content-between">
-                <!-- col -->
-                <div class="col-md-12 pb-2">
-                  <div class="btn-group d-flex">
-                    <button
-                      type="submit"
-                      class="btn btn-success"
-                      v-if="selectId=='' || selectId==null "
-                    >追加する</button>
+                <!-- panel header -->
+                <div class="card-header bg-transparent pb-2 border-0">
+                  <h1 class="float-sm-left font-size-rg">深夜残業時間設定</h1>
+                </div>
+                <!-- /.panel header -->
+              </div>
+              <!-- /.row -->
+              <!-- .row -->
+              <div class="row justify-content-between">
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
+                        id="basic-addon1"
+                      >深夜残業開始時間</span>
+                    </div>
+                    <input
+                      type="time"
+                      class="form-control"
+                      v-model="details[(n-1) * 7 + 6].from_time"
+                      name="syoteifrom"
+                    />
+                  </div>
+                </div>
+                <!-- /.col -->
+                <!-- .col -->
+                <div class="col-md-6 pb-2">
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
+                        id="basic-addon1"
+                      >深夜残業終了時間</span>
+                    </div>
+                    <input
+                      type="time"
+                      class="form-control"
+                      v-model="details[(n-1) * 7 + 6].to_time"
+                      name="syoteito"
+                    />
                   </div>
                 </div>
                 <!-- /.col -->
               </div>
               <!-- /.row -->
-            </fvl-form>
-            <!-- /.panel contents -->
-            <!-- main contentns row -->
-            <div class="row justify-content-between" v-if="details.length ">
-              <!-- .panel -->
-              <div class="col-md pt-3 align-self-stretch">
-                <div class="card shadow-pl">
-                  <!-- panel header -->
-                  <div class="card-header bg-transparent pt-3 border-0">
-                    <h1 class="float-sm-left font-size-rg">
-                      <span>
-                        <button class="btn btn-success btn-lg font-size-rg" v-on:click="show">+</button>
-                      </span>
-                      タイムテーブル一覧
-                    </h1>
-                    <span class="float-sm-right font-size-sm">登録済みのタイムテーブルを編集できます</span>
-                  </div>
-                  <!-- /.panel header -->
-                  <!-- panel body -->
-                  <div class="card-body mb-3 p-0 border-top">
-                    <!-- panel contents -->
-                    <div v-for="n in count" v-bind:key="n">
-                      <!-- .row -->
-                      <div class="row justify-content-between">
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >タイムテーブル名</span>
-                            </div>
-                            <input
-                              type="text"
-                              class="form-control"
-                              v-model="details[(n-1) * 7].name"
-                              name="name"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >有効期間</span>
-                            </div>
-                            <input
-                              type="date"
-                              class="form-control"
-                              v-model="details[(n-1) * 7].apply_term_from"
-                              name="term"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >所定労働開始時間</span>
-                            </div>
-                            <input
-                              type="time"
-                              class="form-control"
-                              v-model="details[(n-1) * 7].from_time"
-                              name="syoteifrom"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >所定労働終了時間</span>
-                            </div>
-                            <input
-                              type="time"
-                              class="form-control"
-                              v-model="details[(n-1) * 7].to_time"
-                              name="syoteito"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                      </div>
-                      <!-- /.row -->
-                      <!-- .row -->
-                      <div class="row justify-content-between">
-                        <!-- panel header -->
-                        <div class="card-header col-12 bg-transparent pb-2 border-0">
-                          <h1 class="float-sm-left font-size-rg">休憩時間設定</h1>
-                          <span class="float-sm-right font-size-sm">5パターンまで設定できます</span>
-                        </div>
-                        <!-- /.panel header -->
-                      </div>
-                      <!-- /.row -->
-                      <!-- .row -->
-                      <div class="row justify-content-between">
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >休憩開始時間 A</span>
-                            </div>
-                            <input
-                              class="form-control"
-                              type="time"
-                              v-model="details[(n-1) * 7 + 1].from_time"
-                              name="syoteifrom"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >休憩終了時間 A</span>
-                            </div>
-                            <input
-                              class="form-control"
-                              type="time"
-                              v-model="details[(n-1) * 7 + 1].to_time"
-                              name="syoteito"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >休憩開始時間 B</span>
-                            </div>
-                            <input
-                              type="time"
-                              class="form-control"
-                              v-model="details[(n-1) * 7 + 2].from_time"
-                              name="syoteifrom"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >休憩終了時間 B</span>
-                            </div>
-                            <input
-                              type="time"
-                              class="form-control"
-                              v-model="details[(n-1) * 7 + 2].to_time"
-                              name="syoteito"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >休憩開始時間 C</span>
-                            </div>
-                            <input
-                              type="time"
-                              class="form-control"
-                              v-model="details[(n-1) * 7 + 3].from_time"
-                              name="syoteifrom"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >休憩終了時間 C</span>
-                            </div>
-                            <input
-                              type="time"
-                              class="form-control"
-                              v-model="details[(n-1) * 7 + 3].to_time"
-                              name="syoteito"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >休憩開始時間 D</span>
-                            </div>
-                            <input
-                              type="time"
-                              class="form-control"
-                              v-model="details[(n-1) * 7 + 4].from_time"
-                              name="syoteifrom"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >休憩終了時間 D</span>
-                            </div>
-                            <input
-                              type="time"
-                              class="form-control"
-                              v-model="details[(n-1) * 7 + 4].to_time"
-                              name="syoteito"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >休憩開始時間 E</span>
-                            </div>
-                            <input
-                              type="time"
-                              class="form-control"
-                              v-model="details[(n-1) * 7 + 5].from_time"
-                              name="syoteifrom"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >休憩終了時間 E</span>
-                            </div>
-                            <input
-                              type="time"
-                              class="form-control"
-                              v-model="details[(n-1) * 7 + 5].to_time"
-                              name="syoteito"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                      </div>
-                      <!-- /.row -->
-                      <!-- .row -->
-                      <div class="row justify-content-between">
-                        <!-- panel header -->
-                        <div class="card-header bg-transparent pb-2 border-0">
-                          <h1 class="float-sm-left font-size-rg">深夜残業時間設定</h1>
-                        </div>
-                        <!-- /.panel header -->
-                      </div>
-                      <!-- /.row -->
-                      <!-- .row -->
-                      <div class="row justify-content-between">
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >深夜残業開始時間</span>
-                            </div>
-                            <input
-                              type="time"
-                              class="form-control"
-                              v-model="details[(n-1) * 7 + 6].from_time"
-                              name="syoteifrom"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                        <!-- .col -->
-                        <div class="col-md-6 pb-2">
-                          <div class="input-group">
-                            <div class="input-group-prepend">
-                              <span
-                                class="input-group-text font-size-sm line-height-xs label-width-150"
-                                id="basic-addon1"
-                              >深夜残業終了時間</span>
-                            </div>
-                            <input
-                              type="time"
-                              class="form-control"
-                              v-model="details[(n-1) * 7 + 6].to_time"
-                              name="syoteito"
-                            />
-                          </div>
-                        </div>
-                        <!-- /.col -->
-                      </div>
-                      <!-- /.row -->
-                      <div class="col-md-12 pb-2 text-align-right">
-                        <div class="btn-group">
-                          <button
-                            type="button"
-                            class="btn btn-danger"
-                            @click="alertDelConf('info',details[(n-1) * 7 + 1].apply_term_from)"
-                          >削除する</button>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- .row -->
-                    <div class="row justify-content-between">
-                      <!-- col -->
-                      <div class="col-md-12 pb-2">
-                        <div class="btn-group d-flex">
-                          <button type="button" class="btn btn-success" @click="fix()">修正する</button>
-                        </div>
-                      </div>
-                      <!-- /.col -->
-                    </div>
-                    <!-- /.row -->
-                    <!-- /.panel contents -->
-                  </div>
-                  <!-- /panel body -->
+              <div class="col-md-12 pb-2 text-align-right">
+                <div class="btn-group">
+                  <button
+                    type="button"
+                    class="btn btn-danger"
+                    @click="delClick(n)"
+                  >削除する</button>
                 </div>
               </div>
-              <!-- /.panel -->
             </div>
-            <!-- /main contentns row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <div class="btn-group d-flex">
+                  <button type="button" class="btn btn-success" @click="fix()">修正する</button>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- /.panel contents -->
           </div>
+          <!-- /panel body -->
         </div>
       </div>
-      <!-- /.panel -->
     </div>
+    <!-- /.panel -->
     <!-- /main contentns row -->
-    <!-- modal -->
-    <modal name="add-time-table" :width="800" :height="800" :pivotY="0.4" v-model="selectId">
+    <!-- modal modalは未使用 20191126-->
+    <modal name="add-time-table" :width="800" :height="800" :pivotY="0.4" v-model="selectMode">
       <div class="card">
         <div class="card-header">新しい有効期間で追加する</div>
         <div class="card-body">
@@ -1114,12 +1024,13 @@
           <!-- /.row -->
         </div>
       </div>
-    </modal>
+    </modal> -->
     <!-- /modal -->
   </div>
 </template>
 <script>
 import toasted from "vue-toasted";
+import moment from "moment";
 import {
   FvlForm,
   FvlInput,
@@ -1191,40 +1102,132 @@ export default {
         irregularMidNightFrom: "",
         irregularMidNightTo: ""
       },
+      showtimetablelist: true,
       timeTableList: [],
       details: [],
-      selectId: "",
+      selectMode: "",
       errors: [],
       count: 0,
       oldId: ""
     };
   },
-  // マウント時
-  mounted() {
-    this.getTimeTableList();
-  },
-  // セレクトボックス変更時
-  watch: {
-    selectId: function(val, oldVal) {
-      if (this.selectId != "") {
-        this.getDetail();
-      } else {
-        this.details = [];
-        this.inputClear();
-      }
-    }
-  },
   methods: {
-    delTime() {
+    // タイムテーブル選択が変更された場合の処理
+    timetableChanges: function(value, name) {
+      this.inputClear();
+      this.details = [];
+      this.form.no = value;
+      if (value == "" || value == null) {
+        this.selectMode = 'NEW';
+      } else {
+        this.selectMode = 'EDT';
+        this.getDetail();
+      }
+    },
+    appendRow: function() {
+      for( var i=0;i<7;i++ ) {
+        this.details.unshift({
+          id: "",
+          no: "",
+          name: "",
+          working_time_kubun: "",
+          apply_term_from: "",
+          from_time: "",
+          to_time: "",
+          result: "",
+          created_user: "",
+          updated_user: ""
+        });
+        this.count = this.details.length / 7; // １データにつき７レコードある
+      }
+    },
+    // 行入力チェック
+    checkRowInput: function(value_n) {
+      var flag = false;
+      if (this.details[(n-1) * 7].name == "" &&
+        this.details[(n-1) * 7].apply_term_from == "" &&
+        this.details[(n-1) * 7].from_time == "" &&
+        this.details[(n-1) * 7].to_time == "" &&
+        this.details[(n-1) * 7 + 1].from_time == "" &&
+        this.details[(n-1) * 7 + 1].to_time == "" &&
+        this.details[(n-1) * 7 + 2].from_time == "" &&
+        this.details[(n-1) * 7 + 2].to_time == "" &&
+        this.details[(n-1) * 7 + 3].from_time == "" &&
+        this.details[(n-1) * 7 + 3].to_time == "" &&
+        this.details[(n-1) * 7 + 4].from_time == "" &&
+        this.details[(n-1) * 7 + 4].to_time == "" &&
+        this.details[(n-1) * 7 + 5].from_time == "" &&
+        this.details[(n-1) * 7 + 5].to_time == "" &&
+        this.details[(n-1) * 7 + 6].from_time == "" &&
+        this.details[(n-1) * 7 + 6].to_time == "") {
+        flag = false;
+      } else {
+        flag = true;
+      }
+      return flag;
+    },
+    /*delTime() {
       this.getDetail();
       console.log("del");
     },
     show: function() {
-      this.add.no = this.selectId;
+      this.add.no = this.selectMode;
       this.$modal.show("add-time-table");
     },
     hide: function() {
       this.$modal.hide("add-time-table");
+    }, */
+    storeclick() {
+      this.$axios
+        .post("/create_time_table/store", {
+          details: this.add
+        })
+        .then(response => {
+          var res = response.data;
+          if (res.result == 0) {
+            this.alert("success", "新規有効期間で追加しました", "追加完了");
+            this.hide();
+            this.inputAddClear();
+            this.refreshtTimeTableList();
+            this.getDetail();
+          } else {
+          }
+        })
+        .catch(reason => {
+          this.alert("error", "追加に失敗しました", "エラー");
+        });
+    },
+    // 削除するボタン押下splice
+    delClick(value_n) {
+      this.validate = this.checkRowInput(value_n);
+      if (this.validate) {
+      }
+    },
+    store_confirm: function(state) {
+      this.$swal({
+        title: "確認",
+        text: "このデータで登録しますか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(result  => {
+        if (result) {
+          this.StoreShiftTime();
+        }
+      });
+    },
+    store_warniong_confirm: function(state) {
+      this.$swal({
+        title: "確認",
+        text: "前月の締日" + moment(this.closingYmd).format('YYYY年MM月DD日') + "以前のデータが含まれますが" + "\n" + "締日以前のデータは自動集計されません" + "\n" + "登録しますか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(result  => {
+        if (result) {
+          this.StoreShiftTime();
+        }
+      });
     },
     addTime() {
       this.$axios
@@ -1237,7 +1240,7 @@ export default {
             this.alert("success", "新規有効期間で追加しました", "追加完了");
             this.hide();
             this.inputAddClear();
-            this.getTimeTableList();
+            this.refreshtTimeTableList();
             this.getDetail();
           } else {
           }
@@ -1267,35 +1270,65 @@ export default {
       this.$axios
         .get("/create_time_table/get", {
           params: {
-            no: this.selectId
+            no: this.form.no
           }
         })
         .then(response => {
           this.details = response.data;
-          this.count = this.details.length / 7; // １データにつき７レコードある
+          if (this.details != null) {
+            this.count = this.details.length / 7; // １データにつき７レコードある
+          } else {
+            alert("詳細取得でエラーが発生しました");
+          }
         })
         .catch(reason => {
           alert("詳細取得でエラーが発生しました");
         });
     },
-    getTimeTableList() {
-      this.$axios
-        .get("/get_time_table_list")
-        .then(response => {
-          this.timeTableList = response.data;
-          this.object = { apply_term_from: "", name: "新規登録", no: "" };
-          this.timeTableList.unshift(this.object);
-
-          console.log("タイムテーブルリスト取得");
-        })
-        .catch(reason => {
-          alert("リスト取得エラー");
-        });
+    refreshtTimeTableList() {
+      // 最新リストの表示
+      this.showtimetablelist = false;
+      this.$nextTick(() => (this.showtimetablelist = true));
+    },
+    // 時刻が変更された場合の処理
+    timeChanges: function(value, type) {
+      if (type == '1') {
+        this.form.regularFrom = value;
+      } else if (type == '2') {
+        this.form.regularTo = value;
+      } else if (type == '3') {
+        this.form.regularRestFrom1 = value;
+      } else if (type == '4') {
+        this.form.regularRestTo1 = value;
+      } else if (type == '5') {
+        this.form.regularRestFrom2 = value;
+      } else if (type == '6') {
+        this.form.regularRestTo2 = value;
+      } else if (type == '7') {
+        this.form.regularRestFrom3 = value;
+      } else if (type == '8') {
+        this.form.regularRestTo3 = value;
+      } else if (type == '9') {
+        this.form.regularRestFrom4 = value;
+      } else if (type == '10') {
+        this.form.regularRestTo4 = value;
+      } else if (type == '11') {
+        this.form.regularRestFrom5 = value;
+      } else if (type == '12') {
+        this.form.regularRestTo5 = value;
+      } else if (type == '13') {
+        this.form.irregularMidNightFrom = value;
+      } else if (type == '14') {
+        this.form.irregularMidNightTo = value;
+      }
+    },
+    timeDetailChanges1: function(value, typeRow) {
+      this.details[(typeRow-1) * 7].from_time = value;
     },
     addSuccess() {
       this.alert("success", "登録しました", "登録成功");
-      this.selectId = this.form.no;
-      this.getTimeTableList();
+      this.selectMode = this.form.no;
+      this.refreshtTimeTableList();
       this.getDetail();
     },
     error() {
@@ -1311,7 +1344,7 @@ export default {
           if (res.result == 0) {
             this.alert("success", "タイムテーブルを修正しました", "修正完了");
             this.getDetail();
-            this.getTimeTableList();
+            this.refreshtTimeTableList();
           } else {
           }
         })
@@ -1323,7 +1356,7 @@ export default {
     del: function(date) {
       this.$axios
         .post("/create_time_table/del", {
-          no: this.selectId,
+          no: this.selectMode,
           apply_term_from: date
         })
         .then(response => {
@@ -1335,8 +1368,8 @@ export default {
               "削除"
             );
             this.getDetail();
-            this.getTimeTableList();
-            this.selectId = "";
+            this.refreshtTimeTableList();
+            this.selectMode = "";
           } else {
           }
         })
@@ -1348,7 +1381,6 @@ export default {
       this.form.name = "";
       this.form.id = "";
       this.form.no = "";
-      this.selectId = "";
       this.form.regularFrom = "";
       this.form.regularTo = "";
 

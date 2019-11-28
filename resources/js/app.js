@@ -13,6 +13,9 @@ import VCalendar from "v-calendar";
 import VModal from "vue-js-modal";
 import Vue from "vue";
 import VueSwal from "vue-swal";
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
+import locale from 'element-ui/lib/locale/lang/ja'
 
 var options = {
     position: "bottom-center",
@@ -20,10 +23,12 @@ var options = {
     fullWidth: false,
     type: "info"
 };
+
 Vue.use(toasted, options);
 Vue.use(VCalendar);
 Vue.use(VModal);
 Vue.use(VueSwal);
+Vue.use(ElementUI, { locale });
 
 Vue.prototype.$axios = axios;
 // Vue.prototype.$toasted = toasted;
@@ -111,6 +116,11 @@ Vue.component("select-user", require("./components/SelectUser.vue").default);
 Vue.component(
     "input-datepicker",
     require("./components/InputDatepicker.vue").default
+);
+
+Vue.component(
+    "input-eltimepicker",
+    require("./components/InputElTimepicker.vue").default
 );
 
 Vue.component("input-ym", require("./components/InputDateYm.vue").default);
@@ -268,6 +278,28 @@ Vue.component(
 Vue.component(
     "working-chart",
     require("./components/WorkingChart.vue").default
+);
+
+Vue.component(
+    "company-set",
+    require("./components/CompanySet.vue").default
+);
+
+Vue.component(
+    "select-timetablelist",
+    require("./components/SelectTimetableList.vue").default
+);
+
+Vue.component(
+    "input-timetablepicker",
+    require("./components/InputTimeTableElTimepicker.vue").default
+);
+
+
+// 使えないコントロールなので途中で断念した（sizeとか）。使用不可
+Vue.component(
+    "select-elcommonlist",
+    require("./components/SelectElCommonList.vue").default
 );
 
 /**

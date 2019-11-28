@@ -1,7 +1,7 @@
 <template>
   <div class="card-body mb-3 p-0 border-top">
     <!-- .row -->
-    <div class="row text-center align-middle w-20">
+    <div class="col-md-3 pt-2 pb-2 w-30 text-center align-middle">
       <col-note
         v-bind:item-name="'各月の残業時間（Ｈ）'"
         v-bind:item-control="'PRIMARY'"
@@ -71,15 +71,26 @@
               </tr>
             </tbody>
           </table>
+          <!-- <div
+            v-for="(timevalue,index) in timeItems.timevalues"
+          >
+            <div  class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">
+              <working-chart
+                v-on:label-data="'残業時間＋深夜残業時間'"
+                v-on:chart-data="timevalue.total_noholiday_working_times_1"
+              >
+              </working-chart>
+            </div>
+          </div> -->
         </div>
       </div>
     </div>
     <!-- /.row -->
     <!-- .row -->
-    <div class="row text-center align-middle w-20">
+    <div class="col-md-3 pt-2 pb-2 w-30 text-center align-middle">
       <col-note
         v-bind:item-name="'警告内容'"
-        v-bind:item-control="'SUCCESS'"
+        v-bind:item-control="'SECONDARY'"
         v-bind:item-note="''"
         data-toggle="tooltip"
         data-placement="top"

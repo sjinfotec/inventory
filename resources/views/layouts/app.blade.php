@@ -37,7 +37,7 @@
                 <!-- /editable title -->
                 <div class="form-inline my-lg-0 ml-auto">
                     @if(Auth::check())
-                    <span class="pr-2 d-none d-md-inline">三条印刷株式会社</span>
+                    <company-set></company-set>
                     @else
                     <span class="pr-2">
                         <a href="{{ route('login') }}">{{ __('Login') }}</a>

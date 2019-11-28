@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\ApiCommonController;
+use Carbon\Carbon;
 
 
 class WorkingTimeTable extends Model
@@ -310,21 +312,44 @@ class WorkingTimeTable extends Model
      * @return void
      */
     public function getDetail(){
-        $data = DB::table($this->table)
-            ->select(
-                $this->table.'.id',
-                $this->table.'.apply_term_from',
-                $this->table.'.no',
-                $this->table.'.name',
-                $this->table.'.working_time_kubun',
-                $this->table.'.from_time',
-                $this->table.'.to_time',
-                $this->table.'.created_user',
-                $this->table.'.updated_user'
-            )
-            ->where($this->table.'.no', $this->no)
-            ->where($this->table.'.is_deleted', 0)
-            ->get();
+        // 適用期間日付の取得
+        $dt = new Carbon();
+        $target_date = $dt->format('Ymd');
+        try {
+            // usersの最大適用開始日付subquery
+            $subquery = DB::table($this->table)
+                ->select('no as no')
+                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('apply_term_from', '<=',$target_date)
+                ->where('is_deleted', '=', 0)
+                ->groupBy('no');
+            $mainquery = DB::table($this->table.' AS t1')
+                ->select(
+                    't1.id', 't1.no', 't1.name', 't1.working_time_kubun')
+                ->selectRaw("DATE_FORMAT(t1.apply_term_from, '%Y-%m-%d') as apply_term_from")
+                ->selectRaw("DATE_FORMAT(t1.from_time, '%H:%i') as from_time")
+                ->selectRaw("DATE_FORMAT(t1.to_time, '%H:%i') as to_time")
+                ->selectRaw("CASE t2.max_apply_term_from = t1.apply_term_from WHEN TRUE THEN 1 ELSE 0 END as result")
+                ->addselect('t1.created_user')
+                ->addselect('t1.updated_user');
+            $mainquery
+                ->leftJoinSub($subquery, 't2', function ($join) { 
+                    $join->on('t2.no', '=', 't1.no');
+                });
+            $data = $mainquery
+                ->where('t1.no', $this->no)
+                ->where('t1.is_deleted', 0)
+                ->orderBy('t1.apply_term_from', 'desc')
+                ->get();
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
 
         return $data;
     }
@@ -343,52 +368,108 @@ class WorkingTimeTable extends Model
 
     /**
      * 取得
-     *
+     *  日付範囲指定は必須とする $subquery5をmeinqueryとしてバインドするため　20191128
      * @return void
      */
     public function getWorkingTimeTableJoin(){
-        // sunquery1    日次タイムレコード
-        $sunquery1 = DB::table($this->table_temp_calc_workingtimes)
-            ->select(
-                $this->table_temp_calc_workingtimes.'.working_timetable_no as working_timetable_no'
-            );
+        // subquery1    日次タイムレコード
+        try {
+            \DB::enableQueryLog();
+            $subquery1 = DB::table($this->table_temp_calc_workingtimes)
+                ->select(
+                    $this->table_temp_calc_workingtimes.'.working_timetable_no as working_timetable_no'
+                );
 
+                if(!empty($this->param_date_from) && !empty($this->param_date_to)){
+                    $date = date_create($this->param_date_from);
+                    $this->param_date_from = $date->format('Ymd');
+                    $date = date_create($this->param_date_to);
+                    $this->param_date_to = $date->format('Ymd');
+                    $subquery1->where($this->table_temp_calc_workingtimes.'.working_date', '>=', $this->param_date_from);             // 日付範囲指定
+                    $subquery1->where($this->table_temp_calc_workingtimes.'.working_date', '<=', $this->param_date_to);               // 日付範囲指定
+                }
+                if(!empty($this->param_employment_status)){
+                    $subquery1->where($this->table_temp_calc_workingtimes.'.employment_status', $this->param_employment_status);      //　雇用形態指定
+                }
+                if(!empty($this->param_department_code)){
+                    $subquery1->where($this->table_temp_calc_workingtimes.'.department_code', $this->param_department_code);          // department_code指定
+                }
+                if(!empty($this->param_user_code)){
+                    $subquery1->where($this->table_temp_calc_workingtimes.'.user_code', $this->param_user_code);                      // user_code指定
+                }
+                $subquery1->groupBy($this->table_temp_calc_workingtimes.'.working_timetable_no');
+            $subquery11 = $subquery1->toSql();
+
+            // working_timetablesの最大適用開始日付subquery
+            $apicommon = new ApiCommonController();
+            $subquery5 = $apicommon->getTimetableApplyTermSubquery($this->param_date_to);
+            $subquery51 = $subquery5->toSql();
+            // ---------------- mainquery ----------------------------
+            $mainquery = DB::table(DB::raw('('.$subquery51.') as t1'))
+                ->select(
+                    't1.no as no',
+                    't1.name as name',
+                    't1.working_time_kubun as working_time_kubun',
+                    't1.from_time as from_time',
+                    't1.to_time as to_time'
+                )
+                ->Join(DB::raw('('.$subquery11.') AS t2'), function ($join) { 
+                    $join->on('t2.working_timetable_no', '=', 't1.no');
+                });
+
+            $results = $mainquery
+                ->orderBy('t1.no','asc')
+                ->orderBy('t1.working_time_kubun','asc');
+
+            $array_setBindingsStr = array();
+            $cnt = 0;
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>$this->param_date_to);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>0);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>0);
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
-                $date = date_create($this->param_date_from);
-                $this->param_date_from = $date->format('Ymd');
-                $date = date_create($this->param_date_to);
-                $this->param_date_to = $date->format('Ymd');
-                $sunquery1->where($this->table_temp_calc_workingtimes.'.working_date', '>=', $this->param_date_from);             // 日付範囲指定
-                $sunquery1->where($this->table_temp_calc_workingtimes.'.working_date', '<=', $this->param_date_to);               // 日付範囲指定
+                $cnt += 1;
+                $array_setBindingsStr[] = array($cnt=>$this->param_date_from);
+                $cnt += 1;
+                $array_setBindingsStr[] = array($cnt=>$this->param_date_to);
             }
             if(!empty($this->param_employment_status)){
-                $sunquery1->where($this->table_temp_calc_workingtimes.'.employment_status', $this->param_employment_status);      //　雇用形態指定
+                $cnt += 1;
+                $array_setBindingsStr[] = array($cnt=>$this->param_employment_status);
             }
             if(!empty($this->param_department_code)){
-                $sunquery1->where($this->table_temp_calc_workingtimes.'.department_code', $this->param_department_code);          // department_code指定
+                $cnt += 1;
+                $array_setBindingsStr[] = array($cnt=>$this->param_department_code);
             }
             if(!empty($this->param_user_code)){
-                $sunquery1->where($this->table_temp_calc_workingtimes.'.user_code', $this->param_user_code);                      // user_code指定
+                $cnt += 1;
+                $array_setBindingsStr[] = array($cnt=>$this->param_user_code);
             }
-            $sunquery1->groupBy($this->table_temp_calc_workingtimes.'.working_timetable_no');
-
-        $mainquery = DB::table($this->table.' AS t1')
-            ->select(
-                't1.no as no',
-                't1.name as name',
-                't1.working_time_kubun as working_time_kubun',
-                't1.from_time as from_time',
-                't1.to_time as to_time'
-                )
-            ->JoinSub($sunquery1, 't2', function ($join) { 
-                $join->on('t2.working_timetable_no', '=', 't1.no');
-            });
+            if (count($array_setBindingsStr) > 0) {
+                $mainquery->setBindings($array_setBindingsStr);
+            }
+            $results = $mainquery->get();
         
-        $results = $mainquery
-            ->orderBy('t1.no','asc')
-            ->orderBy('t1.working_time_kubun','asc')
-            ->get();
+            \Log::debug(
+                'sql_debug_log',
+                [
+                    'getWorkingTimeTableJoin' => \DB::getQueryLog()
+                ]
+            );
+            \DB::disableQueryLog();
     
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+        
         return $results;
     }
 

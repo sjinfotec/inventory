@@ -134,7 +134,7 @@
                   <button
                     type="button"
                     class="btn btn-success btn-lg font-size-rg w-100"
-                    @click="StoreShiftTime()"
+                    @click="Storeclick()"
                   >この条件で登録する</button>
                 </div>
               </div>
@@ -240,6 +240,9 @@ export default {
       valueemploymentstatus: "",
       getDo: 1,
       valueuser: "",
+      closingYm: "",
+      closingYmd: "",
+      dt: "",
       validate: false
     };
   },
@@ -284,6 +287,7 @@ export default {
           this.errors.push("開始日＞終了日となっています");
         }
       }
+
       return flag;
     },
     // 検索・削除のバリデーション
@@ -335,7 +339,7 @@ export default {
         });
       } else {
       }
-    }, */
+    },
     alertDelConf: function(state, id) {
       this.$swal({
         title: "確認",
@@ -349,44 +353,92 @@ export default {
         } else {
         }
       });
-    },
+    }, */
     // 登録ボタン押下
-    StoreShiftTime() {
+    Storeclick() {
       this.validate = this.checkForm();
       if (this.validate) {
-        this.fromdate = ""
-        if (this.from) {
-          this.fromdate = moment(this.from).format("YYYYMMDD");
-        }
-        this.todate = ""
-        if (this.to) {
-          this.todate = moment(this.to).format("YYYYMMDD");
-        }
+        this.closingYm = moment(new Date()).subtract(1, 'M').format('YYYYMM');
         this.$axios
-          .post("/setting_shift_time/store", {
-            user_code: this.selectedUser,
-            department_code: this.valuedepartment,
-            time_table_no: this.timeTable.no,
-            apply_term_from: this.timeTable.apply_term_from,
-            from: this.fromdate,
-            to: this.todate
+          .get("/get_closing_day", {
+            params: {
+              target_date: this.closingYm
+            }
           })
           .then(response => {
             var res = response.data;
-            console.log(res.result);
-            if (res.result == 0) {
-              this.$toasted.show("シフトを登録しました");
-              this.errors = [];
-              // this.getUserShift(this.selectedUser);
+            this.closingYmd =String(this.closingYm) + String(res);
+            this.dt = moment(this.from).format('YYYYMMDD');
+            if (this.closingYmd >= this.dt) {
+              this.store_warniong_confirm();
             } else {
-              this.alert("error", "シフトの登録に失敗しました", "エラー");
+              this.store_confirm();
             }
           })
           .catch(reason => {
-            this.alert("error", "シフト登録に失敗しました", "エラー");
+            this.alert("error", "締日取得に失敗しました", "エラー");
           });
-      } else {
       }
+    },
+    store_confirm: function(state) {
+      this.$swal({
+        title: "確認",
+        text: "このデータで登録しますか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(result  => {
+        if (result) {
+          this.StoreShiftTime();
+        }
+      });
+    },
+    store_warniong_confirm: function(state) {
+      this.$swal({
+        title: "確認",
+        text: "前月の締日" + moment(this.closingYmd).format('YYYY年MM月DD日') + "以前のデータが含まれますが" + "\n" + "締日以前のデータは自動集計されません" + "\n" + "登録しますか？",
+        icon: state,
+        buttons: true,
+        dangerMode: true
+      }).then(result  => {
+        if (result) {
+          this.StoreShiftTime();
+        }
+      });
+    },
+    // 登録
+    StoreShiftTime() {
+      this.fromdate = ""
+      if (this.from) {
+        this.fromdate = moment(this.from).format("YYYYMMDD");
+      }
+      this.todate = ""
+      if (this.to) {
+        this.todate = moment(this.to).format("YYYYMMDD");
+      }
+      this.$axios
+        .post("/setting_shift_time/store", {
+          user_code: this.selectedUser,
+          department_code: this.valuedepartment,
+          time_table_no: this.timeTable.no,
+          apply_term_from: this.timeTable.apply_term_from,
+          from: this.fromdate,
+          to: this.todate
+        })
+        .then(response => {
+          var res = response.data;
+          console.log(res.result);
+          if (res.result == 0) {
+            this.$toasted.show("シフトを登録しました");
+            this.errors = [];
+            this.getUserShift(this.selectedUser);
+          } else {
+            this.alert("error", "シフトの登録に失敗しました", "エラー");
+          }
+        })
+        .catch(reason => {
+          this.alert("error", "シフト登録に失敗しました", "エラー");
+        });
     },
     // ユーザーリスト
     getUserList() {
