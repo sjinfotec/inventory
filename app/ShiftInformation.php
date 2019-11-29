@@ -138,8 +138,8 @@ class ShiftInformation extends Model
 
             $subquery2 = DB::table($this->table_calendars.' as t1')
                 ->select(
-                    't1.date as date',
-                    't2.no as no'
+                    't2.no as no',
+                    't1.date as date'
                 );
             $subquery2
                 ->selectRaw('MAX(t2.apply_term_from) as max_apply_term_from')
@@ -165,7 +165,7 @@ class ShiftInformation extends Model
                     $join->on('t3.apply_term_from', '=', 't2.max_apply_term_from')
                     ->where('t1.is_deleted', '=', ':is_deleted3');
                 });
-            $subquery3->groupBy('t1.date', 't2.no', 't3.name');
+            $subquery3->groupBy('t1.date', 't1.weekday_kubun', 't2.no', 't3.name');
             $subquery31 = $subquery3->toSql();
             $subquery4 = DB::table($this->table.' as t2')
                 ->select(
