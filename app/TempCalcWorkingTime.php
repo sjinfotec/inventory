@@ -773,8 +773,8 @@ class TempCalcWorkingTime extends Model
      * @return void
      */
     public function getTempCalcWorkingtime(){
-        \DB::enableQueryLog();
-        $mainquery = DB::table($this->table.' AS t1')
+        try{
+            $mainquery = DB::table($this->table.' AS t1')
             ->select(
                 't1.working_date as working_date',
                 't1.employment_status as employment_status',
@@ -827,38 +827,47 @@ class TempCalcWorkingTime extends Model
                 't1.check_interval as check_interval'
             );
 
-        if(!empty($this->param_date_from) && !empty($this->param_date_to)){
-            $date = date_create($this->param_date_from);
-            $this->param_date_from = $date->format('Ymd');
-            $date = date_create($this->param_date_to);
-            $this->param_date_to = $date->format('Ymd');
-            $mainquery->where('t1.working_date', '>=', $this->param_date_from);             // 日付範囲指定
-            $mainquery->where('t1.working_date', '<=', $this->param_date_to);               // 日付範囲指定
-        }
-        if(!empty($this->param_employment_status)){
-            $mainquery->where('t1.employment_status', $this->param_employment_status);      //　雇用形態指定
-        }
-        if(!empty($this->param_department_code)){
-            $mainquery->where('t1.department_code', $this->param_department_code);          // department_code指定
-        }
-        if(!empty($this->param_user_code)){
-            $mainquery->where('t1.user_code', $this->param_user_code);                      // user_code指定
-        }
-        
-        $results = $mainquery
-            ->orderBy('t1.working_date','asc')
-            ->orderBy('t1.department_code','asc')
-            ->orderBy('t1.user_code','asc')
-            ->orderBy('t1.seq','asc')
-            ->get();
+            if(!empty($this->param_date_from) && !empty($this->param_date_to)){
+                $date = date_create($this->param_date_from);
+                $this->param_date_from = $date->format('Ymd');
+                $date = date_create($this->param_date_to);
+                $this->param_date_to = $date->format('Ymd');
+                $mainquery->where('t1.working_date', '>=', $this->param_date_from);             // 日付範囲指定
+                $mainquery->where('t1.working_date', '<=', $this->param_date_to);               // 日付範囲指定
+            }
+            if(!empty($this->param_employment_status)){
+                $mainquery->where('t1.employment_status', $this->param_employment_status);      //　雇用形態指定
+            }
+            if(!empty($this->param_department_code)){
+                $mainquery->where('t1.department_code', $this->param_department_code);          // department_code指定
+            }
+            if(!empty($this->param_user_code)){
+                $mainquery->where('t1.user_code', $this->param_user_code);                      // user_code指定
+            }
+            
+            $results = $mainquery
+                ->orderBy('t1.working_date','asc')
+                ->orderBy('t1.department_code','asc')
+                ->orderBy('t1.user_code','asc')
+                ->orderBy('t1.seq','asc')
+                ->get();
 
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getTempCalcWorkingtime' => \DB::getQueryLog()
-            ]
-            );
-
+            \Log::debug(
+                'sql_debug_log',
+                [
+                    'getTempCalcWorkingtime' => \DB::getQueryLog()
+                ]
+                );
+            \DB::disableQueryLog();
+        }catch(\PDOException $pe){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')));
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
         return $results;
     }
 
@@ -870,11 +879,12 @@ class TempCalcWorkingTime extends Model
     public function insertTempCalcWorkingtime(){
         Log::debug('        <<<< insertTempCalcWorkingtime  $this->working_date = '.$this->working_date);
         Log::debug('        <<<< insertTempCalcWorkingtime  $this->user_code = '.$this->user_code);
-        Log::debug('        <<<< insertTempCalcWorkingtime  $this->user_name = '.$this->user_name);
+        Log::debug('        <<<< insertTempCalcWorkingtime  $this->working_timetable_from_time = ('.$this->working_timetable_from_time.')');
+        Log::debug('        <<<< insertTempCalcWorkingtime  $this->working_timetable_to_time = ('.$this->working_timetable_to_time.')');
+        Log::debug('        <<<< insertTempCalcWorkingtime  $this->shift_from_time = ('.$this->shift_from_time.')');
+        Log::debug('        <<<< insertTempCalcWorkingtime  $this->shift_to_time = ('.$this->shift_to_time.')');
+        Log::debug('        <<<< insertTempCalcWorkingtime  $this->record_datetime = ('.$this->record_datetime.')');
         try{
-            // ''をnullにする
-            $retValue = (strlen($this->record_datetime) > 0) ? $this->record_datetime : null;
-
             DB::table($this->table)->insert(
                 [
                     'working_date' => $this->working_date,
@@ -887,14 +897,14 @@ class TempCalcWorkingTime extends Model
                     'user_name' => $this->user_name,
                     'working_timetable_no' => $this->working_timetable_no,
                     'working_timetable_name' => $this->working_timetable_name,
-                    'working_timetable_from_time' => $this->working_timetable_from_time,
-                    'working_timetable_to_time' => $this->working_timetable_to_time,
+                    'working_timetable_from_time' => (strlen($this->working_timetable_from_time) > 0) ? $this->working_timetable_from_time : null,
+                    'working_timetable_to_time' => (strlen($this->working_timetable_to_time) > 0) ? $this->working_timetable_to_time : null,
                     'shift_no' => $this->shift_no,
                     'shift_name' => $this->shift_name,
-                    'shift_from_time' => $this->shift_from_time,
-                    'shift_to_time' => $this->shift_to_time,
+                    'shift_from_time' => (strlen($this->shift_from_time) > 0) ? $this->shift_from_time : null,
+                    'shift_to_time' => (strlen($this->shift_to_time) > 0) ? $this->shift_to_time : null,
                     'mode' => $this->mode,
-                    'record_datetime' => $retValue,
+                    'record_datetime' => (strlen($this->record_datetime) > 0) ? $this->record_datetime : null,
                     'record_year' => $this->record_year,
                     'record_month' => $this->record_month,
                     'record_date' => $this->record_date,
@@ -933,6 +943,10 @@ class TempCalcWorkingTime extends Model
             Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')));
             Log::error($pe->getMessage());
             throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')));
+            Log::error($e->getMessage());
+            throw $e;
         }
     }
 
@@ -948,6 +962,10 @@ class TempCalcWorkingTime extends Model
             Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')));
             Log::error($pe->getMessage());
             throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')));
+            Log::error($e->getMessage());
+            throw $e;
         }
     }
 
