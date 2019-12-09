@@ -235,11 +235,11 @@ class Confirm extends Model
                 ->orderBy($this->table.'.id')
                 ->get();
         }catch(\PDOException $pe){
-            Log::error('method = selectConfirm '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('method = selectConfirm '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -308,15 +308,15 @@ class Confirm extends Model
                 ->orderBy($this->table.'.main_sub')
                 ->get();
         }catch(\PDOException $pe){
-            Log::error('method = selectConfirm '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('method = selectConfirm '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
-
+    
         return $result;
     }
 
@@ -339,11 +339,11 @@ class Confirm extends Model
                     ]
             );
         }catch(\PDOException $pe){
-            Log::error('method = insertConfirm '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('method = insertConfirm '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -377,11 +377,11 @@ class Confirm extends Model
                 ]
             );
         }catch(\PDOException $pe){
-            Log::error('method = updateConfirm '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('method = updateConfirm '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -407,11 +407,11 @@ class Confirm extends Model
             }
             $mainquery->delete();
         }catch(\PDOException $pe){
-            Log::error('method = deleteConfirm '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('method = deleteConfirm '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }

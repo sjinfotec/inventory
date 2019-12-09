@@ -36,7 +36,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGroupSelect01"
-                    >所属部署<span class="color-red">[*]</span></label>
+                    >所属部署<span class="color-red">[必須]</span></label>
                   </div>
                   <select-department
                     ref="selectdepartment"
@@ -54,7 +54,7 @@
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       id="basic-addon1"
                       for="shift_start"
-                    >社員名<span class="color-red">[*]</span></span>
+                    >社員名<span class="color-red">[必須]</span></span>
                   </div>
                   <select-user
                     ref="selectuser"
@@ -73,7 +73,7 @@
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       id="basic-addon1"
                       for="shift_end"
-                    >開始日付<span class="color-red">[*]</span></span>
+                    >開始日付<span class="color-red">[必須]</span></span>
                   </div>
                   <datepicker
                     :language="ja"
@@ -92,7 +92,7 @@
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       id="basic-addon1"
                       for="shift_end"
-                    >終了日付<span class="color-red">[*]</span></span>
+                    >終了日付<span class="color-red">[必須]</span></span>
                   </div>
                   <datepicker
                     :language="ja"
@@ -263,45 +263,15 @@ export default {
 
       if (!this.valuedepartment) {
         flag = false;
-        this.errors.push("部署を選択してください");
+        this.errors.push("所属部署を選択してください");
       }
       if (!this.selectedUser) {
         flag = false;
-        this.errors.push("社員を選択してください");
+        this.errors.push("社員名を選択してください");
       }
       if (!this.timeTable.no) {
         flag = false;
-        this.errors.push("シフトを選択をしてください");
-      }
-      if (!this.from) {
-        flag = false;
-        this.errors.push("開始日を入力してください");
-      }
-      if (!this.to) {
-        flag = false;
-        this.errors.push("終了日を入力してください");
-      }
-      if (flag) {
-        if (this.from > this.to) {
-          flag = false;
-          this.errors.push("開始日＞終了日となっています");
-        }
-      }
-
-      return flag;
-    },
-    // 検索・削除のバリデーション
-    checkFormSearch: function() {
-      var flag = true;
-      this.errors = [];
-
-      if (!this.valuedepartment) {
-        flag = false;
-        this.errors.push("部署を選択してください");
-      }
-      if (!this.selectedUser) {
-        flag = false;
-        this.errors.push("社員を選択してください");
+        this.errors.push("登録する場合はシフト選択を選択してください");
       }
       if (!this.from) {
         flag = false;
@@ -314,7 +284,37 @@ export default {
       if (flag) {
         if (this.from > this.to) {
           flag = false;
-          this.errors.push("開始日＞終了日となっています");
+          this.errors.push("開始日付＞終了日付となっています");
+        }
+      }
+
+      return flag;
+    },
+    // 検索・削除のバリデーション
+    checkFormSearch: function() {
+      var flag = true;
+      this.errors = [];
+
+      if (!this.valuedepartment) {
+        flag = false;
+        this.errors.push("所属部署を選択してください");
+      }
+      if (!this.selectedUser) {
+        flag = false;
+        this.errors.push("社員名を選択してください");
+      }
+      if (!this.from) {
+        flag = false;
+        this.errors.push("開始日付を入力してください");
+      }
+      if (!this.to) {
+        flag = false;
+        this.errors.push("終了日付を入力してください");
+      }
+      if (flag) {
+        if (this.from > this.to) {
+          flag = false;
+          this.errors.push("開始日付＞終了日付となっています");
         }
       }
       return flag;
@@ -376,7 +376,7 @@ export default {
             }
           })
           .catch(reason => {
-            this.alert("error", "締日取得に失敗しました", "エラー");
+            this.alert("error", "締日取得エラー。集計方法基本設定の締日設定を確認してください。", "エラー");
           });
       }
     },
@@ -396,7 +396,7 @@ export default {
     store_warniong_confirm: function(state) {
       this.$swal({
         title: "確認",
-        text: "前月の締日" + moment(this.closingYmd).format('YYYY年MM月DD日') + "以前のデータが含まれますが" + "\n" + "締日以前のデータは自動集計されません" + "\n" + "登録しますか？",
+        text: "前月の締日" + moment(this.closingYmd).format('YYYY年MM月DD日') + "以前のデータが含まれますが" + "\n" + "前月締日以前のデータは自動集計されません" + "\n" + "登録しますか？",
         icon: state,
         buttons: true,
         dangerMode: true

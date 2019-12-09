@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 
 
 /**
@@ -399,46 +400,55 @@ class Setting extends Model
      */
     public function getSettingDatas(){
 
+        try {
+            // 取得SQL作成
+            $mainquery = DB::table($this->table)
+                ->select(
+                    $this->table.'.fiscal_year',
+                    $this->table.'.fiscal_month',
+                    $this->table.'.closing',
+                    $this->table.'.uplimit_time',
+                    $this->table.'.statutory_uplimit_time',
+                    $this->table.'.time_unit',
+                    $this->table.'.time_rounding',
+                    $this->table.'.calc_auto_time',
+                    $this->table.'.max_1month_total',
+                    $this->table.'.max_2month_total',
+                    $this->table.'.max_3month_total',
+                    $this->table.'.max_6month_total',
+                    $this->table.'.max_12month_total',
+                    $this->table.'.ave_2_6_time_sp',
+                    $this->table.'.max_12month_total_sp',
+                    $this->table.'.max_1month_total_sp',
+                    $this->table.'.count_sp',
+                    $this->table.'.beginning_month',
+                    $this->table.'.interval',
+                    $this->table.'.year',
+                    $this->table.'.is_deleted');
 
-        // 取得SQL作成
-        $mainquery = DB::table($this->table)
-            ->select(
-                $this->table.'.fiscal_year',
-                $this->table.'.fiscal_month',
-                $this->table.'.closing',
-                $this->table.'.uplimit_time',
-                $this->table.'.statutory_uplimit_time',
-                $this->table.'.time_unit',
-                $this->table.'.time_rounding',
-                $this->table.'.calc_auto_time',
-                $this->table.'.max_1month_total',
-                $this->table.'.max_2month_total',
-                $this->table.'.max_3month_total',
-                $this->table.'.max_6month_total',
-                $this->table.'.max_12month_total',
-                $this->table.'.ave_2_6_time_sp',
-                $this->table.'.max_12month_total_sp',
-                $this->table.'.max_1month_total_sp',
-                $this->table.'.count_sp',
-                $this->table.'.beginning_month',
-                $this->table.'.interval',
-                $this->table.'.year',
-                $this->table.'.is_deleted');
+            if(!empty($this->param_fiscal_year)){
+                $mainquery->where($this->table.'.fiscal_year', $this->param_fiscal_year);           //年度指定
+            }
+            
+            if(!empty($this->param_fiscal_month)){
+                $mainquery->where($this->table.'.fiscal_month', $this->param_fiscal_month);         //月指定
+            }
+            
+            if(!empty($this->param_year)){
+                $mainquery->where($this->table.'.year', $this->param_year);                         //年指定
+            }
 
-        if(!empty($this->param_fiscal_year)){
-            $mainquery->where($this->table.'.fiscal_year', $this->param_fiscal_year);           //年度指定
+            $data = $mainquery->where($this->table.'.is_deleted', '=', 0)
+                ->get();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
         }
-        
-        if(!empty($this->param_fiscal_month)){
-            $mainquery->where($this->table.'.fiscal_month', $this->param_fiscal_month);         //月指定
-        }
-        
-        if(!empty($this->param_year)){
-            $mainquery->where($this->table.'.year', $this->param_year);                         //年指定
-        }
-
-        $data = $mainquery->where($this->table.'.is_deleted', '=', 0)
-            ->get();
 
         return $data;
     }
@@ -452,58 +462,68 @@ class Setting extends Model
      */
     public function getSettingDatasYearOrderBy($orderby){
 
-        // 取得SQL作成
-        $sunquery1 = DB::table($this->table)
-            ->select(
-                DB::raw('MAX('.$this->table.'.fiscal_year) as fiscal_year')
-            );
-        if(!empty($this->param_year)){
-            $sunquery1->where($this->table.'.year', $this->param_year);                         //年指定
-        }
-        $sunquery1
-            ->where($this->table.'.is_deleted', '=', 0)
-            ->groupBy($this->table.'.year');
-
-        $mainquery = DB::table($this->table)
-            ->select(
-                $this->table.'.fiscal_year',
-                $this->table.'.fiscal_month',
-                $this->table.'.closing',
-                $this->table.'.uplimit_time',
-                $this->table.'.statutory_uplimit_time',
-                $this->table.'.time_unit',
-                $this->table.'.time_rounding',
-                $this->table.'.calc_auto_time',
-                $this->table.'.max_1month_total',
-                $this->table.'.max_2month_total',
-                $this->table.'.max_3month_total',
-                $this->table.'.max_6month_total',
-                $this->table.'.max_12month_total',
-                $this->table.'.ave_2_6_time_sp',
-                $this->table.'.max_12month_total_sp',
-                $this->table.'.max_1month_total_sp',
-                $this->table.'.count_sp',
-                $this->table.'.beginning_month',
-                $this->table.'.interval',
-                $this->table.'.year',
-                $this->table.'.is_deleted')
-            ->JoinSub($sunquery1, 't2', function ($join) { 
-                $join->on('t2.fiscal_year', '=', $this->table.'.fiscal_year');
-            })
-            ->where($this->table.'.is_deleted', '=', 0);
-
-        if (isset($orderby)) {
-            if ($orderby == 1) {
-                $mainquery
-                    ->orderBy($this->table.'.year', 'asc');
-            } else {
-                $mainquery
-                    ->orderBy($this->table.'.fiscal_year', 'asc');
+        try {
+            // 取得SQL作成
+            $sunquery1 = DB::table($this->table)
+                ->select(
+                    DB::raw('MAX('.$this->table.'.fiscal_year) as fiscal_year')
+                );
+            if(!empty($this->param_year)){
+                $sunquery1->where($this->table.'.year', $this->param_year);                         //年指定
             }
+            $sunquery1
+                ->where($this->table.'.is_deleted', '=', 0)
+                ->groupBy($this->table.'.year');
+
+            $mainquery = DB::table($this->table)
+                ->select(
+                    $this->table.'.fiscal_year',
+                    $this->table.'.fiscal_month',
+                    $this->table.'.closing',
+                    $this->table.'.uplimit_time',
+                    $this->table.'.statutory_uplimit_time',
+                    $this->table.'.time_unit',
+                    $this->table.'.time_rounding',
+                    $this->table.'.calc_auto_time',
+                    $this->table.'.max_1month_total',
+                    $this->table.'.max_2month_total',
+                    $this->table.'.max_3month_total',
+                    $this->table.'.max_6month_total',
+                    $this->table.'.max_12month_total',
+                    $this->table.'.ave_2_6_time_sp',
+                    $this->table.'.max_12month_total_sp',
+                    $this->table.'.max_1month_total_sp',
+                    $this->table.'.count_sp',
+                    $this->table.'.beginning_month',
+                    $this->table.'.interval',
+                    $this->table.'.year',
+                    $this->table.'.is_deleted')
+                ->JoinSub($sunquery1, 't2', function ($join) { 
+                    $join->on('t2.fiscal_year', '=', $this->table.'.fiscal_year');
+                })
+                ->where($this->table.'.is_deleted', '=', 0);
+
+            if (isset($orderby)) {
+                if ($orderby == 1) {
+                    $mainquery
+                        ->orderBy($this->table.'.year', 'asc');
+                } else {
+                    $mainquery
+                        ->orderBy($this->table.'.fiscal_year', 'asc');
+                }
+            }
+            $get = $mainquery
+                ->orderBy($this->table.'.fiscal_month', 'asc')
+                ->get();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
         }
-        $get = $mainquery
-            ->orderBy($this->table.'.fiscal_month', 'asc')
-            ->get();
         return $get;
     }
 
@@ -517,11 +537,21 @@ class Setting extends Model
     public function getMonthClosing(){
         
         // 取得
-        return $mainquery = DB::table($this->table)
-            ->where($this->table.'.year', $this->param_year)
-            ->where($this->table.'.fiscal_month', $this->param_fiscal_month)
-            ->where($this->table.'.is_deleted', 0)
-            ->value($this->table.'.closing');
+        try {
+            return $mainquery = DB::table($this->table)
+                ->where($this->table.'.year', $this->param_year)
+                ->where($this->table.'.fiscal_month', $this->param_fiscal_month)
+                ->where($this->table.'.is_deleted', 0)
+                ->value($this->table.'.closing');
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
 
     }
 
@@ -534,40 +564,60 @@ class Setting extends Model
      */
     public function getBeginingMonth(){
 
-        // 取得
-        return $mainquery = DB::table($this->table)
-            ->where($this->table.'.year', $this->param_year)
-            ->where($this->table.'.is_deleted', 0)
-            ->value($this->table.'.beginning_month');
+        try {
+            // 取得
+            return $mainquery = DB::table($this->table)
+                ->where($this->table.'.year', $this->param_year)
+                ->where($this->table.'.is_deleted', 0)
+                ->value($this->table.'.beginning_month');
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
 
     }
 
     public function insertSettings(){
-        DB::table($this->table)->insert(
-            [
-                'fiscal_year' => $this->fiscal_year,
-                'fiscal_month' => $this->fiscal_month,
-                'closing' => $this->closing,
-                'uplimit_time' => $this->uplimit_time,
-                'time_unit' => $this->time_unit,
-                'time_rounding' => $this->time_rounding,
-                'calc_auto_time' => $this->calc_auto_time,
-                'max_1month_total' => $this->max_1month_total,
-                'max_2month_total' => $this->max_2month_total,
-                'max_3month_total' => $this->max_3month_total,
-                'max_6month_total' => $this->max_6month_total,
-                'max_12month_total' => $this->max_12month_total,
-                'ave_2_6_time_sp' => $this->ave_2_6_time_sp,
-                'max_12month_total_sp' => $this->max_12month_total_sp,
-                'max_1month_total_sp' => $this->max_1month_total_sp,
-                'count_sp' => $this->count_sp,
-                'beginning_month' => $this->beginning_month,
-                'interval' => $this->interval,
-                'year' => $this->year,
-                'created_user' => $this->created_user,
-                'created_at'=>$this->created_at
-            ]
-        );
+        try {
+            DB::table($this->table)->insert(
+                [
+                    'fiscal_year' => $this->fiscal_year,
+                    'fiscal_month' => $this->fiscal_month,
+                    'closing' => $this->closing,
+                    'uplimit_time' => $this->uplimit_time,
+                    'time_unit' => $this->time_unit,
+                    'time_rounding' => $this->time_rounding,
+                    'calc_auto_time' => $this->calc_auto_time,
+                    'max_1month_total' => $this->max_1month_total,
+                    'max_2month_total' => $this->max_2month_total,
+                    'max_3month_total' => $this->max_3month_total,
+                    'max_6month_total' => $this->max_6month_total,
+                    'max_12month_total' => $this->max_12month_total,
+                    'ave_2_6_time_sp' => $this->ave_2_6_time_sp,
+                    'max_12month_total_sp' => $this->max_12month_total_sp,
+                    'max_1month_total_sp' => $this->max_1month_total_sp,
+                    'count_sp' => $this->count_sp,
+                    'beginning_month' => $this->beginning_month,
+                    'interval' => $this->interval,
+                    'year' => $this->year,
+                    'created_user' => $this->created_user,
+                    'created_at'=>$this->created_at
+                ]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -576,10 +626,20 @@ class Setting extends Model
      * @return boolean
      */
     public function isExistsSetting(){
-        $is_exists = DB::table($this->table)
-            ->where('fiscal_year',$this->fiscal_year)
-            ->where('is_deleted',0)
-            ->exists();
+        try {
+            $is_exists = DB::table($this->table)
+                ->where('fiscal_year',$this->fiscal_year)
+                ->where('is_deleted',0)
+                ->exists();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
 
         return $is_exists;
     }
@@ -590,10 +650,20 @@ class Setting extends Model
      * @return void
      */
     public function getDetails(){
-        $details = DB::table($this->table)
-            ->where('fiscal_year',$this->fiscal_year)
-            ->where('is_deleted',0)
-            ->get();
+        try {
+            $details = DB::table($this->table)
+                ->where('fiscal_year',$this->fiscal_year)
+                ->where('is_deleted',0)
+                ->get();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
 
         return $details;
     }
@@ -604,9 +674,19 @@ class Setting extends Model
      * @return void
      */
     public function delSetting(){
-        DB::table($this->table)
-            ->where('fiscal_year',$this->fiscal_year)
-            ->delete();
+        try {
+            DB::table($this->table)
+                ->where('fiscal_year',$this->fiscal_year)
+                ->delete();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
 }

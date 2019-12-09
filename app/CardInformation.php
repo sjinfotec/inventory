@@ -4,10 +4,13 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 
 class CardInformation extends Model
 {
     protected $table = 'card_informations';
+    protected $table_users = '$table_users';
     protected $guarded = array('id');
 
     private $user_code;
@@ -85,29 +88,49 @@ class CardInformation extends Model
      * @return boolean
      */
     public function isCardInfoExists(){
-        $data = DB::table('card_informations')
-            ->join('users', function ($join) {
-                $join->on('users.code', '=', 'card_informations.user_code');
-                $join->on('users.department_code', '=', 'card_informations.department_code');
-            })
-            ->where('card_informations.card_idm',$this->card_idm)
-            ->where('users.is_deleted',0)
-            ->where('card_informations.is_deleted',0)
-            ->exists();
+        try {
+            $data = DB::table($this->table)
+                ->join($this->table_users, function ($join) {
+                    $join->on($this->table_users.'.code', '=', $this->table.'.user_code');
+                    $join->on($this->table_users.'.department_code', '=', $this->table.'.department_code');
+                })
+                ->where($this->table.'.card_idm',$this->card_idm)
+                ->where($this->table_users.'.is_deleted',0)
+                ->where($this->table.'.is_deleted',0)
+                ->exists();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
 
         return $data;
     }
 
     public function insertCardInfo(){
-        DB::table('card_informations')->insert(
-            [
-                'user_code' => $this->user_code,
-                'department_code' => $this->department_code,
-                'card_idm' => $this->card_idm,
-                'created_user'=>$this->created_user,
-                'created_at'=>$this->systemdate
-            ]
-        );
+        try {
+            DB::table($this->table.'')->insert(
+                [
+                    'user_code' => $this->user_code,
+                    'department_code' => $this->department_code,
+                    'card_idm' => $this->card_idm,
+                    'created_user'=>$this->created_user,
+                    'created_at'=>$this->systemdate
+                ]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
 }

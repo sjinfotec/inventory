@@ -1,7 +1,7 @@
 <template>
   <select class="form-control" v-model="confirm" v-on:change="selChanges(confirm)">
-    <!-- <option selected v-if="this.blankData" value="" disabled selected>＜{{ placeholderData }}＞</option> -->
-    <option selected v-if="this.blankData" value="">＜{{ placeholderData }}＞</option>
+    <option disabled selected style="display:none;" v-if="this.placeholderData" value="">＜{{ placeholderData }}＞</option>
+    <option v-if="this.blankData" value=""></option>
     <option v-for="item in confirmList" v-bind:value="item.user_code">
       {{ item.list_name }}
     </option>

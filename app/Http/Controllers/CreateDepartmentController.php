@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Config;
 use App\Http\Requests\StoreDepartmentPost;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,8 @@ class CreateDepartmentController extends Controller
 {
     const SUCCESS = 0;
     const FAILED = 1;
+    // メッセージ
+    private $array_messagedata = array();
 
     /**
      * 初期処理
@@ -33,15 +36,20 @@ class CreateDepartmentController extends Controller
      * @return void
      */
     public function getDetails(Request $request){
-        $code = $request->code;
-        $details = DB::table('departments')->where('code', $code)->where('is_deleted', 0)->orderby('id','asc')->get();
-        foreach ($details as $detail) {
-            if(isset($detail->apply_term_from)){
-                // yyyy-mm-ddに変換
-                $carbon = new Carbon($detail->apply_term_from);
-                $detail->apply_term_from = $carbon->copy()->format("Y-m-d");
-
-            }
+        $details = new Collection();
+        try {
+            $code = $request->code;
+            $department_model = new Department();
+            $dt = new Carbon();
+            $from = $dt->copy()->format('Ymd');
+            $department_model->setParamapplytermfromAttribute($from);
+            $department_model->setParamcodeAttribute($code);
+            $details = $department_model->getDetails();
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            throw $e;
         }
         return $details;
     }
@@ -53,8 +61,19 @@ class CreateDepartmentController extends Controller
      * @return void
      */
     public function getDepartmentApplyTerm(Request $request){
-        $code = $request->code;
-        $terms = DB::table('departments')->where('code', $code)->where('is_deleted', 0)->orderby('apply_term_from','asc')->get();
+        $terms = new Collection();
+        try {
+            $code = $request->code;
+            $terms = DB::table('departments')->where('code', $code)->where('is_deleted', 0)->orderby('apply_term_from','asc')->get();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
         return $terms;
     }
 
@@ -65,17 +84,31 @@ class CreateDepartmentController extends Controller
      * @return void
      */
     public function store(StoreDepartmentPost $request){
-        $name = $request->name;
-        if(isset($request->id)){    // UPDATE
-            $id = $request->id;
-            $result = $this->updateName($id,$name);
-        }else{                      // INSERT
-             $result = $this->insert($name);
-        }
-       
-        if($result){
-        }else{
-            return false;
+        $code = '';
+        try {
+            $kbn = $request->kbn;
+            $code = $request->code;
+            $name = $request->name;
+            if ($kbn == Config::get('const.DB_KBN.store')) {
+                if (isset($code)) {
+                    $this->array_messagedata[] = Config::get('const.MSG_ERROR.already_data');
+                    return response()->json(
+                        ['result' => false, 'code' => $code,
+                        Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                    );
+                }
+            }
+            $code = $this->insert($kbn, $code, $name);
+    
+            return response()->json(
+                ['result' => true, 'code' => $code,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            throw $e;
         }
     }
 
@@ -103,16 +136,32 @@ class CreateDepartmentController extends Controller
      * @param [type] $name
      * @return void
      */
-    private function insert($name){
-        $systemdate = Carbon::now();
-        $user = Auth::user();
-        $department = new Department();
-        $user_code = $user->code;
-        $from = "20000101";
+    private function insert($kbn, $code, $name){
         DB::beginTransaction();
         try{
-            $max_code = $department->getMaxCode();          // code 自動採番
-            $code = $max_code + 1;
+            $systemdate = Carbon::now();
+            $user = Auth::user();
+            $department = new Department();
+            $user_code = $user->code;
+            if ($kbn == Config::get('const.DB_KBN.store')) {
+                $from = Config::get('const.INIT_DATE.initdate');
+                $max_code = $department->getMaxCode();          // code 自動採番
+                if (isset($max_code)) {
+                    $code = $max_code + 1;
+                } else {
+                    $code = 1;
+                }
+            } else {
+                $maxno = $code;
+                if(isset($data[0]['apply_term_from'])){
+                    $carbon = new Carbon($data[0]['apply_term_from']);
+                    Log::debug("carbon = ".$carbon);
+                    $from = $carbon->copy()->format('Ymd');
+                    $term_from = $from;
+                    Log::debug("term_from = ".$term_from);
+                }
+            }
+
             $department->setApplytermfromAttribute($from);
             $department->setCodeAttribute($code);
             $department->setNameAttribute($name);
@@ -121,12 +170,15 @@ class CreateDepartmentController extends Controller
             $department->insertDepartment();
         
             DB::commit();
-            return true;
+            return $code;
 
-        }catch(\PDOException $e){
+        }catch(\PDOException $pe){
+            DB::rollBack();
+            throw $pe;
+        }catch(\Exception $e){
             Log::error($e->getMessage());
             DB::rollBack();
-            return false;
+            throw $e;
         }
     }
 

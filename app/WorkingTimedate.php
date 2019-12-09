@@ -1299,11 +1299,11 @@ class WorkingTimedate extends Model
             }
             $result = $mainquery->where('t1.is_deleted', '=', 0)->get();
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1330,7 +1330,6 @@ class WorkingTimedate extends Model
         // 日次労働時間取得SQL作成
         $result = true;
 
-        \DB::enableQueryLog();
         try{
             $case_where = "CASE ifnull({0},0) WHEN 0 THEN '00:00' ";
             $case_where .= "ELSE CONCAT(CONCAT(LPAD(TRUNCATE({0}, 0), 2, '0'),':'),LPAD(TRUNCATE((mod({0} * 100, 100) * 60) / 100, 0) , 2, '0')) ";
@@ -1578,21 +1577,14 @@ class WorkingTimedate extends Model
             }
             
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
-        \Log::debug(
-            'sql_debug_log',
-            [
-                'getWorkingTimeDateTimeFormat' => \DB::getQueryLog()
-            ]
-        );
-
         return $result;
     }
 
@@ -1614,7 +1606,6 @@ class WorkingTimedate extends Model
 
         // 日次労働時間合計取得SQL作成
         try{
-            \DB::enableQueryLog();
             $case_where = "CASE ifnull({0},0) WHEN 0 THEN '00:00' ";
             $case_where .= "ELSE CONCAT(CONCAT(TRUNCATE({0}, 0),':'),LPAD(TRUNCATE((mod({0} * 100, 100) * 60) / 100, 0) , 2, '0')) ";
             $case_where .= ' END as {1} ';
@@ -1820,24 +1811,24 @@ class WorkingTimedate extends Model
             $cnt = 0;
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $cnt += 1;
-                $array_setBindingsStr = array($cnt=>$this->param_date_from);
+                $array_setBindingsStr[] = array($cnt=>$this->param_date_from);
                 $cnt += 1;
-                $array_setBindingsStr += array($cnt=>$this->param_date_to);
+                $array_setBindingsStr[] = array($cnt=>$this->param_date_to);
             }
             
             if(!empty($this->param_employment_status)){
                 $cnt += 1;
-                $array_setBindingsStr += array($cnt=>$this->param_employment_status);
+                $array_setBindingsStr[] = array($cnt=>$this->param_employment_status);
             }
             
             if(!empty($this->param_user_code)){
                 $cnt += 1;
-                $array_setBindingsStr += array($cnt=>$this->param_user_code);
+                $array_setBindingsStr[] = array($cnt=>$this->param_user_code);
             }
             
             if(!empty($this->param_department_code)){
                 $cnt += 1;
-                $array_setBindingsStr += array($cnt=>$this->param_department_code);
+                $array_setBindingsStr[] = array($cnt=>$this->param_department_code);
             }
 
             if (count($array_setBindingsStr) > 0) {
@@ -1845,20 +1836,13 @@ class WorkingTimedate extends Model
             }
 
             $result = $mainquery->get();
-            \Log::debug(
-                'sql_debug_log',
-                [
-                    'getWorkingTimeDateTimeSum' => \DB::getQueryLog()
-                ]
-            );
-            \DB::disableQueryLog();
                 
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1883,7 +1867,6 @@ class WorkingTimedate extends Model
 
         // 日時労働時間合計取得SQL作成
         try{
-            \DB::enableQueryLog();
             // 各月の集計SQL
             $array_subquery = array(); 
             for ($i=0;$i<count($this->array_param_date_from);$i++) {
@@ -1974,24 +1957,17 @@ class WorkingTimedate extends Model
                 ->orderBy('t1.employment_status', 'asc')
                 ->orderBy('t1.code', 'asc')
                 ->get();
-            \Log::debug(
-                'sql_debug_log',
-                [
-                    'getMonthlyAlertTimeSum' => \DB::getQueryLog()
-                ]
-            );
-            \DB::disableQueryLog();
                 
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
-        
+            
         return $result;
     }
 
@@ -2004,11 +1980,11 @@ class WorkingTimedate extends Model
         try{
             DB::table($this->table)->insert($array_subquery);
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -2028,11 +2004,11 @@ class WorkingTimedate extends Model
             return $mainquery->exists();
 
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -2053,11 +2029,11 @@ class WorkingTimedate extends Model
             $mainquery->delete();
 
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -2094,7 +2070,7 @@ class WorkingTimedate extends Model
             }
 
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.where_illegal')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }

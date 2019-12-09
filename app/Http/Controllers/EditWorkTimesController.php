@@ -5,17 +5,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
-use App\Http\Requests\StoreUserPost;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
+use App\Http\Requests\StoreUserPost;
+use App\Http\Controllers\ApiCommonController;
 use App\WorkTime;
 use App\UserHolidayKubun;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Config;
 
 
 class EditWorkTimesController extends Controller
 {
+    private $array_messagedata = array();
     const SUCCESS = 0;
     const FAILED = 1;
 
@@ -34,47 +36,77 @@ class EditWorkTimesController extends Controller
      * @return list results
      */
     public function get(Request $request){
-        $code = $request->code;
-        $year = $request->year;
-        $month = $request->month;
-        // ToDO closingがないとき
-        $closing = DB::table('settings')->where('fiscal_year', $year)->where('fiscal_month', $month)->where('is_deleted', 0)->value('closing');
-        $ymd_start = $year."/".$month."/".$closing." 00:00:00";
-        $ymd_end = $year."/".$month."/".$closing." 23:59:59";
-        $closing_start = new Carbon($ymd_start);
-        $closing_end = new Carbon($ymd_end);
-        $closing_start = $closing_start->copy()->subMonth()->addDay()->format('Y/m/d H:i:s');
-        $closing_end = $closing_end->format('Y/m/d H:i:s');
-
-        $work_times = new WorkTime();
-        $work_times->setUsercodeAttribute($code);
-        $work_times->setParamStartDateAttribute($closing_start);
-        $work_times->setParamEndDateAttribute($closing_end);
-
-        $details = $work_times->getUserDetails();
-        $count = 0;
-        $before_date = "";
-        foreach ($details as $detail) {
-            $detail->kbn_flag = 0;
-            $detail->user_holiday_kbn="";
-            if(isset($detail->record_time)){
-                $carbon = new Carbon($detail->record_time);
-                $detail->date = $carbon->copy()->format('Y/m/d');
-                $search_date = $carbon->copy()->format('Ymd');
-                // 個人休暇区分取得
-                $holiday_kbn = DB::table('user_holiday_kubuns')->where('working_date', $search_date)->where('user_code', $code)->where('is_deleted', 0)->value('holiday_kubun');
-                if(isset($holiday_kbn)){
-                    $detail->user_holiday_kbn = $holiday_kbn;
-                }
-                $detail->time = $carbon->copy()->format('H:i');
-                if($detail->date != $before_date){
-                    $detail->kbn_flag = 1;
-                }
-                $before_date = $detail->date;
+        try{
+            $code = $request->code;
+            $target_ym = $request->ym;
+            $apicommon_mopdel = new ApiCommonController();
+            $closing = $apicommon_mopdel->getCommonClosingDay($target_ym);
+            if (!isset($closing)) {
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_setting_closing');
+                return response()->json(
+                    ['result' => false,
+                    'details' => null,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
             }
+
+            $target_ymd = new Carbon($target_ym.'15');
+            $year = $target_ymd->format('Y');
+            $month = $target_ymd->format('m');
+            $ymd_start = $year."/".$month."/".$closing." 00:00:00";
+            $ymd_end = $year."/".$month."/".$closing." 23:59:59";
+            $closing_start = new Carbon($ymd_start);
+            $closing_end = new Carbon($ymd_end);
+            $closing_start = $closing_start->copy()->subMonth()->addDay()->format('Y/m/d H:i:s');
+            $closing_end = $closing_end->format('Y/m/d H:i:s');
+    
+            $work_times = new WorkTime();
+            $work_times->setUsercodeAttribute($code);
+            $work_times->setParamStartDateAttribute($closing_start);
+            $work_times->setParamEndDateAttribute($closing_end);
+    
+            $details = $work_times->getUserDetails();
+            $count = 0;
+            $before_date = "";
+            foreach ($details as $detail) {
+                $detail->kbn_flag = 0;
+                $detail->user_holiday_kbn="";
+                if(isset($detail->record_time)){
+                    $carbon = new Carbon($detail->record_time);
+                    $detail->date = $carbon->copy()->format('Y/m/d');
+                    $search_date = $carbon->copy()->format('Ymd');
+                    // 個人休暇区分取得
+                    $holiday_kbn = $apicommon_mopdel->getUserHolidaykbn($code, $search_date);
+                    $detail->time = $carbon->copy()->format('H:i');
+                    if($detail->date != $before_date){
+                        $detail->kbn_flag = 1;
+                    }
+                    $before_date = $detail->date;
+                }
+            }
+            Log::debug('$details count = '.count($details));
+            return response()->json(
+                ['result' => true,
+                'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error($pe->getMessage());
+            $this->array_messagedata[] = Config::get('const.MSG_ERROR.data_accesee_eror');
+            return response()->json(
+                ['result' => false,
+                'details' => null,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            $this->array_messagedata[] = Config::get('const.MSG_ERROR.data_accesee_eror');
+            return response()->json(
+                ['result' => false,
+                'details' => null,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }
-        
-        return $details;
     }
 
     /**

@@ -5,7 +5,8 @@
       format='HH:mm'
       value-format='HH:mm'
       v-on:change="change()"
-      size="medium "
+      v-on:focus="focus()"
+      size="medium"
       :placeholder="placeHolder">
     </el-time-picker>
   </div>
@@ -27,9 +28,13 @@ export default {
   },
   methods: {
     // 親コンポーネントに入力値を返却
-    change : function() {
+    change : function($event) {
       this.$emit('change-event', this.valueData);
 
+    },
+    focus : function($event) {
+      console.log('this.value = '+this.value);
+      console.log('this.value = '+$event.value);
     }
   }
 

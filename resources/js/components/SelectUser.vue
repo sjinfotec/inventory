@@ -1,5 +1,6 @@
 <template>
-  <select class="form-control" v-model="selectedusercode" v-on:change="selChanges(selectedusercode,rowIndex)" placeholder="社員を選択してください">
+  <select class="form-control" v-model="selectedusercode" v-on:change="selChanges(selectedusercode,rowIndex)">
+    <option disabled selected style="display:none;" v-if="this.placeholderData" value="">＜{{ placeholderData }}＞</option>
     <option v-if="this.blankData" value=""></option>
     <option v-for="users in userList" v-bind:value="users.code">
       {{ users.name }}
@@ -13,6 +14,14 @@ export default {
   name: "selectUser",
   props: {
     blankData: {
+        type: Boolean,
+        default: false
+    },
+    placeholderData: {
+        type: String,
+        default: '氏名を選択してください'
+    },
+    addNew: {
         type: Boolean,
         default: false
     },
@@ -49,6 +58,8 @@ export default {
     this.selectedusercode = this.selectedUser;
     if (this.dateValue == '') {
       this.dateApllyValue = moment(new Date()).format("YYYYMMDD");
+    } else {
+      this.dateApllyValue = moment(this.dateValue).format("YYYYMMDD");
     }
     if (this.selectedDepartment == '') {
       this.getUserList(this.getDo, this.selectedusercode, this.dateApllyValue);
@@ -70,6 +81,10 @@ export default {
         })
         .then(response => {
           this.userList = response.data;
+          if (this.addNew) {
+            this.object = { name: "新規にユーザー登録する", code: "" };
+            this.userList.unshift(this.object);
+          }
         })
         .catch(reason => {
           alert("社員選択リスト作成エラー");
@@ -89,6 +104,10 @@ export default {
         })
         .then(response => {
           this.userList = response.data;
+          if (this.addNew) {
+            this.object = { name: "新規にユーザー登録する", code: "" };
+            this.userList.unshift(this.object);
+          }
         })
         .catch(reason => {
           alert("社員選択リスト作成エラー");
@@ -108,6 +127,10 @@ export default {
         })
         .then(response => {
           this.userList = response.data;
+          if (this.addNew) {
+            this.object = { name: "新規にユーザー登録する", code: "" };
+            this.userList.unshift(this.object);
+          }
         })
         .catch(reason => {
           alert("社員選択リスト作成エラー");
@@ -128,6 +151,10 @@ export default {
         })
         .then(response => {
           this.userList = response.data;
+          if (this.addNew) {
+            this.object = { name: "新規にユーザー登録する", code: "" };
+            this.userList.unshift(this.object);
+          }
         })
         .catch(reason => {
           alert("社員選択リスト作成エラー");

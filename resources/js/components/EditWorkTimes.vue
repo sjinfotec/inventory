@@ -6,10 +6,10 @@
       <div class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
-          <div class="card-header bg-transparent pb-0 border-0">
-            <h1 class="float-sm-left font-size-rg">年月を指定して集計を表示する</h1>
-            <span class="float-sm-right font-size-sm">雇用形態や所属部署でフィルタリングして表示できます</span>
-          </div>
+          <daily-working-information-panel-header
+            v-bind:header-text1="'年月を指定して勤怠時刻を表示する'"
+            v-bind:header-text2="'雇用形態や所属部署でフィルタリングして表示できます'"
+          ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <!-- panel body -->
           <div class="card-body pt-2">
@@ -21,33 +21,18 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       id="basic-addon1"
-                    >指定年<span class="color-red">＊</span></span>
+                    >指定年月<span class="color-red">[必須]</span></span>
                   </div>
-                  <select class="form-control" v-model="year">
-                    <option
-                      v-for="n in 20"
-                      :value="n + baseYear -1"
-                      v-bind:key="n"
-                    >{{ n + baseYear -1 }}年</option>
-                  </select>
+                  <input-datepicker
+                    v-bind:default-date="defaultDate"
+                    v-bind:date-format="'yyyy年MM月'"
+                    v-on:change-event="fromdateChanges"
+                    v-on:clear-event="fromdateCleared"
+                  ></input-datepicker>
                 </div>
-              </div>
-              <!-- /.col -->
-              <!-- .col -->
-              <div class="col-md-6 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
-                      id="basic-addon1"
-                    >指定月<span class="color-red">＊</span></span>
-                  </div>
-                  <select class="form-control" v-model="month">
-                    <option v-for="n in 12" :value="n" v-bind:key="n">{{ n }}月</option>
-                  </select>
-                </div>
+                <message-data v-bind:message-datas="messagedatasfromdate" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -55,7 +40,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGroupSelect01"
                     >雇用形態</label>
                   </div>
@@ -71,11 +56,15 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGroupSelect01"
                     >所属部署</label>
                   </div>
-                  <select-department v-bind:blank-data="true" v-on:change-event="departmentChanges"></select-department>
+                  <select-department
+                    ref="selectdepartment"
+                    v-bind:blank-data="true"
+                    v-on:change-event="departmentChanges"
+                  ></select-department>
                 </div>
               </div>
               <!-- /.col -->
@@ -83,15 +72,16 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <label
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
-                      for="inputGroupSelect01"
-                    >氏名<span class="color-red">＊</span></label>
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      id="basic-addon1"
+                    >氏名<span class="color-red">[必須]</span></span>
                   </div>
                   <select-user
                     ref="selectuser"
                     v-bind:blank-data="true"
                     v-bind:get-Do="getDo"
+                    v-bind:date-value="fromdate"
                     v-on:change-event="userChanges"
                   ></select-user>
                 </div>
@@ -103,11 +93,12 @@
             <div class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
-                <div class="btn-group d-flex">
-                  <button class="btn btn-primary btn-lg font-size-rg w-100" @click="getDetail()">
-                    <img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt />この条件で表示する
-                  </button>
-                </div>
+                <btn-work-time
+                  v-on:searchclick-event="getDetail"
+                  v-bind:btn-mode="'search'"
+                  v-bind:is-push="issearchbutton">
+                </btn-work-time>
+                <message-data v-bind:message-datas="messageshowsearch" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
               <!-- col -->
@@ -414,16 +405,24 @@
 import toasted from "vue-toasted";
 import Datepicker from "vuejs-datepicker";
 import { ja } from "vuejs-datepicker/dist/locale";
+import moment from "moment";
 
 export default {
   name: "EditWorkTimes",
   data() {
     return {
       dates: new Date(),
+      valueym: "",
+      fromdate: "",
+      valuefromdate: "",
+      defaultDate: new Date(),
       valuedepartment: "",
       valueemploymentstatus: "",
       getDo: 0,
       valueuser: "",
+      messageshowsearch: [],
+      messagedatasfromdate: [],
+      issearchbutton: false,
       valueBusinessDay: "",
       valueholiDay: "",
       year: "",
@@ -453,6 +452,7 @@ export default {
     var date = new Date();
     var baseDate = new Date("2018/01/01 8:00:00");
     this.baseYear = baseDate.getFullYear();
+    this.valueym = moment(this.defaultDate).format("YYYYMM");
     this.getUserLeaveKbnList();
     this.getModeList();
     // this.baseYear = baseDate;
@@ -500,6 +500,24 @@ export default {
           return flag;
         }
       }
+    },
+    // 指定年月が変更された場合の処理
+    fromdateChanges: function(value) {
+      this.valuefromdate = value;
+      // 再取得
+      this.fromdate = "";
+      if (this.valuefromdate) {
+        this.valueym = moment(this.valuefromdate).format("YYYYMM");
+        this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
+      }
+      this.$refs.selectdepartment.getDepartmentList(this.fromdate);
+      this.getUserSelected();
+    },
+    // 指定日付がクリアされた場合の処理
+    fromdateCleared: function() {
+      this.valuefromdate = "";
+      this.fromdate = "";
+      this.valueym = ""
     },
     alert: function(state, message, title) {
       this.$swal(title, message, state);
@@ -582,16 +600,25 @@ export default {
       this.$axios
         .get("/edit_work_times/get", {
           params: {
-            year: this.year,
-            month: this.month,
+            ym: this.valueym,
             code: this.valueuser
           }
         })
         .then(response => {
-          this.details = response.data;
+          this.res = response.data;
+          console.log('res.result = ' + res.result);
+          if (res.result) {
+            this.details = res.details
+          } else {
+            if (res.messagedata.length > 0) {
+              this.messageshowsearch = res.messagedata;
+            } else {
+              this.alert("error", "勤怠時刻取得処理でエラーが発生しました", "エラー");
+            }
+          }
         })
         .catch(reason => {
-          alert("error");
+          this.alert("error", "勤怠時刻取得処理でエラーが発生しました", "エラー");
         });
     },
     getUserLeaveKbnList() {
@@ -670,6 +697,44 @@ export default {
             this.getDo,
             this.valuedepartment,
             this.valueemploymentstatus
+          );
+        }
+      }
+    },
+    // ユーザー選択コンポーネント取得メソッド
+    getUserSelected: function() {
+      this.valueuser = "";
+      this.getDo = 1;
+      this.fromdate = "";
+      if (this.valuefromdate) {
+        this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
+      }
+      if (this.valueemploymentstatus == "") {
+        if (this.valuedepartment == "") {
+          this.$refs.selectuser.getUserList(this.getDo, this.valueuser, this.fromdate);
+        } else {
+          this.$refs.selectuser.getUserListByDepartment(
+            this.getDo,
+            this.valuedepartment,
+            this.valueuser,
+            this.fromdate
+          );
+        }
+      } else {
+        if (this.valuedepartment == "") {
+          this.$refs.selectuser.getUserListByEmployment(
+            this.getDo,
+            this.valueemploymentstatus,
+            this.valueuser,
+            this.fromdate
+          );
+        } else {
+          this.$refs.selectuser.getUserListByDepartmentEmployment(
+            this.getDo,
+            this.valuedepartment,
+            this.valueemploymentstatus,
+            this.valueuser,
+            this.fromdate
           );
         }
       }

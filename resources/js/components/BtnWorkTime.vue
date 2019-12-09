@@ -34,12 +34,12 @@
         指定年月締め一括集計</button>
     </div>
     <div v-if="btnMode === 'init'" class="btn-group d-flex" v-on:click="initclickBtn()">
-      <button type="button" class="btn btn-outline-secondary btn-lg font-size-rg w-100" :disabled="isPush">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
         <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-restore-b.svg" alt="">初期設定をする</button> -->
         初期設定をする</button>
     </div>
     <div v-if="btnMode === 'store'" class="btn-group d-flex" v-on:click="storeclickBtn()">
-      <button type="button" class="btn btn-success btn-lg font-size-rg w-100">この内容で登録する</button>
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">この内容で登録する</button>
     </div>
     <div v-if="btnMode === 'makedemand'" class="btn-group d-flex" v-on:click="makedemandclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
@@ -81,8 +81,12 @@
         申請を差し戻し</button>
     </div>
     <div v-if="btnMode === 'back'" class="btn-group d-flex" v-on:click="backclickBtn()">
-      <button type="button" class="btn btn-outline-warning btn-lg font-size-rg w-100" :disabled="isPush">
+      <button type="button" class="btn btn-outline-secondary btn-lg font-size-rg w-100" :disabled="isPush">
         戻る</button>
+    </div>
+    <div v-if="btnMode === 'cancel'" class="btn-group d-flex" v-on:click="cancelclickBtn()">
+      <button type="button" class="btn btn-outline-secondary btn-lg font-size-rg w-100" :disabled="isPush">
+        キャンセル</button>
     </div>
   </div>
 </template>
@@ -154,6 +158,9 @@ export default {
     },
     backclickBtn : function() {
       this.$emit('backclick-event',event);
+    },
+    cancelclickBtn : function() {
+      this.$emit('cancelclick-event',event);
     },
     listdemandclickBtn : function() {
       this.$emit('listdemandclick-event',event);

@@ -11,7 +11,7 @@
 								<!-- panel header -->
 								<div class="card-header bg-transparent pt-2 border-0">
 									<h1 class="float-left font-size-xl">
-										<img class="icon-size-rg mr-3" src="{{ asset('images/round-laptop-chromebook-w.svg') }}" alt="">基本設定
+										<img class="icon-size-rg mr-3" src="{{ asset('images/round-laptop-chromebook-w.svg') }}" alt="">集計方法基本設定
 									</h1>
 								</div>
 								<!-- /.panel header -->

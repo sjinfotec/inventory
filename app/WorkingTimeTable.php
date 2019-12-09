@@ -232,36 +232,72 @@ class WorkingTimeTable extends Model
     }
 
     /**
+     * 最大番号取得
+     *
+     * @return void
+     */
+    public function getMaxNo(){
+        try {
+            $mainquery = DB::table($this->table)
+                        ->where($this->table.'.no', '<', 9999)
+                        ->limit(1);
+            $results = $mainquery->max('no');
+            return $results;
+    
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_maxget_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_maxget_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    
+    }
+
+    /**
      * セレクト用データ取得
      *
      * @return void
      */
     public function getTimeTables(){
-        $code_name = DB::table($this->table_generalcodes)
+        try {
+            $code_name = DB::table($this->table_generalcodes)
             ->where($this->table_generalcodes.'.identification_id', 'C999')
             ->where($this->table_generalcodes.'.is_deleted', '0')
             ->where($this->table_generalcodes.'.code', '1')
             ->value('code_name');
 
-        // no nameでgroup by した際　noが同じでnameが異なるものが別れて表示してしまう対策
-        $subquery = DB::table($this->table)
-            ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-            ->selectRaw('no as no')
-            ->where('is_deleted', '=', 0)
-            ->groupBy('no');
+            // no nameでgroup by した際　noが同じでnameが異なるものが別れて表示してしまう対策
+            $subquery = DB::table($this->table)
+                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->selectRaw('no as no')
+                ->where('is_deleted', '=', 0)
+                ->groupBy('no');
 
-        $data = DB::table($this->table)
-            ->JoinSub($subquery, 't1', function ($join) { 
-                $join->on('t1.no', '=', $this->table.'.no');
-                $join->on('t1.max_apply_term_from', '=', $this->table.'.apply_term_from');
-            })
-            ->select($this->table.'.no',$this->table.'.name',$this->table.'.apply_term_from')
-            ->whereNotIn($this->table.'.no', [$code_name])
-            ->groupBy($this->table.'.no',$this->table.'.name',$this->table.'.apply_term_from')
-            ->orderby($this->table.'.no','asc')
-            ->get();
+            $mainquery = DB::table($this->table)
+                ->JoinSub($subquery, 't1', function ($join) { 
+                    $join->on('t1.no', '=', $this->table.'.no');
+                    $join->on('t1.max_apply_term_from', '=', $this->table.'.apply_term_from');
+                })
+                ->select($this->table.'.no',$this->table.'.name',$this->table.'.apply_term_from')
+                ->whereNotIn($this->table.'.no', [$code_name])
+                ->groupBy($this->table.'.no',$this->table.'.name',$this->table.'.apply_term_from')
+                ->orderby($this->table.'.no','asc');
+            $results = $mainquery->get();
+            return $results;
     
-        return $data;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    
     }
 
     /**
@@ -270,7 +306,8 @@ class WorkingTimeTable extends Model
      * @return void
      */
     public function insert(){
-        DB::table($this->table)->insert(
+        try {
+            DB::table($this->table)->insert(
             [
                 'apply_term_from' => $this->apply_term_from,
                 'no' => $this->no,
@@ -280,8 +317,17 @@ class WorkingTimeTable extends Model
                 'to_time' => $this->to_time,
                 'created_user' => $this->created_user,
                 'created_at' => $this->created_at,
-            ]
-        );
+            ]);
+    
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -290,7 +336,8 @@ class WorkingTimeTable extends Model
      * @return void
      */
     public function updateDetail(){
-        DB::table($this->table)
+        try {
+            DB::table($this->table)
             ->where($this->table.'.id', $this->id)
             ->where($this->table.'.is_deleted', 0)
             ->update(
@@ -304,6 +351,18 @@ class WorkingTimeTable extends Model
                     'updated_at' => $this->updated_at,
                 ]
             );
+            return true;
+    
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
     }
 
     /**
@@ -336,22 +395,23 @@ class WorkingTimeTable extends Model
                 ->leftJoinSub($subquery, 't2', function ($join) { 
                     $join->on('t2.no', '=', 't1.no');
                 });
-            $data = $mainquery
+            $results = $mainquery
                 ->where('t1.no', $this->no)
                 ->where('t1.is_deleted', 0)
                 ->orderBy('t1.apply_term_from', 'desc')
                 ->get();
-        }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
 
-        return $data;
+            }catch(\PDOException $pe){
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+                Log::error($pe->getMessage());
+                throw $pe;
+            }catch(\Exception $e){
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+                Log::error($e->getMessage());
+                throw $e;
+            }
+    
+        return $results;
     }
 
     /**
@@ -360,10 +420,21 @@ class WorkingTimeTable extends Model
      * @return void
      */
     public function updateIsDelete(){
-        DB::table($this->table)
+        try {
+            DB::table($this->table)
             ->where('no', $this->no)
             ->where('apply_term_from', $this->apply_term_from)
             ->update(['is_deleted' => 1]);
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -374,7 +445,6 @@ class WorkingTimeTable extends Model
     public function getWorkingTimeTableJoin(){
         // subquery1    日次タイムレコード
         try {
-            \DB::enableQueryLog();
             $subquery1 = DB::table($this->table_temp_calc_workingtimes)
                 ->select(
                     $this->table_temp_calc_workingtimes.'.working_timetable_no as working_timetable_no'
@@ -451,21 +521,13 @@ class WorkingTimeTable extends Model
                 $mainquery->setBindings($array_setBindingsStr);
             }
             $results = $mainquery->get();
-        
-            \Log::debug(
-                'sql_debug_log',
-                [
-                    'getWorkingTimeTableJoin' => \DB::getQueryLog()
-                ]
-            );
-            \DB::disableQueryLog();
     
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }

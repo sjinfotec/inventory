@@ -20,14 +20,15 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       id="basic-addon1"
-                    >指定年月<span class="color-red">[*]</span></span>
+                    >指定年月<span class="color-red">[必須]</span></span>
                   </div>
                   <input-datepicker
                     v-bind:default-date="defaultDate"
                     v-bind:date-format="'yyyy年MM月'"
                     v-on:change-event="fromdateChanges"
+                    v-on:clear-event="fromdateCleared"
                   ></input-datepicker>
                 </div>
                 <message-data v-bind:message-datas="messagedatasfromdate" v-bind:message-class="'warning'"></message-data>
@@ -38,9 +39,9 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGroupSelect01"
-                    >集計区分<span class="color-red">[*]</span></label>
+                    >集計区分<span class="color-red">[必須]</span></label>
                   </div>
                   <general-list
                     v-bind:identification-id="'C016'"
@@ -57,7 +58,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGroupSelect01"
                     >雇用形態</label>
                   </div>
@@ -73,13 +74,14 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGroupSelect01"
                     >所属部署</label>
                   </div>
                   <select-department
                     ref="selectdepartment"
                     v-bind:blank-data="true"
+                    v-bind:selected-department="valuedepartment"
                     v-on:change-event="departmentChanges"
                   ></select-department>
                 </div>
@@ -91,14 +93,16 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGroupSelect01"
                     >氏 名</label>
                   </div>
                   <select-user
                     ref="selectuser"
                     v-bind:blank-data="true"
-                    v-bind:get-Do="'1'"
+                    v-bind:get-do="'1'"
+                    v-bind:add-new="false"
+                    v-bind:selectedUser="valueuser"
                     v-bind:date-value="fromdate"
                     v-on:change-event="userChanges"
                   ></select-user>
@@ -425,6 +429,7 @@ export default {
   },
   // マウント時
   mounted() {
+    this.valueym = moment(this.defaultDate).format("YYYYMMDD");
     this.getUserRole();
   },
   methods: {
@@ -489,7 +494,6 @@ export default {
     },
     // 指定年月が変更された場合の処理
     fromdateChanges: function(value) {
-      console.log("fromdateChanges value = " + value);
       this.valueym = value;
       // パネルに表示
       this.setPanelHeader();
@@ -500,6 +504,14 @@ export default {
       }
       this.$refs.selectdepartment.getDepartmentList(this.fromdate);
       this.getUserSelected();
+    },
+    // 指定日付がクリアされた場合の処理
+    fromdateCleared: function() {
+      this.valueym = ""
+      // パネルに表示
+      this.setPanelHeader();
+      this.fromdate = "";
+      this.valuefromdate = "";
     },
     // 表示区分が変更された場合の処理
     displayChange: function(value, name) {
@@ -561,10 +573,6 @@ export default {
             if (this.resresults.messagedata != null) {
               this.messagedatasserver = this.resresults.messagedata;
             }
-            console.log("calcresults" + Object.keys(this.calcresults).length);
-            console.log("sumresults" + Object.keys(this.sumresults).length);
-            console.log("sumresults" + Object.keys(this.messagedatasserver).length);
-            console.log("company_name" + this.company_name);
             this.messageshowsearch = false;
             this.issearchbutton = false;
             this.isupdatebutton = false;
@@ -716,10 +724,10 @@ export default {
       if (this.valueym == null || this.valueym == "") {
         this.stringtext = "";
       } else {
+        this.valuefromdate = this.valueym;
         if (this.valuedisplay == null || this.valuedisplay == "") {
           this.stringtext = "";
         } else {
-          this.valuefromdate = this.valueym;
           if (
             moment(this.valuefromdate).format("YYYYMM") !=
             moment().format("YYYYMM")

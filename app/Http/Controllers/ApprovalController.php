@@ -377,8 +377,8 @@ class ApprovalController extends Controller
         }
         
         // 申請追加
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
             // 申請項目設定
             $maxlogno = $demand_model->getMaxLogno($already_demandno);
             if (isset($maxlogno)) {

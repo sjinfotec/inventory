@@ -20,9 +20,9 @@
                 <div v-if="this.identification_id" class="input-group">
                   <div class="input-group-prepend">
                     <label
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGroupSelect01"
-                    >申請書類<span class="color-red">[*]</span></label>
+                    >申請書類<span class="color-red">[必須]</span></label>
                   </div>
                   <general-list
                     v-bind:identification-id="this.identification_id"
@@ -192,7 +192,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputDemanddate"
-                    >申請日<span class="color-red">[*]</span></label>
+                    >申請日<span class="color-red">[必須]</span></label>
                   </div>
                   <input v-model="edit.demanddate" type="date" class="form-control" id="inputDemanddate">
                 </div>
@@ -210,7 +210,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputDemanddate"
-                    >申請日<span class="color-red">[*]</span></label>
+                    >申請日<span class="color-red">[必須]</span></label>
                   </div>
                   <input v-model="edit.demanddate" type="date" class="form-control" id="inputDemanddate">
                 </div>
@@ -230,7 +230,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputOvertimedate"
-                    >残業日<span class="color-red">[*]</span></label>
+                    >残業日<span class="color-red">[必須]</span></label>
                   </div>
                   <input v-model="edit.getperiodfrom" type="date" class="form-control" id="inputOvertimedate">
                 </div>
@@ -250,7 +250,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputHolidaydate"
-                    >取得日<span class="color-red">[*]</span></label>
+                    >取得日<span class="color-red">[必須]</span></label>
                   </div>
                   <input v-model="edit.getperiodfrom" type="date" class="form-control" id="inputHolidaydate">
                 </div>
@@ -270,7 +270,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGetperiodfrom"
-                    >振替休暇日<span class="color-red">[*]</span></label>
+                    >振替休暇日<span class="color-red">[必須]</span></label>
                   </div>
                   <input v-model="edit.getperiodfrom" type="date" class="form-control" id="inputGetperiodfrom">
                 </div>
@@ -286,7 +286,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGetperiodto"
-                    >休日出勤日<span class="color-red">[*]</span></label>
+                    >休日出勤日<span class="color-red">[必須]</span></label>
                   </div>
                   <input v-model="edit.getperiodto" type="date" class="form-control" id="inputGetperiodto">
                 </div>
@@ -306,7 +306,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGetperiodfrom"
-                    >休日出勤日<span class="color-red">[*]</span></label>
+                    >休日出勤日<span class="color-red">[必須]</span></label>
                   </div>
                   <input v-model="edit.getperiodfrom" type="date" class="form-control" id="inputGetperiodfrom">
                 </div>
@@ -322,7 +322,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGetperiodto"
-                    >代休日<span class="color-red">[*]</span></label>
+                    >代休日<span class="color-red">[必須]</span></label>
                   </div>
                   <input v-model="edit.getperiodto" type="date" class="form-control" id="inputGetperiodto">
                 </div>
@@ -342,7 +342,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGetperiodfrom"
-                    >取得期間開始<span class="color-red">[*]</span></label>
+                    >取得期間開始<span class="color-red">[必須]</span></label>
                   </div>
                   <input v-model="edit.getperiodfrom" type="date" class="form-control" id="inputGetperiodfrom">
                 </div>
@@ -358,7 +358,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGetperiodto"
-                    >取得期間終了<span class="color-red">[*]</span></label>
+                    >取得期間終了<span class="color-red">[必須]</span></label>
                   </div>
                   <input v-model="edit.getperiodto" type="date" class="form-control" id="inputGetperiodto">
                 </div>
@@ -378,7 +378,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGetperiodfrom"
-                    >取得日<span class="color-red">[*]</span></label>
+                    >取得日<span class="color-red">[必須]</span></label>
                   </div>
                   <input v-model="edit.getperiodfrom" type="date" class="form-control" id="inputGetperiodfrom">
                 </div>
@@ -398,7 +398,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-130"
                       for="inputGetperiodfrom"
-                    >欠勤取得期間開始<span class="color-red">[*]</span></label>
+                    >欠勤取得期間開始<span class="color-red">[必須]</span></label>
                   </div>
                   <input v-model="edit.getperiodfrom" type="date" class="form-control" id="inputGetperiodfrom">
                 </div>
@@ -414,7 +414,7 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-130"
                       for="inputGetperiodto"
-                    >欠勤取得期間終了<span class="color-red">[*]</span></label>
+                    >欠勤取得期間終了<span class="color-red">[必須]</span></label>
                   </div>
                   <input v-model="edit.getperiodto" type="date" class="form-control" id="inputGetperiodto">
                 </div>
@@ -457,12 +457,12 @@
                           <table class="table table-striped border-bottom font-size-sm text-nowrap">
                             <thead>
                               <tr>
-                                <td class="text-center align-middle w-15">氏名<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-15">作業項目<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-10">残業時間開始<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-10">残業時間終了<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-10">予定時間<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-165">申請理由<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-15">氏名<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-15">作業項目<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-10">残業時間開始<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-10">残業時間終了<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-10">予定時間<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-165">申請理由<span class="color-red">[必須]</span></td>
                                 <td class="text-center align-middle w-15">操作</td>
                               </tr>
                             </thead>
@@ -587,12 +587,12 @@
                           <table class="table table-striped border-bottom font-size-sm text-nowrap">
                             <thead>
                               <tr>
-                                <td class="text-center align-middle w-15">氏名<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-15">作業項目<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-10">時間開始<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-10">時間終了<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-10">出勤時間<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-165">申請理由<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-15">氏名<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-15">作業項目<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-10">時間開始<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-10">時間終了<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-10">出勤時間<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-165">申請理由<span class="color-red">[必須]</span></td>
                                 <td class="text-center align-middle w-15">操作</td>
                               </tr>
                             </thead>
@@ -716,12 +716,12 @@
                           <table class="table table-striped border-bottom font-size-sm text-nowrap">
                             <thead>
                               <tr>
-                                <td class="text-center align-middle w-15">氏名<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-10">期間開始<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-10">期間終了<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-10">始業時間<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-10">終業時間<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-165">申請理由<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-15">氏名<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-10">期間開始<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-10">期間終了<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-10">始業時間<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-10">終業時間<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-165">申請理由<span class="color-red">[必須]</span></td>
                                 <td class="text-center align-middle w-15">操作</td>
                               </tr>
                             </thead>
@@ -845,9 +845,9 @@
                           <table class="table table-striped border-bottom font-size-sm text-nowrap">
                             <thead>
                               <tr>
-                                <td class="text-center align-middle w-10">取得開始時間<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-10">取得終了時間<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-165">申請理由<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-10">取得開始時間<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-10">取得終了時間<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-165">申請理由<span class="color-red">[必須]</span></td>
                                 <td class="text-center align-middle w-15">操作</td>
                               </tr>
                             </thead>
@@ -909,7 +909,7 @@
               <div class="col-md-12 pb-2">
                 <div :class="errorClassObject('summary')" class="input-group">
                   <div class="input-group-prepend">
-                    <label for="inputDemandreason" class="control-label">申請理由<span class="color-red">[*]</span></label>
+                    <label for="inputDemandreason" class="control-label">申請理由<span class="color-red">[必須]</span></label>
                   </div>
                 </div>
                 <div>

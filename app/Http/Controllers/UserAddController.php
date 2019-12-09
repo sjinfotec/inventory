@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 use App\Http\Requests\StoreUserPost;
 use Illuminate\Support\Facades\Auth;
 use App\UserModel;
@@ -23,7 +24,8 @@ class UserAddController extends Controller
      */
     public function index()
     {
-        return view('user_add');
+        //return view('user_add');
+        return view('edit_user');
     }
 
     /**
@@ -33,8 +35,6 @@ class UserAddController extends Controller
      * @return void
      */
     public function store(StoreUserPost $request){
-        Log::debug('$request->departmentCode = '.$request->departmentCode);
-        Log::debug('$request->role = '.$request->role);
         $department_code = $request->departmentCode;
         $kana = $request->kana;
         $code = $request->code;
@@ -45,7 +45,7 @@ class UserAddController extends Controller
         $password = bcrypt($request->password);
         $management = $request->management;
         $role = $request->role;
-        $from = "20000101";         // 有効期間 初期値
+        $from = Config::get('const.INIT_DATE.initdate');         // 有効期間 初期値
 
         if(isset($request->id)){    // UPDATE
             // $id = $request->id;

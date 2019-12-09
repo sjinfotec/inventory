@@ -234,15 +234,14 @@ class ShiftInformation extends Model
             $cnt += 1;
             $array_setBindingsStr[] =  array([$cnt=>1]);
             $mainquery->setBindings($array_setBindingsStr);
-            Log::error('$array_setBindingsStr = '.count($array_setBindingsStr));
             $result = $mainquery->get();
     
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -266,11 +265,11 @@ class ShiftInformation extends Model
                 ]
             );
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -289,11 +288,11 @@ class ShiftInformation extends Model
                 ->whereBetween('target_date', [$this->start_target_date,$this->end_target_date])
                 ->exists();
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -313,11 +312,11 @@ class ShiftInformation extends Model
             ->whereBetween('target_date', [$this->start_target_date,$this->end_target_date])
             ->delete();
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }

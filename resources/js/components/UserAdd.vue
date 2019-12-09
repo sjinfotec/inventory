@@ -30,7 +30,7 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
-                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
                       >部署</span>
                     </div>
@@ -51,7 +51,7 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
-                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
                       >ユーザー</span>
                     </div>
@@ -74,9 +74,9 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
-                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
-                      >社員名<span class="color-red">[*]</span></span>
+                      >社員名<span class="color-red">[必須]</span></span>
                     </div>
                     <fvl-input
                       type="text"
@@ -92,7 +92,7 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
-                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
                       >ふりがな</span>
                     </div>
@@ -110,12 +110,12 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
-                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
                         data-toggle="tooltip"
                         data-placement="top"
                         v-bind:title="'登録は管理者が（半角英数字4-10文字）で決定入力します。'"
-                      >ログインID<span class="color-red">[*]</span></span>
+                      >ログインID<span class="color-red">[必須]</span></span>
                     </div>
                     <fvl-input
                       type="text"
@@ -133,12 +133,12 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
-                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
                         data-toggle="tooltip"
                         data-placement="top"
                         v-bind:title="'管理者が初期パスワードを（半角英数字6-12文字）で決定入力します。'"
-                      >パスワード<span class="color-red">[*]</span></span>
+                      >パスワード<span class="color-red">[必須]</span></span>
                     </div>
                     <fvl-input
                       type="text"
@@ -156,7 +156,7 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
-                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
                       >メールアドレス</span>
                     </div>
@@ -174,7 +174,7 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
-                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
                       >所属部署</span>
                     </div>
@@ -195,9 +195,9 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
-                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
-                      >雇用形態<span class="color-red">[*]</span></span>
+                      >雇用形態<span class="color-red">[必須]</span></span>
                     </div>
                     <fvl-search-select
                       :selected.sync="form.status"
@@ -216,12 +216,12 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
-                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
                         id="basic-addon1"
                         data-toggle="tooltip"
                         data-placement="top"
                         v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
-                      >タイムテーブル<span class="color-red">[*]</span></span>
+                      >タイムテーブル<span class="color-red">[必須]</span></span>
                     </div>
                     <fvl-search-select
                       :selected.sync="form.table_no"
@@ -241,9 +241,9 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <label
-                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
                         for="inputGroupSelect01"
-                      >勤怠管理<span class="color-red">[*]</span></label>
+                      >勤怠管理<span class="color-red">[必須]</span></label>
                     </div>
                     <fvl-search-select
                       :selected.sync="form.management"
@@ -262,9 +262,9 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <label
-                        class="input-group-text font-size-sm line-height-xs label-width-120"
+                        class="input-group-text font-size-sm line-height-xs label-width-150"
                         for="inputGroupSelect02"
-                      >権限<span class="color-red">[*]</span></label>
+                      >権限<span class="color-red">[必須]</span></label>
                     </div>
                     <fvl-search-select
                       :selected.sync="form.role"
@@ -334,24 +334,24 @@
                             <thead>
                               <tr>
                                 <td class="text-center align-middle w-35">有効期間</td>
-                                <td class="text-center align-middle w-35 mw-rem-10">社員名<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-35 mw-rem-10">社員名<span class="color-red">[必須]</span></td>
                                 <td class="text-center align-middle w-35 mw-rem-10">ふりがな</td>
                                 <td class="text-center align-middle w-35 mw-rem-10">メールアドレス</td>
                                 <td class="text-center align-middle w-35 mw-rem-10">部署</td>
-                                <td class="text-center align-middle w-35 mw-rem-10">雇用形態<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-35 mw-rem-10">雇用形態<span class="color-red">[必須]</span></td>
                                 <td class="text-center align-middle w-35 mw-rem-10"
                                   data-toggle="tooltip"
                                   data-placement="top"
                                   v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
-                                >タイムテーブル<span class="color-red">[*]</span></td>
+                                >タイムテーブル<span class="color-red">[必須]</span></td>
                                 <td class="text-center align-middle w-35 mw-rem-10">ログインID(編集不可)</td>
                                 <td class="text-center align-middle w-35 mw-rem-10"
                                   data-toggle="tooltip"
                                   data-placement="top"
                                   v-bind:title="'管理者が初期パスワードを（半角英数字6-12文字）で決定入力します。'"
-                                >パスワード(追加時必須)<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-35 mw-rem-10">勤怠管理<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-35 mw-rem-10">権限<span class="color-red">[*]</span></td>
+                                >パスワード(追加時必須)<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-35 mw-rem-10">勤怠管理<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-35 mw-rem-10">権限<span class="color-red">[必須]</span></td>
                                 <td class="text-center align-middle w-35 mw-rem-10">操作</td>
                               </tr>
                             </thead>

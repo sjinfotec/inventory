@@ -1,6 +1,7 @@
 <template>
   <select class="form-control" v-model="demandno" v-on:change="selChanges(demandno)">
-    <option selected v-if="this.blankData" value="" disabled selected>＜{{ placeholderData }}＞</option>
+    <option disabled selected style="display:none;" v-if="this.placeholderData" value="">＜{{ placeholderData }}＞</option>
+    <option v-if="this.blankData" value=""></option>
     <option v-for="demands in demandList" v-bind:value="demand.no">
       {{ demand.no }}
     </option>

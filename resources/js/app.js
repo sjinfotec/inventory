@@ -125,7 +125,11 @@ Vue.component(
 
 Vue.component("input-ym", require("./components/InputDateYm.vue").default);
 
+Vue.component("input-time", require("./components/InputTime.vue").default);
+
 Vue.component("user-add", require("./components/UserAdd.vue").default);
+
+Vue.component("edit-user", require("./components/EditUser.vue").default);
 
 Vue.component("user-pass", require("./components/UserPass.vue").default);
 

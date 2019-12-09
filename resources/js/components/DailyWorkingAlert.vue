@@ -20,19 +20,20 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="target_fromdate"
-                    >指定日付<span class="color-red">[*]</span></span>
+                    >指定日付<span class="color-red">[必須]</span></span>
                   </div>
                   <input-datepicker
-                    v-bind:default-Date="defaultDate"
+                    v-bind:default-date="defaultDate"
                     v-on:change-event="fromdateChanges"
+                    v-on:clear-event="fromdateCleared"
                   ></input-datepicker>
-                  <message-data
-                    v-bind:message-datas="messagedatasfromdate"
-                    v-bind:message-class="'warning'">
-                  </message-data>
                 </div>
+                <message-data
+                  v-bind:message-datas="messagedatasfromdate"
+                  v-bind:message-class="'warning'">
+                </message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -40,7 +41,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="target_employmentstatus"
                     >雇用形態</label>
                   </div>
@@ -56,16 +57,18 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="target_department"
                     >所属部署</label>
                   </div>
                   <select-department
                     ref="selectdepartment"
-                    v-bind:blank-data="true" v-on:change-event="departmentChanges"
+                    v-bind:blank-data="true"
+                    v-bind:selected-department="valuedepartment"
+                    v-on:change-event="departmentChanges"
                   ></select-department>
-                  <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
                 </div>
+                <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -73,7 +76,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="target_users"
                     >氏 名</label>
                   </div>
@@ -81,11 +84,13 @@
                     ref="selectuser"
                     v-bind:blank-data="true"
                     v-bind:get-do="getDo"
+                    v-bind:add-new="false"
+                    v-bind:selectedUser="valueuser"
                     v-bind:date-value="fromdate"
                     v-on:change-event="userChanges"
                   ></select-user>
-                  <message-data v-bind:message-datas="messagedatauser" v-bind:message-class="'warning'"></message-data>
                 </div>
+                <message-data v-bind:message-datas="messagedatauser" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
               <div class="col-md-6 pb-2">
@@ -157,12 +162,12 @@ export default {
   },
   // マウント時
   mounted() {
+    this.valuefromdate = this.defaultDate;
     this.getUserRole();
   },
   methods: {
     // バリデーション
     checkForm: function(e) {
-      console.log("checkForm in ");
       this.validate = true;
       this.messagedatasserver = [];
       this.messagedatasfromdate = [];
@@ -214,6 +219,12 @@ export default {
       this.$refs.selectdepartment.getDepartmentList(this.fromdate);
       this.getUserSelected();
     },
+    // 指定日付がクリアされた場合の処理
+    fromdateCleared: function() {
+      this.valuefromdate = ""
+      this.fromdate = "";
+    },
+    
     // 雇用形態が変更された場合の処理
     employmentChanges: function(value) {
       this.valueemploymentstatus = value;

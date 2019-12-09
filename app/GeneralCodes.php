@@ -4,6 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 
 
 class GeneralCodes extends Model
@@ -182,7 +184,13 @@ class GeneralCodes extends Model
      */
     public function __construct() {
 
-        $this->codes = $this->getGeneralcode();
+        try {
+            $this->codes = $this->getGeneralcode();
+        }catch(\PDOException $pe){
+            $this->codes = new Collection()
+        }catch(\Exception $e){
+            $this->codes = new Collection()
+        }
 
     }
 
@@ -192,26 +200,36 @@ class GeneralCodes extends Model
      * @return 取得結果
      */
     public function getGeneralcode(){
-        $data = DB::table($this->table)
-            ->select(
-                $this->table.'.identification_id as identification_id',
-                $this->table.'.code as code',
-                $this->table.'.sort_seq as sort_seq',
-                $this->table.'.identification_name as identification_name',
-                $this->table.'.description as description',
-                $this->table.'.code_name as code_name',
-                $this->table.'.is_deleted as is_deleted'
-            );
-        if (isset($this->param_identification_id)) {
-            $data->where($this->table.'.identification_id',$this->param_identification_id);
+        try {
+            $data = DB::table($this->table)
+                ->select(
+                    $this->table.'.identification_id as identification_id',
+                    $this->table.'.code as code',
+                    $this->table.'.sort_seq as sort_seq',
+                    $this->table.'.identification_name as identification_name',
+                    $this->table.'.description as description',
+                    $this->table.'.code_name as code_name',
+                    $this->table.'.is_deleted as is_deleted'
+                );
+            if (isset($this->param_identification_id)) {
+                $data->where($this->table.'.identification_id',$this->param_identification_id);
+            }
+            if (isset($this->param_code)) {
+                $data->where($this->table.'.code',$this->param_code);
+            }
+            $result = $data->where($this->table.'.is_deleted',0)
+                ->orderBy($this->table.'.identification_id', 'asc')
+                ->orderBy($this->table.'.sort_seq', 'asc')
+                ->get();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
         }
-        if (isset($this->param_code)) {
-            $data->where($this->table.'.code',$this->param_code);
-        }
-        $result = $data->where($this->table.'.is_deleted',0)
-            ->orderBy($this->table.'.identification_id', 'asc')
-            ->orderBy($this->table.'.sort_seq', 'asc')
-            ->get();
         
         return $result;
     }
