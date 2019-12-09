@@ -29,8 +29,8 @@
                     <div class="input-group">
                       <div class="input-group-prepend">
                         <span
-                          class="input-group-text font-size-rg line-height-sm label-width-250"
-                        >新しいパスワード　　　　　</span>
+                          class="input-group-text font-size-sm line-height-sm label-width-230"
+                        >新しいパスワード<span class="color-red">[必須]</span></span>
                       </div>
                       <input
                         class="form-control"
@@ -48,8 +48,8 @@
                     <div class="input-group">
                       <div class="input-group-prepend">
                         <span
-                          class="input-group-text font-size-rg line-height-sm label-width-250"
-                        >新しいパスワード（再入力）</span>
+                          class="input-group-text font-size-sm line-height-sm label-width-230"
+                        >新しいパスワード（再入力）<span class="color-red">[必須]</span></span>
                       </div>
                       <input
                         class="form-control"
@@ -60,6 +60,7 @@
                         pattern="^[a-zA-Z0-9]{6,12}$"
                       />
                     </div>
+                    <p class="rf-mini rf-mt-5">※確認のため再入力してください。</p>
                   </div>
                   <!-- /.col -->
                 </div>

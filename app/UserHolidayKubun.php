@@ -183,21 +183,59 @@ class UserHolidayKubun extends Model
     // --------------------- メソッド ------------------------------------------------------
 
     /**
+     * 取得
+     *
+     * @return list
+     */
+    public function getDetail(){
+        try {
+            $mainQuery = DB::table($this->table)
+            ->where('working_date', $this->param_date_from)
+            ->where('user_code', $this->param_user_code);
+
+            if(!empty($this->param_department_code)){
+                $mainquery->where('department_code', $this->param_department_code);          // department_code指定
+            }
+            $datas = $mainQuery->where('is_deleted', 0)->get();
+
+            return $datas;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
      * 登録
      *
      * @return void
      */
     public function insertKbn(){
-        DB::table($this->table)->insert(
-            [
-                'working_date' => $this->working_date,
-                'department_code' => $this->department_code,
-                'user_code' => $this->user_code,
-                'holiday_kubun' => $this->holiday_kubun,
-                'created_user' => $this->created_user,
-                'created_at'=>$this->systemdate
-            ]
-        );
+        try {
+            DB::table($this->table)->insert(
+                [
+                    'working_date' => $this->working_date,
+                    'department_code' => $this->department_code,
+                    'user_code' => $this->user_code,
+                    'holiday_kubun' => $this->holiday_kubun,
+                    'created_user' => $this->created_user,
+                    'created_at'=>$this->systemdate
+                ]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -206,14 +244,24 @@ class UserHolidayKubun extends Model
      * @return void
      */
     public function delKbn(){
-        DB::table($this->table)
-        ->where('working_date', $this->working_date)
-        ->where('user_code', $this->user_code)
-        ->where('is_deleted', 0)
-        ->update([
-            'is_deleted' => 1,
-            'updated_at' => $this->systemdate
-            ]);
+        try {
+            DB::table($this->table)
+            ->where('working_date', $this->working_date)
+            ->where('user_code', $this->user_code)
+            ->where('is_deleted', 0)
+            ->update([
+                'is_deleted' => 1,
+                'updated_at' => $this->systemdate
+                ]);
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -222,10 +270,20 @@ class UserHolidayKubun extends Model
      * @return boolean
      */
     public function isExistsKbn(){
-        $is_exists = DB::table($this->table)
-            ->where('working_date', $this->working_date)
-            ->where('user_code', $this->user_code)
-            ->exists();
+        try {
+            $is_exists = DB::table($this->table)
+                ->where('working_date', $this->working_date)
+                ->where('user_code', $this->user_code)
+                ->exists();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
 
         return $is_exists;
     }

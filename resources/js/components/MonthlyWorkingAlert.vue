@@ -19,12 +19,13 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <span class="input-group-text font-size-sm line-height-xs label-width-90" id="basic-addon1">指定年月<span class="color-red">[*]</span></span>
+                    <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">指定年月<span class="color-red">[必須]</span></span>
                   </div>
                   <input-datepicker
                     v-bind:default-date="defaultDate"
                     v-bind:date-format="'yyyy年MM月'"
                     v-on:change-event="fromdateChanges"
+                    v-on:clear-event="fromdateCleared"
                   ></input-datepicker>
                 </div>
                 <message-data v-bind:message-datas="messagedatasfromdate" v-bind:message-class="'warning'"></message-data>
@@ -34,13 +35,13 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <label class="input-group-text font-size-sm line-height-xs label-width-90" for="inputGroupSelect01">検索区分<span class="color-red">[*]</span></label>
+                    <label class="input-group-text font-size-sm line-height-xs label-width-120" for="inputGroupSelect01">
+                      検索区分<span class="color-red">[必須]</span></label>
                   </div>
                   <general-list
                     v-bind:identification-id="'C022'"
                     v-bind:placeholder-data="'検索区分を選択してください'"
                     v-bind:blank-data="false"
-                    v-bind:selected-value="valuedisplay"
                     v-on:change-event="displayChange"
                   ></general-list>
                 </div>
@@ -51,7 +52,7 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <label class="input-group-text font-size-sm line-height-xs label-width-90" for="inputGroupSelect01">雇用形態</label>
+                    <label class="input-group-text font-size-sm line-height-xs label-width-120" for="inputGroupSelect01">雇用形態</label>
                   </div>
                   <select-employmentstatus
                     v-bind:blank-data="true"
@@ -64,11 +65,12 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <label class="input-group-text font-size-sm line-height-xs label-width-90" for="inputGroupSelect01">所属部署</label>
+                    <label class="input-group-text font-size-sm line-height-xs label-width-120" for="inputGroupSelect01">所属部署</label>
                   </div>
                   <select-department
                     ref="selectdepartment"
                     v-bind:blank-data="true"
+                    v-bind:selected-department="valuedepartment"
                     v-on:change-event="departmentChanges"
                   ></select-department>
                   <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
@@ -79,12 +81,14 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <label class="input-group-text font-size-sm line-height-xs label-width-90" for="inputGroupSelect01">氏　　名</label>
+                    <label class="input-group-text font-size-sm line-height-xs label-width-120" for="inputGroupSelect01">氏　　名</label>
                   </div>
                   <select-user
                     ref="selectuser"
                     v-bind:blank-data="true"
-                    v-bind:get-Do="'1'"
+                    v-bind:get-do="'1'"
+                    v-bind:add-new="false"
+                    v-bind:selectedUser="valueuser"
                     v-bind:date-value="fromdate"
                     v-on:change-event="userChanges"
                   ></select-user>
@@ -220,6 +224,7 @@ export default {
   },
   // マウント時
   mounted() {
+    this.valueym = moment(this.defaultDate).format("YYYYMMDD");
     this.getUserRole();
     },
   methods: {
@@ -286,7 +291,6 @@ export default {
     },
     // 指定年月が変更された場合の処理
     fromdateChanges: function(value) {
-      console.log("fromdateChanges value = " + value);
       this.valueym = value;
       // パネルに表示
       this.setPanelHeader();
@@ -297,6 +301,14 @@ export default {
       }
       this.$refs.selectdepartment.getDepartmentList(this.fromdate);
       this.getUserSelected();
+    },
+    // 指定日付がクリアされた場合の処理
+    fromdateCleared: function() {
+      this.valueym = ""
+      // パネルに表示
+      this.setPanelHeader();
+      this.fromdate = "";
+      this.valuefromdate = "";
     },
     // 表示区分が変更された場合の処理
     displayChange: function(value, name) {

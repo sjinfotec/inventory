@@ -312,8 +312,8 @@ class DemandController extends Controller
             $maxseq = 1;
         }
         // 申請追加
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
             // 申請項目設定
             $demand_model->setNoAttribute($target_demand_no);
             $demand_model->setDoccodeAttribute($doc_code);

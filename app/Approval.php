@@ -325,7 +325,6 @@ class Approval extends Model
     public function getDemandList($targetdate, $situation){
 
         try {
-            \DB::enableQueryLog();
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             // usersの最大適用開始日付subquery
@@ -511,24 +510,19 @@ class Approval extends Model
                 $mainquery
                     ->limit($this->param_limit);
             }
-            $result = $mainquery
-                ->get();
 
-            \Log::debug(
-                'sql_debug_log',
-                [
-                    'getDemandList' => \DB::getQueryLog()
-                ]
-            );
+            $results = $mainquery->get();
     
         }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
-        return $result;
+        return $results;
     }
 
     /**
@@ -538,22 +532,34 @@ class Approval extends Model
      */
     public function getDemandfromNo(){
 
-        $mainquery = DB::table($this->table)
-            ->where($this->table.'.no', '=', $this->param_no);
+        try {
+            $mainquery = DB::table($this->table)
+                ->where($this->table.'.no', '=', $this->param_no);
 
-        if (isset($this->param_user_code)) {
+            if (isset($this->param_user_code)) {
+                $mainquery
+                    ->where($this->table.'.user_code', '=', $this->param_user_code);
+            }
+            if (isset($this->param_seq)) {
+                $mainquery
+                    ->where($this->table.'.seq', '=', $this->param_seq);
+            }
             $mainquery
-                ->where($this->table.'.user_code', '=', $this->param_user_code);
+                ->where($this->table.'.is_deleted', '=', 0)
+                ->orderBy($this->table.'.log_no', 'desc');
+
+            $results = $mainquery->get();
+    
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
         }
-        if (isset($this->param_seq)) {
-            $mainquery
-                ->where($this->table.'.seq', '=', $this->param_seq);
-        }
-        $mainquery
-            ->where($this->table.'.is_deleted', '=', 0)
-            ->orderBy($this->table.'.log_no', 'desc')
-            ->get();
-        return $mainquery;
+        return $results;
     }
 
     /**
@@ -563,16 +569,29 @@ class Approval extends Model
      */
     public function getMaxSeq($targetdate){
 
-        $mainquery = DB::table($this->table);
-        if (isset($this->param_doc_code)) {
+        try {
+            $mainquery = DB::table($this->table);
+            if (isset($this->param_doc_code)) {
+                $mainquery
+                    ->where($this->table.'.doc_code', '=', $this->param_doc_code);
+            }
             $mainquery
-                ->where($this->table.'.doc_code', '=', $this->param_doc_code);
+                ->where($this->table.'.demand_now', '=', $targetdate)
+                ->where($this->table.'.is_deleted', '=', 0);
+
+            $results = $mainquery>max('seq');
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_maxget_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_maxget_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
         }
-        $max = $mainquery
-            ->where($this->table.'.demand_now', '=', $targetdate)
-            ->where($this->table.'.is_deleted', '=', 0)
-            ->max('seq');
-        return $max;
+
+        return $results;
     }
 
     /**
@@ -602,11 +621,11 @@ class Approval extends Model
                 ]
             );
         }catch(\PDOException $pe){
-            Log::error('method = getBeforeDailyMaxData '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('method = getBeforeDailyMaxData '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }

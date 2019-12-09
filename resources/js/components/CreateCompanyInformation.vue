@@ -36,7 +36,7 @@
             <div class="col-md-6 pb-2">
               <div class="input-group">
                 <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-150">会社カナ</span>
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">会社フリガナ</span>
                 </div>
                 <fvl-input class="form-control p-0" :value.sync="form.companyKana" name="companyKana" />
               </div>
@@ -76,7 +76,7 @@
             <div class="col-md-6 pb-2">
               <div class="input-group">
                 <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-150">住所カナ</span>
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">住所フリガナ</span>
                 </div>
                 <fvl-input class="form-control p-0" :value.sync="form.addressKana" name="addressKana" />
               </div>
@@ -116,7 +116,7 @@
             <div class="col-md-6 pb-2">
               <div class="input-group">
                 <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-150">代表者カナ</span>
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">代表者フリガナ</span>
                 </div>
                 <fvl-input class="form-control p-0" :value.sync="form.representativeKana" name="representativeKana" />
               </div>
@@ -126,7 +126,7 @@
             <div class="col-md-6 pb-2">
               <div class="input-group">
                 <div class="input-group-prepend">
-                  <span class="input-group-text font-size-sm line-height-xs label-width-150">E-mail</span>
+                  <span class="input-group-text font-size-sm line-height-xs label-width-150">メールアドレス</span>
                 </div>
                 <fvl-input class="form-control p-0" :value.sync="form.email" name="email" />
               </div>

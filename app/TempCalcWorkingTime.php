@@ -851,20 +851,12 @@ class TempCalcWorkingTime extends Model
                 ->orderBy('t1.user_code','asc')
                 ->orderBy('t1.seq','asc')
                 ->get();
-
-            \Log::debug(
-                'sql_debug_log',
-                [
-                    'getTempCalcWorkingtime' => \DB::getQueryLog()
-                ]
-                );
-            \DB::disableQueryLog();
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')));
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')));
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -940,11 +932,11 @@ class TempCalcWorkingTime extends Model
                 ]
             );
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')));
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')));
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -959,11 +951,11 @@ class TempCalcWorkingTime extends Model
         try{
             $mainquery = DB::table($this->table)->truncate();
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')));
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')));
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }

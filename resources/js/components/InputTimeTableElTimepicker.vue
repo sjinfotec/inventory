@@ -10,7 +10,7 @@
         format='HH:mm'
         value-format='HH:mm'
         v-on:change="change()"
-        size="medium "
+        size="medium"
         :placeholder="placeHolder">
       </el-time-picker>
     </div>

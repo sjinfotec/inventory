@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Config;
 use App\Http\Requests\StoreCompanyInfoPost;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -64,7 +65,7 @@ class CreateCompanyInformationController extends Controller
         $systemdate = Carbon::now();
         $user = Auth::user();
         $user_code = $user->code;
-        $apply_term_from = "20000101";
+        $apply_term_from = Config::get('const.INIT_DATE.initdate');
 
         DB::beginTransaction();
         try{

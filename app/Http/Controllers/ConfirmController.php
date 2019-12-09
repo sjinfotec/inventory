@@ -117,9 +117,9 @@ class ConfirmController extends Controller
     {
         $insert_result = true;
         $confirm_model = new Confirm();
+        // delete&insert処理
+        DB::beginTransaction();
         try {
-            // delete&insert処理
-            DB::beginTransaction();
             // delete処理
             // パラメータ設定
             $confirm_model->setParamDepartmentcodeAttribute($departmentcode);

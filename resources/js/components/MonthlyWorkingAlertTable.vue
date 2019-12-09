@@ -4,7 +4,7 @@
     <div class="col-md-3 pt-2 pb-2 w-30 text-center align-middle">
       <col-note
         v-bind:item-name="'各月の残業時間（Ｈ）'"
-        v-bind:item-control="'PRIMARY'"
+        v-bind:item-control="'LIGHT'"
         v-bind:item-note="''"
         data-toggle="tooltip"
         data-placement="top"
@@ -90,7 +90,7 @@
     <div class="col-md-3 pt-2 pb-2 w-30 text-center align-middle">
       <col-note
         v-bind:item-name="'警告内容'"
-        v-bind:item-control="'SECONDARY'"
+        v-bind:item-control="'LIGHT'"
         v-bind:item-note="''"
         data-toggle="tooltip"
         data-placement="top"

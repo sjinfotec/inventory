@@ -319,9 +319,9 @@ class DailyWorkingInformationController extends Controller
         $work_time_results = $work_time->getWorkTimes($datefrom, $dateto, $business_kubun);
         if(count($work_time_results) > 0){
             $temp_calc_model = new TempCalcWorkingTime();
+            // temporary削除処理
+            DB::beginTransaction();
             try{
-                // temporary削除処理
-                DB::beginTransaction();
                 $temp_calc_model->delTempCalcWorkingtime();
                 $temp_working_model->delTempWorkingTimeDate();
                 try{
@@ -407,9 +407,9 @@ class DailyWorkingInformationController extends Controller
                     $working_model->setParamEmploymentStatusAttribute($employmentstatus);
                     $working_model->setParamDepartmentcodeAttribute($departmentcode);
                     $working_model->setParamUsercodeAttribute($usercode);
+                    DB::beginTransaction();
+                    Log::debug(' calc beginTransaction ');
                     try{
-                        DB::beginTransaction();
-                        Log::debug(' calc beginTransaction ');
                         if ($working_model->isExistsWorkingTimeDate()) {
                             Log::debug(' $delWorkingTimeDate  ');
                             $working_model->delWorkingTimeDate();

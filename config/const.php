@@ -337,6 +337,16 @@ return [
         'sendback' => 'sendback'
     ],
 
+    'DB_KBN' => [
+        'store' => 'store',
+        'fix' => 'fix',
+        'del' => 'del'
+    ],
+
+    'INIT_DATE' => [
+        'initdate' => '20190101'
+    ],
+
 
     'MEMO_DATA' => [
         'MEMO_DATA_001' => '退勤打刻がない。',
@@ -459,7 +469,8 @@ return [
         'rounding_not_demand' => '承認回覧中のため、申請できません。',
         'making_or_final' => '取り下げまたは最終承認済みのため、承認できません。',
         'alreadymaking_or_final' => 'すでに取り下げているかまたは最終承認済みのため、取り下げできません。',
-        'mail_send_eror' => 'メール送信異常のため送信できませんでした。'
+        'mail_send_eror' => 'メール送信異常のため送信できませんでした。',
+        'already_data' => 'すでに登録されています'
     ],
 
     'LOG_MSG' => [
@@ -469,11 +480,22 @@ return [
         'data_update_erorr' => 'データupdateエラー table = [{0}]',
         'data_delete_erorr' => 'データdeleteエラー table = [{0}]',
         'data_exists_erorr' => 'データexistsエラー table = [{0}]',
+        'data_maxget_erorr' => 'データmaxgetエラー table = [{0}]',
+        'data_count_erorr' => 'データcountエラー table = [{0}]',
         'mismatch_data' => 'データ不整合',
         'not_set_time_rounding ' => '時間の端数処理が設定されていない',
         'not_setting_timetable' => '期間内に該当する勤務時間がないかまたはタイムテーブルが設定されていない。',
         'non_approval_demandno' => '承認する申請番号なし。',
-        'non_approval_demanddate' => '承認する申請日なし。'
+        'non_approval_demanddate' => '承認する申請日なし。',
+        'subquery_illegal ' => 'subquery設定エラー',
+        'where_illegal ' => 'WHERE句設定エラー'
+    ],
+
+    'DEBUG_LEVEL' => 'DEBUG',
+
+    'DEBUG_LEVEL_VALUE' => [
+        'NON' => 'NON',
+        'DEBUG' => 'DEBUG'
     ]
 
 ];

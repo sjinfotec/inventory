@@ -4,6 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 
 
 
@@ -113,14 +115,25 @@ class public_holiday extends Model
      * @return void
      */
     public function insert(){
-        DB::table($this->table)->insert(
-            [
-                'date' => $this->date,
-                'weekday_kubun' => $this->weekday_kubun,
-                'name' => $this->name,
-                'created_user' => $this->created_user,
-                'created_at' => $this->created_at
-            ]
-        );
+        try {
+            DB::table($this->table)->insert(
+                [
+                    'date' => $this->date,
+                    'weekday_kubun' => $this->weekday_kubun,
+                    'name' => $this->name,
+                    'created_user' => $this->created_user,
+                    'created_at' => $this->created_at
+                ]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
     }
 }

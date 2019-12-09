@@ -18,18 +18,19 @@
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- .col -->
-              <div class="col-md-6 pb-2">
+              <div class="col-md-12 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       id="basic-addon1"
-                    >指定年月<span class="color-red">＊</span></span>
+                    >指定年月<span class="color-red">[必須]</span></span>
                   </div>
                   <input-datepicker
                     v-bind:default-date="defaultDate"
                     v-bind:date-format="'yyyy年MM月'"
                     v-on:change-event="fromdateChanges"
+                    v-on:clear-event="fromdateCleared"
                   ></input-datepicker>
                 </div>
                 <message-data v-bind:message-datas="messagedatasfromdate" v-bind:message-class="'warning'"></message-data>
@@ -52,7 +53,7 @@
             </div>
             <!-- .modal -->
             <modal name="setting-calendar_work" :width="800" :height="600">
-              <init-calendar v-on:backclick-event="backclick"></init-calendar>
+              <init-calendar v-on:cancelclick-event="cancelclick"></init-calendar>
             </modal>
             <!-- /.modal -->
           </div>
@@ -181,7 +182,6 @@ export default {
       valueBusinessDay: "",
       BusinessDayList: [],
       business: [{}],
-      valueholiDay: "",
       HoliDayList: [],
       holiday: [{}],
       details: [],
@@ -192,15 +192,18 @@ export default {
   },
   // セレクトボックス変更時
   watch: {
-    valueholiDay: function(val, oldVal) {
-      console.log(val + " " + oldVal);
-    },
     details: function(val, oldVal) {
       this.details.forEach((detail, i) => {
         this.business[i] = detail.business_kubun;
         this.holiday[i] = detail.holiday_kubun;
       });
     }
+  },
+  // マウント時
+  mounted() {
+    this.valueym = moment(this.defaultDate).format("YYYYMMDD");
+    this.year = moment(this.valueym).format("YYYY");
+    this.month = moment(this.valueym).format("MM");
   },
   methods: {
     checkForm: function() {
@@ -224,14 +227,23 @@ export default {
       this.year = moment(this.valueym).format("YYYY");
       this.month = moment(this.valueym).format("MM");
     },
+    // 指定日付がクリアされた場合の処理
+    fromdateCleared: function() {
+      this.valueym = "";
+      this.year = "";
+      this.month = "";
+    },
     searchclick() {
-      this.getDetail();
+      this.checkForm();
+      if (this.validate) {
+        this.getDetail();
+      }
     },
     // 初期設定ボタンの処理
     initclick: function(e) {
       this.$modal.show("setting-calendar_work");
     },
-    backclick: function() {
+    cancelclick: function() {
       this.$modal.hide("setting-calendar_work");
       if (this.valueym) {
         this.searchclick();

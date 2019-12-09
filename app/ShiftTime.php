@@ -4,6 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 
 
 class ShiftTime extends Model
@@ -51,12 +53,22 @@ class ShiftTime extends Model
      * @return void
      */
     public function insertShiftTime(){
-        DB::table($this->table)->insert(
-            [
-                'shift_start_time' => $this->shift_start_time,
-                'shift_end_time' => $this->shift_end_time,
-                'created_at'=>$this->systemdate
-            ]
-        );
+        try {
+            DB::table($this->table)->insert(
+                [
+                    'shift_start_time' => $this->shift_start_time,
+                    'shift_end_time' => $this->shift_end_time,
+                    'created_at'=>$this->systemdate
+                ]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 }

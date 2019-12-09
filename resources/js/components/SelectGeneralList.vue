@@ -1,7 +1,7 @@
 <template>
   <select class="form-control" v-model="selectedvalue" v-on:change="selChanges(selectedvalue)">
-    <!--< option selected v-if="this.blankData" value="" disabled selected>＜{{ placeholderData }}＞</option> -->
-    <option selected v-if="this.blankData" value="">＜{{ placeholderData }}＞</option>
+    <option disabled selected style="display:none;" v-if="this.placeholderData" value="">＜{{ placeholderData }}＞</option>
+    <option v-if="this.blankData" value=""></option>
     <option v-for="(generallists, index) in generalList" v-bind:value="generallists.code">
       {{ generallists.code_name }}
     </option>

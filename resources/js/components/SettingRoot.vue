@@ -88,13 +88,13 @@
                           <table class="table table-striped border-bottom font-size-sm text-nowrap">
                             <thead>
                               <tr>
-                                <td class="text-center align-middle w-35 mw-rem-10">部署<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-35 mw-rem-10">社員名<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-35 mw-rem-10">部署<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-35 mw-rem-10">社員名<span class="color-red">[必須]</span></td>
                                 <td class="text-center align-middle w-35 mw-rem-10"
                                   data-toggle="tooltip"
                                   data-placement="top"
                                   v-bind:title="'正の承認者と直前の正の代理承認者となる副の承認者の区別を選択します。'"
-                                >正副区分<span class="color-red">[*]</span></td>
+                                >正副区分<span class="color-red">[必須]</span></td>
                                 <td class="text-center align-middle w-35 mw-rem-10">操作</td>
                               </tr>
                             </thead>
@@ -208,13 +208,13 @@
                           <table class="table table-striped border-bottom font-size-sm text-nowrap">
                             <thead>
                               <tr>
-                                <td class="text-center align-middle w-35 mw-rem-10">部署<span class="color-red">[*]</span></td>
-                                <td class="text-center align-middle w-35 mw-rem-10">社員名<span class="color-red">[*]</span></td>
+                                <td class="text-center align-middle w-35 mw-rem-10">部署<span class="color-red">[必須]</span></td>
+                                <td class="text-center align-middle w-35 mw-rem-10">社員名<span class="color-red">[必須]</span></td>
                                 <td class="text-center align-middle w-35 mw-rem-10"
                                   data-toggle="tooltip"
                                   data-placement="top"
                                   v-bind:title="'正の承認者と直前の正の代理承認者となる副の承認者の区別を選択します。'"
-                                >正副区分<span class="color-red">[*]</span></td>
+                                >正副区分<span class="color-red">[必須]</span></td>
                                 <td class="text-center align-middle w-35 mw-rem-10">操作</td>
                               </tr>
                             </thead>

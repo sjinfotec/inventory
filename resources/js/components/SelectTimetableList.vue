@@ -1,7 +1,7 @@
 <template>
   <select class="form-control" v-model="selectedvalue" v-on:change="selChanges(selectedvalue)">
-    <option disabled selected style="display:none;" v-if="this.blankData && this.placeholderData" value="">＜{{ placeholderData }}＞</option>
-    <option selected v-if="this.blankData && this.placeholderData==''" value="">＜{{ placeholderData }}＞</option>
+    <option disabled selected style="display:none;" v-if="this.placeholderData" value="">＜{{ placeholderData }}＞</option>
+    <option selected v-if="this.blankData" value=""></option>
     <option v-for="(item, index) in itemList" v-bind:value="item.no">
       {{ item.name }}
     </option>
@@ -46,7 +46,12 @@ export default {
         })
         .then(response => {
           this.itemList = response.data;
-          this.object = { apply_term_from: "", name: "新規登録", no: "" };
+          if (this.itemList.length != 0) {
+            this.object = { apply_term_from: "", name: "新規にタイムテーブルを登録する", no: "" };
+          } else {
+            this.placeholderData = "はじめに「所定就業時間の登録」を選択してください"
+            this.object = { apply_term_from: "", name: "所定就業時間の登録", no: "" };
+          }
           this.itemList.unshift(this.object);
         })
         .catch(reason => {

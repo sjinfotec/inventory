@@ -24,14 +24,15 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <span
-                        class="input-group-text font-size-sm line-height-xs label-width-90"
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
                         id="basic-addon1"
-                      >指定年<span class="color-red">＊</span></span>
+                      >指定年<span class="color-red">[必須]</span></span>
                     </div>
                     <input-datepicker
                       v-bind:default-date="defaultDate"
                       v-bind:date-format="'yyyy年'"
                       v-on:change-event="fromdateChanges"
+                      v-on:clear-event="fromdateCleared"
                     ></input-datepicker>
                   </div>
                   <message-data v-bind:message-datas="messagedatasfromdate" v-bind:message-class="'warning'"></message-data>
@@ -41,9 +42,9 @@
                   <div class="input-group">
                     <div class="input-group-prepend">
                       <label
-                        class="input-group-text font-size-sm line-height-xs label-width-90"
+                        class="input-group-text font-size-sm line-height-xs label-width-120"
                         for="inputGroupSelect01"
-                      >設定区分<span class="color-red">＊</span></label>
+                      >設定区分<span class="color-red">[必須]</span></label>
                     </div>
                     <general-list
                       v-bind:identification-id="'C024'"
@@ -58,17 +59,20 @@
               </div>
               <!-- /.row -->
               <div class="col-md-12 pb-2">
-                <div class="btn-group d-flex" v-on:click="initclick">
-                  <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100"><img class="icon-size-sm mr-2 pb-1" src="/images/round-notifications-b.svg" alt="">
-                    初期設定する</button>
-                </div>
+                <btn-work-time
+                  v-on:initclick-event="initclick"
+                  v-bind:btn-mode="'init'"
+                  v-bind:is-push="isinitbutton">
+                </btn-work-time>
               </div>
               <!-- .row -->
               <!-- /.row -->
               <div class="col-md-12 pb-2">
-                <div class="btn-group d-flex" v-on:click="backclick">
-                  <button type="button" class="btn btn-outline-secondary btn-lg font-size-rg w-100"><img class="icon-size-sm mr-2 pb-1" src="/images/round-outlined-flag-w.svg" alt="">戻る</button>
-                </div>
+                <btn-work-time
+                  v-on:cancelclick-event="cancelclick"
+                  v-bind:btn-mode="'cancel'"
+                  v-bind:is-push="isinitbutton">
+                </btn-work-time>
               </div>
               <!-- .row -->
             </div>
@@ -84,7 +88,7 @@
             <div class="card-header bg-transparent pt-3 border-0 print-none">
               <daily-working-information-panel-header
                 v-bind:header-text1="stringtext"
-                v-bind:header-text2="''"
+                v-bind:header-text2="'土曜日【法定外休日】日曜日【法定休日】祝日を自動設定'"
               ></daily-working-information-panel-header>
               <message-waiting v-bind:is-message-show="ismessageshowsearch"></message-waiting>
             </div>
@@ -122,6 +126,10 @@ export default {
       validate: false
     };
   },
+  // マウント時
+  mounted() {
+    this.valueym = moment(this.defaultDate).format("YYYYMMDD");
+  },
   methods: {
     // バリデーション
     checkForm: function(e) {
@@ -154,6 +162,14 @@ export default {
       if (this.valuefromdate) {
         this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
       }
+    },
+    // 指定日付がクリアされた場合の処理
+    fromdateCleared: function() {
+      this.valueym = "";
+      // パネルに表示
+      this.setPanelHeader();
+      this.fromdate = "";
+      this.valuefromdate = "";
     },
     // 設定区分が変更された場合の処理
     displayChange: function(value) {
@@ -204,9 +220,8 @@ export default {
       }
     },
     // 戻るボタンがクリックされた場合の処理
-    backclick: function(e) {
-      console.log("init backclickBtn click");
-      this.$emit('backclick-event',event);
+    cancelclick: function(e) {
+      this.$emit('cancelclick-event',event);
     },
     // 設定ボタンがクリックされた場合の処理
     initProc: function(e) {

@@ -1,13 +1,11 @@
 <template>
   <datepicker 
-    :value="this.defaultDate"
     :language="ja"
     :format="dateFormat"
     :clear-button="true"
-    v-model="inputdate"
-    v-on:opened="todaySet()"
+    v-model="defaultDate"
     v-on:closed="dateselected()"
-    v-on:cleared="clearDate()"
+    v-on:cleared="datecleared()"
     :placeholder="placeHolder">
   </datepicker>
 </template>
@@ -38,8 +36,7 @@ export default {
   data: function() {
     return {
       ja:ja,
-      todaydate: new Date(),
-      inputdate:''
+      todaydate: new Date()
     }
   },
   components: {
@@ -48,19 +45,12 @@ export default {
   methods: {
     // 親コンポーネントに入力値を返却
     dateselected : function() {
-      console.log("dateselected = ["+ this.inputdate + ']');
-      this.$emit('change-event', this.inputdate);
-
+      this.$emit('change-event', this.defaultDate);
     },
-    // TODO openedイベントが発生しない？
-    todaySet() {
-      console.log("todaySet = ["+ this.defaultDate + ']');
+    // 親コンポーネントに入力値を返却
+    datecleared : function() {
+      this.$emit('clear-event');
     },
-    // 
-    clearDate() {
-      console.log("clearDate = ["+ this.inputdate + ']');
-      this.$emit('change-event', this.inputdate);
-    }
   }
 
 };

@@ -47,7 +47,7 @@
       </div>
     </div>
     <div v-if="this.itemControl === 'INFO'">
-      <div class="card text-white border border-info bg-info">
+      <div class="card text-black-50 border border-info bg-info">
         <div class="card-body px-3 py-2">
           <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/imagesround-info-b.svg" alt=""></span>
           <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>
@@ -56,7 +56,7 @@
       </div>
     </div>
     <div v-if="this.itemControl === 'LIGHT'">
-      <div class="card text-light border border-black bg-light">
+      <div class="card text-primary border border-primary bg-light">
         <div class="card-body px-3 py-2">
           <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/round-watch-later-b.svg" alt=""></span>
           <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>
@@ -65,7 +65,7 @@
       </div>
     </div>
     <div v-if="this.itemControl === 'DARK'">
-      <div class="card text-dark border border-dark bg-dark">
+      <div class="card text-white-50 border border-dark bg-dark">
         <div class="card-body px-3 py-2">
           <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/round-watch-later-b.svg" alt=""></span>
           <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>
@@ -74,7 +74,7 @@
       </div>
     </div>
     <div v-if="this.itemControl === 'WHITE'">
-      <div class="card text-black border border-black bg-white">
+      <div class="card text-black-50 border border-black bg-white">
         <div class="card-body px-3 py-2">
           <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/round-watch-later-b.svg" alt=""></span>
           <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>

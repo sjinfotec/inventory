@@ -1,5 +1,6 @@
 <template>
-  <select class="form-control" v-model="selecteddepartmentcode" v-on:change="selChanges(selecteddepartmentcode,rowIndex)" placeholder="部署を選択してください">
+  <select class="form-control" v-model="selecteddepartmentcode" v-on:change="selChanges(selecteddepartmentcode,rowIndex)">
+    <option disabled selected style="display:none;" v-if="this.placeholderData" value="">＜{{ placeholderData }}＞</option>
     <option v-if="this.blankData" value=""></option>
     <option v-for="departments in departmentList" v-bind:value="departments.code">
       {{ departments.name }}
@@ -16,9 +17,17 @@ export default {
       type: Boolean,
       default: false
     },
+    placeholderData: {
+        type: String,
+        default: '部署を選択してください'
+    },
     selectedDepartment: {
         type: String,
         default: ''
+    },
+    addNew: {
+        type: Boolean,
+        default: false
     },
     dateValue: {
         type: String,
@@ -32,6 +41,7 @@ export default {
   data() {
     return {
       selecteddepartmentcode: '',
+      selectedname: '',
       dateApllyValue: '',
       departmentList: []
     };
@@ -54,6 +64,10 @@ export default {
         })
         .then(response => {
           this.departmentList = response.data;
+          if (this.addNew) {
+            this.object = { name: "新規に部署を登録する", code: "" };
+            this.departmentList.unshift(this.object);
+          }
         })
         .catch(reason => {
           alert("部署選択リスト作成エラー");
@@ -62,8 +76,20 @@ export default {
     // 選択が変更された場合、親コンポーネントに選択値を返却
     selChanges : function(value, index) {
 
-        this.$emit('change-event', value, index);
-
+      this.selectedname = this.getText(value);
+      var arrayData = {'rowindex' : index, 'name' : this.selectedname};
+      this.$emit('change-event', value, arrayData);
+    },
+    // 選択テキスト取得
+    getText : function(value) {
+      name = "";
+      this.departmentList.forEach(function (item) {
+        if (item.code == value) {
+          name = item.name;
+          return name;
+        }
+      });
+      return name;
     }
 
   }

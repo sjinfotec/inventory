@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 use App\Http\Requests\StoreTimeTablePost;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -37,46 +38,59 @@ class CreateTimeTableController extends Controller
      */
     public function store(Request $request){
         $data = array();
-        $no = $request->no;
-        $name = $request->name;
-        $data[0]['working_time_kubun'] = 1;
-        $data[0]['from_time'] = $request->regularFrom;
-        $data[0]['to_time'] = $request->regularTo;
-        $data[1]['working_time_kubun'] = 2;
-        $data[1]['from_time'] = $request->regularRestFrom1;
-        $data[1]['to_time'] = $request->regularRestTo1;
-        $data[2]['working_time_kubun'] = 2;
-        $data[2]['from_time'] = $request->regularRestFrom2;
-        $data[2]['to_time'] = $request->regularRestTo2;
-        $data[3]['working_time_kubun'] = 2;
-        $data[3]['from_time'] = $request->regularRestFrom3;
-        $data[3]['to_time'] = $request->regularRestTo3;
-        $data[4]['working_time_kubun'] = 2;
-        $data[4]['from_time'] = $request->regularRestFrom4;
-        $data[4]['to_time'] = $request->regularRestTo4;
-        $data[5]['working_time_kubun'] = 2;
-        $data[5]['from_time'] = $request->regularRestFrom5;
-        $data[5]['to_time'] = $request->regularRestTo5;
-        $data[6]['working_time_kubun'] = 4;
-        $data[6]['from_time'] = $request->irregularMidNightFrom;
-        $data[6]['to_time'] = $request->irregularMidNightTo;
-        if(isset($request->id)){    // UPDATE
-        }else{                      // INSERT
-            $validatedData = $request->validate([
-                'no' => 'required|unique:working_timetables|max:10',
-                'name' => 'required|string|max:191'
-            ],[
-                'no.required'  => 'No を入力してください',
-                'no.unique'  => 'No は既に使用済です',
-                'no.max'  => 'No の最大文字数は 10 です',
-                'name.required'  => 'タイムテーブル名称を入力してください',
-                'name.max'  => 'タイムテーブル名称の最大文字数は 191 です',
-            ]);
-            $result = $this->insert($data,$no,$name);
-        }
-        if($result){
-        }else{
-            return false;
+        try{
+            $no = $request->no;
+            $kbn = $request->kbn;
+            $kbn = $request->kbn;
+            if ($kbn == Config::get('const.DB_KBN.store')) {
+                if (isset($no)) {
+                    $this->array_messagedata[] = Config::get('const.MSG_ERROR.already_data');
+                    return response()->json(
+                        ['result' => true, 'no' => $result,
+                        Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                    );
+                }
+            }
+            $name = $request->name;
+            $details = $request->details;
+            $data[0]['apply_term_from'] = $details['apply_term_from'];
+            $data[0]['working_time_kubun'] = 1;
+            $data[0]['from_time'] = $details['regularFrom'];
+            $data[0]['to_time'] = $details['regularTo'];
+            $data[1]['working_time_kubun'] = 2;
+            $data[1]['from_time'] = $details['regularRestFrom1'];
+            $data[1]['to_time'] = $details['regularRestTo1'];
+            $data[2]['working_time_kubun'] = 2;
+            $data[2]['from_time'] = $details['regularRestFrom2'];
+            $data[2]['to_time'] = $details['regularRestTo2'];
+            $data[3]['working_time_kubun'] = 2;
+            $data[3]['from_time'] = $details['regularRestFrom3'];
+            $data[3]['to_time'] = $details['regularRestTo3'];
+            $data[4]['working_time_kubun'] = 2;
+            $data[4]['from_time'] = $details['regularRestFrom4'];
+            $data[4]['to_time'] = $details['regularRestTo4'];
+            $data[5]['working_time_kubun'] = 2;
+            $data[5]['from_time'] = $details['regularRestFrom5'];
+            $data[5]['to_time'] = $details['regularRestTo5'];
+            $data[6]['working_time_kubun'] = 4;
+            $data[6]['from_time'] = $details['irregularMidNightFrom'];
+            $data[6]['to_time'] = $details['irregularMidNightTo'];
+            $result = $this->insert($kbn , $data ,$no, $name);
+            return response()->json(
+                ['result' => true, 'no' => $result,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            return response()->json(
+                ['result' => false, 'no' => '',
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            return response()->json(
+                ['result' => false, 'no' => '',
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }
     }
 
@@ -88,20 +102,34 @@ class CreateTimeTableController extends Controller
      * @param [type] $name
      * @return void
      */
-    private function insert($data,$no,$name){
-        $systemdate = Carbon::now();
-        $time_table = new WorkingTimeTable();
-        $user = Auth::user();
-        $user_code = $user->code;
-        $term_from = "20000101";
+    private function insert($kbn , $data, $no, $name){
         DB::beginTransaction();
         try{
-            if(isset($data[0]['apply_term_from'])){
-                $carbon = new Carbon($data[0]['apply_term_from']);
-                $from = $carbon->copy()->format('Ymd');
-                $term_from = $from;
+            $systemdate = Carbon::now();
+            $time_table = new WorkingTimeTable();
+            $user = Auth::user();
+            $user_code = $user->code;
+            $maxno = 1;
+            if ($kbn == Config::get('const.DB_KBN.store')) {
+                $term_from = Config::get('const.INIT_DATE.initdate');
+                $maxno = $time_table->getMaxNo();
+                if (isset($maxno)) {
+                    $maxno = $maxno + 1;
+                } else {
+                    $maxno = 1;
+                }
+            } else {
+                $maxno = $no;
+                Log::debug("data[0]['apply_term_from'] = ".$data[0]['apply_term_from']);
+                if(isset($data[0]['apply_term_from'])){
+                    $carbon = new Carbon($data[0]['apply_term_from']);
+                    Log::debug("carbon = ".$carbon);
+                    $from = $carbon->copy()->format('Ymd');
+                    $term_from = $from;
+                    Log::debug("term_from = ".$term_from);
+                }
             }
-            $time_table->setNoAttribute($no);
+            $time_table->setNoAttribute($maxno);
             $time_table->setApplytermfromAttribute($term_from);
             $time_table->setNameAttribute($name);
             $time_table->setCreateduserAttribute($user_code);
@@ -113,11 +141,15 @@ class CreateTimeTableController extends Controller
                $time_table->insert();
             }
             DB::commit();
-            return true;
-
-        }catch(\PDOException $e){
+            return $maxno;
+        }catch(\PDOException $pe){
+            Log::error($pe->getMessage());
             DB::rollBack();
-            return false;
+            return -1;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            DB::rollBack();
+            return -2;
         }
     }
 
@@ -128,15 +160,26 @@ class CreateTimeTableController extends Controller
      * @return response
      */
     public function fix(Request $request){ 
-        $details = $request->details;
-        $response = collect();
-        $result = $this->update($details);
-        if($result){
-            $response->put('result',self::SUCCESS);
-        }else{
-            $response->put('result',self::FAILED);
+        try{
+            $no = $request->no;
+            $details = $request->details;
+            $response = collect();
+            $result = $this->update($no, $details);
+            return response()->json(
+                ['result' => true, 'no' => $no,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            return response()->json(
+                ['result' => false, 'no' => '',
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\Exception $e){
+            return response()->json(
+                ['result' => false, 'no' => '',
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }
-        return $response;
     }
 
     /**
@@ -146,40 +189,54 @@ class CreateTimeTableController extends Controller
      * @return response
      */
     public function add(Request $request){ 
-        $details = $request->all();
-        $data = array();
-        $no = $details['details']['no'];
-        $name = $details['details']['name'];
-        $data[0]['apply_term_from'] = $details['details']['apply_term_from'];
-        $data[0]['working_time_kubun'] = 1;
-        $data[0]['from_time'] = $details['details']['regularFrom'];
-        $data[0]['to_time'] = $details['details']['regularTo'];
-        $data[1]['working_time_kubun'] = 2;
-        $data[1]['from_time'] = $details['details']['regularRestFrom1'];
-        $data[1]['to_time'] = $details['details']['regularRestTo1'];
-        $data[2]['working_time_kubun'] = 2;
-        $data[2]['from_time'] = $details['details']['regularRestFrom2'];
-        $data[2]['to_time'] = $details['details']['regularRestTo2'];
-        $data[3]['working_time_kubun'] = 2;
-        $data[3]['from_time'] = $details['details']['regularRestFrom3'];
-        $data[3]['to_time'] = $details['details']['regularRestTo3'];
-        $data[4]['working_time_kubun'] = 2;
-        $data[4]['from_time'] = $details['details']['regularRestFrom4'];
-        $data[4]['to_time'] = $details['details']['regularRestTo4'];
-        $data[5]['working_time_kubun'] = 2;
-        $data[5]['from_time'] = $details['details']['regularRestFrom5'];
-        $data[5]['to_time'] = $details['details']['regularRestTo5'];
-        $data[6]['working_time_kubun'] = 4;
-        $data[6]['from_time'] = $details['details']['irregularMidNightFrom'];
-        $data[6]['to_time'] = $details['details']['irregularMidNightTo'];
-        $response = collect();
-        $result = $this->insert($data,$no,$name);
-        if($result){
-            $response->put('result',self::SUCCESS);
-        }else{
+        DB::beginTransaction();
+        try{
+            $details = $request->all();
+            $data = array();
+            $no = $details['details']['no'];
+            $name = $details['details']['name'];
+            $data[0]['apply_term_from'] = $details['details']['apply_term_from'];
+            $data[0]['working_time_kubun'] = 1;
+            $data[0]['from_time'] = $details['details']['regularFrom'];
+            $data[0]['to_time'] = $details['details']['regularTo'];
+            $data[1]['working_time_kubun'] = 2;
+            $data[1]['from_time'] = $details['details']['regularRestFrom1'];
+            $data[1]['to_time'] = $details['details']['regularRestTo1'];
+            $data[2]['working_time_kubun'] = 2;
+            $data[2]['from_time'] = $details['details']['regularRestFrom2'];
+            $data[2]['to_time'] = $details['details']['regularRestTo2'];
+            $data[3]['working_time_kubun'] = 2;
+            $data[3]['from_time'] = $details['details']['regularRestFrom3'];
+            $data[3]['to_time'] = $details['details']['regularRestTo3'];
+            $data[4]['working_time_kubun'] = 2;
+            $data[4]['from_time'] = $details['details']['regularRestFrom4'];
+            $data[4]['to_time'] = $details['details']['regularRestTo4'];
+            $data[5]['working_time_kubun'] = 2;
+            $data[5]['from_time'] = $details['details']['regularRestFrom5'];
+            $data[5]['to_time'] = $details['details']['regularRestTo5'];
+            $data[6]['working_time_kubun'] = 4;
+            $data[6]['from_time'] = $details['details']['irregularMidNightFrom'];
+            $data[6]['to_time'] = $details['details']['irregularMidNightTo'];
+            $response = collect();
+            $result = $this->insert($data,$no,$name);
+            if($result){
+                $response->put('result',self::SUCCESS);
+            }else{
+                $response->put('result',self::FAILED);
+            }
+            DB::commit();
+            return $response;
+        }catch(\PDOException $pe){
+            Log::error($pe->getMessage());
+            DB::rollBack();
             $response->put('result',self::FAILED);
+            return $response;ex
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            DB::rollBack();
+            $response->put('result',self::FAILED);
+            return $response;
         }
-        return $response;
     }
 
     /**
@@ -188,7 +245,7 @@ class CreateTimeTableController extends Controller
      * @param [type] $details
      * @return boolean
      */
-    private function update($details){
+    private function update($no, $details){
         $systemdate = Carbon::now();
         $time_table = new WorkingTimeTable();
         $user = Auth::user();
@@ -197,30 +254,37 @@ class CreateTimeTableController extends Controller
         try{
             $time_table->setUpdateduserAttribute($user_code);
             $time_table->setUpdatedatAttribute($systemdate);
-            foreach ($details as $index => $detail) {
-                if($index % 7 == 0){        // index 0 7 14 ...の場合
-                    if(isset($details[$index]['apply_term_from'])){
-                        $carbon = new Carbon($details[$index]['apply_term_from']);
+            $start_index = ($no - 1) * 7;
+            $end_index = $start_index + 6;
+            for ($i=$start_index; $i <= $end_index; $i++) {
+                if($i == $start_index){
+                    if(isset($details[$i]['apply_term_from'])){
+                        $carbon = new Carbon($details[$i]['apply_term_from']);
                         $temp_from = $carbon->copy()->format('Ymd');
                         $apply_term_from = $temp_from;
                     }
-                    if(isset($details[$index]['name'])){
-                        $name = $details[$index]['name'];
+                    if(isset($details[$i]['name'])){
+                        $name = $details[$i]['name'];
                     }
                 }
                 $time_table->setApplytermfromAttribute($apply_term_from);
-                $time_table->setIdAttribute($detail['id']);
+                $time_table->setIdAttribute($details[$i]['id']);
                 $time_table->setNameAttribute($name);
-                $time_table->setNoAttribute($detail['no']);
-                $time_table->setWorkingtimekubunAttribute($detail['working_time_kubun']);
-                $time_table->setFromtimeAttribute($detail['from_time']);
-                $time_table->setTotimeAttribute($detail['to_time']);
+                $time_table->setNoAttribute($no);
+                $time_table->setWorkingtimekubunAttribute($details[$i]['working_time_kubun']);
+                $time_table->setFromtimeAttribute($details[$i]['from_time']);
+                $time_table->setTotimeAttribute($details[$i]['to_time']);
                 $time_table->updateDetail();
             }
             DB::commit();
             return true;
 
-        }catch(\PDOException $e){
+        }catch(\PDOException $pe){
+            Log::error($pe->getMessage());
+            DB::rollBack();
+            return false;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
             DB::rollBack();
             return false;
         }
@@ -233,19 +297,31 @@ class CreateTimeTableController extends Controller
      * @return void
      */
     public function del(Request $request){
-        $no = $request->no;
-        $temp_from = $request->apply_term_from;
-        $carbon = new Carbon($temp_from);
-        $apply_term_from = $carbon->copy()->format('Ymd');
-        
-        $response = collect();
-        $result = $this->updateIsDelete($no,$apply_term_from);
-        if($result){
-            $response->put('result',self::SUCCESS);
-        }else{
+        try{
+            $no = $request->no;
+            $temp_from = $request->apply_term_from;
+            $carbon = new Carbon($temp_from);
+            $apply_term_from = $carbon->copy()->format('Ymd');
+            
+            $response = collect();
+            $result = $this->updateIsDelete($no,$apply_term_from);
+            if($result){
+                $response->put('result',self::SUCCESS);
+            }else{
+                $response->put('result',self::FAILED);
+            }
+            return $response;
+        }catch(\PDOException $pe){
+            Log::error($pe->getMessage());
+            DB::rollBack();
             $response->put('result',self::FAILED);
+            return $response;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            DB::rollBack();
+            $response->put('result',self::FAILED);
+            return $response;
         }
-        return $response;
     }
 
     /**
@@ -255,19 +331,26 @@ class CreateTimeTableController extends Controller
      * @return void
      */
     public function updateIsDelete($no,$apply_term_from){
-        $time_table = new WorkingTimeTable();
-        $time_table->setNoAttribute($no);
-        $time_table->setApplytermfromAttribute($apply_term_from);
         
         DB::beginTransaction();
         try{
+            $time_table = new WorkingTimeTable();
+            $time_table->setNoAttribute($no);
+            $time_table->setApplytermfromAttribute($apply_term_from);
             $time_table->updateIsDelete();
             DB::commit();
-            return true;
-
-        }catch(\PDOException $e){
+            $response->put('result',self::SUCCESS);
+            return $response;
+        }catch(\PDOException $pe){
+            Log::error($pe->getMessage());
             DB::rollBack();
-            return false;
+            $response->put('result',self::FAILED);
+            return $response;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            DB::rollBack();
+            $response->put('result',self::FAILED);
+            return $response;
         }
     }
 
@@ -283,12 +366,23 @@ class CreateTimeTableController extends Controller
             $time_table = new WorkingTimeTable();
             $time_table->setNoAttribute($no);
             $result = $time_table->getDetail();
+            return response()->json(
+                ['result' => true, 'details' => $result,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\PDOException $pe){
-            return null;
+            Log::error($pe->getMessage());
+            return response()->json(
+                ['result' => false, 'details' => null,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\Exception $e){
-            return null;
+            Log::error($e->getMessage());
+            return response()->json(
+                ['result' => false, 'details' => null,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }
-        return $result;
     }
 
 }

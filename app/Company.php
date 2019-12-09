@@ -4,6 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
 
 class Company extends Model
@@ -238,24 +240,34 @@ class Company extends Model
      * @return void
      */
     public function insertCompany(){
-        DB::table($this->table)->insert(
-            [
-                'apply_term_from' => $this->apply_term_from,
-                'name' => $this->name,
-                'kana' => $this->kana,
-                'post_code' => $this->post_code,
-                'address1' => $this->address1,
-                'address2' => $this->address2,
-                'address_kana' => $this->address_kana,
-                'tel_no' => $this->tel_no,
-                'fax_no' => $this->fax_no,
-                'represent_name' => $this->represent_name,
-                'represent_kana' => $this->represent_kana,
-                'email' => $this->email,
-                'created_user' => $this->created_user,
-                'created_at' => $this->created_at
-            ]
-        );
+        try {
+            DB::table($this->table)->insert(
+                [
+                    'apply_term_from' => $this->apply_term_from,
+                    'name' => $this->name,
+                    'kana' => $this->kana,
+                    'post_code' => $this->post_code,
+                    'address1' => $this->address1,
+                    'address2' => $this->address2,
+                    'address_kana' => $this->address_kana,
+                    'tel_no' => $this->tel_no,
+                    'fax_no' => $this->fax_no,
+                    'represent_name' => $this->represent_name,
+                    'represent_kana' => $this->represent_kana,
+                    'email' => $this->email,
+                    'created_user' => $this->created_user,
+                    'created_at' => $this->created_at
+                ]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -264,24 +276,34 @@ class Company extends Model
      * @return void
      */
     public function getCompanyInfo(){
-        $data = DB::table($this->table)
-        ->select(
-                'apply_term_from',
-                'name',
-                'kana',
-                'post_code',
-                'address1',
-                'address2',
-                'address_kana',
-                'tel_no',
-                'fax_no',
-                'represent_name',
-                'represent_kana',
-                'email'
-        )
-        ->where('is_deleted',0)
-        ->get();
-    
+        try {
+            $data = DB::table($this->table)
+            ->select(
+                    'apply_term_from',
+                    'name',
+                    'kana',
+                    'post_code',
+                    'address1',
+                    'address2',
+                    'address_kana',
+                    'tel_no',
+                    'fax_no',
+                    'represent_name',
+                    'represent_kana',
+                    'email'
+            )
+            ->where('is_deleted',0)
+            ->get();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
         return $data;
     }
 
@@ -292,27 +314,37 @@ class Company extends Model
      */
     public function getCompanyInfoApply(){
         // 適用期間日付の取得
-        $dt = null;
-        if (isset($this->apply_term_from)) {
-            $dt = new Carbon($this->apply_term_from);
-        } else {
-            $dt = new Carbon();
+        try {
+            $dt = null;
+            if (isset($this->apply_term_from)) {
+                $dt = new Carbon($this->apply_term_from);
+            } else {
+                $dt = new Carbon();
+            }
+            $target_date = $dt->format('Ymd');
+
+            // companyの最大適用開始日付subquery
+            $subquery = DB::table($this->table)
+                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('apply_term_from', '<=',$target_date)
+                ->where('is_deleted', '=', 0);
+            $mainquery = DB::table($this->table.' as t1')
+                ->select('t1.name as name')
+                ->JoinSub($subquery, 't2', function ($join) { 
+                    $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
+                })
+                ->where('t1.is_deleted', '=', 0)
+                ->get();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
         }
-        $target_date = $dt->format('Ymd');
-
-        // companyの最大適用開始日付subquery
-        $subquery = DB::table($this->table)
-            ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-            ->where('apply_term_from', '<=',$target_date)
-            ->where('is_deleted', '=', 0);
-        $mainquery = DB::table($this->table.' as t1')
-            ->select('t1.name as name')
-            ->JoinSub($subquery, 't2', function ($join) { 
-                $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
-            })
-            ->where('t1.is_deleted', '=', 0)
-            ->get();
-
+    
         return $mainquery;
 
     }
@@ -323,9 +355,19 @@ class Company extends Model
      * @return boolean
      */
     public function isExistsInfo(){
-        $is_exists = DB::table($this->table)
-            ->where('is_deleted',0)
-            ->exists();
+        try {
+            $is_exists = DB::table($this->table)
+                ->where('is_deleted',0)
+                ->exists();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
 
         return $is_exists;
     }
@@ -336,9 +378,19 @@ class Company extends Model
      * @return void
      */
     public function delInfo(){
-        DB::table($this->table)
-            ->where('is_deleted',0)
-            ->delete();
+        try {
+            DB::table($this->table)
+                ->where('is_deleted',0)
+                ->delete();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
 }
