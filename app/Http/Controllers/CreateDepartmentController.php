@@ -30,51 +30,63 @@ class CreateDepartmentController extends Controller
     }
 
     /**
-     * 部署名取得
+     * 部署取得
      *
      * @param Request $request
      * @return void
      */
     public function getDetails(Request $request){
+        $this->array_messagedata = array();
         $details = new Collection();
+        $result = true;
         try {
-            $code = $request->code;
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['code'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "code", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $code =  $params['code'];
             $department_model = new Department();
             $dt = new Carbon();
             $from = $dt->copy()->format('Ymd');
             $department_model->setParamapplytermfromAttribute($from);
             $department_model->setParamcodeAttribute($code);
+            $killvalue = false;
+            if (isset($params['killvalue'])) {
+                $killvalue =  $params['killvalue'];
+            }
+            $department_model->setKillvalueAttribute($killvalue);
             $details = $department_model->getDetails();
+            if (count($details) == 0) {
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_found_data');
+                $result = false;
+            }
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\PDOException $pe){
             throw $pe;
         }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
             Log::error($e->getMessage());
             throw $e;
         }
         return $details;
-    }
-
-    /**
-     * 有効期間取得
-     *
-     * @param Request $request
-     * @return void
-     */
-    public function getDepartmentApplyTerm(Request $request){
-        $terms = new Collection();
-        try {
-            $code = $request->code;
-            $terms = DB::table('departments')->where('code', $code)->where('is_deleted', 0)->orderby('apply_term_from','asc')->get();
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-        return $terms;
     }
 
     /**
@@ -83,50 +95,112 @@ class CreateDepartmentController extends Controller
      * @param Request $request
      * @return void
      */
-    public function store(StoreDepartmentPost $request){
+    public function store(Request $request){
+        $this->array_messagedata = array();
         $code = '';
+        $result = true;
         try {
-            $kbn = $request->kbn;
-            $code = $request->code;
-            $name = $request->name;
-            if ($kbn == Config::get('const.DB_KBN.store')) {
-                if (isset($code)) {
-                    $this->array_messagedata[] = Config::get('const.MSG_ERROR.already_data');
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'code' => $code,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['name'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "name", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'code' => $code,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (isset($params['code'])) {
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.already_data');
+                $result = false;
+                return response()->json(
+                    ['result' => $result, 'code' => $code,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $name = $params['name'];
+            // 部署名チェック
+            if ($name != "") {
+                $department_model = new Department();
+                $department_model->setNameAttribute($name);
+                $isExists = $department_model->isExistsName();
+                if ($isExists) {
+                    $this->array_messagedata[] = str_replace('{0}', "部署", Config::get('const.MSG_ERROR.already_name'));
+                    $result = false;
                     return response()->json(
-                        ['result' => false, 'code' => $code,
+                        ['result' => $result, 'code' => $code,
                         Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                     );
                 }
             }
-            $code = $this->insert($kbn, $code, $name);
+            $code = $this->insert($code, $name);
     
             return response()->json(
-                ['result' => true, 'code' => $code,
+                ['result' => $result, 'code' => $code,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
             throw $pe;
         }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
             Log::error($e->getMessage());
             throw $e;
         }
     }
 
     /**
-     * 修正ボタン押下 
+     * 更新ボタン押下 
      *
      * @param Request $request
      * @return response
      */
     public function fix(Request $request){
-        $details = $request->details;
-        $response = collect();
-        $result = $this->fixData($details);
-        if($result){
-            $response->put('result',self::SUCCESS);
-        }else{
-            $response->put('result',self::FAILED);
+        $this->array_messagedata = array();
+        $details = array();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['details'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $details = $params['details'];
+            $this->fixData($details);
+            return response()->json(
+                ['result' => $result,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
         }
+
         return $response;
     }
 
@@ -136,35 +210,25 @@ class CreateDepartmentController extends Controller
      * @param [type] $name
      * @return void
      */
-    private function insert($kbn, $code, $name){
+    private function insert($code, $name){
         DB::beginTransaction();
         try{
             $systemdate = Carbon::now();
             $user = Auth::user();
             $department = new Department();
             $user_code = $user->code;
-            if ($kbn == Config::get('const.DB_KBN.store')) {
-                $from = Config::get('const.INIT_DATE.initdate');
-                $max_code = $department->getMaxCode();          // code 自動採番
-                if (isset($max_code)) {
-                    $code = $max_code + 1;
-                } else {
-                    $code = 1;
-                }
+            $from = Config::get('const.INIT_DATE.initdate');
+            $maxdate = Config::get('const.INIT_DATE.maxdate');
+            $max_code = $department->getMaxCode();          // code 自動採番
+            if (isset($max_code)) {
+                $code = $max_code + 1;
             } else {
-                $maxno = $code;
-                if(isset($data[0]['apply_term_from'])){
-                    $carbon = new Carbon($data[0]['apply_term_from']);
-                    Log::debug("carbon = ".$carbon);
-                    $from = $carbon->copy()->format('Ymd');
-                    $term_from = $from;
-                    Log::debug("term_from = ".$term_from);
-                }
+                $code = 1;
             }
-
             $department->setApplytermfromAttribute($from);
             $department->setCodeAttribute($code);
             $department->setNameAttribute($name);
+            $department->setKillfromdateAttribute($maxdate);
             $department->setCreatedatAttribute($systemdate);
             $department->setCreateduserAttribute($user_code);
             $department->insertDepartment();
@@ -176,6 +240,7 @@ class CreateDepartmentController extends Controller
             DB::rollBack();
             throw $pe;
         }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
             Log::error($e->getMessage());
             DB::rollBack();
             throw $e;
@@ -183,7 +248,7 @@ class CreateDepartmentController extends Controller
     }
 
     /**
-     * 修正
+     * 更新
      *
      * @param [type] $details
      * @return boolean
@@ -196,31 +261,36 @@ class CreateDepartmentController extends Controller
 
         DB::beginTransaction();
         try{
-            foreach ($details as $detail) {
-                $carbon = new Carbon($detail['apply_term_from']);
-                $from = $carbon->copy()->format('Ymd');
-                $department->setApplytermfromAttribute($from);
-                $department->setCodeAttribute($detail['code']);
-                $department->setNameAttribute($detail['name']);
-                // idもっているかどうか
-                if(isset($detail['id'])){     // idもっている→UPDATE
-                    $department->setIdAttribute($detail['id']);   
-                    $department->setUpdatedatAttribute($systemdate);   
-                    $department->setUpdateduserAttribute($user_code);   
-                    $department->updateDepartment();
-                }else{                      // idもっていない→INSERT
-                    $department->setCreatedatAttribute($systemdate);
-                    $department->setCreateduserAttribute($user_code);
-                    $department->insertDepartment();
-                }
-            }   
+            $carbon = new Carbon($details['apply_term_from']);
+            $from = $carbon->copy()->format('Ymd');
+            $department->setApplytermfromAttribute($from);
+            $department->setCodeAttribute($details['code']);
+            $department->setNameAttribute($details['name']);
+            if ($details['kill_from_date'] == "" || $details['kill_from_date'] == null) {
+                $department->setKillfromdateAttribute(Config::get('const.INIT_DATE.maxdate'));
+            } else {
+                $dt = new Carbon($details['kill_from_date']);
+                $to = $dt->copy()->format('Ymd');
+                $department->setKillfromdateAttribute($to);
+            }
+            $department->setUpdatedatAttribute($systemdate);   
+            $department->setUpdateduserAttribute($user_code);   
+            if ($details['id'] == "" || $details['id'] == null) {
+                $department->insertDepartment();
+            } else {
+                $department->setIdAttribute($details['id']);   
+                $department->updateDepartment();
+            }
             DB::commit();
-            return true;
 
-        }catch(\PDOException $e){
+        }catch(\PDOException $pe){
+            DB::rollBack();
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
             Log::error($e->getMessage());
             DB::rollBack();
-            return false;
+            throw $e;
         }
     }
 
@@ -231,14 +301,43 @@ class CreateDepartmentController extends Controller
      * @return void
      */
     public function del(Request $request){
-        $id = $request->id;
-        $response = collect();
-        $result = $this->updateIsDelete($id);
-        if($result){
-            $response->put('result',self::SUCCESS);
-        }else{
-            $response->put('result',self::FAILED);
+        $this->array_messagedata = array();
+        $details = array();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['id'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "id", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $id = $params['id'];
+            $this->updateIsDelete($id);
+            return response()->json(
+                ['result' => $result,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
         }
+
         return $response;
     }
 
@@ -255,11 +354,10 @@ class CreateDepartmentController extends Controller
             ->where('id', $id)
             ->update(['is_deleted' => 1]);
             DB::commit();
-            return true;
 
-        }catch(\PDOException $e){
+        }catch(\PDOException $pe){
             DB::rollBack();
-            return false;
+            throw $pe;
         }
     }
 

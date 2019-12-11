@@ -49,7 +49,7 @@
     <div v-if="this.itemControl === 'INFO'">
       <div class="card text-black-50 border border-info bg-info">
         <div class="card-body px-3 py-2">
-          <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/imagesround-info-b.svg" alt=""></span>
+          <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-info-b.svg" alt=""></span>
           <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>
           <p v-for="value in itemNote" class="font-size-sm my-2">{{ value }}</p>
         </div>
@@ -58,7 +58,7 @@
     <div v-if="this.itemControl === 'LIGHT'">
       <div class="card text-primary border border-primary bg-light">
         <div class="card-body px-3 py-2">
-          <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/round-watch-later-b.svg" alt=""></span>
+          <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-watch-later-b.svg" alt=""></span>
           <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>
           <p v-for="value in itemNote" class="font-size-sm my-2">{{ value }}</p>
         </div>
@@ -67,7 +67,7 @@
     <div v-if="this.itemControl === 'DARK'">
       <div class="card text-white-50 border border-dark bg-dark">
         <div class="card-body px-3 py-2">
-          <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/round-watch-later-b.svg" alt=""></span>
+          <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-watch-later-b.svg" alt=""></span>
           <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>
           <p v-for="value in itemNote" class="font-size-sm my-2">{{ value }}</p>
         </div>
@@ -76,7 +76,7 @@
     <div v-if="this.itemControl === 'WHITE'">
       <div class="card text-black-50 border border-black bg-white">
         <div class="card-body px-3 py-2">
-          <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/round-watch-later-b.svg" alt=""></span>
+          <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-watch-later-b.svg" alt=""></span>
           <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>
           <p v-for="value in itemNote" class="font-size-sm my-2">{{ value }}</p>
         </div>

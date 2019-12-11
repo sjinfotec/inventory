@@ -19,6 +19,7 @@ class Department extends Model
     private $apply_term_from;               // 適用期間開始
     private $code;                          // 部署コード
     private $name;                          // 部署名
+    private $kill_from_date;                // 廃止年月日
     private $is_deleted;                    // 削除フラグ
     private $created_user;                  // 作成ユーザー
     private $updated_user;                  // 修正ユーザー
@@ -68,6 +69,17 @@ class Department extends Model
     public function setNameAttribute($value)
     {
         $this->name = $value;
+    }
+
+    // 廃止年月日
+    public function getKillfromdateAttribute()
+    {
+        return $this->kill_from_date;
+    }
+
+    public function setKillfromdateAttribute($value)
+    {
+        $this->kill_from_date = $value;
     }
 
     // 削除フラグ
@@ -128,6 +140,7 @@ class Department extends Model
     // ---------------- param --------------------------------
     private $param_apply_term_from;               // 適用期間開始
     private $param_code;                          // 部署コード
+    private $param_killvalue;                     // 廃止開始日を条件に含む(true)
 
     // 適用期間開始
     public function getParamapplytermfromAttribute()
@@ -151,8 +164,20 @@ class Department extends Model
         $this->param_code = $value;
     }
 
+    // 廃止開始日を条件に含む
+    public function getKillvalueAttribute()
+    {
+        return $this->param_killvalue;
+    }
+
+    public function setKillvalueAttribute($value)
+    {
+        $this->param_killvalue = $value;
+    }
+    
+
     /**
-     * 部署名取得
+     * 部署取得
      *
      * @return void
      */
@@ -163,15 +188,32 @@ class Department extends Model
             $subquery = DB::table($this->table)
                 ->select('code as code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->where('apply_term_from', '<=',$this->param_apply_term_from)
+                ->where('apply_term_from', '<=',$this->param_apply_term_from);
+            if(!empty($this->param_killvalue)){
+                if (!$this->param_killvalue) {
+                    $subquery->where('kill_from_date', '>',$this->param_apply_term_from);
+                }
+            } else {
+                $subquery->where('kill_from_date', '>',$this->param_apply_term_from);
+            }
+            $subquery
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
+
+            $case_sql1 = "CASE t1.kill_from_date = ".Config::get('const.INIT_DATE.maxdate');
+            $case_sql1 = $case_sql1." WHEN TRUE THEN NULL ELSE DATE_FORMAT(t1.kill_from_date, '%Y-%m-%d') END as kill_from_date";
+            $case_sql2 = "CASE t2.max_apply_term_from = t1.apply_term_from ";
+            $case_sql2 = $case_sql2." WHEN TRUE THEN 1";
+            $case_sql2 = $case_sql2." ELSE CASE t2.max_apply_term_from < t1.apply_term_from ";
+            $case_sql2 = $case_sql2."      WHEN TRUE THEN 2 ELSE 0 END ";
+            $case_sql2 = $case_sql2." END  as result";
             $mainquery = DB::table($this->table.' AS t1')
                 ->select(
-                    't1.id', 't1.code', 't1.name')
+                    't1.id as id', 't1.code as code', 't1.name as name')
                 ->selectRaw("DATE_FORMAT(t1.apply_term_from, '%Y-%m-%d') as apply_term_from")
-                ->selectRaw("CASE t2.max_apply_term_from = t1.apply_term_from WHEN TRUE THEN 1 ELSE 0 END as result")
-                ->leftJoinSub($subquery, 't2', function ($join) { 
+                ->selectRaw($case_sql1)
+                ->selectRaw($case_sql2)
+                ->JoinSub($subquery, 't2', function ($join) { 
                     $join->on('t2.code', '=', 't1.code');
                 });
             $details = $mainquery
@@ -188,8 +230,31 @@ class Department extends Model
             Log::error($e->getMessage());
             throw $e;
         }
-        Log::debug('$details count = '.count($details));
         return $details;
+    }
+
+    /**
+     * 部署名（同名）チェック
+     *
+     * @return boolean
+     */
+    public function isExistsName(){
+        try {
+            $is_exists = DB::table($this->table)
+                ->where('name',$this->name)
+                ->where('is_deleted',0)
+                ->exists();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $is_exists;
     }
 
 
@@ -205,6 +270,7 @@ class Department extends Model
                     'apply_term_from' => $this->apply_term_from,
                     'code' => $this->code,
                     'name' => $this->name,
+                    'kill_from_date' => $this->kill_from_date,
                     'created_user'=>$this->created_user,
                     'created_at'=>$this->created_at
                 ]
@@ -233,6 +299,7 @@ class Department extends Model
                 ->update([
                     'apply_term_from' => $this->apply_term_from,
                     'name' => $this->name,
+                    'kill_from_date' => $this->kill_from_date,
                     'updated_at'=>$this->updated_at,
                     'updated_user'=>$this->updated_user
                 ]);

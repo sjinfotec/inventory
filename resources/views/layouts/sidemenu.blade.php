@@ -61,8 +61,8 @@
                             <ul class="collapse show list-unstyled" id="collapseSetting">
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/create_company_information') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-business-w.svg') }}" alt="">会社設定</a></li>
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/create_department') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-group-w.svg') }}" alt="">組織設定</a></li>
-                                <li><a class="px-3 py-1 text-white d-block" href="{{ url('/setting_calc') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-laptop-chromebook-w.svg') }}" alt="">集計方法基本設定</a></li>
-                                <li><a class="px-3 py-1 text-white d-block" href="{{ url('/create_time_table') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-restore-w.svg') }}" alt="">勤務時間設定</a></li>
+                                <li><a class="px-3 py-1 text-white d-block" href="{{ url('/setting_calc') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-laptop-chromebook-w.svg') }}" alt="">労働時間基本設定</a></li>
+                                <li><a class="px-3 py-1 text-white d-block" href="{{ url('/create_time_table') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-restore-w.svg') }}" alt="">勤務帯時間設定</a></li>
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/create_calendar') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-flag-w.svg') }}" alt="">カレンダー設定</a></li>
                                 <!-- <li><a class="px-3 py-1 text-white d-block" href="{{ url('/user_add') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-assignment-ind-w.svg') }}" alt="">ユーザ情報設定</a></li> -->
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_user') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-assignment-ind-w.svg') }}" alt="">ユーザ情報設定</a></li>

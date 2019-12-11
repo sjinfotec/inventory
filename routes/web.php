@@ -78,12 +78,11 @@ Route::get('/user_pass', 'UserPassController@index')->middleware('auth');
 Route::post('/user_pass/passchange', 'UserPassController@passChange')->middleware('auth');
 // 部署
 Route::get('/create_department', 'CreateDepartmentController@index')->middleware('auth');
-Route::get('/create_department/get', 'CreateDepartmentController@getDetails')->middleware('auth');
+Route::post('/create_department/get', 'CreateDepartmentController@getDetails')->middleware('auth');
 Route::post('/create_department/store', 'CreateDepartmentController@store')->middleware('auth');
 Route::post('/create_department/fix', 'CreateDepartmentController@fix')->middleware('auth');
 Route::post('/create_department/del', 'CreateDepartmentController@del')->middleware('auth');
 Route::post('/create_department/edit', 'CreateDepartmentController@edit')->middleware('auth');
-Route::get('/create_department/get_apply', 'CreateDepartmentController@getDepartmentApplyTerm')->middleware('auth');
 // カレンダー登録
 Route::get('/create_calendar', 'CreateCalendarController@index')->middleware('auth');
 Route::post('/create_calendar/store', 'CreateCalendarController@store')->middleware('auth');
@@ -108,7 +107,7 @@ Route::post('/create_time_table/del', 'CreateTimeTableController@del')->middlewa
 Route::post('/create_time_table/fix', 'CreateTimeTableController@fix')->middleware('auth');
 Route::post('/create_time_table/add', 'CreateTimeTableController@add')->middleware('auth');
 // リスト取得
-Route::get('/get_departments_list', 'ApiCommonController@getDepartmentList')->middleware('auth');
+Route::post('/get_departments_list', 'ApiCommonController@getDepartmentList')->middleware('auth');
 Route::get('/get_employment_status_list', 'ApiCommonController@getEmploymentStatusList')->middleware('auth');
 Route::get('/get_time_table_list', 'ApiCommonController@getTimeTableList')->middleware('auth');
 Route::get('/get_business_day_list', 'ApiCommonController@getBusinessDayList')->middleware('auth');

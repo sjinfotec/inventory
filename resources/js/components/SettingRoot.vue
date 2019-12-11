@@ -310,9 +310,12 @@
 </template>
 <script>
 import toasted from "vue-toasted";
+import {dialogable} from '../mixins/dialogable.js';
+import {requestable} from '../mixins/requestable.js';
 
 export default {
   name: "SettingRoot",
+  mixins: [ dialogable, requestable ],
   data() {
     return {
       valuedepartment: "",
@@ -543,13 +546,14 @@ export default {
       e.preventDefault();
     },
     getDepartmentList() {
-      this.$axios
-        .get("/get_departments_list")
-        .then(response => {
+      this.postRequest("/get_departments_list", [])
+        .then(response  => {
           this.departmentList = response.data;
         })
         .catch(reason => {
-          this.alert("error", "部署リスト取得に失敗しました", "エラー");
+          var messages = [];
+          messages.push("部署選択リスト作成エラー");
+          this.messageswal("エラー", messages, "error", true, false, true);
         });
     },
     getGeneralList(value) {

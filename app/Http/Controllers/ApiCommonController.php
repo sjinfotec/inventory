@@ -26,6 +26,7 @@ class ApiCommonController extends Controller
     protected $table_generalcodes = 'generalcodes';
     protected $table_companies = 'companies';
     protected $table_confirms = 'confirms';
+    protected $table_departments = 'departments';
     protected $table_working_timetables = 'working_timetables';
 
     /**
@@ -178,56 +179,73 @@ class ApiCommonController extends Controller
     public function getDepartmentList(Request $request){
         $departments = new Collection();
         try {
+            // パラメータチェック
+            $params = array();
+            $params = $request->keyparams;
+            
             // 適用期間日付の取得
             $dt = null;
-            if (isset($request->targetdate)) {
-                $dt = new Carbon($request->targetdate);
+            if (isset($params['targetdate'])) {
+                $dt = new Carbon($params['targetdate']);
             } else {
                 $dt = new Carbon();
+            }
+            if (isset($params['killvalue'])) {
+                $killvalue = $params['killvalue'];
+            } else {
+                $killvalue = false;
             }
             $target_date = $dt->format('Ymd');
             // ログインユーザの権限取得
             $chk_user_id = Auth::user()->code;
             $role = $this->getUserRole($chk_user_id, $target_date);
             if(!isset($role)) { return null; }
-            $subquery1 = DB::table('departments')
+            $subquery1 = DB::table($this->table_departments)
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->selectRaw('code as code')
-                ->where('apply_term_from', '<=',$target_date)
-                ->where('is_deleted', '=', 0)
-                ->groupBy('code');
+                ->where('apply_term_from', '<=',$target_date);
+            if (!$killvalue) {
+                $subquery1
+                    ->where('kill_from_date', '>',$target_date)
+                    ->where('is_deleted', '=', 0)
+                    ->groupBy('code');
+            } else {
+                $subquery1
+                    ->where('is_deleted', '=', 0)
+                    ->groupBy('code');
+            }
 
             if($role == Config::get('const.C025.general_user')){
-                $departments = DB::table('departments')
+                $departments = DB::table($this->table_departments)
                     ->JoinSub($subquery1, 't1', function ($join) { 
-                        $join->on('t1.code', '=', 'departments.code');
-                        $join->on('t1.max_apply_term_from', '=', 'departments.apply_term_from');
+                        $join->on('t1.code', '=', $this->table_departments.'.code');
+                        $join->on('t1.max_apply_term_from', '=', $this->table_departments.'.apply_term_from');
                     })
                     ->Join('users', function ($join) { 
-                        $join->on('users.department_code', '=', 'departments.code')
+                        $join->on('users.department_code', '=', $this->table_departments.'.code')
                         ->where('users.is_deleted', '=', 0);
                     })
-                    ->select('departments.code','departments.name')
+                    ->select($this->table_departments.'.code',$this->table_departments.'.name')
                     ->where('users.code','=',$chk_user_id)
-                    ->where('departments.is_deleted', 0)
-                    ->orderby('departments.code','asc')
+                    ->where($this->table_departments.'.is_deleted', 0)
+                    ->orderby($this->table_departments.'.code','asc')
                     ->get();
             } else {
-                $departments = DB::table('departments')
-                    ->select('departments.code','departments.name')
+                $departments = DB::table($this->table_departments)
+                    ->select($this->table_departments.'.code',$this->table_departments.'.name')
                     ->JoinSub($subquery1, 't1', function ($join) { 
-                        $join->on('t1.code', '=', 'departments.code');
-                        $join->on('t1.max_apply_term_from', '=', 'departments.apply_term_from');
+                        $join->on('t1.code', '=', $this->table_departments.'.code');
+                        $join->on('t1.max_apply_term_from', '=', $this->table_departments.'.apply_term_from');
                     })
-                    ->where('departments.is_deleted', 0)
-                    ->orderby('departments.code','asc')
+                    ->where($this->table_departments.'.is_deleted', 0)
+                    ->orderby($this->table_departments.'.code','asc')
                     ->get();
             }
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'departments', Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_departments, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'departments', Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_departments, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
         }
         return $departments;
@@ -554,13 +572,14 @@ class ApiCommonController extends Controller
             $target_date = $dt->format('Ymd');
 
             // departmentsの最大適用開始日付subquery
-            $subquery1 = DB::table('departments')
+            $subquery1 = DB::table($this->table_departments)
                 ->select('code as code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->where('apply_term_from', '<=',$target_date)
+                ->where('kill_from_date', '>',$target_date)
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
-            $subquery2 = DB::table('departments as t1')
+            $mainquery = DB::table($this->table_departments.' as t1')
                 ->select('t1.code as code', 't1.name as name')
                 ->JoinSub($subquery1, 't2', function ($join) { 
                     $join->on('t1.code', '=', 't2.code');
@@ -568,15 +587,15 @@ class ApiCommonController extends Controller
                 })
                 ->where('t1.is_deleted', '=', 0);
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'departments', Config::get('const.LOG_MSG.subquery_illegal')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_departments, Config::get('const.LOG_MSG.subquery_illegal')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'departments', Config::get('const.LOG_MSG.subquery_illegal')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_departments, Config::get('const.LOG_MSG.subquery_illegal')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
-        return $subquery2;
+        return $mainquery;
     }
         
     /** タイムテーブル適用期間開始サブクエリー作成
