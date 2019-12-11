@@ -327,7 +327,7 @@
               <!-- panel header -->
               <div class="card-header col-12 bg-transparent pb-2 border-0">
                 <h1 class="float-sm-left font-size-rg">◆集計自動起動設定</h1>
-                <span class="float-sm-right font-size-sm">設定した時刻にその時刻までの時間集計を自動で行います。</span>
+                <span class="float-sm-right font-size-sm">設定した時刻に当月度の間集計を自動で行います。</span>
               </div>
               <!-- /.panel header -->
             </div>

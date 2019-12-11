@@ -9,9 +9,13 @@
 </template>
 <script>
 import moment from "moment";
+import {dialogable} from '../mixins/dialogable.js';
+import {requestable} from '../mixins/requestable.js';
+
 
 export default {
   name: "selectDepartment",
+  mixins: [ dialogable, requestable ],
   props: {
     blankData: {
       type: Boolean,
@@ -32,6 +36,10 @@ export default {
     dateValue: {
         type: String,
         default: ''
+    },
+    killValue: {
+        type: Boolean,
+        default: false
     },
     rowIndex: {
         type: Number,
@@ -56,13 +64,8 @@ export default {
   },
   methods: {
     getDepartmentList(datevalue){
-      this.$axios
-        .get("/get_departments_list", {
-          params: {
-            targetdate: datevalue
-          }
-        })
-        .then(response => {
+      this.postRequest("/get_departments_list", { targetdate: datevalue, killvalue: this.killValue })
+        .then(response  => {
           this.departmentList = response.data;
           if (this.addNew) {
             this.object = { name: "新規に部署を登録する", code: "" };
@@ -70,7 +73,9 @@ export default {
           }
         })
         .catch(reason => {
-          alert("部署選択リスト作成エラー");
+          var messages = [];
+          messages.push("部署選択リスト作成エラー");
+          this.messageswal("エラー", messages, "error", true, false, true);
         });
     },
     // 選択が変更された場合、親コンポーネントに選択値を返却

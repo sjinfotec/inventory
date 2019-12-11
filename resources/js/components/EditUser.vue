@@ -849,6 +849,8 @@
 <script>
 import toasted from "vue-toasted";
 import moment from "moment";
+import {dialogable} from '../mixins/dialogable.js';
+import {requestable} from '../mixins/requestable.js';
 import {
   FvlForm,
   FvlInput,
@@ -859,6 +861,7 @@ import {
 
 export default {
   name: "UserAdd",
+  mixins: [ dialogable, requestable ],
   components: {
     FvlForm,
     FvlInput,
@@ -1127,16 +1130,16 @@ export default {
       return flag;
     },
     getDepartmentList() {
-      this.$axios
-        .get("/get_departments_list")
-        .then(response => {
+      this.postRequest("/get_departments_list", [])
+        .then(response  => {
           this.departmentList = response.data;
           this.object = { code: "", name: "未選択" };
           this.departmentList.unshift(this.object);
-          console.log("部署リスト取得");
         })
         .catch(reason => {
-          this.alert("error", "部署リスト取得に失敗しました", "エラー");
+          var messages = [];
+          messages.push("部署選択リスト作成エラー");
+          this.messageswal("エラー", messages, "error", true, false, true);
         });
     },
     getEmploymentStatusList() {

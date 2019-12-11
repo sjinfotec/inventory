@@ -230,7 +230,7 @@ class CreateTimeTableController extends Controller
             Log::error($pe->getMessage());
             DB::rollBack();
             $response->put('result',self::FAILED);
-            return $response;ex
+            return $response;
         }catch(\Exception $e){
             Log::error($e->getMessage());
             DB::rollBack();

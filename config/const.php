@@ -344,7 +344,8 @@ return [
     ],
 
     'INIT_DATE' => [
-        'initdate' => '20190101'
+        'initdate' => '20190101',
+        'maxdate' => '20991231'
     ],
 
 
@@ -470,7 +471,10 @@ return [
         'making_or_final' => '取り下げまたは最終承認済みのため、承認できません。',
         'alreadymaking_or_final' => 'すでに取り下げているかまたは最終承認済みのため、取り下げできません。',
         'mail_send_eror' => 'メール送信異常のため送信できませんでした。',
-        'already_data' => 'すでに登録されています'
+        'already_data' => 'すでに登録されています',
+        'already_name' => 'すでに登録されている[{0}]名です',
+        'not_found_data' => '該当するデータは見つかりませんでした。',
+        'parameter_illegal' => '不正なパラメータです。'
     ],
 
     'LOG_MSG' => [
@@ -482,13 +486,15 @@ return [
         'data_exists_erorr' => 'データexistsエラー table = [{0}]',
         'data_maxget_erorr' => 'データmaxgetエラー table = [{0}]',
         'data_count_erorr' => 'データcountエラー table = [{0}]',
+        'unknown_error' => '不明なエラー',
         'mismatch_data' => 'データ不整合',
         'not_set_time_rounding ' => '時間の端数処理が設定されていない',
         'not_setting_timetable' => '期間内に該当する勤務時間がないかまたはタイムテーブルが設定されていない。',
         'non_approval_demandno' => '承認する申請番号なし。',
         'non_approval_demanddate' => '承認する申請日なし。',
         'subquery_illegal ' => 'subquery設定エラー',
-        'where_illegal ' => 'WHERE句設定エラー'
+        'where_illegal ' => 'WHERE句設定エラー',
+        'parameter_illegal' => '不正なパラメータ params = [{0}]'
     ],
 
     'DEBUG_LEVEL' => 'DEBUG',
