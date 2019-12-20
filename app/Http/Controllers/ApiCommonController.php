@@ -26,8 +26,11 @@ class ApiCommonController extends Controller
     protected $table_generalcodes = 'generalcodes';
     protected $table_companies = 'companies';
     protected $table_confirms = 'confirms';
+    protected $table_users = 'users';
     protected $table_departments = 'departments';
     protected $table_working_timetables = 'working_timetables';
+
+    private $array_messagedata = array();
 
     /**
      * ユーザーリスト取得
@@ -37,107 +40,165 @@ class ApiCommonController extends Controller
      */
     public function getUserList(Request $request){
 
-        $users = new Collection();
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
         try {
             // パラメータチェック
-            if (isset($request->getdo)) {
-                $getdo = $request->getdo;
-                if ($getdo != 1) { return null; }
-            } else {
-                $getdo = 1;
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            $targetdate = '';
+            if (isset($params['targetdate'])) {
+                $targetdate =  $params['targetdate'];
             }
             // 適用期間日付の取得
             $dt = null;
-            if (isset($request->targetdate)) {
-                $dt = new Carbon($request->targetdate);
+            if ($targetdate != '') {
+                $dt = new Carbon($targetdate);
             } else {
                 $dt = new Carbon();
             }
-            $target_date = $dt->format('Ymd');
+            $target_date = $dt->format("Ymd");
+
+            $killvalue = false;
+            if (isset($params['killvalue'])) {
+                $killvalue =  $params['killvalue'];
+            }
+            $getdo = 0;
+            if (isset($params['getDo'])) {
+                $getdo =  $params['getDo'];
+            }
+            if ($getdo != 1) {
+                return response()->json(
+                    ['result' => true, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $departmentcode = null;
+            if (isset($params['departmentcode'])) {
+                $departmentcode =  $params['departmentcode'];
+            }
+            $employmentcode = null;
+            if (isset($params['employmentcode'])) {
+                $employmentcode =  $params['employmentcode'];
+            }
             // ログインユーザの権限取得
             $chk_user_id = Auth::user()->code;
             $role = $this->getUserRole($chk_user_id, $target_date);
-            if(!isset($role)) { return null; }
-
-            $subquery1 = DB::table('users')
+            if(!isset($role)) {
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_setting_role');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            // 取得SQL
+            /*$subquery1 = DB::table($this->table_users)
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->selectRaw('code as code')
-                ->where('apply_term_from', '<=',$target_date)
+                ->where('apply_term_from', '<=',$targetdate)
                 ->where('is_deleted', '=', 0)
-                ->groupBy('code');
+                ->groupBy('code');*/
+            $subquery1 = DB::table($this->table_users)
+                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->selectRaw('code as code');
 
-            if (isset($request->code)) {
-                if (isset($request->employment)) {
-                    $mainQuery = DB::table('users')
+            if (!$killvalue) {
+                $subquery1
+                    ->where('kill_from_date', '>',$target_date)
+                    ->where('is_deleted', '=', 0)
+                    ->groupBy('code');
+            } else {
+                $subquery1
+                    ->where('is_deleted', '=', 0)
+                    ->groupBy('code');
+            }
+    
+            if (isset($departmentcode)) {
+                if (isset($employmentcode)) {
+                    $mainQuery = DB::table($this->table_users)
                         ->JoinSub($subquery1, 't1', function ($join) { 
-                            $join->on('t1.code', '=', 'users.code');
-                            $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                            $join->on('t1.code', '=', $this->table_users.'.code');
+                            $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                         })
-                        ->where('users.department_code', $request->code)
-                        ->where('users.employment_status', $request->employment);
+                        ->where($this->table_users.'.department_code', $departmentcode)
+                        ->where($this->table_users.'.employment_status', $employmentcode);
                     if($role == Config::get('const.C025.general_user')){
-                        $mainQuery->where('users.code','=',$chk_user_id);
+                        $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
+                        $mainQuery->where($this->table_users.'.management','<',Config::get('const.C017.admin_user'));
                     }
-                    $users = $mainQuery->where('users.is_deleted', 0)
-                        ->orderby('users.code','asc')
+                    $details = $mainQuery->where($this->table_users.'.is_deleted', 0)
+                        ->orderby($this->table_users.'.code','asc')
                         ->get();
                 } else {
-                    $mainQuery = DB::table('users')
+                    $mainQuery = DB::table($this->table_users)
                         ->JoinSub($subquery1, 't1', function ($join) { 
-                            $join->on('t1.code', '=', 'users.code');
-                            $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                            $join->on('t1.code', '=', $this->table_users.'.code');
+                            $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                         })
-                        ->where('users.department_code', $request->code);
+                        ->where($this->table_users.'.department_code', $departmentcode);
                     if($role == Config::get('const.C025.general_user')){
-                        $mainQuery->where('users.code','=',$chk_user_id);
+                        $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
+                        $mainQuery->where($this->table_users.'.management','<',Config::get('const.C017.admin_user'));
                     }
-                    $users = $mainQuery->where('users.is_deleted', 0)
-                        ->orderby('users.code','asc')
+                    $details = $mainQuery->where($this->table_users.'.is_deleted', 0)
+                        ->orderby($this->table_users.'.code','asc')
                         ->get();
                 }
             } else {
-                if (isset($request->employment)) {
-                    $mainQuery = DB::table('users')
+                if (isset($employmentcode)) {
+                    $mainQuery = DB::table($this->table_users)
                         ->JoinSub($subquery1, 't1', function ($join) { 
-                            $join->on('t1.code', '=', 'users.code');
-                            $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                            $join->on('t1.code', '=', $this->table_users.'.code');
+                            $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                         })
-                        ->where('users.employment_status', $request->employment);
+                        ->where($this->table_users.'.employment_status', $employmentcode);
                     if($role == Config::get('const.C025.general_user')){
-                        $mainQuery->where('users.code','=',$chk_user_id);
+                        $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
+                        $mainQuery->where($this->table_users.'.management','<',Config::get('const.C017.admin_user'));
                     }
-                    $users = $mainQuery->where('users.is_deleted', 0)
-                        ->orderby('users.code','asc')
+                    $details = $mainQuery->where($this->table_users.'.is_deleted', 0)
+                        ->orderby($this->table_users.'.code','asc')
                         ->get();
                 } else {
-                    $mainQuery = DB::table('users')
+                    $mainQuery = DB::table($this->table_users)
                         ->JoinSub($subquery1, 't1', function ($join) { 
-                            $join->on('t1.code', '=', 'users.code');
-                            $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                            $join->on('t1.code', '=', $this->table_users.'.code');
+                            $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                         });
                     if($role == Config::get('const.C025.general_user')){
-                        $mainQuery->where('users.code','=',$chk_user_id);
+                        $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where('users.management','<',Config::get('const.C017.admin_user'));
+                        $mainQuery->where($this->table_users.'.management','<',Config::get('const.C017.admin_user'));
                     }
-                    $users = $mainQuery->where('users.is_deleted', 0)->get();
+                    $details = $mainQuery->where($this->table_users.'.is_deleted', 0)->get();
                 }
             }
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'users', Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
+            throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'users', Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
+            throw $e;
         }
 
-        return $users;
     }
 
     /**
@@ -146,30 +207,77 @@ class ApiCommonController extends Controller
      * @return void
      */
     public function getShiftInformation(Request $request){
-        $shift_results = new Collection();
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
         try {
-            $code = $request->code;
-            $no = $request->no;
-            $from = new Carbon($request->from);
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['code'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "code", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (!isset($params['from'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "from", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (!isset($params['to'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "to", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $code = $params['code'];
+            $no = "";
+            if (isset($params['no'])) {
+                $no = $params['no'];
+            }
+            $from = new Carbon($params['from']);
             $from = $from->format("Y/m/d");
-            $to = new Carbon($request->to);
+            $to = new Carbon($params['to']);
             $to = $to->format("Y/m/d");
-        
-            $shift_info = new ShiftInformation();
 
+            $shift_info = new ShiftInformation();
             $shift_info->setUsercodeAttribute($code);
-            $shift_info->setWorkingtimetablenoAttribute($no);
+            if ($no != "") {
+                $shift_info->setParamWorkingtimetablenoAttribute($no);
+            }
             $shift_info->setStarttargetdateAttribute($from);
             $shift_info->setEndtargetdateAttribute($to);
-            $shift_results = $shift_info->getUserShift();
-        }catch(\PDOException $pe){
-            return $shift_results;
-        }catch(\Exception $e){
-            Log::error($e->getMessage());
-            return $shift_results;
-        }
+            $details = $shift_info->getUserShift();
 
-        return $shift_results;
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
         
     /** 部署リスト取得
@@ -177,29 +285,40 @@ class ApiCommonController extends Controller
      * @return list departments
      */
     public function getDepartmentList(Request $request){
-        $departments = new Collection();
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
         try {
+            // 適用期間日付の取得
+            $dt = new Carbon();
+            $killvalue = false;
             // パラメータチェック
             $params = array();
-            $params = $request->keyparams;
-            
-            // 適用期間日付の取得
-            $dt = null;
-            if (isset($params['targetdate'])) {
-                $dt = new Carbon($params['targetdate']);
-            } else {
-                $dt = new Carbon();
-            }
-            if (isset($params['killvalue'])) {
-                $killvalue = $params['killvalue'];
-            } else {
-                $killvalue = false;
+            if (isset($request->keyparams)) {
+                $params = $request->keyparams;
+                // 適用期間日付の取得
+                $dt = null;
+                if (isset($params['targetdate'])) {
+                    $dt = new Carbon($params['targetdate']);
+                } else {
+                    $dt = new Carbon();
+                }
+                if (isset($params['killvalue'])) {
+                    $killvalue = $params['killvalue'];
+                }
             }
             $target_date = $dt->format('Ymd');
+
             // ログインユーザの権限取得
             $chk_user_id = Auth::user()->code;
             $role = $this->getUserRole($chk_user_id, $target_date);
-            if(!isset($role)) { return null; }
+            if(!isset($role)) {
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_setting_role');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
             $subquery1 = DB::table($this->table_departments)
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->selectRaw('code as code')
@@ -216,22 +335,22 @@ class ApiCommonController extends Controller
             }
 
             if($role == Config::get('const.C025.general_user')){
-                $departments = DB::table($this->table_departments)
+                $details = DB::table($this->table_departments)
                     ->JoinSub($subquery1, 't1', function ($join) { 
                         $join->on('t1.code', '=', $this->table_departments.'.code');
                         $join->on('t1.max_apply_term_from', '=', $this->table_departments.'.apply_term_from');
                     })
-                    ->Join('users', function ($join) { 
-                        $join->on('users.department_code', '=', $this->table_departments.'.code')
-                        ->where('users.is_deleted', '=', 0);
+                    ->Join($this->table_users, function ($join) { 
+                        $join->on($this->table_users.'.department_code', '=', $this->table_departments.'.code')
+                        ->where($this->table_users.'.is_deleted', '=', 0);
                     })
                     ->select($this->table_departments.'.code',$this->table_departments.'.name')
-                    ->where('users.code','=',$chk_user_id)
+                    ->where($this->table_users.'.code','=',$chk_user_id)
                     ->where($this->table_departments.'.is_deleted', 0)
                     ->orderby($this->table_departments.'.code','asc')
                     ->get();
             } else {
-                $departments = DB::table($this->table_departments)
+                $details = DB::table($this->table_departments)
                     ->select($this->table_departments.'.code',$this->table_departments.'.name')
                     ->JoinSub($subquery1, 't1', function ($join) { 
                         $join->on('t1.code', '=', $this->table_departments.'.code');
@@ -241,14 +360,19 @@ class ApiCommonController extends Controller
                     ->orderby($this->table_departments.'.code','asc')
                     ->get();
             }
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_departments, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
+            throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_departments, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
+            throw $e;
         }
-        return $departments;
     }
         
     /** ユーザー部署ロール取得（画面から）
@@ -256,18 +380,24 @@ class ApiCommonController extends Controller
      * @return list departments
      */
     public function getLoginUserDepartment(){
-        $mainquery = new Collection();
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
         try {
             // ログインユーザの権限取得
             $chk_user_id = Auth::user()->code;
-            $mainquery = $this->getUserDepartment($chk_user_id, null);
+            $details = $this->getUserDepartment($chk_user_id, null);
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\PDOException $pe){
-            return $mainquery;
+            throw $pe;
         }catch(\Exception $e){
             Log::error($e->getMessage());
-            return $mainquery;
+            throw $e;
         }
-        return $mainquery;
     }
         
     /** ユーザー権限取得（画面から）
@@ -275,7 +405,9 @@ class ApiCommonController extends Controller
      * @return list departments
      */
     public function getLoginUserRole(){
+        $this->array_messagedata = array();
         $role = null;
+        $result = true;
         try {
             // ログインユーザの権限取得
             $chk_user_id = Auth::user()->code;
@@ -283,14 +415,18 @@ class ApiCommonController extends Controller
             $dt = new Carbon();
             $target_date = $dt->format('Ymd');
             $role = $this->getUserRole($chk_user_id, $target_date);
+
+            return response()->json(
+                ['result' => $result, 'role' => $role,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\PDOException $pe){
-            return $role;
+            throw $pe;
         }catch(\Exception $e){
             Log::error($e->getMessage());
-            return $role;
+            throw $e;
         }
-        return $role;
-    }
+   }
         
     /** ユーザー権限取得
      *
@@ -306,81 +442,36 @@ class ApiCommonController extends Controller
                 $dt = new Carbon();
             }
             $target_date = $dt->format('Ymd');
-            $subquery1 = DB::table('users')
+            $subquery1 = DB::table($this->table_users)
                 ->selectRaw('code as code')
                 ->selectRaw('department_code as department_code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->where('apply_term_from', '<=',$target_date)
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code', 'department_code');
-            $userrole = DB::table('users')
+            $userrole = DB::table($this->table_users)
                 ->JoinSub($subquery1, 't1', function ($join) { 
-                    $join->on('t1.code', '=', 'users.code');
-                    $join->on('t1.department_code', '=', 'users.department_code');
-                    $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                    $join->on('t1.code', '=', $this->table_users.'.code');
+                    $join->on('t1.department_code', '=', $this->table_users.'.department_code');
+                    $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                 })
-                ->where('users.code', $user_id)
-                ->where('users.is_deleted', 0)
+                ->where($this->table_users.'.code', $user_id)
+                ->where($this->table_users.'.is_deleted', 0)
                 ->value('role');
             if(!isset($userrole)) { return null; }
+            return $userrole;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'users', Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'users', Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
 
-        return $userrole;
     }
-        
-    /** ユーザー勤怠管理取得
-     *
-     * @return list departments
-     */
-    public function getUserManagement($user_id, $target_date){
-        $usermanagement = null;
-        try {
-            // ユーザの権限取得
-            $dt = null;
-            if (isset($target_date)) {
-                $dt = new Carbon($target_date);
-            } else {
-                $dt = new Carbon();
-            }
-            $target_date = $dt->format('Ymd');
-            $subquery1 = DB::table('users')
-                ->selectRaw('code as code')
-                ->selectRaw('department_code as department_code')
-                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->where('apply_term_from', '<=',$target_date)
-                ->where('is_deleted', '=', 0)
-                ->groupBy('code', 'department_code');
-            $usermanagement = DB::table('users')
-                ->JoinSub($subquery1, 't1', function ($join) { 
-                    $join->on('t1.code', '=', 'users.code');
-                    $join->on('t1.department_code', '=', 'users.department_code');
-                    $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
-                })
-                ->where('users.code', $user_id)
-                ->where('users.is_deleted', 0)
-                ->value('management');
-            if(!isset($usermanagement)) { return null; }
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'users', Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-            Log::error($pe->getMessage());
-            return $usermanagement;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'users', Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-            Log::error($e->getMessage());
-            return $usermanagement;
-        }
 
-        return $usermanagement;
-    }
-        
     /** ユーザー部署取得
      *
      * @return list departments
@@ -398,34 +489,34 @@ class ApiCommonController extends Controller
             $subquery3 = $this->getUserApplyTermSubquery($target_date);
             // departmentsの最大適用開始日付subquery
             $subquery4 = $this->getDepartmentApplyTermSubquery($target_date);
-            $mainquery = DB::table('users')
+            $mainquery = DB::table($this->table_users)
                 ->select(
-                    'users.code as code',
-                    'users.name as name',
-                    'users.department_code as department_code',
+                    $this->table_users.'.code as code',
+                    $this->table_users.'.name as name',
+                    $this->table_users.'.department_code as department_code',
                     't2.name as department_name',
-                    'users.role as role')
+                    $this->table_users.'.role as role')
                 ->JoinSub($subquery3, 't1', function ($join) { 
-                    $join->on('t1.code', '=', 'users.code');
-                    $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                    $join->on('t1.code', '=', $this->table_users.'.code');
+                    $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                 })
                 ->JoinSub($subquery4, 't2', function ($join) { 
-                    $join->on('t2.code', '=', 'users.department_code');
+                    $join->on('t2.code', '=', $this->table_users.'.department_code');
                 })
-                ->where('users.code', $user_id)
-                ->where('users.is_deleted', 0)
+                ->where($this->table_users.'.code', $user_id)
+                ->where($this->table_users.'.is_deleted', 0)
                 ->get();
+                return $mainquery;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'users', Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'users', Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
             
-        return $mainquery;
     }
         
     /** ユーザーメールアドレス取得
@@ -443,34 +534,34 @@ class ApiCommonController extends Controller
                 $dt = new Carbon();
             }
             $target_date = $dt->format('Ymd');
-            $subquery1 = DB::table('users')
+            $subquery1 = DB::table($this->table_users)
                 ->selectRaw('code as code')
                 ->selectRaw('department_code as department_code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->where('apply_term_from', '<=',$target_date)
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code', 'department_code');
-            $useremail = DB::table('users')
+            $useremail = DB::table($this->table_users)
                 ->JoinSub($subquery1, 't1', function ($join) { 
-                    $join->on('t1.code', '=', 'users.code');
-                    $join->on('t1.department_code', '=', 'users.department_code');
-                    $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                    $join->on('t1.code', '=', $this->table_users.'.code');
+                    $join->on('t1.department_code', '=', $this->table_users.'.department_code');
+                    $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                 })
-                ->where('users.code', $user_id)
-                ->where('users.is_deleted', 0)
-                ->value('users.email');
+                ->where($this->table_users.'.code', $user_id)
+                ->where($this->table_users.'.is_deleted', 0)
+                ->value($this->table_users.'.email');
             if(!isset($useremail)) { return null; }
+            return $useremail;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'users', Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
-            return $useremail;
+            throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'users', Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
-            return $useremail;
+            throw $e;
         }
 
-        return $useremail;
     }
 
     /**
@@ -495,10 +586,10 @@ class ApiCommonController extends Controller
             }
             return $holiday_kbn;
         }catch(\PDOException $pe){
-            return $holiday_kbn;
+            throw $pe;
         }catch(\Exception $e){
             Log::error($e->getMessage());
-            return $holiday_kbn;
+            throw $e;
         }
     }
         
@@ -507,18 +598,24 @@ class ApiCommonController extends Controller
      * @return list departments
      */
     public function getCompanyInfoApply(Request $request){
-
-        $results = new Collection();
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
         try {
             $company_model = new Company();
-            $results = $company_model->getCompanyInfoApply();
+            $details = $company_model->getCompanyInfoApply();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\PDOException $pe){
-            return $results;
+            throw $pe;
         }catch(\Exception $e){
             Log::error($e->getMessage());
-            return $results;
+            throw $e;
         }
-        return $results;
+
     }
         
     /** ユーザー適用期間開始サブクエリー作成
@@ -537,7 +634,7 @@ class ApiCommonController extends Controller
             $target_date = $dt->format('Ymd');
 
             // usersの最大適用開始日付subquery
-            $subquery = DB::table('users')
+            $subquery = DB::table($this->table_users)
                 ->select('code as code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->where('apply_term_from', '<=',$target_date)
@@ -545,11 +642,11 @@ class ApiCommonController extends Controller
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'users', Config::get('const.LOG_MSG.subquery_illegal')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.subquery_illegal')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'users', Config::get('const.LOG_MSG.subquery_illegal')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.subquery_illegal')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -633,6 +730,7 @@ class ApiCommonController extends Controller
                     $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
                 })
                 ->where('t1.is_deleted', '=', 0);
+                return $subquery2;
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_working_timetables, Config::get('const.LOG_MSG.subquery_illegal')).'$pe');
             Log::error($pe->getMessage());
@@ -642,7 +740,6 @@ class ApiCommonController extends Controller
             Log::error($e->getMessage());
             throw $e;
         }
-        return $subquery2;
     }
 
     /**
@@ -651,22 +748,49 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getClosingDay(Request $request){
+        
+        $this->array_messagedata = array();
         $closing = null;
-        try {
+        $result = true;
+        try{
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'closing' => $closing,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['target_date'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "target_date", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'closing' => $closing,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $target_date = $params['target_date'];
             // 設定マスタより締め日取得
-            $target_date = $this->setRequestQeury($request->target_date);
+            $target_date = $this->setRequestQeury($params['target_date']);
             $setting_model = new Setting();
             $target_dateYmd = new Carbon($target_date.'15');
             $setting_model->setParamFiscalmonthAttribute(date_format($target_dateYmd, 'm'));
             $setting_model->setParamYearAttribute(date_format($target_dateYmd, 'Y'));
             $closing = $setting_model->getMonthClosing();
-        }catch(\PDOException $pe){
+            return response()->json(
+                ['result' => true, 'closing' => $closing,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
             return $closing;
+        }catch(\PDOException $pe){
+            throw $pe;
         }catch(\Exception $e){
             Log::error($e->getMessage());
-            return $closing;
+            throw $e;
         }
-        return $closing;
     }
 
     /**
@@ -684,31 +808,13 @@ class ApiCommonController extends Controller
             $setting_model->setParamFiscalmonthAttribute(date_format($target_dateYmd, 'm'));
             $setting_model->setParamYearAttribute(date_format($target_dateYmd, 'Y'));
             $closing = $setting_model->getMonthClosing();
-        }catch(\PDOException $pe){
             return $closing;
+        }catch(\PDOException $pe){
+            throw $pe;
         }catch(\Exception $e){
             Log::error($e->getMessage());
-            return $closing;
+            throw $e;
         }
-        return $closing;
-    }
-
-    /** 雇用形態リスト取得
-     *
-     * @return list statuses
-     */
-    public function getEmploymentStatusList(){
-        $statuses =  new Collection();
-        try {
-            $statuses = DB::table($this->table_generalcodes)->where('identification_id', Config::get('const.C001.value'))->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-            Log::error($pe->getMessage());
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-            Log::error($e->getMessage());
-        }
-        return $statuses;
     }
 
     /**
@@ -717,17 +823,24 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getTimeTableList(){
-        $results = new Collection();
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
         try {
             $time_tables = new WorkingTimeTable();
-            $results = $time_tables->getTimeTables();
+            $details = $time_tables->getTimeTables();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\PDOException $pe){
-            return $results;
+            throw $pe;
         }catch(\Exception $e){
             Log::error($e->getMessage());
-            return $results;
+            throw $e;
         }
-        return $results;
+
     }
 
     /**
@@ -736,17 +849,30 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getBusinessDayList(){
-        $businessDays = new Collection();
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
         try {
-            $businessDays = DB::table($this->table_generalcodes)->where('identification_id', Config::get('const.C007.value'))->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+            $details =
+                DB::table($this->table_generalcodes)
+                    ->where('identification_id', Config::get('const.C007.value'))
+                    ->where('is_deleted', 0)
+                    ->orderby('sort_seq','asc')
+                    ->get();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
+            throw $pe;
         }catch(\Exception $e){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
+            throw $e;
         }
-        return $businessDays;
     }
     
     /**
@@ -755,55 +881,30 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getHoliDayList(){
-        $holiDays = new Collection();
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
         try {
-            $holiDays = DB::table($this->table_generalcodes)->where('identification_id', Config::get('const.C008.value'))->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-            Log::error($pe->getMessage());
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-            Log::error($e->getMessage());
-        }
-        return $holiDays;
-    }
+            $details =
+                DB::table($this->table_generalcodes)
+                    ->where('identification_id', Config::get('const.C008.value'))
+                    ->where('is_deleted', 0)
+                    ->orderby('sort_seq','asc')
+                    ->get();
 
-    /**
-     * 時間単位リスト取得
-     *
-     * @return list
-     */
-    public function getTimeUnitList(){
-        $timeUnits = new Collection();
-        try {
-            $timeUnits = DB::table($this->table_generalcodes)->where('identification_id', 'C009')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
+            throw $pe;
         }catch(\Exception $e){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
+            throw $e;
         }
-        return $timeUnits;
-    }
-
-    /**
-     * 時間の丸めリスト取得
-     *
-     * @return list
-     */
-    public function getTimeRoundingList(){
-        $timeRounds = new Collection();
-        try {
-            $timeRounds = DB::table($this->table_generalcodes)->where('identification_id', 'C010')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-            Log::error($pe->getMessage());
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-            Log::error($e->getMessage());
-        }
-        return $timeRounds;
     }
 
     /**
@@ -812,17 +913,30 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getUserLeaveKbnList(){
-        $userLeaveKbnList = new Collection();
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
         try {
-            $userLeaveKbnList = DB::table($this->table_generalcodes)->where('identification_id', 'C013')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+            $details =
+                DB::table($this->table_generalcodes)
+                    ->where('identification_id', 'C013')
+                    ->where('is_deleted', 0)
+                    ->orderby('sort_seq','asc')
+                    ->get();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
+            throw $pe;
         }catch(\Exception $e){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
+            throw $e;
         }
-        return $userLeaveKbnList;
     }
 
     /**
@@ -831,17 +945,30 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getModeList(){
-        $modeList = new Collection();
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
         try {
-            $modeList = DB::table($this->table_generalcodes)->where('identification_id', 'C005')->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+            $details =
+                DB::table($this->table_generalcodes)
+                    ->where('identification_id', 'C005')
+                    ->where('is_deleted', 0)
+                    ->orderby('sort_seq','asc')
+                    ->get();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
+            throw $pe;
         }catch(\Exception $e){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
+            throw $e;
         }
-        return $modeList;
     }
 
     /**
@@ -850,18 +977,40 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getRequestGeneralList(Request $request){
-        $results = new Collection();
-        try {
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try{
             // パラメータチェック
-            if (!isset($request->identificationid)) { return null; }
-            $results = $this->getGeneralList($request->identificationid);
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['identificationid'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "identificationid", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $details = $this->getGeneralList($params['identificationid']);
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\PDOException $pe){
-            return $results;
+            throw $pe;
         }catch(\Exception $e){
             Log::error($e->getMessage());
-            return $results;
+            throw $e;
         }
-        return $results;
     }
 
     /**
@@ -870,17 +1019,24 @@ class ApiCommonController extends Controller
      * @return list
      */
     public function getGeneralList($identification_id){
-        $codeList = new Collection();
+        $details = new Collection();
         try {
-            $codeList = DB::table($this->table_generalcodes)->where('identification_id', $identification_id)->where('is_deleted', 0)->orderby('sort_seq','asc')->get();
+            $details =
+                DB::table($this->table_generalcodes)
+                    ->where('identification_id', $identification_id)
+                    ->where('is_deleted', 0)
+                    ->orderby('sort_seq','asc')
+                    ->get();
+            return $details;
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
+            throw $pe;
         }catch(\Exception $e){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
+            throw $e;
         }
-        return $codeList;
     }
 
     /**

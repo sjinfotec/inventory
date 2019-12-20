@@ -2,30 +2,31 @@
   <div>
     <!-- main contentns row -->
     <div class="row justify-content-between">
+      <!-- ========================== 検索部 START ========================== -->
       <!-- .panel -->
       <div class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
-          <div class="card-header bg-transparent pb-0 border-0">
-            <h1 class="float-sm-left font-size-rg">シフトの割り当てを編集する</h1>
-            <span class="float-sm-right font-size-sm">勤務時間設定で登録したタイムテーブルを割り当てることができます</span>
-          </div>
+          <daily-working-information-panel-header
+            v-bind:header-text1="'シフトの割り当てを編集する'"
+            v-bind:header-text2="'勤務時間設定で登録したタイムテーブルを割り当てることができます'"
+          ></daily-working-information-panel-header>
           <!-- /.panel header -->
-          <div class="card-body pt-2" v-if="errors.length">
-            <!-- panel contents -->
+          <div class="card-body pt-2">
+            <!-- ----------- メッセージ部 START ---------------- -->
             <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-12 pb-2">
-                <ul class="error-red">
-                  <li v-for="(error,index) in errors" v-bind:key="index">{{ error }}</li>
+            <div class="row justify-content-between" v-if="messagevalidatesSearch.length">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <ul class="error-red color-red">
+                  <li v-for="(messagevalidate,index) in messagevalidatesSearch" v-bind:key="index">{{ messagevalidate }}</li>
                 </ul>
               </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
-          </div>
-          <div class="card-body pt-2">
+            <!-- ----------- メッセージ部 END ---------------- -->
+            <!-- ----------- 選択リスト START ---------------- -->
             <!-- panel contents -->
             <!-- .row -->
             <div class="row justify-content-between">
@@ -33,54 +34,18 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <label
-                      class="input-group-text font-size-sm line-height-xs label-width-120"
-                      for="inputGroupSelect01"
-                    >所属部署<span class="color-red">[必須]</span></label>
-                  </div>
-                  <select-department
-                    ref="selectdepartment"
-                    v-bind:blank-data="true"
-                    v-on:change-event="departmentChanges"
-                  ></select-department>
-                </div>
-              </div>
-              <!-- /.col -->
-              <!-- .col -->
-              <div class="col-md-6 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
                     <span
-                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                      for="shift_start"
-                    >社員名<span class="color-red">[必須]</span></span>
-                  </div>
-                  <select-user
-                    ref="selectuser"
-                    v-bind:blank-data="true"
-                    v-bind:get-Do="getDo"
-                    v-on:change-event="userChanges"
-                  ></select-user>
-                </div>
-              </div>
-              <!-- /.col -->
-              <!-- .col -->
-              <div class="col-md-6 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span
-                      class="input-group-text font-size-sm line-height-xs label-width-120"
-                      id="basic-addon1"
-                      for="shift_end"
                     >開始日付<span class="color-red">[必須]</span></span>
                   </div>
-                  <datepicker
-                    :language="ja"
-                    :value="this.default"
-                    :format="DatePickerFormat"
-                    v-model="from"
-                  ></datepicker>
+                  <input-datepicker
+                    v-bind:default-date="valuefromdate"
+                    v-bind:date-format="DatePickerFormat"
+                    v-bind:place-holder="'開始日付を選択してください'"
+                    v-on:change-event="fromdateChanges"
+                    v-on:clear-event="fromdateCleared"
+                  ></input-datepicker>
                 </div>
               </div>
               <!-- /.col -->
@@ -89,17 +54,66 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                      for="shift_end"
                     >終了日付<span class="color-red">[必須]</span></span>
                   </div>
-                  <datepicker
-                    :language="ja"
-                    :value="this.default"
-                    :format="DatePickerFormat"
-                    v-model="to"
-                  ></datepicker>
+                  <input-datepicker
+                    v-bind:default-date="valuetodate"
+                    v-bind:date-format="DatePickerFormat"
+                    v-bind:place-holder="'終了日付を選択してください'"
+                    v-on:change-event="fromtoChanges"
+                    v-on:clear-event="fromtoCleared"
+                  ></input-datepicker>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span
+                    class="input-group-text font-size-sm line-height-xs label-width-150"
+                    id="basic-addon1"
+                    >所属部署<span class="color-red">[登録時必須]</span></span>
+                  </div>
+                  <select-departmentlist v-if="showdepartmentlist"
+                    ref="selectdepartmentlist"
+                    v-bind:blank-data="true"
+                    v-bind:placeholder-data="'部署を選択してください'"
+                    v-bind:selected-department="selectedDepartmentValue"
+                    v-bind:add-new="false"
+                    v-bind:date-value="applytermdate"
+                    v-bind:kill-value="valueDepartmentkillcheck"
+                    v-bind:row-index=0
+                    v-on:change-event="departmentChanges"
+                  ></select-departmentlist>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
+                    class="input-group-text font-size-sm line-height-xs label-width-150"
+                    for="target_users"
+                    >氏 　 　名<span class="color-red">[必須]</span></label>
+                  </div>
+                  <select-userlist v-if="showuserlist"
+                    ref="selectuserlist"
+                    v-bind:blank-data="true"
+                    v-bind:placeholder-data="'氏名を選択してください'"
+                    v-bind:selected-value="selectedUserValue"
+                    v-bind:add-new="false"
+                    v-bind:get-do="1"
+                    v-bind:date-value="applytermdate"
+                    v-bind:kill-value="valueUserkillcheck"
+                    v-bind:row-index=0
+                    v-bind:department-value="selectedDepartmentValue"
+                    v-bind:employment-value="''"
+                    v-on:change-event="userChanges"
+                  ></select-userlist>
                 </div>
               </div>
               <!-- /.col -->
@@ -108,20 +122,37 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                      class="input-group-text font-size-sm line-height-xs label-width-120"
-                      id="basic-addon1"
-                      for="shift_start"
-                    >シフト選択</span>
+                    class="input-group-text font-size-sm line-height-xs label-width-150"
+                    id="basic-addon1"
+                    >タイムテーブル選択</span>
                   </div>
-                  <select class="form-control" v-model="timeTable">
-                    <option></option>
-                    <option
-                      v-for="option in timeTableList"
-                      v-bind:value="{no: option.no, name: option.name,apply_term_from:option.apply_term_from}"
-                      v-bind:key="option.no"
-                    >{{ option.name }}</option>
-                  </select>
+                  <select-timetablelist v-if="showtimetablelist"
+                    ref="selecttimetablelist"
+                    v-bind:blank-data="true"
+                    v-bind:placeholder-data="'タイムテーブルを選択してください'"
+                    v-bind:setting-value="selectedTimetableValue"
+                    v-bind:add-new="false"
+                    v-bind:date-value="''"
+                    v-bind:kill-value="valueTimetablekillcheck"
+                    v-bind:row-index=0
+                    v-on:change-event="timetableChanges"
+                  ></select-timetablelist>
                 </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- ----------- 選択リスト END ---------------- -->
+            <!-- ----------- ボタン部 START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <btn-work-time
+                  v-on:condstoreclick-event="condstoreClick"
+                  v-bind:btn-mode="'condstore'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
               </div>
               <!-- /.col -->
             </div>
@@ -130,52 +161,36 @@
             <div class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
-                <div class="btn-group d-flex">
-                  <button
-                    type="button"
-                    class="btn btn-success btn-lg font-size-rg w-100"
-                    @click="Storeclick()"
-                  >この条件で登録する</button>
-                </div>
+                <btn-work-time
+                  v-on:searchclick-event="searchClick"
+                  v-bind:btn-mode="'search'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
               </div>
-              <div class="col-md-12 pb-2">
-                <div class="btn-group d-flex">
-                  <button
-                    type="button"
-                    class="btn btn-primary btn-lg font-size-rg w-100"
-                    @click="getUserShift()"
-                  >指定した期間のシフトを表示する</button>
-                </div>
-              </div>
-              <!-- <div class="col-md-12 pb-2">
-                <div class="btn-group d-flex">
-                  <button
-                    type="button"
-                    class="btn btn-danger btn-lg font-size-rg w-100"
-                    @click="alertRangeDelConf('info')"
-                  >指定した期間を削除する</button>
-                </div>
-              </div> -->
               <!-- /.col -->
             </div>
+            <!-- /.row -->
+            <!-- ----------- ボタン部 END ---------------- -->
             <!-- /.row -->
             <!-- /.panel contents -->
           </div>
         </div>
       </div>
       <!-- /.panel -->
+      <!-- ========================== 検索部 END ========================== -->
     </div>
     <!-- /main contentns row -->
+    <!-- ========================== 編集部 START ========================== -->
     <!-- main contentns row -->
-    <div class="row justify-content-between" v-if="shiftInfo.length ">
+    <div class="row justify-content-between" v-if="details.length ">
       <!-- .panel -->
       <div class="col-md pt-3 align-self-stretch">
         <div class="card shadow-pl">
           <!-- panel header -->
-          <div class="card-header bg-transparent pt-3 border-0">
-            <h1 class="float-sm-left font-size-rg">登録済みシフト</h1>
-            <span class="float-sm-right font-size-sm">シフト割り当てされたタイムテーブルの一覧です</span>
-          </div>
+          <daily-working-information-panel-header
+            v-bind:header-text1="'登録済みシフト'"
+            v-bind:header-text2="'シフト割り当てされたタイムテーブルの一覧です'"
+          ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <!-- panel body -->
           <div class="card-body mb-3 p-0 border-top">
@@ -192,7 +207,7 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="item in shiftInfo" v-bind:key="item.id">
+                      <tr v-for="item in details" v-bind:key="item.id">
                         <input type="hidden" v-model="item.id" />
                         <td class="text-center align-middle">{{item.date_name}}</td>
                         <td class="text-center align-middle">{{item.working_timetable_name}}</td>
@@ -211,368 +226,412 @@
       </div>
       <!-- /main contentns row -->
     </div>
+    <!-- ========================== 編集部 END ========================== -->
   </div>
 </template>
 <script>
 import toasted from "vue-toasted";
 import moment from "moment";
-import Datepicker from "vuejs-datepicker";
-import { ja } from "vuejs-datepicker/dist/locale";
+import {dialogable} from '../mixins/dialogable.js';
+import {checkable} from '../mixins/checkable.js';
+import {requestable} from '../mixins/requestable.js';
 
 export default {
   name: "SettingShiftTime",
+  mixins: [ dialogable, checkable, requestable ],
   data() {
     return {
-      ja: ja,
-      default: new Date(),
-      DatePickerFormat: "yyyy年MM月dd日",
-      from: "",
-      to: "",
-      shiftTimes: [],
-      userList: [],
-      shiftInfo: [],
-      timeTableList: [],
-      csvData: [{}],
-      selectedUser: "",
-      timeTable: [{}],
-      errors: [],
-      valuedepartment: "",
-      valueemploymentstatus: "",
-      getDo: 1,
-      valueuser: "",
+      getDo : 1,
+      selectedDepartmentValue : "",
+      valueDepartmentkillcheck : false,
+      showdepartmentlist: true,
+      selectedUserValue : "",
+      showuserlist: true,
+      valueUserkillcheck : false,
+      selectedTimetableValue : "",
+      valueTimetablekillcheck : false,
+      showtimetablelist: true,
+      valuefromdate: "",
+      valuetodate: "",
+      applytermdate: "",
+      getDo : 1,
+      details: [],
+      messagevalidatesSearch: [],
       closingYm: "",
       closingYmd: "",
+      DatePickerFormat: "yyyy年MM月dd日",
+      defaultfromDate: new Date(),
+      defaulttoDate: new Date(),
       dt: "",
-      validate: false
+      shift_informations: {
+        working_timetable_no: "",
+        user_code: "",
+        department_code: "",
+        target_date_from: "",
+        target_date_to: ""
+      },
     };
-  },
-  components: {
-    Datepicker
   },
   // マウント時
   mounted() {
-    console.log("create shift time Component mounted.");
-    this.getTimeTableList();
-    this.getUserList();
+    this.valuefromdate = this.defaultfromDate;
+    this.valuetodate = this.defaulttoDate;
   },
   methods: {
-    // バリデーション
-    checkForm: function() {
-      var flag = true;
-      this.errors = [];
-
-      if (!this.valuedepartment) {
-        flag = false;
-        this.errors.push("所属部署を選択してください");
-      }
-      if (!this.selectedUser) {
-        flag = false;
-        this.errors.push("社員名を選択してください");
-      }
-      if (!this.timeTable.no) {
-        flag = false;
-        this.errors.push("登録する場合はシフト選択を選択してください");
-      }
-      if (!this.from) {
-        flag = false;
-        this.errors.push("開始日付を入力してください");
-      }
-      if (!this.to) {
-        flag = false;
-        this.errors.push("終了日付を入力してください");
-      }
-      if (flag) {
-        if (this.from > this.to) {
-          flag = false;
-          this.errors.push("開始日付＞終了日付となっています");
-        }
-      }
-
-      return flag;
-    },
-    // 検索・削除のバリデーション
+    // ------------------------ バリデーション ------------------------------------
+    // 検索時のバリデーション
     checkFormSearch: function() {
+      this.messagevalidatesSearch = [];
+      var chkArray = [];
       var flag = true;
-      this.errors = [];
-
-      if (!this.valuedepartment) {
-        flag = false;
-        this.errors.push("所属部署を選択してください");
+      // 開始日付
+      var required = true;
+      var equalength = 0;
+      var maxlength = 0;
+      var itemname = '開始日付';
+      chkArray = 
+        this.checkHeader(this.valuefromdate, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesSearch.length == 0) {
+          this.messagevalidatesSearch = chkArray;
+        } else {
+          this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
+        }
       }
-      if (!this.selectedUser) {
-        flag = false;
-        this.errors.push("社員名を選択してください");
+      // 終了日付
+      var required = true;
+      var equalength = 0;
+      var maxlength = 0;
+      var itemname = '終了日付';
+      chkArray = 
+        this.checkHeader(this.valuetodate, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesSearch.length == 0) {
+          this.messagevalidatesSearch = chkArray;
+        } else {
+          this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
+        }
       }
-      if (!this.from) {
-        flag = false;
-        this.errors.push("開始日付を入力してください");
+      // 氏名
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '氏名';
+      chkArray = 
+        this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesSearch.length == 0) {
+          this.messagevalidatesSearch = chkArray;
+        } else {
+          this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
+        }
       }
-      if (!this.to) {
-        flag = false;
-        this.errors.push("終了日付を入力してください");
+      if (this.messagevalidatesSearch.length > 0) {
+        flag  = false;
       }
       if (flag) {
-        if (this.from > this.to) {
+        if (this.valuefromdate > this.valuetodate) {
           flag = false;
-          this.errors.push("開始日付＞終了日付となっています");
+          this.messagevalidatesSearch.push("開始日付＞終了日付となっています");
         }
       }
+      if (this.messagevalidatesSearch.length > 0) {
+        flag  = false;
+      }
+
       return flag;
     },
-    alert: function(state, message, title) {
-      this.$swal(title, message, state);
-    },
-    /*alertRangeDelConf: function(state) {
-      this.validate = this.checkFormSearch();
-      if (this.validate) {
-        this.$swal({
-          title: "確認",
-          text: "選択した日付範囲のシフトを削除しますか？",
-          icon: state,
-          buttons: true,
-          dangerMode: true
-        }).then(willDelete => {
-          if (willDelete) {
-            this.rangeDell();
-          } else {
-          }
-        });
-      } else {
-      }
-    },
-    alertDelConf: function(state, id) {
-      this.$swal({
-        title: "確認",
-        text: "シフトを削除しますか？",
-        icon: state,
-        buttons: true,
-        dangerMode: true
-      }).then(willDelete => {
-        if (willDelete) {
-          this.delShiftTimes(id);
+    // 登録時のバリデーション
+    checkFormStore: function() {
+      this.messagevalidatesSearch = [];
+      var chkArray = [];
+      var flag = true;
+      // 開始日付
+      var required = true;
+      var equalength = 0;
+      var maxlength = 0;
+      var itemname = '開始日付';
+      chkArray = 
+        this.checkHeader(this.valuefromdate, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesSearch.length == 0) {
+          this.messagevalidatesSearch = chkArray;
         } else {
+          this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
         }
-      });
-    }, */
-    // 登録ボタン押下
-    Storeclick() {
-      this.validate = this.checkForm();
-      if (this.validate) {
-        this.closingYm = moment(new Date()).subtract(1, 'M').format('YYYYMM');
-        this.$axios
-          .get("/get_closing_day", {
-            params: {
-              target_date: this.closingYm
-            }
-          })
-          .then(response => {
-            var res = response.data;
-            this.closingYmd =String(this.closingYm) + String(res);
-            this.dt = moment(this.from).format('YYYYMMDD');
-            if (this.closingYmd >= this.dt) {
-              this.store_warniong_confirm();
-            } else {
-              this.store_confirm();
-            }
-          })
-          .catch(reason => {
-            this.alert("error", "締日取得エラー。集計方法基本設定の締日設定を確認してください。", "エラー");
-          });
       }
-    },
-    store_confirm: function(state) {
-      this.$swal({
-        title: "確認",
-        text: "このデータで登録しますか？",
-        icon: state,
-        buttons: true,
-        dangerMode: true
-      }).then(result  => {
-        if (result) {
-          this.StoreShiftTime();
+      // 終了日付
+      var required = true;
+      var equalength = 0;
+      var maxlength = 0;
+      var itemname = '終了日付';
+      chkArray = 
+        this.checkHeader(this.valuetodate, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesSearch.length == 0) {
+          this.messagevalidatesSearch = chkArray;
+        } else {
+          this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
         }
-      });
-    },
-    store_warniong_confirm: function(state) {
-      this.$swal({
-        title: "確認",
-        text: "前月の締日" + moment(this.closingYmd).format('YYYY年MM月DD日') + "以前のデータが含まれますが" + "\n" + "前月締日以前のデータは自動集計されません" + "\n" + "登録しますか？",
-        icon: state,
-        buttons: true,
-        dangerMode: true
-      }).then(result  => {
-        if (result) {
-          this.StoreShiftTime();
-        }
-      });
-    },
-    // 登録
-    StoreShiftTime() {
-      this.fromdate = ""
-      if (this.from) {
-        this.fromdate = moment(this.from).format("YYYYMMDD");
       }
-      this.todate = ""
-      if (this.to) {
-        this.todate = moment(this.to).format("YYYYMMDD");
-      }
-      this.$axios
-        .post("/setting_shift_time/store", {
-          user_code: this.selectedUser,
-          department_code: this.valuedepartment,
-          time_table_no: this.timeTable.no,
-          apply_term_from: this.timeTable.apply_term_from,
-          from: this.fromdate,
-          to: this.todate
-        })
-        .then(response => {
-          var res = response.data;
-          console.log(res.result);
-          if (res.result == 0) {
-            this.$toasted.show("シフトを登録しました");
-            this.errors = [];
-            this.getUserShift(this.selectedUser);
-          } else {
-            this.alert("error", "シフトの登録に失敗しました", "エラー");
-          }
-        })
-        .catch(reason => {
-          this.alert("error", "シフト登録に失敗しました", "エラー");
-        });
-    },
-    // ユーザーリスト
-    getUserList() {
-      this.$refs.selectuser.getUserList(this.getDo, "");
-    },
-    // タイムテーブルリスト
-    getTimeTableList() {
-      this.$axios
-        .get("/get_time_table_list")
-        .then(response => {
-          this.timeTableList = response.data;
-        })
-        .catch(reason => {
-          alert("error");
-        });
-    },
-    // ユーザーリスト変更時
-    getUserShift: function() {
-      this.validate = this.checkFormSearch();
-      if (this.validate) {
-        this.fromdate = ""
-        if (this.from) {
-          this.fromdate = moment(this.from).format("YYYYMMDD");
+      // 部署
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '部署';
+      chkArray = 
+        this.checkHeader(this.selectedDepartmentValue, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesSearch.length == 0) {
+          this.messagevalidatesSearch = chkArray;
+        } else {
+          this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
         }
-        this.todate = ""
-        if (this.to) {
-          this.todate = moment(this.to).format("YYYYMMDD");
-        }
-        this.$axios
-          .post("/get_user_shift", {
-            code: this.selectedUser,
-            from: this.fromdate,
-            to: this.todate,
-            no: this.timeTable.no
-          })
-          .then(response => {
-            this.shiftInfo = response.data;
-            console.log("this.shiftInfo length = " + this.shiftInfo.length);
-            this.errors = [];
-          })
-          .catch(reason => {});
-      } else {
       }
+      // 氏名
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '氏名';
+      chkArray = 
+        this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesSearch.length == 0) {
+          this.messagevalidatesSearch = chkArray;
+        } else {
+          this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
+        }
+      }
+      // タイムテーブル
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = 'タイムテーブル';
+      chkArray = 
+        this.checkHeader(this.selectedTimetableValue, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesSearch.length == 0) {
+          this.messagevalidatesSearch = chkArray;
+        } else {
+          this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
+        }
+      }
+      if (this.messagevalidatesSearch.length > 0) {
+        flag  = false;
+      }
+      if (flag) {
+        if (this.valuefromdate > this.valuetodate) {
+          flag = false;
+          this.messagevalidatesSearch.push("開始日付＞終了日付となっています");
+        }
+      }
+      if (this.messagevalidatesSearch.length > 0) {
+        flag  = false;
+      }
+
+      return flag;
+    },
+    // ------------------------ イベント処理 ------------------------------------
+    
+    // 開始日付が変更された場合の処理
+    fromdateChanges: function(value) {
+      this.valuefromdate = value;
+    },
+    // 開始日付がクリアされた場合の処理
+    fromdateCleared: function() {
+      this.valuefromdate = "";
+    },
+    // 終了日付が変更された場合の処理
+    fromtoChanges: function(value, arrayitem) {
+      this.valuetodate = value;
+    },
+    // 終了日付がクリアされた場合の処理
+    fromtoCleared: function() {
+      this.valuetodate = "";
     },
     // 部署選択が変更された場合の処理
-    departmentChanges: function(value) {
-      this.valuedepartment = value;
-      this.valueuser = "";
+    departmentChanges: function(value, arrayitem) {
+      this.selectedDepartmentValue = value;
+      // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
-      this.fromdate = ""
-      if (this.from) {
-        this.fromdate = moment(this.from).format("YYYYMMDD");
+      this.getUserSelected();
+    },
+    // ユーザー選択が変更された場合の処理
+    userChanges: function(value, arrayitem) {
+      this.messagevalidatesSearch = [];
+      this.selectedUserValue = value;
+    },
+    // タイムテーブル選択が変更された場合の処理
+    timetableChanges: function(value, arrayitem) {
+      this.messagevalidatesSearch = [];
+      this.selectedTimetableValue = value;
+    },
+    // 検索ボタン押下
+    searchClick: function() {
+      var flag = this.checkFormSearch();
+      if (flag) {
+        this.getItem();
       }
-      if (this.valueemploymentstatus == "") {
-        if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserList(this.getDo, this.valueuser, this.fromdate);
-        } else {
-          this.$refs.selectuser.getUserListByDepartment(
-            this.getDo,
-            this.valuedepartment,
-            this.valueuser,
-            this.fromdate
-          );
+    },
+    // 登録ボタン押下
+    condstoreClick() {
+      var flag = this.checkFormStore();
+      if (flag) {
+        this.getclosingItem();
+      }
+    },
+    // 通常登録確認
+    store_confirm: function() {
+      var messages = [];
+      messages.push("このデータで登録しますか？");
+      this.messageswal("確認", messages, "info", true, true, true)
+        .then(result  => {
+          if (result) {
+            this.store("追加");
+          }
+      });
+    },
+    // 締日登録確認
+    store_warniong_confirm: function(state) {
+      var messages = [];
+      messages.push("前月の締日" + moment(this.closingYmd).format('YYYY年MM月DD日') + "以前のデータが含まれますが");
+      messages.push("前月締日以前のデータは自動集計されません");
+      messages.push("月次集計での手動集計が必要となります");
+      messages.push("このデータで登録しますか？");
+      this.messageswal("確認", messages, "info", true, true, true)
+        .then(result  => {
+          if (result) {
+            this.store("追加");
+          }
+      });
+    },
+    // -------------------- サーバー処理 ----------------------------
+    // シフト取得処理
+    getItem() {
+      this.fromdate = ""
+      if (this.valuefromdate) {
+        this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
+      }
+      this.todate = ""
+      if (this.valuetodate) {
+        this.todate = moment(this.valuetodate).format("YYYYMMDD");
+      }
+      var arrayParams = { code : this.selectedUserValue, no : this.selectedTimetableValue, from: this.fromdate, to: this.todate };
+      this.postRequest("/get_user_shift", arrayParams)
+        .then(response  => {
+          this.getThen(response);
+        })
+        .catch(reason => {
+          this.serverCatch("シフト", "取得");
+        });
+    },
+    // 締日取得処理
+    getclosingItem() {
+      this.closingYm = moment(new Date()).subtract(1, 'M').format('YYYYMM');
+      var arrayParams = { target_date: this.closingYm };
+      this.postRequest("/get_closing_day", arrayParams)
+        .then(response  => {
+          this.getThenclosing(response);
+        })
+        .catch(reason => {
+          this.serverCatch("ユーザ", "取得");
+        });
+    },
+    // シフト登録処理
+    store() {
+      this.fromdate = ""
+      if (this.valuefromdate) {
+        this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
+      }
+      this.todate = ""
+      if (this.valuetodate) {
+        this.todate = moment(this.valuetodate).format("YYYYMMDD");
+      }
+      this.shift_informations['working_timetable_no'] = this.selectedTimetableValue;
+      this.shift_informations['user_code'] = this.selectedUserValue;
+      this.shift_informations['department_code'] = this.selectedDepartmentValue;
+      this.shift_informations['shift_start_time'] = this.fromdate;
+      this.shift_informations['shift_end_time'] = this.todate;
+      var arrayParams = { form : this.shift_informations };
+      this.postRequest("/setting_shift_time/store", arrayParams)
+        .then(response  => {
+          this.putThenHead(response, "登録");
+        })
+        .catch(reason => {
+          this.serverCatch("シフト", "登録");
+        });
+    },
+
+    // -------------------- 共通 ----------------------------
+    // ユーザー選択コンポーネント取得メソッド
+    getUserSelected: function() {
+      this.$refs.selectuserlist.getList(
+        '',
+        this.valueUserkillcheck,
+        this.getDo,
+        this.selectedDepartmentValue,
+        ''
+      );
+    },
+    // 取得正常処理（シフト）
+    getThen(response) {
+      this.details = [];
+      var res = response.data;
+      if (res.result) {
+        this.details = res.details;
+        if (this.details.length == 0) {
+          var messages = [];
+          messages.push("該当期間に登録されている期間はありません");
+          this.messageswal("エラー", messages, "error", true, false, true);
         }
       } else {
-        if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserListByEmployment(
-            this.getDo,
-            this.valueemploymentstatus,
-            this.valueuser,
-            this.fromdate
-          );
+        if (res.messagedata.length > 0) {
+          this.messageswal("エラー", res.messagedata, "error", true, false, true);
         } else {
-          this.$refs.selectuser.getUserListByDepartmentEmployment(
-            this.getDo,
-            this.valuedepartment,
-            this.valueemploymentstatus,
-            this.valueuser,
-            this.fromdate
-          );
+          this.serverCatch("シフト", "取得");
         }
       }
     },
-    // ユーザー選択が変更された場合の処理
-    userChanges: function(value) {
-      this.valueuser = value;
+    // 取得正常処理（締日）
+    getThenclosing(response) {
+      this.details = [];
+      var res = response.data;
+      if (res.result) {
+        this.closingYmd =String(this.closingYm) + String(res.closing);
+        this.dt = moment(this.valuefromdate).format('YYYYMMDD');
+        if (this.closingYmd >= this.dt) {
+          this.store_warniong_confirm();
+        } else {
+          this.store_confirm();
+        }
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+        } else {
+          this.serverCatch("締日", "取得");
+        }
+      }
     },
-    // 削除
-    delShiftTimes: function(itemid) {
-      console.log(itemid);
-      this.$axios
-        .post("/setting_shift_time/del", {
-          id: itemid
-        })
-        .then(response => {
-          var res = response.data;
-          if (res.result == 0) {
-            this.$toasted.show("シフトを削除しました");
-            this.getUserShift();
-            this.errors = [];
-          } else {
-          }
-        })
-        .catch(reason => {});
+    // 登録正常処理
+    putThenHead(response, eventtext) {
+      var messages = [];
+      var res = response.data;
+      if (res.result) {
+        messages.push("シフトを" + eventtext + "しました");
+        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+        } else {
+          this.serverCatch("シフト",eventtext);
+        }
+      }
     },
-    // 範囲削除
-    /*rangeDell: function() {
-      this.$axios
-        .post("/setting_shift_time/range_del", {
-          user_code: this.selectedUser,
-          from: this.from,
-          to: this.to
-        })
-        .then(response => {
-          var res = response.data;
-          if (res.result == 0) {
-            this.alert(
-              "success",
-              "選択した日付のシフトを削除しました",
-              "削除成功"
-            );
-            this.getUserShift();
-            this.errors = [];
-          } else {
-            this.alert("error", "削除に失敗しました", "エラー");
-          }
-        })
-        .catch(reason => {});
-    }, */
-    // ユーザー選択が変更された場合の処理
-    userChanges: function(value) {
-      this.selectedUser = value;
-      // this.getUserShift(value);
-      console.log("userChanges = " + value);
+    // 異常処理
+    serverCatch(kbn, eventtext) {
+      var messages = [];
+      messages.push(kbn + "情報" + eventtext + "に失敗しました");
+      this.messageswal("エラー", messages, "error", true, false, true);
     }
   }
 };

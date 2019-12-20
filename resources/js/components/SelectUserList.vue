@@ -5,7 +5,7 @@
     <option v-if="this.blankData" value=""></option>
     <!-- 項目設定 -->
     <option v-for="(item, index) in itemList" v-bind:value="item.code">
-      {{ item.code_name }}
+      {{ item.name }}
     </option>
   </select>
 </template>
@@ -16,7 +16,7 @@ import {dialogable} from '../mixins/dialogable.js';
 import {requestable} from '../mixins/requestable.js';
 
 export default {
-  name: "selectGeneralList",
+  name: "selecUserList",
   mixins: [ dialogable, requestable ],
   props: {
     blankData: {
@@ -25,7 +25,7 @@ export default {
     },
     placeholderData: {
         type: String,
-        default: '区分を選択してください'
+        default: '氏名を選択してください'
     },
     selectedValue: {
         type: Number,
@@ -51,7 +51,11 @@ export default {
         type: Number,
         default: 0
     },
-    identificationId: {
+    departmentValue: {
+        type: String,
+        default: ''
+    },
+    employmentValue: {
         type: String,
         default: ''
     }
@@ -66,45 +70,60 @@ export default {
     // マウント時
   mounted() {
     this.selectedvalue = this.selectedValue;
-    this.getList('');
+    this.getList(this.dateValue, this.killValue, this.getDo, this.departmentValue, this.employmentValue);
   },
   methods: {
     // ------------------------ イベント処理 ------------------------------------
     // 選択が変更された場合、親コンポーネントに選択値を返却
     selChanges : function(value, index) {
-
       this.selectedname = this.getText(value);
       var arrayData = {'rowindex' : index, 'name' : this.selectedname};
       this.$emit('change-event', value, arrayData);
     },
     // -------------------- サーバー処理 ----------------------------
-    getList(targetdate){
+    getList(targetdate, killvalue, getdo, departmentValue, employmentValue){
+      console.log('selecUserList getList targetdate = ' + targetdate);
       if (targetdate == '') {
         targetdate = moment(new Date()).format("YYYYMMDD");
       }
-      this.postRequest("/get_general_list", { identificationid: this.identificationId })
+      if (getdo == '') { getdo = 1; }
+      if (departmentValue == '') { departmentValue = null; }
+      if (employmentValue == '') { employmentValue = null; }
+      this.postRequest("/get_user_list",
+        { targetdate: targetdate,
+          killvalue: killvalue,
+          getDo : getdo,
+          departmentcode : departmentValue,
+          employmentcode : employmentValue
+        })
         .then(response  => {
           this.getThen(response);
         })
         .catch(reason => {
-          this.serverCatch("");
+          this.serverCatch("氏名");
         });
     },
     // -------------------- 共通 ----------------------------
-    // ユーザー取得正常処理
+    // 氏名取得正常処理
     getThen(response) {
       this.itemList = [];
       var res = response.data;
       if (res.result) {
-          // 固有処理 START
-          this.itemList = res.details;
-          // 固有処理 end
-      } else {
-          if (res.messagedata.length > 0) {
-              this.messageswal("エラー", res.messagedata, "error", true, false, true);
-          } else {
-              this.serverCatch("");
+        // 固有処理 START
+        this.itemList = res.details;
+        if (this.itemList.length != 0) {
+          if (this.addNew) {
+            this.object = { name: "新規に氏名登録する", code: "" };
+            this.itemList.unshift(this.object);
           }
+        }
+        // 固有処理 end
+      } else {
+        if (res.messagedata.length > 0) {
+            this.messageswal("エラー", res.messagedata, "error", true, false, true);
+        } else {
+            this.serverCatch("氏名");
+        }
       }
     },
     // 異常処理
@@ -118,13 +137,13 @@ export default {
       name = "";
       this.itemList.forEach(function (item) {
         if (item.code == value) {
-          name = item.code_name;
+          name = item.name;
           return name;
         }
       });
       return name;
     }
-  }
 
+  }
 };
 </script>

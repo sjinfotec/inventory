@@ -9,6 +9,7 @@ export const checkable =  {
     // チェック（ヘッダ）
     checkHeader(value, required, equalength, maxlength, itemname) {
       this.checkmessagedata = [];
+      if (value == null) { value = ""; }
       if (required) {
         if (value == "") {
           this.checkmessagedata.push(itemname + "を入力してください");
@@ -26,9 +27,10 @@ export const checkable =  {
       }
       return this.checkmessagedata;
     },
-    // チェック（明細）
+    // チェック（明細No）
     checkDetail(value, required, equalength, maxlength, itemname, rowindex) {
       this.checkmessagedata = [];
+      if (value == null) { value = ""; }
       if (required) {
         if (value == "") {
           this.checkmessagedata.push("No." + rowindex + "の" + itemname + "を入力してください");
@@ -42,6 +44,27 @@ export const checkable =  {
       if (maxlength > 0) {
         if (value.length > maxlength) {
           this.checkmessagedata.push("No." + rowindex + "の" + itemname + "は" + maxlength + "文字数以内で入力してください");
+        }
+      }
+      return this.checkmessagedata;
+    },
+    // チェック（明細No以外）
+    checkDetailtext(value, required, equalength, maxlength, itemname, strtext) {
+      this.checkmessagedata = [];
+      if (value == null) { value = ""; }
+      if (required) {
+        if (value == "") {
+          this.checkmessagedata.push(strtext + "の" + itemname + "を入力してください");
+        }
+      }
+      if (equalength > 0) {
+        if (value.length != equalength) {
+          this.checkmessagedata.push(strtext + "の" + itemname + "は" + equalength + "桁で入力してください");
+        }
+      }
+      if (maxlength > 0) {
+        if (value.length > maxlength) {
+          this.checkmessagedata.push(strtext + "の" + itemname + "は" + maxlength + "文字数以内で入力してください");
         }
       }
       return this.checkmessagedata;

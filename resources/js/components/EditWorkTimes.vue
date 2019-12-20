@@ -60,11 +60,11 @@
                       for="inputGroupSelect01"
                     >所属部署</label>
                   </div>
-                  <select-department
+                  <select-departmentlist
                     ref="selectdepartment"
                     v-bind:blank-data="true"
                     v-on:change-event="departmentChanges"
-                  ></select-department>
+                  ></select-departmentlist>
                 </div>
               </div>
               <!-- /.col -->
@@ -81,7 +81,7 @@
                     ref="selectuser"
                     v-bind:blank-data="true"
                     v-bind:get-Do="getDo"
-                    v-bind:date-value="fromdate"
+                    v-bind:date-value="applytermdate"
                     v-on:change-event="userChanges"
                   ></select-user>
                 </div>
@@ -413,7 +413,7 @@ export default {
     return {
       dates: new Date(),
       valueym: "",
-      fromdate: "",
+      applytermdate: "",
       valuefromdate: "",
       defaultDate: new Date(),
       valuedepartment: "",
@@ -505,18 +505,18 @@ export default {
     fromdateChanges: function(value) {
       this.valuefromdate = value;
       // 再取得
-      this.fromdate = "";
+      this.applytermdate = ""
       if (this.valuefromdate) {
-        this.valueym = moment(this.valuefromdate).format("YYYYMM");
-        this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
+          this.valueym = moment(this.valuefromdate).format("YYYYMM");
+          this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
       }
-      this.$refs.selectdepartment.getDepartmentList(this.fromdate);
+      this.$refs.selectdepartment.getList(this.applytermdate);
       this.getUserSelected();
     },
     // 指定日付がクリアされた場合の処理
     fromdateCleared: function() {
       this.valuefromdate = "";
-      this.fromdate = "";
+      this.applytermdate = "";
       this.valueym = ""
     },
     alert: function(state, message, title) {
@@ -673,7 +673,7 @@ export default {
       }
     },
     // 部署選択が変更された場合の処理
-    departmentChanges: function(value) {
+    departmentChanges: function(value, arrayitem) {
       this.valuedepartment = value;
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
@@ -705,19 +705,19 @@ export default {
     getUserSelected: function() {
       this.valueuser = "";
       this.getDo = 1;
-      this.fromdate = "";
+      this.applytermdate = "";
       if (this.valuefromdate) {
-        this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
+        this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
       }
       if (this.valueemploymentstatus == "") {
         if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserList(this.getDo, this.valueuser, this.fromdate);
+          this.$refs.selectuser.getUserList(this.getDo, this.valueuser, this.applytermdate);
         } else {
           this.$refs.selectuser.getUserListByDepartment(
             this.getDo,
             this.valuedepartment,
             this.valueuser,
-            this.fromdate
+            this.applytermdate
           );
         }
       } else {
@@ -726,7 +726,7 @@ export default {
             this.getDo,
             this.valueemploymentstatus,
             this.valueuser,
-            this.fromdate
+            this.applytermdate
           );
         } else {
           this.$refs.selectuser.getUserListByDepartmentEmployment(
@@ -734,7 +734,7 @@ export default {
             this.valuedepartment,
             this.valueemploymentstatus,
             this.valueuser,
-            this.fromdate
+            this.applytermdate
           );
         }
       }

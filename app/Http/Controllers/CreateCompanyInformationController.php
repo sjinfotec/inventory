@@ -29,28 +29,47 @@ class CreateCompanyInformationController extends Controller
     /**
      * 会社情報登録
      *
-     * @param StoreCompanyInfoPost $request
+     * @param Request $request
      * @return void
      */
-    public function store(StoreCompanyInfoPost $request){
-        $inputs = collect();
-        $inputs->put('company_name',$request->companyName);
-        $inputs->put('company_kana',$request->companyKana);
-        $inputs->put('post_code',$request->postCode);
-        $inputs->put('address1', $request->address1);
-        $inputs->put('address2',$request->address2);
-        $inputs->put('address_kana',$request->addressKana);
-        $inputs->put('tell',$request->tell);
-        $inputs->put('fax',$request->fax);
-        $inputs->put('representative_name',$request->representativeName);
-        $inputs->put('representative_kana',$request->representativeKana);
-        $inputs->put('email',$request->email);
-    
-        $result = $this->insert($inputs);
-        
-        if($result){
-        }else{
-            return false;
+    public function store(Request $request){
+        $this->array_messagedata = array();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['form'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "form", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $details = $params['form'];
+            $result = $this->insert($details);
+
+            return response()->json(
+                ['result' => $result,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
         }
     }
 
@@ -60,7 +79,7 @@ class CreateCompanyInformationController extends Controller
      * @param [type] $inputs
      * @return void
      */
-    private function insert($inputs){
+    private function insert($details){
         $company = new Company();
         $systemdate = Carbon::now();
         $user = Auth::user();
@@ -70,17 +89,17 @@ class CreateCompanyInformationController extends Controller
         DB::beginTransaction();
         try{
             $company->setApplytermfromAttribute($apply_term_from);
-            $company->setNameAttribute($inputs->get('company_name'));
-            $company->setKanaAttribute($inputs->get('company_kana'));
-            $company->setPostcodeAttribute($inputs->get('post_code'));
-            $company->setAddress1Attribute($inputs->get('address1'));
-            $company->setAddress2Attribute($inputs->get('address2'));
-            $company->setAddresskanaAttribute($inputs->get('address_kana'));
-            $company->setTelnoAttribute($inputs->get('tell'));
-            $company->setFaxnoAttribute($inputs->get('fax'));
-            $company->setRepresentnameAttribute($inputs->get('representative_name'));
-            $company->setRepresentkanaAttribute($inputs->get('representative_kana'));
-            $company->setEmailAttribute($inputs->get('email'));
+            $company->setNameAttribute($details['name']);
+            $company->setKanaAttribute($details['kana']);
+            $company->setPostcodeAttribute($details['post_code']);
+            $company->setAddress1Attribute($details['address1']);
+            $company->setAddress2Attribute($details['address2']);
+            $company->setAddresskanaAttribute($details['address_kana']);
+            $company->setTelnoAttribute($details['tel_no']);
+            $company->setFaxnoAttribute($details['fax_no']);
+            $company->setRepresentnameAttribute($details['represent_name']);
+            $company->setRepresentkanaAttribute($details['represent_kana']);
+            $company->setEmailAttribute($details['email']);
             $company->setCreateduserAttribute($user_code);
             $company->setCreatedatAttribute($systemdate);
             $is_exists = $company->isExistsInfo();
@@ -92,9 +111,14 @@ class CreateCompanyInformationController extends Controller
             DB::commit();
             return true;
 
-        }catch(\PDOException $e){
+        }catch(\PDOException $pe){
+            Log::error($pe->getMessage());
             DB::rollBack();
-            return false;
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            DB::rollBack();
+            throw $e;
         }
 
     }
@@ -105,9 +129,25 @@ class CreateCompanyInformationController extends Controller
      * @return void
      */
     public function getCompanyInfo(){
-        $company = new Company();
-        $result =  $company->getCompanyInfo();
-        
-        return $result;
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            $company = new Company();
+            $details =  $company->getCompanyInfo();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 }

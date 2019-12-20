@@ -2,16 +2,18 @@
   <div>
     <!-- main contentns row -->
     <div class="row justify-content-between">
+      <!-- ========================== 検索部 START ========================== -->
       <!-- .panel -->
       <div class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:header-text1="'部署を設定する'"
-            v-bind:header-text2="'部署の登録や変更ができます'"
+            v-bind:header-text1="'ＸＸＸを設定する'"
+            v-bind:header-text2="'ＸＸＸの登録や変更ができます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="card-body pt-2">
+            <!-- ----------- 選択リスト START ---------------- -->
             <!-- panel contents -->
             <!-- .row -->
             <div class="row justify-content-between">
@@ -22,24 +24,26 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                    >部署選択<span class="color-red">[必須]</span></span>
+                    >ＸＸＸＸ<span class="color-red">[必須]</span></span>
                   </div>
-                  <select-departmentlist v-if="showdepartmentlist"
-                    ref="selectdepartmentlist"
+                  <select-XXXXXXXXX v-if="showlist"
+                    ref="selectXXXXXXXXX"
                     v-bind:blank-data="false"
-                    v-bind:placeholder-data="'部署を選択すると編集モードになります'"
+                    v-bind:placeholder-data="'ＸＸＸを選択すると編集モードになります'"
                     v-bind:setting-value="selectedValue"
                     v-bind:add-new="true"
                     v-bind:date-value="''"
                     v-bind:kill-value="valuekillcheck"
                     v-bind:row-index=0
-                    v-on:change-event="departmentChanges"
-                  ></select-departmentlist>
+                    v-on:change-event="itemChanges"
+                  ></select-XXXXXXXXX>
                 </div>
               </div>
               <!-- /.col -->
             </div>
-            <!-- .row -->
+            <!-- /.row -->
+            <!-- ----------- 選択リスト END ---------------- -->
+            <!-- ----------- 選択ボタン類 START ---------------- -->
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- .col -->
@@ -52,27 +56,33 @@
                     v-model="valuekillcheck"
                     @change="checkboxChange"
                   >
-                  <label class="form-check-label" for="inlineCheckbox1">※部署選択リストに廃止した部署も含める</label>
+                  <label class="form-check-label" for="inlineCheckbox1">※ＸＸＸＸ選択リストに廃止したＸＸＸＸも含める</label>
                 </div>
               </div>
               <!-- /.col -->
             </div>
-            <!-- .row -->
+            <!-- /.row -->
+            <!-- ----------- 選択ボタン類 START ---------------- -->
           </div>
           <!-- panel contents -->
         </div>
       </div>
+      <!-- /.panel -->
+      <!-- ========================== 検索部 END ========================== -->
+      <!-- ========================== 新規部 START ========================== -->
       <!-- .panel -->
       <div class="col-md-12 pt-3" v-if="selectMode=='NEW'">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:header-text1="'◆部署登録'"
+            v-bind:header-text1="'◆ＸＸＸＸ登録'"
             v-bind:header-text2="''"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
+          <!-- ----------- 新規入力部 START ---------------- -->
           <!-- panel contents -->
           <div class="card-body pt-2">
+            <!-- ----------- メッセージ部 START ---------------- -->
             <!-- .row -->
             <div class="row justify-content-between" v-if="messagevalidatesNew.length">
               <!-- col -->
@@ -84,6 +94,8 @@
               <!-- /.col -->
             </div>
             <!-- /.row -->
+            <!-- ----------- メッセージ部 END ---------------- -->
+            <!-- ----------- 項目部 START ---------------- -->
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- .col -->
@@ -93,12 +105,15 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                    >部署名<span class="color-red">[必須]</span></span>
+                    >ＸＸＸＸ名<span class="color-red">[必須]</span></span>
                   </div>
                   <input
                     type="text"
                     class="form-control"
-                    v-model="form.name"
+                    v-model="form.XXXX"
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    v-bind:title="'ＸＸＸＸ'"
                     name="name"
                   />
                 </div>
@@ -106,6 +121,8 @@
               <!-- /.col -->
             </div>
             <!-- /.row -->
+            <!-- ----------- 項目部 END ---------------- -->
+            <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- col -->
@@ -113,23 +130,31 @@
                 <btn-work-time
                   v-on:storeclick-event="storeclick"
                   v-bind:btn-mode="'store'"
+                  v-bind:is-push="false"
                 ></btn-work-time>
               </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
+            <!-- ----------- ボタン部 END ---------------- -->
           </div>
           <!-- /.panel contents -->
+          <!-- ----------- 新規入力部 END ---------------- -->
         </div>
       </div>
+      <!-- /.panel -->
+      <!-- ========================== 新規部 END ========================== -->
+      <!-- ========================== 編集部 START ========================== -->
+      <!-- .panel -->
       <div class="col-md-12 pt-3" v-if="selectMode=='EDT'">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:header-text1="'◆部署編集'"
+            v-bind:header-text1="'◆ＸＸＸＸ編集'"
             v-bind:header-text2="''"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
+          <!-- ----------- 「＋」アイコン部 START ---------------- -->
           <!-- panel header -->
           <div class="card-header bg-transparent pt-3 border-0">
             <h1 class="float-sm-left font-size-rg">
@@ -138,11 +163,15 @@
               </span>
               {{ this.selectedName }}
             </h1>
-            <span class="float-sm-right font-size-sm">「＋」アイコンで新たに追加することができます</span>
+            <span class="float-sm-right font-size-sm">「＋」アイコンで新規に追加することができます</span>
           </div>
+          <!-- /.panel header -->
+          <!-- ----------- 「＋」アイコン部 END ---------------- -->
+          <!-- ----------- 編集入力部 START ---------------- -->
+          <!-- main contentns row -->
           <div class="card-body pt-2" v-if="details.length">
             <!-- panel contents -->
-            <!-- .panel -->
+            <!-- ----------- メッセージ部 START ---------------- -->
             <!-- .row -->
             <div class="row justify-content-between" v-if="messagevalidatesEdt.length">
               <!-- col -->
@@ -154,6 +183,8 @@
               <!-- /.col -->
             </div>
             <!-- /.row -->
+            <!-- ----------- メッセージ部 END ---------------- -->
+            <!-- ----------- 項目部 START ---------------- -->
             <div class="col-md pt-3 align-self-stretch">
               <div class="card shadow-pl">
                 <!-- panel body -->
@@ -161,14 +192,15 @@
                   <!-- panel contents -->
                   <div class="row">
                     <div class="col-12">
+                      <!-- ----------- 項目table部 START ---------------- -->
                       <div class="table-responsive">
                         <table class="table table-striped border-bottom font-size-sm text-nowrap">
                           <thead>
                             <tr>
                               <td class="text-center align-middle w-35 mw-rem-10">No</td>
                               <td class="text-center align-middle w-30">適用開始日</td>
-                              <td class="text-center align-middle w-30">廃止開始日</td>
-                              <td class="text-center align-middle w-35 mw-rem-10">部署名</td>
+                              <td class="text-center align-middle w-30">ＸＸＸＸ</td>
+                              <td class="text-center align-middle w-35 mw-rem-10">ＸＸＸＸ</td>
                               <td colspan="2" class="text-center align-middle w-35 mw-rem-10">操作</td>
                             </tr>
                           </thead>
@@ -178,7 +210,7 @@
                                 <!-- panel header -->
                                 <col-note
                                   v-bind:item-name="'No.' + (index+1) + ' 現在適用中'"
-                                  v-bind:item-control="'INFO'"
+                                  v-bind:item-control="'LIGHT'"
                                   v-bind:item-note="''"
                                 ></col-note>
                                 <!-- /.panel header -->
@@ -205,7 +237,7 @@
                                   <input
                                     type="date"
                                     class="form-control"
-                                    v-model="details[index].kill_from_date"
+                                    v-model="details[index].XXXXXXXX"
                                   />
                                 </div>
                               </td>
@@ -215,7 +247,7 @@
                                     type="text"
                                     maxlength="50"
                                     class="form-control"
-                                    v-model="details[index].name"
+                                    v-model="details[index].XXXXXXXX"
                                   />
                                 </div>
                               </td>
@@ -241,7 +273,7 @@
                                     type="button"
                                     class="btn btn-danger"
                                     @click="delClick(index)"
-                                  >削除する</button>
+                                  >この内容を削除する</button>
                                 </div>
                                 <div class="btn-group" v-if="details[index].id == ''">
                                   <button
@@ -255,6 +287,7 @@
                           </tbody>
                         </table>
                       </div>
+                      <!-- ----------- 項目table部 START ---------------- -->
                     </div>
                   </div>
                   <!-- /.row -->
@@ -263,9 +296,10 @@
                 <!-- /panel body -->
               </div>
             </div>
-            <!-- /.panel -->
+            <!-- ----------- 項目部 END ---------------- -->
           </div>
           <!-- /main contentns row -->
+          <!-- ----------- 編集入力部 END ---------------- -->
         </div>
       </div>
     </div>
@@ -281,33 +315,25 @@ import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
 export default {
-  name: "CreateDepartment",
+  name: "CreateXXXXXXXX",
   mixins: [ dialogable, checkable, requestable ],
   data() {
     return {
-      form: {
-        name: "",
-        id: "",
-        code: ""
-      },
-      dbtablename: "",
-      listitemname: "",
+      showlist: true,
+      selectedValue: "",
+      valuekillcheck: false,
+      selectMode: "",
       messagevalidatesNew: [],
       messagevalidatesEdt: [],
-      valuedepartment: "",
-      valuekillcheck: false,
-      departmentList: [],
-      selectMode: "",
-      details: [],
-      applyTerms: [],
-      selectedValue: "",
       selectedName: "",
-      selectApplyTerm: "",
+      details: [],
+      form: {
+        XXXX: "",
+        XXXX: "",
+        XXXX: ""
+      },
       count: 0,
-      before_count: 0,
-      showdepartmentlist: true,
-      confirmresult: true,
-      oldId: ""
+      before_count: 0
     };
   },
   methods: {
@@ -325,7 +351,13 @@ export default {
       chkArray = 
         this.checkHeader(this.form.name, required, equalength, maxlength, itemname);
       if (chkArray.length > 0) {
-        this.messagevalidatesNew = chkArray;
+        if (this.messagevalidatesNew.length == 0) {
+          this.messagevalidatesNew = chkArray;
+        } else {
+          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
+        }
+      }
+      if (this.messagevalidatesNew.length > 0) {
         flag = false;
       }
       return flag;
@@ -343,8 +375,11 @@ export default {
       chkArray = 
         this.checkDetail(this.details[index].apply_term_from, required, equalength, maxlength, itemname, index+1);
       if (chkArray.length > 0) {
-        this.messagevalidatesEdt = chkArray;
-        flag = false;
+        if (this.messagevalidatesEdt.length == 0) {
+          this.messagevalidatesEdt = chkArray;
+        } else {
+          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
+        }
       }
       // 部署名
       required = true;
@@ -368,7 +403,7 @@ export default {
     // ------------------------ イベント処理 ------------------------------------
     
     // 部署選択が変更された場合の処理
-    departmentChanges: function(value, arrayitem) {
+    itemChanges: function(value, arrayitem) {
       // 入力項目の部署クリア
       this.inputClear();
       this.messagevalidatesNew = [];
@@ -379,12 +414,12 @@ export default {
       } else {
         this.selectMode = 'EDT';
         this.selectedName = arrayitem['name'];
-        this.getDepartment();
+        this.getItem();
       }
     },
     // 廃止チェックボックスが変更された場合の処理
     checkboxChange: function() {
-      this.refreshtDepartmentList();
+      this.refreshItemList();
 
     },
     // 新規作成ボタンクリック処理
@@ -399,6 +434,13 @@ export default {
               this.store();
             }
         });
+      // 項目数が多い場合以下コメントアウト
+      /* } else {
+        this.countswal("エラー", this.messagevalidatesNew, "error", true, false, true)
+          .then(result  => {
+            if (result) {
+            }
+        }); */
       }
     },
     // 更新ボタンクリック処理
@@ -418,6 +460,13 @@ export default {
               this.FixDetail("更新", index);
             }
         });
+      // 項目数が多い場合以下コメントアウト
+      /* } else {
+        this.countswal("エラー", this.messagevalidatesEdt, "error", true, false, true)
+          .then(result  => {
+            if (result) {
+            }
+        }); */
       }
     },
     // 追加ボタンクリック処理
@@ -437,6 +486,13 @@ export default {
               this.FixDetail("追加", index);
             }
         });
+      // 項目数が多い場合以下コメントアウト
+      /* } else {
+        this.countswal("エラー", this.messagevalidatesEdt, "error", true, false, true)
+          .then(result  => {
+            if (result) {
+            }
+        }); */
       }
     },
     // 削除ボタンクリック処理
@@ -457,7 +513,7 @@ export default {
         messages.push("１度に追加できる情報は１個です。追加してから再実行してください");
         this.messageswal("エラー", messages, "error", true, false, true);
       } else {
-        this.object = { id: "", code: this.details[this.details.length-1].code, name: "", apply_term_from: "", kill_from_date: "", result: "" };
+        this.object = { id: "", code: this.details[this.details.length-1].code, name: "", apply_term_from: "", kill_from_date: "", result: "2" };
         this.details.unshift(this.object);
         this.count = this.details.length
       }
@@ -482,7 +538,7 @@ export default {
     
     // -------------------- サーバー処理 ----------------------------
     // 部署取得処理
-    getDepartment() {
+    getItem() {
       this.details = [];
       var messages = [];
       this.postRequest("/create_department/get", { code : this.selectedValue, killvalue : this.valuekillcheck})
@@ -553,7 +609,8 @@ export default {
       if (res.result) {
         messages.push("部署を" + eventtext + "しました");
         this.messageswal(eventtext + "完了", messages, "success", true, false, true);
-        this.refreshtDepartmentList();
+        this.refreshItemList();
+        this.form.code = res.code;
       } else {
         if (res.messagedata.length > 0) {
           this.messageswal("警告", res.messagedata, "warning", true, false, true);
@@ -569,8 +626,8 @@ export default {
       if (res.result) {
         messages.push("部署を" + eventtext + "しました");
         this.messageswal(eventtext + "完了", messages, "success", true, false, true);
-        this.refreshtDepartmentList();
-        this.getDepartment();
+        this.refreshItemList();
+        this.getItem();
         this.count = this.details.length;
         this.before_count = this.count;
       } else {
@@ -582,7 +639,8 @@ export default {
       }
     },
     // 異常処理
-    serverCatch(eventtext) {
+    putCatch(eventtext) {
+      var messages = [];
       messages.push("部署情報" + eventtext + "に失敗しました");
       this.messageswal("エラー", messages, "error", true, false, true);
     },
@@ -602,10 +660,10 @@ export default {
       if (this.details[index].kill_from_date != "" && this.details[index].kill_from_date != null) { return true; }
       if (this.details[index].name != "" && this.details[index].name != null) { return true; }
     },
-    refreshtDepartmentList() {
+    refreshItemList() {
       // 最新リストの表示
-      this.showdepartmentlist = false;
-      this.$nextTick(() => (this.showdepartmentlist = true));
+      this.showlist = false;
+      this.$nextTick(() => (this.showlist = true));
     }
   }
 };

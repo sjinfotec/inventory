@@ -14,9 +14,6 @@ use Carbon\Carbon;
 
 class UserAddController extends Controller
 {
-    const SUCCESS = 0;
-    const FAILED = 1;
-
     /**
      * 初期処理
      *
@@ -34,73 +31,105 @@ class UserAddController extends Controller
      * @param Request $request
      * @return void
      */
-    public function store(StoreUserPost $request){
-        $department_code = $request->departmentCode;
-        $kana = $request->kana;
-        $code = $request->code;
-        $name = $request->name;
-        $email = $request->email;
-        $status = $request->status;
-        $table_no = $request->table_no;
-        $password = bcrypt($request->password);
-        $management = $request->management;
-        $role = $request->role;
-        $from = Config::get('const.INIT_DATE.initdate');         // 有効期間 初期値
-
-        if(isset($request->id)){    // UPDATE
-            // $id = $request->id;
-            // $result = $this->updateUser($id,$code,$kana,$department_code,$name,$password,$email,$status,$table_no);
-        }else{                      // INSERT
-            $result = $this->insertNewUser($code,$kana,$department_code,$name,$password,$email,$status,$table_no,$from,$management,$role);
-        }
-        if($result){
-        }else{
-            return false;
+    public function store(Request $request){
+        $this->array_messagedata = array();
+        $details = array();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['details'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $details = $params['details'];
+            // ログインIDチェック
+            if ($details['code'] != "") {
+                $user_model = new UserModel();
+                $user_model->setParamcodeAttribute($details['code']);
+                $isExists = $user_model->isExistsCode();
+                if ($isExists) {
+                    $this->array_messagedata[] = str_replace('{0}', "ログインID", Config::get('const.MSG_ERROR.already_item'));
+                    $result = false;
+                    return response()->json(
+                        ['result' => $result,
+                        Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                    );
+                }
+            }
+            // insert
+            $this->insert($details);
+            return response()->json(
+                ['result' => $result,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            return response()->json(
+                ['result' => false,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            return response()->json(
+                ['result' => false,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }
     }
 
     /**
-     * ユーザー追加
+     * 新規
      *
-     * @param [type] $code
-     * @param [type] $kana
-     * @param [type] $department_code
-     * @param [type] $name
-     * @param [type] $password
-     * @param [type] $email
-     * @param [type] $status
-     * @param [type] $table_no
+     * @param [type] $data
      * @return void
      */
-    private function insertNewUser($code,$kana,$department_code,$name,$password,$email,$status,$table_no,$from,$management,$role){
-        $users = new UserModel();
-        $systemdate = Carbon::now();
-        $user = Auth::user();
-        $user_code = $user->code;
-        $users->setApplytermfromAttribute($from);
-        $users->setCodeAttribute($code);
-        $users->setDepartmentcodeAttribute($department_code);
-        $users->setNameAttribute($name);
-        $users->setKanaAttribute($kana);
-        $users->setPasswordAttribute($password);
-        $users->setEmailAttribute($email);
-        $users->setEmploymentstatusAttribute($status);
-        $users->setWorkingtimetablenoAttribute($table_no);
-        $users->setCreatedatAttribute($systemdate);
-        $users->setCreateduserAttribute($user_code);
-        $users->setManagementAttribute($management);
-        $users->setRoleAttribute($role);
-        Log::debug('$role = '.$role);
-        
+    private function insert($data){
         DB::beginTransaction();
         try{
+            $users = new UserModel();
+            $systemdate = Carbon::now();
+            $user = Auth::user();
+            $user_code = $user->code;
+            $users->setApplytermfromAttribute(Config::get('const.INIT_DATE.initdate'));
+            $users->setCodeAttribute($data['code']);
+            $users->setDepartmentcodeAttribute($data['department_code']);
+            $users->setEmploymentstatusAttribute($data['employment_status']);
+            $users->setNameAttribute($data['name']);
+            $users->setKanaAttribute($data['kana']);
+            $users->setOfficialpositionAttribute($data['official_position']);
+            $users->setKillfromdateAttribute(Config::get('const.INIT_DATE.maxdate'));
+            $users->setWorkingtimetablenoAttribute($data['working_timetable_no']);
+            $users->setEmailAttribute($data['email']);
+            Log::debug('insert password = '.$data['password']);
+            $users->setPasswordAttribute(bcrypt($data['password']));
+            $users->setCreatedatAttribute($systemdate);
+            $users->setCreateduserAttribute($user_code);
+            $users->setManagementAttribute($data['management']);
+            $users->setRoleAttribute($data['role']);
+            // insert
             $users->insertNewUser();
             DB::commit();
-            return true;
-
-        }catch(\PDOException $e){
+        }catch(\PDOException $pe){
+            Log::error($pe->getMessage());
             DB::rollBack();
-            return false;
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            DB::rollBack();
+            throw $e;
         }
     }
 
@@ -111,16 +140,47 @@ class UserAddController extends Controller
      * @return response
      */
     public function fixUser(Request $request){
-        $details = $request->details;
-        $pass_word = $request->pass;
-        $response = collect();
-        $result = $this->fixData($details,$pass_word);
-        if($result){
-            $response->put('result',self::SUCCESS);
-        }else{
-            $response->put('result',self::FAILED);
+        $this->array_messagedata = array();
+        $details = array();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['details'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $details = $params['details'];
+            $this->update($details);
+            return response()->json(
+                ['result' => true,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            return response()->json(
+                ['result' => false,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            return response()->json(
+                ['result' => false,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }
-        return $response;
     }
 
     /**
@@ -129,53 +189,58 @@ class UserAddController extends Controller
      * @param [type] $details
      * @return boolean
      */
-    private function fixData($details,$pass_word){
+    private function update($data){
         $systemdate = Carbon::now();
-        $user_model = new UserModel();
         $user = Auth::user();
         $user_code = $user->code;
-
         DB::beginTransaction();
         try{
-            foreach ($details as $detail) {
-                $carbon = new Carbon($detail['apply_term_from']);
-                $from = $carbon->copy()->format('Ymd');
-                $user_model->setApplytermfromAttribute($from);
-                $user_model->setCodeAttribute($detail['code']);
-                $user_model->setNameAttribute($detail['name']);
-                $user_model->setKanaAttribute($detail['kana']);
-                $user_model->setDepartmentcodeAttribute($detail['department_code']);
-                $user_model->setEmploymentstatusAttribute($detail['employment_status']);
-                $user_model->setEmailAttribute($detail['email']);
-                $user_model->setWorkingtimetablenoAttribute($detail['working_timetable_no']);
-                $user_model->setManagementAttribute($detail['management']);
-                $user_model->setRoleAttribute($detail['role']);
-                
-                // idもっているかどうか
-                if(isset($detail['id'])){     // idもっている→UPDATE
-                    $user_model->setIdAttribute($detail['id']);   
-                    $user_model->setUpdatedatAttribute($systemdate);   
-                    $user_model->setUpdateduserAttribute($user_code);   
-                    $user_model->updateUser();
-                }else{                      // idもっていない→INSERT
-                    $pass_word = bcrypt($detail['password']);
-                    $user_model->setPasswordAttribute($pass_word);
-                    $user_model->setCreatedatAttribute($systemdate);
-                    $user_model->setCreateduserAttribute($user_code);
-                    $user_model->insertNewUser();
-                }
-            }   
+            $user_model = new UserModel();
+            $carbon = new Carbon($data['apply_term_from']);
+            $temp_from = $carbon->copy()->format('Ymd');
+            $apply_term_from = $temp_from;
+            $user_model->setApplytermfromAttribute($apply_term_from);
+            $user_model->setCodeAttribute($data['code']);
+            $user_model->setDepartmentcodeAttribute($data['department_code']);
+            $user_model->setEmploymentstatusAttribute($data['employment_status']);
+            $user_model->setNameAttribute($data['name']);
+            $user_model->setKanaAttribute($data['kana']);
+            $user_model->setOfficialpositionAttribute($data['official_position']);
+            $temp_from = Config::get('const.INIT_DATE.maxdate');
+            if ($data['kill_from_date'] != "" && $data['kill_from_date'] != null) {
+                $carbon = new Carbon($data['kill_from_date']);
+                $temp_from = $carbon->copy()->format('Ymd');
+            }
+            $kill_from_date = $temp_from;
+            $user_model->setKillfromdateAttribute($kill_from_date);
+            $user_model->setWorkingtimetablenoAttribute($data['working_timetable_no']);
+            $user_model->setEmailAttribute($data['email']);
+            $user_model->setCreatedatAttribute($systemdate);
+            $user_model->setCreateduserAttribute($user_code);
+            $user_model->setManagementAttribute($data['management']);
+            $user_model->setRoleAttribute($data['role']);
+            if ($data['id'] == "" || $data['id'] == null) {
+                $user_model->setCreateduserAttribute($user_code);
+                $user_model->setCreatedatAttribute($systemdate);
+                Log::debug('update password = '.$data['code']);
+                $user_model->setPasswordAttribute(bcrypt($data['code']));
+                $user_model->insertNewUser();
+            } else {
+                $user_model->setIdAttribute($data['id']);   
+                $user_model->setUpdateduserAttribute($user_code);
+                $user_model->setUpdatedatAttribute($systemdate);
+                $user_model->updateUser();
+            }
             DB::commit();
-            return true;
 
         }catch(\PDOException $pe){
             Log::error($pe->getMessage());
             DB::rollBack();
-            return false;
+            throw $pe;
         }catch(\Exception $e){
             Log::error($e->getMessage());
             DB::rollBack();
-            return false;
+            throw $e;
         }
     }
 
@@ -186,15 +251,43 @@ class UserAddController extends Controller
      * @return void
      */
     public function del(Request $request){
-        $id = $request->id;
-        $response = collect();
-        $result = $this->updateIsDelete($id);
-        if($result){
-            $response->put('result',self::SUCCESS);
-        }else{
-            $response->put('result',self::FAILED);
+        $this->array_messagedata = array();
+        $code = "";
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['id'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "id", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $id = $params['id'];
+            $this->updateIsDelete($id);
+        
+            return response()->json(
+                ['result' => $result,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
         }
-        return $response;
     }
 
     /**
@@ -211,11 +304,14 @@ class UserAddController extends Controller
         try{
             $users->updateIsDelete();
             DB::commit();
-            return true;
 
-        }catch(\PDOException $e){
+        }catch(\PDOException $pe){
             DB::rollBack();
-            return false;
+            throw $pe;
+        }catch(\Exception $e){
+            DB::rollBack();
+            Log::error($e->getMessage());
+            throw $e;
         }
     }
 
@@ -224,50 +320,98 @@ class UserAddController extends Controller
      * @return list results
      */
     public function getUserDetails(Request $request){
-        $response = collect();
-        try{
-            $code = $request->code;
+        $this->array_messagedata = array();
+        $code = "";
+        $killvalue = false;
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => null,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['code'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "code", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => null,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $code = $params['code'];
+            if (isset($params['killvalue'])) {
+                $killvalue = $params['killvalue'];
+            }
             $users = new UserModel();
             $users->setCodeAttribute($code);
+            $users->setKillvalueAttribute($killvalue);
             $details = $users->getUserDetails();
-            foreach ($details as $detail) {
-                if(isset($detail->apply_term_from)){
-                    // yyyy-mm-ddに変換
-                    $carbon = new Carbon($detail->apply_term_from);
-                    $detail->apply_term_from = $carbon->copy()->format("Y-m-d");
     
-                }
-            }
-            $response->put('result',self::SUCCESS);
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
         }catch(\PDOException $pe){
-            Log::error($pe->getMessage());
-            $response->put('result',self::FAILED);
+            throw $pe;
         }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
             Log::error($e->getMessage());
-            $response->put('result',self::FAILED);
+            throw $e;
         }
-        $response->put('details',$details);
-        return $response;
     }
 
     public function releaseCardInfo(Request $request){
-        $card_idm = $request->card_idm;
-        $response = collect();
-        $systemdate = Carbon::now();
-        $user = Auth::user();
-        $user_code = $user->code;
-    
-        // パスワード変更
+        $this->array_messagedata = array();
+        $code = "";
+        $result = true;
         DB::beginTransaction();
-        try{
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['card_idm'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "card_idm", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $card_idm = $params['card_idm'];
+            $systemdate = Carbon::now();
+            $user = Auth::user();
+            $user_code = $user->code;
             DB::table('card_informations')->where('card_idm', $card_idm)->update(['is_deleted' => 1,'updated_user' => $user_code ,'updated_at' => $systemdate]);
             DB::commit();
-            $response->put('result',self::SUCCESS);
-
-        }catch(\PDOException $e){
+        
+            return response()->json(
+                ['result' => $result,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
             DB::rollBack();
-            $response->put('result',self::FAILED);
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            DB::rollBack();
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
         }
-        return $response;
     }
 }

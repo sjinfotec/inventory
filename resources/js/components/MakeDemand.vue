@@ -24,13 +24,18 @@
                       for="inputGroupSelect01"
                     >申請書類<span class="color-red">[必須]</span></label>
                   </div>
-                  <general-list
-                    v-bind:identification-id="this.identification_id"
+                  <select-generallist
+                    v-bind:blank-data="false"
                     v-bind:placeholder-data="'申請書類を選択してください'"
-                    v-bind:blank-data="true"
-                    v-bind:selected-value="valueselecteddoccode"
+                    v-bind:selected-value="selectedDoccodeValue"
+                    v-bind:add-new="false"
+                    v-bind:get-do="'1'"
+                    v-bind:date-value="''"
+                    v-bind:kill-value="false"
+                    v-bind:row-index="'0'"
+                    v-bind:identification-id="identification_id"
                     v-on:change-event="doccodeChange"
-                  ></general-list>
+                  ></select-generallist>
                 </div>
                 <message-data v-bind:message-datas="messagedatadoccode" v-bind:message-class="'warning'"></message-data>
               </div>
@@ -184,7 +189,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valueselecteddoccode === 7 || valueselecteddoccode === 8 || valueselecteddoccode === 9" class="row justify-content-between">
+            <div v-if="selectedDoccodeValue === 7 || selectedDoccodeValue === 8 || selectedDoccodeValue === 9" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -222,7 +227,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valueselecteddoccode === 1" class="row justify-content-between">
+            <div v-if="selectedDoccodeValue === 1" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -242,7 +247,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valueselecteddoccode === 2" class="row justify-content-between">
+            <div v-if="selectedDoccodeValue === 2" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -262,7 +267,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valueselecteddoccode === 3" class="row justify-content-between">
+            <div v-if="selectedDoccodeValue === 3" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -298,7 +303,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valueselecteddoccode === 4" class="row justify-content-between">
+            <div v-if="selectedDoccodeValue === 4" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -334,7 +339,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valueselecteddoccode === 6" class="row justify-content-between">
+            <div v-if="selectedDoccodeValue === 6" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -370,7 +375,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valueselecteddoccode === 7 || valueselecteddoccode === 8 || valueselecteddoccode === 9" class="row justify-content-between">
+            <div v-if="selectedDoccodeValue === 7 || selectedDoccodeValue === 8 || selectedDoccodeValue === 9" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -390,7 +395,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valueselecteddoccode === 10" class="row justify-content-between">
+            <div v-if="selectedDoccodeValue === 10" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -427,7 +432,7 @@
             <!-- /.row -->
             <!-- .row -->
             <!-- /.panel contents -->
-            <div v-if="valueselecteddoccode === 1" class="row justify-content-between">
+            <div v-if="selectedDoccodeValue === 1" class="row justify-content-between">
               <!-- .panel -->
               <div class="col-md pt-3 align-self-stretch">
                 <div class="card shadow-pl">
@@ -557,7 +562,7 @@
             </div>
             <!-- /.row -->
             <!-- /.panel contents -->
-            <div v-if="valueselecteddoccode === 2" class="row justify-content-between">
+            <div v-if="selectedDoccodeValue === 2" class="row justify-content-between">
               <!-- .panel -->
               <div class="col-md pt-3 align-self-stretch">
                 <div class="card shadow-pl">
@@ -686,7 +691,7 @@
               </div>
             </div>
             <!-- /.row -->
-            <div v-if="valueselecteddoccode === 5" class="row justify-content-between">
+            <div v-if="selectedDoccodeValue === 5" class="row justify-content-between">
               <!-- .panel -->
               <div class="col-md pt-3 align-self-stretch">
                 <div class="card shadow-pl">
@@ -815,7 +820,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valueselecteddoccode === 7 || valueselecteddoccode === 8 || valueselecteddoccode === 9" class="row justify-content-between">
+            <div v-if="selectedDoccodeValue === 7 || selectedDoccodeValue === 8 || selectedDoccodeValue === 9" class="row justify-content-between">
               <!-- .panel -->
               <div class="col-md pt-3 align-self-stretch">
                 <div class="card shadow-pl">
@@ -904,7 +909,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div v-if="valueselecteddoccode !== 1" class="row justify-content-between">
+            <div v-if="selectedDoccodeValue !== 1" class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div :class="errorClassObject('summary')" class="input-group">
@@ -1030,6 +1035,10 @@
 <script>
 import toasted from "vue-toasted";
 import moment from "moment";
+import {dialogable} from '../mixins/dialogable.js';
+import {checkable} from '../mixins/checkable.js';
+import {requestable} from '../mixins/requestable.js';
+
 
 const dateRE   = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/
 const timeRE   = /^[0-9]{2}:[0-9]{2}$/
@@ -1037,12 +1046,14 @@ const timecountRE   = /^([1-9][0-9]{0,2}|0)(\.[0-9]{1,2})?$/
 
 export default {
   name: "MakeDemand",
+  mixins: [ dialogable, checkable, requestable ],
   data() {
     return {
-      getdo: 0,
-      valueselecteddoccode: 0,
+      getDo: 0,
+      selectedDoccodeValue: 0,
       fromdate: "",
       valueselecteddocname: "",
+      killValue: false,
       validate: false,
       displayphase: "",
       isdischargepush: true,
@@ -1096,6 +1107,7 @@ export default {
   // マウント時
   mounted() {
     this.getUserDepartmentRole();
+    //this.getUserRole();
   },
   computed: {
     validation() {
@@ -1119,7 +1131,7 @@ export default {
     checkForm: function(e) {
       this.validate = true;
       this.messagedataClear();
-      if (!this.valueselecteddoccode) {
+      if (!this.selectedDoccodeValue) {
         this.messagedatadoccode.push("申請書類は必ず選択してください。");
         this.validate = false;
       }
@@ -1143,7 +1155,7 @@ export default {
           this.validate = false;
         }
       }
-      if (this.valueselecteddoccode == 1) {
+      if (this.selectedDoccodeValue == 1) {
         if (!this.edit.getperiodfrom) {
           this.messageeditgetperiodfrom.push("残業日は必ず入力してください。");
           this.validate = false;
@@ -1231,11 +1243,11 @@ export default {
       this.array_demand = [];
       this.array_demanddeatail = [];
       this.demandDetails = [];
-      this.valueselecteddoccode = value;
+      this.selectedDoccodeValue = value;
       this.valueselecteddocname = name;
       this.getDo = 1;
       // 申請一覧取得
-      if (this.valueselecteddoccode) {
+      if (this.selectedDoccodeValue) {
         this.getDemandList();
       }
     },
@@ -1300,7 +1312,7 @@ export default {
     backclick: function(e) {
       this.displayphase = "";
       this.demanditemClear();
-      this.doccodeChange(this.valueselecteddoccode, this.valueselecteddocname);
+      this.doccodeChange(this.selectedDoccodeValue, this.valueselecteddocname);
     },
     // ラジオボタンがクリックされた場合の処理
     radiochange: function(index) {
@@ -1343,31 +1355,33 @@ export default {
               this.userdepartment_code = this.userroleList[i]["department_code"];
               this.userrole = this.userroleList[i]["role"];
           }
-          this.getUserList(1, this.userdepartment_code);
-          if (this.userrole == "1") {
-            this.identification_id = "C032";
-          } else {
-            this.identification_id = "C026";
-          }
-          this.getGeneralList(this.identification_id);
+          this.getUserList('', this.userdepartment_code);
         })
         .catch(reason => {
           alert("ログインユーザー権限取得エラー");
         });
     },
-    getUserList(getdovalue, value) {
-      this.$axios
-        .get("/get_user_list", {
-          params: {
-            getdo: getdovalue,
-            code: value
-          }
+    // 氏名選択リスト取得処理
+    getUserList(targetdate){
+      if (targetdate == '') {
+        targetdate = moment(new Date()).format("YYYYMMDD");
+      }
+      if (this.userdepartment_code == "") { this.userdepartment_code = null; }
+      this.postRequest("/get_user_list",
+        { targetdate: targetdate,
+          killvalue: this.killValue,
+          getDo : this.getDo,
+          departmentcode : this.userdepartment_code,
+          employmentcode : null
         })
-        .then(response => {
-          this.userList = response.data;
+        .then(response  => {
+          this.getThenuser(response);
+          if (this.userdepartment_code == null) { this.userdepartment_code = ""; }
+          // 固有処理 END
         })
         .catch(reason => {
-          alert("ユーザーリスト取得エラー");
+          this.serverCatch("氏名", "取得");
+          if (this.userdepartment_code == null) { this.userdepartment_code = ""; }
         });
     },
     getGeneralList(value) {
@@ -1389,7 +1403,7 @@ export default {
       this.$axios
         .get("/demand/list_demand", {
           params: {
-            doccode: this.valueselecteddoccode,
+            doccode: this.selectedDoccodeValue,
             usercode: "",
             getdo: 1
           }
@@ -1489,7 +1503,7 @@ export default {
       this.edit.confirmfinal = this.valueselectedconfirmfinal;
       this.$axios
         .post("/demand/make_demand", {
-          doccode: this.valueselecteddoccode,
+          doccode: this.selectedDoccodeValue,
           demandedit: this.edit,
           demanddetail: this.demandDetails,
           kbn: kbn
@@ -1524,6 +1538,57 @@ export default {
         .catch(reason => {
           this.alert("error", "申請に失敗しました", "エラー");
         });
+    },
+    // ------------------------ サーバー処理 ----------------------------
+    // ログインユーザーの権限を取得
+    getUserRole: function() {
+      var arrayParams = [];
+      this.postRequest("/get_login_user_role", arrayParams)
+        .then(response  => {
+          this.getThenrole(response);
+        })
+        .catch(reason => {
+          this.serverCatch("ユーザー権限", "取得");
+        });
+    },
+
+    // ----------------- 共通メソッド ----------------------------------
+    // 取得正常処理（ユーザー権限）
+    getThenuser(response) {
+      var res = response.data;
+      if (res.result) {
+        this.userrole = res.role;
+        if (this.userrole == "1") {
+          this.identification_id = "C032";
+        } else {
+          this.identification_id = "C026";
+        }
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+        } else {
+          this.serverCatch("ユーザー権限", "取得");
+        }
+      }
+    },
+    // 取得正常処理（ユーザー権限）
+    getThenrole(response) {
+      var res = response.data;
+      if (res.result) {
+        this.userrole = res.role;
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+        } else {
+          this.serverCatch("ユーザー権限", "取得");
+        }
+      }
+    },
+    // 異常処理
+    serverCatch(kbn, eventtext) {
+      var messages = [];
+      messages.push(kbn + "情報" + eventtext + "に失敗しました");
+      this.messageswal("エラー", messages, "error", true, false, true);
     },
     // クリアメソッド
     itemClear: function() {
@@ -1569,25 +1634,25 @@ export default {
       var address, ccAddress, subject, body, hiddenData;
       var sendmail = document.getElementById('mail');
       subject = '件名：';
-      if (this.valueselecteddoccode == 1){
+      if (this.selectedDoccodeValue == 1){
         subject += '残業申請';
-      } else if (this.valueselecteddoccode == 2){
+      } else if (this.selectedDoccodeValue == 2){
         subject += '休日出勤申請';
-      } else if (this.valueselecteddoccode == 3){
+      } else if (this.selectedDoccodeValue == 3){
         subject += '休日振替申請';
-      } else if (this.valueselecteddoccode == 4){
+      } else if (this.selectedDoccodeValue == 4){
         subject += '代休申請';
-      } else if (this.valueselecteddoccode == 5){
+      } else if (this.selectedDoccodeValue == 5){
         subject += 'シフト変更申請';
-      } else if (this.valueselecteddoccode == 6){
+      } else if (this.selectedDoccodeValue == 6){
         subject += '有給休暇申請';
-      } else if (this.valueselecteddoccode == 7){
+      } else if (this.selectedDoccodeValue == 7){
         subject += '遅刻申請';
-      } else if (this.valueselecteddoccode == 8){
+      } else if (this.selectedDoccodeValue == 8){
         subject += '早退申請';
-      } else if (this.valueselecteddoccode == 9){
+      } else if (this.selectedDoccodeValue == 9){
         subject += '外出申請書';
-      } else if (this.valueselecteddoccode == 10){
+      } else if (this.selectedDoccodeValue == 10){
         subject += '欠勤申請';
       }
       subject += '承認依頼';

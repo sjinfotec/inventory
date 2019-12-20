@@ -43,16 +43,23 @@
     </div>
     <div v-if="btnMode === 'makedemand'" class="btn-group d-flex" v-on:click="makedemandclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
-        <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-restore-b.svg" alt="">新規作成する</button> -->
         新規作成する</button>
+    </div>
+    <div v-if="btnMode === 'condstore'" class="btn-group d-flex" v-on:click="condstoreclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+        この条件で登録する</button>
     </div>
     <div v-if="btnMode === 'editcopy'" class="btn-group d-flex" v-on:click="editcopyclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
         選択した行を複写して作成する</button>
     </div>
+    <div v-if="btnMode === 'fix'" class="btn-group d-flex" v-on:click="fixclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+        この内容で更新する</button>
+    </div>
     <div v-if="btnMode === 'editfix'" class="btn-group d-flex" v-on:click="editfixclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
-        この内容で編集を確定する</button>
+        この内容で編集確定する</button>
     </div>
     <div v-if="btnMode === 'editdemand'" class="btn-group d-flex" v-on:click="editdemandclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
@@ -132,6 +139,9 @@ export default {
     makedemandclickBtn : function() {
       this.$emit('makedemandclick-event',event);
     },
+    condstoreclickBtn : function() {
+      this.$emit('condstoreclick-event',event);
+    },
     editdemandclickBtn : function() {
       this.$emit('editdemandclick-event',event);
     },
@@ -146,6 +156,9 @@ export default {
     },
     doapprovalclickBtn : function() {
       this.$emit('doapprovalclick-event',event);
+    },
+    fixclickBtn : function() {
+      this.$emit('fixclick-event',event);
     },
     editfixclickBtn : function() {
       this.$emit('editfixclick-event',event);

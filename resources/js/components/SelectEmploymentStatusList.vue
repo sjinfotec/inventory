@@ -16,7 +16,7 @@ import {dialogable} from '../mixins/dialogable.js';
 import {requestable} from '../mixins/requestable.js';
 
 export default {
-  name: "selectGeneralList",
+  name: "selectEmploymentStatusList",
   mixins: [ dialogable, requestable ],
   props: {
     blankData: {
@@ -25,7 +25,7 @@ export default {
     },
     placeholderData: {
         type: String,
-        default: '区分を選択してください'
+        default: '雇用形態を選択してください'
     },
     selectedValue: {
         type: Number,
@@ -34,10 +34,6 @@ export default {
     addNew: {
         type: Boolean,
         default: false
-    },
-    getDo: {
-        type: Number,
-        default: 1
     },
     dateValue: {
         type: String,
@@ -50,10 +46,6 @@ export default {
     rowIndex: {
         type: Number,
         default: 0
-    },
-    identificationId: {
-        type: String,
-        default: ''
     }
   },
   data() {
@@ -66,8 +58,9 @@ export default {
     // マウント時
   mounted() {
     this.selectedvalue = this.selectedValue;
-    this.getList('');
+    this.getList();
   },
+
   methods: {
     // ------------------------ イベント処理 ------------------------------------
     // 選択が変更された場合、親コンポーネントに選択値を返却
@@ -78,33 +71,31 @@ export default {
       this.$emit('change-event', value, arrayData);
     },
     // -------------------- サーバー処理 ----------------------------
-    getList(targetdate){
-      if (targetdate == '') {
-        targetdate = moment(new Date()).format("YYYYMMDD");
-      }
-      this.postRequest("/get_general_list", { identificationid: this.identificationId })
+    getList(){
+      var arrayParams = { identificationid : "C001" };
+      this.postRequest("/get_general_list", arrayParams)
         .then(response  => {
           this.getThen(response);
         })
         .catch(reason => {
-          this.serverCatch("");
+          this.serverCatch("雇用形態");
         });
     },
     // -------------------- 共通 ----------------------------
-    // ユーザー取得正常処理
+    // 雇用形態取得正常処理
     getThen(response) {
       this.itemList = [];
       var res = response.data;
       if (res.result) {
-          // 固有処理 START
-          this.itemList = res.details;
-          // 固有処理 end
+        // 固有処理 START
+        this.itemList = res.details;
+        // 固有処理 end
       } else {
-          if (res.messagedata.length > 0) {
-              this.messageswal("エラー", res.messagedata, "error", true, false, true);
-          } else {
-              this.serverCatch("");
-          }
+        if (res.messagedata.length > 0) {
+            this.messageswal("エラー", res.messagedata, "error", true, false, true);
+        } else {
+            this.serverCatch("雇用形態");
+        }
       }
     },
     // 異常処理
@@ -118,13 +109,12 @@ export default {
       name = "";
       this.itemList.forEach(function (item) {
         if (item.code == value) {
-          name = item.code_name;
+          name = item.name;
           return name;
         }
       });
       return name;
     }
   }
-
 };
 </script>

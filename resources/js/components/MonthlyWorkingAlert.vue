@@ -22,8 +22,9 @@
                     <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">指定年月<span class="color-red">[必須]</span></span>
                   </div>
                   <input-datepicker
-                    v-bind:default-date="defaultDate"
-                    v-bind:date-format="'yyyy年MM月'"
+                    v-bind:default-date="valuefromym"
+                    v-bind:date-format="DatePickerFormat"
+                    v-bind:place-holder="'指定日付を選択してください'"
                     v-on:change-event="fromdateChanges"
                     v-on:clear-event="fromdateCleared"
                   ></input-datepicker>
@@ -38,12 +39,18 @@
                     <label class="input-group-text font-size-sm line-height-xs label-width-120" for="inputGroupSelect01">
                       検索区分<span class="color-red">[必須]</span></label>
                   </div>
-                  <general-list
-                    v-bind:identification-id="'C022'"
-                    v-bind:placeholder-data="'検索区分を選択してください'"
+                  <select-generallist
                     v-bind:blank-data="false"
+                    v-bind:placeholder-data="'検索区分を選択してください'"
+                    v-bind:selected-value="selecteSearchvalue"
+                    v-bind:add-new="false"
+                    v-bind:get-do="'1'"
+                    v-bind:date-value="''"
+                    v-bind:kill-value="false"
+                    v-bind:row-index="'0'"
+                    v-bind:identification-id="'C022'"
                     v-on:change-event="displayChange"
-                  ></general-list>
+                  ></select-generallist>
                 </div>
                 <message-data v-bind:message-datas="messagedatadisplay" v-bind:message-class="'warning'"></message-data>
               </div>
@@ -54,10 +61,13 @@
                   <div class="input-group-prepend">
                     <label class="input-group-text font-size-sm line-height-xs label-width-120" for="inputGroupSelect01">雇用形態</label>
                   </div>
-                  <select-employmentstatus
+                  <select-employmentstatuslist
+                    ref="selectemploymentstatuslist"
                     v-bind:blank-data="true"
+                    v-bind:placeholder-data="'雇用形態を選択してください'"
+                    v-bind:selected-value="selectedEmploymentValue"
                     v-on:change-event="employmentChanges"
-                  ></select-employmentstatus>
+                  ></select-employmentstatuslist>
                 </div>
               </div>
               <!-- /.col -->
@@ -67,14 +77,19 @@
                   <div class="input-group-prepend">
                     <label class="input-group-text font-size-sm line-height-xs label-width-120" for="inputGroupSelect01">所属部署</label>
                   </div>
-                  <select-department
-                    ref="selectdepartment"
+                  <select-departmentlist
+                    ref="selectdepartmentlist"
                     v-bind:blank-data="true"
-                    v-bind:selected-department="valuedepartment"
+                    v-bind:placeholder-data="'部署を選択してください'"
+                    v-bind:selected-department="selectedDepartmentValue"
+                    v-bind:add-new="false"
+                    v-bind:date-value="''"
+                    v-bind:kill-value="valueDepartmentkillcheck"
+                    v-bind:row-index=0
                     v-on:change-event="departmentChanges"
-                  ></select-department>
-                  <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
+                  ></select-departmentlist>
                 </div>
+                <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -83,17 +98,22 @@
                   <div class="input-group-prepend">
                     <label class="input-group-text font-size-sm line-height-xs label-width-120" for="inputGroupSelect01">氏　　名</label>
                   </div>
-                  <select-user
-                    ref="selectuser"
+                  <select-userlist v-if="showuserlist"
+                    ref="selectuserlist"
                     v-bind:blank-data="true"
-                    v-bind:get-do="'1'"
+                    v-bind:placeholder-data="'氏名を選択してください'"
+                    v-bind:selected-value="selectedUserValue"
                     v-bind:add-new="false"
-                    v-bind:selectedUser="valueuser"
-                    v-bind:date-value="fromdate"
+                    v-bind:get-do="'1'"
+                    v-bind:date-value="applytermdate"
+                    v-bind:kill-value="valueUserkillcheck"
+                    v-bind:row-index=0
+                    v-bind:department-value="selectedDepartmentValue"
+                    v-bind:employment-value="selectedEmploymentValue"
                     v-on:change-event="userChanges"
-                  ></select-user>
-                  <message-data v-bind:message-datas="messagedatauser"></message-data>
+                  ></select-userlist>
                 </div>
+                <message-data v-bind:message-datas="messagedatauser" v-bind:message-class="'warning'"></message-data>
               </div>
               <div class="col-md-6 pb-2">
                 <message-data-server v-bind:message-datas="messagedatasserver" v-bind:message-class="'warning'"></message-data-server>
@@ -188,21 +208,31 @@
 <script>
 import toasted from "vue-toasted";
 import moment from "moment";
+import {dialogable} from '../mixins/dialogable.js';
+import {checkable} from '../mixins/checkable.js';
+import {requestable} from '../mixins/requestable.js';
 
 export default {
+  name: "monthlyworkingtime",
+  mixins: [ dialogable, checkable, requestable ],
   data: function() {
     return {
+      selectedDepartmentValue : "",
+      valueDepartmentkillcheck : false,
+      showdepartmentlist: true,
+      selectedUserValue : "",
+      showuserlist: true,
+      valueUserkillcheck : false,
+      selectedEmploymentValue: "",
       placeholderdata: "",
       company_name: "",
-      valueym: "",
-      valuedisplay: 0,
-      valuedepartment: "",
-      valueemploymentstatus: "",
+      valuefromym: "",
+      selecteSearchvalue: 0,
       getDo: 1,
-      fromdate: "",
-      valueuser: "",
+      applytermdate: "",
       valuefromdate: "",
       userrole: "",
+      DatePickerFormat: "yyyy年MM月",
       defaultDate: new Date(),
       stringtext: "",
       datejaFormat: "",
@@ -224,7 +254,7 @@ export default {
   },
   // マウント時
   mounted() {
-    this.valueym = moment(this.defaultDate).format("YYYYMMDD");
+    this.valuefromym = this.defaultDate;
     this.getUserRole();
     },
   methods: {
@@ -236,35 +266,35 @@ export default {
       this.messagedatadisplay = [];
       this.messagedatadepartment = [];
       this.messagedatauser = [];
-      if (!this.valueym) {
+      if (!this.valuefromym) {
         this.messagedatasfromdate.push("指定年月は必ず入力してください。");
         this.validate = false;
       }
-      if (!this.valuedisplay) {
-        this.messagedatadisplay.push("表示区分は必ず入力してください。");
+      if (!this.selecteSearchvalue) {
+        this.messagedatadisplay.push("検索区分は必ず入力してください。");
         this.validate = false;
-      } else if (this.valuedisplay == 0) {
-        this.messagedatadisplay.push("表示区分は必ず入力してください。");
+      } else if (this.selecteSearchvalue == 0) {
+        this.messagedatadisplay.push("検索区分は必ず入力してください。");
         this.validate = false;
       }
       if (this.serchorupdate == "update") {
-        if (!this.valuedepartment) {
+        if (!this.selectedDepartmentValue) {
           this.messagedatadepartment.push("所属部署は必ず入力してください。");
           this.validate = false;
         }
         if (this.userrole < "8") {
-          if (!this.valueuser) {
+          if (!this.selectedUserValue) {
             this.messagedatauser.push("氏名は必ず入力してください。");
             this.validate = false;
           }
         }
       } else {
         if (this.userrole < "8") {
-          if (!this.valuedepartment) {
+          if (!this.selectedDepartmentValue) {
             this.messagedatadepartment.push("所属部署は必ず入力してください。");
             this.validate = false;
           }
-          if (!this.valueuser) {
+          if (!this.selectedUserValue) {
             this.messagedatauser.push("氏名は必ず入力してください。");
             this.validate = false;
           }
@@ -277,61 +307,49 @@ export default {
 
       e.preventDefault();
     },
-    // ログインユーザーの権限を取得
-    getUserRole: function() {
-      this.$axios
-        .get("/get_login_user_role", {
-        })
-        .then(response => {
-          this.userrole = response.data;
-        })
-        .catch(reason => {
-          alert("ログインユーザー権限取得エラー");
-        });
-    },
     // 指定年月が変更された場合の処理
     fromdateChanges: function(value) {
-      this.valueym = value;
+      this.valuefromym = value;
       // パネルに表示
       this.setPanelHeader();
       // 再取得
-      this.fromdate = ""
+      this.applytermdate = ""
       if (this.valuefromdate) {
-        this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
+          this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
       }
-      this.$refs.selectdepartment.getDepartmentList(this.fromdate);
+      this.$refs.selectdepartmentlist.getList(this.applytermdate);
       this.getUserSelected();
     },
     // 指定日付がクリアされた場合の処理
     fromdateCleared: function() {
-      this.valueym = ""
+      this.valuefromym = ""
       // パネルに表示
       this.setPanelHeader();
-      this.fromdate = "";
+      this.applytermdate = "";
       this.valuefromdate = "";
     },
     // 表示区分が変更された場合の処理
     displayChange: function(value, name) {
-      this.valuedisplay = value;
+      this.selecteSearchvalue = value;
       this.setPanelHeader();
     },
     // 雇用形態が変更された場合の処理
     employmentChanges: function(value) {
-      this.valueemploymentstatus = value;
+      this.selectedEmploymentValue = value;
       this.getDo = 1;
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getUserSelected();
     },
     // 部署選択が変更された場合の処理
-    departmentChanges: function(value) {
-      this.valuedepartment = value;
+    departmentChanges: function(value, arrayitem) {
+      this.selectedDepartmentValue = value;
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       this.getUserSelected();
     },
     // ユーザー選択が変更された場合の処理
     userChanges: function(value) {
-      this.valueuser = value;
+      this.selectedUserValue = value;
     },
     // 検索開始ボタンがクリックされた場合の処理
     searchclick: function(e) {
@@ -343,10 +361,10 @@ export default {
           .get("/monthly_alert/show", {
             params: {
               datefrom: moment(this.valuefromdate).format("YYYYMM"),
-              displaykbn: this.valuedisplay,
-              employmentstatus: this.valueemploymentstatus,
-              departmentcode: this.valuedepartment,
-              usercode: this.valueuser
+              displaykbn: this.selecteSearchvalue,
+              employmentstatus: this.selectedEmploymentValue,
+              departmentcode: this.selectedDepartmentValue,
+              usercode: this.selectedUserValue
             }
           })
           .then(response => {
@@ -368,8 +386,39 @@ export default {
           });
       }
     },
+    // ------------------------ サーバー処理 ----------------------------
+    // ログインユーザーの権限を取得
+    getUserRole: function() {
+      var arrayParams = [];
+      this.postRequest("/get_login_user_role", arrayParams)
+        .then(response  => {
+          this.getThenrole(response);
+        })
+        .catch(reason => {
+          this.serverCatch("ユーザー権限", "取得");
+        });
+    },
 
     // ----------------- 共通メソッド ----------------------------------
+    // 取得正常処理（ユーザー権限）
+    getThenrole(response) {
+      var res = response.data;
+      if (res.result) {
+        this.userrole = res.role;
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+        } else {
+          this.serverCatch("ユーザー権限", "取得");
+        }
+      }
+    },
+    // 異常処理
+    serverCatch(kbn, eventtext) {
+      var messages = [];
+      messages.push(kbn + "情報" + eventtext + "に失敗しました");
+      this.messageswal("エラー", messages, "error", true, false, true);
+    },
     // クリアメソッド
     itemClear: function() {
       this.resresults = [];
@@ -386,53 +435,24 @@ export default {
     },
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
-      this.valueuser = "";
-      this.getDo = 1;
-      this.fromdate = ""
-      if (this.valuefromdate) {
-        this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
-      }
-      if (this.valueemploymentstatus == "") {
-        if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserList(this.getDo, this.valueuser, this.fromdate);
-        } else {
-          this.$refs.selectuser.getUserListByDepartment(
-            this.getDo,
-            this.valuedepartment,
-            this.valueuser,
-            this.fromdate
-          );
-        }
-      } else {
-        if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserListByEmployment(
-            this.getDo,
-            this.valueemploymentstatus,
-            this.valueuser,
-            this.fromdate
-          );
-        } else {
-          this.$refs.selectuser.getUserListByDepartmentEmployment(
-            this.getDo,
-            this.valuedepartment,
-            this.valueemploymentstatus,
-            this.valueuser,
-            this.fromdate
-          );
-        }
-      }
+      this.$refs.selectuserlist.getList(
+        '',
+        this.valueUserkillcheck,
+        this.getDo,
+        this.selectedDepartmentValue,
+        this.selectedEmploymentValue
+      );
     },
-
     // 集計パネルヘッダ文字列編集処理
     setPanelHeader: function() {
       moment.locale("ja");
-      if (this.valueym == null || this.valueym == "") {
+      if (this.valuefromym == null || this.valuefromym == "") {
         this.stringtext = "";
       } else {
-        if (this.valuedisplay == null || this.valuedisplay == "" || this.valuedisplay == 0) {
+        if (this.selecteSearchvalue == null || this.selecteSearchvalue == "" || this.selecteSearchvalue == 0) {
           this.stringtext = "";
         } else {
-          this.valuefromdate = this.valueym;
+          this.valuefromdate = this.valuefromym;
           if (
             moment(this.valuefromdate).format("YYYYMM") !=
             moment().format("YYYYMM")
@@ -444,16 +464,16 @@ export default {
             this.valuefromdate = moment().format("YYYYMMDD");
           }
           this.datejaFormat = moment(this.valuefromdate).format("YYYY年MM月");
-          if (this.valuedisplay == 1) {
+          if (this.selecteSearchvalue == 1) {
             this.stringtext = this.datejaFormat + "のアラートを締日集計で検索";
           } else {
-            if (this.valuedisplay == 2) {
+            if (this.selecteSearchvalue == 2) {
               this.stringtext = this.datejaFormat + "のアラートを１か月集計で検索";
             } else {
-              if (this.valuedisplay == 3) {
+              if (this.selecteSearchvalue == 3) {
                 this.stringtext = this.datejaFormat + "のアラートを締日集計で検索";
               } else {
-                if (this.valuedisplay == 4) {
+                if (this.selecteSearchvalue == 4) {
                   this.stringtext = this.datejaFormat + "のアラートを１か月集計で検索";
                 } else {
                   this.stringtext = "";

@@ -32,11 +32,43 @@ class SettingCalcController extends Controller
      * @return void
      */
     public function get(Request $request){
-        $target_year = $request->year;
-        $setting = new Setting();
-        $setting->setFiscalyearAttribute($target_year);
-        $details = $setting->getDetails();
-        return $details;
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try{
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['year'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "year", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $target_year = $params['year'];
+            $setting = new Setting();
+            $setting->setFiscalyearAttribute($target_year);
+            $details = $setting->getDetails();
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -45,51 +77,77 @@ class SettingCalcController extends Controller
      * @param Request $request
      * @return void
      */
-  public function store(Request $request){
-        // request
-        $fiscal_year = $request->settings["year"];
-        $b_month = $request->settings["biginningMonth"];
-        $calc_auto_time = $request->settings["calc_auto_time"];
-        $oneMonthTotal = $request->settings["oneMonthTotal"];
-        $twoMonthTotal = $request->settings["twoMonthTotal"];
-        $threeMonthTotal = $request->settings["threeMonthTotal"];
-        $year_total = $request->settings["yearTotal"];
-        $oneMonthTotal_sp = $request->settings["sp_oneMonthTotal"];
-        $year_total_sp = $request->settings["sp_yearTotal"];
-        $ave_2_6 = $request->settings["sp_ave_2_6"];
-        $interval = $request->settings["sp_interval"];
-        $count_sp = $request->settings["sp_count"];
-        $up_times = $request->settings["upTime"];
-        $closing_date = $request->settings["closingDate"];
-        $time_rounds = $request->settings["timeround"];
-        $time_units = $request->settings["timeunit"];
-        $converts = array();
-        $response = collect();
-    
-        $result = $this->insert(
-            $fiscal_year,
-            $b_month,
-            $calc_auto_time,
-            $oneMonthTotal,
-            $twoMonthTotal,
-            $threeMonthTotal,
-            $year_total,
-            $oneMonthTotal_sp,
-            $year_total_sp,
-            $ave_2_6,
-            $interval,
-            $count_sp,
-            $up_times,
-            $closing_date,
-            $time_rounds,
-            $time_units
-        );
+    public function store(Request $request){
+        $this->array_messagedata = array();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['form'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "form", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $data = $params['form'];
+            $fiscal_year = $data["year"];
+            $b_month = $data["biginningMonth"];
+            $calc_auto_time = $data["calc_auto_time"];
+            $oneMonthTotal = $data["oneMonthTotal"];
+            $twoMonthTotal = $data["twoMonthTotal"];
+            $threeMonthTotal = $data["threeMonthTotal"];
+            $year_total = $data["yearTotal"];
+            $oneMonthTotal_sp = $data["sp_oneMonthTotal"];
+            $year_total_sp = $data["sp_yearTotal"];
+            $ave_2_6 = $data["sp_ave_2_6"];
+            $interval = $data["sp_interval"];
+            $count_sp = $data["sp_count"];
+            $up_times = $data["upTime"];
+            $closing_date = $data["closingDate"];
+            $time_rounds = $data["timeround"];
+            $time_units = $data["timeunit"];
 
-        if($result){
-        }else{
-            return false;
+            $result = $this->insert(
+                $fiscal_year,
+                $b_month,
+                $calc_auto_time,
+                $oneMonthTotal,
+                $twoMonthTotal,
+                $threeMonthTotal,
+                $year_total,
+                $oneMonthTotal_sp,
+                $year_total_sp,
+                $ave_2_6,
+                $interval,
+                $count_sp,
+                $up_times,
+                $closing_date,
+                $time_rounds,
+                $time_units
+            );
+
+            return response()->json(
+                ['result' => $result,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
         }
-    
     }
 
     /**
@@ -189,9 +247,13 @@ class SettingCalcController extends Controller
             DB::commit();
             return true;
 
-        }catch(\PDOException $e){
+        }catch(\PDOException $pe){
             DB::rollBack();
-            return false;
+            throw $pe;
+        }catch(\Exception $e){
+            DB::rollBack();
+            Log::error($e->getMessage());
+            throw $e;
         }
     }
 

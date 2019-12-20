@@ -1,28 +1,52 @@
 <template>
-  <select class="form-control" v-model="selectedvalue" v-on:change="selChanges(selectedvalue)">
+  <!-- リスト定義 -->
+  <select class="form-control" v-model="selectedvalue" v-on:change="selChanges(selectedvalue,rowIndex)">
     <option disabled selected style="display:none;" v-if="this.placeholderData" value="">＜{{ placeholderData }}＞</option>
-    <option selected v-if="this.blankData" value=""></option>
+    <option v-if="this.blankData" value=""></option>
+    <!-- 項目設定 -->
     <option v-for="(item, index) in itemList" v-bind:value="item.no">
       {{ item.name }}
     </option>
   </select>
 </template>
+
 <script>
 
+import moment from "moment";
+import {dialogable} from '../mixins/dialogable.js';
+import {requestable} from '../mixins/requestable.js';
+
 export default {
-  name: "SelectCommonlList",
+  name: "selectimetableList",
+  mixins: [ dialogable, requestable ],
   props: {
+    blankData: {
+        type: Boolean,
+        default: true
+    },
+    placeholderData: {
+        type: String,
+        default: 'タイムテーブルを選択してください'
+    },
     selectedValue: {
         type: Number,
         default: ''
     },
-    placeholderData: {
+    addNew: {
+        type: Boolean,
+        default: false
+    },
+    dateValue: {
         type: String,
         default: ''
     },
-    blankData: {
+    killValue: {
         type: Boolean,
-        default: true
+        default: false
+    },
+    rowIndex: {
+        type: Number,
+        default: 0
     }
   },
   data() {
@@ -35,34 +59,63 @@ export default {
     // マウント時
   mounted() {
     this.selectedvalue = this.selectedValue;
-    this.getList();
+    this.getList(this.dateValue);
   },
   methods: {
-    getList(){
-      this.$axios
-        .get("/get_time_table_list", {
-          params: {
-          }
+    // ------------------------ イベント処理 ------------------------------------
+    // 選択が変更された場合、親コンポーネントに選択値を返却
+    selChanges : function(value, index) {
+      this.selectedname = this.getText(value);
+      var arrayData = {'rowindex' : index, 'name' : this.selectedname};
+      this.$emit('change-event', value, arrayData);
+    },
+    // -------------------- サーバー処理 ----------------------------
+    getList(targetdate){
+      console.log('getList in targetdate = ' + targetdate);
+      console.log('getList in this.killValue = ' + this.killValue);
+      if (targetdate == '') {
+          targetdate = moment(new Date()).format("YYYYMMDD");
+      }
+      this.postRequest("/get_time_table_list", { targetdate: targetdate, killvalue: this.killValue })
+        .then(response  => {
+          this.getThen(response);
         })
-        .then(response => {
-          this.itemList = response.data;
+        .catch(reason => {
+          this.serverCatch("タイムテーブル");
+        });
+    },
+    // -------------------- 共通 ----------------------------
+    // タイムテーブル取得正常処理
+    getThen(response) {
+      this.itemList = [];
+      var res = response.data;
+      if (res.result) {
+          // 固有処理 START
+          this.itemList = res.details;
           if (this.itemList.length != 0) {
-            this.object = { apply_term_from: "", name: "新規にタイムテーブルを登録する", no: "" };
+            if (this.addNew) {
+              this.object = { apply_term_from: "", name: "新規にタイムテーブルを登録する", no: "" };
+              this.itemList.unshift(this.object);
+            }
           } else {
             this.placeholderData = "はじめに「所定就業時間の登録」を選択してください"
             this.object = { apply_term_from: "", name: "所定就業時間の登録", no: "" };
+            this.itemList.unshift(this.object);
           }
-          this.itemList.unshift(this.object);
-        })
-        .catch(reason => {
-          alert("リスト作成に失敗しました。");
-        });
+          // 固有処理 end
+      } else {
+          if (res.messagedata.length > 0) {
+              this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          } else {
+              this.serverCatch("タイムテーブル");
+          }
+      }
     },
-    // 選択が変更された場合、親コンポーネントに選択値を返却
-    selChanges : function(value) {
-      this.selectedname = this.getText(value);
-      this.$emit('change-event', value, this.selectedname);
-
+    // 異常処理
+    serverCatch(kbn) {
+      var messages = [];
+      messages.push(kbn + "選択リスト作成に失敗しました");
+      this.messageswal("エラー", messages, "error", true, false, true);
     },
     // 選択テキスト取得
     getText : function(value) {
