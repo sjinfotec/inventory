@@ -1,13 +1,18 @@
 <template>
-  <!-- リスト定義 -->
-  <select class="form-control" v-model="selectedvalue" v-on:change="selChanges(selectedvalue,rowIndex)">
-    <option disabled selected style="display:none;" v-if="this.placeholderData" value="">＜{{ placeholderData }}＞</option>
-    <option v-if="this.blankData" value=""></option>
-    <!-- 項目設定 -->
-    <option v-for="(item, index) in itemList" v-bind:value="item.code">
-      {{ item.code_name }}
-    </option>
-  </select>
+  <div class="input-group">
+    <div class="input-group-prepend">
+      <span class="input-group-text font-size-sm line-height-xs label-width-120">営業日区分</span>
+    </div>
+    <!-- リスト定義 -->
+    <select class="form-control" v-model="selectedvalue" v-on:change="selChanges(selectedvalue,rowIndex)">
+      <option disabled selected style="display:none;" v-if="this.placeholderData" value="">＜{{ placeholderData }}＞</option>
+      <option v-if="this.blankData" value=""></option>
+      <!-- 項目設定 -->
+      <option v-for="(item, index) in itemList" v-bind:value="item.code">
+        {{ item.code_name }}
+      </option>
+    </select>
+  </div>
 </template>
 <script>
 
@@ -16,7 +21,7 @@ import {dialogable} from '../mixins/dialogable.js';
 import {requestable} from '../mixins/requestable.js';
 
 export default {
-  name: "selectGeneralList",
+  name: "SelectBusinessDayList",
   mixins: [ dialogable, requestable ],
   props: {
     blankData: {
@@ -25,7 +30,7 @@ export default {
     },
     placeholderData: {
         type: String,
-        default: '区分を選択してください'
+        default: '営業区分を選択してください'
     },
     selectedValue: {
         type: Number,
@@ -34,10 +39,6 @@ export default {
     addNew: {
         type: Boolean,
         default: false
-    },
-    getDo: {
-        type: Number,
-        default: 1
     },
     dateValue: {
         type: String,
@@ -50,10 +51,6 @@ export default {
     rowIndex: {
         type: Number,
         default: 0
-    },
-    identificationId: {
-        type: String,
-        default: ''
     }
   },
   data() {
@@ -66,7 +63,7 @@ export default {
     // マウント時
   mounted() {
     this.selectedvalue = this.selectedValue;
-    this.getList('');
+    this.getList(this.dateValue);
   },
   methods: {
     // ------------------------ イベント処理 ------------------------------------
@@ -78,33 +75,31 @@ export default {
       this.$emit('change-event', value, arrayData);
     },
     // -------------------- サーバー処理 ----------------------------
-    getList(targetdate){
-      if (targetdate == '') {
-        targetdate = moment(new Date()).format("YYYYMMDD");
-      }
-      this.postRequest("/get_general_list", { identificationid: this.identificationId })
+    getList(){
+      var arrayParams = { identificationid : "C007" };
+      this.postRequest("/get_general_list", arrayParams)
         .then(response  => {
           this.getThen(response);
         })
         .catch(reason => {
-          this.serverCatch("");
+          this.serverCatch("営業区分");
         });
     },
     // -------------------- 共通 ----------------------------
-    // ユーザー取得正常処理
+    // 雇用形態取得正常処理
     getThen(response) {
       this.itemList = [];
       var res = response.data;
       if (res.result) {
-          // 固有処理 START
-          this.itemList = res.details;
-          // 固有処理 end
+        // 固有処理 START
+        this.itemList = res.details;
+        // 固有処理 end
       } else {
-          if (res.messagedata.length > 0) {
-              this.messageswal("エラー", res.messagedata, "error", true, false, true);
-          } else {
-              this.serverCatch("");
-          }
+        if (res.messagedata.length > 0) {
+            this.messageswal("エラー", res.messagedata, "error", true, false, true);
+        } else {
+            this.serverCatch("営業区分");
+        }
       }
     },
     // 異常処理
@@ -118,13 +113,12 @@ export default {
       name = "";
       this.itemList.forEach(function (item) {
         if (item.code == value) {
-          name = item.code_name;
+          name = item.name;
           return name;
         }
       });
       return name;
     }
   }
-
 };
 </script>

@@ -21,11 +21,11 @@
                   <div class="input-group-prepend">
                     <label class="input-group-text font-size-sm line-height-xs label-width-90" for="inputGroupSelect01">部署</label>
                   </div>
-                  <select-department
-                    ref="selectdepartment"
+                  <select-departmentlist
+                    ref="selectdepartmentlist"
                     v-bind:blank-data="true"
                     v-on:change-event="departmentChanges"
-                  ></select-department>
+                  ></select-departmentlist>
                   <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
                 </div>
               </div>
@@ -102,13 +102,13 @@
                               <tr v-for="(item,index) in confirms" v-bind:key="item.id">
                                 <td class="text-center align-middle">
                                   <div class="input-group">
-                                    <select-department
-                                      ref="selectdepartment"
+                                    <select-departmentlist
+                                      ref="selectdepartmentlist"
                                       v-bind:blank-data="true"
                                       v-bind:selected-department="confirms[index].confirm_department_code"
                                       v-bind:row-index="index"
                                       v-on:change-event="departmentChangesConfirm"
-                                    ></select-department>
+                                    ></select-departmentlist>
                                   </div>
                                 </td>
                                 <td class="text-center align-middle">
@@ -222,13 +222,13 @@
                               <tr v-for="(item,index) in final_confirms" v-bind:key="item.id">
                                 <td class="text-center align-middle">
                                   <div class="input-group">
-                                    <select-department
-                                      ref="selectdepartment2"
+                                    <select-departmentlist
+                                      ref="selectdepartmentlist"
                                       v-bind:blank-data="true"
                                       v-bind:selected-department="final_confirms[index].confirm_department_code"
                                       v-bind:row-index="index"
                                       v-on:change-event="departmentChangesFinalConfirm"
-                                    ></select-department>
+                                    ></select-departmentlist>
                                   </div>
                                 </td>
                                 <td class="text-center align-middle">
@@ -331,6 +331,7 @@ export default {
       show_result: false,
       messagedatasserver: [],
       fromdate : '',
+      killValue: false,
       getDo : 1,
       errors: [],
       finalerrors: []
@@ -339,25 +340,25 @@ export default {
   // マウント時
   mounted() {
     this.confirms = [];
-    this.getDepartmentList();
+    this.getDepartmentList('');
     this.getUserList(1, null);
     this.getGeneralList("C027");
   },
   methods: {
     // 検索部署選択が変更された場合の処理
-    departmentChanges: function(value) {
+    departmentChanges: function(value, arrayitem) {
       this.valuedepartment = value;
     },
     // 承認者部署選択が変更された場合の処理
-    departmentChangesConfirm: function(value, index) {
-      this.confirms[index].confirm_department_code = value;
+    departmentChangesConfirm: function(value, arrayitem) {
+      this.confirms[arrayitem['index']].confirm_department_code = value;
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       this.getUserSelected(value, index);
     },
     // 最終承認者部署選択が変更された場合の処理
-    departmentChangesFinalConfirm: function(value, index) {
-      this.final_confirms[index].confirm_department_code = value;
+    departmentChangesFinalConfirm: function(value, arrayitem) {
+      this.final_confirms[arrayitem['index']].confirm_department_code = value;
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       this.getUserSelectedFinal(value, index);
@@ -545,15 +546,19 @@ export default {
       }
       e.preventDefault();
     },
-    getDepartmentList() {
-      this.postRequest("/get_departments_list", [])
+    // 部署選択リスト取得処理
+    getDepartmentList(targetdate){
+      if (targetdate == '') {
+        targetdate = moment(new Date()).format("YYYYMMDD");
+      }
+      this.postRequest("/get_departments_list", { targetdate: targetdate, killvalue: this.killValue })
         .then(response  => {
-          this.departmentList = response.data;
+        this.departmentList = response.data;
         })
         .catch(reason => {
-          var messages = [];
-          messages.push("部署選択リスト作成エラー");
-          this.messageswal("エラー", messages, "error", true, false, true);
+        var messages = [];
+        messages.push("部署選択リスト作成エラー");
+        this.messageswal("エラー", messages, "error", true, false, true);
         });
     },
     getGeneralList(value) {

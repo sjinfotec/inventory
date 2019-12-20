@@ -47,7 +47,7 @@
       </div>
     </div>
     <div v-if="this.itemControl === 'INFO'">
-      <div class="card text-black-50 border border-info bg-info">
+      <div class="card text-black-50 border border-primary bg-info">
         <div class="card-body px-3 py-2">
           <span class="d-md-none float-left"><img class="icon-size-ml mr-2" src="/images/round-info-b.svg" alt=""></span>
           <h1 class="font-size-sm m-0">{{ this.itemName }}</h1>

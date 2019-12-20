@@ -2,12 +2,10 @@
   <datepicker 
     :language="ja"
     :format="dateFormat"
-    :clear-button="true"
+    :clear-button="false"
     v-model="defaultDate"
-    v-on:closed="dateclosed()"
-    v-on:cleared="datecleared()"
     :placeholder="placeHolder"
-    :disabled="false"
+    :disabled="true"
     >
   </datepicker>
 </template>
@@ -17,7 +15,7 @@ import Datepicker from "vuejs-datepicker";
 import {ja} from 'vuejs-datepicker/dist/locale';
 
 export default {
-  name: "inputDatePicker",
+  name: "inputDatePickerDisabled",
   props: {
     defaultDate: {
       type: Date
@@ -31,27 +29,14 @@ export default {
       default: 'yyyy年MM月dd日'
     }
   },
-  // マウント時
-  mounted() {
-    console.log("inputDatePicker Component mounted.");
-  },
   data: function() {
     return {
-      ja:ja
+      ja:ja,
+      todaydate: new Date()
     }
   },
   components: {
     Datepicker
-  },
-  methods: {
-    // 親コンポーネントに入力値を返却
-    dateclosed : function() {
-      this.$emit('change-event', this.defaultDate);
-    },
-    // 親コンポーネントに入力値を返却
-    datecleared : function() {
-      this.$emit('clear-event');
-    },
   }
 
 };

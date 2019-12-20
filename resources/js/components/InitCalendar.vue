@@ -46,12 +46,12 @@
                         for="inputGroupSelect01"
                       >設定区分<span class="color-red">[必須]</span></label>
                     </div>
-                    <general-list
+                    <select-generallist
                       v-bind:identification-id="'C024'"
                       v-bind:placeholder-data="'設定区分を選択してください'"
                       v-bind:blank-data="false"
                       v-on:change-event="displayChange"
-                    ></general-list>
+                    ></select-generallist>
                   </div>
                   <message-data v-bind:message-datas="messagedatadisplay" v-bind:message-class="'warning'"></message-data>
                 </div>

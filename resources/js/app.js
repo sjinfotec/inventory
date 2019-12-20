@@ -97,25 +97,13 @@ Vue.component(
 );
 
 Vue.component(
-    "select-department",
-    require("./components/SelectDepartment.vue").default
-);
-
-Vue.component(
-    "select-business-day",
-    require("./components/SelectBusinessDay.vue").default
-);
-
-Vue.component(
-    "select-holi-day",
-    require("./components/SelectHoliDay.vue").default
-);
-
-Vue.component("select-user", require("./components/SelectUser.vue").default);
-
-Vue.component(
     "input-datepicker",
     require("./components/InputDatepicker.vue").default
+);
+
+Vue.component(
+    "input-datepicker-disabled",
+    require("./components/InputDatepickerDisabled.vue").default
 );
 
 Vue.component(
@@ -126,6 +114,8 @@ Vue.component(
 Vue.component("input-ym", require("./components/InputDateYm.vue").default);
 
 Vue.component("input-time", require("./components/InputTime.vue").default);
+
+Vue.component("input-time-disabled", require("./components/InputTimeDisabled.vue").default);
 
 Vue.component("user-add", require("./components/UserAdd.vue").default);
 
@@ -141,11 +131,6 @@ Vue.component(
 Vue.component(
     "create-time-table",
     require("./components/CreateTimeTable.vue").default
-);
-
-Vue.component(
-    "create-calendar",
-    require("./components/CreateCalendar.vue").default
 );
 
 Vue.component(
@@ -183,11 +168,6 @@ Vue.component(
 );
 
 Vue.component(
-    "select-employmentstatus",
-    require("./components/SelectEmploymentStatus.vue").default
-);
-
-Vue.component(
     "col-attendance",
     require("./components/ColAttendance.vue").default
 );
@@ -217,11 +197,6 @@ Vue.component(
 );
 
 Vue.component("col-note", require("./components/ColNote.vue").default);
-
-Vue.component(
-    "general-list",
-    require("./components/SelectGeneralList.vue").default
-);
 
 // CSV ダウンロードボタン
 Vue.component(
@@ -265,16 +240,6 @@ Vue.component(
 );
 
 Vue.component(
-    "select-demandno",
-    require("./components/SelectDemandNo.vue").default
-);
-
-Vue.component(
-    "select-comfirm",
-    require("./components/SelectConfirm.vue").default
-);
-
-Vue.component(
     "rowbtn-work-time",
     require("./components/RowBtnWorkTime.vue").default
 );
@@ -290,15 +255,55 @@ Vue.component(
 );
 
 Vue.component(
-    "select-timetablelist",
-    require("./components/SelectTimetableList.vue").default
-);
-
-Vue.component(
     "input-timetablepicker",
     require("./components/InputTimeTableElTimepicker.vue").default
 );
 
+
+// 選択リスト
+Vue.component(
+    "select-departmentlist",
+    require("./components/SelectDepartmentList.vue").default
+);
+
+Vue.component(
+    "select-timetablelist",
+    require("./components/SelectTimetableList.vue").default
+);
+
+Vue.component("select-user", require("./components/SelectUser.vue").default);
+
+Vue.component("select-userlist", require("./components/SelectUserList.vue").default);
+
+Vue.component(
+    "select-businessdaylist",
+    require("./components/SelectBusinessDayList.vue").default
+);
+
+Vue.component(
+    "select-employmentstatuslist",
+    require("./components/SelectEmploymentStatusList.vue").default
+);
+
+Vue.component(
+    "select-holi-day",
+    require("./components/SelectHoliDay.vue").default
+);
+
+Vue.component(
+    "select-demandno",
+    require("./components/SelectDemandNo.vue").default
+);
+
+Vue.component(
+    "select-comfirm",
+    require("./components/SelectConfirm.vue").default
+);
+
+Vue.component(
+    "select-generallist",
+    require("./components/SelectGeneralList.vue").default
+);
 
 // 使えないコントロールなので途中で断念した（sizeとか）。使用不可
 Vue.component(

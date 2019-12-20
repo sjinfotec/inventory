@@ -600,6 +600,7 @@ export default {
       userCode: "",
       departmentCode: "",
       validate: false,
+      killValue: false,
       errors: [],
       oldCode: "",
       cardId: "",
@@ -610,7 +611,7 @@ export default {
   mounted() {
     this.userDetails = [];
     console.log("UserAdd Component mounted.");
-    this.getDepartmentList();
+    this.getDepartmentList('');
     this.getEmploymentStatusList();
     this.getTimeTableList();
     this.getUserList(1, null);
@@ -804,14 +805,22 @@ export default {
       });
       return flag;
     },
-    getDepartmentList() {
-      this.postRequest("/get_departments_list", [])
+    // 部署選択リスト取得処理
+    getDepartmentList(targetdate){
+      if (targetdate == '') {
+        targetdate = moment(new Date()).format("YYYYMMDD");
+      }
+      this.postRequest("/get_departments_list", { targetdate: targetdate, killvalue: this.killValue })
         .then(response  => {
+          // 固有処理 START
           this.departmentList = response.data;
-          this.object = { code: "", name: "未選択" };
-          this.departmentList.unshift(this.object);
+          if (this.departmentList.length != 0) {
+            this.object = { code: "", name: "未選択" };
+            this.departmentList.unshift(this.object);
+          }
+        // 固有処理 END
         })
-        .catch(reason => {
+          .catch(reason => {
           var messages = [];
           messages.push("部署選択リスト作成エラー");
           this.messageswal("エラー", messages, "error", true, false, true);

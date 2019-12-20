@@ -6,10 +6,10 @@
       <div class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
-          <div class="card-header clearfix bg-transparent pb-0 border-0">
-            <h1 class="float-sm-left font-size-rg">◆年度指定</h1>
-            <span class="float-sm-right font-size-sm">設定する年度と期首月を指定します</span>
-          </div>
+          <daily-working-information-panel-header
+            v-bind:header-text1="'◆年度指定'"
+            v-bind:header-text2="'設定する年度と期首月を指定します'"
+          ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="card-body pt-2">
             <!-- panel contents -->
@@ -393,7 +393,7 @@
                           <td class="text-center align-middle">{{ n }}月</td>
                           <td class="text-center align-middle">
                             <div class="input-group">
-                              <select class="form-control" v-model="form.closingDate[index]">
+                              <select class="form-control" v-model="form.closingDate[index]" @change="days_maxChanges(index)">
                                 <option value></option>
                                 <option
                                   v-for="n in days_max[index]"
@@ -413,12 +413,13 @@
                                 step="0.50"
                                 class="form-control"
                                 v-model="form.upTime[index]"
+                                @change="upTimeChanges(index)"
                               />
                             </div>
                           </td>
                           <td class="text-center align-middle">
                             <div class="input-group">
-                              <select class="form-control" v-model="form.timeunit[index]">
+                              <select class="form-control" v-model="form.timeunit[index]" @change="timeunitChanges(index)">
                                 <option value></option>
                                 <option
                                   v-for="tulist in TimeUnitList"
@@ -430,7 +431,7 @@
                           </td>
                           <td class="text-center align-middle">
                             <div class="btn-group d-flex">
-                              <select class="form-control" v-model="form.timeround[index]">
+                              <select class="form-control" v-model="form.timeround[index]" @change="timeroundChanges(index)">
                                 <option value></option>
                                 <option
                                   v-for="trlist in TimeRoundingList"
@@ -451,9 +452,7 @@
               </div>
             </div>
             <!-- /.row -->
-          </div>
-          <div class="card-body pt-2">
-            <!-- panel contents -->
+            <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- col -->
@@ -461,9 +460,8 @@
                 <btn-work-time
                   v-on:storeclick-event="storeclick"
                   v-bind:btn-mode="'store'"
-                  v-bind:is-push="storeisPush">
-                </btn-work-time>
-                <message-data v-bind:message-datas="messagedatastore" v-bind:message-class="'warning'"></message-data>
+                  v-bind:is-push="false"
+                ></btn-work-time>
               </div>
               <!-- /.col -->
             </div>
@@ -480,23 +478,13 @@
 <script>
 import toasted from "vue-toasted";
 import moment from "moment";
-import {
-  FvlForm,
-  FvlInput,
-  FvlSearchSelect,
-  FvlSelect,
-  FvlSubmit
-} from "formvuelar";
+import {dialogable} from '../mixins/dialogable.js';
+import {checkable} from '../mixins/checkable.js';
+import {requestable} from '../mixins/requestable.js';
 
 export default {
   name: "SettingCalc",
-  components: {
-    FvlForm,
-    FvlInput,
-    FvlSearchSelect,
-    FvlSelect,
-    FvlSubmit
-  },
+  mixins: [ dialogable, checkable, requestable ],
   data() {
     return {
       defaultDate: new Date(),
@@ -554,7 +542,6 @@ export default {
       messagedatatimeunit: [],
       messagedatatimeround: [],
       messagedatastore: [],
-      errcnt: 0,
       storeisPush: false
     };
   },
@@ -564,214 +551,243 @@ export default {
     this.valueymd = moment(this.defaultDate).format("YYYY");
     this.year = moment(this.valueymd).format("YYYY");
     this.inputClear();
+    this.messageClear();
     this.baseYear = date.getFullYear();
-    this.getTimeUnitList();
-    this.getTimeRoundingList();
     this.get_days();
-  },
-  watch: {
-    year: function(val, oldVal) {
-      this.form.year = this.year;
-      this.getDetail(this.form.year);
-    },
-    bMonth: function(val, oldVal) {
-      this.form.biginningMonth = this.bMonth;
-      this.hidden = "GET";
-    },
-    details: function(val, oldVal) {
-      this.details.forEach((detail, i) => {
-        if (detail.closing != null) {
-          this.form.closingDate[i] = detail.closing.toString();
-        } else {
-          this.form.closingDate[i] = "";
-        }
-        if (detail.uplimit_time != null) {
-          this.form.upTime[i] = detail.uplimit_time.toString();
-        } else {
-          this.form.upTime[i] = "";
-        }
-        if (detail.time_unit != null) {
-          this.form.timeunit[i] = detail.time_unit.toString();
-        } else {
-          this.form.timeunit[i] = "";
-        }
-        if (detail.time_rounding != null) {
-          this.form.timeround[i] = detail.time_rounding.toString();
-        } else {
-          this.form.timeround[i] = "";
-        }
-        this.bMonth = detail.beginning_month;
-      });
-      this.hidden = "GET";
-    }
+    this.getItem();
+    this.getGeneralList("C009");
+    this.getGeneralList("C010");
   },
   methods: {
+    // ------------------------ バリデーション ------------------------------------
     // バリデーション
     checkForm: function() {
       var flag = true;
-      this.messagedatayear = [];
-      this.messagedatabiginningMonth = [];
-      this.messagedataoneMonthTotal = [];
-      this.messagedatayearTotal = [];
-      this.messagedatasponeMonthTotal = [];
-      this.messagedatasptwoMonthTotal = [];
-      this.messagedataspthreeMonthTotal = [];
-      this.messagedataspyearTotal = [];
-      this.messagedataspave_2_6 = [];
-      this.messagedataspcount = [];
-      this.messagedataspinterval = [];
-      this.messagedatavaluecalcauto = [];
-      this.messagedataclosing = [];
-      this.messagedataupTime = [];
-      this.messagedatatimeunit = [];
-      this.messagedatatimeround = [];
-      this.messagedatastore = [];
+      this.messageClear();
 
-      this.errcnt = 0;
       if (this.form.year == "" || this.form.year == null) {
         this.messagedatayear.push("年度を入力してください");
-        flag = false;
-        this.errcnt++;
+      }
+      if (this.messagedatayear.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedatayear;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedatayear);
+        }
       }
       if (this.form.biginningMonth == "" || this.form.biginningMonth == null) {
         this.messagedatabiginningMonth.push("期首月を入力してください");
-        flag = false;
-        this.errcnt++;
       } else if (parseInt(this.form.biginningMonth) < 1 || parseInt(this.form.biginningMonth) > 12) {
           this.messagedatabiginningMonth.push("1~12の範囲で入力してください");
-          flag = false;
-          this.errcnt++;
       } else {
         this.form.biginningMonth = parseInt(this.form.biginningMonth);
+      }
+      if (this.messagedatabiginningMonth.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedatabiginningMonth;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedatabiginningMonth);
+        }
       }
       if (this.form.oneMonthTotal != "" && this.form.oneMonthTotal != null) {
         if (parseFloat(this.form.oneMonthTotal) < 1 || parseFloat(this.form.oneMonthTotal) > 45) {
           this.messagedataoneMonthTotal.push("1~45の範囲で入力してください");
-          flag = false;
-          this.errcnt++;
+        }
+      }
+      if (this.messagedataoneMonthTotal.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedataoneMonthTotal;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedataoneMonthTotal);
         }
       }
       if (this.form.twoMonthTotal != "" && this.form.twoMonthTotal != null) {
         if (parseFloat(this.form.twoMonthTotal) < 1 || parseFloat(this.form.twoMonthTotal) > 81) {
           this.messagedatatwoMonthTotal.push("1~81の範囲で入力してください");
-          flag = false;
-          this.errcnt++;
+        }
+      }
+      if (this.messagedatatwoMonthTotal.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedatatwoMonthTotal;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedatatwoMonthTotal);
         }
       }
       if (this.form.threeMonthTotal != "" && this.form.threeMonthTotal != null) {
         if (parseFloat(this.form.threeMonthTotal) < 1 || parseFloat(this.form.threeMonthTotal) > 120) {
           this.messagedatathreeMonthTotal.push("1~120の範囲で入力してください");
-          flag = false;
-          this.errcnt++;
+        }
+      }
+      if (this.messagedatathreeMonthTotal.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedatathreeMonthTotal;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedatathreeMonthTotal);
         }
       }
       if (this.form.yearTotal != "" && this.form.yearTotal != null) {
         if (parseFloat(this.form.yearTotal) < 1 || parseFloat(this.form.yearTotal) > 360) {
           this.messagedatayearTotal.push("1~360の範囲で入力してください");
-          flag = false;
-          this.errcnt++;
+        }
+      }
+      if (this.messagedatayearTotal.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedatayearTotal;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedatayearTotal);
         }
       }
       if (this.form.sp_oneMonthTotal != "" && this.form.sp_oneMonthTotal != null) {
         if (parseFloat(this.form.sp_oneMonthTotal) < 1 || parseFloat(this.form.sp_oneMonthTotal) > 100) {
           this.messagedatasponeMonthTotal.push("1~100の範囲で入力してください");
-          flag = false;
-          this.errcnt++;
+        }
+      }
+      if (this.messagedatasponeMonthTotal.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedatasponeMonthTotal;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedatasponeMonthTotal);
         }
       }
       if (this.form.sp_yearTotal != "" && this.form.sp_yearTotal != null) {
         if (parseFloat(this.form.sp_yearTotal) < 1 || parseFloat(this.form.sp_yearTotal) > 720) {
           this.messagedataspyearTotal.push("1~720の範囲で入力してください");
-          flag = false;
-          this.errcnt++;
+        }
+      }
+      if (this.messagedataspyearTotal.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedataspyearTotal;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedataspyearTotal);
         }
       }
       if (this.form.sp_ave_2_6 != "" && this.form.sp_ave_2_6 != null) {
         if (parseFloat(this.form.sp_ave_2_6) < 1 || parseFloat(this.form.sp_ave_2_6) > 80) {
           this.messagedataspave_2_6.push("1~80の範囲で入力してください");
-          flag = false;
-          this.errcnt++;
+        }
+      }
+      if (this.messagedataspave_2_6.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedataspave_2_6;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedataspave_2_6);
         }
       }
       if (this.form.sp_count != "" && this.form.sp_count == null) {
         if (parseInt(this.form.sp_count) < 1 || parseInt(this.form.sp_count) > 6) {
           this.messagedataspcount.push("1~6の範囲で入力してください");
-          flag = false;
-          this.errcnt++;
         } else {
           this.form.sp_count = parseInt(this.form.sp_count);
+        }
+      }
+      if (this.messagedataspcount.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedataspcount;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedataspcount);
         }
       }
       if (this.form.sp_interval != "" && this.form.sp_interval != null) {
         if (parseFloat(this.form.sp_interval) < 1 || parseFloat(this.form.sp_interval) > 8) {
           this.messagedataspinterval.push("1~8の範囲で入力してください");
-          flag = false;
-          this.errcnt++;
+        }
+      }
+      if (this.messagedataspinterval.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedataspinterval;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedataspinterval);
         }
       }
       if (this.form.calc_auto_time == "" || this.form.calc_auto_time == null) {
         this.messagedatavaluecalcauto.push("自動起動時刻を入力してください");
-        flag = false;
-        this.errcnt++;
+      }
+      if (this.messagedatavaluecalcauto.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedatavaluecalcauto;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedatavaluecalcauto);
+        }
       }
       for (let index = 0; index < this.form.closingDate.length; index++) {
         if (this.form.closingDate[index] == "" || this.form.closingDate[index] == null) {
           this.messagedataclosing.push(index+1 + "月の締日を入力してください");
-          flag = false;
-          this.errcnt++;
+        }
+      }
+      if (this.messagedataclosing.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedataclosing;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedataclosing);
         }
       }
       for (let index = 0; index < this.form.upTime.length; index++) {
         if (this.form.upTime[index] == "" || this.form.upTime[index] == null) {
           this.messagedataupTime.push(index+1 + "月の上限残業時間を入力してください");
-          flag = false;
-          this.errcnt++;
         } else {
           if (this.form.sp_oneMonthTotal != "" && this.form.sp_oneMonthTotal != null) {
             if (parseFloat(this.form.upTime[index]) < 1 || parseFloat(this.form.upTime[index]) > parseFloat(this.form.sp_oneMonthTotal)) {
               this.messagedataupTime.push(index+1 + "月の上限残業時間は1~" + this.form.sp_oneMonthTotal + "の範囲で入力してください");
-              flag = false;
-              this.errcnt++;
             }
           } else {
             if (this.form.oneMonthTotal != "" && this.form.oneMonthTotal != null) {
               if (parseFloat(this.form.upTime[index]) < 1 || parseFloat(this.form.upTime[index])> parseFloat(this.form.oneMonthTotal)) {
                 this.messagedataupTime.push(index+1 + "月の上限残業時間は1~" + this.form.oneMonthTotal + "の範囲で入力してください");
-                flag = false;
-                this.errcnt++;
               }
             }
           }
         }
       }
+      if (this.messagedataupTime.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedataupTime;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedataupTime);
+        }
+      }
       for (let index = 0; index < this.form.timeunit.length; index++) {
         if (this.form.timeunit[index] == "" || this.form.timeunit[index] == null) {
           this.messagedatatimeunit.push(index+1 + "月の時間単位を入力してください");
-          flag = false;
-          this.errcnt++;
+        }
+      }
+      if (this.messagedatatimeunit.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedatatimeunit;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedatatimeunit);
         }
       }
       for (let index = 0; index < this.form.timeround.length; index++) {
         if (this.form.timeround[index] == "" || this.form.timeround[index] == null) {
           this.messagedatatimeround.push(index+1 + "月の時間の丸めを入力してください");
-          flag = false;
-          this.errcnt++;
         }
       }
-      if (!flag) {
-        this.messagedatastore.push(this.errcnt + "項目にエラーがあります。");
+      if (this.messagedatatimeround.length > 0) {
+        if (this.messagedatastore.length == 0) {
+          this.messagedatastore = this.messagedatatimeround;
+        } else {
+          this.messagedatastore = this.messagedatastore.concat(this.messagedatatimeround);
+        }
+      }
+      if (this.messagedatastore.length > 0) {
+        flag  = false;
       }
       return flag;
     },
+    // ------------------------ イベント処理 ------------------------------------
     // 指定年月が変更された場合の処理
     fromdateChanges: function(value) {
       this.valueymd = value;
       this.year = moment(this.valueymd).format("YYYY");
+      this.getItem();
     },
     // 指定日付がクリアされた場合の処理
     fromdateCleared: function() {
       this.valueymd = ""
       this.year = "";
+      this.defaultDate = "";
+      this.inputClear();
+      this.messageClear();
     },
     // 期首月が変更された場合の処理
     basemonthChanges: function(value) {
@@ -779,6 +795,7 @@ export default {
       this.bYMD = moment(this.valueymd);
       this.bMonth = moment(this.valueymd).format("MM");
     },
+    // 月45時間以内が変更された場合の処理
     oneMonthTotalChanges: function(event) {
       this.before_valueoneMonthTotal = this.valueoneMonthTotal;
       this.valueoneMonthTotal = event.target.value;
@@ -803,14 +820,17 @@ export default {
         }
       }
     },
+    // 36協定設定１ヶ月累計が変更された場合の処理
     twoMonthTotalChanges: function(event) {
       this.valuetwoMonthTotal = event.target.value;
       this.form.twoMonthTotal = this.valuetwoMonthTotal;
     },
+    // 36協定設定２ヶ月累計が変更された場合の処理
     threeMonthTotalChanges: function(event) {
       this.valuethreeMonthTotal = event.target.value;
       this.form.threeMonthTotal = this.valuethreeMonthTotal;
     },
+    // 36協定特別条項設定１ヶ月累計が変更された場合の処理
     oneSpMonthTotalChanges: function(event) {
       this.before_valuesp_oneMonthTotal = this.valuesp_oneMonthTotal;
       this.valuesp_oneMonthTotal = event.target.value;
@@ -838,130 +858,246 @@ export default {
       this.valuecalcauto = value;
       this.form.calc_auto_time = this.valuecalcauto;
     },
-    // 登録の処理
-    storeclick: function() {
+    // 締日が変更された場合の処理
+    days_maxChanges: function(index) {
+      if (index < 11) {
+        if (this.form.closingDate[index+1] == "" || this.form.closingDate[index+1] == null) {
+          for ( var i=index+1; i<12; i++ ) {
+            if (this.form.closingDate[i] != "" && this.form.closingDate[i] != null) {
+              i = 12;
+            } else {
+              this.form.closingDate[i] = this.form.closingDate[index];
+            }
+          }
+        }
+      }
+    },
+    // 上限残業時間が変更された場合の処理
+    upTimeChanges: function(index) {
+      if (index < 11) {
+        if (this.form.upTime[index+1] == "" || this.form.upTime[index+1] == null) {
+          for ( var i=index+1; i<12; i++ ) {
+            if (this.form.upTime[i] != "" && this.form.upTime[i] != null) {
+              i = 12;
+            } else {
+              this.form.upTime[i] = this.form.upTime[index];
+            }
+          }
+        }
+      }
+    },
+    // 時間単位が変更された場合の処理
+    timeunitChanges: function(index) {
+      if (index < 11) {
+        if (this.form.timeunit[index+1] == "" || this.form.timeunit[index+1] == null) {
+          for ( var i=index+1; i<12; i++ ) {
+            if (this.form.timeunit[i] != "" && this.form.timeunit[i] != null) {
+              i = 12;
+            } else {
+              this.form.timeunit[i] = this.form.timeunit[index];
+            }
+          }
+        }
+      }
+    },
+    // 時間の丸めが変更された場合の処理
+    timeroundChanges: function(index) {
+      if (index < 11) {
+        if (this.form.timeround[index+1] == "" || this.form.timeround[index+1] == null) {
+          for ( var i=index+1; i<12; i++ ) {
+            if (this.form.timeround[i] != "" && this.form.timeround[i] != null) {
+              i = 12;
+            } else {
+              this.form.timeround[i] = this.form.timeround[index];
+            }
+          }
+        }
+      }
+    },
+    // -------------------- サーバー処理 ----------------------------
+    // 労働時間基本設定取得処理
+    getItem() {
+      this.inputClear();
+      this.messageClear();
+      this.form.year = this.year;
+      var arrayParams = { year : this.year };
+      this.postRequest("/setting_calc/get", arrayParams)
+        .then(response  => {
+          this.getThen(response);
+        })
+        .catch(reason => {
+          this.serverCatch("取得");
+        });
+    },
+    storeclick() {
       if (this.checkForm()) {
-        this.$axios
-          .post("/setting_calc/store", {
-            settings: this.form
-          })
-          .then(response => {
-            var res = response.data;
-            this.alert("success", "登録しました", "登録完了");
-            this.getDetail(this.form.year);
+        var arrayParams = { form : this.form };
+        this.postRequest("/setting_calc/store", arrayParams)
+          .then(response  => {
+            this.putThenHead(response, "登録");
           })
           .catch(reason => {
-            this.alert("error", "登録に失敗しました", "エラー");
+            this.serverCatch("登録");
           });
+      } else {
+        this.countswal("エラー", this.messagedatastore, "error", true, false, true)
+          .then(result  => {
+            if (result) {
+            }
+        });
       }
     },
-    get_days: function() {
-      for (let index = 0; index < 12; index++) {
-        var month = index + 1;
-        this.days_max[index] = new Date(this.form.year, month, 0).getDate();
-      }
-    },
-    getDetail(year) {
-      this.inputClear();
-      this.messagedatayear = [];
-      this.messagedatabiginningMonth = [];
-      this.messagedataoneMonthTotal = [];
-      this.messagedatatwoMonthTotal = [];
-      this.messagedatathreeMonthTotal = [];
-      this.messagedatayearTotal = [];
-      this.messagedatasponeMonthTotal = [];
-      this.messagedataspyearTotal = [];
-      this.messagedataspave_2_6 = [];
-      this.messagedataspcount = [];
-      this.messagedataspinterval = [];
-      this.messagedataclosing = [];
-      this.messagedataupTime = [];
-      this.messagedatatimeunit = [];
-      this.messagedatatimeround = [];
-      this.messagedatastore = [];
-      this.$axios
-        .get("/setting_calc/get", {
-          params: {
-            year: year
+    // コード選択リスト取得処理
+    getGeneralList(value) {
+      var arrayParams = { identificationid : value };
+      this.postRequest("/get_general_list", arrayParams)
+        .then(response  => {
+          if (value == "C009") {
+            this.getThentimeUnit(response, "時間単位");
           }
-        })
-        .then(response => {
-          if (response.data.length > 0) {
-            this.details = response.data;
-            this.form.year = this.details[0].fiscal_year;
-            this.form.biginningMonth = this.details[0].beginning_month;
-            this.form.sp_count = this.details[0].count_sp;
-            if (this.details[0].calc_auto_time != null) {
-              this.form.calc_auto_time = this.details[0].calc_auto_time.toString();
-              this.valuecalcauto = this.form.calc_auto_time;
-            }
-            if (this.details[0].max_1month_total != null) {
-              this.form.oneMonthTotal = this.details[0].max_1month_total.toString();
-              this.valueoneMonthTotal = this.details[0].max_1month_total.toString();
-              this.limit_valueoneMonthTotal = this.details[0].max_1month_total;
-            }
-            if (this.details[0].max_2month_total != null) {
-              this.form.twoMonthTotal = this.details[0].max_2month_total.toString();
-              this.valuetwoMonthTotal = this.details[0].max_2month_total.toString();
-            }
-            if (this.details[0].max_3month_total != null) {
-              this.form.threeMonthTotal = this.details[0].max_3month_total.toString();
-              this.valuethreeMonthTotal = this.details[0].max_3month_total.toString();
-            }
-            if (this.details[0].max_12month_total != null) {
-              this.form.yearTotal = this.details[0].max_12month_total.toString();
-            }
-            if (this.details[0].max_1month_total_sp != null) {
-              this.form.sp_oneMonthTotal = this.details[0].max_1month_total_sp.toString();
-              this.valuesp_oneMonthTotal = this.details[0].max_1month_total_sp.toString();
-              this.limit_valueoneMonthTotal = this.details[0].max_1month_total_sp;
-            }
-            if (this.details[0].ave_2_6_time_sp != null) {
-              this.form.sp_ave_2_6 = this.details[0].ave_2_6_time_sp.toString();
-            }
-            if (this.details[0].max_12month_total_sp != null) {
-              this.form.sp_yearTotal = this.details[0].max_12month_total_sp.toString();
-            }
-            this.form.sp_interval = this.details[0].interval.toString();
+          if (value == "C010") {
+            this.getThentimeRounding(response, "時間の丸め");
           }
         })
         .catch(reason => {
-          alert("詳細取得エラー");
+          if (value == "C009") {
+            this.serverCatch("時間単位", "取得");
+          }
+          if (value == "C010") {
+            this.serverCatch("時間の丸め", "取得");
+          }
         });
     },
-    alert: function(state, message, title) {
-      this.$swal(title, message, state);
+    // -------------------- 共通 ----------------------------
+    // 取得正常処理
+    getThen(response) {
+      var res = response.data;
+      if (res.result) {
+        this.details = res.details;
+        this.count = this.details.length;
+        this.before_count = this.count;
+        if ( this.details.length > 0) {
+          this.form.year = this.details[0].fiscal_year;
+          this.form.biginningMonth = this.details[0].beginning_month;
+          this.form.sp_count = this.details[0].count_sp;
+          if (this.details[0].calc_auto_time != null) {
+            this.form.calc_auto_time = this.details[0].calc_auto_time.toString();
+            this.valuecalcauto = this.form.calc_auto_time;
+          }
+          if (this.details[0].max_1month_total != null) {
+            this.form.oneMonthTotal = this.details[0].max_1month_total.toString();
+            this.valueoneMonthTotal = this.details[0].max_1month_total.toString();
+            this.limit_valueoneMonthTotal = this.details[0].max_1month_total;
+          }
+          if (this.details[0].max_2month_total != null) {
+            this.form.twoMonthTotal = this.details[0].max_2month_total.toString();
+            this.valuetwoMonthTotal = this.details[0].max_2month_total.toString();
+          }
+          if (this.details[0].max_3month_total != null) {
+            this.form.threeMonthTotal = this.details[0].max_3month_total.toString();
+            this.valuethreeMonthTotal = this.details[0].max_3month_total.toString();
+          }
+          if (this.details[0].max_12month_total != null) {
+            this.form.yearTotal = this.details[0].max_12month_total.toString();
+          }
+          if (this.details[0].max_1month_total_sp != null) {
+            this.form.sp_oneMonthTotal = this.details[0].max_1month_total_sp.toString();
+            this.valuesp_oneMonthTotal = this.details[0].max_1month_total_sp.toString();
+            this.limit_valueoneMonthTotal = this.details[0].max_1month_total_sp;
+          }
+          if (this.details[0].ave_2_6_time_sp != null) {
+            this.form.sp_ave_2_6 = this.details[0].ave_2_6_time_sp.toString();
+          }
+          if (this.details[0].max_12month_total_sp != null) {
+            this.form.sp_yearTotal = this.details[0].max_12month_total_sp.toString();
+          }
+          this.form.sp_interval = this.details[0].interval.toString();
+          this.details.forEach((detail, i) => {
+            if (detail.closing != null) {
+              this.form.closingDate[i] = detail.closing.toString();
+            } else {
+              this.form.closingDate[i] = "";
+            }
+            if (detail.uplimit_time != null) {
+              this.form.upTime[i] = detail.uplimit_time.toString();
+            } else {
+              this.form.upTime[i] = "";
+            }
+            if (detail.time_unit != null) {
+              this.form.timeunit[i] = detail.time_unit.toString();
+            } else {
+              this.form.timeunit[i] = "";
+            }
+            if (detail.time_rounding != null) {
+              this.form.timeround[i] = detail.time_rounding.toString();
+            } else {
+              this.form.timeround[i] = "";
+            }
+            this.bMonth = detail.beginning_month;
+          });
+        }
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+        } else {
+          this.serverCatch("取得");
+        }
+      }
     },
-    addSuccess() {
-      // ここで会社情報呼び出す
-      this.$toasted.show("登録しました");
+    // 更新系正常処理
+    putThenHead(response, eventtext) {
+      var messages = [];
+      var res = response.data;
+      if (res.result) {
+        messages.push("労働時間基本設定を" + eventtext + "しました");
+        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+        } else {
+          this.serverCatch(eventtext);
+        }
+      }
     },
-    getTimeUnitList() {
-      this.$axios
-        .get("/get_time_unit_list")
-        .then(response => {
-          this.TimeUnitList = response.data;
-        })
-        .catch(reason => {
-          alert("error");
-        });
+    // 異常処理
+    serverCatch(eventtext) {
+      var messages = [];
+      messages.push("労働時間基本設定" + eventtext + "に失敗しました");
+      this.messageswal("エラー", messages, "error", true, false, true);
     },
-    getTimeRoundingList() {
-      this.$axios
-        .get("/get_time_rounding_list", {})
-        .then(response => {
-          this.TimeRoundingList = response.data;
-        })
-        .catch(reason => {
-          alert("error");
-        });
+    // 取得正常処理（明細時間単位リスト）
+    getThentimeUnit(response) {
+      var res = response.data;
+      if (res.result) {
+        this.TimeUnitList = res.details;
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+        } else {
+          this.serverCatch("時間単位", "取得");
+        }
+      }
     },
-    error() {
-      this.alert("error", "登録に失敗しました", "エラー");
+    // 取得正常処理（明細時間の丸め選択リスト）
+    getThentimeRounding(response, value) {
+      var res = response.data;
+      if (res.result) {
+        this.TimeRoundingList = res.details;
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+        } else {
+          this.serverCatch("時間の丸め", "取得");
+        }
+      }
     },
+    // 項目クリア
     inputClear() {
-      // alert("clear");
+      this.details = [];
+      this.count = 0;
+      this.before_count = 0;
       this.bMonth = this.form.biginningMonth;
+      this.form.year = "";
       this.form.biginningMonth = "";
       this.form.calc_auto_time = "";
       this.form.oneMonthTotal = "";
@@ -985,7 +1121,27 @@ export default {
         this.form.timeround[index] = "";
       }
     },
-    // tooltips
+    // メッセージ項目クリア
+    messageClear() {
+      this.messagedatayear = [];
+      this.messagedatabiginningMonth = [];
+      this.messagedataoneMonthTotal = [];
+      this.messagedatatwoMonthTotal = [];
+      this.messagedatathreeMonthTotal = [];
+      this.messagedatayearTotal = [];
+      this.messagedatasponeMonthTotal = [];
+      this.messagedataspyearTotal = [];
+      this.messagedataspave_2_6 = [];
+      this.messagedataspcount = [];
+      this.messagedataspinterval = [];
+      this.messagedatavaluecalcauto = [];
+      this.messagedataclosing = [];
+      this.messagedataupTime = [];
+      this.messagedatatimeunit = [];
+      this.messagedatatimeround = [];
+      this.messagedatastore = [];
+    },
+    // tooltips文字列生成
     edttooltips: function(value1, value2) {
       if (value1.length > 0) {
         this.edtString = value1;
@@ -993,12 +1149,14 @@ export default {
       if (value2.length > 0) {
         this.edtString = this.edtString + '\n' + value2;
       }
-    }
+    },
+    // 月の日付リづと作成
+    get_days: function() {
+      for (let index = 0; index < 12; index++) {
+        var month = index + 1;
+        this.days_max[index] = new Date(this.form.year, month, 0).getDate();
+      }
+    },
   }
 };
 </script>
-<style scoped>
-.width15 {
-  width: 15%;
-}
-</style>

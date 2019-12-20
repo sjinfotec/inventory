@@ -4,8 +4,8 @@
     <option disabled selected style="display:none;" v-if="this.placeholderData" value="">＜{{ placeholderData }}＞</option>
     <option v-if="this.blankData" value=""></option>
     <!-- 項目設定 -->
-    <option v-for="(item, index) in itemList" v-bind:value="item.code">
-      {{ item.code_name }}
+    <option v-for="(item, index) in itemList" v-bind:value="item.XXXX">
+      {{ item.XXXX }}
     </option>
   </select>
 </template>
@@ -16,7 +16,7 @@ import {dialogable} from '../mixins/dialogable.js';
 import {requestable} from '../mixins/requestable.js';
 
 export default {
-  name: "selectGeneralList",
+  name: "selecXXXXXXXXList",
   mixins: [ dialogable, requestable ],
   props: {
     blankData: {
@@ -25,7 +25,7 @@ export default {
     },
     placeholderData: {
         type: String,
-        default: '区分を選択してください'
+        default: 'ＸＸＸＸＸＸを選択してください'
     },
     selectedValue: {
         type: Number,
@@ -50,10 +50,6 @@ export default {
     rowIndex: {
         type: Number,
         default: 0
-    },
-    identificationId: {
-        type: String,
-        default: ''
     }
   },
   data() {
@@ -66,7 +62,7 @@ export default {
     // マウント時
   mounted() {
     this.selectedvalue = this.selectedValue;
-    this.getList('');
+    this.getList(this.dateValue);
   },
   methods: {
     // ------------------------ イベント処理 ------------------------------------
@@ -82,12 +78,12 @@ export default {
       if (targetdate == '') {
         targetdate = moment(new Date()).format("YYYYMMDD");
       }
-      this.postRequest("/get_general_list", { identificationid: this.identificationId })
+      this.postRequest("/XXXXXXXXXX_list", { targetdate: targetdate, killvalue: this.killValue })
         .then(response  => {
           this.getThen(response);
         })
         .catch(reason => {
-          this.serverCatch("");
+          this.serverCatch("ＸＸ");
         });
     },
     // -------------------- 共通 ----------------------------
@@ -98,12 +94,22 @@ export default {
       if (res.result) {
           // 固有処理 START
           this.itemList = res.details;
+          if (this.itemList.length != 0) {
+            if (this.addNew) {
+              this.object = { XXXX: "新規にＸＸＸＸＸＸＸＸを登録する", XXXX: "" };
+              this.itemList.unshift(this.object);
+            }
+          } else {
+            this.placeholderData = "はじめに「所定就業時間の登録」を選択してください"
+            this.object = { XXXX: "所定就業時間の登録", XXXX: "" };
+            this.itemList.unshift(this.object);
+          }
           // 固有処理 end
       } else {
           if (res.messagedata.length > 0) {
               this.messageswal("エラー", res.messagedata, "error", true, false, true);
           } else {
-              this.serverCatch("");
+              this.serverCatch("部署");
           }
       }
     },
@@ -117,14 +123,14 @@ export default {
     getText : function(value) {
       name = "";
       this.itemList.forEach(function (item) {
-        if (item.code == value) {
-          name = item.code_name;
+        if (item.XXXX == value) {
+          name = item.XXXX;
           return name;
         }
       });
       return name;
     }
-  }
 
+  }
 };
 </script>

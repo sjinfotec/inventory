@@ -51,7 +51,7 @@ class WorkingTimeTable extends Model
     {
         $this->no = $value;
     }
-     
+    
     public function getNameAttribute()
     {
         return $this->name;
@@ -382,13 +382,18 @@ class WorkingTimeTable extends Model
                 ->where('apply_term_from', '<=',$target_date)
                 ->where('is_deleted', '=', 0)
                 ->groupBy('no');
+            $case_sql2 = "CASE t2.max_apply_term_from = t1.apply_term_from ";
+            $case_sql2 = $case_sql2." WHEN TRUE THEN 1";
+            $case_sql2 = $case_sql2." ELSE CASE t2.max_apply_term_from < t1.apply_term_from ";
+            $case_sql2 = $case_sql2."      WHEN TRUE THEN 2 ELSE 0 END ";
+            $case_sql2 = $case_sql2." END  as result";
             $mainquery = DB::table($this->table.' AS t1')
                 ->select(
                     't1.id', 't1.no', 't1.name', 't1.working_time_kubun')
                 ->selectRaw("DATE_FORMAT(t1.apply_term_from, '%Y-%m-%d') as apply_term_from")
                 ->selectRaw("DATE_FORMAT(t1.from_time, '%H:%i') as from_time")
                 ->selectRaw("DATE_FORMAT(t1.to_time, '%H:%i') as to_time")
-                ->selectRaw("CASE t2.max_apply_term_from = t1.apply_term_from WHEN TRUE THEN 1 ELSE 0 END as result")
+                ->selectRaw($case_sql2)
                 ->addselect('t1.created_user')
                 ->addselect('t1.updated_user');
             $mainquery
@@ -422,8 +427,7 @@ class WorkingTimeTable extends Model
     public function updateIsDelete(){
         try {
             DB::table($this->table)
-            ->where('no', $this->no)
-            ->where('apply_term_from', $this->apply_term_from)
+            ->where('id', $this->id)
             ->update(['is_deleted' => 1]);
 
         }catch(\PDOException $pe){
@@ -533,6 +537,30 @@ class WorkingTimeTable extends Model
         }
         
         return $results;
+    }
+
+    /**
+     * タイムテーブル名（同名）チェック用
+     *
+     * @return boolean
+     */
+    public function isExistsName(){
+        try {
+            $is_exists = DB::table($this->table)
+                ->where('name',$this->name)
+                ->where('is_deleted',0)
+                ->exists();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $is_exists;
     }
 
 }

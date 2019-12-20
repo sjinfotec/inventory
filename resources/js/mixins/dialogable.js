@@ -52,6 +52,23 @@ export const dialogable =  {
         });
       });
     },
+    // 処理中メッセージ表示
+    waitswal: function(title, arrayMessage, icon) {
+      this.messagedata = this.arrayTostring(arrayMessage);
+      let self = this;
+      return new Promise( function (resolve, reject) {
+        self.$swal({
+          title: title,
+          text: self.messagedata,
+          icon: icon,
+          allowOutsideClick : false,    //枠外をクリックしても画面を閉じない
+          showConfirmButton: false,
+          onBeforeOpen: () => {
+            Swal.showLoading();
+          }
+        })
+      });
+    },
     // -------------------------- private メソッド ------------------------
     // 配列→String改行
     arrayTostring(arrayMessage) {

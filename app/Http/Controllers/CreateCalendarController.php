@@ -30,7 +30,7 @@ class CreateCalendarController extends Controller
      */
     public function index()
     {
-        return view('create_calendar');
+        return view('setting_calendar');
     }
 
     /**

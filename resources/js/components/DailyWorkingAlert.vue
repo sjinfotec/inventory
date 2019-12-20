@@ -25,7 +25,9 @@
                     >指定日付<span class="color-red">[必須]</span></span>
                   </div>
                   <input-datepicker
-                    v-bind:default-date="defaultDate"
+                    v-bind:default-date="valuefromdate"
+                    v-bind:date-format="DatePickerFormat"
+                    v-bind:place-holder="'指定日付を選択してください'"
                     v-on:change-event="fromdateChanges"
                     v-on:clear-event="fromdateCleared"
                   ></input-datepicker>
@@ -45,10 +47,13 @@
                       for="target_employmentstatus"
                     >雇用形態</label>
                   </div>
-                  <select-employmentstatus
+                  <select-employmentstatuslist
+                    ref="selectemploymentstatuslist"
                     v-bind:blank-data="true"
+                    v-bind:placeholder-data="'雇用形態を選択してください'"
+                    v-bind:selected-value="selectedEmploymentValue"
                     v-on:change-event="employmentChanges"
-                  ></select-employmentstatus>
+                  ></select-employmentstatuslist>
                 </div>
               </div>
               <!-- /.col -->
@@ -61,12 +66,17 @@
                       for="target_department"
                     >所属部署</label>
                   </div>
-                  <select-department
-                    ref="selectdepartment"
+                  <select-departmentlist
+                    ref="selectdepartmentlist"
                     v-bind:blank-data="true"
-                    v-bind:selected-department="valuedepartment"
+                    v-bind:placeholder-data="'部署を選択してください'"
+                    v-bind:selected-department="selectedDepartmentValue"
+                    v-bind:add-new="false"
+                    v-bind:date-value="''"
+                    v-bind:kill-value="valueDepartmentkillcheck"
+                    v-bind:row-index=0
                     v-on:change-event="departmentChanges"
-                  ></select-department>
+                  ></select-departmentlist>
                 </div>
                 <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
               </div>
@@ -80,15 +90,20 @@
                       for="target_users"
                     >氏 名</label>
                   </div>
-                  <select-user
-                    ref="selectuser"
+                  <select-userlist v-if="showuserlist"
+                    ref="selectuserlist"
                     v-bind:blank-data="true"
-                    v-bind:get-do="getDo"
+                    v-bind:placeholder-data="'氏名を選択してください'"
+                    v-bind:selected-value="selectedUserValue"
                     v-bind:add-new="false"
-                    v-bind:selectedUser="valueuser"
-                    v-bind:date-value="fromdate"
+                    v-bind:get-do="getDo"
+                    v-bind:date-value="applytermdate"
+                    v-bind:kill-value="valueUserkillcheck"
+                    v-bind:row-index=0
+                    v-bind:department-value="selectedDepartmentValue"
+                    v-bind:employment-value="selectedEmploymentValue"
                     v-on:change-event="userChanges"
-                  ></select-user>
+                  ></select-userlist>
                 </div>
                 <message-data v-bind:message-datas="messagedatauser" v-bind:message-class="'warning'"></message-data>
               </div>
@@ -120,7 +135,7 @@
         <div class="card shadow-pl">
           <!-- panel body -->
           <daily-working-alert-table
-            v-bind:alert-lists="alertresults"
+            v-bind:alert-lists="details"
           ></daily-working-alert-table>
           <!-- /panel body -->
         </div>
@@ -134,24 +149,30 @@
 <script>
 import toasted from "vue-toasted";
 import moment from "moment";
+import {dialogable} from '../mixins/dialogable.js';
+import {checkable} from '../mixins/checkable.js';
+import {requestable} from '../mixins/requestable.js';
 
 export default {
-  name: "dailyworkingalert",
-  data: function() {
+  name: "dailyworkingtime",
+  mixins: [ dialogable, checkable, requestable ],
+ data: function() {
     return {
-      valuedepartment: "",
-      valueemploymentstatus: "",
+      selectedDepartmentValue : "",
+      valueDepartmentkillcheck : false,
+      showdepartmentlist: true,
+      selectedUserValue : "",
+      showuserlist: true,
+      valueUserkillcheck : false,
+      selectedEmploymentValue: "",
       getDo: 1,
-      fromdate: "",
-      valueuser: "",
+      applytermdate: "",
       valuefromdate: "",
       userrole: "",
+      DatePickerFormat: "yyyy年MM月dd日",
       defaultDate: new Date(),
-      datejaFormat: "",
-      hrefindex: "",
       dateName: "",
-      resresults: [],
-      alertresults: [],
+      details: [],
       messagedatasserver: [],
       messagedatasfromdate: [],
       messagedatadepartment: [],
@@ -163,170 +184,193 @@ export default {
   // マウント時
   mounted() {
     this.valuefromdate = this.defaultDate;
+    moment.locale("ja");
     this.getUserRole();
   },
   methods: {
+    // ------------------------ バリデーション ------------------------------------
     // バリデーション
     checkForm: function(e) {
-      this.validate = true;
       this.messagedatasserver = [];
       this.messagedatasfromdate = [];
       this.messagedatadepartment = [];
       this.messagedatauser = [];
-      if (!this.valuefromdate) {
-        this.messagedatasfromdate.push("指定日付は必ず入力してください。");
+      var chkArray = [];
+      this.validate = true;
+      // 指定日付
+      var required = true;
+      var equalength = 0;
+      var maxlength = 0;
+      var itemname = '指定日付';
+      chkArray = 
+        this.checkHeader(this.valuefromdate, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagedatasfromdate.length == 0) {
+          this.messagedatasfromdate = chkArray;
+        } else {
+          this.messagedatasfromdate = this.messagedatasfromdate.concat(chkArray);
+        }
         this.validate = false;
       }
+      // 所属部署
       if (this.userrole < "8") {
-        if (!this.valuedepartment) {
-          this.messagedatadepartment.push("所属部署は必ず入力してください。");
+        required = true;
+        equalength = 0;
+        maxlength = 0;
+        itemname = '所属部署';
+        chkArray = 
+          this.checkHeader(this.selectedDepartmentValue, required, equalength, maxlength, itemname);
+        if (chkArray.length > 0) {
+          if (this.messagedatadepartment.length == 0) {
+            this.messagedatadepartment.push("一般ユーザーは所属部署は必ず入力してください。");
+          } else {
+            this.messagedatadepartment = this.messagedatadepartment.concat(chkArray);
+          }
           this.validate = false;
         }
-        if (!this.valueuser) {
-          this.messagedatauser.push("氏名は必ず入力してください。");
+        required = true;
+        equalength = 0;
+        maxlength = 0;
+        itemname = '氏名';
+        chkArray = 
+          this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
+        if (chkArray.length > 0) {
+          if (this.messagedatauser.length == 0) {
+            this.messagedatauser.push("一般ユーザーは氏名は必ず入力してください。");
+          } else {
+            this.messagedatauser = this.messagedatauser.concat(chkArray);
+          }
           this.validate = false;
         }
       }
-      console.log("validate = true");
-
       if (this.validate) {
         return this.validate;
       }
 
       e.preventDefault();
     },
-    // ログインユーザーの権限を取得
-    getUserRole: function() {
-      this.$axios
-        .get("/get_login_user_role", {
-        })
-        .then(response => {
-          this.userrole = response.data;
-        })
-        .catch(reason => {
-          alert("ログインユーザー権限取得エラー");
-        });
-    },
+    // ------------------------ イベント処理 ------------------------------------
     // 指定日付が変更された場合の処理
     fromdateChanges: function(value) {
-      moment.locale("ja");
       this.valuefromdate = value;
       // 再取得
-      this.fromdate = ""
+      this.applytermdate = ""
       if (this.valuefromdate) {
-        this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
+        this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
       }
-      this.$refs.selectdepartment.getDepartmentList(this.fromdate);
+      this.$refs.selectdepartmentlist.getList(this.applytermdate);
       this.getUserSelected();
     },
     // 指定日付がクリアされた場合の処理
     fromdateCleared: function() {
       this.valuefromdate = ""
-      this.fromdate = "";
+      this.applytermdate = "";
     },
     
     // 雇用形態が変更された場合の処理
     employmentChanges: function(value) {
-      this.valueemploymentstatus = value;
+      this.selectedEmploymentValue = value;
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       this.getUserSelected();
     },
     // 部署選択が変更された場合の処理
-    departmentChanges: function(value) {
-      this.valuedepartment = value;
+    departmentChanges: function(value, arrayitem) {
+      this.selectedDepartmentValue = value;
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       this.getUserSelected();
     },
     // ユーザー選択が変更された場合の処理
-    userChanges: function(value) {
-      this.valueuser = value;
+    userChanges: function(value, arrayitem) {
+      this.selectedUserValue = value;
     },
     // 集計開始ボタンがクリックされた場合の処理
     searchclick: function(e) {
       this.validate = this.checkForm(e);
-      console.log("this.valuefromdate" + this.valuefromdate);
-      console.log("this.valueemploymentstatus" + this.valueemploymentstatus);
-      console.log("this.valuedepartment" + this.valuedepartment);
-      console.log("this.valueuser" + this.valueuser);
       if (this.validate) {
         this.itemClear();
-        this.$axios
-          .get("/daily_alert/show", {
-            params: {
-              datefrom: moment(this.valuefromdate).format("YYYYMMDD"),
-              dateto: moment(this.valuefromdate).format("YYYYMMDD"),
-              employmentstatus: this.valueemploymentstatus,
-              departmentcode: this.valuedepartment,
-              usercode: this.valueuser
-            }
-          })
-          .then(response => {
-            this.resresults = response.data;
-            if (this.resresults.alertresults != null) {
-              this.alertresults = this.resresults.alertresults;
-            }
-            if (this.resresults.datename != null) {
-              this.dateName = this.resresults.datename;
-              this.stringtext = this.dateName;
-            }
-            if (this.resresults.messagedata != null) {
-              this.messagedatasserver = this.resresults.messagedata;
-            }
-            console.log("alertresults" + Object.keys(this.alertresults).length);
-            console.log("messagedatasserver" + Object.keys(this.messagedatasserver).length);
-            this.$forceUpdate();
-          })
-          .catch(reason => {
-            alert("error");
-          });
+        this.getItem();
       }
+    },
+    // ------------------------ サーバー処理 ----------------------------
+    // 日次警告取得処理
+    getItem() {
+      var arrayParams = {
+        alert_form_date : moment(this.valuefromdate).format("YYYYMMDD"),
+        employmentstatus : this.selectedEmploymentValue,
+        departmentcode : this.selectedDepartmentValue,
+        usercode : this.selectedUserValue
+      };
+      this.postRequest("/daily_alert/show", arrayParams)
+        .then(response  => {
+          this.getThen(response);
+        })
+        .catch(reason => {
+          this.serverCatch("日次警告", "取得");
+        });
+    },
+    // ログインユーザーの権限を取得
+    getUserRole: function() {
+      var arrayParams = [];
+      this.postRequest("/get_login_user_role", arrayParams)
+        .then(response  => {
+          this.getThenrole(response);
+        })
+        .catch(reason => {
+          this.serverCatch("ユーザー権限", "取得");
+        });
     },
 
     // ----------------- 共通メソッド ----------------------------------
-
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
-      this.fromdate = "";
-      this.valueuser = "";
-      if (this.valuefromdate) {
-        this.fromdate = moment(this.valuefromdate).format("YYYYMMDD");
-      }
-      if (this.valueemploymentstatus == "") {
-        if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserList(this.getDo, this.fromdate);
-        } else {
-          this.$refs.selectuser.getUserListByDepartment(
-            this.getDo,
-            this.valuedepartment,
-            this.fromdate
-          );
-        }
+      this.$refs.selectuserlist.getList(
+        '',
+        this.valueUserkillcheck,
+        this.getDo,
+        this.selectedDepartmentValue,
+        this.selectedEmploymentValue
+      );
+    },
+    // 取得正常処理（アラート）
+    getThen(response) {
+      var res = response.data;
+      if (res.result) {
+        this.details = res.details;
+        this.dateName = res.datename;
       } else {
-        if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserListByEmployment(
-            this.getDo,
-            this.valueemploymentstatus,
-            this.fromdate
-          );
+        if (res.messagedata.length > 0) {
+          this.messageswal("エラー", res.messagedata, "error", true, false, true);
         } else {
-          this.$refs.selectuser.getUserListByDepartmentEmployment(
-            this.getDo,
-            this.valuedepartment,
-            this.valueemploymentstatus,
-            this.fromdate
-          );
+          this.serverCatch("日次警告", "取得");
         }
       }
     },
+    // 取得正常処理（ユーザー権限）
+    getThenrole(response) {
+      var res = response.data;
+      if (res.result) {
+        this.userrole = res.role;
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+        } else {
+          this.serverCatch("ユーザー権限", "取得");
+        }
+      }
+    },
+    // 異常処理
+    serverCatch(kbn, eventtext) {
+      var messages = [];
+      messages.push(kbn + "情報" + eventtext + "に失敗しました");
+      this.messageswal("エラー", messages, "error", true, false, true);
+    },
     // クリアメソッド
     itemClear: function() {
-      this.resresults = [];
-      this.alertresults = [];
+      this.details = [];
       this.messagedatasserver = [];
       this.messagedatasfromdate = [];
-      this.messagedatastodate = [];
       this.messagedatadepartment = [];
       this.messagedatauser = [];
     }

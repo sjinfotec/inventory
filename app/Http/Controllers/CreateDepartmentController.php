@@ -14,8 +14,6 @@ use App\Department;
 
 class CreateDepartmentController extends Controller
 {
-    const SUCCESS = 0;
-    const FAILED = 1;
     // メッセージ
     private $array_messagedata = array();
 

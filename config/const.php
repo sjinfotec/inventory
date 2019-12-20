@@ -457,6 +457,7 @@ return [
         'not_setting_department_code_nouser' => '部署が設定されていない社員がいます。確認してください。',
         'not_setting_fiscal_month' => '月の時間計算設定が設定されていません。',
         'not_setting_closing' => '締日が設定されていません。',
+        'not_setting_role' => 'ユーザー権限が設定されていません。',
         'not_setting_time_unit' => '時間計算の単位が設定されていません。',
         'not_setting_time_rounding' => '時間計算の端数処理が設定されていません。',
         'not_setting_beginning_month' => '期首月が設定されていません。',
@@ -473,6 +474,7 @@ return [
         'mail_send_eror' => 'メール送信異常のため送信できませんでした。',
         'already_data' => 'すでに登録されています',
         'already_name' => 'すでに登録されている[{0}]名です',
+        'already_item' => 'すでに登録されている[{0}]です',
         'not_found_data' => '該当するデータは見つかりませんでした。',
         'parameter_illegal' => '不正なパラメータです。'
     ],

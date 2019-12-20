@@ -1066,6 +1066,9 @@ class WorkTime extends Model
      */
     public function getAlertData($targetdate){
         if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
+        Log::debug('getBeforeDailyMaxData $this->param_date_from '.$this->param_date_from);
+        Log::debug('getBeforeDailyMaxData $this->param_date_to '.$this->param_date_to);
+        Log::debug('getBeforeDailyMaxData $targetdate '.$targetdate);
 
         try {
             // 日次労働時間取得SQL作成
@@ -1245,6 +1248,11 @@ class WorkTime extends Model
      */
     public function getdailyAlertData($targetdate){
         if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
+        Log::debug('getdailyAlertData $this->param_date_from '.$this->param_date_from);
+        Log::debug('getdailyAlertData $this->param_date_to '.$this->param_date_to);
+        Log::debug('getdailyAlertData $targetdate '.$targetdate);
+        Log::debug('getdailyAlertData $this->param_date_from '.$this->param_start_date);
+        Log::debug('getdailyAlertData $this->param_date_to '.$this->param_end_date);
 
         try {
             // 日次労働時間取得SQL作成
@@ -1601,6 +1609,8 @@ class WorkTime extends Model
             $cnt += 1;
             $array_setBindingsStr[] = array($cnt=>$targetdate);
             $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>$targetdate);
+            $cnt += 1;
             $array_setBindingsStr[] = array($cnt=>0);
             $cnt += 1;
             $array_setBindingsStr[] = array($cnt=>0);
@@ -1630,6 +1640,8 @@ class WorkTime extends Model
             $array_setBindingsStr[] = array($cnt=>Config::get('const.C017.admin_user'));
             $cnt += 1;
             $array_setBindingsStr[] = array($cnt=>0);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>$targetdate);
             $cnt += 1;
             $array_setBindingsStr[] = array($cnt=>$targetdate);
             $cnt += 1;

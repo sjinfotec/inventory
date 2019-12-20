@@ -32,97 +32,116 @@ class DailyWorkingAlertController extends Controller
      * @return void
      */
     public function show(Request $request){
-
-        // パラメータのチェック
-        // datefromとdatetoがあるが、このメソッドではdatefrom=datetoであること
-        Log::debug('------------- 日次アラート表示開始 ----------------');
-        Log::debug('    パラメータ  $request->datefrom = '.$request->datefrom);
-        Log::debug('    パラメータ  $request->employmentstatus = '.$request->employmentstatus);
-        Log::debug('    パラメータ  $request->departmentcode = '.$request->departmentcode);
-        Log::debug('    パラメータ  $request->usercode = '.$request->usercode);
-        $calc_result = true;
-        $add_result = true;
-        // reqestクエリーセット
-        // 指定日付はfromで受信
-        $datefrom = null;
-        if(isset($request->datefrom)){
-            $datefrom = $request->datefrom;
-        }
-        // datetoをdatefromにし、datefromは１週間前に設定する
-        $dateto = $datefrom;
-        if(isset($datefrom)){
-            $dt = new Carbon($datefrom.' 00:00:00');
-            $dtfrom = date("Y-m-d H:i:s",strtotime($dt."-1 week"));
-            $datefrom = date_format(new Carbon($dtfrom), 'Ymd');
-        }
-        $employmentstatus = null;
-        if(isset($request->employmentstatus)){
-            $employmentstatus = $request->employmentstatus;
-        }
-        $departmentcode = null;
-        if(isset($request->departmentcode)){
-            $departmentcode =$request->departmentcode;
-        }
-        $usercode = null;
-        if(isset($request->usercode)){
-            $usercode = $request->usercode;
-        }
-        $this->collect_massegedata = collect();
-
-        $working_time_alerts = new Collection();
-        $work_time_model = new WorkTime();
-
-        // 打刻時刻を取得
-        $work_time_model->setParamDatefromAttribute($datefrom);
-        $work_time_model->setParamDatetoAttribute($dateto);
-        $work_time_model->setParamemploymentstatusAttribute($employmentstatus);
-        $work_time_model->setParamDepartmentcodeAttribute($departmentcode);
-        $work_time_model->setParamUsercodeAttribute($usercode);
-        $work_time_model->setParamStartDateAttribute($datefrom);
-        $work_time_model->setParamEndDateAttribute($dateto);
-        // パラメータのチェック
-        // datefromとdatetoがあるが、このメソッドではdatefrom=datetoであること
-        Log::debug('------------- パラメータのチェック ----------------');
-        Log::debug('    パラメータ  datefrom = '.$datefrom);
-        Log::debug('    パラメータ  dateto = '.$dateto);
-        Log::debug('    パラメータ  employmentstatus = '.$employmentstatus);
-        Log::debug('    パラメータ  departmentcode = '.$departmentcode);
-        Log::debug('    パラメータ  usercode = '.$usercode);
-        $chk_work_time = $work_time_model->chkWorkingTimeData();
-        if ($chk_work_time) {
-            Log::debug('------------- アラート開始　------------------');
-            //$working_time_alerts = $work_time_model->getAlertData($dateto);
-            $working_time_alerts = $work_time_model->getdailyAlertData($dateto);
-            if (count($working_time_alerts) == 0) {
-                $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_INFO.no_alert_data'));
-            }
-            Log::debug('------------- アラート終了　------------------');
-            Log::debug('  $working_time_alerts count = '.count($working_time_alerts));
-            Log::debug('  $array_messagedata count = '.count($this->array_messagedata));
-        } else {
-            Log::debug('------------- パラメータのチェック NG  ----------------');
-            $this->array_messagedata[] = $work_time->getMassegedataAttribute();
-        }
-
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result_working = new Collection();
         $date_name = '';
-        $calender_model = new Calendar();
-        $calender_model->setDateAttribute(date_format(new Carbon($datefrom), 'Ymd'));
-        $calendars = $calender_model->getCalenderDate();
-        if (count($calendars) > 0) {
-            foreach ($calendars as $result) {
-                if (isset($result->date_name)) {
-                    $date_name = $result->date_name;
-                }
-                break;
+        $result = true;
+        $killvalue = false; // 未使用
+        try{
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $result_working, 'datename' => $date_name,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
             }
-        }
-        $result_working = $working_time_alerts->where('business_kubun', Config::get('const.C007.basic'));
-        Log::debug('  $result_working count = '.count($result_working));
+            $params = $request->keyparams;
+            if (!isset($params['alert_form_date'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "alert_form_date", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $result_working, 'datename' => $date_name,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $alert_form_date = $params['alert_form_date'];      // YYYYMMDD
+            // datetoをdatefromにし、datefromは１週間前に設定する
+            $alert_to_date = $alert_form_date;
+            $dt = new Carbon($alert_form_date.' 00:00:00');
+            $dtfrom = date("Y-m-d H:i:s",strtotime($dt."-1 week"));
+            $alert_form_date = date_format(new Carbon($dtfrom), 'Ymd');
 
-        return response()->json([
-            'alertresults' => $working_time_alerts ,
-            'datename' => $date_name,
-            Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
+            $employmentstatus = null;
+            if(isset($params['employmentstatus'])){
+                $employmentstatus = $params['employmentstatus'];
+            }
+            $departmentcode = null;
+            if(isset($params['departmentcode'])){
+                $departmentcode = $params['departmentcode'];
+            }
+            $usercode = null;
+            if(isset($params['usercode'])){
+                $usercode = $params['usercode'];
+            }
+            $this->collect_massegedata = collect();
+    
+            $details = new Collection();
+            $work_time_model = new WorkTime();
+            // 打刻時刻を取得
+            $work_time_model->setParamdatefromAttribute($alert_form_date);
+            $work_time_model->setParamdatetoAttribute($alert_to_date);
+            $work_time_model->setParamemploymentstatusAttribute($employmentstatus);
+            $work_time_model->setParamDepartmentcodeAttribute($departmentcode);
+            $work_time_model->setParamUsercodeAttribute($usercode);
+            $work_time_model->setParamStartDateAttribute($alert_form_date);
+            $work_time_model->setParamEndDateAttribute($alert_to_date);
+            $chk_work_time = $work_time_model->chkWorkingTimeData();
+            if ($chk_work_time) {
+                $details = $work_time_model->getdailyAlertData($alert_to_date);
+                if (count($details) == 0) {
+                    Log::debug('count($details) = '.count($details));
+                    $this->array_messagedata[] = Config::get('const.MSG_INFO.no_alert_data');
+                    return response()->json(
+                        ['result' => false, 'details' => $result_working, 'datename' => $date_name,
+                        Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                    );
+                }
+            } else {
+                Log::debug('chk_work_time error ');
+                $this->array_messagedata[] = $work_time->getMassegedataAttribute();
+                return response()->json(
+                    ['result' => false, 'details' => $result_working, 'datename' => $date_name,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            // 日付編集
+            $calender_model = new Calendar();
+            $calender_model->setDateAttribute(date_format(new Carbon($alert_form_date), 'Ymd'));
+            $calendars = $calender_model->getCalenderDate();
+            if (count($calendars) > 0) {
+                foreach ($calendars as $result) {
+                    if (isset($result->date_name)) {
+                        $date_name = $result->date_name;
+                    }
+                    break;
+                }
+            }
+            $result_working = $details->where('business_kubun', Config::get('const.C007.basic'));
+            if (count($result_working) == 0) {
+                Log::debug('count($result_working) = '.count($result_working));
+                $this->array_messagedata[] = Config::get('const.MSG_INFO.no_alert_data');
+                return response()->json(
+                    ['result' => false, 'details' => $result_working, 'datename' => $date_name,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+    
+
+            return response()->json(
+                ['result' => true, 'details' => $result_working, 'datename' => $date_name,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
     }
 
 }

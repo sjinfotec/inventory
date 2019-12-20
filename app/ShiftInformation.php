@@ -111,7 +111,19 @@ class ShiftInformation extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
 
+    private $param_working_timetable_no;                  // タイムテーブルNO
     private $param_max_apply_term_from;                   // 最大有効期間
+
+    // タイムテーブルNO
+    public function getParamWorkingtimetablenoAttribute()
+    {
+        return $this->param_working_timetable_no;
+    }
+
+    public function setParamWorkingtimetablenoAttribute($value)
+    {
+        $this->param_working_timetable_no = $value;
+    }
 
     // 開始日付
     public function getParamMaxApplyTermfromAttribute()
@@ -197,13 +209,19 @@ class ShiftInformation extends Model
                     $join->on('t2.target_date', '=', 't1.date');
                 });
 
-            $mainquery
-                ->where(function ($query) {
-                    $query->whereColumn('t1.no', '=', 't2.working_timetable_no');
-                    })->orwhere(function ($query) {
-                            $query->Where('t1.no', '=', ':t1_no')
-                                    ->WhereNull('t2.working_timetable_no');
-                    });
+            if (!empty($this->param_working_timetable_no)) {
+                $mainquery
+                    ->whereColumn('t1.no', '=', 't2.working_timetable_no')
+                    ->where('t1.no', '=', ':t1_no1');
+            } else {
+                $mainquery
+                    ->where(function ($query) {
+                        $query->whereColumn('t1.no', '=', 't2.working_timetable_no');
+                        })->orwhere(function ($query) {
+                                $query->Where('t1.no', '=', ':t1_no')
+                                        ->WhereNull('t2.working_timetable_no');
+                        });
+            }
             $mainquery->orderBy('t1.date', 'asc');
 
             $array_setBindingsStr = array();
@@ -231,8 +249,13 @@ class ShiftInformation extends Model
                 $cnt += 1;
                 $array_setBindingsStr[] =  array([$cnt=>0]);
             }
-            $cnt += 1;
-            $array_setBindingsStr[] =  array([$cnt=>1]);
+            if (!empty($this->param_working_timetable_no)) {
+                $cnt += 1;
+                $array_setBindingsStr[] =  array([$cnt=>$this->param_working_timetable_no]);
+            } else {
+                $cnt += 1;
+                $array_setBindingsStr[] =  array([$cnt=>1]);
+            }
             $mainquery->setBindings($array_setBindingsStr);
             $result = $mainquery->get();
     

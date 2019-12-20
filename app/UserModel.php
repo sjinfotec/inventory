@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
+use App\Http\Controllers\ApiCommonController;
 use Carbon\Carbon;
 
 
@@ -21,18 +22,20 @@ class UserModel extends Model
     private $code;                  
     private $department_code;                  
     private $name;                  
-    private $kana;                  
+    private $kana;
+    private $official_position;
     private $password;                  
     private $email;                  
     private $employment_status;                  
+    private $kill_from_date;
     private $working_timetable_no;
     private $management;                    // 勤怠管理対象
     private $roe;                           // 権限
-    private $is_deleted;                 // 削除フラグ
-    private $updated_user;                 // 修正ユーザー
-    private $created_user;                 // 作成ユーザー
-    private $updated_at;                 // 修正日時
-    private $created_at;                 // 作成日時
+    private $is_deleted;                    // 削除フラグ
+    private $updated_user;                  // 修正ユーザー
+    private $created_user;                  // 作成ユーザー
+    private $updated_at;                    // 修正日時
+    private $created_at;                    // 作成日時
 
  
     public function getIdAttribute()
@@ -93,6 +96,26 @@ class UserModel extends Model
     public function setKanaAttribute($value)
     {
         $this->kana = $value;
+    }
+ 
+    public function getOfficialpositionAttribute()
+    {
+        return $this->official_position;
+    }
+
+    public function setOfficialpositionAttribute($value)
+    {
+        $this->official_position = $value;
+    }
+ 
+    public function getKillfromdateAttribute()
+    {
+        return $this->kill_from_date;
+    }
+
+    public function setKillfromdateAttribute($value)
+    {
+        $this->kill_from_date = $value;
     }
 
     public function getPasswordAttribute()
@@ -215,6 +238,43 @@ class UserModel extends Model
         $this->is_deleted = $value;
     }
 
+    // ---------------- param --------------------------------
+    private $param_code;                            // ユーザーCODE
+    private $param_apply_term_from;                 // 適用期間開始
+    private $param_killvalue;                       // 退職開始日を条件に含む(true)
+     
+    public function getParamcodeAttribute()
+    {
+        return $this->param_code;
+    }
+
+    public function setParamcodeAttribute($value)
+    {
+        $this->param_code = $value;
+    }
+
+    // 適用期間開始
+    public function getParamapplytermfromAttribute()
+    {
+        return $this->param_apply_term_from;
+    }
+
+    public function setParamapplytermfromAttribute($value)
+    {
+        $this->param_apply_term_from = $value;
+    }
+
+    // 退職開始日を条件に含む
+    public function getKillvalueAttribute()
+    {
+        return $this->param_killvalue;
+    }
+
+    public function setKillvalueAttribute($value)
+    {
+        $this->param_killvalue = $value;
+    }
+
 
     /**
      * ユーザー新規登録
@@ -231,6 +291,8 @@ class UserModel extends Model
                     'department_code' => $this->department_code,
                     'name' => $this->name,
                     'kana' => $this->kana,
+                    'official_position' => $this->official_position,
+                    'kill_from_date' => $this->kill_from_date,
                     'working_timetable_no' => $this->working_timetable_no,
                     'email' => $this->email,
                     'password' => $this->password,
@@ -267,6 +329,8 @@ class UserModel extends Model
                 'employment_status' => $this->employment_status,
                 'name' => $this->name,
                 'kana' => $this->kana,
+                'official_position' => $this->official_position,
+                'kill_from_date' => $this->kill_from_date,
                 'working_timetable_no' => $this->working_timetable_no,
                 'email' => $this->email,
                 'updated_user'=>$this->updated_user,
@@ -292,35 +356,74 @@ class UserModel extends Model
      * @return void
      */
     public function getUserDetails(){
+        // 適用期間日付の取得
+        $dt = new Carbon();
+        $target_date = $dt->format('Ymd');
         try {
-            $subquery = DB::table($this->table_card_infomations)
-                ->selectRaw('id')
-                ->selectRaw('user_code')
-                ->selectRaw('card_idm')
+            if(empty($this->param_apply_term_from)){
+                $this->param_apply_term_from = $target_date;
+            }
+            // usersの最大適用開始日付subquery
+            $subquery1 = DB::table($this->table)
+                ->select('code as code')
+                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('apply_term_from', '<=',$this->param_apply_term_from)
+                ->where('role', '<', Config::get('const.C017.admin_user'));
+
+            if(!empty($this->param_killvalue)){
+                if (!$this->param_killvalue) {
+                    $subquery1->where('kill_from_date', '>',$this->param_apply_term_from);
+                }
+            } else {
+                $subquery1->where('kill_from_date', '>',$this->param_apply_term_from);
+            }
+            $subquery1
+                ->where('is_deleted', '=', 0)
+                ->groupBy('code');
+            // ICカード
+            $subquery2 = DB::table($this->table_card_infomations)
+                ->select('user_code', 'card_idm')
                 ->where('is_deleted', '=', 0);
-    
-            $data = DB::table($this->table)
-                ->leftJoinSub($subquery, 't1', function ($join) { 
-                    $join->on('t1.user_code', '=', $this->table.'.code');
-                })
+            $case_sql1 = "CASE t1.kill_from_date = ".Config::get('const.INIT_DATE.maxdate');
+            $case_sql1 = $case_sql1." WHEN TRUE THEN NULL ELSE DATE_FORMAT(t1.kill_from_date, '%Y-%m-%d') END as kill_from_date";
+            $case_sql2 = "CASE IFNULL(t2.max_apply_term_from,".Config::get('const.INIT_DATE.initdate').") = t1.apply_term_from ";
+            $case_sql2 = $case_sql2." WHEN TRUE THEN 1";
+            $case_sql2 = $case_sql2." ELSE CASE IFNULL(t2.max_apply_term_from,".Config::get('const.INIT_DATE.initdate').") < t1.apply_term_from ";
+            $case_sql2 = $case_sql2."      WHEN TRUE THEN 2 ELSE 0 END ";
+            $case_sql2 = $case_sql2." END  as result";
+            $mainquery = DB::table($this->table.' AS t1')
                 ->select(
-                    $this->table.'.id',
-                    $this->table.'.apply_term_from',
-                    $this->table.'.code',
-                    $this->table.'.employment_status',
-                    $this->table.'.department_code',
-                    $this->table.'.name',
-                    $this->table.'.kana',
-                    $this->table.'.working_timetable_no',
-                    $this->table.'.email',
-                    $this->table.'.password',
-                    $this->table.'.management',
-                    $this->table.'.role',
-                    't1.card_idm'
-                )
-                ->where($this->table.'.code', $this->code)
-                ->where($this->table.'.is_deleted', 0)
+                    't1.id',
+                    't1.code',
+                    't1.department_code',
+                    't1.employment_status',
+                    't1.name',
+                    't1.kana',
+                    't1.official_position',
+                    't1.working_timetable_no',
+                    't1.email',
+                    't1.password',
+                    't1.management',
+                    't1.role',
+                    't3.card_idm'
+                    )
+                ->selectRaw("DATE_FORMAT(t1.apply_term_from, '%Y-%m-%d') as apply_term_from")
+                ->selectRaw($case_sql1)
+                ->selectRaw($case_sql2);
+            $mainquery
+                ->leftJoinSub($subquery1, 't2', function ($join) { 
+                    $join->on('t2.code', '=', 't1.code');
+                })
+                ->leftJoinSub($subquery2, 't3', function ($join) { 
+                    $join->on('t3.user_code', '=', 't1.code');
+                });
+            $results = $mainquery
+                ->where('t1.code', $this->code)
+                ->where('t1.is_deleted', 0)
+                ->orderBy('t1.apply_term_from', 'desc')
                 ->get();
+
+            return $results;
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
@@ -330,8 +433,6 @@ class UserModel extends Model
             Log::error($e->getMessage());
             throw $e;
         }
-
-        return $data;
     }
 
     /**
@@ -401,5 +502,29 @@ class UserModel extends Model
             Log::error($e->getMessage());
             throw $e;
         }
+    }
+
+    /**
+     * ログインID（同ログインID）チェック
+     *
+     * @return boolean
+     */
+    public function isExistsCode(){
+        try {
+            $is_exists = DB::table($this->table)
+                ->where('code',$this->param_code)
+                ->where('is_deleted',0)
+                ->exists();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $is_exists;
     }
 }

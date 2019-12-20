@@ -24,13 +24,13 @@
                       for="inputGroupSelect01"
                     >申請状況指定</label>
                   </div>
-                  <general-list
+                  <select-generallist
                     v-bind:identification-id="'C031'"
                     v-bind:placeholder-data="'申請状況を選択してください'"
                     v-bind:blank-data="true"
                     v-bind:selected-value="valueselectedsituation"
                     v-on:change-event="situationChange"
-                  ></general-list>
+                  ></select-generallist>
                 </div>
                 <message-data v-bind:message-datas="messagedatadoccode" v-bind:message-class="'warning'"></message-data>
               </div>
@@ -45,13 +45,13 @@
                       for="inputGroupSelect01"
                     >申請書類</label>
                   </div>
-                  <general-list
+                  <select-generallist
                     v-bind:identification-id="'C026'"
                     v-bind:placeholder-data="'申請書類を選択してください'"
                     v-bind:blank-data="true"
                     v-bind:selected-value="valueselecteddoccode"
                     v-on:change-event="doccodeChange"
-                  ></general-list>
+                  ></select-generallist>
                 </div>
                 <message-data v-bind:message-datas="messagedatadoccode" v-bind:message-class="'warning'"></message-data>
               </div>
