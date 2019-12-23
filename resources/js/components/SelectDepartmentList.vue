@@ -90,11 +90,9 @@ export default {
       if (res.result) {
         // 固有処理 START
         this.itemList = res.details;
-        if (this.itemList.length != 0) {
-          if (this.addNew) {
-            this.object = { name: "新規に部署を登録する", code: "" };
-            this.itemList.unshift(this.object);
-          }
+        if (this.addNew) {
+          this.object = { name: "新規に部署を登録する", code: "" };
+          this.itemList.unshift(this.object);
         }
         // 固有処理 end
       } else {
