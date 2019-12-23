@@ -251,7 +251,7 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                    >メールアドレス</span>
+                    >メールアドレス<span class="color-red">[必須]</span></span>
                   </div>
                   <input
                     type="text"
@@ -650,7 +650,7 @@
                         <span
                           class="input-group-text font-size-sm line-height-xs label-width-180"
                           id="basic-addon1"
-                        >メールアドレス</span>
+                        >メールアドレス<span class="color-red">[必須]</span></span>
                       </div>
                       <input
                         type="email"
@@ -1282,7 +1282,7 @@ export default {
         }
       }
       // email
-      required = false;
+      required = true;
       equalength = 0;
       maxlength = 191;
       itemname = 'メールアドレス';
@@ -1486,7 +1486,7 @@ export default {
         }
       }
       // メールアドレス
-      required = false;
+      required = true;
       equalength = 0;
       maxlength = 191;
       itemname = 'メールアドレス';
