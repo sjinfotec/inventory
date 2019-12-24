@@ -46,7 +46,6 @@ class ApiCardRegisterController extends Controller
         $card_id = $request->card_id;               // カードID
         $user_code = $request->user_code;           // ユーザーコード
         $department_code = $request->department_code;   // 部署ID
-        Log::debug('department_code = '.$department_code );
         $user = new User();
         $card_info = new CardInformation();
         $systemdate = Carbon::now();
@@ -131,6 +130,9 @@ class ApiCardRegisterController extends Controller
         $systemdate = Carbon::now();
         $login_user = Auth::user();
         try{
+            Log::debug('insCardInfo $this->systemdate = '.$user_code );
+            Log::debug('insCardInfo $this->systemdate = '.$card_id );
+            Log::debug('insCardInfo $this->systemdate = '.$department_code );
             $card_info->setUserCodeAttribute($user_code);
             $card_info->setDepartmentcodeAttribute($department_code);
             $card_info->setCardIdmAttribute($card_id);
