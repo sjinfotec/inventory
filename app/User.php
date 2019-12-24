@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
+use App\Http\Controllers\ApiCommonController;
 
 
 class User extends Authenticatable
@@ -50,6 +51,10 @@ class User extends Authenticatable
      */
     public function getUserCardData($card_id){
         try {
+            // usersの最大適用開始日付subquery
+            // 適用期間日付の取得
+            $apicommon = new ApiCommonController();
+            $subquery2 = $apicommon->getUserApplyTermSubquery(null);
             $data = DB::table('users')
                 ->select(
                     'users.id',
@@ -63,7 +68,13 @@ class User extends Authenticatable
                     $join->on('card_informations.user_code', '=', 'users.code');
                     $join->on('card_informations.department_code', '=', 'users.department_code')
                     ->where('card_informations.is_deleted',0);
-                })
+                });
+            $data
+                ->JoinSub($subquery2, 't1', function ($join) { 
+                    $join->on('t1.code', '=', 'users.code');
+                    $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                });
+            $data
                 ->where('card_informations.card_idm',$card_id)
                 ->where('users.role',"<>",10)
                 ->where('users.is_deleted',0)
@@ -103,6 +114,11 @@ class User extends Authenticatable
                 ->where('t1.role',"<>",10)
                 ->where('t1.is_deleted',0);
 
+            // usersの最大適用開始日付subquery
+            // 適用期間日付の取得
+            $apicommon = new ApiCommonController();
+            $subquery2 = $apicommon->getUserApplyTermSubquery(null);
+
             $mainquery = DB::table('users as t3')
                 ->select(
                     't3.code as user_code',
@@ -117,7 +133,14 @@ class User extends Authenticatable
                 ->leftJoin('departments as t5', function ($join) { 
                     $join->on('t5.code', '=', 't3.department_code')
                     ->where('t5.is_deleted',0);
-                })
+                });
+
+            $mainquery
+                ->JoinSub($subquery2, 't6', function ($join) { 
+                    $join->on('t6.code', '=', 't3.code');
+                    $join->on('t6.max_apply_term_from', '=', 't3.apply_term_from');
+                });
+            $mainquery
                 ->where('t3.role',"<>",10)
                 ->where('t3.is_deleted',0)
                 ->whereNull('t4.card_idm');      // whereNull 
