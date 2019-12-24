@@ -118,6 +118,8 @@ class User extends Authenticatable
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             $subquery2 = $apicommon->getUserApplyTermSubquery(null);
+            // departmentsの最大適用開始日付subquery
+            $subquery3 = $apicommon->getDepartmentApplyTermSubquery(null);
 
             $mainquery = DB::table('users as t3')
                 ->select(
@@ -129,12 +131,12 @@ class User extends Authenticatable
                 ->leftJoinSub($sunquery1, 't4', function ($join) { 
                     $join->on('t4.user_code', '=', 't3.code');
                     $join->on('t4.department_code', '=', 't3.department_code');
-                })
-                ->leftJoin('departments as t5', function ($join) { 
-                    $join->on('t5.code', '=', 't3.department_code')
-                    ->where('t5.is_deleted',0);
                 });
-
+            $mainquery
+                ->leftJoinSub($subquery3, 't5', function ($join) { 
+                    $join->on('t5.code', '=', 't3.code')
+                    ->where('t3.is_deleted', '=', 0);
+                });
             $mainquery
                 ->JoinSub($subquery2, 't6', function ($join) { 
                     $join->on('t6.code', '=', 't3.code');
