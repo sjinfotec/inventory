@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
+use App\Http\Controllers\ApiCommonController;
 
 class CardInformation extends Model
 {
     protected $table = 'card_informations';
-    protected $table_users = '$table_users';
+    protected $table_users = 'users';
     protected $guarded = array('id');
 
     private $user_code;
@@ -89,11 +90,21 @@ class CardInformation extends Model
      */
     public function isCardInfoExists(){
         try {
+            // usersの最大適用開始日付subquery
+            // 適用期間日付の取得
+            $apicommon = new ApiCommonController();
+            $subquery2 = $apicommon->getUserApplyTermSubquery(null);
             $data = DB::table($this->table)
                 ->join($this->table_users, function ($join) {
                     $join->on($this->table_users.'.code', '=', $this->table.'.user_code');
                     $join->on($this->table_users.'.department_code', '=', $this->table.'.department_code');
-                })
+                });
+            $data
+                ->JoinSub($subquery2, 't1', function ($join) { 
+                    $join->on('t1.code', '=', $this->table_users.'.code');
+                    $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
+                });
+            $data
                 ->where($this->table.'.card_idm',$this->card_idm)
                 ->where($this->table_users.'.is_deleted',0)
                 ->where($this->table.'.is_deleted',0)
