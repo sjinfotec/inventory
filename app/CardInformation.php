@@ -94,21 +94,21 @@ class CardInformation extends Model
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             $subquery2 = $apicommon->getUserApplyTermSubquery(null);
-            $data = DB::table($this->table)
+            $mainquery = DB::table($this->table)
                 ->join($this->table_users, function ($join) {
                     $join->on($this->table_users.'.code', '=', $this->table.'.user_code');
                     $join->on($this->table_users.'.department_code', '=', $this->table.'.department_code');
                 });
-            $data
+            $mainquery
                 ->JoinSub($subquery2, 't1', function ($join) { 
                     $join->on('t1.code', '=', $this->table_users.'.code');
                     $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
                 });
-            $data
+            $mainquery
                 ->where($this->table.'.card_idm',$this->card_idm)
                 ->where($this->table_users.'.is_deleted',0)
-                ->where($this->table.'.is_deleted',0)
-                ->exists();
+                ->where($this->table.'.is_deleted',0);
+            $data = $mainquery->exists();
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
             Log::error($pe->getMessage());
@@ -124,6 +124,11 @@ class CardInformation extends Model
 
     public function insertCardInfo(){
         try {
+            Log::debug('insertCardInfo $this->user_code = '.$this->user_code );
+            Log::debug('insertCardInfo $this->department_code = '.$this->department_code );
+            Log::debug('insertCardInfo $this->card_idm = '.$this->card_idm );
+            Log::debug('insertCardInfo $this->created_user = '.$this->created_user );
+            Log::debug('insertCardInfo $this->systemdate = '.$this->systemdate );
             DB::table($this->table.'')->insert(
                 [
                     'user_code' => $this->user_code,
