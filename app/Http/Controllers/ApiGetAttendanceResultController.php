@@ -33,61 +33,55 @@ class ApiGetAttendanceResultController extends Controller
      * @return void
      */
     public function store(Request $request) { 
-        $card_id = $request->card_id;       // カードID
-        $mode = $request->mode;             // 打刻モード
-        $user = new User();
-        $work_time = new WorkTime();
-        $systemdate = Carbon::now();
-        $response = collect();              // 端末の戻り値
-        $this->source_mode = '';
-        $array_chkAttendance_result = array(Config::get('const.RESULT_CODE.normal'), Config::get('const.RESULT_CODE.normal'));
-        // カード情報存在チェック
-        $is_exists = DB::table('card_informations')->where('card_idm', $card_id)->exists();
-        if($is_exists){
-            $user_datas = $user->getUserCardData($card_id);
-            Log::debug('カード情報存在チェック OK count($user_datas) '.count($user_datas));
-            if (count($user_datas) > 0) {
-                foreach($user_datas as $user_data) {
-                    $array_chkAttendance_result = $this->chkAttendance($user_data, $mode, $systemdate);
-                    if($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.normal')){
-                        $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
-                    } elseif($array_chkAttendance_result[0] == Config::get('const.C018.forget_stamp')) {
-                        $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.mode_illegal'));
-                    } else {
-                        $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.unknown'));
-                    }
-                    // 打刻データ登録
-                    DB::beginTransaction();
-                    try{
-                        $ins_result = $this->insertTime($user_data, $mode, $card_id, $array_chkAttendance_result, $systemdate);
-                        $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
-                        $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
-                        $response->put(Config::get('const.PUT_ITEM.record_time'),$systemdate->format('H:i:s'));
-                        $response->put(Config::get('const.PUT_ITEM.source_mode'),$this->source_mode);
-                        DB::commit();
-
-                    }catch(\PDOException $pe){
-                        DB::rollBack();
-                        Log::error(Config::get('insert_error = '.'const.RESULT_CODE.insert_error'));
-                        Log::error(Config::get('$pe = '.$pe->getMessage()));
+        try{
+            $card_id = $request->card_id;       // カードID
+            $mode = $request->mode;             // 打刻モード
+            $user = new User();
+            $work_time = new WorkTime();
+            $systemdate = Carbon::now();
+            $response = collect();              // 端末の戻り値
+            $this->source_mode = '';
+            $array_chkAttendance_result = array(Config::get('const.RESULT_CODE.normal'), Config::get('const.RESULT_CODE.normal'));
+            // カード情報存在チェック
+            $is_exists = DB::table('card_informations')->where('card_idm', $card_id)->exists();
+            if($is_exists){
+                $user_datas = $user->getUserCardData($card_id);
+                Log::debug('カード情報存在チェック OK count($user_datas) '.count($user_datas));
+                if (count($user_datas) > 0) {
+                    foreach($user_datas as $user_data) {
+                        $array_chkAttendance_result = $this->chkAttendance($user_data, $mode, $systemdate);
+                        if($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.normal')){
+                            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
+                        } elseif($array_chkAttendance_result[0] == Config::get('const.C018.forget_stamp')) {
+                            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.mode_illegal'));
+                        } else {
+                            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.unknown'));
+                        }
+                        $this->insertTable($user_data, $mode, $card_id, $array_chkAttendance_result, $systemdate);
                         $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.insert_error'));
                         $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
                         $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
                         $response->put(Config::get('const.PUT_ITEM.record_time'),$systemdate->format('H:i:s'));
                         $response->put(Config::get('const.PUT_ITEM.source_mode'),$this->source_mode);
+                        break;
                     }
-                    break;
+                } else {
+                    Log::debug('カード情報取得 NG'.Config::get('const.RESULT_CODE.user_not_exsits'));
+                    $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.user_not_exsits'));
                 }
-            } else {
-                Log::debug('カード情報取得 NG'.Config::get('const.RESULT_CODE.user_not_exsits'));
-                $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.user_not_exsits'));
+            }else{  // カード情報が存在しない
+                Log::debug('カード情報存在チェック NG'.Config::get('const.RESULT_CODE.card_not_exsits'));
+                $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.card_not_exsits'));
             }
-        }else{  // カード情報が存在しない
-            Log::debug('カード情報存在チェック NG'.Config::get('const.RESULT_CODE.card_not_exsits'));
-            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.card_not_exsits'));
-        }
 
-        return $response;
+            return $response;
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error(str_replace('{0}', 'work_times', Config::get('const.LOG_MSG.data_insert_erorr')));
+            Log::error($pe->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -181,13 +175,39 @@ class ApiGetAttendanceResultController extends Controller
     }
 
     /**
+     * 登録
+     *
+     * @param Request $request
+     * @param [type] $id
+     * @return void
+     */
+    public function insertTable($user_data, $mode, $card_id, $array_check_result, $systemdate) {
+
+        try{
+            // 打刻データ登録
+            DB::beginTransaction();
+            $this->insertTime($user_data, $mode, $array_check_result, $systemdate);
+            $this->insertTimeLogs($user_data, $mode, $card_id, $systemdate);
+            DB::commit();
+        }catch(\PDOException $pe){
+            DB::rollBack();
+            throw $pe;
+        }catch(\Exception $e){
+            DB::rollBack();
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
      * 打刻データ登録
      *
      * @param Request $request
      * @param [type] $id
      * @return void
      */
-    public function insertTime($user_data, $mode, $card_id, $array_check_result, $systemdate) {
+    public function insertTime($user_data, $mode, $array_check_result, $systemdate) {
 
         try{
             $work_time = new WorkTime();
@@ -201,7 +221,25 @@ class ApiGetAttendanceResultController extends Controller
             $work_time->setCreateduserAttribute($user_data->code);
             $work_time->setSystemDateAttribute($systemdate);
             $work_time->insertWorkTime();
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
 
+    /**
+     * ログデータ登録
+     *
+     * @param Request $request
+     * @param [type] $id
+     * @return void
+     */
+    public function insertTimeLogs($user_data, $mode, $card_id, $systemdate) {
+
+        try{
             $work_time_log = new WorkTimeLog();
             $work_time_log->setUsercodeAttribute($user_data->code);
             $work_time_log->setDepartmentcodeAttribute($user_data->department_code);
@@ -213,11 +251,12 @@ class ApiGetAttendanceResultController extends Controller
             $work_time_log->setSystemDateAttribute($systemdate);
             $work_time_log->insertWorkTimeLog();
 
-            return true;
-
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', 'work_times', Config::get('const.LOG_MSG.data_insert_erorr')));
-            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
         }
     }
 

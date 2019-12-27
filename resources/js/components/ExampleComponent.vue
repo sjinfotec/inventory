@@ -20,6 +20,24 @@
                     <!-- .row -->
                     <div class="row justify-content-between">
                         <!-- .col -->
+                        <div class="col-md-12 pb-2">
+                            <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span
+                                class="input-group-text font-size-sm line-height-xs label-width-150"
+                                id="basic-addon1"
+                                >指定年月</span>
+                            </div>
+                            <input-datepicker
+                                v-bind:default-date="valueym"
+                                v-bind:date-format="'yyyy年MM月'"
+                                v-on:change-event="fromymChanges"
+                                v-on:clear-event="fromymCleared"
+                            ></input-datepicker>
+                            </div>
+                        </div>
+                        <!-- /.col -->
+                        <!-- .col -->
                         <div class="col-md-6 pb-2">
                             <div class="input-group">
                             <div class="input-group-prepend">
@@ -106,19 +124,19 @@
                         <!-- .col -->
                         <div class="col-md-6 pb-2">
                             <div class="input-group">
-                            <div class="input-group-prepend">
-                                <label
-                                class="input-group-text font-size-sm line-height-xs label-width-120"
-                                for="target_employmentstatus"
-                                >雇用形態</label>
-                            </div>
-                            <select-employmentstatuslist
-                                ref="selectemploymentstatuslist"
-                                v-bind:blank-data="true"
-                                v-bind:placeholder-data="'雇用形態を選択してください'"
-                                v-bind:selected-value="valueemploymentstatus"
-                                v-on:change-event="employmentChanges"
-                            ></select-employmentstatuslist>
+                                <div class="input-group-prepend">
+                                    <label
+                                    class="input-group-text font-size-sm line-height-xs label-width-120"
+                                    for="target_employmentstatus"
+                                    >雇用形態</label>
+                                </div>
+                                <select-employmentstatuslist
+                                    ref="selectemploymentstatuslist"
+                                    v-bind:blank-data="true"
+                                    v-bind:placeholder-data="'雇用形態を選択してください'"
+                                    v-bind:selected-value="valueemploymentstatus"
+                                    v-on:change-event="employmentChanges"
+                                ></select-employmentstatuslist>
                             </div>
                         </div>
                         <!-- /.col -->

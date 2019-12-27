@@ -67,6 +67,7 @@ Route::post('/confirm/store', 'ConfirmController@store')->middleware('auth');
 Route::get('/edit_work_times', 'EditWorkTimesController@index')->middleware('auth');
 Route::post('/edit_work_times/get', 'EditWorkTimesController@get')->middleware('auth');
 Route::post('/edit_work_times/store', 'EditWorkTimesController@store')->middleware('auth');
+Route::post('/edit_work_times/fix', 'EditWorkTimesController@fix')->middleware('auth');
 Route::post('/edit_work_times/del', 'EditWorkTimesController@del')->middleware('auth');
 Route::post('/edit_work_times/add', 'EditWorkTimesController@add')->middleware('auth');
 // シフト

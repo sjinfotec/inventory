@@ -2087,6 +2087,7 @@ export default {
       if (this.details[index].management != "" && this.details[index].management != null) { return true; }
       if (this.details[index].role != "" && this.details[index].role != null) { return true; }
       if (this.details[index].kill_from_date != "" && this.details[index].kill_from_date != null) { return true; }
+      return false;
     },
     // 最新リストの表示（部署）
     refreshDepartmentList() {

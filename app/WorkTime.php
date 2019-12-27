@@ -925,71 +925,47 @@ class WorkTime extends Model
      */
     public function getUserDetails(){
         try {
+            // 適用期間日付の取得
+            $apicommon = new ApiCommonController();
+            // usersの最大適用開始日付subquery
+            $subquery3 = $apicommon->getUserApplyTermSubquery($this->param_start_date);
+            // departmentsの最大適用開始日付subquery
+            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($this->param_start_date);
+            // working_timetablesの最大適用開始日付subquery
+            $subquery5 = $apicommon->getTimetableApplyTermSubquery($this->param_start_date);
             // users max(apply_term_from)
-            $max_user_apply = DB::table($this->table_users)
-                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->where('is_deleted', '=', 0)
-                ->where('code',$this->user_code)
-                ->value('max_apply_term_from');
-            
-            $user_department_code = DB::table($this->table_users)
-                ->where('code', $this->user_code)
-                ->where('apply_term_from', $max_user_apply)
-                ->where('is_deleted', 0)->value('department_code');
-
-            // departments max(apply_term_from)
-            $max_department_apply = DB::table($this->table_departments)
-                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->where('is_deleted', '=', 0)
-                ->where('code',$user_department_code)
-                ->value('max_apply_term_from');
-
-            // users
-            $subquery1 = DB::table($this->table_users)
-                // ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->selectRaw('code as code')
-                ->selectRaw('name as name')
-                ->where('is_deleted', '=', 0)
-                ->where('apply_term_from',$max_user_apply);
-            
-            // departments
-            $subquery2 = DB::table($this->table_departments)
-                // ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->selectRaw('code as code')
-                ->selectRaw('name as name')
-                ->where('is_deleted', '=', 0)
-                ->where('apply_term_from',$max_department_apply);
         
-            // \DB::enableQueryLog();
-            $data = DB::table($this->table)
-                // ->join('users','users.code','=',$this->table.'.user_code')
-                // ->join('departments','departments.code','users.department_code')
-                ->JoinSub($subquery1, 't1', function ($join) { 
-                    $join->on('t1.code', '=', $this->table.'.user_code');
-                    // $join->on('t1.max_apply_term_from', '=', $max_user_apply);
+            $data = DB::table($this->table.' as t1')
+                ->leftJoin($this->table_users.' as t2', function ($join) { 
+                    $join->on('t2.code', '=', 't1.user_code');
+                    $join->on('t2.department_code', '=', 't1.department_code')
+                    ->where('t2.is_deleted', '=', 0);
                 })
-                ->JoinSub($subquery2, 't2', function ($join) { 
-                    $join->on('t2.code', '=', $this->table.'.department_code');
-                    // $join->on('t2.max_apply_term_from', '=', $max_department_apply);
+                ->JoinSub($subquery3, 't3', function ($join) { 
+                    $join->on('t3.code', '=', 't2.code');
+                    $join->on('t3.max_apply_term_from', '=', 't2.apply_term_from');
                 })
-                ->leftJoin($this->table_generalcodes.' as g', function ($join) { 
-                    $join->on('g.code', '=', $this->table.'.mode')
-                    ->where('g.identification_id', '=', Config::get('const.C005.value'));
+                ->JoinSub($subquery4, 't4', function ($join) { 
+                    $join->on('t4.code', '=', 't1.department_code');
+                })
+                ->leftJoin($this->table_generalcodes.' as t5', function ($join) { 
+                    $join->on('t5.code', '=','t1.mode')
+                    ->where('t5.identification_id', '=', Config::get('const.C005.value'));
                 })
                 ->select(
-                    $this->table.'.id',
-                    $this->table.'.user_code',
-                    $this->table.'.department_code',
-                    $this->table.'.record_time',
-                    $this->table.'.mode',
-                    't1.name as user_name',
-                    't2.name as d_name',
-                    'g.code_name'
+                    't1.id',
+                    't1.user_code',
+                    't1.department_code',
+                    't1.record_time',
+                    't1.mode',
+                    't2.name as user_name',
+                    't4.name as department_name',
+                    't5.code_name'
                 )
-                ->where($this->table.'.user_code', $this->user_code)
-                ->whereBetween('record_time', [$this->param_start_date,$this->param_end_date])
-                ->where($this->table.'.is_deleted', 0)
-                ->orderBy($this->table.'.record_time', 'asc')
+                ->where('t1.user_code', $this->user_code)
+                ->whereBetween('t1.record_time', [$this->param_start_date,$this->param_end_date])
+                ->where('t1.is_deleted', 0)
+                ->orderBy('t1.record_time', 'asc')
                 ->get();
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
