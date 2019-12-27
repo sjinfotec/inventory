@@ -42,6 +42,7 @@
                                 <label class="custom-control-label" for="customCheck">次回から入力を省略する</label>
                             </div>
                         </div>
+                        <p>◆自動更新しました。shiftキー押しながらF5キーを押してください。◆</p>
                         <div class="col pb-2">
                             <div class="btn-group d-flex">
                                 <button type="submit" class="btn btn-primary btn-lg font-size-rg w-100">ログインする</button>
