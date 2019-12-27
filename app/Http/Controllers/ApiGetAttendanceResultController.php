@@ -58,7 +58,6 @@ class ApiGetAttendanceResultController extends Controller
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.unknown'));
                         }
                         $this->insertTable($user_data, $mode, $card_id, $array_chkAttendance_result, $systemdate);
-                        $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.insert_error'));
                         $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
                         $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
                         $response->put(Config::get('const.PUT_ITEM.record_time'),$systemdate->format('H:i:s'));
