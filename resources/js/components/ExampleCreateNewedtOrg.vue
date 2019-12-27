@@ -691,6 +691,7 @@ export default {
       if (this.details[index].apply_term_from != "" && this.details[index].apply_term_from != null) { return true; }
       if (this.details[index].kill_from_date != "" && this.details[index].kill_from_date != null) { return true; }
       if (this.details[index].name != "" && this.details[index].name != null) { return true; }
+      return false;
     },
     refreshItemList() {
       // 最新リストの表示

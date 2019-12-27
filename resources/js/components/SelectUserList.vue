@@ -82,7 +82,6 @@ export default {
     },
     // -------------------- サーバー処理 ----------------------------
     getList(targetdate, killvalue, getdo, departmentValue, employmentValue){
-      console.log('selecUserList getList targetdate = ' + targetdate);
       if (targetdate == '') {
         targetdate = moment(new Date()).format("YYYYMMDD");
       }

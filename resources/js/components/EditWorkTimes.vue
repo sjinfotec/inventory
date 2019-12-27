@@ -2,17 +2,32 @@
   <div>
     <!-- main contentns row -->
     <div class="row justify-content-between print-none">
+      <!-- ========================== 検索部 START ========================== -->
       <!-- .panel -->
       <div class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:header-text1="'年月を指定して勤怠時刻を表示する'"
+            v-bind:header-text1="'年月日を指定して勤怠時刻を表示する'"
             v-bind:header-text2="'雇用形態や所属部署でフィルタリングして表示できます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <!-- panel body -->
           <div class="card-body pt-2">
+            <!-- ----------- メッセージ部 START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between" v-if="messagevalidatesSearch.length">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <ul class="error-red color-red">
+                  <li v-for="(messagevalidate,index) in messagevalidatesSearch" v-bind:key="index">{{ messagevalidate }}</li>
+                </ul>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- ----------- メッセージ部 END ---------------- -->
+            <!-- ----------- 選択リスト START ---------------- -->
             <!-- panel contents -->
             <!-- .row -->
             <div class="row justify-content-between">
@@ -21,18 +36,17 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                    >指定年月<span class="color-red">[必須]</span></span>
+                    >指定日付<span class="color-red">[必須]</span></span>
                   </div>
                   <input-datepicker
-                    v-bind:default-date="defaultDate"
-                    v-bind:date-format="'yyyy年MM月'"
+                    v-bind:default-date="valuedate"
+                    v-bind:date-format="'yyyy年MM月dd日'"
                     v-on:change-event="fromdateChanges"
                     v-on:clear-event="fromdateCleared"
                   ></input-datepicker>
                 </div>
-                <message-data v-bind:message-datas="messagedatasfromdate" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -40,29 +54,37 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
-                      class="input-group-text font-size-sm line-height-xs label-width-120"
-                      for="inputGroupSelect01"
+                    class="input-group-text font-size-sm line-height-xs label-width-150"
+                    for="target_employmentstatus"
                     >雇用形態</label>
                   </div>
-                  <select-employmentstatus
-                    v-bind:blank-data="true"
-                    v-on:change-event="employmentChanges"
-                  ></select-employmentstatus>
+                  <select-employmentstatuslist
+                      ref="selectemploymentstatuslist"
+                      v-bind:blank-data="true"
+                      v-bind:placeholder-data="'雇用形態を選択してください'"
+                      v-bind:selected-value="selectedEmploymentValue"
+                      v-on:change-event="employmentChanges"
+                  ></select-employmentstatuslist>
                 </div>
               </div>
-              <!-- /.col -->
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <label
-                      class="input-group-text font-size-sm line-height-xs label-width-120"
-                      for="inputGroupSelect01"
-                    >所属部署</label>
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      id="basic-addon1"
+                    >所属部署</span>
                   </div>
-                  <select-departmentlist
-                    ref="selectdepartment"
+                  <select-departmentlist v-if="showdepartmentlist"
+                    ref="selectdepartmentlist"
                     v-bind:blank-data="true"
+                    v-bind:placeholder-data="'部署を選択してください'"
+                    v-bind:selected-department="selectedDepartmentValue"
+                    v-bind:add-new="false"
+                    v-bind:date-value="''"
+                    v-bind:kill-value="valueDepartmentkillcheck"
+                    v-bind:row-index=0
                     v-on:change-event="departmentChanges"
                   ></select-departmentlist>
                 </div>
@@ -72,333 +94,237 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <span
-                      class="input-group-text font-size-sm line-height-xs label-width-120"
-                      id="basic-addon1"
-                    >氏名<span class="color-red">[必須]</span></span>
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      for="target_users"
+                    >氏 　名<span class="color-red">[必須]</span></label>
                   </div>
-                  <select-user
-                    ref="selectuser"
+                  <select-userlist v-if="showuserlist"
+                    ref="selectuserlist"
                     v-bind:blank-data="true"
-                    v-bind:get-Do="getDo"
+                    v-bind:placeholder-data="'氏名を選択してください'"
+                    v-bind:selected-value="selectedUserValue"
+                    v-bind:add-new="false"
+                    v-bind:get-do="1"
                     v-bind:date-value="applytermdate"
+                    v-bind:kill-value="valueUserkillcheck"
+                    v-bind:row-index=0
+                    v-bind:department-value="selectedDepartmentValue"
+                    v-bind:employment-value="''"
                     v-on:change-event="userChanges"
-                  ></select-user>
+                  ></select-userlist>
                 </div>
               </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
+            <!-- ----------- 選択リスト END ---------------- -->
+            <!-- ----------- 選択ボタン類 START ---------------- -->
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
-                  v-on:searchclick-event="getDetail"
+                  v-on:searchclick-event="searchclick"
                   v-bind:btn-mode="'search'"
-                  v-bind:is-push="issearchbutton">
-                </btn-work-time>
-                <message-data v-bind:message-datas="messageshowsearch" v-bind:message-class="'warning'"></message-data>
-              </div>
-              <!-- /.col -->
-              <!-- col -->
-              <div class="col-md-12 pb-2" v-if="valueuser != ''">
-                <div class="btn-group d-flex">
-                  <button class="btn btn-success btn-lg font-size-rg w-100" v-on:click="show">
-                    <img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt />勤務時間を追加
-                  </button>
-                </div>
+                  v-bind:is-push="issearchbutton"
+                ></btn-work-time>
               </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
             <!-- /.panel contents -->
+            <!-- ----------- 選択ボタン類 END ---------------- -->
           </div>
         </div>
       </div>
       <!-- /.panel -->
-    </div>
-    <!-- /main contentns row -->
-    <!-- main contentns row -->
-    <div class="row justify-content-between" v-if="details.length ">
+      <!-- ========================== 編集部 START ========================== -->
       <!-- .panel -->
-      <div class="col-md pt-3 align-self-stretch">
+      <div class="col-md-12 pt-3" v-if="selectMode=='EDT'">
         <div class="card shadow-pl">
           <!-- panel header -->
-          <div class="card-header bg-transparent pt-3 border-0 print-none">
-            <h1 class="float-md-left font-size-rg">{{ year }}年 {{ month }} 月 〆分を表示</h1>
-            <span class="float-md-right font-size-sm">勤務時間や休暇区分などを変更できます</span>
+          <daily-working-information-panel-header
+            v-bind:header-text1="'◆勤怠編集'"
+            v-bind:header-text2="''"
+          ></daily-working-information-panel-header>
+          <!-- /.panel header -->
+          <!-- ----------- 「＋」アイコン部 START ---------------- -->
+          <!-- panel header -->
+          <div class="card-header bg-transparent pt-3 border-0">
+            <h1 class="float-sm-left font-size-rg">
+              <span>
+                <button class="btn btn-success btn-lg font-size-rg" v-on:click="appendRowClick">+</button>
+              </span>
+              {{ this.selectedName }}
+            </h1>
+            <span class="float-sm-right font-size-sm">「＋」アイコンで新規に追加することができます</span>
           </div>
           <!-- /.panel header -->
-          <!-- panel body -->
-          <div class="card-body mb-3 py-0 pt-4 border-top print-space">
+          <!-- ----------- 「＋」アイコン部 END ---------------- -->
+          <!-- ----------- 編集入力部 START ---------------- -->
+          <!-- main contentns row -->
+          <div class="card-body pt-2" v-if="details.length">
             <!-- panel contents -->
+            <!-- ----------- メッセージ部 START ---------------- -->
             <!-- .row -->
-            <div class="row">
-              <!-- col -->
-              <div class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">
-                <h1 class="font-size-sm m-0 mb-1">氏名</h1>
-                <p class="font-size-rg font-weight-bold m-0">{{ details[0].user_name }}</p>
-              </div>
-              <!-- /.col -->
-              <!-- col -->
-              <div class="col-sm-6 col-md-6 col-lg-6 pb-2 align-self-stretch">
-                <h1 class="font-size-sm m-0 mb-1 text-sm-right">所属部署</h1>
-                <p class="font-size-rg m-0 text-sm-right">{{details[0].d_name}}</p>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- /.panel contents -->
-          </div>
-          <!-- /panel body -->
-          <!-- panel body -->
-          <div class="card-body mb-3 p-0 border-top">
-            <!-- panel contents -->
-            <!-- .row -->
-            <div class="row">
-              <div class="col-12">
-                <div class="table-responsive">
-                  <div class="col-12 p-0">
-                    <table class="table table-striped border-bottom font-size-sm text-nowrap">
-                      <thead>
-                        <tr>
-                          <td class="text-center align-middle w-15">日付</td>
-                          <td class="text-center align-middle w-15">時間</td>
-                          <td class="text-center align-middle w-15">区分</td>
-                          <td class="text-center align-middle w-35 mw-rem-20">備考</td>
-                          <td class="text-center align-middle mw-rem-15">操作</td>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr v-for="(item,index) in details" v-bind:key="item.id">
-                          <td class="text-center align-middle">{{item.date}}</td>
-                          <td class="text-center align-middle">
-                            <div class="input-group">
-                              <input type="time" class="form-control" v-model="details[index].time" />
-                            </div>
-                          </td>
-                          <td class="text-center align-middle">
-                            <div class="input-group">
-                              <select class="form-control" v-model="details[index].mode">
-                                <option value></option>
-                                <option
-                                  v-for="mode in modeList"
-                                  :value="mode.code"
-                                >{{ mode.code_name }}</option>
-                              </select>
-                            </div>
-                          </td>
-                          <td class="text-center align-middle" v-if="index==0">
-                            <div class="input-group">
-                              <div class="input-group-prepend">
-                                <label
-                                  class="input-group-text font-size-sm line-height-xs label-width-90"
-                                  for="inputGroupSelect01"
-                                >休暇区分</label>
-                              </div>
-                              <select
-                                class="form-control"
-                                v-model="details[index].user_holiday_kbn"
-                              >
-                                <option value></option>
-                                <option
-                                  v-for="list in userLeaveKbnList"
-                                  :value="list.code"
-                                >{{ list.code_name }}</option>
-                              </select>
-                            </div>
-                          </td>
-                          <td class="text-center align-middle" v-else-if="item.kbn_flag == 1">
-                            <div class="input-group">
-                              <div class="input-group-prepend">
-                                <label
-                                  class="input-group-text font-size-sm line-height-xs label-width-90"
-                                  for="inputGroupSelect01"
-                                >休暇区分</label>
-                              </div>
-                              <select
-                                class="form-control"
-                                v-model="details[index].user_holiday_kbn"
-                              >
-                                <option value></option>
-                                <option
-                                  v-for="list in userLeaveKbnList"
-                                  :value="list.code"
-                                >{{ list.code_name }}</option>
-                              </select>
-                            </div>
-                          </td>
-                          <td v-else></td>
-                          <td class="text-center align-middle">
-                            <div class="btn-group d-flex">
-                              <button
-                                type="button"
-                                class="btn btn-danger btn-lg font-size-rg w-100"
-                                @click="alertDelConf('warning',item.id)"
-                              >削除</button>
-                            </div>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between px-3">
+            <div class="row justify-content-between" v-if="messagevalidatesEdt.length">
               <!-- col -->
               <div class="col-md-12 pb-2">
-                <div class="btn-group d-flex">
-                  <button
-                    type="button"
-                    class="btn btn-success btn-lg font-size-rg w-100"
-                    @click="alertStoreConf('info')"
-                  >この内容で編集を確定する</button>
-                </div>
+                <ul class="error-red color-red">
+                  <li v-for="(messagevalidate,index) in messagevalidatesEdt" v-bind:key="index">{{ messagevalidate }}</li>
+                </ul>
               </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
+            <!-- ----------- メッセージ部 END ---------------- -->
+            <!-- ----------- 項目部 START ---------------- -->
+            <div class="col-md pt-3 align-self-stretch">
+              <div class="card shadow-pl">
+                <!-- panel body -->
+                <div class="card-body mb-3 p-0 border-top">
+                  <!-- panel contents -->
+                  <div class="row">
+                    <div class="col-12">
+                      <!-- ----------- 項目table部 START ---------------- -->
+                      <div class="table-responsive">
+                        <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                          <thead>
+                            <tr>
+                              <td class="text-center align-middle w-15">No.</td>
+                              <td class="text-center align-middle w-30">勤怠モード</td>
+                              <td class="text-center align-middle w-30">時刻</td>
+                              <td class="text-center align-middle w-35 mw-rem-10">休暇</td>
+                              <td colspan="2" class="text-center align-middle w-35 mw-rem-10">操作</td>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="(item,index) in details" v-bind:key="item.id">
+                              <td class="text-right align-middle">
+                                <div class="input-group">
+                                  <label>{{ index+1 }}</label>
+                                </div>
+                              </td>
+                              <td class="text-center align-middle">
+                                <div class="input-group">
+                                  <select
+                                    class="custom-select"
+                                    v-model="details[index].mode"
+                                    @change="changeMode(index)"
+                                  >
+                                    <option value></option>
+                                    <option
+                                      v-for="mlist in generalList_c005"
+                                      :value="mlist.code"
+                                      v-bind:key="mlist.code"
+                                    >{{ mlist.code_name }}</option>
+                                  </select>
+                                </div>
+                              </td>
+                              <td class="text-center align-middle">
+                                <div class>
+                                  <input
+                                    type="time"
+                                    class="form-control"
+                                    v-model="details[index].time"
+                                    @change="changeTime(index)"
+                                  />
+                                </div>
+                              </td>
+                              <td class="text-center align-middle" v-if="index==0">
+                                <div class="input-group">
+                                  <div class="input-group-prepend">
+                                    <label
+                                      class="input-group-text font-size-sm line-height-xs label-width-90"
+                                      for="inputGroupSelect01"
+                                    >休暇区分</label>
+                                  </div>
+                                  <select
+                                    class="form-control"
+                                    v-model="details[index].user_holiday_kbn"
+                                    @change="changeHolidayKbn(index)"
+                                  >
+                                    <option value></option>
+                                    <option
+                                      v-for="list in generalList_c013"
+                                      :value="list.code"
+                                    >{{ list.code_name }}</option>
+                                  </select>
+                                </div>
+                              </td>
+                              <td v-else></td>
+                              <td class="text-center align-middle">
+                                <div class="btn-group" v-if="details[index].id != ''">
+                                  <button
+                                    type="button"
+                                    class="btn btn-success"
+                                    @click="fixclick(index)"
+                                  >この内容で更新する</button>
+                                </div>
+                                <div class="btn-group" v-if="details[index].id == ''">
+                                  <button
+                                    type="button"
+                                    class="btn btn-success"
+                                    @click="addClick(index)"
+                                  >この内容で追加する</button>
+                                </div>
+                              </td>
+                              <td class="text-center align-middle">
+                                <div class="btn-group" v-if="details[index].id != ''">
+                                  <button
+                                    type="button"
+                                    class="btn btn-danger"
+                                    @click="delClick(index)"
+                                  >この内容を削除する</button>
+                                </div>
+                                <div class="btn-group" v-if="details[index].id == ''">
+                                  <button
+                                    type="button"
+                                    class="btn btn-danger"
+                                    @click="rowDelClick(index)"
+                                  >行削除</button>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <!-- ----------- 項目table部 START ---------------- -->
+                    </div>
+                  </div>
+                  <!-- /.row -->
+                  <!-- /.panel contents -->
+                </div>
+                <!-- /panel body -->
+              </div>
+            </div>
+            <!-- ----------- 項目部 END ---------------- -->
+            <!-- ----------- 選択ボタン類 START ---------------- -->
+            <!-- .row -->
+            <!-- <div class="row justify-content-between">
+              <!-- col -->
+              <!-- <div class="col-md-12 pb-2">
+                <btn-work-time
+                  v-on:editfixclick-event="editfixclick"
+                  v-bind:btn-mode="'editfix'"
+                  v-bind:is-push="issearchbutton"
+                ></btn-work-time>
+              </div>-->
+              <!-- /.col -->
+            <!-- </div> -->
+            <!-- /.row -->
             <!-- /.panel contents -->
+            <!-- ----------- 選択ボタン類 END ---------------- -->
           </div>
+          <!-- /main contentns row -->
+          <!-- ----------- 編集入力部 END ---------------- -->
           <!-- /panel body -->
         </div>
       </div>
       <!-- /.panel -->
     </div>
     <!-- /main contentns row -->
-    <!-- modal -->
-    <modal name="add-work_time" :width="800" :height="600" v-model="valueuser">
-      <div class="card">
-        <div class="card-header">勤怠情報追加</div>
-        <div class="card-body">
-          <!-- .row -->
-          <div class="row justify-content-between" v-if="errors.length">
-            <!-- col -->
-            <div class="col-md-12 pb-2">
-              <ul class="error-red color-red">
-                <li v-for="(error,index) in errors" v-bind:key="index">{{ error }}</li>
-              </ul>
-            </div>
-            <!-- /.col -->
-          </div>
-          <!-- /.row -->
-          <!-- .row -->
-          <div class="row justify-content-between">
-            <!-- col -->
-            <div class="col-md-12 pb-2">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span
-                    class="input-group-text font-size-sm line-height-xs label-width-120"
-                    for="shift_end"
-                  >日付</span>
-                </div>
-                <datepicker
-                  :language="ja"
-                  :value="this.default"
-                  :format="DatePickerFormat"
-                  v-model="addDate"
-                ></datepicker>
-              </div>
-            </div>
-            <!-- /.col -->
-            <!-- col -->
-            <div class="col-md-12 pb-2" v-if="addKbn == ''">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span
-                    class="input-group-text font-size-sm line-height-xs label-width-120"
-                    for="shift_end"
-                  >時間</span>
-                </div>
-                <input type="time" class="form-control" v-model="addTime" />
-              </div>
-            </div>
-            <!-- /.col -->
-            <!-- col -->
-            <div class="col-md-12 pb-2" v-if="addKbn == ''">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span
-                    class="input-group-text font-size-sm line-height-xs label-width-120"
-                    for="shift_end"
-                  >勤務区分</span>
-                </div>
-                <select class="form-control" v-model="addMode">
-                  <option value></option>
-                  <option
-                    v-for="mode in modeList"
-                    :value="mode.code"
-                    v-bind:key="mode.code"
-                  >{{ mode.code_name }}</option>
-                </select>
-              </div>
-            </div>
-            <!-- /.col -->
-            <!-- col -->
-            <div class="col-md-12 pb-2" v-if="addMode == ''">
-              <div class="input-group">
-                <div class="input-group-prepend">
-                  <span
-                    class="input-group-text font-size-sm line-height-xs label-width-120"
-                    for="holiday_kbn"
-                  >休暇区分</span>
-                </div>
-                <select class="form-control" v-model="addKbn">
-                  <option value></option>
-                  <option
-                    v-for="list in userLeaveKbnList"
-                    :value="list.code"
-                    v-bind:key="list.code"
-                  >{{ list.code_name }}</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- /.col -->
-          </div>
-          <!-- /.row -->
-          <!-- .row -->
-          <div class="row justify-content-between">
-            <!-- col -->
-            <div class="col-md-12 py-4"></div>
-            <!-- /.col -->
-          </div>
-          <!-- /.row -->
-          <!-- .row -->
-          <div class="row justify-content-between">
-            <!-- col -->
-            <div class="col-md-12 pb-2">
-              <div class="btn-group d-flex">
-                <button
-                  type="button"
-                  class="btn btn-success btn-lg font-size-rg w-100"
-                  v-on:click="alertAddConf('info')"
-                >この条件で登録</button>
-              </div>
-            </div>
-            <!-- /.col -->
-            <!-- col -->
-            <div class="col-md-12 pb-2">
-              <div class="btn-group d-flex">
-                <button
-                  type="button"
-                  class="btn btn-warning btn-lg font-size-rg w-100"
-                  v-on:click="hide"
-                >キャンセル</button>
-              </div>
-            </div>
-            <!-- /.col -->
-          </div>
-          <!-- /.row -->
-        </div>
-      </div>
-    </modal>
-    <!-- /modal -->
   </div>
 </template>
 <script>
@@ -406,20 +332,41 @@ import toasted from "vue-toasted";
 import Datepicker from "vuejs-datepicker";
 import { ja } from "vuejs-datepicker/dist/locale";
 import moment from "moment";
+import {dialogable} from '../mixins/dialogable.js';
+import {checkable} from '../mixins/checkable.js';
+import {requestable} from '../mixins/requestable.js';
 
 export default {
   name: "EditWorkTimes",
+  mixins: [ dialogable, checkable, requestable ],
   data() {
     return {
-      dates: new Date(),
-      valueym: "",
-      applytermdate: "",
-      valuefromdate: "",
       defaultDate: new Date(),
-      valuedepartment: "",
-      valueemploymentstatus: "",
+      valuedate: "",
+      date_name: "",
+      selectedEmploymentValue: "",
+      selectedDepartmentValue : "",
+      showdepartmentlist: true,
+      valueDepartmentkillcheck : false,
+      department_name: "",
+      selectedUserValue : "",
+      valueUserkillcheck : false,
+      showuserlist: true,
+      user_name: "",
+      selectMode: "",
+      applytermdate: "",
       getDo: 0,
+      selectedName: "",
+      generalList_c005: [],
+      generalList_c013: [],
+      count: 0,
+      before_count: 0,
+
+      valuefromdate: "",
       valueuser: "",
+      messagevalidatesSearch: [],
+      messagevalidatesEdt: [],
+
       messageshowsearch: [],
       messagedatasfromdate: [],
       issearchbutton: false,
@@ -448,350 +395,468 @@ export default {
   },
   // マウント時
   mounted() {
-    // this.getTimeTableList();
-    var date = new Date();
-    var baseDate = new Date("2018/01/01 8:00:00");
-    this.baseYear = baseDate.getFullYear();
-    this.valueym = moment(this.defaultDate).format("YYYYMM");
-    this.getUserLeaveKbnList();
-    this.getModeList();
-    // this.baseYear = baseDate;
-  },
-  // セレクトボックス変更時
-  watch: {
-    month: function(val, oldVal) {
-      this.selectMonth = this.zeroPadding(val, 2);
-    },
-    addMode: function(val, oldVal) {
-      this.addKbn = "";
-    },
-    addKbn: function(val, oldVal) {
-      this.addMode = "";
-      this.addTime = "";
-    }
+    this.valuedate = this.defaultDate;
+    this.valuefromdate = moment(this.defaultDate).format("YYYYMMDD");
+    this.date_name = moment(this.defaultDate).format("YYYY年MM月DD日");
+    this.getGeneralList("C005");
+    this.getGeneralList("C013");
   },
   methods: {
-    // バリデーション
-    checkForm: function() {
-      var flag = false;
-      this.errors = [];
-      if (this.addDate && this.addKbn) {
-        flag = true;
-        return flag;
-      } else {
-        if (this.addDate && this.addTime && this.addMode) {
-          flag = true;
-          return flag;
+    // ------------------------ バリデーション ------------------------------------
+    // バリデーション（検索）
+    checkFormSearch: function() {
+      this.messagevalidatesSearch = [];
+      var chkArray = [];
+      var flag = true;
+      // 氏名
+      var required = true;
+      var equalength = 0;
+      var maxlength = 0;
+      var itemname = '氏名';
+      chkArray = 
+        this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesSearch.length == 0) {
+          this.messagevalidatesSearch = chkArray;
         } else {
-          if (!this.addDate) {
-            flag = false;
-            this.errors.push("登録する日付を選択してください");
-          }
-          if (this.addKbn == "") {
-            if (!this.addTime) {
-              flag = false;
-              this.errors.push("時間を入力してください");
-            }
-            if (!this.addMode) {
-              flag = false;
-              this.errors.push("モードを選択してください");
-            }
-          }
-          return flag;
+          this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
         }
       }
+      // 指定日付
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '指定日付';
+      chkArray = 
+        this.checkHeader(this.valuedate, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesSearch.length == 0) {
+          this.messagevalidatesSearch = chkArray;
+        } else {
+          this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
+        }
+      }
+      if (this.messagevalidatesSearch.length > 0) {
+        flag = false;
+      }
+      return flag;
     },
+    // バリデーション（更新）
+    checkFormFix: function(index) {
+      this.messagevalidatesEdt = [];
+      var chkArray = [];
+      var flag = true;
+      var required = true;
+      var equalength = 0;
+      var maxlength = 0;
+      var itemname = '';
+      // 勤怠モードと時刻休暇
+      var isrow = this.checkRowData(index);
+      if (!isrow) {
+        this.messagevalidatesEdt.push("No." + index+1 + "の" + "勤怠モード・時刻または休暇を入力してください");
+      } else {
+        if (this.details[index].user_holiday_kbn == "" || this.details[index].user_holiday_kbn == null) {
+          // 勤怠モードと時刻
+          if (this.details[index].mode != "" && this.details[index].mode != null) {
+            required = true;
+            equalength = 0;
+            maxlength = 0;
+            itemname = '時刻';
+            chkArray = 
+              this.checkDetail(this.details[index].time, required, equalength, maxlength, itemname, index+1) ;
+            if (chkArray.length > 0) {
+              if (this.messagevalidatesEdt.length == 0) {
+                this.messagevalidatesEdt = chkArray;
+              } else {
+                this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
+              }
+            }
+          } else {
+            required = true;
+            equalength = 0;
+            maxlength = 0;
+            itemname = '勤怠モード';
+            chkArray =
+              this.checkDetail(this.details[index].mode, required, equalength, maxlength, itemname, index+1);
+            if (chkArray.length > 0) {
+              if (this.messagevalidatesEdt.length == 0) {
+                this.messagevalidatesEdt = chkArray;
+              } else {
+                this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
+              }
+            }
+          }
+        //} else {
+          //this.details[index].mode = "";
+          //this.details[index].time = "";
+        }
+      }
+      if (this.messagevalidatesEdt.length > 0) {
+        flag = false;
+      }
+      return flag;
+    },
+    // ------------------------ イベント処理 ------------------------------------
+    
     // 指定年月が変更された場合の処理
     fromdateChanges: function(value) {
-      this.valuefromdate = value;
-      // 再取得
-      this.applytermdate = ""
-      if (this.valuefromdate) {
-          this.valueym = moment(this.valuefromdate).format("YYYYMM");
-          this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
-      }
-      this.$refs.selectdepartment.getList(this.applytermdate);
+      this.valuedate = value;
+      this.valuefromdate = moment(value).format("YYYYMMDD");
+      this.date_name = moment(value).format("YYYY年MM月DD日");
+      this.selectedName = this.user_name + "　" + this.date_name + "分勤怠編集" ;
+      // ユーザー選択コンポーネントの取得メソッドを実行
+      this.selectedEmploymentValue = "";
+      this.selectedDepartmentValue = "";
+      this.selectedUserValue = "";
+      this.getDo = 1;
+      this.applytermdate = this.valuefromdate;
+      this.getDepartmentSelected();
       this.getUserSelected();
+      this.selectMode = '';
     },
-    // 指定日付がクリアされた場合の処理
+    // 指定年月がクリアされた場合の処理
     fromdateCleared: function() {
+      this.valuedate = "";
       this.valuefromdate = "";
       this.applytermdate = "";
-      this.valueym = ""
-    },
-    alert: function(state, message, title) {
-      this.$swal(title, message, state);
-    },
-    alertStoreConf: function(state) {
-      this.$swal({
-        title: "確認",
-        text: "登録してもよろしいですか？",
-        icon: state,
-        buttons: true,
-        dangerMode: true
-      }).then(willDelete => {
-        if (willDelete) {
-          this.store();
-        } else {
-        }
-      });
-    },
-    alertAddConf: function(state) {
-      this.validate = this.checkForm();
-      if (this.validate) {
-        this.$swal({
-          title: "確認",
-          text: "登録してもよろしいですか？",
-          icon: state,
-          buttons: true,
-          dangerMode: true
-        }).then(willDelete => {
-          if (willDelete) {
-            this.inputClear();
-            this.addWorkTime();
-          } else {
-          }
-        });
-      } else {
-      }
-    },
-    alertDelConf: function(state, value) {
-      this.$swal({
-        title: "確認",
-        text: "削除してもよろしいですか？",
-        icon: state,
-        buttons: true,
-        dangerMode: true
-      }).then(willDelete => {
-        if (willDelete) {
-          this.del(value);
-        } else {
-        }
-      });
-    },
-    show: function() {
-      this.$modal.show("add-work_time");
-    },
-    hide: function() {
-      this.$modal.hide("add-work_time");
-    },
-    addWorkTime: function() {
-      this.$axios
-        .post("/edit_work_times/add", {
-          date: this.addDate,
-          user_code: this.valueuser,
-          time: this.addTime,
-          mode: this.addMode,
-          holiday_kbn: this.addKbn
-        })
-        .then(response => {
-          var res = response.data;
-          if (res.result == 0) {
-            // this.$toasted.show("勤怠情報を登録しました");
-            this.alert("success", "登録しました", "登録成功");
-            this.hide();
-          } else {
-            this.alert("error", "登録に失敗しました", "エラー");
-          }
-        })
-        .catch(reason => {});
-    },
-    getDetail() {
-      this.$axios
-        .get("/edit_work_times/get", {
-          params: {
-            ym: this.valueym,
-            code: this.valueuser
-          }
-        })
-        .then(response => {
-          this.res = response.data;
-          console.log('res.result = ' + res.result);
-          if (res.result) {
-            this.details = res.details
-          } else {
-            if (res.messagedata.length > 0) {
-              this.messageshowsearch = res.messagedata;
-            } else {
-              this.alert("error", "勤怠時刻取得処理でエラーが発生しました", "エラー");
-            }
-          }
-        })
-        .catch(reason => {
-          this.alert("error", "勤怠時刻取得処理でエラーが発生しました", "エラー");
-        });
-    },
-    getUserLeaveKbnList() {
-      this.$axios
-        .get("/get_user_leave_kbn")
-        .then(response => {
-          this.userLeaveKbnList = response.data;
-          console.log("個人休暇区分取得");
-        })
-        .catch(reason => {
-          alert("error");
-        });
-    },
-    getModeList() {
-      this.$axios
-        .get("/get_mode_list")
-        .then(response => {
-          this.modeList = response.data;
-          console.log("モード取得");
-        })
-        .catch(reason => {
-          alert("error");
-        });
+      this.date_name = "";
+      this.selectedName = this.user_name + "　" + this.date_name + "分勤怠編集" ;
     },
     // 雇用形態が変更された場合の処理
     employmentChanges: function(value) {
-      this.valueemploymentstatus = value;
+      this.selectedEmploymentValue = value;
       // ユーザー選択コンポーネントの取得メソッドを実行
+      this.selectedUserValue = "";
       this.getDo = 1;
-      if (this.valuedepartment == "") {
-        if (this.valueemploymentstatus == "") {
-          this.$refs.selectuser.getUserList(this.getDo);
-        } else {
-          this.$refs.selectuser.getUserListByEmployment(
-            this.getDo,
-            this.valueemploymentstatus
-          );
-        }
-      } else {
-        if (this.valueemploymentstatus == "") {
-          this.$refs.selectuser.getUserListByDepartment(
-            this.getDo,
-            this.valuedepartment
-          );
-        } else {
-          this.$refs.selectuser.getUserListByDepartmentEmployment(
-            this.getDo,
-            this.valuedepartment,
-            this.valueemploymentstatus
-          );
-        }
-      }
+      this.applytermdate = this.valuefromdate;
+      this.getDo = 1;
+      this.getUserSelected();
+      this.selectMode = '';
     },
     // 部署選択が変更された場合の処理
     departmentChanges: function(value, arrayitem) {
-      this.valuedepartment = value;
+      this.selectedDepartmentValue = value;
+      this.department_name = arrayitem['name'];
       // ユーザー選択コンポーネントの取得メソッドを実行
+      this.selectedUserValue = "";
       this.getDo = 1;
-      if (this.valueemploymentstatus == "") {
-        if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserList(this.getDo);
-        } else {
-          this.$refs.selectuser.getUserListByDepartment(
-            this.getDo,
-            this.valuedepartment
-          );
-        }
-      } else {
-        if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserListByEmployment(
-            this.getDo,
-            this.valueemploymentstatus
-          );
-        } else {
-          this.$refs.selectuser.getUserListByDepartmentEmployment(
-            this.getDo,
-            this.valuedepartment,
-            this.valueemploymentstatus
-          );
-        }
-      }
-    },
-    // ユーザー選択コンポーネント取得メソッド
-    getUserSelected: function() {
-      this.valueuser = "";
-      this.getDo = 1;
-      this.applytermdate = "";
-      if (this.valuefromdate) {
-        this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
-      }
-      if (this.valueemploymentstatus == "") {
-        if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserList(this.getDo, this.valueuser, this.applytermdate);
-        } else {
-          this.$refs.selectuser.getUserListByDepartment(
-            this.getDo,
-            this.valuedepartment,
-            this.valueuser,
-            this.applytermdate
-          );
-        }
-      } else {
-        if (this.valuedepartment == "") {
-          this.$refs.selectuser.getUserListByEmployment(
-            this.getDo,
-            this.valueemploymentstatus,
-            this.valueuser,
-            this.applytermdate
-          );
-        } else {
-          this.$refs.selectuser.getUserListByDepartmentEmployment(
-            this.getDo,
-            this.valuedepartment,
-            this.valueemploymentstatus,
-            this.valueuser,
-            this.applytermdate
-          );
-        }
-      }
+      this.getUserSelected();
+      this.selectMode = '';
     },
     // ユーザー選択が変更された場合の処理
-    userChanges: function(value) {
-      this.valueuser = value;
+    userChanges: function(value, arrayitem) {
+      this.selectedUserValue = value;
+      this.user_name = arrayitem['name'];
+      this.selectedName = this.user_name + "　" + this.date_name + "分勤怠編集" ;
     },
-    // 削除
-    del: function(value) {
-      this.$axios
-        .post("/edit_work_times/del", {
-          id: value
+    // 勤怠モードが変更された場合の処理
+    changeMode: function(index) {
+      /*if ((this.details[index].mode != "" && this.details[index].mode != null) &&
+        (this.details[index].time != "" && this.details[index].time != null)){
+        this.details[index].user_holiday_kbn = "";
+        this.details[index].kbn_flag = 0;
+      } */
+    },
+    // 時間が変更された場合の処理
+    changeTime: function(index) {
+      /*if ((this.details[index].mode != "" && this.details[index].mode != null) &&
+        (this.details[index].time != "" && this.details[index].time != null)){
+        this.details[index].user_holiday_kbn = "";
+        this.details[index].kbn_flag = 0;
+      } */
+    },
+    // 休暇区分が変更された場合の処理
+    changeHolidayKbn: function(index) {
+      if (this.details[index].user_holiday_kbn != "" && this.details[index].user_holiday_kbn != null) {
+      //  this.details[index].mode = "";
+       // this.details[index].time = "";
+        this.details[index].kbn_flag = 1;
+      } else {
+        this.details[index].kbn_flag = 0;
+      }
+    },
+    // 表示ボタンクリック処理
+    searchclick() {
+      // 入力項目クリア
+      this.inputClear();
+      this.messagevalidatesSearch = [];
+      this.messagevalidatesEdt = [];
+      if (this.checkFormSearch()) {
+        this.selectMode = 'EDT';
+        this.getItem();
+      }
+    },
+    // プラス追加ボタンクリック処理
+    appendRowClick: function() {
+      if (this.before_count < this.count) {
+        var messages = [];
+        messages.push("１度に追加できる情報は１個です。追加してから再実行してください");
+        this.messageswal("エラー", messages, "error", true, false, true);
+      } else {
+        this.object = {
+          id: "",
+          user_code: this.selectedUserValue,
+          department_code: this.selectedDepartmentValue,
+          record_time: "",
+          mode: "",
+          user_name: this.user_name,
+          department_name: this.department_name,
+          code_name: "",
+          kbn_flag: 0,
+          user_holiday_kbn: "",
+          date: moment(this.valuedate).format("YYYY/MM/DD"),
+          time: ""
+          };
+        this.details.push(this.object);
+        this.count = this.details.length
+      }
+    },
+    // 更新ボタンクリック処理
+    fixclick(index) {
+      var flag = this.checkFormFix(index);
+      if (flag) {
+        var messages = [];
+        messages.push("この内容で更新しますか？");
+        this.messageswal("確認", messages, "info", true, true, true)
+          .then(result  => {
+            if (result) {
+              this.FixDetail("更新", index);
+            }
+        });
+      // 項目数が多い場合以下コメントアウト
+      /* } else {
+        this.countswal("エラー", this.messagevalidatesEdt, "error", true, false, true)
+          .then(result  => {
+            if (result) {
+            }
+        }); */
+      }
+    },
+    // 追加ボタンクリック処理
+    addClick(index) {
+      var flag = this.checkFormFix(index);
+      if (flag) {
+        var messages = [];
+        messages.push("この内容で追加しますか？");
+        this.messageswal("確認", messages, "info", true, true, true)
+          .then(result  => {
+            if (result) {
+              this.addDetail(index);
+            }
+        });
+      // 項目数が多い場合以下コメントアウト
+      /* } else {
+        this.countswal("エラー", this.messagevalidatesEdt, "error", true, false, true)
+          .then(result  => {
+            if (result) {
+            }
+        }); */
+      }
+    },
+    // 削除ボタンクリック処理
+    delClick(index) {
+      var messages = [];
+      messages.push("この行内容を削除しますか？");
+      this.messageswal("確認", messages, "info", true, true, true)
+        .then(result  => {
+          if (result) {
+            this.DelDetail(index);
+          }
+      });
+    },
+    // 行削除ボタンクリック処理
+    rowDelClick: function(index) {
+      if (this.checkRowData(index)) {
+        var messages = [];
+        messages.push("行削除してよろしいですか？");
+        this.messageswal("確認", messages, "info", true, true, true)
+          .then(result  => {
+            if (result) {
+              this.details.splice(index, 1);
+              this.count = this.details.length
+            }
+        });
+      } else {
+        this.details.splice(index, 1);
+        this.count = this.details.length
+      }
+    },
+    // -------------------- サーバー処理 ----------------------------
+    // 勤怠取得処理
+    getItem() {
+      this.postRequest("/edit_work_times/get", { ymd : this.valuefromdate, code : this.selectedUserValue})
+        .then(response  => {
+          this.getThen(response);
         })
-        .then(response => {
-          var res = response.data;
-          if (res.result == 0) {
-            this.$toasted.show("選択したレコードを削除しました");
-            this.getDetail();
-          } else {
+        .catch(reason => {
+          this.serverCatch("勤怠時間","取得");
+        });
+    },
+    // コード選択リスト取得処理
+    getGeneralList(value) {
+      var arrayParams = { identificationid : value };
+      this.postRequest("/get_general_list", arrayParams)
+        .then(response  => {
+          if (value == "C005") {
+            this.getThenc005(response, "勤怠モード");
+          }
+          if (value == "C013") {
+            this.getThenc013(response, "休暇区分");
           }
         })
         .catch(reason => {
-          alert("error", "削除でエラーが発生しました", "エラー");
+          if (value == "C005") {
+            this.serverCatch("勤怠モード", "取得");
+          }
+          if (value == "C013") {
+            this.serverCatch("休暇区分", "取得");
+          }
         });
     },
-    store() {
-      this.$axios
-        .post("/edit_work_times/store", {
-          details: this.details
+    // 勤怠追加処理
+    addDetail(index) {
+      var messages = [];
+      var arrayParams = { details : this.details[index] };
+      this.postRequest("/edit_work_times/store", arrayParams)
+        .then(response  => {
+          this.putThenDetail(response, "追加");
         })
-        .then(response => {
-          var res = response.data;
-          if (res.result == 0) {
-            this.alert("success", "登録しました", "登録成功");
-            this.getDetail();
-          } else {
-            this.alert("error", "登録に失敗しました", "エラー");
-          }
+        .catch(reason => {
+          this.serverCatch("勤怠編集", "追加");
+        });
+    },
+    // 勤怠更新処理（明細）
+    FixDetail(kbnname, index) {
+      var messages = [];
+      var arrayParams = { details : this.details[index] };
+      this.postRequest("/edit_work_times/fix", arrayParams)
+        .then(response  => {
+          this.putThenDetail(response, kbnname);
         })
-        .catch(reason => {});
+        .catch(reason => {
+          this.serverCatch("勤怠編集", kbnname);
+        });
     },
-    display() {
-      this.getDetail();
+    // 部署削除処理（明細）
+    DelDetail(index) {
+      var messages = [];
+      var arrayParams = { id : this.details[index].id };
+      this.postRequest("/edit_work_times/del", arrayParams)
+        .then(response  => {
+          this.putThenDetail(response, "削除");
+        })
+        .catch(reason => {
+          this.serverCatch("勤怠編集", "削除");
+        });
     },
-    // ゼロ埋め
-    zeroPadding(num, length) {
-      return ("0000000000" + num).slice(-length);
+
+    // -------------------- 共通 ----------------------------
+    // 部署選択コンポーネント取得メソッド
+    getDepartmentSelected: function() {
+      this.$refs.selectdepartmentlist.getList(
+        this.applytermdate
+      );
+      this.refreshDepartmentList();
+    },
+    // ユーザー選択コンポーネント取得メソッド
+    getUserSelected: function() {
+      this.$refs.selectuserlist.getList(
+        this.applytermdate,
+        this.valueUserkillcheck,
+        this.getDo,
+        this.selectedDepartmentValue,
+        this.selectedEmploymentValue
+      );
+      this.refreshUserList();
+    },
+    // 取得正常処理
+    getThen(response) {
+      this.details = [];
+      var res = response.data;
+      if (res.result) {
+        this.details = res.details;
+        this.count = this.details.length;
+        this.before_count = this.count;
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+        } else {
+          this.serverCatch("勤怠編集", "取得");
+        }
+      }
+    },
+    // 取得正常処理（勤怠モード選択リスト）
+    getThenc005(response, value) {
+      var res = response.data;
+      if (res.result) {
+        this.generalList_c005 = res.details;
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+        } else {
+          this.serverCatch("勤怠モード選択リスト", "取得");
+        }
+      }
+    },
+    // 取得正常処理（休暇区分選択リスト）
+    getThenc013(response, value) {
+      var res = response.data;
+      if (res.result) {
+        this.generalList_c013 = res.details;
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+        } else {
+          this.serverCatch("明細勤怠休暇区分選択リスト管理", "取得");
+        }
+      }
+    },
+    // 更新系正常処理（明細）
+    putThenDetail(response, eventtext) {
+      var messages = [];
+      var res = response.data;
+      if (res.result) {
+        messages.push("勤怠編集を" + eventtext + "しました");
+        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+        this.getItem();
+        this.count = this.details.length;
+        this.before_count = this.count;
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+        } else {
+          this.serverCatch("勤怠編集", eventtext);
+        }
+      }
+    },
+    // 異常処理
+    serverCatch(kbn, eventtext) {
+      var messages = [];
+      messages.push(kbn + eventtext + "に失敗しました");
+      this.messageswal("エラー", messages, "error", true, false, true);
     },
     inputClear() {
-      this.errors = [];
+      this.details = [];
+      this.count = 0;
+      this.before_count = 0;
+    },
+    checkRowData(index) {
+      if (this.details[index].mode != "" && this.details[index].mode != null) { return true; }
+      if (this.details[index].time != "" && this.details[index].time != null) { return true; }
+      if (this.details[index].user_holiday_kbn != "" && this.details[index].user_holiday_kbn != null) { return true; }
+      console.log('checkRowData false');
+      return false;
+    },
+    refreshDepartmentList() {
+      // 最新リストの表示
+      this.showdepartmentlist = false;
+      this.$nextTick(() => (this.showdepartmentlist = true));
+    },
+    refreshUserList() {
+      // 最新リストの表示
+      this.showuserlist = false;
+      this.$nextTick(() => (this.showuserlist = true));
     }
   }
 };
 </script>
-<style scoped>
-.margin-set-mid {
-  margin-top: 30px;
-}
-</style>

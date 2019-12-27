@@ -255,6 +255,8 @@ class ApiCommonController extends Controller
             $from = $from->format("Y/m/d");
             $to = new Carbon($params['to']);
             $to = $to->format("Y/m/d");
+            Log::debug('$from = '.$from);
+            Log::debug('$to = '.$to);
 
             $shift_info = new ShiftInformation();
             $shift_info->setUsercodeAttribute($code);
