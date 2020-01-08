@@ -130,9 +130,9 @@ class ApiCardRegisterController extends Controller
         $systemdate = Carbon::now();
         $login_user = Auth::user();
         try{
-            Log::debug('insCardInfo $this->systemdate = '.$user_code );
-            Log::debug('insCardInfo $this->systemdate = '.$card_id );
-            Log::debug('insCardInfo $this->systemdate = '.$department_code );
+            Log::debug('insCardInfo $user_code = '.$user_code );
+            Log::debug('insCardInfo $card_id = '.$card_id );
+            Log::debug('insCardInfo $department_code = '.$department_code );
             $card_info->setUserCodeAttribute($user_code);
             $card_info->setDepartmentcodeAttribute($department_code);
             $card_info->setCardIdmAttribute($card_id);

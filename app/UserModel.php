@@ -404,9 +404,9 @@ class UserModel extends Model
                     't1.email',
                     't1.password',
                     't1.management',
-                    't1.role',
-                    't3.card_idm'
+                    't1.role'
                     )
+                ->selectRaw("IFNULL(t3.card_idm,'') as card_idm")
                 ->selectRaw("DATE_FORMAT(t1.apply_term_from, '%Y-%m-%d') as apply_term_from")
                 ->selectRaw($case_sql1)
                 ->selectRaw($case_sql2);
