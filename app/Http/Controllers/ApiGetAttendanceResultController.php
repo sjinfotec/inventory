@@ -45,8 +45,9 @@ class ApiGetAttendanceResultController extends Controller
             // カード情報存在チェック
             $is_exists = DB::table('card_informations')->where('card_idm', $card_id)->exists();
             if($is_exists){
+                Log::debug('カード情報存在チェック OK $card_id '.$card_id);
                 $user_datas = $user->getUserCardData($card_id);
-                Log::debug('カード情報存在チェック OK count($user_datas) '.count($user_datas));
+                Log::debug('count($user_datas) '.count($user_datas));
                 if (count($user_datas) > 0) {
                     foreach($user_datas as $user_data) {
                         $array_chkAttendance_result = $this->chkAttendance($user_data, $mode, $systemdate);
