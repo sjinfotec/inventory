@@ -1069,7 +1069,7 @@ class TempWorkingTimeDate extends Model
                 })
                 ->leftJoin($this->table_generalcodes.' as t5', function ($join) { 
                     $join->on('t5.code', '=', 't2.working_status')
-                    ->where('t5.identification_id', '=', Config::get('const.C005.value'))
+                    ->where('t5.identification_id', '=', Config::get('const.C012.value'))
                     ->where('t5.is_deleted', '=', 0);
                 })
                 ->JoinSub($subquery2, 't6', function ($join) { 
@@ -1090,7 +1090,7 @@ class TempWorkingTimeDate extends Model
             }
             $result = 
                 $mainquery
-                    ->where('t1.role', '<', 10)
+                    ->where('t1.role', '<', Config::get('const.C017.admin_user'))
                     ->get();
 
             if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {

@@ -648,7 +648,7 @@ class WorkTime extends Model
             if(!empty($this->param_user_code)){
                 $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
             } else {
-                $mainquery->where('t1.role','<',Config::get('const.C017.out_of_user'));
+                $mainquery->where('t1.role','<',Config::get('const.C017.admin_user'));
             }
             $mainquery
                 ->JoinSub($subquery3, 't14', function ($join) { 
