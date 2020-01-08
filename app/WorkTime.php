@@ -648,7 +648,7 @@ class WorkTime extends Model
             if(!empty($this->param_user_code)){
                 $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
             } else {
-                $mainquery->where('t1.role','<',Config::get('const.C017.admin_user'));
+                $mainquery->where('t1.management','<',Config::get('const.C017.admin_user'));
             }
             $mainquery
                 ->JoinSub($subquery3, 't14', function ($join) { 
@@ -1167,7 +1167,7 @@ class WorkTime extends Model
             if(!empty($this->param_user_code)){
                 $mainquery->where('t1.code', $this->param_user_code);                           //user_code指定
             } else {
-                $mainquery->where('t1.role','<',Config::get('const.C017.out_of_user'));
+                $mainquery->where('t1.management','<',Config::get('const.C017.out_of_user'));
             }
             $mainquery
                 ->JoinSub($subquery3, 't4', function ($join) { 
@@ -1187,7 +1187,7 @@ class WorkTime extends Model
                 });
             if(!empty($this->param_user_code)){
                 $mainquery
-                    ->where('t1.role', '<', 10);
+                    ->where('t1.management', '<', Config::get('const.C017.admin_user'));
             }
             $mainquery
                 ->where('t1.is_deleted', '=', 0)
@@ -1292,7 +1292,7 @@ class WorkTime extends Model
                 ->select(
                     't1.code as user_code',
                     't1.name as user_name',
-                    't1.role as user_role',
+                    't1.management as user_management',
                     't1.employment_status as employment_status',
                     't1.department_code as department_code');
             $subquery7
@@ -1318,7 +1318,7 @@ class WorkTime extends Model
                 ->select(
                     't1.user_code as user_code',
                     't1.user_name as user_name',
-                    't1.user_role as user_role',
+                    't1.user_management as user_management',
                     't1.employment_status as employment_status',
                     't10.code_name as employment_status_name',
                     't1.department_code as department_code',
@@ -1365,7 +1365,7 @@ class WorkTime extends Model
                 ->select(
                     't3.user_code as user_code',
                     't8.name as user_name',
-                    't8.role as user_role',
+                    't8.management as user_management',
                     't8.employment_status as employment_status',
                     't10.code_name as employment_status_name',
                     't3.department_code as department_code',
@@ -1506,7 +1506,7 @@ class WorkTime extends Model
                 ->select(
                     't1.user_code as user_code',
                     't1.user_name as user_name',
-                    't1.user_role as user_role',
+                    't1.user_management as user_management',
                     't1.employment_status as employment_status',
                     't1.employment_status_name as employment_status_name',
                     't1.department_code as department_code',
@@ -1544,7 +1544,7 @@ class WorkTime extends Model
             if(!empty($this->param_user_code)){
                 $mainquery->where('t1.user_code', $this->param_user_code);                           //user_code指定
             } else {
-                $mainquery->where('t1.user_role','<',Config::get('const.C017.out_of_user'));
+                $mainquery->where('t1.user_management','<',Config::get('const.C017.out_of_user'));
             }
             $mainquery
                 ->Where('t2.business_kubun', '=', Config::get('const.C007.basic'))

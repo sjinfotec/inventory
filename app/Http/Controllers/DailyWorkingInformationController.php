@@ -4826,6 +4826,7 @@ class DailyWorkingInformationController extends Controller
                 if ($working_time_kubun != Config::get('const.C004.out_of_regular_night_working_time') ||
                     $inc == Config::get('const.INC_NO.missing_return') ||
                     $inc == Config::get('const.INC_NO.public_going_out_return')) {
+                    // 打刻時刻$targetが所定時間内$working_timeの場合
                     if ($apicommon->chkBetweenTime($target_from_time, $target_to_time, $working_time_calc_from, $working_time_calc_to)) {
                         if ($working_time_calc_from < $working_time_calc_to) {
                             if ($target_from_time > $working_time_calc_from) {
