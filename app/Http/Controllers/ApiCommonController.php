@@ -640,6 +640,7 @@ class ApiCommonController extends Controller
                 ->select('code as code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->where('apply_term_from', '<=',$target_date)
+                ->where('kill_from_date', '>',$target_date)
                 ->where('role', '<', Config::get('const.C017.admin_user'))
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
