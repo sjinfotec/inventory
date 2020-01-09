@@ -91,6 +91,12 @@ Vue.component(
     require("./components/SettingShiftTime.vue").default
 );
 
+// 操作
+// パスワード変更
+Vue.component("user-pass", require("./components/UserPass.vue").default);
+// ダウンロード
+Vue.component("file-download", require("./components/FileDownload.vue").default);
+
 Vue.component(
     "btn-work-time",
     require("./components/BtnWorkTime.vue").default
@@ -120,8 +126,6 @@ Vue.component("input-time-disabled", require("./components/InputTimeDisabled.vue
 Vue.component("user-add", require("./components/UserAdd.vue").default);
 
 Vue.component("edit-user", require("./components/EditUser.vue").default);
-
-Vue.component("user-pass", require("./components/UserPass.vue").default);
 
 Vue.component(
     "create-department",

@@ -74,6 +74,9 @@
                             </h3>
                             <ul class="collapse show list-unstyled" id="collapseLogout">
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/user_pass') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-assignment-ind-w.svg') }}" alt="">パスワード変更</a></li>
+                                @can('admin-higher')
+                                <li><a class="px-3 py-1 text-white d-block" href="{{ url('/file_download') }}"><img class="icon-size-sm mr-3" src="{{ asset('/images/round-get-app-w.svg') }}" alt="">ダウンロード</a></li>
+                                @endcan
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img class="icon-size-sm mr-3" src="{{ asset('images/round-lock-w.svg') }}" alt="">ログアウト</a></li>
                             </ul>
                             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
