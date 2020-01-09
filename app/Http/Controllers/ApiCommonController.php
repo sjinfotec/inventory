@@ -109,7 +109,8 @@ class ApiCommonController extends Controller
                 ->groupBy('code');*/
             $subquery1 = DB::table($this->table_users)
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->selectRaw('code as code');
+                ->selectRaw('code as code')
+                ->where('apply_term_from', '<=',$targetdate);
 
             if (!$killvalue) {
                 $subquery1

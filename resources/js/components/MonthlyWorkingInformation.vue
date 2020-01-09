@@ -465,6 +465,12 @@ export default {
   mounted() {
     this.valuefromym = this.defaultDate;
     this.getUserRole();
+    this.applytermdate = ""
+    if (this.valuefromdate) {
+      this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+    }
+    this.$refs.selectdepartmentlist.getList(this.applytermdate);
+    this.getUserSelected();
   },
   methods: {
     // バリデーション
