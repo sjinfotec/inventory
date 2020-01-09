@@ -432,8 +432,12 @@ export default {
     // ----------------- 共通メソッド ----------------------------------
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
+      this.applytermdate = ""
+      if (this.valuefromdate) {
+        this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+      }
       this.$refs.selectuserlist.getList(
-        '',
+        this.applytermdate,
         this.valueUserkillcheck,
         this.getDo,
         this.selectedDepartmentValue,
