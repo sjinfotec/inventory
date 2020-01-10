@@ -131,6 +131,7 @@ Route::get('/user_pass', 'UserPassController@index')->middleware('auth');
 Route::post('/user_pass/passchange', 'UserPassController@passChange')->middleware('auth');
 // ファイルダウンロード
 Route::get('/file_download', 'FileDownloadController@index')->middleware('auth');
+Route::get('/file_download/getdownload', 'FileDownloadController@getfileDownload')->middleware('auth');
 // ------------------ 共通 --------------------------------
 // リスト取得
 Route::post('/get_departments_list', 'ApiCommonController@getDepartmentList')->middleware('auth');

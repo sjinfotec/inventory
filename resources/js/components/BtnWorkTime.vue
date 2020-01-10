@@ -105,6 +105,11 @@
       <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
       給与計算用CSVファイルを出力する</button>
     </div>
+    <div v-if="btnMode === 'filedownload'" class="btn-group d-flex" v-on:click="filedownloadclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+      <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
+      {{ btnName }}</button>
+    </div>
   </button>
   </div>
 </template>
@@ -118,6 +123,10 @@ export default {
           type: String
       },
       isPush: {
+          default: false,
+          type: Boolean
+      },
+      btnName: {
           default: false,
           type: Boolean
       }
@@ -194,6 +203,9 @@ export default {
     },
     csvsalaryclickBtn : function() {
       this.$emit('csvsalary-event',event);
+    },
+    filedownloadclickBtn : function() {
+      this.$emit('filedownload-event',event);
     },
     // tooltips
     edttooltips: function(value1) {

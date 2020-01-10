@@ -439,6 +439,53 @@ return [
         'WA' => '警告',
         'NG' => 'エラー'
     ],
+ 
+    'FILE_DOWNLOAD_PATH' => [
+        'STORAGE' => 'private/'
+    ],
+ 
+    'FILE_DOWNLOAD_NAME' => [
+        'file1' => 'croud_install.zip',
+        'file2' => '',
+        'file3' => '',
+        'file4' => '',
+        'file5' => '',
+        'file6' => '',
+        'file7' => '',
+        'file8' => '',
+        'file9' => '',
+        'file10' => '',
+        'file11' => '',
+        'file12' => '',
+        'file13' => '',
+        'file14' => '',
+        'file15' => '',
+        'file16' => '',
+        'file17' => '',
+        'file18' => '',
+        'file19' => '',
+        'file20' => '',
+        'file21' => 'Installmanual.pdf',
+        'file22' => 'Installmanual.xlsx',
+        'file23' => 'Operationmanual(card_reader).pdf',
+        'file24' => 'Operationmanual(card_reader).xlsx',
+        'file25' => 'Operationmanual(traial).pdf',
+        'file26' => 'Operationmanual(traial).xlsx',
+        'file27' => '',
+        'file28' => '',
+        'file29' => '',
+        'file30' => '',
+        'file31' => '',
+        'file32' => '',
+        'file33' => '',
+        'file34' => '',
+        'file35' => '',
+        'file36' => '',
+        'file37' => '',
+        'file38' => '',
+        'file39' => '',
+        'file40' => ''
+    ],
 
     'MSG_INFO' => [
         'past_closing' => '締日を過ぎていますが、集計しますか？',
@@ -477,7 +524,8 @@ return [
         'already_name' => 'すでに登録されている[{0}]名です',
         'already_item' => 'すでに登録されている[{0}]です',
         'not_found_data' => '該当するデータは見つかりませんでした。',
-        'parameter_illegal' => '不正なパラメータです。'
+        'parameter_illegal' => '不正なパラメータです。',
+        'file_download_error' => 'ファイルダウンロード失敗しました。'
     ],
 
     'LOG_MSG' => [
@@ -497,7 +545,8 @@ return [
         'non_approval_demanddate' => '承認する申請日なし。',
         'subquery_illegal ' => 'subquery設定エラー',
         'where_illegal ' => 'WHERE句設定エラー',
-        'parameter_illegal' => '不正なパラメータ params = [{0}]'
+        'parameter_illegal' => '不正なパラメータ params = [{0}]',
+        'file_download_error' => 'ファイルダウンロード失敗しました。'
     ],
 
     'DEBUG_LEVEL' => 'DEBUG',
