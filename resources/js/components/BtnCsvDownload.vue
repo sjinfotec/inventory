@@ -6,7 +6,7 @@
       v-bind:is-push="isCsvbutton">
     </btn-work-time>
     <btn-work-time v-if="btnMode === 'csvsalary'"
-      v-on:csvcalc-event="downloadCSVSalary"
+      v-on:csvsalary-event="downloadCSVSalary"
       v-bind:btn-mode="btnMode"
       v-bind:is-push="isCsvbutton">
     </btn-work-time>
@@ -118,27 +118,30 @@ export default {
     downloadCSVSalary() {
       var csv = "";
       var line = "";
+      var workingdate = "";
       // 1ユーザーごと
       this.csvData.forEach(user => {
-
         //  '\ufeff' + 
         user.date.forEach(record => {
-          line =
-            record["user_code"] +
-            "," +
-            record["workingdate"] +
-            "," +
-            record["attendance"] +
-            "," +
-            record["leaving"] +
-            "," +
-            record["public_going_out_hours"] +
-            "," +
-            record["missing_middle_hours"] +
-            "," +  
-            record["remark_holiday_name"] +
-            "\r\n";
-          csv += line;
+          if (record["attendance"] != "" && record["attendance"] != null) {
+            workingdate = record["workingdate"].substr(0,4) + "/" + record["workingdate"].substr(4,2) + "/" +  record["workingdate"].substr(6,2);
+            line =
+              record["user_code"] +
+              "," +
+              workingdate +
+              "," +
+              record["attendance"] +
+              "," +
+              record["leaving"] +
+              "," +
+              record["public_going_out_hours"] +
+              "," +
+              record["missing_middle_hours"] +
+              "," +  
+              record["remark_holiday_name"] +
+              "\r\n";
+            csv += line;
+          }
         });
       });
       // csvを文字コードの数値の配列に変換

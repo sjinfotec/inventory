@@ -6,37 +6,112 @@
       <div class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
+          <daily-working-information-panel-header
+            v-bind:header-text1="'ダウンロード'"
+            v-bind:header-text2="'該当ダウンロードのリンクをクリックします'"
+          ></daily-working-information-panel-header>
           <!-- /.panel header -->
-          <div class="card">
-            <div class="card-header font-size-rg">ダウンロード
-            <span class="float-sm-right font-size-sm">該当ダウンロードのリンクをクリックします。</span></div>
-              <div class="card-body">
-                <!-- .row -->
-                <div class="row justify-content-between" v-if="errors.length">
-                  <!-- col -->
-                  <div class="col-md-12 pb-2">
-                    <ul class="error-red color-red">
-                      <li v-for="(error,index) in errors" v-bind:key="index">{{ error }}</li>
-                    </ul>
-                  </div>
-                  <!-- /.col -->
-                </div>
-                <!-- /.row -->
-                <!-- .row -->
-                <div class="row justify-content-between">
-                  <!-- col -->
-                  <div class="col-md-12 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <a v-bind:href="url">打刻インストール（64bitトライアル版）</a>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                </div>
-                <!-- /.row -->
-              </div>
+          <div class="card-body pt-2">
+            <!-- panel contents -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- panel header -->
+              <daily-working-information-panel-header
+                v-bind:header-text1="'◆ＯｎｅＤａｗｎインストール'"
+                v-bind:header-text2="'とくに指定ない限り最新版をインストールしてください'"
+                v-bind:class-text="'card-header col-12 bg-transparent pb-2 border-0'"
+              ></daily-working-information-panel-header>
+              <!-- /.panel header -->
             </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=1">・カード打刻インストール（64bitトライアル版 最新版）</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- panel header -->
+              <daily-working-information-panel-header
+                v-bind:header-text1="'◆説明書インストール'"
+                v-bind:header-text2="'とくに指定ない限り最新版をインストールしてください'"
+                v-bind:class-text="'card-header col-12 bg-transparent pb-2 border-0'"
+              ></daily-working-information-panel-header>
+              <!-- /.panel header -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=21">・操作マニュアル（導入編）（PDF 最新版） -- ファイル名：Installmanual.pdf</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=22">・操作マニュアル（導入編）（EXCEL 最新版） -- ファイル名：Installmanual.xlsx</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=23">・操作マニュアル（打刻編）（PDF 最新版） -- ファイル名：Operationmanual(card_reader).pdf</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=24">・操作マニュアル（打刻編）（EXCEL 最新版） -- ファイル名：Operationmanual(card_reader).xlsx</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=25">・操作説明書（トライアル版）（PDF 最新版） -- ファイル名：Operationmanual(traial).pdf</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=26">・操作説明書（トライアル版）（EXCEL 最新版） -- ファイル名：Operationmanual(traial).xlsx</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
           </div>
         </div>
       </div>
@@ -46,89 +121,12 @@
   <!-- main contentns row -->
 </template>
 <script>
-import toasted from "vue-toasted";
 
 export default {
-  name: "UserPass",
-  data() {
-    return {
-      enterPass: "",
-      reEnterPass: "",
-      validate: false,
-      errors: []
-    };
-  },
-  // マウント時
-  mounted() {
-    console.log("UserPass Component mounted.");
-  },
+  name: "FileDownload",
   methods: {
-    alert: function(state, message, title) {
-      this.$swal(title, message, state);
-    },
-    alertPassConf: function(state) {
-      this.$swal({
-        title: "確認",
-        text: "パスワードを変更しますか？",
-        icon: state,
-        buttons: true,
-        dangerMode: true
-      }).then(willDelete => {
-        if (willDelete) {
-          this.passChange();
-        } else {
-        }
-      });
-    },
-    // バリデーション
-    checkFormPass: function() {
-      var flag = false;
-      this.errors = [];
-
-      if (this.reEnterPass && this.enterPass) {
-        if (this.reEnterPass != this.enterPass) {
-          flag = false;
-          this.errors.push("入力したパスワードが一致していません");
-        } else {
-          flag = true;
-        }
-        return flag;
-      } else {
-        if (!this.enterPass) {
-          flag = false;
-          this.errors.push("新しいパスワードを入力してください");
-        }
-        if (!this.reEnterPass) {
-          flag = false;
-          this.errors.push("新しいパスワード（再入力）を入力してください");
-        }
-        return flag;
-      }
-    },
-    passChange: function() {
-      this.validate = this.checkFormPass();
-      if (this.validate) {
-        this.$axios
-          .post("/user_pass/passchange", {
-            password: this.enterPass
-          })
-          .then(response => {
-            var res = response.data;
-            if (res.result == 0) {
-              this.alert("success", "パスワードを変更しました", "変更完了");
-            } else {
-            }
-          })
-          .catch(reason => {
-            this.alert("error", "パスワード変更に失敗しました", "エラー");
-          });
-      } else {
-      }
-    },
-    inputPassClear() {
-      this.enterPass = "";
-      this.reEnterPass = "";
-    }
+    // -------------------- サーバー処理 ----------------------------
+    // -------------------- 共通 ----------------------------
   }
 };
 </script>
