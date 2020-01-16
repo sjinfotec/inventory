@@ -40,6 +40,7 @@ class TempWorkingTimeDate extends Model
     private $out_of_regular_working_times;  // 所定外労働時間
     private $overtime_hours;                // 残業時間
     private $late_night_overtime_hours;     // 深夜残業時間
+    private $late_night_working_hours;      // 深夜労働時間
     private $legal_working_times;           // 法定労働時間
     private $out_of_legal_working_times;    // 法定外労働時間
     private $not_employment_working_hours;  // 未就労労働時間
@@ -318,6 +319,18 @@ class TempWorkingTimeDate extends Model
     public function setLatenightovertimehoursAttribute($value)
     {
         $this->late_night_overtime_hours = $value;
+    }
+
+
+    // 深夜労働時間
+    public function getLatenightworkinghoursAttribute()
+    {
+        return $this->late_night_working_hours;
+    }
+
+    public function setLatenightworkinghoursAttribute($value)
+    {
+        $this->late_night_working_hours = $value;
     }
 
 
@@ -917,6 +930,7 @@ class TempWorkingTimeDate extends Model
                     $this->table.'.out_of_regular_working_times',
                     $this->table.'.overtime_hours',
                     $this->table.'.late_night_overtime_hours',
+                    $this->table.'.late_night_working_hours',
                     $this->table.'.legal_working_times',
                     $this->table.'.out_of_legal_working_times',
                     $this->table.'.not_employment_working_hours',
@@ -1016,6 +1030,7 @@ class TempWorkingTimeDate extends Model
                 ->addselect('t2.out_of_regular_working_times')
                 ->addselect('t2.overtime_hours')
                 ->addselect('t2.late_night_overtime_hours')
+                ->addselect('t2.late_night_working_hours')
                 ->addselect('t2.legal_working_times')
                 ->addselect('t2.out_of_legal_working_times')
                 ->addselect('t2.not_employment_working_hours')
@@ -1168,6 +1183,7 @@ class TempWorkingTimeDate extends Model
                     'out_of_regular_working_times' => $this->out_of_regular_working_times,
                     'overtime_hours' => $this->overtime_hours,
                     'late_night_overtime_hours' => $this->late_night_overtime_hours,
+                    'late_night_working_hours' => $this->late_night_working_hours,
                     'legal_working_times' => $this->legal_working_times,
                     'out_of_legal_working_times' => $this->out_of_legal_working_times,
                     'not_employment_working_hours' => $this->not_employment_working_hours,

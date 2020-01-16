@@ -1441,7 +1441,7 @@ export default {
       } else {
         var no = this.details[0].no;
         var name = this.details[0].name;
-        var j=0;
+        var j=6;
         for( var i=0;i<7;i++ ) {
           this.details.unshift({
             id: "",
@@ -1455,7 +1455,6 @@ export default {
             created_user: "",
             updated_user: ""
           });
-          j=j+2;
         }
         this.count = this.details.length / 7; // １データにつき７レコードある
       }

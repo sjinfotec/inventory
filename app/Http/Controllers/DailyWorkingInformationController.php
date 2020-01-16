@@ -4816,12 +4816,15 @@ class DailyWorkingInformationController extends Controller
                 // to_time日付付与
                 $working_time_to_time = $apicommon->convTimeToDateTo($from_time, $to_time, $current_date, $target_from_time, $target_to_time);         
                 $working_time_calc_to = $working_time_to_time;
-                Log::DEBUG('working_time_kubun = '.$working_time_kubun);
-                Log::DEBUG('target_from_time = '.$target_from_time);
-                Log::DEBUG('target_to_time = '.$target_to_time);
-                Log::DEBUG('working_time_calc_from = '.$working_time_calc_from);
-                Log::DEBUG('working_time_calc_to = '.$working_time_calc_to);
-                Log::DEBUG('inc = '.$inc);
+                // ------------------ DEBUG strat ----------------------------------------
+                Log::DEBUG(' ◆◆◆◆◆　労働時間計算　 ◆◆◆◆◆◆');
+                Log::DEBUG(' 　　　　　　working_time_kubun = '.$working_time_kubun);
+                Log::DEBUG('　　　　　　 出勤時刻  target_from_time = '.$target_from_time);
+                Log::DEBUG('            退勤時刻  target_to_time = '.$target_to_time);
+                Log::DEBUG('            設定開始時刻  working_time_calc_from = '.$working_time_calc_from);
+                Log::DEBUG('            設定終了時刻  working_time_calc_to = '.$working_time_calc_to);
+                Log::DEBUG('            inc = '.$inc);
+                // ------------------ DEBUG end ----------------------------------------
                 // 深夜労働残業時間以外の場合
                 if ($working_time_kubun != Config::get('const.C004.out_of_regular_night_working_time') ||
                     $inc == Config::get('const.INC_NO.missing_return') ||
@@ -4835,71 +4838,100 @@ class DailyWorkingInformationController extends Controller
                             if ($target_to_time < $working_time_calc_to) {
                                 $working_time_calc_to = $target_to_time;
                             }
-                            Log::DEBUG('diffTimeSerial working_time_calc_from = '.$working_time_calc_from);
-                            Log::DEBUG('diffTimeSerial working_time_calc_to = '.$working_time_calc_to);
                             $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
-                            Log::DEBUG('calc_times = '.$calc_times);
                             $working_times += $calc_times;
-                            Log::DEBUG('$working_times = '.$working_times);
+                            // ------------------ DEBUG strat ----------------------------------------
+                            Log::DEBUG('          　深夜労働残業時間以外の場合');
+                            Log::DEBUG(' 　　　　　　打刻時刻が所定時間内の場合 ');
+                            Log::DEBUG('　　　　　　 計算開始時刻  working_time_calc_from = '.$working_time_calc_from);
+                            Log::DEBUG('　　　　　　 計算終了時刻  working_time_calc_to = '.$working_time_calc_to);
+                            Log::DEBUG('            労働時間      calc_times = '.$calc_times."  ".$calc_times / 60 / 60);
+                            Log::DEBUG('            累計労働時間  working_times = '.$working_times."  ".$working_times / 60 / 60);
+                            // ------------------ DEBUG end ----------------------------------------
                         }
                     }
                     // 夜勤の場合は打刻target_from_time、target_to_timeが翌日の場合があるため
                     // working_time_calc_from、working_time_calc_toを翌日にして計算する
                     $working_time_calc_from_nextday = $apicommon->getNextDay($working_time_from_time, 'Y-m-d H:i:s');
                     $working_time_calc_to_nextday = $apicommon->getNextDay($working_time_to_time, 'Y-m-d H:i:s');
-                    Log::DEBUG(' working_time_calc_from_nextday = '.$working_time_calc_from_nextday);
-                    Log::DEBUG(' working_time_calc_to_nextday = '.$working_time_calc_to_nextday);
                     if ($apicommon->chkBetweenTime($target_from_time, $target_to_time, $working_time_calc_from_nextday, $working_time_calc_to_nextday)) {
-                        Log::DEBUG('夜勤の場合は打刻target_from_time、target_to_timeが翌日の場合があるための計算対象');
+                        // ------------------ DEBUG strat ----------------------------------------
+                        Log::DEBUG('          　夜勤の場合の翌日労働時間計算');
+                        Log::DEBUG('          　打刻開始時刻  target_from_time = '.$target_from_time);
+                        Log::DEBUG('          　打刻計算終了時刻  target_to_time = '.$target_to_time);
+                        Log::DEBUG('          　当日計算開始時刻  working_time_calc_from = '.$working_time_calc_from);
+                        Log::DEBUG('          　当日計算終了時刻  working_time_calc_to = '.$working_time_calc_to);
+                        Log::DEBUG('          　翌日計算開始時刻  working_time_calc_from_nextday = '.$working_time_calc_from_nextday);
+                        Log::DEBUG('          　翌日計算終了時刻  working_time_calc_to_nextday = '.$working_time_calc_to_nextday);
+                        // ------------------ DEBUG end ----------------------------------------
                         if ($working_time_calc_from_nextday < $working_time_calc_to_nextday) {
-                            if ($target_from_time > $working_time_calc_from) {
+                            /*if ($target_from_time > $working_time_calc_from) {
+                                $working_time_calc_from_nextday = $target_from_time;
+                            } */
+                            if ($target_from_time > $working_time_calc_from_nextday) {
                                 $working_time_calc_from_nextday = $target_from_time;
                             }
                             if ($target_to_time < $working_time_calc_to_nextday) {
                                 $working_time_calc_to_nextday = $target_to_time;
                             }
-                            Log::DEBUG('diffTimeSerial working_time_calc_from_nextday = '.$working_time_calc_from_nextday);
-                            Log::DEBUG('diffTimeSerial working_time_calc_to_nextday = '.$working_time_calc_to_nextday);
                             $calc_times = $apicommon->diffTimeSerial($working_time_calc_from_nextday, $working_time_calc_to_nextday);
-                            Log::DEBUG('calc_times = '.$calc_times);
                             $working_times += $calc_times;
-                            Log::DEBUG('$working_times = '.$working_times);
+                            // ------------------ DEBUG strat ----------------------------------------
+                            Log::DEBUG('          　翌日計算開始時刻 調整 working_time_calc_from_nextday = '.$working_time_calc_from_nextday);
+                            Log::DEBUG('          　翌日計算終了時刻 調整 working_time_calc_to_nextday = '.$working_time_calc_to_nextday);
+                            Log::DEBUG('            労働時間      calc_times = '.$calc_times."  ".$calc_times / 60 / 60);
+                            Log::DEBUG('            累計労働時間  working_times = '.$working_times."  ".$working_times / 60 / 60);
+                            // ------------------ DEBUG end ----------------------------------------
                         }
                     }
                 } else {
                     // 深夜労働残業時間
-                    Log::DEBUG('【深夜労働残業時間 計算開始】');
                     $w_time = 0;
                     // target_to_timeは退勤時刻
-                    Log::DEBUG('$target_to_time = '.$target_to_time);
                     // 退勤時刻 > 深夜残業開始の場合
-                    Log::DEBUG('$working_time_calc_from = '.$working_time_calc_from);
+                    // ------------------ DEBUG strat ----------------------------------------
+                    Log::DEBUG('           【深夜労働残業時間 計算開始】');
+                    // ------------------ DEBUG end ----------------------------------------
                     if ($target_to_time > $working_time_calc_from) {
-                        Log::DEBUG('深夜労働残業時間 計算判断対象 $target_to_time > $working_time_calc_from ');
+                        // ------------------ DEBUG strat ----------------------------------------
+                        Log::DEBUG('　　　　　　 退勤時刻 >  設定開始時刻の場合');
+                        Log::DEBUG('　　　　　　 退勤時刻  target_to_time = '.$target_to_time);
+                        Log::DEBUG('　　　　　　 設定開始時刻  working_time_calc_from = '.$working_time_calc_from);
+                        // ------------------ DEBUG end ----------------------------------------
                         // ここまでに計算された労働時間と私用外出時間から労働時間を算出
                         $index = (int)(Config::get('const.C004.regular_working_time'))-1;
                         $w_time += $array_calc_time[$index];
-                        Log::DEBUG('$w_time $array_calc_time 1 = '.$w_time.'  '.$array_calc_time[$index]);
+                        // ------------------ DEBUG strat ----------------------------------------
+                        Log::DEBUG('　　　　　　 所定労働時間加算　$array_calc_time[$index]  = '.$array_calc_time[$index]);
+                        Log::DEBUG('　　　　　　 加算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
+                        // ------------------ DEBUG end ----------------------------------------
                         $index = (int)(Config::get('const.C004.regular_working_breaks_time'))-1;
                         $w_time -= $array_calc_time[$index];
-                        Log::DEBUG('$w_time $array_calc_time 2 = '.$w_time.'  '.$array_calc_time[$index]);
+                        // ------------------ DEBUG strat ----------------------------------------
+                        Log::DEBUG('　　　　　　 所定休憩時間減算　$array_calc_time[$index]  = '.$array_calc_time[$index]);
+                        Log::DEBUG('　　　　　　 減算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
+                        // ------------------ DEBUG end ----------------------------------------
                         $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
                         $w_time += $array_calc_time[$index];
-                        Log::DEBUG('$w_time $array_calc_time 3 = '.$w_time.'  '.$array_calc_time[$index]);
+                        // ------------------ DEBUG strat ----------------------------------------
+                        Log::DEBUG('　　　　　　 時間外時間加算　$array_calc_time[$index]  = '.$array_calc_time[$index]);
+                        Log::DEBUG('　　　　　　 加算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
+                        // ------------------ DEBUG end ----------------------------------------
                         $index = (int)(Config::get('const.C004.regular_working_time'))-1;
                         $w_time -= $array_gouing_out_time[$index];
-                        Log::DEBUG('$w_time $array_gouing_out_time = '.$w_time.'  '.$array_gouing_out_time[$index]);
+                        // ------------------ DEBUG strat ----------------------------------------
+                        Log::DEBUG('　　　　　　 所定労働時間内私用外出減算　$array_gouing_out_time[$index]  = '.$array_gouing_out_time[$index]);
+                        Log::DEBUG('　　　　　　 減算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
+                        // ------------------ DEBUG end ----------------------------------------
                         $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
                         $w_time -= $array_gouing_out_time[$index];
-                        Log::DEBUG('$w_time $array_gouing_out_time = '.$w_time.'  '.$array_gouing_out_time[$index]);
-                        Log::DEBUG('legal_working_hours_day = '.(double)Config::get('const.C002.legal_working_hours_day') * 60 * 60);
+                        // ------------------ DEBUG strat ----------------------------------------
+                        Log::DEBUG('　　　　　　 時間外私用外出減算　$array_gouing_out_time[$index]  = '.$array_gouing_out_time[$index]);
+                        Log::DEBUG('　　　　　　 減算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
+                        // ------------------ DEBUG end ----------------------------------------
                         // ここまでに計算された労働時間が8Hを超えている場合は深夜残業を計算する
                         if ($w_time > (double)Config::get('const.C002.legal_working_hours_day') * 60 * 60) {
                             // 退勤時刻<=深夜残業終了
-                            Log::DEBUG('深夜労働残業時間 8H超え計算対象 $w_time > 8 ');
-                            Log::DEBUG('退勤時刻<=深夜残業終了か？ $target_to_time = '.$target_to_time);
-                            Log::DEBUG('退勤時刻<=深夜残業終了か？ $working_time_calc_from = '.$working_time_calc_from);
-                            Log::DEBUG('退勤時刻<=深夜残業終了か？ $working_time_calc_to = '.$working_time_calc_to);
                             if ($target_to_time <= $working_time_calc_to) {
                                 // 出勤時刻<=深夜残業開始
                                 if ($target_from_time <= $working_time_calc_from) {
@@ -4919,9 +4951,15 @@ class DailyWorkingInformationController extends Controller
                                     $calc_times = $apicommon->diffTimeSerial($target_from_time, $working_time_calc_to);
                                 }
                             }
-                            Log::DEBUG('$calc_times = '.$calc_times);
                             $working_times += $calc_times;
-                            Log::DEBUG('$working_times = '.$working_times);
+                            // ------------------ DEBUG strat ----------------------------------------
+                            Log::DEBUG('　　　　　　 労働時間が8H超えため、深夜労働残業時間を計算');
+                            Log::DEBUG('　　　　　　 退勤時刻<=深夜残業終了か？ $target_to_time = '.$target_to_time);
+                            Log::DEBUG('　　　　　　 退勤時刻<=深夜残業終了か？ $working_time_calc_from = '.$working_time_calc_from);
+                            Log::DEBUG('　　　　　　 退勤時刻<=深夜残業終了か？ $working_time_calc_to = '.$working_time_calc_to);
+                            Log::DEBUG('　　　　　　 計算結果　$calc_times  = '.$calc_times."  ".$calc_times / 60 / 60);
+                            Log::DEBUG('　　　　　　 累計計算結果　$working_times  = '.$working_times."  ".$working_times / 60 / 60);
+                            // ------------------ DEBUG end ----------------------------------------
                         }
                         // さらにシフト勤務などは所定労働時間と重複する時間となりうるので、重複時間があれば減算する。
                         $filtered_regular = 
@@ -5027,8 +5065,10 @@ class DailyWorkingInformationController extends Controller
                 }
             }
         }
-        Log::DEBUG('calcTimes end '.$working_times);
+        // ------------------ DEBUG strat ----------------------------------------
+        Log::DEBUG('            累計労働時間  working_times = '.$working_times."  ".$working_times / 60 / 60);
         Log::DEBUG('---------------------- calcTimes end ------------------------ ');
+        // ------------------ DEBUG end ----------------------------------------
 
         return $working_times;
     }
@@ -5234,18 +5274,32 @@ class DailyWorkingInformationController extends Controller
         $total_time = 0;
         // 残業時間
         $overtime_hours = 0;
-        // 所定労働時間
         $index = (int)(Config::get('const.C004.regular_working_time'))-1;
-        Log::DEBUG('        所定労働時間 $array_calc_time[$index] = '.$array_calc_time[$index]);
-        Log::DEBUG('        所定労働時間 $array_missing_middle_time[$index] = '.$array_missing_middle_time[$index]);
+        // -------------  debug ---------------------- start --------------
+        Log::DEBUG('    <<< ユーザー労働時間計算 >>> '.$target_user_code);
+        Log::DEBUG('        所定労働時間の計算 ');
+        Log::DEBUG('        所定労働時間 10進数　$array_calc_time[$index]           = '.$array_calc_time[$index]);
+        Log::DEBUG('        未就労時間   10進数 $array_missing_middle_time[$index]  = '.$array_missing_middle_time[$index]);
+        // -------------  debug ---------------------- end --------------
         $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
         $regular_calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-        Log::DEBUG('        $target_user_code = '.$target_user_code.' 所定労働時間 = $total_time + $regular_calc_time '.$total_time.' '.$regular_calc_time);
+        // -------------  debug ---------------------- start --------------
+        Log::DEBUG('        所定労働時間　- 未就労時間　10進数　$w_time　　　　　　　　= '.$w_time);
+        Log::DEBUG('        所定労働時間　- 未就労時間　60進数　$regular_calc_time    = '.$regular_calc_time);
+        // -------------  debug ---------------------- end --------------
         // 時間外労働時間
         $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
+        // -------------  debug ---------------------- start --------------
+        Log::DEBUG('        時間外労働時間の計算 ');
+        Log::DEBUG('        時間外労働時間 10進数　$array_calc_time[$index]           = '.$array_calc_time[$index]);
+        Log::DEBUG('        未就労時間   10進数 $array_missing_middle_time[$index]  = '.$array_missing_middle_time[$index]);
+        // -------------  debug ---------------------- end --------------
         $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
-        Log::DEBUG('        時間外労働時間 $target_user_code = '.$target_user_code.' 時間外労働時間 = $array + $array '.$array_calc_time[$index].' '.$array_missing_middle_time[$index]);
         $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+        // -------------  debug ---------------------- start --------------
+        Log::DEBUG('        時間外労働時間- 未就労時間　10進数　$w_time　　　　　　　　= '.$w_time);
+        Log::DEBUG('        時間外労働時間- 未就労時間　60進数　$calc_time            = '.$calc_time);
+        // -------------  debug ---------------------- end --------------
         // 平日は時間外労働時間＝残業時間
         // ---- 取り消し--休日は所定労働時間+時間外労働時間>8の場合、所定労働時間+時間外労働時間-8=残業時間
         // 休日は残業時間は単価は1.25で休日の労働時間同じなので休日の労働時間に加算
@@ -5253,6 +5307,9 @@ class DailyWorkingInformationController extends Controller
         $legal_working_holiday_hours = 0;               // 法定休日労働時間
         if ($target_result->business_kubun == Config::get('const.C007.basic')) {
             $temp_working_model->setOffhoursworkinghoursAttribute($calc_time);
+            // -------------  debug ---------------------- start --------------
+            Log::DEBUG('        出勤日 時間外労働時間　$calc_time       = '.$calc_time);
+            // -------------  debug ---------------------- end --------------
         } else {
             $temp_calc = $regular_calc_time + $calc_time;       // 所定労働時間+時間外労働時間
             $calc_time = $temp_calc;
@@ -5265,45 +5322,78 @@ class DailyWorkingInformationController extends Controller
                 $calc_time = 0;
             } */
             $temp_working_model->setOffhoursworkinghoursAttribute($temp_calc);
+            // -------------  debug ---------------------- start --------------
+            Log::DEBUG('        休日 時間外労働時間　$calc_time       = '.$temp_calc);
+            // -------------  debug ---------------------- end --------------
             if ($target_result->business_kubun == Config::get('const.C007.legal_holoday')) {
                 $legal_working_holiday_hours = $temp_calc;
                 $temp_working_model->setLegalworkingholidayhoursAttribute($legal_working_holiday_hours);
+                // -------------  debug ---------------------- start --------------
+                Log::DEBUG('        法定休日労働時間 時間外労働時間　$legal_working_holiday_hours       = '.$legal_working_holiday_hours);
+                // -------------  debug ---------------------- end --------------
             } elseif($target_result->business_kubun == Config::get('const.C007.legal_out_holoday')) {
                 $out_of_legal_working_holiday_hours = $temp_calc;
                 $temp_working_model->setOutoflegalworkingholidayhoursAttribute($out_of_legal_working_holiday_hours);
+                // -------------  debug ---------------------- start --------------
+                Log::DEBUG('        法定外休日労働時間 時間外労働時間　$out_of_legal_working_holiday_hours       = '.$out_of_legal_working_holiday_hours);
+                // -------------  debug ---------------------- end --------------
             }
         }
         $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);   // 所定労働時間
+        // -------------  debug ---------------------- start --------------
+        Log::DEBUG('        所定労働時間 $regular_calc_time       = '.$regular_calc_time);
+        // -------------  debug ---------------------- end --------------
         $total_time = $total_time + $regular_calc_time;
         $total_time = $total_time + $calc_time;
         $overtime_hours = $overtime_hours + $calc_time;
-        Log::DEBUG('        $target_user_code = '.$target_user_code.' 時間外労働時間 = $overtime_hours + $calc_time '.$overtime_hours.' '.$calc_time);
+        // -------------  debug ---------------------- start --------------
+        Log::DEBUG('        時間外労働時間 = $overtime_hours + $calc_time '.$overtime_hours.' '.$calc_time);
+        Log::DEBUG('        法定外休日労働時間 $out_of_legal_working_holiday_hours       = '.$out_of_legal_working_holiday_hours);
+        Log::DEBUG('        法定休日労働時間   $legal_working_holiday_hours              = '.$legal_working_holiday_hours);
+        Log::DEBUG('        トータル労働時間   $total_time              = '.$total_time);
+        // -------------  debug ---------------------- end --------------
         // 深夜労働残業時間
         $index = (int)(Config::get('const.C004.out_of_regular_night_working_time'))-1;
-        Log::DEBUG('        深夜労働残業時間 $array_calc_time[$index] = '.$array_calc_time[$index].' index = '.$index);
+        // -------------  debug ---------------------- start --------------
+        Log::DEBUG('        深夜労働残業時間の計算 ');
+        Log::DEBUG('        深夜労働残業時間 $array_calc_time[$index]           = '.$array_calc_time[$index]);
+        Log::DEBUG('        未就労時間       $array_missing_middle_time[$index]  = '.$array_missing_middle_time[$index]);
+        // -------------  debug ---------------------- end --------------
         $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
-        Log::DEBUG('        深夜労働残業時間1 $array_calc_time[$index] = '.$array_calc_time[$index].' index = '.$index);
-        Log::DEBUG('        $target_user_code = '.$target_user_code.' 深夜労働残業時間 = $array + $array '.$array_calc_time[$index].' '.$array_missing_middle_time[$index]);
         $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-        Log::DEBUG('        深夜労働残業時間 $calc_time = '.$calc_time);
+        // -------------  debug ---------------------- start --------------
+        Log::DEBUG('        深夜労働残業時間 10進数 $w_time           = '.$w_time);
+        Log::DEBUG('        深夜労働残業時間 60進数 $calc_time        = '.$calc_time);
+        // -------------  debug ---------------------- end --------------
         $temp_working_model->setLatenightovertimehoursAttribute($calc_time);
         $total_time = $total_time + $calc_time;
-        Log::DEBUG('        $total_time = '.$total_time);
-        Log::DEBUG('        $target_user_code = '.$target_user_code.' 残業時間 = $overtime_hours + $calc_time '.$overtime_hours.' '.$calc_time);
+        // -------------  debug ---------------------- start --------------
+        Log::DEBUG('        トータル労働時間   $total_time              = '.$total_time);
+        // -------------  debug ---------------------- end --------------
         // 残業時間
         $temp_working_model->setOvertimehoursAttribute($overtime_hours);
         // 所定外労働時間
+        // -------------  debug ---------------------- start --------------
+        Log::DEBUG('        所定外労働時間計算の計算 ');
+        // -------------  debug ---------------------- end --------------
         $outside_calc_time = 0;
         $default_time = (int)(Config::get('const.C002.legal_working_hours_day'));
-        Log::DEBUG('        所定外労働時間計算 $default_time = '.$default_time);
-        Log::DEBUG('        所定外労働時間計算 $total_time = '.$total_time);
-        Log::DEBUG('        所定外労働時間計算 $regular_calc_time = '.$regular_calc_time);
         if ($regular_calc_time < $default_time && $total_time > $default_time) {    // 所定労働時間 < 8 and 合計勤務時間 > 8 の場合
             $outside_calc_time = $default_time - $regular_calc_time;
+            // -------------  debug ---------------------- start --------------
+            Log::DEBUG('        所定労働時間 < 8 and 合計勤務時間 > 8 の場合 ');
+            // -------------  debug ---------------------- end --------------
         } elseif ($regular_calc_time < $total_time) { 
+            // -------------  debug ---------------------- start --------------
+            Log::DEBUG('        所定労働時間 < 合計勤務時間 の場合 ');
+            // -------------  debug ---------------------- end --------------
             $outside_calc_time = $total_time- $regular_calc_time;
         } 
-        Log::DEBUG('        所定外労働時間計算 $outside_calc_time = '.$outside_calc_time);
+        // -------------  debug ---------------------- start --------------
+        Log::DEBUG('        所定外労働時間計算の計算 ');
+        Log::DEBUG('        所定外労働時間計算 $default_time = '.$default_time);
+        Log::DEBUG('        所定外労働時間計算 $outside_calc_time        = '.$outside_calc_time);
+        // -------------  debug ---------------------- end --------------
 
         $temp_working_model->setOutofregularworkingtimesAttribute($outside_calc_time);
         // 法定労働時間 法定外労働時間
