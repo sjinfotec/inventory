@@ -405,6 +405,7 @@ class WorkingTimeTable extends Model
                 ->where('t1.is_deleted', 0)
                 ->orderBy('t1.apply_term_from', 'desc')
                 ->orderBy('t1.working_time_kubun', 'asc')
+                ->orderBy('t1.id', 'asc')
                 ->get();
 
         }catch(\PDOException $pe){
