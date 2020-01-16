@@ -688,8 +688,8 @@ export default {
         }
       }
       if (this.form.sp_interval != "" && this.form.sp_interval != null) {
-        if (parseFloat(this.form.sp_interval) < 1 || parseFloat(this.form.sp_interval) > 8) {
-          this.messagedataspinterval.push("1~8の範囲で入力してください");
+        if (parseFloat(this.form.sp_interval) < 0 || parseFloat(this.form.sp_interval) > 8) {
+          this.messagedataspinterval.push("0~8の範囲で入力してください");
         }
       }
       if (this.messagedataspinterval.length > 0) {
@@ -1011,7 +1011,9 @@ export default {
           if (this.details[0].max_12month_total_sp != null) {
             this.form.sp_yearTotal = this.details[0].max_12month_total_sp.toString();
           }
-          this.form.sp_interval = this.details[0].interval.toString();
+          if (this.details[0].interval != null) {
+            this.form.sp_interval = this.details[0].interval.toString();
+          }
           this.details.forEach((detail, i) => {
             if (detail.closing != null) {
               this.form.closingDate[i] = detail.closing.toString();
