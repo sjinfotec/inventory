@@ -52,6 +52,7 @@ class WorkingTimedate extends Model
     private $out_of_regular_working_times;  // 所定外労働時間
     private $overtime_hours;                // 残業時間
     private $late_night_overtime_hours;     // 深夜残業時間
+    private $late_night_working_hours;      // 深夜労働時間
     private $legal_working_times;           // 法定労働時間
     private $out_of_legal_working_times;    // 法定外労働時間
     private $not_employment_working_hours;  // 未就労労働時間
@@ -327,6 +328,18 @@ class WorkingTimedate extends Model
     public function setLatenightovertimehoursAttribute($value)
     {
         $this->late_night_overtime_hours = $value;
+    }
+
+
+    // 深夜労働時間
+    public function getLatenightworkinghoursAttribute()
+    {
+        return $this->late_night_working_hours;
+    }
+
+    public function setLatenightworkinghoursAttribute($value)
+    {
+        $this->late_night_working_hours = $value;
     }
 
 
@@ -1237,6 +1250,7 @@ class WorkingTimedate extends Model
                     $this->table.'.out_of_regular_working_times',
                     $this->table.'.overtime_hours',
                     $this->table.'.late_night_overtime_hours',
+                    $this->table.'.late_night_working_hours',
                     $this->table.'.legal_working_times',
                     $this->table.'.out_of_legal_working_times',
                     $this->table.'.not_employment_working_hours',
@@ -1390,6 +1404,7 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'out_of_regular_working_times', str_replace('{0}', $this->table.'.out_of_regular_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'overtime_hours', str_replace('{0}', $this->table.'.overtime_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'late_night_overtime_hours', str_replace('{0}', $this->table.'.late_night_overtime_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'late_night_working_hours', str_replace('{0}', $this->table.'.late_night_working_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'legal_working_times', str_replace('{0}', $this->table.'.legal_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'out_of_legal_working_times', str_replace('{0}', $this->table.'.out_of_legal_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'not_employment_working_hours', str_replace('{0}', $this->table.'.not_employment_working_hours', $case_where)))
@@ -1700,6 +1715,7 @@ class WorkingTimedate extends Model
                 ->selectRaw('sum(ifnull('.$this->table.'.out_of_regular_working_times, 0)) as out_of_regular_working_times')
                 ->selectRaw('sum(ifnull('.$this->table.'.overtime_hours, 0)) as overtime_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.late_night_overtime_hours, 0)) as late_night_overtime_hours')
+                ->selectRaw('sum(ifnull('.$this->table.'.late_night_working_hours, 0)) as late_night_working_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.legal_working_times, 0)) as legal_working_times')
                 ->selectRaw('sum(ifnull('.$this->table.'.out_of_legal_working_times, 0)) as out_of_legal_working_times')
                 ->selectRaw('sum(ifnull('.$this->table.'.not_employment_working_hours, 0)) as not_employment_working_hours')
@@ -1782,6 +1798,7 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'out_of_regular_working_times', str_replace('{0}', 't1.out_of_regular_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'overtime_hours', str_replace('{0}', 't1.overtime_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'late_night_overtime_hours', str_replace('{0}', 't1.late_night_overtime_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'late_night_working_hours', str_replace('{0}', 't1.late_night_working_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'legal_working_times', str_replace('{0}', 't1.legal_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'out_of_legal_working_times', str_replace('{0}', 't1.out_of_legal_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'not_employment_working_hours', str_replace('{0}', 't1.not_employment_working_hours', $case_where)))

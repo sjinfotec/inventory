@@ -17,8 +17,8 @@
             <div class="row justify-content-between">
               <!-- panel header -->
               <daily-working-information-panel-header
-                v-bind:header-text1="'◆ＯｎｅＤａｗｎインストール'"
-                v-bind:header-text2="'とくに指定ない限り最新版をインストールしてください'"
+                v-bind:header-text1="'◆ＯｎｅＤａｗｎインストールファイルダウンロード'"
+                v-bind:header-text2="'とくに指定ない限り最新版をダウンロードしてください'"
                 v-bind:class-text="'card-header col-12 bg-transparent pb-2 border-0'"
               ></daily-working-information-panel-header>
               <!-- /.panel header -->
@@ -39,8 +39,8 @@
             <div class="row justify-content-between">
               <!-- panel header -->
               <daily-working-information-panel-header
-                v-bind:header-text1="'◆説明書インストール'"
-                v-bind:header-text2="'とくに指定ない限り最新版をインストールしてください'"
+                v-bind:header-text1="'◆説明書ダウンロード'"
+                v-bind:header-text2="'とくに指定ない限り最新版をダウンロードしてください'"
                 v-bind:class-text="'card-header col-12 bg-transparent pb-2 border-0'"
               ></daily-working-information-panel-header>
               <!-- /.panel header -->

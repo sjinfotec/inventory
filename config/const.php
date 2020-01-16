@@ -554,6 +554,18 @@ return [
     'DEBUG_LEVEL_VALUE' => [
         'NON' => 'NON',
         'DEBUG' => 'DEBUG'
+    ],
+
+    'EDITION' => [
+        'EDITION' => 3
+    ],
+
+    'EDITION_NAME' => [
+        'DEMO' => 1,
+        'TRIAL' => 2,
+        'CROUD' => 3,
+        'SSJJOO' => 4,
+        'CLIENT' => 5
     ]
 
 ];
