@@ -449,6 +449,8 @@
             <!-- ----------- 項目部 START ---------------- -->
             <!-- panel contents -->
             <div v-for="(item,index) in details" v-bind:key="item.id">
+              <!-- item.result  1: 現在適用中 -->
+              <!-- item.result  2: 未来適用予定または -->
               <!-- 現在適用中 ----------------------------------------------------------------->
               <div v-if="item.result != ''">
                 <!-- .row -->
@@ -1150,6 +1152,7 @@ export default {
       showadddepartmentlist: true,
       selectedUserValue : "",
       valueUserkillcheck : false,
+      isUsermanagement : true,
       showuserlist: true,
       selectedEmploymentValue : "",
       valueTimeTablekillcheck: false,
@@ -1190,6 +1193,8 @@ export default {
   mounted() {
     this.details = [];
     this.getDepartmentList('');
+    // 全ユーザー取得のためgetUserSelected実行
+    this.getUserSelected();
     this.getGeneralList("C001");
     this.getTimeTableList('');
     this.getGeneralList("C017");
@@ -1567,7 +1572,6 @@ export default {
     // ユーザー選択が変更された場合の処理
     userChanges: function(value, arrayitem) {
       // 入力項目の部署クリア
-      this.inputClear();
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
       this.selectedUserValue = value;
@@ -1781,7 +1785,7 @@ export default {
     // -------------------- サーバー処理 ----------------------------
     // 氏名取得処理
     getItem() {
-      var arrayParams = { code : this.selectedUserValue, killvalue : this.valuekillcheck };
+      var arrayParams = { code : this.selectedUserValue, killvalue : this.isUsermanagement };
       this.postRequest("/edit_user/get", arrayParams)
         .then(response  => {
           this.getThen(response);
@@ -1878,7 +1882,8 @@ export default {
           killvalue: this.killValue,
           getDo : this.getDo,
           departmentcode : this.selectedDepartmentValue,
-          employmentcode : this.selectedEmploymentValue
+          employmentcode : this.selectedEmploymentValue,
+          managementcode : "ALL"
         })
         .then(response  => {
           this.getThenuser(response);
@@ -1923,12 +1928,14 @@ export default {
     // -------------------- 共通 ----------------------------
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
+      // managementcode=99 → すべて
       this.$refs.selectuserlist.getList(
         '',
         this.valueUserkillcheck,
         this.getDo,
         this.selectedDepartmentValue,
-        this.selectedEmploymentValue
+        this.selectedEmploymentValue,
+        99
       );
     },
     // 取得正常処理（ユーザーリスト）
