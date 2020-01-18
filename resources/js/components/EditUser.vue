@@ -55,7 +55,7 @@
                     v-bind:placeholder-data="'氏名を選択すると編集モードになります'"
                     v-bind:selected-value="selectedUserValue"
                     v-bind:add-new="true"
-                    v-bind:get-do="1"
+                    v-bind:get-do="getDo"
                     v-bind:date-value="applytermdate"
                     v-bind:kill-value="valueUserkillcheck"
                     v-bind:row-index=0
@@ -1142,7 +1142,7 @@ import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
 export default {
-  name: "UserEdit",
+  name: "EditUser",
   mixins: [ dialogable, checkable, requestable ],
   data() {
     return {
@@ -1193,8 +1193,6 @@ export default {
   mounted() {
     this.details = [];
     this.getDepartmentList('');
-    // 全ユーザー取得のためgetUserSelected実行
-    this.getUserSelected();
     this.getGeneralList("C001");
     this.getTimeTableList('');
     this.getGeneralList("C017");
@@ -1560,6 +1558,7 @@ export default {
     // 部署選択が変更された場合の処理
     departmentChanges: function(value, arrayitem) {
       this.selectedDepartmentValue = value;
+      this.inputClear()
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       this.getUserSelected();
@@ -1568,6 +1567,12 @@ export default {
     // 廃止チェックボックスが変更された場合の処理
     checkboxChangeDepartment: function() {
       this.refreshDepartmentList();
+      this.inputClear()
+      this.selectedDepartmentValue = "";
+      // ユーザー選択コンポーネントの取得メソッドを実行
+      this.getDo = 1;
+      this.getUserSelected();
+      this.selectMode = '';
     },
     // ユーザー選択が変更された場合の処理
     userChanges: function(value, arrayitem) {
@@ -1587,6 +1592,7 @@ export default {
     },
     // 廃止チェックボックスが変更された場合の処理
     checkboxChangeUser: function() {
+      this.inputClear()
       this.refreshUserList();
     },
     // 新規作成部署選択が変更された場合の処理
