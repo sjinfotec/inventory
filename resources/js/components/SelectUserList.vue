@@ -70,7 +70,7 @@ export default {
     // マウント時
   mounted() {
     this.selectedvalue = this.selectedValue;
-    this.getList(this.dateValue, this.killValue, this.getDo, this.departmentValue, this.employmentValue);
+    this.getList(this.dateValue, this.killValue, this.getDo, this.departmentValue, this.employmentValue, 99);
   },
   methods: {
     // ------------------------ イベント処理 ------------------------------------
