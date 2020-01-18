@@ -61,6 +61,7 @@
                     v-bind:row-index=0
                     v-bind:department-value="selectedDepartmentValue"
                     v-bind:employment-value="''"
+                    v-bind:management-value="'99'"
                     v-on:change-event="userChanges"
                   ></select-userlist>
                 </div>

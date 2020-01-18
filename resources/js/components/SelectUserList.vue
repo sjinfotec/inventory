@@ -58,6 +58,10 @@ export default {
     employmentValue: {
         type: String,
         default: ''
+    },
+    managementValue: {
+        type: Number,
+        default: 10
     }
   },
   data() {
@@ -70,7 +74,9 @@ export default {
     // マウント時
   mounted() {
     this.selectedvalue = this.selectedValue;
-    this.getList(this.dateValue, this.killValue, this.getDo, this.departmentValue, this.employmentValue, 99);
+  },
+  created() {
+    this.getList(this.dateValue, this.killValue, this.getDo, this.departmentValue, this.employmentValue, this.managementValue);
   },
   methods: {
     // ------------------------ イベント処理 ------------------------------------
