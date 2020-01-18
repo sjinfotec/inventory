@@ -90,6 +90,10 @@ class ApiCommonController extends Controller
             if (isset($params['employmentcode'])) {
                 $employmentcode =  $params['employmentcode'];
             }
+            $managementcode = Config::get('const.C017.admin_user');
+            if (isset($params['managementcode'])) {
+                $managementcode =  $params['managementcode'];
+            }
             // ログインユーザの権限取得
             $chk_user_id = Auth::user()->code;
             $role = $this->getUserRole($chk_user_id, $target_date);
@@ -100,28 +104,13 @@ class ApiCommonController extends Controller
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
-            // 取得SQL
-            /*$subquery1 = DB::table($this->table_users)
+            $subquery1 = DB::table($this->table_users)
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->selectRaw('code as code')
                 ->where('apply_term_from', '<=',$targetdate)
                 ->where('is_deleted', '=', 0)
-                ->groupBy('code');*/
-            $subquery1 = DB::table($this->table_users)
-                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->selectRaw('code as code')
-                ->where('apply_term_from', '<=',$targetdate);
+                ->groupBy('code');
 
-            if (!$killvalue) {
-                $subquery1
-                    ->where('kill_from_date', '>',$target_date)
-                    ->where('is_deleted', '=', 0)
-                    ->groupBy('code');
-            } else {
-                $subquery1
-                    ->where('is_deleted', '=', 0)
-                    ->groupBy('code');
-            }
     
             if (isset($departmentcode)) {
                 if (isset($employmentcode)) {
@@ -135,11 +124,20 @@ class ApiCommonController extends Controller
                     if($role == Config::get('const.C025.general_user')){
                         $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where($this->table_users.'.management','<',Config::get('const.C017.admin_user'));
+                        $mainQuery->where($this->table_users.'.management','<',$managementcode);
                     }
-                    $details = $mainQuery->where($this->table_users.'.is_deleted', 0)
-                        ->orderby($this->table_users.'.code','asc')
-                        ->get();
+                    if (!$killvalue) {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.kill_from_date', '>',$target_date)
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.code','asc')
+                            ->get();
+                    } else {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.code','asc')
+                            ->get();
+                    }
                 } else {
                     $mainQuery = DB::table($this->table_users)
                         ->JoinSub($subquery1, 't1', function ($join) { 
@@ -150,11 +148,20 @@ class ApiCommonController extends Controller
                     if($role == Config::get('const.C025.general_user')){
                         $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where($this->table_users.'.management','<',Config::get('const.C017.admin_user'));
+                        $mainQuery->where($this->table_users.'.management','<',$managementcode);
                     }
-                    $details = $mainQuery->where($this->table_users.'.is_deleted', 0)
-                        ->orderby($this->table_users.'.code','asc')
-                        ->get();
+                    if (!$killvalue) {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.kill_from_date', '>',$target_date)
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.code','asc')
+                            ->get();
+                    } else {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.code','asc')
+                            ->get();
+                    }
                 }
             } else {
                 if (isset($employmentcode)) {
@@ -167,11 +174,20 @@ class ApiCommonController extends Controller
                     if($role == Config::get('const.C025.general_user')){
                         $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where($this->table_users.'.management','<',Config::get('const.C017.admin_user'));
+                        $mainQuery->where($this->table_users.'.management','<',$managementcode);
                     }
-                    $details = $mainQuery->where($this->table_users.'.is_deleted', 0)
-                        ->orderby($this->table_users.'.code','asc')
-                        ->get();
+                    if (!$killvalue) {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.kill_from_date', '>',$target_date)
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.code','asc')
+                            ->get();
+                    } else {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.code','asc')
+                            ->get();
+                    }
                 } else {
                     $mainQuery = DB::table($this->table_users)
                         ->JoinSub($subquery1, 't1', function ($join) { 
@@ -181,9 +197,18 @@ class ApiCommonController extends Controller
                     if($role == Config::get('const.C025.general_user')){
                         $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where($this->table_users.'.management','<',Config::get('const.C017.admin_user'));
+                        $mainQuery->where($this->table_users.'.management','<',$managementcode);
                     }
-                    $details = $mainQuery->where($this->table_users.'.is_deleted', 0)->get();
+                    if (!$killvalue) {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.kill_from_date', '>',$target_date)
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->get();
+                    } else {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->get();
+                    }
                 }
             }
             return response()->json(
@@ -325,20 +350,12 @@ class ApiCommonController extends Controller
             $subquery1 = DB::table($this->table_departments)
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->selectRaw('code as code')
-                ->where('apply_term_from', '<=',$target_date);
-            if (!$killvalue) {
-                $subquery1
-                    ->where('kill_from_date', '>',$target_date)
-                    ->where('is_deleted', '=', 0)
-                    ->groupBy('code');
-            } else {
-                $subquery1
-                    ->where('is_deleted', '=', 0)
-                    ->groupBy('code');
-            }
+                ->where('apply_term_from', '<=',$target_date)
+                ->where('is_deleted', '=', 0)
+                ->groupBy('code');
 
             if($role == Config::get('const.C025.general_user')){
-                $details = DB::table($this->table_departments)
+                $mainQuery = DB::table($this->table_departments)
                     ->JoinSub($subquery1, 't1', function ($join) { 
                         $join->on('t1.code', '=', $this->table_departments.'.code');
                         $join->on('t1.max_apply_term_from', '=', $this->table_departments.'.apply_term_from');
@@ -348,20 +365,36 @@ class ApiCommonController extends Controller
                         ->where($this->table_users.'.is_deleted', '=', 0);
                     })
                     ->select($this->table_departments.'.code',$this->table_departments.'.name')
-                    ->where($this->table_users.'.code','=',$chk_user_id)
-                    ->where($this->table_departments.'.is_deleted', 0)
-                    ->orderby($this->table_departments.'.code','asc')
-                    ->get();
-            } else {
-                $details = DB::table($this->table_departments)
-                    ->select($this->table_departments.'.code',$this->table_departments.'.name')
-                    ->JoinSub($subquery1, 't1', function ($join) { 
-                        $join->on('t1.code', '=', $this->table_departments.'.code');
-                        $join->on('t1.max_apply_term_from', '=', $this->table_departments.'.apply_term_from');
-                    })
-                    ->where($this->table_departments.'.is_deleted', 0)
-                    ->orderby($this->table_departments.'.code','asc')
-                    ->get();
+                    ->where($this->table_users.'.code','=',$chk_user_id);
+                    if (!$killvalue) {
+                        $mainQuery
+                            ->where('kill_from_date', '>',$target_date)
+                            ->where($this->table_departments.'.is_deleted', 0)
+                            ->orderby($this->table_departments.'.code','asc');
+                    } else {
+                        $mainQuery
+                            ->where($this->table_departments.'.is_deleted', 0)
+                            ->orderby($this->table_departments.'.code','asc');
+                    }
+                    $details = $mainQuery->get();
+                } else {
+                    $mainQuery = DB::table($this->table_departments)
+                        ->select($this->table_departments.'.code',$this->table_departments.'.name')
+                        ->JoinSub($subquery1, 't1', function ($join) { 
+                            $join->on('t1.code', '=', $this->table_departments.'.code');
+                            $join->on('t1.max_apply_term_from', '=', $this->table_departments.'.apply_term_from');
+                        });
+                    if (!$killvalue) {
+                        $mainQuery
+                            ->where('kill_from_date', '>',$target_date)
+                            ->where($this->table_departments.'.is_deleted', 0)
+                            ->orderby($this->table_departments.'.code','asc');
+                    } else {
+                        $mainQuery
+                            ->where($this->table_departments.'.is_deleted', 0)
+                            ->orderby($this->table_departments.'.code','asc');
+                    }
+                    $details = $mainQuery->get();
             }
             return response()->json(
                 ['result' => true, 'details' => $details,

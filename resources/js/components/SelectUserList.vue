@@ -81,7 +81,7 @@ export default {
       this.$emit('change-event', value, arrayData);
     },
     // -------------------- サーバー処理 ----------------------------
-    getList(targetdate, killvalue, getdo, departmentValue, employmentValue){
+    getList(targetdate, killvalue, getdo, departmentValue, employmentValue, managementcode = null ){
       if (targetdate == '') {
         targetdate = moment(new Date()).format("YYYYMMDD");
       }
@@ -93,7 +93,8 @@ export default {
           killvalue: killvalue,
           getDo : getdo,
           departmentcode : departmentValue,
-          employmentcode : employmentValue
+          employmentcode : employmentValue,
+          managementcode : managementcode
         })
         .then(response  => {
           this.getThen(response);
