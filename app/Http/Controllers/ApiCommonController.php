@@ -98,6 +98,8 @@ class ApiCommonController extends Controller
             $chk_user_id = Auth::user()->code;
             $role = $this->getUserRole($chk_user_id, $target_date);
             if(!isset($role)) {
+                // エラー追加 20200121
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $chk_user_id, Config::get('const.LOG_MSG.not_setting_role')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_setting_role');
                 return response()->json(
                     ['result' => false, 'details' => $details,
@@ -281,8 +283,6 @@ class ApiCommonController extends Controller
             $from = $from->format("Y/m/d");
             $to = new Carbon($params['to']);
             $to = $to->format("Y/m/d");
-            Log::debug('$from = '.$from);
-            Log::debug('$to = '.$to);
 
             $shift_info = new ShiftInformation();
             $shift_info->setUsercodeAttribute($code);
@@ -342,6 +342,8 @@ class ApiCommonController extends Controller
             $role = $this->getUserRole($chk_user_id, $target_date);
             if(!isset($role)) {
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_setting_role');
+                // エラー追加 20200121
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $chk_user_id, Config::get('const.LOG_MSG.not_setting_role')));
                 return response()->json(
                     ['result' => false, 'details' => $details,
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -368,7 +370,7 @@ class ApiCommonController extends Controller
                     ->where($this->table_users.'.code','=',$chk_user_id);
                     if (!$killvalue) {
                         $mainQuery
-                            ->where('kill_from_date', '>',$target_date)
+                            ->where($this->table_departments.'kill_from_date', '>',$target_date)
                             ->where($this->table_departments.'.is_deleted', 0)
                             ->orderby($this->table_departments.'.code','asc');
                     } else {
@@ -386,7 +388,7 @@ class ApiCommonController extends Controller
                         });
                     if (!$killvalue) {
                         $mainQuery
-                            ->where('kill_from_date', '>',$target_date)
+                            ->where($this->table_departments.'kill_from_date', '>',$target_date)
                             ->where($this->table_departments.'.is_deleted', 0)
                             ->orderby($this->table_departments.'.code','asc');
                     } else {
@@ -709,7 +711,6 @@ class ApiCommonController extends Controller
                 ->select('code as code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->where('apply_term_from', '<=',$target_date)
-                ->where('kill_from_date', '>',$target_date)
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
             $mainquery = DB::table($this->table_departments.' as t1')
@@ -718,6 +719,7 @@ class ApiCommonController extends Controller
                     $join->on('t1.code', '=', 't2.code');
                     $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
                 })
+                ->where('t1.kill_from_date', '>',$target_date)
                 ->where('t1.is_deleted', '=', 0);
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_departments, Config::get('const.LOG_MSG.subquery_illegal')).'$pe');
@@ -1587,7 +1589,6 @@ class ApiCommonController extends Controller
         }
         $hh = floor($interval);
         $mm = ($interval - floor($interval)) * 60;
-        Log::DEBUG('インターバル時間 = '.str_pad($hh, 2 , '0', STR_PAD_LEFT).":".str_pad($mm, 2 , '0', STR_PAD_LEFT).":00");
         return str_pad($hh, 2 , '0', STR_PAD_LEFT).":".str_pad($mm, 2 , '0', STR_PAD_LEFT).":00";
     }
     

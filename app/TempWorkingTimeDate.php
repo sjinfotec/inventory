@@ -881,6 +881,7 @@ class TempWorkingTimeDate extends Model
     public function getTempWorkingTimeDateUserJoin($targetdate){
 
         // 日次労働時間取得SQL作成
+        $this->targetdate = $targetdate;
         if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
         try{
             $subquery1 = DB::table($this->table)
@@ -1089,7 +1090,8 @@ class TempWorkingTimeDate extends Model
                 })
                 ->JoinSub($subquery2, 't6', function ($join) { 
                     $join->on('t6.code', '=', 't1.code');
-                    $join->on('t6.max_apply_term_from', '=', 't1.apply_term_from');
+                    $join->on('t6.max_apply_term_from', '=', 't1.apply_term_from')
+                    ->where('t1.kill_from_date', '>', $this->targetdate);
                 });
                         
             if(!empty($this->param_employment_status)){

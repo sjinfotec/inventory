@@ -141,34 +141,57 @@ class DailyWorkingInformationController extends Controller
                 Log::debug('------------- 集計開始 日付 = '.$datefrom.' 法定休日　business_kubun = '.$business_kubun );
             }
             // -------------- debug -------------- end --------
-            $addCalc = $this->addDailyCalc(
-                $work_time,
-                $datefrom,
-                $dateto,
-                $employmentstatus,
-                $departmentcode,
-                $usercode,
-                $business_kubun);
-            if ($addCalc) {
-                $working_model = new WorkingTimedate();
-                $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
-                $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
-                $working_model->setParamEmploymentStatusAttribute($employmentstatus);
-                $working_model->setParamDepartmentcodeAttribute($departmentcode);
-                $working_model->setParamUsercodeAttribute($usercode);
-                // 集計結果
-                $working_time_dates = 
-                    $working_model->getWorkingTimeDateTimeFormat(
-                        Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'),
-                        $working_model->getParamdatefromAttribute(), $business_kubun);
-                // 合計結果
-                if (count($working_time_dates) > 0) {
-                    $working_time_sum = $working_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'));
+            // パラメータの内容でworking_time_datesを削除
+            $working_model = new WorkingTimedate();
+            $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
+            $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
+            $working_model->setParamEmploymentStatusAttribute($employmentstatus);
+            $working_model->setParamDepartmentcodeAttribute($departmentcode);
+            DB::beginTransaction();
+            try{
+                if ($working_model->isExistsWorkingTimeDate()) {
+                    $working_model->delWorkingTimeDate();
+                };
+                $addCalc = $this->addDailyCalc(
+                    $work_time,
+                    $datefrom,
+                    $dateto,
+                    $employmentstatus,
+                    $departmentcode,
+                    $usercode,
+                    $business_kubun);
+                if ($addCalc) {
+                    $working_model = new WorkingTimedate();
+                    $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
+                    $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
+                    $working_model->setParamEmploymentStatusAttribute($employmentstatus);
+                    $working_model->setParamDepartmentcodeAttribute($departmentcode);
+                    $working_model->setParamUsercodeAttribute($usercode);
+                    // 集計結果
+                    $working_time_dates = 
+                        $working_model->getWorkingTimeDateTimeFormat(
+                            Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'),
+                            $working_model->getParamdatefromAttribute(), $business_kubun);
+                    // 合計結果
+                    if (count($working_time_dates) > 0) {
+                        $working_time_sum = $working_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'));
+                    } else {
+                        $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_workintime'));
+                    }
+                    Log::debug('------------- 集計終了 日付 = '.$datefrom.' business_kubun = '.$business_kubun );
                 } else {
-                    $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_workintime'));
+                    $add_result = false;
                 }
-                Log::debug('------------- 集計終了 日付 = '.$datefrom.' business_kubun = '.$business_kubun );
-            } else {
+                DB::commit();
+                Log::debug(' calc commit ');
+            }catch(\PDOException $pe){
+                DB::rollBack();
+                Log::debug(' calc rollBack ');
+                $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
+            }catch(\Exception $e){
+                DB::rollBack();
+                Log::debug(' calc rollBack ');
+                $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                 $add_result = false;
             }
         } else {
@@ -320,7 +343,7 @@ class DailyWorkingInformationController extends Controller
         if(count($work_time_results) > 0){
             $temp_calc_model = new TempCalcWorkingTime();
             // temporary削除処理
-            DB::beginTransaction();
+            //DB::beginTransaction();
             try{
                 $temp_calc_model->delTempCalcWorkingtime();
                 $temp_working_model->delTempWorkingTimeDate();
@@ -354,29 +377,32 @@ class DailyWorkingInformationController extends Controller
                         Log::error(Config::get('const.LOG_MSG.not_workintime'));
                         $add_result = false;
                     }
-                    DB::commit();
-                    Log::debug('temporary commit');
+                    //DB::commit();
+                    //Log::debug('temporary commit');
                 }catch(\PDOException $pe){
-                    DB::rollBack();
-                    Log::debug('temporary rollBack');
+                    //DB::rollBack();
+                    //Log::debug('temporary rollBack');
                     $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                     Log::error(Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                     Log::error($pe->getMessage());
                     $add_result = false;
+                    throw $pe;
                 }catch(\Exception $e){
-                    DB::rollBack();
-                    Log::debug('temporary rollBack');
+                    //DB::rollBack();
+                    //Log::debug('temporary rollBack');
                     $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
                     Log::error(Config::get('const.LOG_MSG.data_error_dailycalc'));
                     Log::error($e->getMessage());
                     $add_result = false;
+                    throw $e;
                 }
             }catch(\PDOException $pe){
-                DB::rollBack();
-                Log::debug('temporary rollBack');
+                //DB::rollBack();
+                //Log::debug('temporary rollBack');
                 $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                 Log::error($pe->getMessage());
                 $add_result = false;
+                throw $pe;
             }
         } else {
             $add_result = false;
@@ -407,13 +433,13 @@ class DailyWorkingInformationController extends Controller
                     $working_model->setParamEmploymentStatusAttribute($employmentstatus);
                     $working_model->setParamDepartmentcodeAttribute($departmentcode);
                     $working_model->setParamUsercodeAttribute($usercode);
-                    DB::beginTransaction();
-                    Log::debug(' calc beginTransaction ');
+                    //DB::beginTransaction();
+                    //Log::debug(' calc beginTransaction ');
                     try{
-                        if ($working_model->isExistsWorkingTimeDate()) {
-                            Log::debug(' $delWorkingTimeDate  ');
-                            $working_model->delWorkingTimeDate();
-                        };
+                        //if ($working_model->isExistsWorkingTimeDate()) {
+                        //    Log::debug(' $delWorkingTimeDate  ');
+                         //   $working_model->delWorkingTimeDate();
+                        //};
                         Log::debug(' $insertWorkingTimeDateFromTemp  ');
                         $temp_array = array();
                         foreach($temp_working_time_dates as $working_time_date) {
@@ -421,17 +447,19 @@ class DailyWorkingInformationController extends Controller
                             $temp_array[] = $temp_collect->toArray();
                         } 
                         $working_model->insertWorkingTimeDateFromTemp($temp_array);
-                        DB::commit();
-                        Log::debug(' calc commit ');
+                        //DB::commit();
+                        //Log::debug(' calc commit ');
                     }catch(\PDOException $pe){
-                        DB::rollBack();
-                        Log::debug(' calc rollBack ');
+                        //DB::rollBack();
+                        //Log::debug(' calc rollBack ');
                         $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
+                        throw $pe;
                     }catch(\Exception $e){
-                        DB::rollBack();
-                        Log::debug(' calc rollBack ');
+                        //DB::rollBack();
+                        //Log::debug(' calc rollBack ');
                         $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                         $add_result = false;
+                        throw $e;
                     }
                 }
             }catch(\PDOException $pe){
@@ -439,9 +467,11 @@ class DailyWorkingInformationController extends Controller
                 Log::error(Config::get('const.LOG_MSG.data_error_dailycalc'));
                 Log::error($e->getMessage());
                 $add_result = false;
+                throw $pe;
             }catch(\Exception $e){
                 $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                 $add_result = false;
+                throw $e;
             }
         }
 
@@ -737,8 +767,10 @@ class DailyWorkingInformationController extends Controller
                                 $target_flg = false;
                             }catch(\PDOException $pe){
                                 $add_results = false;
+                                throw $pe;
                             }catch(\Exception $e){
                                 $add_results = false;
+                                throw $e;
                             }
                         }
                         // 打刻ないデータはtempに出力
@@ -851,8 +883,10 @@ class DailyWorkingInformationController extends Controller
                             $this->iniArrayCalc();
                         }catch(\PDOException $pe){
                             $add_results = false;
+                            throw $pe;
                         }catch(\Exception $e){
                             $add_results = false;
+                            throw $e;
                         }
                     }
                     try{
@@ -932,8 +966,10 @@ class DailyWorkingInformationController extends Controller
                         $this->iniArrayCalc();
                     }catch(\PDOException $pe){
                         $add_results = false;
+                        throw $pe;
                     }catch(\Exception $e){
                         $add_results = false;
+                        throw $e;
                     }
                 }
                 // 打刻ないデータはtempに出力
@@ -1019,8 +1055,10 @@ class DailyWorkingInformationController extends Controller
                 Log::DEBUG('    最終残のユーザーを登録終了 $current_user_code = '.$current_user_code);
             }catch(\PDOException $pe){
                 $add_results = false;
+                throw $pe;
             }catch(\Exception $e){
                 $add_results = false;
+                throw $e;
             }
         }
 
@@ -4767,10 +4805,11 @@ class DailyWorkingInformationController extends Controller
                         $array_add_public_going_out_return_time);
                 }catch(\PDOException $pe){
                     $add_result = false;
-                    Log::DEBUG('PDOException');
+                    throw $pe;
                 }catch(\Exception $e){
                     Log::DEBUG('Exception'.$e->getMessage());
                     $add_result = false;
+                    throw $e;
                 }
                 Log::DEBUG('        temp_working_time_datesデータ作成終了 ');
             }

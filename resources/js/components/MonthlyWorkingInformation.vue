@@ -64,6 +64,46 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      id="basic-addon1"
+                    >開始日付<span class="color-red">[必須]</span></span>
+                  </div>
+                  <input-datepicker
+                    v-bind:default-date="valuefromym"
+                    v-bind:date-format="DatePickerFormat"
+                    v-bind:place-holder="'開始日付を選択してください'"
+                    v-on:change-event="fromdateChanges"
+                    v-on:clear-event="fromdateCleared"
+                  ></input-datepicker>
+                </div>
+                <message-data v-bind:message-datas="messagedatasfromdate" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      id="basic-addon1"
+                    >終了日付<span class="color-red">[必須]</span></span>
+                  </div>
+                  <input-datepicker
+                    v-bind:default-date="valuefromym"
+                    v-bind:date-format="DatePickerFormat"
+                    v-bind:place-holder="'終了日付を選択してください'"
+                    v-on:change-event="fromdateChanges"
+                    v-on:clear-event="fromdateCleared"
+                  ></input-datepicker>
+                </div>
+                <message-data v-bind:message-datas="messagedatasfromdate" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGroupSelect01"

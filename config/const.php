@@ -540,6 +540,7 @@ return [
         'unknown_error' => '不明なエラー',
         'mismatch_data' => 'データ不整合',
         'not_set_time_rounding ' => '時間の端数処理が設定されていない',
+        'not_setting_role' => 'ユーザー権限が設定されていない。user = [{0}]',
         'not_setting_timetable' => '期間内に該当する勤務時間がないかまたはタイムテーブルが設定されていない。',
         'non_approval_demandno' => '承認する申請番号なし。',
         'non_approval_demanddate' => '承認する申請日なし。',
