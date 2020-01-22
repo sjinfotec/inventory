@@ -259,6 +259,11 @@ Vue.component(
 );
 
 Vue.component(
+    "department-set",
+    require("./components/DepartmentSet.vue").default
+);
+
+Vue.component(
     "input-timetablepicker",
     require("./components/InputTimeTableElTimepicker.vue").default
 );

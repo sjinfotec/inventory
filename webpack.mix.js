@@ -13,8 +13,8 @@ const mix = require("laravel-mix");
 mix
     .js("resources/js/app.js", "public/js")
     .sass("resources/sass/app.scss", "public/css"
-).version();
+);
 // ブラウザキャッシュ回避のためのファイルのバージョ二ングを有効に
-/*if (mix.inProduction()) {
+if (mix.inProduction()) {
     mix.version();
-}*/
+}

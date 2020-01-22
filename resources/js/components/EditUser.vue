@@ -795,7 +795,7 @@
                         class="btn btn-success"
                         @click="addClick(index)"
                       >この内容で追加する</button>
-                      <button v-if="item.result == 2 && item.id != ''"
+                      <button v-if="item.result != 0 && item.id != ''"
                         type="button"
                         class="btn btn-danger"
                         @click="delClick(index)"

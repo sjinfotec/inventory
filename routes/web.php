@@ -150,5 +150,5 @@ Route::post('/get_closing_day', 'ApiCommonController@getClosingDay')->middleware
 // ユーザー権限取得
 Route::post('/get_login_user_role', 'ApiCommonController@getLoginUserRole')->middleware('auth');
 // ユーザー部署権限取得
-Route::get('/get_login_user_department', 'ApiCommonController@getLoginUserDepartment')->middleware('auth');
+Route::post('/get_login_user_department', 'ApiCommonController@getLoginUserDepartment')->middleware('auth');
 
