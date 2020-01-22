@@ -7,7 +7,7 @@
                                 <img class="p-2 icon-size-user rounded-circle" src="{{ asset('images/round-person-w.svg') }}" alt="">
                             </div>
                             <ul class="float-left list-unstyled">
-                                <li class="pr-3 py-1 text-white font-size-sm d-block">情報処理課</li>
+                                <department-set></department-set>
                                 <li class="pr-3 py-1 text-white font-size-sm d-block">
                                     {{ Auth::user()->name }}
                                 </li>
