@@ -370,7 +370,7 @@ class ApiCommonController extends Controller
                     ->where($this->table_users.'.code','=',$chk_user_id);
                     if (!$killvalue) {
                         $mainQuery
-                            ->where($this->table_departments.'kill_from_date', '>',$target_date)
+                            ->where($this->table_departments.'.kill_from_date', '>',$target_date)
                             ->where($this->table_departments.'.is_deleted', 0)
                             ->orderby($this->table_departments.'.code','asc');
                     } else {
@@ -388,7 +388,7 @@ class ApiCommonController extends Controller
                         });
                     if (!$killvalue) {
                         $mainQuery
-                            ->where($this->table_departments.'kill_from_date', '>',$target_date)
+                            ->where($this->table_departments.'.kill_from_date', '>',$target_date)
                             ->where($this->table_departments.'.is_deleted', 0)
                             ->orderby($this->table_departments.'.code','asc');
                     } else {
