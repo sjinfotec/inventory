@@ -51,16 +51,21 @@ class ApiGetAttendanceResultController extends Controller
                         $array_chkAttendance_result = $this->chkAttendance($user_data, $mode, $systemdate);
                         if($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.normal')){
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
+                            $this->insertTable($user_data, $mode, $card_id, $array_chkAttendance_result, $systemdate);
                         } elseif($array_chkAttendance_result[0] == Config::get('const.C018.forget_stamp')) {
                             // エラー追加 20200121
                             Log::error('打刻登録 NG mode_illegal user = '.$user.' '.Config::get('const.RESULT_CODE.mode_illegal'));
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.mode_illegal'));
+                            $this->insertTable($user_data, $mode, $card_id, $array_chkAttendance_result, $systemdate);
+                        } elseif($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.dup_time_check')) {
+                            Log::debug('check_interval result = dup_time_check');
+                            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.dup_time_check'));
                         } else {
                             // エラー追加 20200121
                             Log::error('打刻登録 NG unknown user = '.$user.' '.Config::get('const.RESULT_CODE.unknown'));
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.unknown'));
+                            $this->insertTable($user_data, $mode, $card_id, $array_chkAttendance_result, $systemdate);
                         }
-                        $this->insertTable($user_data, $mode, $card_id, $array_chkAttendance_result, $systemdate);
                         $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
                         $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
                         $response->put(Config::get('const.PUT_ITEM.record_time'),$systemdate->format('H:i:s'));
@@ -139,12 +144,22 @@ class ApiGetAttendanceResultController extends Controller
                 if(isset($result->mode)){
                     $i += 1;
                     $this->source_mode = $result->mode;
-                    $chk_result = $apicommon->chkMode($mode, $this->source_mode);
+                    // モードが同じでタイム間が5秒以内は登録しない（重複打刻防止のため）
+                    if ($mode == $this->source_mode ) {
+                        $check_dup = $apicommon->diffSecoundSerial($result->record_datetime, $systemdate );
+                        if ($check_dup <= 5) {
+                            $chk_result = Config::get('const.RESULT_CODE.dup_time_check');
+                        }
+                    }
+
                     if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
-                        // 出勤インターバルチェック
-                        if ($mode == Config::get('const.C005.attendance_time')) {
-                            if ($this->source_mode == Config::get('const.C005.leaving_time')) {
-                                $check_interval = $apicommon->chkInteval($systemdate, $result->record_datetime);
+                        $chk_result = $apicommon->chkMode($mode, $this->source_mode);
+                        if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
+                            // 出勤インターバルチェック
+                            if ($mode == Config::get('const.C005.attendance_time')) {
+                                if ($this->source_mode == Config::get('const.C005.leaving_time')) {
+                                    $check_interval = $apicommon->chkInteval($systemdate, $result->record_datetime);
+                                }
                             }
                         }
                     }

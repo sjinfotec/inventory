@@ -1567,6 +1567,26 @@ class ApiCommonController extends Controller
     }
     
     /**
+     * 時間差を秒まで求める（シリアルで返却）
+     *
+     * @return 時間差
+     */
+    public function diffSecoundSerial($time_from, $time_to){
+        Log::DEBUG('diffSecoundSerial $time_from = '.$time_from);
+        Log::DEBUG('diffSecoundSerial $time_to = '.$time_to);
+        Log::DEBUG('diffSecoundSerial strtotime $time_from = '.strtotime($time_from));
+        Log::DEBUG('diffSecoundSerial strtotime $time_to = '.strtotime($time_to));
+        $from = strtotime(date('Y-m-d H:i:ss',strtotime($time_from)));
+        $to   = strtotime(date('Y-m-d H:i:ss',strtotime($time_to))); 
+        $from = strtotime($time_from);
+        $to   = strtotime($time_to); 
+        Log::DEBUG('diffSecoundSerial $from = '.$from);
+        Log::DEBUG('diffSecoundSerial to = '.$to);
+        $interval = $to - $from;
+        return $interval;
+    }
+    
+    /**
      * インターバル時間を取得して分に変換する
      * 
      *  設定する時刻はDATEで
