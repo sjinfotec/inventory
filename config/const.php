@@ -400,6 +400,7 @@ return [
         'select_error' => 7,
         'interval_stamp' => 8,
         'max_time_over' => 9,
+        'dup_time_check' => 10,
         'other' => 99
     ],
  

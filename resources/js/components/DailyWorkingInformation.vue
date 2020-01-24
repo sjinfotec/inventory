@@ -249,6 +249,7 @@ export default {
   // マウント時
   mounted() {
     this.valuefromdate = this.defaultDate;
+    console.log('dailyworkingtime mounted getUserRole');
     this.getUserRole();
     this.applytermdate = ""
     if (this.valuefromdate) {
@@ -455,6 +456,7 @@ export default {
       var res = response.data;
       if (res.result) {
         this.userrole = res.role;
+        console.log('dailyworkingtime getThenrole this.userrole = '+this.userrole);
       } else {
         if (res.messagedata.length > 0) {
           this.messageswal("エラー", res.messagedata, "error", true, false, true);
