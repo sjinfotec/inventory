@@ -1416,7 +1416,8 @@ class WorkingTimedate extends Model
 
             $mainquery
                 ->addselect($this->table.'.working_status');
-            $remarks_date_holiday_name = ' CASE ifnull('.$this->table.".holiday_name, '') WHEN '' THEN '' ELSE ".$this->table.'.holiday_name END as remark_holiday_name'; 
+            // $remarks_date_holiday_name = ' CASE ifnull('.$this->table.".holiday_name, '') WHEN '' THEN '' ELSE ".$this->table.'.holiday_name END as remark_holiday_name'; 
+            $remarks_date_holiday_name = $this->table_generalcodes.'.code_name as remark_holiday_name'; 
             $remarks_date_check_result = ' CASE ifnull('.$this->table.'.check_result, 0)';
             $remarks_date_check_result .= ' WHEN '.Config::get('const.C018.forget_stamp')." THEN '".Config::get('const.C018_NAME.forget_stamp')."' ";
             $remarks_date_check_result .= ' WHEN '.Config::get('const.C018.interval_stamp')." THEN '".Config::get('const.C018_NAME.interval_stamp')."' ";

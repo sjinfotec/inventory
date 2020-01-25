@@ -209,6 +209,7 @@ class MonthlyWorkingInformationController extends Controller
                 // パラメータの内容でworking_time_datesを削除
                 $workingtimedate_model->setParamEmploymentStatusAttribute($employmentstatus);
                 $workingtimedate_model->setParamDepartmentcodeAttribute($departmentcode);
+                $workingtimedate_model->setParamUsercodeAttribute($usercode);
                 if ($workingtimedate_model->isExistsWorkingTimeDate()) {
                     $workingtimedate_model->delWorkingTimeDate();
                 };

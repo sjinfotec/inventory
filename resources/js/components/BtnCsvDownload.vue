@@ -123,7 +123,7 @@ export default {
       this.csvData.forEach(user => {
         //  '\ufeff' + 
         user.date.forEach(record => {
-          if (record["attendance"] != "" && record["attendance"] != null) {
+          if ((record["attendance"] != "" && record["attendance"] != null) || (record["remark_holiday_name"] != "" && record["remark_holiday_name"] != null)) {
             workingdate = record["workingdate"].substr(0,4) + "/" + record["workingdate"].substr(4,2) + "/" +  record["workingdate"].substr(6,2);
             line =
               record["user_code"] +
