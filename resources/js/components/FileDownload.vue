@@ -117,7 +117,7 @@
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
-                  <a href="/file_download?filekbn=27">・操作マニュアル（弥生給与ソフト連携 最新版） -- ファイル名：Operationmanual(yayoi).pdf</a>
+                  <a href="/file_download?filekbn=27">・操作マニュアル（弥生給与ソフト連携）（PDF 最新版） -- ファイル名：Operationmanual(yayoi).pdf</a>
                 </div>
               </div>
               <!-- /.col -->
@@ -128,7 +128,7 @@
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
-                  <a href="/file_download?filekbn=28">・操作マニュアル（弥生給与ソフト 最新連携版） -- ファイル名：Operationmanual(yayoi).xlsx</a>
+                  <a href="/file_download?filekbn=28">・操作マニュアル（弥生給与ソフト連携）（EXCEL 最新版） -- ファイル名：Operationmanual(yayoi).xlsx</a>
                 </div>
               </div>
               <!-- /.col -->
