@@ -49,8 +49,10 @@ Route::get('/approval/list_approval', 'ApprovalController@listApproval')->middle
 Route::post('/approval/make_approval', 'ApprovalController@makeApproval')->middleware('auth');
 // 承認設定
 Route::get('/confirm', 'ConfirmController@index')->middleware('auth');
+Route::post('/confirm/gettable', 'ConfirmController@gettable')->middleware('auth');
 Route::post('/confirm/show', 'ConfirmController@show')->middleware('auth');
 Route::post('/confirm/store', 'ConfirmController@store')->middleware('auth');
+Route::post('/confirm/del', 'ConfirmController@del')->middleware('auth');
 
 // カレンダー登録
 // Route::get('/setting-calendar', 'CreateCalendarController@index')->middleware('auth');

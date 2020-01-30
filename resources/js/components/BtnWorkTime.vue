@@ -114,6 +114,10 @@
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
         パスワードを変更する</button>
     </div>
+    <div v-if="btnMode === 'delete'" class="btn-group d-flex" v-on:click="deleteclickBtn()">
+      <button type="button" class="btn btn-danger btn-lg font-size-rg w-100" :disabled="isPush">
+        削除する</button>
+    </div>
   </button>
   </div>
 </template>
@@ -213,6 +217,9 @@ export default {
     },
     passresetclickBtn : function() {
       this.$emit('passreset-event',event);
+    },
+    deleteclickBtn : function() {
+      this.$emit('deleteclick-event',event);
     },
     // tooltips
     edttooltips: function(value1) {

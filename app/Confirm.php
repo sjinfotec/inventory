@@ -14,13 +14,15 @@ class Confirm extends Model
     protected $table = 'confirms';
     protected $table_users = 'users';
     protected $table_departments = 'departments';
+    protected $table_generalcodes = 'generalcodes';
  
     private $id;                  
-    private $department_code;                  
-    private $confirm_department_code;                  
-    private $user_code;
-    private $seq;    
+    private $confirm_no;                  
     private $main_sub;                  
+    private $seq;    
+    private $confirm_department_code;                  
+    private $user_department_code;                  
+    private $user_code;
     private $created_user;    
     private $updated_user;                  
     private $created_at;                  
@@ -37,34 +39,14 @@ class Confirm extends Model
         $this->id = $value;
     }
 
-    // 部署
-    public function getDepartmentcodeAttribute()
+    // 承認ルート番号
+    public function getConfirmnoAttribute()
     {
-        return $this->department_code;
+        return $this->confirm_no;
     }
-    public function setDepartmentcodeAttribute($value)
+    public function setConfirmnoAttribute($value)
     {
-        $this->department_code = $value;
-    }
-
-    // 承認部署
-    public function getConfirmDepartmentcodeAttribute()
-    {
-        return $this->confirm_department_code;
-    }
-    public function setConfirmDepartmentcodeAttribute($value)
-    {
-        $this->confirm_department_code = $value;
-    }
-
-    // ユーザー
-    public function getUsercodeAttribute()
-    {
-        return $this->user_code;
-    }
-    public function setUsercodeAttribute($value)
-    {
-        $this->user_code = $value;
+        $this->confirm_no = $value;
     }
 
     // 承認順番
@@ -85,6 +67,36 @@ class Confirm extends Model
     public function setMainsubAttribute($value)
     {
         $this->main_sub = $value;
+    }
+
+    // ルート適用部署
+    public function getConfirmDepartmentcodeAttribute()
+    {
+        return $this->confirm_department_code;
+    }
+    public function setConfirmDepartmentcodeAttribute($value)
+    {
+        $this->confirm_department_code = $value;
+    }
+
+    // ユーザー部署
+    public function getUserdepartmentcodeAttribute()
+    {
+        return $this->user_department_code;
+    }
+    public function setUserdepartmentcodeAttribute($value)
+    {
+        $this->user_department_code = $value;
+    }
+
+    // ユーザー
+    public function getUsercodeAttribute()
+    {
+        return $this->user_code;
+    }
+    public function setUsercodeAttribute($value)
+    {
+        $this->user_code = $value;
     }
 
     // 作成ユーザー
@@ -138,20 +150,31 @@ class Confirm extends Model
     }
 
     // -------------------------- param ---------------------------------------
-    private $param_department_code;
+    private $param_confirm_no;
+    private $param_user_department_code;
     private $param_confirm_department_code;
     private $param_user_code;
     private $param_seq;
     private $param_main_sub;
 
-    // 部署
-    public function getParamDepartmentcodeAttribute()
+    // 承認ルート番号
+    public function getParamConfirmnoAttribute()
     {
-        return $this->param_department_code;
+        return $this->param_confirm_no;
     }
-    public function setParamDepartmentcodeAttribute($value)
+    public function setParamConfirmnoAttribute($value)
     {
-        $this->param_department_code = $value;
+        $this->param_confirm_no = $value;
+    }
+
+    // ユーザー部署
+    public function getParamUserepartmentcodeAttribute()
+    {
+        return $this->param_user_department_code;
+    }
+    public function setParamUserepartmentcodeAttribute($value)
+    {
+        $this->param_user_department_code = $value;
     }
 
     // 承認部署
@@ -199,40 +222,88 @@ class Confirm extends Model
      *
      * @return void
      */
-    public function selectConfirm(){
+    public function selectConfirm($targetdate){
         try {
-            $mainquery = DB::table($this->table)
+            // 適用期間日付の取得
+            $apicommon = new ApiCommonController();
+            // usersの最大適用開始日付subquery
+            $subquery3 = $apicommon->getUserApplyTermSubquery($targetdate);
+            $subquery1 = DB::table($this->table_users.' as t1')
+                ->select('t1.code', 't1.name', 't1.department_code')
+                ->JoinSub($subquery3, 't2', function ($join) { 
+                    $join->on('t2.code', '=', 't1.code');
+                    $join->on('t2.max_apply_term_from', '=', 't1.apply_term_from');
+                })
+                ->where('t1.is_deleted', '=', 0);
+            // departmentsの最大適用開始日付subquery
+            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
+
+            $mainquery = DB::table($this->table.' AS t1')
                 ->select(
-                    $this->table.'.id',
-                    $this->table.'.department_code',
-                    $this->table.'.confirm_department_code',
-                    $this->table.'.user_code',
-                    $this->table.'.seq',
-                    $this->table.'.main_sub'
+                    't1.id',
+                    't1.confirm_no',
+                    't1.seq',
+                    't1.main_sub',
+                    't1.confirm_department_code',
+                    't1.user_department_code',
+                    't1.user_code',
+                    't1.created_user',
+                    't1.updated_user',
+                    't1.created_at',
+                    't1.updated_at',
+                    't2.code_name as main_sub_name',
+                    't3.name as confirm_department_name',
+                    't4.name as user_department_name',
+                    't5.name as user_name'
                 );
-            if (isset($this->param_department_code)) {
-                $mainquery->where($this->table.'.department_code', $this->param_department_code);
+            $mainquery
+                ->leftJoin($this->table_generalcodes.' as t2', function ($join) { 
+                    $join->on('t2.code', '=', 't1.main_sub')
+                    ->where('t2.identification_id', '=', Config::get('const.C027.value'))
+                    ->where('t2.is_deleted', 0);
+                });
+            $mainquery
+                ->leftJoinSub($subquery4, 't3', function ($join) { 
+                    $join->on('t3.code', '=', 't1.confirm_department_code')
+                    ->where('t1.is_deleted', '=', 0);
+                });
+            $mainquery
+                ->leftJoinSub($subquery4, 't4', function ($join) { 
+                    $join->on('t4.code', '=', 't1.user_department_code')
+                    ->where('t1.is_deleted', '=', 0);
+                });
+            $mainquery
+                ->leftJoinSub($subquery1, 't5', function ($join) { 
+                    $join->on('t5.department_code', '=', 't1.user_department_code');
+                    $join->on('t5.code', '=', 't1.user_code');
+                });
+            if (isset($this->param_confirm_no)) {
+                $mainquery->where('t1.confirm_no', $this->param_confirm_no);
+            }
+            if (isset($this->param_user_department_code)) {
+                $mainquery->where('t1.user_department_code', $this->param_user_department_code);
             }
             if (isset($this->param_confirm_department_code)) {
-                $mainquery->where($this->table.'.confirm_department_code', $this->param_confirm_department_code);
+                $mainquery->where('t1.confirm_department_code', $this->param_confirm_department_code);
             }
             if (isset($this->param_user_code)) {
-                $mainquery->where($this->table.'.user_code', $this->param_user_code);
+                $mainquery->where('t1.user_code', $this->param_user_code);
             }
             if (isset($this->param_seq)) {
                 if ($this->param_seq == Config::get('const.CONFIRM_SEQ.final_confirm')) {
-                    $mainquery->where($this->table.'.seq', $this->param_seq);
+                    $mainquery->where('t1.seq', $this->param_seq);
                 } else {
-                    $mainquery->whereNotIn($this->table.'.seq', [Config::get('const.CONFIRM_SEQ.final_confirm')]);
+                    $mainquery->whereNotIn('t1.seq', [Config::get('const.CONFIRM_SEQ.final_confirm')]);
                 }
             }
             if (isset($this->param_main_sub)) {
-                $mainquery->where($this->table.'.main_sub', $this->param_main_sub);
+                $mainquery->where('t1.main_sub', $this->param_main_sub);
             }
             $result = $mainquery
-                ->where($this->table.'.is_deleted', 0)
-                ->orderBy($this->table.'.department_code')
-                ->orderBy($this->table.'.id')
+                ->where('t1.is_deleted', 0)
+                ->orderBy('t1.confirm_no')
+                ->orderBy('t1.seq')
+                ->orderBy('t1.main_sub')
                 ->get();
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
@@ -321,6 +392,29 @@ class Confirm extends Model
     }
 
     /**
+     * 取得(MAXNO)
+     *
+     * @return void
+     */
+    public function getMaxNo(){
+        try {
+            $maxno = DB::table($this->table)
+                ->selectRaw('IFNULL(MAX('.$this->table.'.confirm_no), 0) AS MAXNO')
+                ->where($this->table.'.is_deleted', 0)
+                ->get();
+            return $maxno;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
      * 登録(INSERT)
      *
      * @return void
@@ -329,14 +423,17 @@ class Confirm extends Model
         try {
             DB::table($this->table)->insert(
                 [
-                    'department_code' => $this->department_code,
-                    'confirm_department_code' => $this->confirm_department_code,
-                    'user_code' => $this->user_code,
+                    'confirm_no' => $this->confirm_no,
                     'seq' => $this->seq,
                     'main_sub' => $this->main_sub,
+                    'confirm_department_code' => $this->confirm_department_code,
+                    'user_department_code' => $this->user_department_code,
+                    'user_code' => $this->user_code,
                     'created_user' => $this->created_user,
-                    'created_at' => $this->created_at
-                    ]
+                    'created_at' => $this->created_at,
+                    'updated_user'=>$this->updated_user,
+                    'updated_at' => $this->updated_at
+                ]
             );
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
@@ -357,8 +454,8 @@ class Confirm extends Model
     public function updateConfirm(){
         try {
             $mainquery = DB::table($this->table);
-            if (isset($this->param_department_code)) {
-                $mainquery->where($this->table.'.department_code', $this->param_department_code);
+            if (isset($this->param_user_department_code)) {
+                $mainquery->where($this->table.'.user_department_code', $this->param_user_department_code);
             }
             if (isset($this->param_seq)) {
                 if ($this->param_seq == Config::get('const.CONFIRM_SEQ.final_confirm')) {
@@ -368,7 +465,7 @@ class Confirm extends Model
                 }
             }
             $mainquery->update([
-                'department_code' => $this->department_code,
+                'user_department_code' => $this->user_department_code,
                 'user_code' => $this->user_code,
                 'seq' => $this->seq,
                 'main_sub' => $this->main_sub,
@@ -388,15 +485,15 @@ class Confirm extends Model
     }
 
     /**
-     * 削除(DELETE)
+     * 論理削除(DELETE)
      *
      * @return void
      */
     public function deleteConfirm(){
         try {
             $mainquery = DB::table($this->table);
-            if (isset($this->param_department_code)) {
-                $mainquery->where($this->table.'.department_code', $this->param_department_code);
+            if (isset($this->param_confirm_no)) {
+                $mainquery->where($this->table.'.confirm_no', $this->param_confirm_no);
             }
             if (isset($this->param_seq)) {
                 if ($this->param_seq == Config::get('const.CONFIRM_SEQ.final_confirm')) {
@@ -405,7 +502,10 @@ class Confirm extends Model
                     $mainquery->whereNotIn($this->table.'.seq', [Config::get('const.CONFIRM_SEQ.final_confirm')]);
                 }
             }
-            $mainquery->delete();
+            $mainquery->update([
+                'is_deleted' => 1
+                ]
+            );
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
             Log::error($pe->getMessage());

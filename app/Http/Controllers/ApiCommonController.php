@@ -94,6 +94,10 @@ class ApiCommonController extends Controller
             if (isset($params['managementcode'])) {
                 $managementcode =  $params['managementcode'];
             }
+            $arrayrole = array();
+            if (isset($params['roles'])) {
+                $arrayrole =  $params['roles'];
+            }
             // ログインユーザの権限取得
             $chk_user_id = Auth::user()->code;
             $role = $this->getUserRole($chk_user_id, $target_date);
@@ -113,7 +117,6 @@ class ApiCommonController extends Controller
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
 
-    
             if (isset($departmentcode)) {
                 if (isset($employmentcode)) {
                     $mainQuery = DB::table($this->table_users)
@@ -127,6 +130,9 @@ class ApiCommonController extends Controller
                         $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
                         $mainQuery->where($this->table_users.'.management','<',$managementcode);
+                    }
+                    if(isset($params['roles'])){
+                        $mainQuery->whereIn($this->table_users.'.role', $arrayrole);
                     }
                     if (!$killvalue) {
                         $details = $mainQuery
@@ -151,6 +157,9 @@ class ApiCommonController extends Controller
                         $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
                         $mainQuery->where($this->table_users.'.management','<',$managementcode);
+                    }
+                    if(isset($params['roles'])){
+                        $mainQuery->whereIn($this->table_users.'.role', $arrayrole);
                     }
                     if (!$killvalue) {
                         $details = $mainQuery
@@ -178,6 +187,9 @@ class ApiCommonController extends Controller
                     } else {
                         $mainQuery->where($this->table_users.'.management','<',$managementcode);
                     }
+                    if(isset($params['roles'])){
+                        $mainQuery->whereIn($this->table_users.'.role', $arrayrole);
+                    }
                     if (!$killvalue) {
                         $details = $mainQuery
                             ->where($this->table_users.'.kill_from_date', '>',$target_date)
@@ -200,6 +212,9 @@ class ApiCommonController extends Controller
                         $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
                         $mainQuery->where($this->table_users.'.management','<',$managementcode);
+                    }
+                    if(isset($params['roles'])){
+                        $mainQuery->whereIn($this->table_users.'.role', $arrayrole);
                     }
                     if (!$killvalue) {
                         $details = $mainQuery

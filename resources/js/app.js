@@ -274,6 +274,10 @@ Vue.component(
     "select-departmentlist",
     require("./components/SelectDepartmentList.vue").default
 );
+Vue.component(
+    "select-departmentlist-detail",
+    require("./components/SelectDepartmentListDetail.vue").default
+);
 
 Vue.component(
     "select-timetablelist",
@@ -283,6 +287,8 @@ Vue.component(
 Vue.component("select-user", require("./components/SelectUser.vue").default);
 
 Vue.component("select-userlist", require("./components/SelectUserList.vue").default);
+
+Vue.component("select-userlist-detail", require("./components/SelectUserListDetail.vue").default);
 
 Vue.component(
     "select-businessdaylist",

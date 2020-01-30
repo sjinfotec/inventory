@@ -19,6 +19,8 @@ export const dialogable =  {
             cancel: cancelbtn,
             ok: okbtn
           },
+          allowOutsideClick : false,    //枠外をクリックしても画面を閉じない
+          grow : 'fullscreen',
           dangerMode: dangerMode
         }).then(result  => {
           resolve(result);
@@ -46,6 +48,8 @@ export const dialogable =  {
             cancel: cancelbtn,
             ok: okbtn
           },
+          allowOutsideClick : false,    //枠外をクリックしても画面を閉じない
+          grow : 'fullscreen',
           dangerMode: dangerMode
         }).then(result  => {
           resolve(result);
@@ -63,6 +67,7 @@ export const dialogable =  {
           icon: icon,
           allowOutsideClick : false,    //枠外をクリックしても画面を閉じない
           showConfirmButton: false,
+          grow : 'fullscreen',
           onBeforeOpen: () => {
             Swal.showLoading();
           }
