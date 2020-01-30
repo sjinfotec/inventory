@@ -2,9 +2,9 @@
   <!-- リスト定義 -->
   <select class="form-control" v-model="selectedvalue" v-on:change="selChanges(selectedvalue,rowIndex)">
     <option disabled selected style="display:none;" v-if="this.placeholderData" value="">＜{{ placeholderData }}＞</option>
-    <option v-if="this.blankdata" value=""></option>
+    <option v-if="this.blankData" value=""></option>
     <!-- 項目設定 -->
-    <option v-for="(item, index) in itemList" v-bind:value="item.code">
+    <option v-for="(item, index) in userList" v-bind:value="item.code">
       {{ item.name }}
     </option>
   </select>
@@ -16,19 +16,13 @@ import {dialogable} from '../mixins/dialogable.js';
 import {requestable} from '../mixins/requestable.js';
 
 export default {
-  name: "SelecUserList",
+  name: "selecUserListDetail",
   mixins: [ dialogable, requestable ],
-  data() {
-    return {
-      selectedvalue: 0,
-      selectedname: '',
-      initlist: 0,
-      itemList: [],
-      blankdata: true,
-      roles: []
-    };
-  },
   props: {
+    userList: {
+        type: Array,
+        default: []
+    },
     blankData: {
         type: Boolean,
         default: true
@@ -75,21 +69,36 @@ export default {
     },
     arrayRole: {
         type: Array,
-        default: () => {
-        return []
+        default: []
+    }
+  },
+  data() {
+    return {
+      selectedvalue: 0,
+      selectedname: '',
+      selectList: []
+    };
+  },
+  computed: {
+    initlist: {
+      // getter 関数
+      get: function () {
+        return this.initlist
+      },
+      // setter 関数
+      set: function (newValue) {
+        this.initlist = newValue
       }
+    }
+  },
+  watch: {
+    userList: function (val) {
+      return this.val
     }
   },
   // マウント時
   mounted() {
     this.selectedvalue = this.selectedValue;
-  },
-  created() {
-    if (this.arrayRole.length == 0) {
-      this.getList(this.dateValue, this.killValue, this.initlist, this.departmentValue, this.employmentValue, this.managementValue, null);
-    } else {
-      this.getList(this.dateValue, this.killValue, this.initlist, this.departmentValue, this.employmentValue, this.managementValue, this.arrayRole);
-    }
   },
   methods: {
     // ------------------------ イベント処理 ------------------------------------
@@ -101,6 +110,7 @@ export default {
     },
     // -------------------- サーバー処理 ----------------------------
     getList(targetdate, killvalue, getdo, departmentValue, employmentValue, managementcode = null, role = null ){
+      if (role == null){console.log('getlist roles null');}
       if (targetdate == '') {
         targetdate = moment(new Date()).format("YYYYMMDD");
       }
@@ -135,6 +145,7 @@ export default {
           this.object = { name: "新規に氏名登録する", code: "" };
           this.itemList.unshift(this.object);
         }
+        this.userList = this.itemList;
         // 固有処理 end
       } else {
         if (res.messagedata.length > 0) {
@@ -150,10 +161,11 @@ export default {
       messages.push(kbn + "選択リスト作成に失敗しました");
       this.messageswal("エラー", messages, "error", true, false, true);
     },
+    // -------------------- 共通 ----------------------------
     // 選択テキスト取得
     getText : function(value) {
       name = "";
-      this.itemList.forEach(function (item) {
+      this.userList.forEach(function (item) {
         if (item.code == value) {
           name = item.name;
           return name;

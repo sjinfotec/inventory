@@ -274,8 +274,6 @@
   </div>
 </template>
 <script>
-import toasted from "vue-toasted";
-import moment from "moment";
 import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
