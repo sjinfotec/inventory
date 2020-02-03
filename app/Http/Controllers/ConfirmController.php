@@ -85,6 +85,16 @@ class ConfirmController extends Controller
                 $array_confirm_all = $confirm_model->selectConfirm(null);
             }
             if (count($array_confirm) > 0 || count($array_final_confirm) > 0) {
+                // **************************************************************************************
+                // *  
+                // *    [array_root]
+                // *        ['confirm_no' => 9, 'seqs' => arrayseqs]
+                // *            [arrayseqs]
+                // *                ['seq' => 9, 'seqs' => main_subs]
+                // *                [main_subs]
+                // *                    ['main_sub_name' => '正', 'user_name' => 'ＮＮＮ']
+                // *
+                // **************************************************************************************
                 // $array_root_confirm_concat = $array_confirm->concat($array_final_confirm);
                 // $array_root_confirm_sort = $array_root_confirm_concat->sortBy('main_sub')->sortBy('seq')->sortBy('confirm_no');
                 $array_roots = array();

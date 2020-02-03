@@ -30,11 +30,17 @@ class TempWorkingTimeDate extends Model
     private $working_timetable_no;          // タイムテーブルNo
     private $working_timetable_name;        // タイムテーブル名称
     private $array_attendance_time = [null,null,null,null,null];                    // 出勤時刻
+    private $array_attendance_time_positions = [null,null,null,null,null];          // 出勤位置情報
     private $array_leaving_time = [null,null,null,null,null];                       // 退勤時刻
+    private $array_leaving_time_positions = [null,null,null,null,null];             // 退勤位置情報
     private $array_missing_middle_time = [null,null,null,null,null];                // 私用外出時刻
+    private $array_missing_middle_time_positions = [null,null,null,null,null];      // 私用位置情報
     private $array_missing_middle_return_time = [null,null,null,null,null];         // 私用外出戻り時刻
-    private $array_public_going_out_time = [null,null,null,null,null];              // 公用外出時刻
-    private $array_public_going_out_return_time = [null,null,null,null,null];       // 公用外出戻り時刻
+    private $array_missing_middle_return_time_positions = [null,null,null,null,null];       // 私用外出戻り位置情報
+    private $array_public_going_out_time = [null,null,null,null,null];                      // 公用外出時刻
+    private $array_public_going_out_time_positions = [null,null,null,null,null];            // 公用外出位置情報
+    private $array_public_going_out_return_time = [null,null,null,null,null];               // 公用外出戻り時刻
+    private $array_public_going_out_return_time_positions = [null,null,null,null,null];     // 公用外出戻り位置情報
     private $total_working_times;           // 合計勤務時間
     private $regular_working_times;         // 所定労働時間
     private $out_of_regular_working_times;  // 所定外労働時間
@@ -75,7 +81,8 @@ class TempWorkingTimeDate extends Model
     private $pattern;                       // 打刻パターン
     private $check_result;                  // 打刻チェック結果
     private $check_max_times;               // 打刻回数最大チェック結果
-    private $check_interval;                // インターバルチェック結果
+    private $check_interval;                // 位置情報
+    private $positions;                     // インターバルチェック結果
     private $fixedtime;                     // 確定
     private $systemdate;
 
@@ -207,6 +214,17 @@ class TempWorkingTimeDate extends Model
         $this->array_attendance_time[$index] = $value;
     }
 
+    // 出勤位置情報
+    public function getAttendancetimepositionsAttribute($index)
+    {
+        return $this->array_attendance_time_positions[$index];
+    }
+
+    public function setAttendancetimepositionsAttribute($index, $value)
+    {
+        $this->array_attendance_time_positions[$index] = $value;
+    }
+
     // 退勤時刻
     public function getLeavingtimeAttribute($index)
     {
@@ -216,6 +234,17 @@ class TempWorkingTimeDate extends Model
     public function setLeavingtimeAttribute($index, $value)
     {
         $this->array_leaving_time[$index] = $value;
+    }
+
+    // 退勤位置情報
+    public function getLeavingtimepositionsAttribute($index)
+    {
+        return $this->array_leaving_time_positions[$index];
+    }
+
+    public function setLeavingtimepositionsAttribute($index, $value)
+    {
+        $this->array_leaving_time_positions[$index] = $value;
     }
 
     // 私用外出時刻
@@ -229,6 +258,17 @@ class TempWorkingTimeDate extends Model
         $this->array_missing_middle_time[$index] = $value;
     }
 
+    // 私用外出位置情報
+    public function getMissingmiddletimepositionsAttribute($index)
+    {
+        return $this->array_missing_middle_time_positions[$index];
+    }
+
+    public function setMissingmiddletimepositionsAttribute($index, $value)
+    {
+        $this->array_missing_middle_time_positions[$index] = $value;
+    }
+
     // 私用外出戻り時刻
     public function getMissingmiddlereturntimeAttribute($index)
     {
@@ -238,6 +278,17 @@ class TempWorkingTimeDate extends Model
     public function setMissingmiddlereturntimeAttribute($index, $value)
     {
         $this->array_missing_middle_return_time[$index] = $value;
+    }
+
+    // 私用外出戻り位置情報
+    public function getMissingmiddlereturntimepositionsAttribute($index)
+    {
+        return $this->array_missing_middle_return_time_positions[$index];
+    }
+
+    public function setMissingmiddlereturntimepositionsAttribute($index, $value)
+    {
+        $this->array_missing_middle_return_time_positions[$index] = $value;
     }
 
     // 公用外出時刻
@@ -251,6 +302,17 @@ class TempWorkingTimeDate extends Model
         $this->array_public_going_out_time[$index] = $value;
     }
 
+    // 公用外出位置情報
+    public function getPublicgoingouttimepositionsAttribute($index)
+    {
+        return $this->array_public_going_out_time_positions[$index];
+    }
+
+    public function setPublicgoingouttimepositionsAttribute($index, $value)
+    {
+        $this->array_public_going_out_time_positions[$index] = $value;
+    }
+
     // 公用外出戻り時刻
     public function getPublicgoingoutreturntimeAttribute($index)
     {
@@ -260,6 +322,17 @@ class TempWorkingTimeDate extends Model
     public function setPublicgoingoutreturntimeAttribute($index, $value)
     {
         $this->array_public_going_out_return_time[$index] = $value;
+    }
+
+    // 公用外出戻り位置情報
+    public function getPublicgoingoutreturntimepositionsAttribute($index)
+    {
+        return $this->array_public_going_out_return_time_positions[$index];
+    }
+
+    public function setPublicgoingoutreturntimepositionsAttribute($index, $value)
+    {
+        $this->array_public_going_out_return_time_positions[$index] = $value;
     }
 
     // 合計勤務時間
@@ -747,7 +820,6 @@ class TempWorkingTimeDate extends Model
         $this->check_interval = $value;
     }
 
-
     // 確定
     public function getFixedtimeAttribute()
     {
@@ -968,7 +1040,79 @@ class TempWorkingTimeDate extends Model
                     $this->table.'.check_max_times',
                     $this->table.'.check_interval',
                     $this->table.'.fixedtime');
-
+            for ($i=1;$i<=5;$i++) {
+                $case_options =
+                    "  CASE IFNULL(".$this->table.'.attendance_time_positions_'.$i.',null)';
+                $case_options .=
+                    '  WHEN null THEN '.$this->table.'.attendance_time_positions_'.$i;
+                $case_options .=
+                    '  ELSE (CONCAT(X('.$this->table.'.attendance_time_positions_'.$i."), ' ' , Y(".$this->table.'.attendance_time_positions_'.$i.')))';
+                $case_options .=
+                    '  END as attendance_time_positions_'.$i;
+                $subquery1
+                    ->selectRaw($case_options);
+            }
+            for ($i=1;$i<=5;$i++) {
+                $case_options =
+                    "  CASE IFNULL(".$this->table.'.leaving_time_positions_'.$i.',null)';
+                $case_options .=
+                    '  WHEN null THEN '.$this->table.'.leaving_time_positions_'.$i;
+                $case_options .=
+                    '  ELSE (CONCAT(X('.$this->table.'.leaving_time_positions_'.$i."), ' ' , Y(".$this->table.'.leaving_time_positions_'.$i.')))';
+                $case_options .=
+                    '  END as leaving_time_positions_'.$i;
+                $subquery1
+                    ->selectRaw($case_options);
+            }
+            for ($i=1;$i<=5;$i++) {
+                $case_options =
+                    "  CASE IFNULL(".$this->table.'.missing_middle_time_positions_'.$i.',null)';
+                $case_options .=
+                    '  WHEN null THEN '.$this->table.'.missing_middle_time_positions_'.$i;
+                $case_options .=
+                    '  ELSE (CONCAT(X('.$this->table.'.missing_middle_time_positions_'.$i."), ' ' , Y(".$this->table.'.missing_middle_time_positions_'.$i.')))';
+                $case_options .=
+                    '  END as missing_middle_time_positions_'.$i;
+                $subquery1
+                    ->selectRaw($case_options);
+            }
+            for ($i=1;$i<=5;$i++) {
+                $case_options =
+                    "  CASE IFNULL(".$this->table.'.missing_middle_return_time_positions_'.$i.',null)';
+                $case_options .=
+                    '  WHEN null THEN '.$this->table.'.missing_middle_return_time_positions_'.$i;
+                $case_options .=
+                    '  ELSE (CONCAT(X('.$this->table.'.missing_middle_return_time_positions_'.$i."), ' ' , Y(".$this->table.'.missing_middle_return_time_positions_'.$i.')))';
+                $case_options .=
+                    '  END as missing_middle_return_time_positions_'.$i;
+                $subquery1
+                    ->selectRaw($case_options);
+            }
+            for ($i=1;$i<=5;$i++) {
+                $case_options =
+                    "  CASE IFNULL(".$this->table.'.public_going_out_time_positions_'.$i.',null)';
+                $case_options .=
+                    '  WHEN null THEN '.$this->table.'.public_going_out_time_positions_'.$i;
+                $case_options .=
+                    '  ELSE (CONCAT(X('.$this->table.'.public_going_out_time_positions_'.$i."), ' ' , Y(".$this->table.'.public_going_out_time_positions_'.$i.')))';
+                $case_options .=
+                    '  END as public_going_out_time_positions_'.$i;
+                $subquery1
+                    ->selectRaw($case_options);
+            }
+            for ($i=1;$i<=5;$i++) {
+                $case_options =
+                    "  CASE IFNULL(".$this->table.'.public_going_out_return_time_positions_'.$i.',null)';
+                $case_options .=
+                    '  WHEN null THEN '.$this->table.'.public_going_out_return_time_positions_'.$i;
+                $case_options .=
+                    '  ELSE (CONCAT(X('.$this->table.'.public_going_out_return_time_positions_'.$i."), ' ' , Y(".$this->table.'.public_going_out_return_time_positions_'.$i.')))';
+                $case_options .=
+                    '  END as public_going_out_return_time_positions_'.$i;
+                $subquery1
+                    ->selectRaw($case_options);
+            }
+     
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             // usersの最大適用開始日付subquery
@@ -1026,7 +1170,38 @@ class TempWorkingTimeDate extends Model
                 ->selectRaw('(case when t2.public_going_out_return_time_3 is not null then t2.public_going_out_return_time_3 else null end) as public_going_out_return_time_3')
                 ->selectRaw('(case when t2.public_going_out_return_time_4 is not null then t2.public_going_out_return_time_4 else null end) as public_going_out_return_time_4')
                 ->selectRaw('(case when t2.public_going_out_return_time_5 is not null then t2.public_going_out_return_time_5 else null end) as public_going_out_return_time_5');
-            $mainquery->addselect('t2.total_working_times')
+            $mainquery
+                ->addselect('t2.attendance_time_positions_1')
+                ->addselect('t2.attendance_time_positions_2')
+                ->addselect('t2.attendance_time_positions_3')
+                ->addselect('t2.attendance_time_positions_4')
+                ->addselect('t2.attendance_time_positions_5')
+                ->addselect('t2.leaving_time_positions_1')
+                ->addselect('t2.leaving_time_positions_2')
+                ->addselect('t2.leaving_time_positions_3')
+                ->addselect('t2.leaving_time_positions_4')
+                ->addselect('t2.leaving_time_positions_5')
+                ->addselect('t2.missing_middle_time_positions_1')
+                ->addselect('t2.missing_middle_time_positions_2')
+                ->addselect('t2.missing_middle_time_positions_3')
+                ->addselect('t2.missing_middle_time_positions_4')
+                ->addselect('t2.missing_middle_time_positions_5')
+                ->addselect('t2.missing_middle_return_time_positions_1')
+                ->addselect('t2.missing_middle_return_time_positions_2')
+                ->addselect('t2.missing_middle_return_time_positions_3')
+                ->addselect('t2.missing_middle_return_time_positions_4')
+                ->addselect('t2.missing_middle_return_time_positions_5')
+                ->addselect('t2.public_going_out_time_positions_1')
+                ->addselect('t2.public_going_out_time_positions_2')
+                ->addselect('t2.public_going_out_time_positions_3')
+                ->addselect('t2.public_going_out_time_positions_4')
+                ->addselect('t2.public_going_out_time_positions_5')
+                ->addselect('t2.public_going_out_return_time_positions_1')
+                ->addselect('t2.public_going_out_return_time_positions_2')
+                ->addselect('t2.public_going_out_return_time_positions_3')
+                ->addselect('t2.public_going_out_return_time_positions_4')
+                ->addselect('t2.public_going_out_return_time_positions_5')
+                ->addselect('t2.total_working_times')
                 ->addselect('t2.regular_working_times')
                 ->addselect('t2.out_of_regular_working_times')
                 ->addselect('t2.overtime_hours')
@@ -1138,93 +1313,158 @@ class TempWorkingTimeDate extends Model
         Log::debug('        <<<< insertTempWorkingTimeDate  $this->user_code = '.$this->user_code);
         Log::debug('        <<<< insertTempWorkingTimeDate  $this->user_name = '.$this->user_name);
         try{
-            DB::table($this->table)->insert(
-                [
-                    'working_date' => $this->working_date,
-                    'employment_status' => $this->employment_status,
-                    'department_code' => $this->department_code,
-                    'user_code' => $this->user_code,
-                    'seq' => $this->seq,
-                    'employment_status_name' => $this->employment_status_name,
-                    'department_name' => $this->department_name,
-                    'user_name' => $this->user_name,
-                    'working_timetable_no' => $this->working_timetable_no,
-                    'working_timetable_name' => $this->working_timetable_name,
-                    'attendance_time_1' => $this->array_attendance_time[0],
-                    'attendance_time_2' => $this->array_attendance_time[1],
-                    'attendance_time_3' => $this->array_attendance_time[2],
-                    'attendance_time_4' => $this->array_attendance_time[3],
-                    'attendance_time_5' => $this->array_attendance_time[4],
-                    'leaving_time_1' => $this->array_leaving_time[0],
-                    'leaving_time_2' => $this->array_leaving_time[1],
-                    'leaving_time_3' => $this->array_leaving_time[2],
-                    'leaving_time_4' => $this->array_leaving_time[3],
-                    'leaving_time_5' => $this->array_leaving_time[4],
-                    'missing_middle_time_1' => $this->array_missing_middle_time[0],
-                    'missing_middle_time_2' => $this->array_missing_middle_time[1],
-                    'missing_middle_time_3' => $this->array_missing_middle_time[2],
-                    'missing_middle_time_4' => $this->array_missing_middle_time[3],
-                    'missing_middle_time_5' => $this->array_missing_middle_time[4],
-                    'missing_middle_return_time_1' => $this->array_missing_middle_return_time[0],
-                    'missing_middle_return_time_2' => $this->array_missing_middle_return_time[1],
-                    'missing_middle_return_time_3' => $this->array_missing_middle_return_time[2],
-                    'missing_middle_return_time_4' => $this->array_missing_middle_return_time[3],
-                    'missing_middle_return_time_5' => $this->array_missing_middle_return_time[4],
-                    'public_going_out_time_1' => $this->array_public_going_out_time[0],
-                    'public_going_out_time_2' => $this->array_public_going_out_time[1],
-                    'public_going_out_time_3' => $this->array_public_going_out_time[2],
-                    'public_going_out_time_4' => $this->array_public_going_out_time[3],
-                    'public_going_out_time_5' => $this->array_public_going_out_time[4],
-                    'public_going_out_return_time_1' => $this->array_public_going_out_return_time[0],
-                    'public_going_out_return_time_2' => $this->array_public_going_out_return_time[1],
-                    'public_going_out_return_time_3' => $this->array_public_going_out_return_time[2],
-                    'public_going_out_return_time_4' => $this->array_public_going_out_return_time[3],
-                    'public_going_out_return_time_5' => $this->array_public_going_out_return_time[4],
-                    'total_working_times' => $this->total_working_times,
-                    'regular_working_times' => $this->regular_working_times,
-                    'out_of_regular_working_times' => $this->out_of_regular_working_times,
-                    'overtime_hours' => $this->overtime_hours,
-                    'late_night_overtime_hours' => $this->late_night_overtime_hours,
-                    'late_night_working_hours' => $this->late_night_working_hours,
-                    'legal_working_times' => $this->legal_working_times,
-                    'out_of_legal_working_times' => $this->out_of_legal_working_times,
-                    'not_employment_working_hours' => $this->not_employment_working_hours,
-                    'off_hours_working_hours' => $this->off_hours_working_hours,
-                    'public_going_out_hours' => $this->public_going_out_hours,
-                    'missing_middle_hours' => $this->missing_middle_hours,
-                    'out_of_legal_working_holiday_hours' => $this->out_of_legal_working_holiday_hours,
-                    'legal_working_holiday_hours' => $this->legal_working_holiday_hours,
-                    'working_status' => $this->working_status,
-                    'working_status_name' => $this->working_status_name,
-                    'note' => $this->note,
-                    'late' => $this->late,
-                    'leave_early' => $this->leave_early,
-                    'current_calc' => $this->current_calc,
-                    'to_be_confirmed' => $this->to_be_confirmed,
-                    'weekday_kubun' => $this->weekday_kubun,
-                    'weekday_name' => $this->weekday_name,
-                    'business_kubun' => $this->business_kubun,
-                    'business_name' => $this->business_name,
-                    'holiday_kubun' => $this->holiday_kubun,
-                    'holiday_name' => $this->holiday_name,
-                    'closing' => $this->closing,
-                    'uplimit_time' => $this->uplimit_time,
-                    'statutory_uplimit_time' => $this->statutory_uplimit_time,
-                    'time_unit' => $this->time_unit,
-                    'time_rounding' => $this->time_rounding,
-                    'max_3month_total' => $this->max_3month_total,
-                    'max_6month_total' => $this->max_6month_total,
-                    'max_12month_total' => $this->max_12month_total,
-                    'beginning_month' => $this->beginning_month,
-                    'year' => $this->year,
-                    'pattern' => $this->pattern,
-                    'check_result' => $this->check_result,
-                    'check_max_times' => $this->check_max_times,
-                    'check_interval' => $this->check_interval,
-                    'fixedtime' => $this->fixedtime,
-                    'created_at'=>$this->systemdate
-                ]
+            $array_insert_items = array(
+                'working_date' => $this->working_date,
+                'employment_status' => $this->employment_status,
+                'department_code' => $this->department_code,
+                'user_code' => $this->user_code,
+                'seq' => $this->seq,
+                'employment_status_name' => $this->employment_status_name,
+                'department_name' => $this->department_name,
+                'user_name' => $this->user_name,
+                'working_timetable_no' => $this->working_timetable_no,
+                'working_timetable_name' => $this->working_timetable_name,
+                'attendance_time_1' => $this->array_attendance_time[0],
+                'attendance_time_2' => $this->array_attendance_time[1],
+                'attendance_time_3' => $this->array_attendance_time[2],
+                'attendance_time_4' => $this->array_attendance_time[3],
+                'attendance_time_5' => $this->array_attendance_time[4],
+                'leaving_time_1' => $this->array_leaving_time[0],
+                'leaving_time_2' => $this->array_leaving_time[1],
+                'leaving_time_3' => $this->array_leaving_time[2],
+                'leaving_time_4' => $this->array_leaving_time[3],
+                'leaving_time_5' => $this->array_leaving_time[4],
+                'missing_middle_time_1' => $this->array_missing_middle_time[0],
+                'missing_middle_time_2' => $this->array_missing_middle_time[1],
+                'missing_middle_time_3' => $this->array_missing_middle_time[2],
+                'missing_middle_time_4' => $this->array_missing_middle_time[3],
+                'missing_middle_time_5' => $this->array_missing_middle_time[4],
+                'missing_middle_return_time_1' => $this->array_missing_middle_return_time[0],
+                'missing_middle_return_time_2' => $this->array_missing_middle_return_time[1],
+                'missing_middle_return_time_3' => $this->array_missing_middle_return_time[2],
+                'missing_middle_return_time_4' => $this->array_missing_middle_return_time[3],
+                'missing_middle_return_time_5' => $this->array_missing_middle_return_time[4],
+                'public_going_out_time_1' => $this->array_public_going_out_time[0],
+                'public_going_out_time_2' => $this->array_public_going_out_time[1],
+                'public_going_out_time_3' => $this->array_public_going_out_time[2],
+                'public_going_out_time_4' => $this->array_public_going_out_time[3],
+                'public_going_out_time_5' => $this->array_public_going_out_time[4],
+                'public_going_out_return_time_1' => $this->array_public_going_out_return_time[0],
+                'public_going_out_return_time_2' => $this->array_public_going_out_return_time[1],
+                'public_going_out_return_time_3' => $this->array_public_going_out_return_time[2],
+                'public_going_out_return_time_4' => $this->array_public_going_out_return_time[3],
+                'public_going_out_return_time_5' => $this->array_public_going_out_return_time[4],
+                'total_working_times' => $this->total_working_times,
+                'regular_working_times' => $this->regular_working_times,
+                'out_of_regular_working_times' => $this->out_of_regular_working_times,
+                'overtime_hours' => $this->overtime_hours,
+                'late_night_overtime_hours' => $this->late_night_overtime_hours,
+                'late_night_working_hours' => $this->late_night_working_hours,
+                'legal_working_times' => $this->legal_working_times,
+                'out_of_legal_working_times' => $this->out_of_legal_working_times,
+                'not_employment_working_hours' => $this->not_employment_working_hours,
+                'off_hours_working_hours' => $this->off_hours_working_hours,
+                'public_going_out_hours' => $this->public_going_out_hours,
+                'missing_middle_hours' => $this->missing_middle_hours,
+                'out_of_legal_working_holiday_hours' => $this->out_of_legal_working_holiday_hours,
+                'legal_working_holiday_hours' => $this->legal_working_holiday_hours,
+                'working_status' => $this->working_status,
+                'working_status_name' => $this->working_status_name,
+                'note' => $this->note,
+                'late' => $this->late,
+                'leave_early' => $this->leave_early,
+                'current_calc' => $this->current_calc,
+                'to_be_confirmed' => $this->to_be_confirmed,
+                'weekday_kubun' => $this->weekday_kubun,
+                'weekday_name' => $this->weekday_name,
+                'business_kubun' => $this->business_kubun,
+                'business_name' => $this->business_name,
+                'holiday_kubun' => $this->holiday_kubun,
+                'holiday_name' => $this->holiday_name,
+                'closing' => $this->closing,
+                'uplimit_time' => $this->uplimit_time,
+                'statutory_uplimit_time' => $this->statutory_uplimit_time,
+                'time_unit' => $this->time_unit,
+                'time_rounding' => $this->time_rounding,
+                'max_3month_total' => $this->max_3month_total,
+                'max_6month_total' => $this->max_6month_total,
+                'max_12month_total' => $this->max_12month_total,
+                'beginning_month' => $this->beginning_month,
+                'year' => $this->year,
+                'pattern' => $this->pattern,
+                'check_result' => $this->check_result,
+                'check_max_times' => $this->check_max_times,
+                'check_interval' => $this->check_interval,
+                'fixedtime' => $this->fixedtime,
+                'created_at'=>$this->systemdate
             );
+            for ($i=0;$i<count($this->array_attendance_time_positions);$i++) {
+                if (isset($this->array_attendance_time_positions[$i])) {
+                    $array_insert_items = array_merge($array_insert_items,
+                        array('attendance_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_attendance_time_positions[$i].")'))"))
+                    );
+                } else {
+                    $array_insert_items = array_merge($array_insert_items,
+                        array('attendance_time_positions_'.($i+1) => null)
+                    );
+                }
+            }
+            for ($i=0;$i<count($this->array_leaving_time_positions);$i++) {
+                if (isset($this->array_leaving_time_positions[$i])) {
+                    $array_insert_items = array_merge($array_insert_items,
+                        array('leaving_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_leaving_time_positions[$i].")'))"))
+                    );
+                } else {
+                    $array_insert_items = array_merge($array_insert_items,
+                        array('leaving_time_positions_'.($i+1) => null)
+                    );
+                }
+            }
+            for ($i=0;$i<count($this->array_missing_middle_time_positions);$i++) {
+                if (isset($this->array_missing_middle_time_positions[$i])) {
+                    $array_insert_items = array_merge($array_insert_items,
+                        array('missing_middle_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_missing_middle_time_positions[$i].")'))"))
+                    );
+                } else {
+                    $array_insert_items = array_merge($array_insert_items,
+                        array('missing_middle_time_positions_'.($i+1) => null)
+                    );
+                }
+            }
+            for ($i=0;$i<count($this->array_missing_middle_return_time_positions);$i++) {
+                if (isset($this->array_missing_middle_return_time_positions[$i])) {
+                    $array_insert_items = array_merge($array_insert_items,
+                        array('missing_middle_return_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_missing_middle_return_time_positions[$i].")'))"))
+                    );
+                } else {
+                    $array_insert_items = array_merge($array_insert_items,
+                        array('missing_middle_return_time_positions_'.($i+1) => null)
+                    );
+                }
+            }
+            for ($i=0;$i<count($this->array_public_going_out_time_positions);$i++) {
+                if (isset($this->array_public_going_out_time_positions[$i])) {
+                    $array_insert_items = array_merge($array_insert_items,
+                        array('public_going_out_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_public_going_out_time_positions[$i].")'))"))
+                    );
+                } else {
+                    $array_insert_items = array_merge($array_insert_items,
+                        array('public_going_out_time_positions_'.($i+1) => null)
+                    );
+                }
+            }
+            for ($i=0;$i<count($this->array_public_going_out_return_time_positions);$i++) {
+                if (isset($this->array_public_going_out_return_time_positions[$i])) {
+                    $array_insert_items = array_merge($array_insert_items,
+                        array('public_going_out_return_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_public_going_out_return_time_positions[$i].")'))"))
+                    );
+                } else {
+                    $array_insert_items = array_merge($array_insert_items,
+                        array('public_going_out_return_time_positions_'.($i+1) => null)
+                    );
+                }
+            }
+            DB::table($this->table)->insert($array_insert_items);
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
             Log::error($pe->getMessage());
