@@ -29,12 +29,15 @@ class DailyWorkingInformationController extends Controller
     private $array_check_max_times = array();
     private $array_check_interval = array();
     private $array_working_timetable_no = array();
+    private $array_mobile_positions = array();
     // 計算用配列
     private $array_calc_mode = array();
     private $array_calc_working_timetable_no = array();
     private $array_calc_time = array();
     private $array_calc_status = array();
     private $array_calc_note = array();
+    // mobile位置情報
+    private $array_calc_mobile_positions = array();
 
     private $array_calc_late = array();
     private $array_calc_leave_early = array();
@@ -211,20 +214,44 @@ class DailyWorkingInformationController extends Controller
                 isset($working_time->public_going_out_return_time_1) ) {
                 $array_working_time_attendances[] = array(
                     'attendance_time' => $working_time->attendance_time_1,
+                    'x_attendance_time_positions' => $working_time->x_attendance_time_positions_1,
+                    'y_attendance_time_positions' => $working_time->y_attendance_time_positions_1,
                     'leaving_time' => $working_time->leaving_time_1,
+                    'x_leaving_time_positions' => $working_time->x_leaving_time_positions_1,
+                    'y_leaving_time_positions' => $working_time->y_leaving_time_positions_1,
                     'missing_middle_time' => $working_time->missing_middle_time_1,
+                    'x_missing_middle_time_positions' => $working_time->x_missing_middle_time_positions_1,
+                    'y_missing_middle_time_positions' => $working_time->y_missing_middle_time_positions_1,
                     'missing_middle_return_time' => $working_time->missing_middle_return_time_1,
+                    'x_missing_middle_return_time_positions' => $working_time->x_missing_middle_return_time_positions_1,
+                    'y_missing_middle_return_time_positions' => $working_time->y_missing_middle_return_time_positions_1,
                     'public_going_out_time' => $working_time->public_going_out_time_1,
-                    'public_going_out_return_time' => $working_time->public_going_out_return_time_1
+                    'x_public_going_out_time_positions' => $working_time->x_public_going_out_time_positions_1,
+                    'y_public_going_out_time_positions' => $working_time->y_public_going_out_time_positions_1,
+                    'public_going_out_return_time' => $working_time->public_going_out_return_time_1,
+                    'x_public_going_out_return_time_positions' => $working_time->x_public_going_out_return_time_positions_1,
+                    'y_public_going_out_return_time_positions' => $working_time->y_public_going_out_return_time_positions_1
                 );
             } else {
                 $array_working_time_attendances[] = array(
                     'attendance_time' => '',
+                    'x_attendance_time_positions' => '',
+                    'y_attendance_time_positions' => '',
                     'leaving_time' => '',
+                    'x_leaving_time_positions' => '',
+                    'y_leaving_time_positions' => '',
                     'missing_middle_time' => '',
+                    'x_missing_middle_time_positions' => '',
+                    'y_missing_middle_time_positions' => '',
                     'missing_middle_return_time' => '',
+                    'x_missing_middle_return_time_positions' => '',
+                    'y_missing_middle_return_time_positions' => '',
                     'public_going_out_time' => '',
-                    'public_going_out_return_time' => ''
+                    'x_public_going_out_time_positions' => '',
+                    'y_public_going_out_time_positions' => '',
+                    'public_going_out_return_time' => '',
+                    'x_public_going_out_return_time_positions' => '',
+                    'y_public_going_out_return_time_positions' => ''
                 );
             }
             if ( isset($working_time->attendance_time_2) ||
@@ -235,11 +262,23 @@ class DailyWorkingInformationController extends Controller
                 isset($working_time->public_going_out_return_time_2) ) {
                 $array_working_time_attendances[] = array(
                     'attendance_time' => $working_time->attendance_time_2,
+                    'x_attendance_time_positions' => $working_time->x_attendance_time_positions_2,
+                    'y_attendance_time_positions' => $working_time->y_attendance_time_positions_2,
                     'leaving_time' => $working_time->leaving_time_2,
+                    'x_leaving_time_positions' => $working_time->x_leaving_time_positions_2,
+                    'y_leaving_time_positions' => $working_time->y_leaving_time_positions_2,
                     'missing_middle_time' => $working_time->missing_middle_time_2,
+                    'x_missing_middle_time_positions' => $working_time->x_missing_middle_time_positions_2,
+                    'y_missing_middle_time_positions' => $working_time->y_missing_middle_time_positions_2,
                     'missing_middle_return_time' => $working_time->missing_middle_return_time_2,
+                    'x_missing_middle_return_time_positions' => $working_time->x_missing_middle_return_time_positions_2,
+                    'y_missing_middle_return_time_positions' => $working_time->y_missing_middle_return_time_positions_2,
                     'public_going_out_time' => $working_time->public_going_out_time_2,
-                    'public_going_out_return_time' => $working_time->public_going_out_return_time_2
+                    'x_public_going_out_time_positions' => $working_time->x_public_going_out_time_positions_2,
+                    'y_public_going_out_time_positions' => $working_time->y_public_going_out_time_positions_2,
+                    'public_going_out_return_time' => $working_time->public_going_out_return_time_2,
+                    'x_public_going_out_return_time_positions' => $working_time->x_public_going_out_return_time_positions_2,
+                    'y_public_going_out_return_time_positions' => $working_time->y_public_going_out_return_time_positions_2
                 );
             }
             if ( isset($working_time->attendance_time_3) ||
@@ -250,11 +289,23 @@ class DailyWorkingInformationController extends Controller
                 isset($working_time->public_going_out_return_time_3) ) {
                 $array_working_time_attendances[] = array(
                     'attendance_time' => $working_time->attendance_time_3,
+                    'x_attendance_time_positions' => $working_time->x_attendance_time_positions_3,
+                    'y_attendance_time_positions' => $working_time->y_attendance_time_positions_3,
                     'leaving_time' => $working_time->leaving_time_3,
+                    'x_leaving_time_positions' => $working_time->x_leaving_time_positions_3,
+                    'y_leaving_time_positions' => $working_time->y_leaving_time_positions_3,
                     'missing_middle_time' => $working_time->missing_middle_time_3,
+                    'x_missing_middle_time_positions' => $working_time->x_missing_middle_time_positions_3,
+                    'y_missing_middle_time_positions' => $working_time->y_missing_middle_time_positions_3,
                     'missing_middle_return_time' => $working_time->missing_middle_return_time_3,
+                    'x_missing_middle_return_time_positions' => $working_time->x_missing_middle_return_time_positions_3,
+                    'y_missing_middle_return_time_positions' => $working_time->y_missing_middle_return_time_positions_3,
                     'public_going_out_time' => $working_time->public_going_out_time_3,
-                    'public_going_out_return_time' => $working_time->public_going_out_return_time_3
+                    'x_public_going_out_time_positions' => $working_time->x_public_going_out_time_positions_3,
+                    'y_public_going_out_time_positions' => $working_time->y_public_going_out_time_positions_3,
+                    'public_going_out_return_time' => $working_time->public_going_out_return_time_3,
+                    'x_public_going_out_return_time_positions' => $working_time->x_public_going_out_return_time_positions_3,
+                    'y_public_going_out_return_time_positions' => $working_time->y_public_going_out_return_time_positions_3
                 );
             }
             if ( isset($working_time->attendance_time_4) ||
@@ -265,11 +316,23 @@ class DailyWorkingInformationController extends Controller
                 isset($working_time->public_going_out_return_time_4) ) {
                 $array_working_time_attendances[] = array(
                     'attendance_time' => $working_time->attendance_time_4,
+                    'x_attendance_time_positions' => $working_time->x_attendance_time_positions_4,
+                    'y_attendance_time_positions' => $working_time->y_attendance_time_positions_4,
                     'leaving_time' => $working_time->leaving_time_4,
+                    'x_leaving_time_positions' => $working_time->x_leaving_time_positions_4,
+                    'y_leaving_time_positions' => $working_time->y_leaving_time_positions_4,
                     'missing_middle_time' => $working_time->missing_middle_time_4,
+                    'x_missing_middle_time_positions' => $working_time->x_missing_middle_time_positions_4,
+                    'y_missing_middle_time_positions' => $working_time->y_missing_middle_time_positions_4,
                     'missing_middle_return_time' => $working_time->missing_middle_return_time_4,
+                    'x_missing_middle_return_time_positions' => $working_time->x_missing_middle_return_time_positions_4,
+                    'y_missing_middle_return_time_positions' => $working_time->y_missing_middle_return_time_positions_4,
                     'public_going_out_time' => $working_time->public_going_out_time_4,
-                    'public_going_out_return_time' => $working_time->public_going_out_return_time_4
+                    'x_public_going_out_time_positions' => $working_time->x_public_going_out_time_positions_4,
+                    'y_public_going_out_time_positions' => $working_time->y_public_going_out_time_positions_4,
+                    'public_going_out_return_time' => $working_time->public_going_out_return_time_4,
+                    'x_public_going_out_return_time_positions' => $working_time->x_public_going_out_return_time_positions_4,
+                    'y_public_going_out_return_time_positions' => $working_time->y_public_going_out_return_time_positions_4
                 );
             }
             if ( isset($working_time->attendance_time_5) ||
@@ -280,11 +343,23 @@ class DailyWorkingInformationController extends Controller
                 isset($working_time->public_going_out_return_time_5) ) {
                 $array_working_time_attendances[] = array(
                     'attendance_time' => $working_time->attendance_time_5,
+                    'x_attendance_time_positions' => $working_time->x_attendance_time_positions_5,
+                    'y_attendance_time_positions' => $working_time->y_attendance_time_positions_5,
                     'leaving_time' => $working_time->leaving_time_5,
+                    'x_leaving_time_positions' => $working_time->x_leaving_time_positions_5,
+                    'y_leaving_time_positions' => $working_time->y_leaving_time_positions_5,
                     'missing_middle_time' => $working_time->missing_middle_time_5,
+                    'x_missing_middle_time_positions' => $working_time->x_missing_middle_time_positions_5,
+                    'y_missing_middle_time_positions' => $working_time->y_missing_middle_time_positions_5,
                     'missing_middle_return_time' => $working_time->missing_middle_return_time_5,
+                    'x_missing_middle_return_time_positions' => $working_time->x_missing_middle_return_time_positions_5,
+                    'y_missing_middle_return_time_positions' => $working_time->y_missing_middle_return_time_positions_5,
                     'public_going_out_time' => $working_time->public_going_out_time_5,
-                    'public_going_out_return_time' => $working_time->public_going_out_return_time_5
+                    'x_public_going_out_time_positions' => $working_time->x_public_going_out_time_positions_5,
+                    'y_public_going_out_time_positions' => $working_time->y_public_going_out_time_positions_5,
+                    'public_going_out_return_time' => $working_time->public_going_out_return_time_5,
+                    'x_public_going_out_return_time_positions' => $working_time->x_public_going_out_return_time_positions_5,
+                    'y_public_going_out_return_time_positions' => $working_time->y_public_going_out_return_time_positions_5
                 );
             }
 
@@ -441,12 +516,7 @@ class DailyWorkingInformationController extends Controller
                          //   $working_model->delWorkingTimeDate();
                         //};
                         Log::debug(' $insertWorkingTimeDateFromTemp  ');
-                        $temp_array = array();
-                        foreach($temp_working_time_dates as $working_time_date) {
-                            $temp_collect = collect($working_time_date);
-                            $temp_array[] = $temp_collect->toArray();
-                        } 
-                        $working_model->insertWorkingTimeDateFromTemp($temp_array);
+                        $working_model->insertWorkingTimeDateFromTemp($temp_working_time_dates);
                         //DB::commit();
                         //Log::debug(' calc commit ');
                     }catch(\PDOException $pe){
@@ -1140,6 +1210,7 @@ class DailyWorkingInformationController extends Controller
             $value_check_result = $this->array_check_result[$i];
             $value_check_max_times = $this->array_check_max_times[$i];
             $value_check_interval = $this->array_check_interval[$i];
+            $value_mobile_positions = $this->array_mobile_positions[$i];
             $dt = new Carbon($value_record_datetime);
             $record_date = date_format($dt, 'Ymd');
             Log::DEBUG('        ユーザー労働時間計算 cnt = '.$cnt);
@@ -1150,6 +1221,7 @@ class DailyWorkingInformationController extends Controller
             Log::DEBUG('        ユーザー労働時間計算 value_check_result = '.$value_check_result);
             Log::DEBUG('        ユーザー労働時間計算 value_check_max_times = '.$value_check_max_times);
             Log::DEBUG('        ユーザー労働時間計算 value_check_interval = '.$value_check_interval);
+            Log::DEBUG('        ユーザー労働時間計算 value_mobile_positions = '.$value_mobile_positions);
             Log::DEBUG('        ユーザー労働時間計算 value_working_timetable_no = '.$value_working_timetable_no);
             Log::DEBUG('        ユーザー労働時間計算 target_date = '.$target_date);
             Log::DEBUG('        ユーザー労働時間計算 record_date = '.$record_date);
@@ -1194,6 +1266,7 @@ class DailyWorkingInformationController extends Controller
                     $value_check_result,
                     $value_check_max_times,
                     $value_check_interval,
+                    $value_mobile_positions,
                     $before_value_mode,
                     $before_value_datetime,
                     $business_kubun,
@@ -1216,6 +1289,7 @@ class DailyWorkingInformationController extends Controller
                     $value_timetable_to_time,
                     $value_check_result,
                     $value_check_max_times,
+                    $value_mobile_positions,
                     $before_value_mode,
                     $before_value_datetime,
                     $business_kubun,
@@ -1236,6 +1310,7 @@ class DailyWorkingInformationController extends Controller
                     $value_timetable_to_time,
                     $value_check_result,
                     $value_check_max_times,
+                    $value_mobile_positions,
                     $before_value_mode,
                     $before_value_datetime,
                     $value_working_timetable_no,
@@ -1253,6 +1328,7 @@ class DailyWorkingInformationController extends Controller
                     $value_timetable_to_time,
                     $value_check_result,
                     $value_check_max_times,
+                    $value_mobile_positions,
                     $before_value_mode,
                     $before_value_datetime,
                     $value_working_timetable_no,
@@ -1270,6 +1346,7 @@ class DailyWorkingInformationController extends Controller
                     $value_timetable_to_time,
                     $value_check_result,
                     $value_check_max_times,
+                    $value_mobile_positions,
                     $before_value_mode,
                     $before_value_datetime,
                     $value_working_timetable_no,
@@ -1287,6 +1364,7 @@ class DailyWorkingInformationController extends Controller
                     $value_timetable_to_time,
                     $value_check_result,
                     $value_check_max_times,
+                    $value_mobile_positions,
                     $before_value_mode,
                     $before_value_datetime,
                     $value_working_timetable_no,
@@ -1312,7 +1390,7 @@ class DailyWorkingInformationController extends Controller
      */
     private function setAttendancetime($cnt, $work_time,
         $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $value_check_interval, $before_value_mode,
+        $value_check_result, $value_check_max_times, $value_check_interval, $value_mobile_positions, $before_value_mode,
         $before_value_datetime, $business_kubun, $interval, $user_holiday_kubun, $working_timetable_no)
     {
 
@@ -1545,6 +1623,7 @@ class DailyWorkingInformationController extends Controller
                 $value_check_result,
                 $value_check_max_times,
                 $value_check_interval,
+                $value_mobile_positions,
                 $business_kubun,
                 $user_holiday_kubun,
                 $working_timetable_no));
@@ -1556,6 +1635,7 @@ class DailyWorkingInformationController extends Controller
                 $value_check_result,
                 $value_check_max_times,
                 $value_check_interval,
+                $value_mobile_positions,
                 $business_kubun,
                 $user_holiday_kubun,
                 $working_timetable_no));
@@ -1583,7 +1663,8 @@ class DailyWorkingInformationController extends Controller
      * @return テーブル
      */
     private function setAttendanceCollectPtn(
-        $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_check_interval, $business_kubun, $user_holiday_kubun, $working_timetable_no)
+        $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_check_interval,$value_mobile_positions,
+        $business_kubun, $user_holiday_kubun, $working_timetable_no)
     {
         Log::DEBUG('---------------------- setAttendanceCollectPtn in -- 出勤 ptn = '.$ptn.' ---------------------- '.$record_datetime);
         Log::DEBUG('                                                  -- working_timetable_no = '.$working_timetable_no);
@@ -1603,6 +1684,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute($value_check_interval);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -1617,6 +1699,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute($value_check_interval);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '3') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -1641,6 +1724,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute($value_check_interval);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '4') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -1665,6 +1749,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute($value_check_interval);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '5') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -1679,6 +1764,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute($value_check_interval);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '6') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -1693,6 +1779,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute($value_check_interval);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } else {
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
@@ -1708,6 +1795,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute($value_check_interval);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         }
 
         Log::DEBUG('---------------------- setAttendanceCollectPtn end ------------------------ ');
@@ -1725,7 +1813,7 @@ class DailyWorkingInformationController extends Controller
      */
     private function setLeavingtime($cnt, $work_time,
         $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime,
+        $value_check_result, $value_check_max_times, $value_mobile_positions, $before_value_mode, $before_value_datetime,
         $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setLeavingtime in ------------------------ ');
@@ -1778,7 +1866,7 @@ class DailyWorkingInformationController extends Controller
                         $ptn = '2';
                         $this->pushArrayCalc(
                             $this->setLeavingCollectPtn(
-                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
                                 $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                         /*$ptn = '3';
                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
@@ -1792,7 +1880,7 @@ class DailyWorkingInformationController extends Controller
                         $ptn = '2';
                         $this->pushArrayCalc(
                             $this->setLeavingCollectPtn(
-                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
                                 $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                         /*$ptn = '3';
                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
@@ -1805,7 +1893,7 @@ class DailyWorkingInformationController extends Controller
                         $ptn = '2';
                         $this->pushArrayCalc(
                             $this->setLeavingCollectPtn(
-                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
                                 $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                         /*$ptn = '3';
                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
@@ -1917,7 +2005,7 @@ class DailyWorkingInformationController extends Controller
                                         $ptn = '2';
                                         $this->pushArrayCalc(
                                             $this->setLeavingCollectPtn(
-                                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
                                                 $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                                         /*$ptn = '3';
                                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
@@ -1928,7 +2016,7 @@ class DailyWorkingInformationController extends Controller
                                         $ptn = '2';
                                         $this->pushArrayCalc(
                                             $this->setLeavingCollectPtn(
-                                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
                                                 $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                                         /*$ptn = '3';
                                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
@@ -1943,7 +2031,7 @@ class DailyWorkingInformationController extends Controller
                             $ptn = '2';
                             $this->pushArrayCalc(
                                 $this->setLeavingCollectPtn(
-                                    $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                    $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
                                     $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                             /*$ptn = '3';
                             $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
@@ -1964,7 +2052,7 @@ class DailyWorkingInformationController extends Controller
                                         $ptn = '2';
                                         $this->pushArrayCalc(
                                             $this->setLeavingCollectPtn(
-                                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
                                                 $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                                         /*$ptn = '3';
                                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
@@ -1982,7 +2070,7 @@ class DailyWorkingInformationController extends Controller
                             $ptn = '2';
                             $this->pushArrayCalc(
                                 $this->setLeavingCollectPtn(
-                                    $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                    $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
                                     $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                             /*$ptn = '3';
                             $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
@@ -2000,7 +2088,7 @@ class DailyWorkingInformationController extends Controller
                                     $ptn = '2';
                                     $this->pushArrayCalc(
                                         $this->setLeavingCollectPtn(
-                                            $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                            $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
                                             $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                                     /*$ptn = '3';
                                     $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
@@ -2018,7 +2106,7 @@ class DailyWorkingInformationController extends Controller
                         $ptn = '2';
                         $this->pushArrayCalc(
                             $this->setLeavingCollectPtn(
-                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
                                 $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
                         /*$ptn = '3';
                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
@@ -2044,13 +2132,13 @@ class DailyWorkingInformationController extends Controller
         if ($ptn != null) {
             $this->pushArrayCalc(
                 $this->setLeavingCollectPtn(
-                    $ptn, $record_datetime, $value_check_result, $value_check_max_times, 
+                    $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
                     $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
         } else {
             // 不明データとして作成する
             $this->pushArrayCalc(
                 $this->setLeavingCollectPtn(
-                    '', $record_datetime, $value_check_result, $value_check_max_times, 
+                    '', $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
                     $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
         }
         Log::DEBUG('        退勤打刻処理 end');
@@ -2075,8 +2163,8 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setLeavingCollectPtn($ptn, $record_datetime, $value_check_result,
-         $value_check_max_times, $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index)
+    private function setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, 
+         $value_check_max_times, $value_mobile_positions, $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setLeavingCollectPtn in -- 退勤 ptn = '.$ptn.' ---------------------- '.$record_datetime);
         Log::DEBUG('                                                  -- working_timetable_no = '.$working_timetable_no);
@@ -2101,6 +2189,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -2119,6 +2208,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '3') {
             // 自動設定はなしにする
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
@@ -2138,6 +2228,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '4') {
             // なしにする
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
@@ -2167,6 +2258,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '5') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -2185,6 +2277,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '6') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -2203,6 +2296,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '7') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -2221,6 +2315,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '8') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -2239,6 +2334,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } else {
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
@@ -2258,6 +2354,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         }
             
         Log::DEBUG('---------------------- setLeavingCollectPtn end ------------------------ ');
@@ -2274,7 +2371,7 @@ class DailyWorkingInformationController extends Controller
      */
     private function setMissingMiddleTime($cnt, $work_time,
         $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
+        $value_check_result, $value_check_max_times, $value_mobile_positions, $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setMissingMiddleTime in ------------------------ ');
         Log::DEBUG('        私用外出打刻処理');
@@ -2384,7 +2481,7 @@ class DailyWorkingInformationController extends Controller
                 if ($record_before_datetime >= $attendance_from_date) {                     // 出勤1日のはじめ <= １個前の打刻時刻
                     // 不明データとして作成する
                     $collect_working_times = $this->setMissingmiddleCollectPtn(
-                        '', $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index);
+                        '', $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index);
                     return $collect_working_times;
                 }
             } else {                                                                        // １個前のモードがない
@@ -2398,11 +2495,11 @@ class DailyWorkingInformationController extends Controller
 
         if ($ptn != null) {
             $this->pushArrayCalc($this->setMissingmiddleCollectPtn(
-                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
+                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
         } else {
             // 不明データとして作成する
             $this->pushArrayCalc($this->setMissingmiddleCollectPtn(
-                '', $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
+                '', $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
         }
         Log::DEBUG('---------------------- setMissingMiddleTime end ------------------------ ');
         Log::DEBUG('        私用外出打刻処理 end');
@@ -2426,7 +2523,8 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setMissingmiddleCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index)
+    private function setMissingmiddleCollectPtn(
+        $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setMissingmiddleCollectPtn in ------------------------ ');
         $temp_calc_model = new TempCalcWorkingTime();
@@ -2449,6 +2547,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -2467,6 +2566,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '3') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -2485,6 +2585,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } else {
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
@@ -2504,6 +2605,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         }
 
         Log::DEBUG('---------------------- setMissingmiddleCollectPtn end ------------------------ ');
@@ -2521,7 +2623,8 @@ class DailyWorkingInformationController extends Controller
      */
     private function setMissingMiddleReturnTime($cnt, $work_time,
         $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
+        $value_check_result, $value_check_max_times, $value_mobile_positions,
+        $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setMissingMiddleReturnTime in ------------------------ ');
         Log::DEBUG('        私用外出戻り打刻処理');
@@ -2636,11 +2739,11 @@ class DailyWorkingInformationController extends Controller
 
         if ($ptn != null) {
             $this->pushArrayCalc($this->setMissingmiddleReturnCollectPtn(
-                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
+                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
         } else {
             // 不明データとして作成する
             $this->pushArrayCalc($this->setMissingmiddleReturnCollectPtn(
-                '', $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
+                '', $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
         }
         Log::DEBUG('        私用外出戻り打刻処理 end');
         Log::DEBUG('---------------------- setMissingMiddleReturnTime end ------------------------ ');
@@ -2664,7 +2767,8 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setMissingmiddleReturnCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index)
+    private function setMissingmiddleReturnCollectPtn(
+        $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setMissingmiddleReturnCollectPtn in ------------------------ ');
         $temp_calc_model = new TempCalcWorkingTime();
@@ -2687,6 +2791,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_return_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -2705,6 +2810,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } else {
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_return_time'));
@@ -2724,6 +2830,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         }
 
         Log::DEBUG('---------------------- setMissingmiddleReturnCollectPtn end ------------------------ ');
@@ -2741,7 +2848,8 @@ class DailyWorkingInformationController extends Controller
      */
     private function setPubliGoingOutTime($cnt, $work_time,
         $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
+        $value_check_result, $value_check_max_times, $value_mobile_positions, 
+        $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setPubliGoingOutTime in ------------------------ ');
         Log::DEBUG('        公用外出打刻処理');
@@ -2851,7 +2959,7 @@ class DailyWorkingInformationController extends Controller
                 if ($record_before_datetime >= $attendance_from_date) {                     // 出勤1日のはじめ <= １個前の打刻時刻
                     // 不明データとして作成する
                     $collect_working_times = $this->setPublicGoingOutCollectPtn(
-                        '', $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index);
+                        '', $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index);
                     return $collect_working_times;
                 }
             } else {                                                                        // １個前のモードがない
@@ -2865,11 +2973,11 @@ class DailyWorkingInformationController extends Controller
 
         if ($ptn != null) {
             $this->pushArrayCalc($this->setPublicGoingOutCollectPtn(
-                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
+                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
         } else {
             // 不明データとして作成する
             $this->pushArrayCalc($this->setPublicGoingOutCollectPtn(
-                '', $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
+                '', $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
         }
 
         Log::DEBUG('---------------------- setPubliGoingOutTime end ------------------------ ');
@@ -2894,7 +3002,8 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setPublicGoingOutCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index)
+    private function setPublicGoingOutCollectPtn(
+        $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setPublicGoingOutCollectPtn in ------------------------ ');
         $temp_calc_model = new TempCalcWorkingTime();
@@ -2917,6 +3026,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -2935,6 +3045,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '3') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -2953,6 +3064,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } else {
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_time'));
@@ -2972,6 +3084,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         }
 
         Log::DEBUG('---------------------- setPublicGoingOutCollectPtn end ------------------------ ');
@@ -2989,7 +3102,8 @@ class DailyWorkingInformationController extends Controller
      */
     private function setPublicGoingOutReturnTime($cnt, $work_time,
         $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
+        $value_check_result, $value_check_max_times, $value_mobile_positions, 
+        $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setPublicGoingOutReturnTime in ------------------------ ');
         Log::DEBUG('        公用外出戻り打刻処理');
@@ -3103,11 +3217,11 @@ class DailyWorkingInformationController extends Controller
 
         if ($ptn != null) {
             $this->pushArrayCalc($this->setPublicGoingOutReturnCollectPtn(
-                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
+                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
         } else {
             // 不明データとして作成する
             $this->pushArrayCalc($this->setPublicGoingOutReturnCollectPtn(
-                '', $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index));
+                '', $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
         }
         Log::DEBUG('        公用外出戻り打刻処理 end');
         Log::DEBUG('---------------------- setPublicGoingOutReturnTime end ------------------------ ');
@@ -3131,7 +3245,8 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setPublicGoingOutReturnCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $working_timetable_no, $attendance_time_index)
+    private function setPublicGoingOutReturnCollectPtn(
+        $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index)
     {
         Log::DEBUG('---------------------- setPublicGoingOutReturnCollectPtn in ------------------------ ');
         $temp_calc_model = new TempCalcWorkingTime();
@@ -3154,6 +3269,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_return_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
@@ -3172,6 +3288,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         } else {
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_return_time'));
@@ -3191,6 +3308,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($value_check_result);
             $temp_calc_model->setCheckmaxtimesAttribute($value_check_max_times);
             $temp_calc_model->setCheckintervalAttribute(0);
+            $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         }
 
         Log::DEBUG('---------------------- setPublicGoingOutReturnCollectPtn end ------------------------ ');
@@ -3433,6 +3551,7 @@ class DailyWorkingInformationController extends Controller
         $this->array_check_max_times = array();
         $this->array_check_interval = array();
         $this->array_working_timetable_no = array();
+        $this->array_mobile_positions = array();
         Log::DEBUG('---------------------- iniArrayWorkingTime end ------------------------ ');
     }
 
@@ -3469,7 +3588,11 @@ class DailyWorkingInformationController extends Controller
         } else {
             $this->array_working_timetable_no[] = 0;
         }
-        
+        if (isset($result->x_positions) && isset($result->y_positions)) {
+            $this->array_mobile_positions[] = $result->x_positions.' '.$result->y_positions;
+        } else {
+            $this->array_mobile_positions[] = null;
+        }
         Log::DEBUG('---------------------- pushArrayWorkingTime end ------------------------ ');
     }
 
@@ -3495,6 +3618,7 @@ class DailyWorkingInformationController extends Controller
         $this->array_calc_check_result = array();
         $this->array_calc_check_max_times = array();
         $this->array_calc_check_interval = array();
+        $this->array_calc_mobile_positions = array();
         Log::DEBUG('---------------------- iniArrayCalc end ------------------------ ');
     }
 
@@ -3522,6 +3646,7 @@ class DailyWorkingInformationController extends Controller
         $this->array_calc_check_result[] = $temp_calc_model->getCheckresultAttribute();
         $this->array_calc_check_max_times[] = $temp_calc_model->getCheckmaxtimesAttribute();
         $this->array_calc_check_interval[] = $temp_calc_model->getCheckintervalAttribute();
+        $this->array_calc_mobile_positions[] = $temp_calc_model->getPositionsAttribute();
         Log::DEBUG('---------------------- pushArrayCalc end ------------------------ ');
     }
 
@@ -3671,6 +3796,8 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setCheckresultAttribute($this->array_calc_check_result[$i]);
             $temp_calc_model->setCheckmaxtimesAttribute($this->array_calc_check_max_times[$i]);
             $temp_calc_model->setCheckintervalAttribute($this->array_calc_check_interval[$i]);
+            $temp_calc_model->setPositionsAttribute($this->array_calc_mobile_positions[$i]);
+
             try{
                 $temp_calc_model->insertTempCalcWorkingtime();
             }catch(\PDOException $pe){
@@ -3711,6 +3838,14 @@ class DailyWorkingInformationController extends Controller
         $missing_middle_return_time = '';
         $public_going_out_time = '';
         $public_going_out_return_time = '';
+        // モバイル用時刻保存
+        $attendance_time_positions = null;
+        $leaving_time_positions = null;
+        $missing_middle_time_positions = null;
+        $missing_middle_return_time_positions = null;
+        $public_going_out_time_positions = null;
+        $public_going_out_return_time_positions = null;
+        //
         $working_status = 0;
         $array_working_time_kubun = array(Config::get('const.C004.regular_working_time'),
             Config::get('const.C004.regular_working_breaks_time'),
@@ -3738,12 +3873,18 @@ class DailyWorkingInformationController extends Controller
         }
         // データ登録用出勤・退勤の労働時刻数配列
         $array_add_attendance_time = array();
+        $array_add_attendance_time_positions = array();
         $array_add_leaving_time = array();
+        $array_add_leaving_time_positions = array();
         // データ登録用外出・戻りの労働時刻数配列
         $array_add_missing_middle_time = array();
+        $array_add_missing_middle_time_positions = array();
         $array_add_missing_middle_return_time = array();
+        $array_add_missing_middle_return_time_positions = array();
         $array_add_public_going_out_time = array();
+        $array_add_public_going_out_time_positions = array();
         $array_add_public_going_out_return_time = array();
+        $array_add_public_going_out_return_time_positions = array();
         // ユーザー休暇区分判定用
         $before_holiday_date = null;
         $before_holiday_user_code = null;
@@ -3799,12 +3940,54 @@ class DailyWorkingInformationController extends Controller
                 $current_user_code == $before_user_code) {
                 Log::DEBUG('    同じキーの場合  ');
                 $calc_nobreak_cnt++;
-                if ($result->mode == Config::get('const.C005.attendance_time')) {$attendance_time = $result->record_datetime;}
-                if ($result->mode == Config::get('const.C005.leaving_time')) {$leaving_time = $result->record_datetime;}
-                if ($result->mode == Config::get('const.C005.missing_middle_time')) {$missing_middle_time = $result->record_datetime;}
-                if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {$missing_middle_return_time = $result->record_datetime;}
-                if ($result->mode == Config::get('const.C005.public_going_out_time')) {$public_going_out_time = $result->record_datetime;}
-                if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {$public_going_out_return_time = $result->record_datetime;}
+                if ($result->mode == Config::get('const.C005.attendance_time')) {
+                    $attendance_time = $result->record_datetime;
+                    if (isset($result->x_positions) && isset($result->y_positions)) {
+                        $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
+                    } else {
+                        $attendance_time_positions = null;
+                    }               
+                }
+                if ($result->mode == Config::get('const.C005.leaving_time')) {
+                    $leaving_time = $result->record_datetime;
+                    if (isset($result->x_positions) && isset($result->y_positions)) {
+                        $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
+                    } else {
+                        $leaving_time_positions = null;
+                    }               
+                }
+                if ($result->mode == Config::get('const.C005.missing_middle_time')) {
+                    $missing_middle_time = $result->record_datetime;
+                    if (isset($result->x_positions) && isset($result->y_positions)) {
+                        $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
+                    } else {
+                        $missing_middle_time_time_positions = null;
+                    }               
+                }
+                if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
+                    $missing_middle_return_time = $result->record_datetime;
+                    if (isset($result->x_positions) && isset($result->y_positions)) {
+                        $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
+                    } else {
+                        $missing_middle_return_time_positions = null;
+                    }               
+                }
+                if ($result->mode == Config::get('const.C005.public_going_out_time')) {
+                    $public_going_out_time = $result->record_datetime;
+                    if (isset($result->x_positions) && isset($result->y_positions)) {
+                        $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
+                    } else {
+                        $public_going_out_time_positions = null;
+                    }               
+                }
+                if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
+                    $public_going_out_return_time = $result->record_datetime;
+                    if (isset($result->x_positions) && isset($result->y_positions)) {
+                        $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
+                    } else {
+                        $public_going_out_return_time_positions = null;
+                    }               
+                }
                 $array_notelateetc = $this->setNoteLateEtc($result);
                 $note .= $array_notelateetc[0];
                 $late = $array_notelateetc[1];
@@ -3829,10 +4012,12 @@ class DailyWorkingInformationController extends Controller
                     Log::DEBUG('        私用外出 $missing_middle_time = '.$missing_middle_time);
                     if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
                         $array_add_missing_middle_time[] = $missing_middle_time;
+                        $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
                     }
                     Log::DEBUG('        私用外出戻り $missing_middle_return_time = '.$missing_middle_return_time);
                     if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
                         $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                        $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
                     }
                     if ($missing_middle_time <> '' && $missing_middle_return_time <> ''){
                         Log::DEBUG('        私用外出データ集計  count($array_working_time_kubun) = '.count($array_working_time_kubun));
@@ -3866,10 +4051,12 @@ class DailyWorkingInformationController extends Controller
                     Log::DEBUG('        公用外出 $public_going_out_time = '.$public_going_out_time);
                     if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
                         $array_add_public_going_out_time[] = $public_going_out_time;
+                        $array_add_public_going_out_time_positions[] = $array_add_public_going_out_time_positions;
                     }
                     Log::DEBUG('        公用外出戻り $public_going_out_return_time = '.$public_going_out_return_time);
                     if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
                         $array_add_public_going_out_return_time[] = $public_going_out_return_time;
+                        $array_add_public_going_out_return_time_positions[] = $array_add_public_going_out_return_time_positions;
                     }
                     if ($public_going_out_time <> '' && $public_going_out_return_time <> ''){
                         Log::DEBUG('        公用外出データ集計  count($array_working_time_kubun) = '.count($array_working_time_kubun));
@@ -3901,12 +4088,14 @@ class DailyWorkingInformationController extends Controller
                     // ----------------------- 出勤 -------------------------------------------
                     if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
                         $array_add_attendance_time[] = $attendance_time;
+                        $array_add_attendance_time_positions[] = $attendance_time_positions;
                     }
                     // ----------------------- 退勤 -------------------------------------------
                     // 退勤データの場合計算開始
                     if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                         Log::DEBUG('        出勤退勤データ集計  count($array_working_time_kubun) = '.count($array_working_time_kubun));
                         $array_add_leaving_time[] = $leaving_time;
+                        $array_add_leaving_time_positions[] = $leaving_time_positions;
                         $index = (int)(Config::get('const.C004.regular_working_time'))-1;
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
                             if (($array_working_time_kubun[$i] <> Config::get('const.C004.regular_working_breaks_time')) &&
@@ -3972,11 +4161,17 @@ class DailyWorkingInformationController extends Controller
                                 $array_missing_middle_time,
                                 $array_public_going_out_time,
                                 $array_add_attendance_time,
+                                $array_add_attendance_time_positions,
                                 $array_add_leaving_time,
+                                $array_add_leaving_time_positions,
                                 $array_add_missing_middle_time,
+                                $array_add_missing_middle_time_positions,
                                 $array_add_missing_middle_return_time,
+                                $array_add_missing_middle_return_time_positions,
                                 $array_add_public_going_out_time,
-                                $array_add_public_going_out_return_time);
+                                $array_add_public_going_out_time_positions,
+                                $array_add_public_going_out_return_time,
+                                $array_add_public_going_out_return_time_positions);
                             Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
                             // 次データ計算事前処理
                             for ($i=0;$i<count($array_working_time_kubun);$i++) {
@@ -4000,23 +4195,36 @@ class DailyWorkingInformationController extends Controller
                             $array_add_missing_middle_return_time = array();
                             $array_add_public_going_out_time = array();
                             $array_add_public_going_out_return_time = array();
+                            $array_add_attendance_time_positions = array();
+                            $array_add_leaving_time_positions = array();
+                            $array_add_missing_middle_time_positions = array();
+                            $array_add_missing_middle_return_time_positions = array();
+                            $array_add_public_going_out_time_positions = array();
+                            $array_add_public_going_out_return_time_positions = array();
                             if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
                                 $array_add_missing_middle_time[] = $missing_middle_time;
+                                $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
                             }
                             if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
                                 $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                                $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
+                                Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
                             }
                             if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
                                 $array_add_public_going_out_time[] = $public_going_out_time;
+                                $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
                             }
                             if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
                                 $array_add_public_going_out_return_time[] = $public_going_out_return_time;
+                                $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
                             }
                             if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
                                 $array_add_attendance_time[] = $attendance_time;
+                                $array_add_attendance_time_positions[] = $attendance_time_positions;
                             }
                             if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                                 $array_add_leaving_time[] = $leaving_time;
+                                $array_add_leaving_time_positions[] = $leaving_time_positions;
                             }
                             // 同じ値にする
                             $before_date = $current_date;
@@ -4069,6 +4277,7 @@ class DailyWorkingInformationController extends Controller
                     Log::DEBUG('    出勤打刻時刻 = '.$attendance_time);
                     if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
                         $array_add_attendance_time[] = $attendance_time;
+                        $array_add_attendance_time_positions[] = $attendance_time_positions;
                     }
                     // ----------------------- 退勤 -------------------------------------------
                     Log::DEBUG('    退勤打刻時刻 = '.$leaving_time);
@@ -4092,12 +4301,18 @@ class DailyWorkingInformationController extends Controller
                             $array_missing_middle_time,
                             $array_public_going_out_time,
                             $array_add_attendance_time,
+                            $array_add_attendance_time_positions,
                             $array_add_leaving_time,
+                            $array_add_leaving_time_positions,
                             $array_add_missing_middle_time,
+                            $array_add_missing_middle_time_positions,
                             $array_add_missing_middle_return_time,
+                            $array_add_missing_middle_return_time_positions,
                             $array_add_public_going_out_time,
-                            $array_add_public_going_out_return_time);
-                        Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$before_user_code);
+                            $array_add_public_going_out_time_positions,
+                            $array_add_public_going_out_return_time,
+                            $array_add_public_going_out_return_time_positions);
+                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$before_user_code);
                     }
                 }
             } elseif ($current_date == $before_date &&
@@ -4149,12 +4364,18 @@ class DailyWorkingInformationController extends Controller
                             $array_missing_middle_time,
                             $array_public_going_out_time,
                             $array_add_attendance_time,
+                            $array_add_attendance_time_positions,
                             $array_add_leaving_time,
+                            $array_add_leaving_time_positions,
                             $array_add_missing_middle_time,
+                            $array_add_missing_middle_time_positions,
                             $array_add_missing_middle_return_time,
+                            $array_add_missing_middle_return_time_positions,
                             $array_add_public_going_out_time,
-                            $array_add_public_going_out_return_time);
-                        Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$before_user_code);
+                            $array_add_public_going_out_time_positions,
+                            $array_add_public_going_out_return_time,
+                            $array_add_public_going_out_return_time_positions);
+                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$before_user_code);
                     }
                     $before_holiday_set = false;
                     // 日付とユーザー休暇区分を保存
@@ -4184,27 +4405,40 @@ class DailyWorkingInformationController extends Controller
                     $array_add_missing_middle_return_time = array();
                     $array_add_public_going_out_time = array();
                     $array_add_public_going_out_return_time = array();
+                    $array_add_attendance_time_positions = array();
+                    $array_add_leaving_time_positions = array();
+                    $array_add_missing_middle_time_positions = array();
+                    $array_add_missing_middle_return_time_positions = array();
+                    $array_add_public_going_out_time_positions = array();
+                    $array_add_public_going_out_return_time_positions = array();
                     Log::DEBUG('        addTempWorkingTimeDate後 $result->current_calc  '.$result->current_calc);
                     Log::DEBUG('        addTempWorkingTimeDate後 $result->mode  '.$result->mode);
                     Log::DEBUG('        addTempWorkingTimeDate後 $leaving_time  '.$leaving_time);
                     //if ($result->current_calc == '1') {             // 当日分である場合
                         if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
                             $array_add_missing_middle_time[] = $missing_middle_time;
+                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
                             $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
+                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
                         }
                         if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
                             $array_add_public_going_out_time[] = $public_going_out_time;
+                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
                             $array_add_public_going_out_return_time[] = $public_going_out_return_time;
+                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
                             $array_add_attendance_time[] = $attendance_time;
+                            $array_add_attendance_time_positions[] = $attendance_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                             $array_add_leaving_time[] = $leaving_time;
+                            $array_add_leaving_time_positions[] = $leaving_time_positions;
                         }
                     //}
                     Log::DEBUG('        $array_add_leaving_time  '.count($array_add_leaving_time));
@@ -4257,12 +4491,18 @@ class DailyWorkingInformationController extends Controller
                             $array_missing_middle_time,
                             $array_public_going_out_time,
                             $array_add_attendance_time,
+                            $array_add_attendance_time_positions,
                             $array_add_leaving_time,
+                            $array_add_leaving_time_positions,
                             $array_add_missing_middle_time,
+                            $array_add_missing_middle_time_positions,
                             $array_add_missing_middle_return_time,
+                            $array_add_missing_middle_return_time_positions,
                             $array_add_public_going_out_time,
-                            $array_add_public_going_out_return_time);
-                        Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
+                            $array_add_public_going_out_time_positions,
+                            $array_add_public_going_out_return_time,
+                            $array_add_public_going_out_return_time_positions);
+                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
                         // 次データ計算事前処理
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
                             $array_calc_time[$i] = 0; 
@@ -4285,23 +4525,36 @@ class DailyWorkingInformationController extends Controller
                         $array_add_missing_middle_return_time = array();
                         $array_add_public_going_out_time = array();
                         $array_add_public_going_out_return_time = array();
+                        $array_add_attendance_time_positions = array();
+                        $array_add_leaving_time_positions = array();
+                        $array_add_missing_middle_time_positions = array();
+                        $array_add_missing_middle_return_time_positions = array();
+                        $array_add_public_going_out_time_positions = array();
+                        $array_add_public_going_out_return_time_positions = array();
                         if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
                             $array_add_missing_middle_time[] = $missing_middle_time;
-                        }
+                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
+                            }
                         if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
                             $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
+                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
                         }
                         if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
                             $array_add_public_going_out_time[] = $public_going_out_time;
+                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
                             $array_add_public_going_out_return_time[] = $public_going_out_return_time;
+                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
                             $array_add_attendance_time[] = $attendance_time;
+                            $array_add_attendance_time_positions[] = $attendance_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                             $array_add_leaving_time[] = $leaving_time;
+                            $array_add_leaving_time_positions[] = $leaving_time_positions;
                         }
                         // 同じ値にする
                         $before_date = $current_date;
@@ -4368,12 +4621,18 @@ class DailyWorkingInformationController extends Controller
                             $array_missing_middle_time,
                             $array_public_going_out_time,
                             $array_add_attendance_time,
+                            $array_add_attendance_time_positions,
                             $array_add_leaving_time,
+                            $array_add_leaving_time_positions,
                             $array_add_missing_middle_time,
+                            $array_add_missing_middle_time_positions,
                             $array_add_missing_middle_return_time,
+                            $array_add_missing_middle_return_time_positions,
                             $array_add_public_going_out_time,
-                            $array_add_public_going_out_return_time);
-                        Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$before_user_code);
+                            $array_add_public_going_out_time_positions,
+                            $array_add_public_going_out_return_time,
+                            $array_add_public_going_out_return_time_positions);
+                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$before_user_code);
                     }
                     $before_holiday_set = false;
                     // 日付とユーザー休暇区分を保存
@@ -4403,24 +4662,37 @@ class DailyWorkingInformationController extends Controller
                     $array_add_missing_middle_return_time = array();
                     $array_add_public_going_out_time = array();
                     $array_add_public_going_out_return_time = array();
+                    $array_add_attendance_time_positions = array();
+                    $array_add_leaving_time_positions = array();
+                    $array_add_missing_middle_time_positions = array();
+                    $array_add_missing_middle_return_time_positions = array();
+                    $array_add_public_going_out_time_positions = array();
+                    $array_add_public_going_out_return_time_positions = array();
                     //if ($result->current_calc == '1') {             // 当日分である場合
                         if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
                             $array_add_missing_middle_time[] = $missing_middle_time;
+                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
                             $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
+                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
                         }
                         if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
                             $array_add_public_going_out_time[] = $public_going_out_time;
+                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
                             $array_add_public_going_out_return_time[] = $public_going_out_return_time;
+                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
                             $array_add_attendance_time[] = $attendance_time;
+                            $array_add_attendance_time_positions[] = $attendance_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                             $array_add_leaving_time[] = $leaving_time;
+                            $array_add_leaving_time_positions[] = $leaving_time_positions;
                         }
                     //}
                     // 同じ値にする
@@ -4473,12 +4745,18 @@ class DailyWorkingInformationController extends Controller
                             $array_missing_middle_time,
                             $array_public_going_out_time,
                             $array_add_attendance_time,
+                            $array_add_attendance_time_positions,
                             $array_add_leaving_time,
+                            $array_add_leaving_time_positions,
                             $array_add_missing_middle_time,
+                            $array_add_missing_middle_time_positions,
                             $array_add_missing_middle_return_time,
+                            $array_add_missing_middle_return_time_positions,
                             $array_add_public_going_out_time,
-                            $array_add_public_going_out_return_time);
-                        Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
+                            $array_add_public_going_out_time_positions,
+                            $array_add_public_going_out_return_time,
+                            $array_add_public_going_out_return_time_positions);
+                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
                         // 次データ計算事前処理
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
                             $array_calc_time[$i] = 0; 
@@ -4501,23 +4779,36 @@ class DailyWorkingInformationController extends Controller
                         $array_add_missing_middle_return_time = array();
                         $array_add_public_going_out_time = array();
                         $array_add_public_going_out_return_time = array();
+                        $array_add_attendance_time_positions = array();
+                        $array_add_leaving_time_positions = array();
+                        $array_add_missing_middle_time_positions = array();
+                        $array_add_missing_middle_return_time_positions = array();
+                        $array_add_public_going_out_time_positions = array();
+                        $array_add_public_going_out_return_time_positions = array();
                         if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
                             $array_add_missing_middle_time[] = $missing_middle_time;
+                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
                             $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
+                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
                         }
                         if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
                             $array_add_public_going_out_time[] = $public_going_out_time;
+                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
                             $array_add_public_going_out_return_time[] = $public_going_out_return_time;
+                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
                             $array_add_attendance_time[] = $attendance_time;
+                            $array_add_attendance_time_positions[] = $attendance_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                             $array_add_leaving_time[] = $leaving_time;
+                            $array_add_leaving_time_positions[] = $leaving_time_positions;
                         }
                         // 同じ値にする
                         $before_date = $current_date;
@@ -4584,12 +4875,18 @@ class DailyWorkingInformationController extends Controller
                             $array_missing_middle_time,
                             $array_public_going_out_time,
                             $array_add_attendance_time,
+                            $array_add_attendance_time_positions,
                             $array_add_leaving_time,
+                            $array_add_leaving_time_positions,
                             $array_add_missing_middle_time,
+                            $array_add_missing_middle_time_positions,
                             $array_add_missing_middle_return_time,
+                            $array_add_missing_middle_return_time_positions,
                             $array_add_public_going_out_time,
-                            $array_add_public_going_out_return_time);
-                        Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$before_user_code);
+                            $array_add_public_going_out_time_positions,
+                            $array_add_public_going_out_return_time,
+                            $array_add_public_going_out_return_time_positions);
+                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$before_user_code);
                     }
                     $before_holiday_set = false;
                     // 日付とユーザー休暇区分を保存
@@ -4619,24 +4916,37 @@ class DailyWorkingInformationController extends Controller
                     $array_add_missing_middle_return_time = array();
                     $array_add_public_going_out_time = array();
                     $array_add_public_going_out_return_time = array();
+                    $array_add_attendance_time_positions = array();
+                    $array_add_leaving_time_positions = array();
+                    $array_add_missing_middle_time_positions = array();
+                    $array_add_missing_middle_return_time_positions = array();
+                    $array_add_public_going_out_time_positions = array();
+                    $array_add_public_going_out_return_time_positions = array();
                     //if ($result->current_calc == '1') {             // 当日分である場合
                         if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
                             $array_add_missing_middle_time[] = $missing_middle_time;
+                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
                             $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
+                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
                         }
                         if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
                             $array_add_public_going_out_time[] = $public_going_out_time;
+                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
                             $array_add_public_going_out_return_time[] = $public_going_out_return_time;
+                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
                             $array_add_attendance_time[] = $attendance_time;
+                            $array_add_attendance_time_positions[] = $attendance_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                             $array_add_leaving_time[] = $leaving_time;
+                            $array_add_leaving_time_positions[] = $leaving_time_positions;
                         }
                     //}
                     // 同じ値にする
@@ -4690,12 +5000,18 @@ class DailyWorkingInformationController extends Controller
                             $array_missing_middle_time,
                             $array_public_going_out_time,
                             $array_add_attendance_time,
+                            $array_add_attendance_time_positions,
                             $array_add_leaving_time,
+                            $array_add_leaving_time_positions,
                             $array_add_missing_middle_time,
+                            $array_add_missing_middle_time_positions,
                             $array_add_missing_middle_return_time,
+                            $array_add_missing_middle_return_time_positions,
                             $array_add_public_going_out_time,
-                            $array_add_public_going_out_return_time);
-                        Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
+                            $array_add_public_going_out_time_positions,
+                            $array_add_public_going_out_return_time,
+                            $array_add_public_going_out_return_time_positions);
+                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
                         // 次データ計算事前処理
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
                             $array_calc_time[$i] = 0; 
@@ -4718,23 +5034,36 @@ class DailyWorkingInformationController extends Controller
                         $array_add_missing_middle_return_time = array();
                         $array_add_public_going_out_time = array();
                         $array_add_public_going_out_return_time = array();
+                        $array_add_attendance_time_positions = array();
+                        $array_add_leaving_time_positions = array();
+                        $array_add_missing_middle_time_positions = array();
+                        $array_add_missing_middle_return_time_positions = array();
+                        $array_add_public_going_out_time_positions = array();
+                        $array_add_public_going_out_return_time_positions = array();
                         if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
                             $array_add_missing_middle_time[] = $missing_middle_time;
+                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
                             $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
+                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
                         }
                         if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
                             $array_add_public_going_out_time[] = $public_going_out_time;
+                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
                             $array_add_public_going_out_return_time[] = $public_going_out_return_time;
+                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
                             $array_add_attendance_time[] = $attendance_time;
+                            $array_add_attendance_time_positions[] = $attendance_time_positions;
                         }
                         if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                             $array_add_leaving_time[] = $leaving_time;
+                            $array_add_leaving_time_positions[] = $leaving_time_positions;
                         }
                         // 同じ値にする
                         $before_date = $current_date;
@@ -4798,12 +5127,18 @@ class DailyWorkingInformationController extends Controller
                         $array_missing_middle_time,
                         $array_public_going_out_time,
                         $array_add_attendance_time,
+                        $array_add_attendance_time_positions,
                         $array_add_leaving_time,
+                        $array_add_leaving_time_positions,
                         $array_add_missing_middle_time,
+                        $array_add_missing_middle_time_positions,
                         $array_add_missing_middle_return_time,
+                        $array_add_missing_middle_return_time_positions,
                         $array_add_public_going_out_time,
-                        $array_add_public_going_out_return_time);
-                }catch(\PDOException $pe){
+                        $array_add_public_going_out_time_positions,
+                        $array_add_public_going_out_return_time,
+                        $array_add_public_going_out_return_time_positions);
+        }catch(\PDOException $pe){
                     $add_result = false;
                     throw $pe;
                 }catch(\Exception $e){
@@ -5188,8 +5523,12 @@ class DailyWorkingInformationController extends Controller
      */
     private function addTempWorkingTimeDate($target_date, $target_user_code, $target_department_code, $target_result, $note, $working_status,
         $array_calc_time, $array_missing_middle_time, $array_public_going_out_time,
-        $array_add_attendance_time, $array_add_leaving_time, $array_add_missing_middle_time, $array_add_missing_middle_return_time,
-        $array_add_public_going_out_time, $array_add_public_going_out_return_time)
+        $array_add_attendance_time, $array_add_attendance_time_positions,
+        $array_add_leaving_time, $array_add_leaving_time_positions,
+        $array_add_missing_middle_time, $array_add_missing_middle_time_positions,
+        $array_add_missing_middle_return_time, $array_add_missing_middle_return_time_positions,
+        $array_add_public_going_out_time, $array_add_public_going_out_time_positions,
+        $array_add_public_going_out_return_time, $array_add_public_going_out_return_time_positions)
     {
         Log::DEBUG('---------------------- addTempWorkingTimeDate in ------------------------ ');
         $temp_working_model = new TempWorkingTimeDate();
@@ -5217,8 +5556,14 @@ class DailyWorkingInformationController extends Controller
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
                 $temp_working_model->setAttendancetimeAttribute($i, $array_decide_times[$i]);
+                if (isset($array_add_attendance_time_positions[$i])) {
+                    $temp_working_model->setAttendancetimepositionsAttribute($i, $array_add_attendance_time_positions[$i]);
+                } else {
+                    $temp_working_model->setAttendancetimepositionsAttribute($i, null);
+                }
             } else {
                 $temp_working_model->setAttendancetimeAttribute($i, null);
+                $temp_working_model->setAttendancetimepositionsAttribute($i, null);
             }
         }
         // 退勤打刻５回までチェック 出勤でチェックエラー時はnote設定しない1
@@ -5236,8 +5581,14 @@ class DailyWorkingInformationController extends Controller
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
                 $temp_working_model->setLeavingtimeAttribute($i, $array_decide_times[$i]);
+                if (isset($array_add_leaving_time_positions[$i])) {
+                    $temp_working_model->setLeavingtimepositionsAttribute($i, $array_add_leaving_time_positions[$i]);
+                } else {
+                    $temp_working_model->setLeavingtimepositionsAttribute($i, null);
+                }
             } else {
                 $temp_working_model->setLeavingtimeAttribute($i, null);
+                $temp_working_model->setLeavingtimepositionsAttribute($i, null);
             }
         }
 
@@ -5252,8 +5603,14 @@ class DailyWorkingInformationController extends Controller
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
                 $temp_working_model->setMissingmiddletimeAttribute($i, $array_decide_times[$i]);
+                if (isset($array_add_missing_middle_time_positions[$i])) {
+                    $temp_working_model->setMissingmiddletimepositionsAttribute($i, $array_add_missing_middle_time_positions[$i]);
+                } else {
+                    $temp_working_model->setMissingmiddletimepositionsAttribute($i, null);
+                }
             } else {
                 $temp_working_model->setMissingmiddletimeAttribute($i, null);
+                $temp_working_model->setMissingmiddletimepositionsAttribute($i, null);
             }
         }
         // 中抜け戻り打刻５回までチェック
@@ -5263,16 +5620,28 @@ class DailyWorkingInformationController extends Controller
             }
         }
         // 設定
+        Log::DEBUG('    before count($array_add_missing_middle_return_time) =  '.count($array_add_missing_middle_return_time));
+        Log::DEBUG('    before count($array_add_missing_middle_time) =  '.count($array_add_missing_middle_time));
         $array_decide_times = $this->decideWorkingTimeTo(
             $array_add_missing_middle_return_time,
             count($array_add_missing_middle_return_time),
             $array_add_missing_middle_time,
             count($array_add_missing_middle_time));
+        Log::DEBUG('    after count($array_add_missing_middle_return_time) =  '.count($array_add_missing_middle_return_time));
+        Log::DEBUG('    after count($array_add_missing_middle_time) =  '.count($array_add_missing_middle_time));
+        Log::DEBUG('    count($array_decide_times) =  '.count($array_decide_times));
+        Log::DEBUG('    count($array_add_missing_middle_return_time_positions) =  '.count($array_add_missing_middle_return_time_positions));
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
                 $temp_working_model->setMissingmiddlereturntimeAttribute($i, $array_decide_times[$i]);
+                if (isset($array_add_missing_middle_return_time_positions[$i])) {
+                    $temp_working_model->setMissingmiddlereturntimepositionsAttribute($i, $array_add_missing_middle_return_time_positions[$i]);
+                } else {
+                    $temp_working_model->setMissingmiddlereturntimepositionsAttribute($i, null);
+                }
             } else {
                 $temp_working_model->setMissingmiddlereturntimeAttribute($i, null);
+                $temp_working_model->setMissingmiddlereturntimepositionsAttribute($i, null);
             }
         }
         // 公用外出打刻５回までチェック
@@ -5286,8 +5655,14 @@ class DailyWorkingInformationController extends Controller
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
                 $temp_working_model->setPublicgoingouttimeAttribute($i, $array_decide_times[$i]);
+                if (isset($array_add_public_going_out_time_positions[$i])) {
+                    $temp_working_model->setPublicgoingouttimepositionsAttribute($i, $array_add_public_going_out_time_positions[$i]);
+                } else {
+                    $temp_working_model->setPublicgoingouttimepositionsAttribute($i, null);
+                }
             } else {
                 $temp_working_model->setPublicgoingouttimeAttribute($i, null);
+                $temp_working_model->setPublicgoingouttimepositionsAttribute($i, null);
             }
         }
         // 公用外出戻り打刻５回までチェック
@@ -5305,7 +5680,13 @@ class DailyWorkingInformationController extends Controller
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
                 $temp_working_model->setPublicgoingoutreturntimeAttribute($i, $array_decide_times[$i]);
+                if (isset($array_add_public_going_out_return_time_positions[$i])) {
+                    $temp_working_model->setPublicgoingoutreturntimeAttribute($i, $array_add_public_going_out_return_time_positions[$i]);
+                } else {
+                    $temp_working_model->setPublicgoingoutreturntimeAttribute($i, null);
+                }
             } else {
+                $temp_working_model->setPublicgoingoutreturntimeAttribute($i, null);
                 $temp_working_model->setPublicgoingoutreturntimeAttribute($i, null);
             }
         }
@@ -5800,11 +6181,23 @@ class DailyWorkingInformationController extends Controller
                     'working_timetable_no' => $working_time->working_timetable_no,
                     'working_timetable_name' => $working_time->working_timetable_name,
                     'attendance_time' => $array_attendance_time[$i]["attendance_time"],
+                    'x_attendance_time_positions' => $array_attendance_time[$i]["x_attendance_time_positions"],
+                    'y_attendance_time_positions' => $array_attendance_time[$i]["y_attendance_time_positions"],
                     'leaving_time' => $array_attendance_time[$i]["leaving_time"],
+                    'x_leaving_time_positions' => $array_attendance_time[$i]["x_leaving_time_positions"],
+                    'y_leaving_time_positions' => $array_attendance_time[$i]["y_leaving_time_positions"],
                     'missing_middle_time' => $array_attendance_time[$i]["missing_middle_time"],
+                    'x_missing_middle_time_positions' => $array_attendance_time[$i]["x_missing_middle_time_positions"],
+                    'y_missing_middle_time_positions' => $array_attendance_time[$i]["y_missing_middle_time_positions"],
                     'missing_middle_return_time' => $array_attendance_time[$i]["missing_middle_return_time"],
+                    'x_missing_middle_return_time_positions' => $array_attendance_time[$i]["x_missing_middle_return_time_positions"],
+                    'y_missing_middle_return_time_positions' => $array_attendance_time[$i]["y_missing_middle_return_time_positions"],
                     'public_going_out_time' => $array_attendance_time[$i]["public_going_out_time"],
+                    'x_public_going_out_time_positions' => $array_attendance_time[$i]["x_public_going_out_time_positions"],
+                    'y_public_going_out_time_positions' => $array_attendance_time[$i]["y_public_going_out_time_positions"],
                     'public_going_out_return_time' => $array_attendance_time[$i]["public_going_out_return_time"],
+                    'x_public_going_out_return_time_positions' => $array_attendance_time[$i]["x_public_going_out_return_time_positions"],
+                    'y_public_going_out_return_time_positions' => $array_attendance_time[$i]["y_public_going_out_return_time_positions"],
                     'total_working_times' => $working_time->total_working_times,
                     'regular_working_times' => $working_time->regular_working_times,
                     'out_of_regular_working_times' => $working_time->out_of_regular_working_times,
@@ -5869,11 +6262,23 @@ class DailyWorkingInformationController extends Controller
                     'working_timetable_no' => '',
                     'working_timetable_name' => '',
                     'attendance_time' => $array_attendance_time[$i]["attendance_time"],
+                    'x_attendance_time_positions' => $array_attendance_time[$i]["x_attendance_time_positions"],
+                    'y_attendance_time_positions' => $array_attendance_time[$i]["y_attendance_time_positions"],
                     'leaving_time' => $array_attendance_time[$i]["leaving_time"],
+                    'x_leaving_time_positions' => $array_attendance_time[$i]["x_leaving_time_positions"],
+                    'y_leaving_time_positions' => $array_attendance_time[$i]["y_leaving_time_positions"],
                     'missing_middle_time' => $array_attendance_time[$i]["missing_middle_time"],
+                    'x_missing_middle_time_positions' => $array_attendance_time[$i]["x_missing_middle_time_positions"],
+                    'y_missing_middle_time_positions' => $array_attendance_time[$i]["y_missing_middle_time_positions"],
                     'missing_middle_return_time' => $array_attendance_time[$i]["missing_middle_return_time"],
+                    'x_missing_middle_return_time_positions' => $array_attendance_time[$i]["x_missing_middle_return_time_positions"],
+                    'y_missing_middle_return_time_positions' => $array_attendance_time[$i]["y_missing_middle_return_time_positions"],
                     'public_going_out_time' => $array_attendance_time[$i]["public_going_out_time"],
+                    'x_public_going_out_time_positions' => $array_attendance_time[$i]["x_public_going_out_time_positions"],
+                    'y_public_going_out_time_positions' => $array_attendance_time[$i]["y_public_going_out_time_positions"],
                     'public_going_out_return_time' => $array_attendance_time[$i]["public_going_out_return_time"],
+                    'x_public_going_out_return_time_positions' => $array_attendance_time[$i]["x_public_going_out_return_time_positions"],
+                    'y_public_going_out_return_time_positions' => $array_attendance_time[$i]["y_public_going_out_return_time_positions"],
                     'total_working_times' => '',
                     'regular_working_times' => '',
                     'out_of_regular_working_times' => '',

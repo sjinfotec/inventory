@@ -21,7 +21,57 @@ class TempCalcWorkingTime extends Model
 
     //--------------- 項目属性 -----------------------------------
 
-    private $working_date;                 // 日付
+    private $working_date;                      // 日付
+    private $employment_status;                 // 雇用形態
+    private $department_code;                   // 部署ID
+    private $user_code;                         // ユーザー
+    private $seq;                               // 順位
+    private $employment_status_name;            // 雇用形態名称
+    private $department_name;                   // 部署名称
+    private $user_name;                         // ユーザー名称
+    private $working_timetable_no;              // タイムテーブルNo
+    private $working_timetable_name;            // タイムテーブル名称
+    private $working_timetable_from_time;       // タイムテーブル開始時刻
+    private $working_timetable_to_time;         // タイムテーブル終了時刻
+    private $shift_no;                          // シフトタイムテーブルNo
+    private $shift_name;                        // シフトタイムテーブル名称
+    private $shift_from_time;                   // シフトタイムテーブル開始時刻
+    private $shift_to_time;                     // シフトタイムテーブル終了時刻
+    private $mode;                              // 打刻モード
+    private $record_datetime;                   // 打刻日時
+    private $record_year;                       // 打刻年
+    private $record_month;                      // 打刻月
+    private $record_date;                       // 打刻年月日
+    private $record_time;                       // 打刻時刻
+    private $working_status;                    // 勤務状態
+    private $working_status_name;               // 勤務状態名称
+    private $note;                              // メモ
+    private $late;                              // 遅刻有無
+    private $leave_early;                       // 早退有無
+    private $current_calc;                      // 当日計算有無
+    private $to_be_confirmed;                   // 要確認有無
+    private $weekday_kubun;                     // 曜日区分
+    private $weekday_name;                      // 曜日名称
+    private $business_kubun;                    // 営業日区分
+    private $business_name;                     // 営業日名称
+    private $holiday_kubun;                     // 休暇区分
+    private $holiday_name;                      // 休暇名称
+    private $closing;                           // 締日
+    private $uplimit_time;                      // 上限残業時間
+    private $statutory_uplimit_time;            // 法定上限残業時間
+    private $time_unit;                         // 時間単位
+    private $time_rounding;                     // 時間の丸め
+    private $max_3month_total;                  // ３ヶ月累計
+    private $max_6month_total;                  // ６ヶ月累計
+    private $max_12month_total;                 // １年間累計
+    private $beginning_month;                   // 期首月
+    private $year;                              // 年
+    private $pattern;                           // 打刻パターン
+    private $check_result;                      // 打刻チェック結果
+    private $check_max_times;                   // 打刻回数最大チェック結果
+    private $check_interval;                    // インターバルチェック結果
+    private $positions;                         // 位置情報
+    private $systemdate;
 
     // 日付
     public function getWorkingdateAttribute()
@@ -34,7 +84,6 @@ class TempCalcWorkingTime extends Model
         $this->working_date = $value;
     }
 
-    private $employment_status;                 // 雇用形態
 
     // 雇用形態
     public function getEmploymentstatusAttribute()
@@ -47,7 +96,6 @@ class TempCalcWorkingTime extends Model
         $this->employment_status = $value;
     }
 
-    private $department_code;                 // 部署ID
 
     // 部署ID
     public function getDepartmentcodeAttribute()
@@ -60,7 +108,6 @@ class TempCalcWorkingTime extends Model
         $this->department_code = $value;
     }
 
-    private $user_code;                 // ユーザー
 
     // ユーザー
     public function getUsercodeAttribute()
@@ -73,7 +120,6 @@ class TempCalcWorkingTime extends Model
         $this->user_code = $value;
     }
 
-    private $seq;                 // 順位
 
     // 順位
     public function getSeqAttribute()
@@ -86,7 +132,6 @@ class TempCalcWorkingTime extends Model
         $this->seq = $value;
     }
 
-    private $employment_status_name;                 // 雇用形態名称
 
     // 雇用形態名称
     public function getEmploymentstatusnameAttribute()
@@ -99,7 +144,6 @@ class TempCalcWorkingTime extends Model
         $this->employment_status_name = $value;
     }
 
-    private $department_name;                 // 部署名称
 
     // 部署名称
     public function getDepartmentnameAttribute()
@@ -112,7 +156,6 @@ class TempCalcWorkingTime extends Model
         $this->department_name = $value;
     }
 
-    private $user_name;                 // ユーザー名称
 
     // ユーザー名称
     public function getUsernameAttribute()
@@ -125,7 +168,6 @@ class TempCalcWorkingTime extends Model
         $this->user_name = $value;
     }
 
-    private $working_timetable_no;                 // タイムテーブルNo
 
     // タイムテーブルNo
     public function getWorkingtimetablenoAttribute()
@@ -138,7 +180,6 @@ class TempCalcWorkingTime extends Model
         $this->working_timetable_no = $value;
     }
 
-    private $working_timetable_name;                 // タイムテーブル名称
 
     // タイムテーブル名称
     public function getWorkingtimetablenameAttribute()
@@ -151,7 +192,6 @@ class TempCalcWorkingTime extends Model
         $this->working_timetable_name = $value;
     }
 
-    private $working_timetable_from_time;                 // タイムテーブル開始時刻
 
     // タイムテーブル開始時刻
     public function getWorkingtimetablefromtimeAttribute()
@@ -164,7 +204,6 @@ class TempCalcWorkingTime extends Model
         $this->working_timetable_from_time = $value;
     }
 
-    private $working_timetable_to_time;                 // タイムテーブル終了時刻
 
     // タイムテーブル終了時刻
     public function getWorkingtimetabletotimeAttribute()
@@ -177,7 +216,6 @@ class TempCalcWorkingTime extends Model
         $this->working_timetable_to_time = $value;
     }
 
-    private $shift_no;                 // シフトタイムテーブルNo
 
     // シフトタイムテーブルNo
     public function getShiftnoAttribute()
@@ -190,7 +228,6 @@ class TempCalcWorkingTime extends Model
         $this->shift_no = $value;
     }
 
-    private $shift_name;                 // シフトタイムテーブル名称
 
     // シフトタイムテーブル名称
     public function getShiftnameAttribute()
@@ -203,7 +240,6 @@ class TempCalcWorkingTime extends Model
         $this->shift_name = $value;
     }
 
-    private $shift_from_time;                 // シフトタイムテーブル開始時刻
 
     // シフトタイムテーブル開始時刻
     public function getShiftfromtimeAttribute()
@@ -216,7 +252,6 @@ class TempCalcWorkingTime extends Model
         $this->shift_from_time = $value;
     }
 
-    private $shift_to_time;                 // シフトタイムテーブル終了時刻
 
     // シフトタイムテーブル終了時刻
     public function getShifttotimeAttribute()
@@ -229,7 +264,6 @@ class TempCalcWorkingTime extends Model
         $this->shift_to_time = $value;
     }
 
-    private $mode;                 // 打刻モード
 
     // 打刻モード
     public function getModeAttribute()
@@ -242,7 +276,6 @@ class TempCalcWorkingTime extends Model
         $this->mode = $value;
     }
 
-    private $record_datetime;                 // 打刻日時
 
     // 打刻日時
     public function getRecorddatetimeAttribute()
@@ -255,7 +288,6 @@ class TempCalcWorkingTime extends Model
         $this->record_datetime = $value;
     }
 
-    private $record_year;                 // 打刻年
 
     // 打刻年
     public function getRecordyearAttribute()
@@ -268,7 +300,6 @@ class TempCalcWorkingTime extends Model
         $this->record_year = $value;
     }
 
-    private $record_month;                 // 打刻月
 
     // 打刻月
     public function getRecordmonthAttribute()
@@ -281,7 +312,6 @@ class TempCalcWorkingTime extends Model
         $this->record_month = $value;
     }
 
-    private $record_date;                 // 打刻年月日
 
     // 打刻年月日
     public function getRecorddateAttribute()
@@ -294,7 +324,6 @@ class TempCalcWorkingTime extends Model
         $this->record_date = $value;
     }
 
-    private $record_time;                 // 打刻時刻
 
     // 打刻時刻
     public function getRecordtimeAttribute()
@@ -307,7 +336,6 @@ class TempCalcWorkingTime extends Model
         $this->record_time = $value;
     }
 
-    private $working_status;                 // 勤務状態
 
     // 勤務状態
     public function getWorkingstatusAttribute()
@@ -320,7 +348,6 @@ class TempCalcWorkingTime extends Model
         $this->working_status = $value;
     }
 
-    private $working_status_name;               // 勤務状態名称
 
     // 勤務状態名称
     public function getWorkingstatusnameAttribute()
@@ -333,7 +360,6 @@ class TempCalcWorkingTime extends Model
         $this->working_status_name = $value;
     }
 
-    private $note;                 // メモ
 
     // メモ
     public function getNoteAttribute()
@@ -346,7 +372,6 @@ class TempCalcWorkingTime extends Model
         $this->note = $value;
     }
 
-    private $late;                 // 遅刻有無
 
     // 遅刻有無
     public function getLateAttribute()
@@ -359,7 +384,6 @@ class TempCalcWorkingTime extends Model
         $this->late = $value;
     }
 
-    private $leave_early;                 // 早退有無
 
     // 早退有無
     public function getLeaveearlyAttribute()
@@ -372,7 +396,6 @@ class TempCalcWorkingTime extends Model
         $this->leave_early = $value;
     }
 
-    private $current_calc;                 // 当日計算有無
 
     // 当日計算有無
     public function getCurrentcalcAttribute()
@@ -385,7 +408,6 @@ class TempCalcWorkingTime extends Model
         $this->current_calc = $value;
     }
 
-    private $to_be_confirmed;                 // 要確認有無
 
     // 要確認有無
     public function getTobeconfirmedAttribute()
@@ -398,7 +420,6 @@ class TempCalcWorkingTime extends Model
         $this->to_be_confirmed = $value;
     }
 
-    private $weekday_kubun;                 // 曜日区分
 
     // 曜日区分
     public function getWeekdaykubunAttribute()
@@ -411,7 +432,6 @@ class TempCalcWorkingTime extends Model
         $this->weekday_kubun = $value;
     }
 
-    private $weekday_name;                 // 曜日名称
 
     // 曜日名称
     public function getWeekdaynameAttribute()
@@ -424,7 +444,6 @@ class TempCalcWorkingTime extends Model
         $this->weekday_name = $value;
     }
 
-    private $business_kubun;                 // 営業日区分
 
     // 営業日区分
     public function getBusinesskubunAttribute()
@@ -437,7 +456,6 @@ class TempCalcWorkingTime extends Model
         $this->business_kubun = $value;
     }
 
-    private $business_name;                 // 営業日名称
 
     // 営業日名称
     public function getBusinessnameAttribute()
@@ -450,7 +468,6 @@ class TempCalcWorkingTime extends Model
         $this->business_name = $value;
     }
 
-    private $holiday_kubun;                 // 休暇区分
 
     // 休暇区分
     public function getHolidaykubunAttribute()
@@ -463,7 +480,6 @@ class TempCalcWorkingTime extends Model
         $this->holiday_kubun = $value;
     }
 
-    private $holiday_name;                 // 休暇名称
 
     // 休暇名称
     public function getHolidaynameAttribute()
@@ -476,7 +492,6 @@ class TempCalcWorkingTime extends Model
         $this->holiday_name = $value;
     }
 
-    private $closing;                 // 締日
 
     // 締日
     public function getClosingAttribute()
@@ -489,7 +504,6 @@ class TempCalcWorkingTime extends Model
         $this->closing = $value;
     }
 
-    private $uplimit_time;                 // 上限残業時間
 
     // 上限残業時間
     public function getUplimittimeAttribute()
@@ -502,7 +516,6 @@ class TempCalcWorkingTime extends Model
         $this->uplimit_time = $value;
     }
 
-    private $statutory_uplimit_time;                 // 法定上限残業時間
 
     // 法定上限残業時間
     public function getStatutoryuplimittimeAttribute()
@@ -515,7 +528,6 @@ class TempCalcWorkingTime extends Model
         $this->statutory_uplimit_time = $value;
     }
 
-    private $time_unit;                 // 時間単位
 
     // 時間単位
     public function getTimeunitAttribute()
@@ -528,7 +540,6 @@ class TempCalcWorkingTime extends Model
         $this->time_unit = $value;
     }
 
-    private $time_rounding;                 // 時間の丸め
 
     // 時間の丸め
     public function getTimeroundingAttribute()
@@ -541,7 +552,6 @@ class TempCalcWorkingTime extends Model
         $this->time_rounding = $value;
     }
 
-    private $max_3month_total;                 // ３ヶ月累計
 
     // ３ヶ月累計
     public function getMax3MonthtotalAttribute()
@@ -554,7 +564,6 @@ class TempCalcWorkingTime extends Model
         $this->max_3month_total = $value;
     }
 
-    private $max_6month_total;                 // ６ヶ月累計
 
     // ６ヶ月累計
     public function getMax6MonthtotalAttribute()
@@ -567,7 +576,6 @@ class TempCalcWorkingTime extends Model
         $this->max_6month_total = $value;
     }
 
-    private $max_12month_total;                 // １年間累計
 
     // １年間累計
     public function getMax12MonthtotalAttribute()
@@ -580,7 +588,6 @@ class TempCalcWorkingTime extends Model
         $this->max_12month_total = $value;
     }
 
-    private $beginning_month;                 // 期首月
 
     // 期首月
     public function getBeginningmonthAttribute()
@@ -593,7 +600,6 @@ class TempCalcWorkingTime extends Model
         $this->beginning_month = $value;
     }
 
-    private $year;                 // 年
 
     // 年
     public function getYearAttribute()
@@ -606,7 +612,6 @@ class TempCalcWorkingTime extends Model
         $this->year = $value;
     }
 
-    private $pattern;                 // 打刻パターン
 
     // 打刻パターン
     public function getPatternAttribute()
@@ -619,7 +624,6 @@ class TempCalcWorkingTime extends Model
         $this->pattern = $value;
     }
 
-    private $check_result;                      // 打刻チェック結果
 
     // 打刻チェック結果
     public function getCheckresultAttribute()
@@ -632,7 +636,6 @@ class TempCalcWorkingTime extends Model
         $this->check_result = $value;
     }
 
-    private $check_max_times;                   // 打刻回数最大チェック結果
 
     // 打刻回数最大チェック結果
     public function getCheckmaxtimesAttribute()
@@ -645,7 +648,6 @@ class TempCalcWorkingTime extends Model
         $this->check_max_times = $value;
     }
 
-    private $check_interval;                   // インターバルチェック結果
 
     // インターバルチェック結果
     public function getCheckintervalAttribute()
@@ -658,7 +660,17 @@ class TempCalcWorkingTime extends Model
         $this->check_interval = $value;
     }
 
-    private $systemdate;
+    // 位置情報
+    public function getPositionsAttribute()
+    {
+        return $this->positions;
+    }
+
+    public function setPositionsAttribute($value)
+    {
+        $this->positions = $value;
+    }
+
 
     public function getSystemDateAttribute()
     {
@@ -826,6 +838,9 @@ class TempCalcWorkingTime extends Model
                 't1.check_max_times as check_max_times',
                 't1.check_interval as check_interval'
             );
+            $mainquery
+                ->selectRaw('X(t1.positions) as x_positions')
+                ->selectRaw('Y(t1.positions) as y_positions');
 
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $date = date_create($this->param_date_from);
@@ -877,60 +892,119 @@ class TempCalcWorkingTime extends Model
         Log::debug('        <<<< insertTempCalcWorkingtime  $this->shift_to_time = ('.$this->shift_to_time.')');
         Log::debug('        <<<< insertTempCalcWorkingtime  $this->record_datetime = ('.$this->record_datetime.')');
         try{
-            DB::table($this->table)->insert(
-                [
-                    'working_date' => $this->working_date,
-                    'employment_status' => $this->employment_status,
-                    'department_code' => $this->department_code,
-                    'user_code' => $this->user_code,
-                    'seq' => $this->seq,
-                    'employment_status_name' => $this->employment_status_name,
-                    'department_name' => $this->department_name,
-                    'user_name' => $this->user_name,
-                    'working_timetable_no' => $this->working_timetable_no,
-                    'working_timetable_name' => $this->working_timetable_name,
-                    'working_timetable_from_time' => (strlen($this->working_timetable_from_time) > 0) ? $this->working_timetable_from_time : null,
-                    'working_timetable_to_time' => (strlen($this->working_timetable_to_time) > 0) ? $this->working_timetable_to_time : null,
-                    'shift_no' => $this->shift_no,
-                    'shift_name' => $this->shift_name,
-                    'shift_from_time' => (strlen($this->shift_from_time) > 0) ? $this->shift_from_time : null,
-                    'shift_to_time' => (strlen($this->shift_to_time) > 0) ? $this->shift_to_time : null,
-                    'mode' => $this->mode,
-                    'record_datetime' => (strlen($this->record_datetime) > 0) ? $this->record_datetime : null,
-                    'record_year' => $this->record_year,
-                    'record_month' => $this->record_month,
-                    'record_date' => $this->record_date,
-                    'record_time' => $this->record_time,
-                    'working_status' => $this->working_status,
-                    'working_status_name' => $this->working_status_name,
-                    'note' => $this->note,
-                    'late' => $this->late,
-                    'leave_early' => $this->leave_early,
-                    'current_calc' => $this->current_calc,
-                    'to_be_confirmed' => $this->to_be_confirmed,
-                    'weekday_kubun' => $this->weekday_kubun,
-                    'weekday_name' => $this->weekday_name,
-                    'business_kubun' => $this->business_kubun,
-                    'business_name' => $this->business_name,
-                    'holiday_kubun' => $this->holiday_kubun,
-                    'holiday_name' => $this->holiday_name,
-                    'closing' => $this->closing,
-                    'uplimit_time' => $this->uplimit_time,
-                    'statutory_uplimit_time' => $this->statutory_uplimit_time,
-                    'time_unit' => $this->time_unit,
-                    'time_rounding' => $this->time_rounding,
-                    'max_3month_total' => $this->max_3month_total,
-                    'max_6month_total' => $this->max_6month_total,
-                    'max_12month_total' => $this->max_12month_total,
-                    'beginning_month' => $this->beginning_month,
-                    'year' => $this->year,
-                    'pattern' => $this->pattern,
-                    'check_result' => $this->check_result,
-                    'check_max_times' => $this->check_max_times,
-                    'check_interval' => $this->check_interval,
-                    'created_at'=>$this->systemdate
-                ]
-            );
+            if (isset($this->positions)) {
+                DB::table($this->table)->insert(
+                    [
+                        'working_date' => $this->working_date,
+                        'employment_status' => $this->employment_status,
+                        'department_code' => $this->department_code,
+                        'user_code' => $this->user_code,
+                        'seq' => $this->seq,
+                        'employment_status_name' => $this->employment_status_name,
+                        'department_name' => $this->department_name,
+                        'user_name' => $this->user_name,
+                        'working_timetable_no' => $this->working_timetable_no,
+                        'working_timetable_name' => $this->working_timetable_name,
+                        'working_timetable_from_time' => (strlen($this->working_timetable_from_time) > 0) ? $this->working_timetable_from_time : null,
+                        'working_timetable_to_time' => (strlen($this->working_timetable_to_time) > 0) ? $this->working_timetable_to_time : null,
+                        'shift_no' => $this->shift_no,
+                        'shift_name' => $this->shift_name,
+                        'shift_from_time' => (strlen($this->shift_from_time) > 0) ? $this->shift_from_time : null,
+                        'shift_to_time' => (strlen($this->shift_to_time) > 0) ? $this->shift_to_time : null,
+                        'mode' => $this->mode,
+                        'record_datetime' => (strlen($this->record_datetime) > 0) ? $this->record_datetime : null,
+                        'record_year' => $this->record_year,
+                        'record_month' => $this->record_month,
+                        'record_date' => $this->record_date,
+                        'record_time' => $this->record_time,
+                        'working_status' => $this->working_status,
+                        'working_status_name' => $this->working_status_name,
+                        'note' => $this->note,
+                        'late' => $this->late,
+                        'leave_early' => $this->leave_early,
+                        'current_calc' => $this->current_calc,
+                        'to_be_confirmed' => $this->to_be_confirmed,
+                        'weekday_kubun' => $this->weekday_kubun,
+                        'weekday_name' => $this->weekday_name,
+                        'business_kubun' => $this->business_kubun,
+                        'business_name' => $this->business_name,
+                        'holiday_kubun' => $this->holiday_kubun,
+                        'holiday_name' => $this->holiday_name,
+                        'closing' => $this->closing,
+                        'uplimit_time' => $this->uplimit_time,
+                        'statutory_uplimit_time' => $this->statutory_uplimit_time,
+                        'time_unit' => $this->time_unit,
+                        'time_rounding' => $this->time_rounding,
+                        'max_3month_total' => $this->max_3month_total,
+                        'max_6month_total' => $this->max_6month_total,
+                        'max_12month_total' => $this->max_12month_total,
+                        'beginning_month' => $this->beginning_month,
+                        'year' => $this->year,
+                        'pattern' => $this->pattern,
+                        'check_result' => $this->check_result,
+                        'check_max_times' => $this->check_max_times,
+                        'check_interval' => $this->check_interval,
+                        'positions' => DB::raw("(GeomFromText('POINT(".$this->positions.")'))"),
+                        'created_at'=>$this->systemdate
+                    ]
+                );
+            } else {
+                DB::table($this->table)->insert(
+                    [
+                        'working_date' => $this->working_date,
+                        'employment_status' => $this->employment_status,
+                        'department_code' => $this->department_code,
+                        'user_code' => $this->user_code,
+                        'seq' => $this->seq,
+                        'employment_status_name' => $this->employment_status_name,
+                        'department_name' => $this->department_name,
+                        'user_name' => $this->user_name,
+                        'working_timetable_no' => $this->working_timetable_no,
+                        'working_timetable_name' => $this->working_timetable_name,
+                        'working_timetable_from_time' => (strlen($this->working_timetable_from_time) > 0) ? $this->working_timetable_from_time : null,
+                        'working_timetable_to_time' => (strlen($this->working_timetable_to_time) > 0) ? $this->working_timetable_to_time : null,
+                        'shift_no' => $this->shift_no,
+                        'shift_name' => $this->shift_name,
+                        'shift_from_time' => (strlen($this->shift_from_time) > 0) ? $this->shift_from_time : null,
+                        'shift_to_time' => (strlen($this->shift_to_time) > 0) ? $this->shift_to_time : null,
+                        'mode' => $this->mode,
+                        'record_datetime' => (strlen($this->record_datetime) > 0) ? $this->record_datetime : null,
+                        'record_year' => $this->record_year,
+                        'record_month' => $this->record_month,
+                        'record_date' => $this->record_date,
+                        'record_time' => $this->record_time,
+                        'working_status' => $this->working_status,
+                        'working_status_name' => $this->working_status_name,
+                        'note' => $this->note,
+                        'late' => $this->late,
+                        'leave_early' => $this->leave_early,
+                        'current_calc' => $this->current_calc,
+                        'to_be_confirmed' => $this->to_be_confirmed,
+                        'weekday_kubun' => $this->weekday_kubun,
+                        'weekday_name' => $this->weekday_name,
+                        'business_kubun' => $this->business_kubun,
+                        'business_name' => $this->business_name,
+                        'holiday_kubun' => $this->holiday_kubun,
+                        'holiday_name' => $this->holiday_name,
+                        'closing' => $this->closing,
+                        'uplimit_time' => $this->uplimit_time,
+                        'statutory_uplimit_time' => $this->statutory_uplimit_time,
+                        'time_unit' => $this->time_unit,
+                        'time_rounding' => $this->time_rounding,
+                        'max_3month_total' => $this->max_3month_total,
+                        'max_6month_total' => $this->max_6month_total,
+                        'max_12month_total' => $this->max_12month_total,
+                        'beginning_month' => $this->beginning_month,
+                        'year' => $this->year,
+                        'pattern' => $this->pattern,
+                        'check_result' => $this->check_result,
+                        'check_max_times' => $this->check_max_times,
+                        'check_interval' => $this->check_interval,
+                        'positions' => null,
+                        'created_at'=>$this->systemdate
+                    ]
+                );
+                }
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
             Log::error($pe->getMessage());

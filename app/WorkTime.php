@@ -36,6 +36,7 @@ class WorkTime extends Model
     private $updated_user;                  // 修正ユーザー
     private $is_deleted;                    // 削除フラグ
     private $systemdate;
+    private $positions;                     // 緯度経度
 
     // ユーザーコード
     public function getIdAttribute()
@@ -175,6 +176,17 @@ class WorkTime extends Model
     public function setSystemDateAttribute($value)
     {
         $this->systemdate = $value;
+    }
+
+    // 緯度経度
+    public function getPositionsAttribute()
+    {
+        return $this->positions;
+    }
+
+    public function setPositionsAttribute($value)
+    {
+        $this->positions = $value;
     }
 
 
@@ -345,19 +357,36 @@ class WorkTime extends Model
      */
     public function insertWorkTime(){
         try {
-            DB::table($this->table)->insert(
-                [
-                    'user_code' => $this->user_code,
-                    'department_code' => $this->department_code,
-                    'record_time' => $this->record_time,
-                    'mode' => $this->mode,
-                    'check_result' => $this->check_result,
-                    'check_max_time' => $this->check_max_time,
-                    'check_interval' => $this->check_interval,
-                    'created_user' => $this->created_user,
-                    'created_at'=>$this->systemdate
-                ]
-            );
+            if(isset($this->positions)){
+                DB::table($this->table)->insert(
+                    [
+                        'user_code' => $this->user_code,
+                        'department_code' => $this->department_code,
+                        'record_time' => $this->record_time,
+                        'mode' => $this->mode,
+                        'check_result' => $this->check_result,
+                        'check_max_time' => $this->check_max_time,
+                        'check_interval' => $this->check_interval,
+                        'created_user' => $this->created_user,
+                        'created_at'=>$this->systemdate,
+                        'positions' => DB::raw("(GeomFromText('POINT(".$this->positions.")'))")
+                    ]
+                );
+            }else{
+                DB::table($this->table)->insert(
+                    [
+                        'user_code' => $this->user_code,
+                        'department_code' => $this->department_code,
+                        'record_time' => $this->record_time,
+                        'mode' => $this->mode,
+                        'check_result' => $this->check_result,
+                        'check_max_time' => $this->check_max_time,
+                        'check_interval' => $this->check_interval,
+                        'created_user' => $this->created_user,
+                        'created_at'=>$this->systemdate
+                    ]
+                );
+            }
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
             Log::error($pe->getMessage());
@@ -481,7 +510,9 @@ class WorkTime extends Model
                 ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%Y') as record_year")
                 ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%m') as record_month")
                 ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%Y%m%d') as record_date")
-                ->selectRaw('DATE_FORMAT('.$this->table.'.record_time'.",'%H%i%s') as record_time");
+                ->selectRaw('DATE_FORMAT('.$this->table.'.record_time'.",'%H%i%s') as record_time")
+                ->selectRaw('X(positions) as x_positions')
+                ->selectRaw('Y(positions) as y_positions');
 
             $record_time = $this->getArrayrecordtimeAttribute();
             if(!empty($record_time)){
@@ -531,6 +562,8 @@ class WorkTime extends Model
                     't2.check_result as check_result',
                     't2.check_max_time as check_max_time',
                     't2.check_interval as check_interval',
+                    't2.x_positions as x_positions',
+                    't2.y_positions as y_positions',
                     't3.weekday_kubun as weekday_kubun',
                     't11.code_name as weekday_name',
                     't3.business_kubun as business_kubun',
@@ -582,7 +615,7 @@ class WorkTime extends Model
                     $join->on('t3.date', '=', 't2.record_date')
                     ->where('t3.is_deleted', '=', 0);
                 })
-                ->leftJoin('settings as t4', function ($join) { 
+                ->leftJoin($this->table_settings.' as t4', function ($join) { 
                     $join->on('t4.year', '=', 't2.record_year');
                     $join->on('t4.fiscal_month', '=', 't2.record_month')
                     ->where('t4.is_deleted', '=', 0);
@@ -625,7 +658,7 @@ class WorkTime extends Model
                     ->where('t3.is_deleted', '=', 0)
                     ->where('t13.is_deleted', '=', 0);
                 })
-                ->leftJoin('user_holiday_kubuns as t14', function ($join) { 
+                ->leftJoin($this->table_user_holiday_kubuns.' as t14', function ($join) { 
                     $join->on('t14.working_date', '=', 't2.record_date');
                     $join->on('t14.user_code', '=', 't1.code');
                     $join->on('t14.department_code', '=', 't1.department_code')
