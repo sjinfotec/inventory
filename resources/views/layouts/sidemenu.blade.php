@@ -7,7 +7,7 @@
                                 <img class="p-2 icon-size-user rounded-circle" src="{{ asset('images/round-person-w.svg') }}" alt="">
                             </div>
                             <ul class="float-left list-unstyled">
-                                <li class="pr-3 py-1 text-white font-size-sm d-block">情報処理課</li>
+                                <department-set></department-set>
                                 <li class="pr-3 py-1 text-white font-size-sm d-block">
                                     {{ Auth::user()->name }}
                                 </li>
@@ -33,15 +33,17 @@
                                 <span>申請機能</span>
                                 <a class="float-right mb-1 font-size-sm line-height-xs btn btn-secondary btn-sm" data-toggle="collapse" href="#collapseAggregate" role="button" aria-expanded="true" aria-controls="collapseAggregate"><img class="icon-size-xs" src="{{ asset('images/round-expand-less-w.svg') }}" alt=""></a>
                             </h3>
+                            @if(Config::get('const.EDITION.EDITION') >= Config::get('const.EDITION_NAME.CROUD') )
                             <ul class="collapse show list-unstyled" id="collapseAggregate">
-                                <!-- <li><a class="px-3 py-1 text-white d-block" href="{{ url('/demand') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">各種申請作成</a></li>
+                                <li><a class="px-3 py-1 text-white d-block" href="{{ url('/demand') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">各種申請作成</a></li>
                                 @can('admin-midle')
                                     <li><a class="px-3 py-1 text-white d-block" href="{{ url('/approval') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">各種申請承認</a></li>
                                     @can('admin-higher')
                                         <li><a class="px-3 py-1 text-white d-block" href="{{ url('/confirm') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">承認者ルート設定</a></li>
                                     @endcan
-                                @endcan -->
+                                @endcan
                             </ul>
+                            @endif('admin-higher')
                             <h3 class="side-head p-3 font-size-rg">
                                 <span>編集</span>
                                 <a class="float-right mb-1 font-size-sm line-height-xs btn btn-secondary btn-sm" data-toggle="collapse" href="#collapseEdit" role="button" aria-expanded="true" aria-controls="collapseEdit"><img class="icon-size-xs" src="{{ asset('images/round-expand-less-w.svg') }}" alt=""></a>
@@ -74,6 +76,7 @@
                             </h3>
                             <ul class="collapse show list-unstyled" id="collapseLogout">
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/user_pass') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-assignment-ind-w.svg') }}" alt="">パスワード変更</a></li>
+                                <li><a class="px-3 py-1 text-white d-block" href="{{ url('/file_download') }}"><img class="icon-size-sm mr-3" src="{{ asset('/images/round-get-app-w.svg') }}" alt="">ダウンロード</a></li>
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img class="icon-size-sm mr-3" src="{{ asset('images/round-lock-w.svg') }}" alt="">ログアウト</a></li>
                             </ul>
                             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">

@@ -2,7 +2,7 @@
   <!-- リスト定義 -->
   <select class="form-control" v-model="selectedvalue" v-on:change="selChanges(selectedvalue,rowIndex)">
     <option disabled selected style="display:none;" v-if="this.placeholderData" value="">＜{{ placeholderData }}＞</option>
-    <option v-if="this.blankData" value=""></option>
+    <option v-if="this.blankdata" value=""></option>
     <!-- 項目設定 -->
     <option v-for="(item, index) in itemList" v-bind:value="item.code">
       {{ item.name }}
@@ -16,8 +16,18 @@ import {dialogable} from '../mixins/dialogable.js';
 import {requestable} from '../mixins/requestable.js';
 
 export default {
-  name: "selecUserList",
+  name: "SelecUserList",
   mixins: [ dialogable, requestable ],
+  data() {
+    return {
+      selectedvalue: 0,
+      selectedname: '',
+      initlist: 0,
+      itemList: [],
+      blankdata: true,
+      roles: []
+    };
+  },
   props: {
     blankData: {
         type: Boolean,
@@ -58,19 +68,28 @@ export default {
     employmentValue: {
         type: String,
         default: ''
+    },
+    managementValue: {
+        type: Number,
+        default: 10
+    },
+    arrayRole: {
+        type: Array,
+        default: () => {
+        return []
+      }
     }
   },
-  data() {
-    return {
-      selectedvalue: 0,
-      selectedname: '',
-      itemList: []
-    };
-  },
-    // マウント時
+  // マウント時
   mounted() {
     this.selectedvalue = this.selectedValue;
-    this.getList(this.dateValue, this.killValue, this.getDo, this.departmentValue, this.employmentValue);
+  },
+  created() {
+    if (this.arrayRole.length == 0) {
+      this.getList(this.dateValue, this.killValue, this.initlist, this.departmentValue, this.employmentValue, this.managementValue, null);
+    } else {
+      this.getList(this.dateValue, this.killValue, this.initlist, this.departmentValue, this.employmentValue, this.managementValue, this.arrayRole);
+    }
   },
   methods: {
     // ------------------------ イベント処理 ------------------------------------
@@ -81,7 +100,7 @@ export default {
       this.$emit('change-event', value, arrayData);
     },
     // -------------------- サーバー処理 ----------------------------
-    getList(targetdate, killvalue, getdo, departmentValue, employmentValue){
+    getList(targetdate, killvalue, getdo, departmentValue, employmentValue, managementcode = null, role = null ){
       if (targetdate == '') {
         targetdate = moment(new Date()).format("YYYYMMDD");
       }
@@ -93,7 +112,9 @@ export default {
           killvalue: killvalue,
           getDo : getdo,
           departmentcode : departmentValue,
-          employmentcode : employmentValue
+          employmentcode : employmentValue,
+          managementcode : managementcode,
+          roles : role
         })
         .then(response  => {
           this.getThen(response);

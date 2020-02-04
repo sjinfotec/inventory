@@ -57,7 +57,6 @@ class ApiCardRegisterController extends Controller
         if($is_card_exists){
             // 既にcard_idと紐づいたユーザーが存在する
             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.already_data'));
-            Log::debug('already_data'.Config::get('const.LOG_MSG.already_data'));
         }else{
             // 新規登録
             DB::beginTransaction();
@@ -125,14 +124,10 @@ class ApiCardRegisterController extends Controller
      * @return void
      */
     private function insCardInfo($user_code,$card_id,$department_code){
-        Log::error("insCardInfo".$card_id);
         $card_info = new CardInformation();
         $systemdate = Carbon::now();
         $login_user = Auth::user();
         try{
-            Log::debug('insCardInfo $this->systemdate = '.$user_code );
-            Log::debug('insCardInfo $this->systemdate = '.$card_id );
-            Log::debug('insCardInfo $this->systemdate = '.$department_code );
             $card_info->setUserCodeAttribute($user_code);
             $card_info->setDepartmentcodeAttribute($department_code);
             $card_info->setCardIdmAttribute($card_id);

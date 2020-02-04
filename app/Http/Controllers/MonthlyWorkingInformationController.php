@@ -204,31 +204,53 @@ class MonthlyWorkingInformationController extends Controller
             // 日次集計の計算を呼ぶ
             $daily_controller = new DailyWorkingInformationController();
             $calc_date = $datefrom_date;
-            while (true) {
-                if ($calc_date > $dateto_date) { break; }
-                // 打刻時刻を取得
-                $work_time->setParamDatefromAttribute($calc_date);
-                $work_time->setParamDatetoAttribute($calc_date);
-                $work_time->setParamemploymentstatusAttribute($employmentstatus);
-                $work_time->setParamDepartmentcodeAttribute($departmentcode);
-                $work_time->setParamUsercodeAttribute($usercode);
-                // 休日判定
-                $business_kubun = $apicommon->jdgBusinessKbn($calc_date);
-                Log::debug('        addDailyCalc パラメータ   Datefrom,Dateto = '.$calc_date);
-                Log::debug('        addDailyCalc パラメータ   employmentstatus = '.$employmentstatus);
-                Log::debug('        addDailyCalc パラメータ   Departmentcode = '.$departmentcode);
-                Log::debug('        addDailyCalc パラメータ   Usercode = '.$usercode);
-                Log::debug('        addDailyCalc パラメータ   business_kubun = '.$business_kubun);
-                $calc_result = $daily_controller->addDailyCalc(
-                    $work_time,
-                    $calc_date,
-                    $calc_date,
-                    $employmentstatus,
-                    $departmentcode,
-                    $usercode,
-                    $business_kubun
-                );
-                $calc_date = $calc_date->addDay(1);
+            DB::beginTransaction();
+            try{
+                // パラメータの内容でworking_time_datesを削除
+                $workingtimedate_model->setParamEmploymentStatusAttribute($employmentstatus);
+                $workingtimedate_model->setParamDepartmentcodeAttribute($departmentcode);
+                $workingtimedate_model->setParamUsercodeAttribute($usercode);
+                if ($workingtimedate_model->isExistsWorkingTimeDate()) {
+                    $workingtimedate_model->delWorkingTimeDate();
+                };
+                while (true) {
+                    if ($calc_date > $dateto_date) { break; }
+                    // 打刻時刻を取得
+                    $work_time->setParamDatefromAttribute($calc_date);
+                    $work_time->setParamDatetoAttribute($calc_date);
+                    $work_time->setParamemploymentstatusAttribute($employmentstatus);
+                    $work_time->setParamDepartmentcodeAttribute($departmentcode);
+                    $work_time->setParamUsercodeAttribute($usercode);
+                    // 休日判定
+                    $business_kubun = $apicommon->jdgBusinessKbn($calc_date);
+                    Log::debug('        addDailyCalc パラメータ   Datefrom,Dateto = '.$calc_date);
+                    Log::debug('        addDailyCalc パラメータ   employmentstatus = '.$employmentstatus);
+                    Log::debug('        addDailyCalc パラメータ   Departmentcode = '.$departmentcode);
+                    Log::debug('        addDailyCalc パラメータ   Usercode = '.$usercode);
+                    Log::debug('        addDailyCalc パラメータ   business_kubun = '.$business_kubun);
+                    $calc_result = $daily_controller->addDailyCalc(
+                        $work_time,
+                        $calc_date,
+                        $calc_date,
+                        $employmentstatus,
+                        $departmentcode,
+                        $usercode,
+                        $business_kubun
+                    );
+                    $calc_date = $calc_date->addDay(1);
+                }
+                DB::commit();
+                Log::debug('        commit calc OK');
+            }catch(\PDOException $pe){
+                DB::rollBack();
+                Log::debug(' calc rollBack ');
+                $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
+                $calc_result = false;
+            }catch(\Exception $e){
+                DB::rollBack();
+                Log::debug(' calc rollBack ');
+                $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
+                $calc_result = false;
             }
         } else {
             $calc_result = false;

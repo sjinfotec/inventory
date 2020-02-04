@@ -95,6 +95,30 @@
       <button type="button" class="btn btn-outline-secondary btn-lg font-size-rg w-100" :disabled="isPush">
         キャンセル</button>
     </div>
+    <div v-if="btnMode === 'csvcalc'" class="btn-group d-flex" v-on:click="csvcalcclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+      <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
+      集計結果をCSVファイルに出力する</button>
+    </div>
+    <div v-if="btnMode === 'csvsalary'" class="btn-group d-flex" v-on:click="csvsalaryclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+      <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
+      給与計算用CSVファイルを出力する</button>
+    </div>
+    <div v-if="btnMode === 'filedownload'" class="btn-group d-flex" v-on:click="filedownloadclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+      <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
+      {{ btnName }}</button>
+    </div>
+    <div v-if="btnMode === 'passreset'" class="btn-group d-flex" v-on:click="passresetclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+        パスワードを変更する</button>
+    </div>
+    <div v-if="btnMode === 'delete'" class="btn-group d-flex" v-on:click="deleteclickBtn()">
+      <button type="button" class="btn btn-danger btn-lg font-size-rg w-100" :disabled="isPush">
+        削除する</button>
+    </div>
+  </button>
   </div>
 </template>
 <script>
@@ -107,6 +131,10 @@ export default {
           type: String
       },
       isPush: {
+          default: false,
+          type: Boolean
+      },
+      btnName: {
           default: false,
           type: Boolean
       }
@@ -177,6 +205,21 @@ export default {
     },
     listdemandclickBtn : function() {
       this.$emit('listdemandclick-event',event);
+    },
+    csvcalcclickBtn : function() {
+      this.$emit('csvcalc-event',event);
+    },
+    csvsalaryclickBtn : function() {
+      this.$emit('csvsalary-event',event);
+    },
+    filedownloadclickBtn : function() {
+      this.$emit('filedownload-event',event);
+    },
+    passresetclickBtn : function() {
+      this.$emit('passreset-event',event);
+    },
+    deleteclickBtn : function() {
+      this.$emit('deleteclick-event',event);
     },
     // tooltips
     edttooltips: function(value1) {

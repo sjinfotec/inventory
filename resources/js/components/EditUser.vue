@@ -55,12 +55,13 @@
                     v-bind:placeholder-data="'氏名を選択すると編集モードになります'"
                     v-bind:selected-value="selectedUserValue"
                     v-bind:add-new="true"
-                    v-bind:get-do="1"
+                    v-bind:get-do="getDo"
                     v-bind:date-value="applytermdate"
                     v-bind:kill-value="valueUserkillcheck"
                     v-bind:row-index=0
                     v-bind:department-value="selectedDepartmentValue"
                     v-bind:employment-value="''"
+                    v-bind:management-value="'99'"
                     v-on:change-event="userChanges"
                   ></select-userlist>
                 </div>
@@ -449,6 +450,8 @@
             <!-- ----------- 項目部 START ---------------- -->
             <!-- panel contents -->
             <div v-for="(item,index) in details" v-bind:key="item.id">
+              <!-- item.result  1: 現在適用中 -->
+              <!-- item.result  2: 未来適用予定または -->
               <!-- 現在適用中 ----------------------------------------------------------------->
               <div v-if="item.result != ''">
                 <!-- .row -->
@@ -792,7 +795,7 @@
                         class="btn btn-success"
                         @click="addClick(index)"
                       >この内容で追加する</button>
-                      <button v-if="item.result == 2 && item.id != ''"
+                      <button v-if="item.result != 0 && item.id != ''"
                         type="button"
                         class="btn btn-danger"
                         @click="delClick(index)"
@@ -802,6 +805,11 @@
                         class="btn btn-danger"
                         @click="rowDelClick(index)"
                       >行削除</button>
+                      <button v-if="item.result != 0 && item.id != '' && item.card_idm != '' && showrelease"
+                        type="button"
+                        class="btn btn-danger"
+                        @click="releaseclick(index)"
+                      >カード情報を解除する</button>
                     </div>
                   </div>
                 </div>
@@ -1117,21 +1125,6 @@
             </div>
             <!-- /panel contents -->
             <!-- ----------- 項目部 END ---------------- -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- col -->
-              <div class="col-md-12 pb-2" v-if="cardId">
-                <div class="btn-group d-flex">
-                  <button
-                    class="btn btn-warning"
-                    @click="ReleaseCardInfo('warning')"
-                    v-if="selectedUserValue != ''"
-                  >ICカード情報を削除する</button>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
           </div>
           <!-- /main contentns row -->
           <!-- ----------- 編集入力部 END ---------------- -->
@@ -1150,7 +1143,7 @@ import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
 export default {
-  name: "UserEdit",
+  name: "EditUser",
   mixins: [ dialogable, checkable, requestable ],
   data() {
     return {
@@ -1160,14 +1153,15 @@ export default {
       showadddepartmentlist: true,
       selectedUserValue : "",
       valueUserkillcheck : false,
+      isUsermanagement : true,
       showuserlist: true,
       selectedEmploymentValue : "",
       valueTimeTablekillcheck: false,
-      valueCardinformationkillcheck: false,
       selectMode: "",
       messagevalidatesNew: [],
       messagevalidatesEdt: [],
       selectedUserName: "",
+      showrelease: true,
       details: [],
       form: {
         id: "",
@@ -1565,6 +1559,7 @@ export default {
     // 部署選択が変更された場合の処理
     departmentChanges: function(value, arrayitem) {
       this.selectedDepartmentValue = value;
+      this.inputClear()
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       this.getUserSelected();
@@ -1573,11 +1568,16 @@ export default {
     // 廃止チェックボックスが変更された場合の処理
     checkboxChangeDepartment: function() {
       this.refreshDepartmentList();
+      this.inputClear()
+      this.selectedDepartmentValue = "";
+      // ユーザー選択コンポーネントの取得メソッドを実行
+      this.getDo = 1;
+      this.getUserSelected();
+      this.selectMode = '';
     },
     // ユーザー選択が変更された場合の処理
     userChanges: function(value, arrayitem) {
       // 入力項目の部署クリア
-      this.inputClear();
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
       this.selectedUserValue = value;
@@ -1593,6 +1593,7 @@ export default {
     },
     // 廃止チェックボックスが変更された場合の処理
     checkboxChangeUser: function() {
+      this.inputClear()
       this.refreshUserList();
     },
     // 新規作成部署選択が変更された場合の処理
@@ -1775,10 +1776,23 @@ export default {
         this.count = this.details.length
       }
     },
+    // ICカード情報削除ボタンクリック処理
+    releaseclick(index) {
+      this.messagevalidatesNew = [];
+      this.messagevalidatesEdt = [];
+      var messages = [];
+      messages.push("カード情報の紐づけを解除しますか？");
+      this.messageswal("確認", messages, "info", true, true, true)
+        .then(result  => {
+          if (result) {
+            this.ReleaseCard("解除", index);
+          }
+      });
+    },
     // -------------------- サーバー処理 ----------------------------
     // 氏名取得処理
     getItem() {
-      var arrayParams = { code : this.selectedUserValue, killvalue : this.valuekillcheck };
+      var arrayParams = { code : this.selectedUserValue, killvalue : this.isUsermanagement };
       this.postRequest("/edit_user/get", arrayParams)
         .then(response  => {
           this.getThen(response);
@@ -1820,15 +1834,17 @@ export default {
           this.serverCatch("ユーザ", "削除");
         });
     },
-    // ICカード解除
-    ReleaseCardInfo: function() {
-      var arrayParams = { card_idm : this.valueCardinformationkillcheck };
+    // カード解除
+    ReleaseCard(kbnname, index) {
+      var arrayParams = { card_idm : this.details[index].card_idm };
       this.postRequest("/edit_user/release_card_info", arrayParams)
         .then(response  => {
-          this.putThenDetail(response, "ICカード解除");
+          this.putThenCard(response, kbnname);
+          this.details[index].card_idm = "";
+          this.refreshreleaseCardbottun();
         })
         .catch(reason => {
-          this.serverCatch("ICカード", "解除");
+          this.serverCatch("カード", kbnname);
         });
     },
     // 部署選択リスト取得処理
@@ -1873,7 +1889,8 @@ export default {
           killvalue: this.killValue,
           getDo : this.getDo,
           departmentcode : this.selectedDepartmentValue,
-          employmentcode : this.selectedEmploymentValue
+          employmentcode : this.selectedEmploymentValue,
+          managementcode : "ALL"
         })
         .then(response  => {
           this.getThenuser(response);
@@ -1918,12 +1935,14 @@ export default {
     // -------------------- 共通 ----------------------------
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
+      // managementcode=99 → すべて
       this.$refs.selectuserlist.getList(
         '',
         this.valueUserkillcheck,
         this.getDo,
         this.selectedDepartmentValue,
-        this.selectedEmploymentValue
+        this.selectedEmploymentValue,
+        99
       );
     },
     // 取得正常処理（ユーザーリスト）
@@ -2058,6 +2077,21 @@ export default {
         }
       }
     },
+    // カード解除正常処理（明細）
+    putThenCard(response, eventtext) {
+      var messages = [];
+      var res = response.data;
+      if (res.result) {
+        messages.push("ユーザーとカードの紐づけを解除しました");
+        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+      } else {
+        if (res.messagedata.length > 0) {
+          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+        } else {
+          this.serverCatch("ユーザ", eventtext);
+        }
+      }
+    },
     // 異常処理
     serverCatch(kbn, eventtext) {
       var messages = [];
@@ -2103,6 +2137,11 @@ export default {
     refreshaddDepartmentList() {
       this.showadddepartmentlist = false;
       this.$nextTick(() => (this.showadddepartmentlist = true));
+    },
+    // 最新リストの表示（明細部署）
+    refreshreleaseCardbottun() {
+      this.showrelease = false;
+      this.$nextTick(() => (this.showrelease = true));
     }
   }
 };

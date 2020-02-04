@@ -256,6 +256,12 @@ export default {
   mounted() {
     this.valuefromym = this.defaultDate;
     this.getUserRole();
+    this.applytermdate = ""
+    if (this.valuefromdate) {
+      this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+    }
+    this.$refs.selectdepartmentlist.getList(this.applytermdate);
+    this.getUserSelected();
     },
   methods: {
     // バリデーション
@@ -377,8 +383,6 @@ export default {
             if (this.resresults.messagedata != null) {
               this.messagedatasserver = this.resresults.messagedata;
             }
-            console.log("timeitems" + Object.keys(this.timeitems).length);
-            console.log("messagedatasserver" + Object.keys(this.messagedatasserver).length);
             this.$forceUpdate();
           })
           .catch(reason => {
@@ -435,8 +439,13 @@ export default {
     },
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
+      // 再取得
+      this.applytermdate = ""
+      if (this.valuefromdate) {
+          this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+      }
       this.$refs.selectuserlist.getList(
-        '',
+        this.applytermdate,
         this.valueUserkillcheck,
         this.getDo,
         this.selectedDepartmentValue,

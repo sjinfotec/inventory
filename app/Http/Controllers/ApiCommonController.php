@@ -90,38 +90,33 @@ class ApiCommonController extends Controller
             if (isset($params['employmentcode'])) {
                 $employmentcode =  $params['employmentcode'];
             }
+            $managementcode = Config::get('const.C017.admin_user');
+            if (isset($params['managementcode'])) {
+                $managementcode =  $params['managementcode'];
+            }
+            $arrayrole = array();
+            if (isset($params['roles'])) {
+                $arrayrole =  $params['roles'];
+            }
             // ログインユーザの権限取得
             $chk_user_id = Auth::user()->code;
             $role = $this->getUserRole($chk_user_id, $target_date);
             if(!isset($role)) {
+                // エラー追加 20200121
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $chk_user_id, Config::get('const.LOG_MSG.not_setting_role')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_setting_role');
                 return response()->json(
                     ['result' => false, 'details' => $details,
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
-            // 取得SQL
-            /*$subquery1 = DB::table($this->table_users)
+            $subquery1 = DB::table($this->table_users)
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->selectRaw('code as code')
                 ->where('apply_term_from', '<=',$targetdate)
                 ->where('is_deleted', '=', 0)
-                ->groupBy('code');*/
-            $subquery1 = DB::table($this->table_users)
-                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->selectRaw('code as code');
+                ->groupBy('code');
 
-            if (!$killvalue) {
-                $subquery1
-                    ->where('kill_from_date', '>',$target_date)
-                    ->where('is_deleted', '=', 0)
-                    ->groupBy('code');
-            } else {
-                $subquery1
-                    ->where('is_deleted', '=', 0)
-                    ->groupBy('code');
-            }
-    
             if (isset($departmentcode)) {
                 if (isset($employmentcode)) {
                     $mainQuery = DB::table($this->table_users)
@@ -134,11 +129,23 @@ class ApiCommonController extends Controller
                     if($role == Config::get('const.C025.general_user')){
                         $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where($this->table_users.'.management','<',Config::get('const.C017.admin_user'));
+                        $mainQuery->where($this->table_users.'.management','<',$managementcode);
                     }
-                    $details = $mainQuery->where($this->table_users.'.is_deleted', 0)
-                        ->orderby($this->table_users.'.code','asc')
-                        ->get();
+                    if(isset($params['roles'])){
+                        $mainQuery->whereIn($this->table_users.'.role', $arrayrole);
+                    }
+                    if (!$killvalue) {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.kill_from_date', '>',$target_date)
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.code','asc')
+                            ->get();
+                    } else {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.code','asc')
+                            ->get();
+                    }
                 } else {
                     $mainQuery = DB::table($this->table_users)
                         ->JoinSub($subquery1, 't1', function ($join) { 
@@ -149,11 +156,23 @@ class ApiCommonController extends Controller
                     if($role == Config::get('const.C025.general_user')){
                         $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where($this->table_users.'.management','<',Config::get('const.C017.admin_user'));
+                        $mainQuery->where($this->table_users.'.management','<',$managementcode);
                     }
-                    $details = $mainQuery->where($this->table_users.'.is_deleted', 0)
-                        ->orderby($this->table_users.'.code','asc')
-                        ->get();
+                    if(isset($params['roles'])){
+                        $mainQuery->whereIn($this->table_users.'.role', $arrayrole);
+                    }
+                    if (!$killvalue) {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.kill_from_date', '>',$target_date)
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.code','asc')
+                            ->get();
+                    } else {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.code','asc')
+                            ->get();
+                    }
                 }
             } else {
                 if (isset($employmentcode)) {
@@ -166,11 +185,23 @@ class ApiCommonController extends Controller
                     if($role == Config::get('const.C025.general_user')){
                         $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where($this->table_users.'.management','<',Config::get('const.C017.admin_user'));
+                        $mainQuery->where($this->table_users.'.management','<',$managementcode);
                     }
-                    $details = $mainQuery->where($this->table_users.'.is_deleted', 0)
-                        ->orderby($this->table_users.'.code','asc')
-                        ->get();
+                    if(isset($params['roles'])){
+                        $mainQuery->whereIn($this->table_users.'.role', $arrayrole);
+                    }
+                    if (!$killvalue) {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.kill_from_date', '>',$target_date)
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.code','asc')
+                            ->get();
+                    } else {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.code','asc')
+                            ->get();
+                    }
                 } else {
                     $mainQuery = DB::table($this->table_users)
                         ->JoinSub($subquery1, 't1', function ($join) { 
@@ -180,9 +211,21 @@ class ApiCommonController extends Controller
                     if($role == Config::get('const.C025.general_user')){
                         $mainQuery->where($this->table_users.'.code','=',$chk_user_id);
                     } else {
-                        $mainQuery->where($this->table_users.'.management','<',Config::get('const.C017.admin_user'));
+                        $mainQuery->where($this->table_users.'.management','<',$managementcode);
                     }
-                    $details = $mainQuery->where($this->table_users.'.is_deleted', 0)->get();
+                    if(isset($params['roles'])){
+                        $mainQuery->whereIn($this->table_users.'.role', $arrayrole);
+                    }
+                    if (!$killvalue) {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.kill_from_date', '>',$target_date)
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->get();
+                    } else {
+                        $details = $mainQuery
+                            ->where($this->table_users.'.is_deleted', 0)
+                            ->get();
+                    }
                 }
             }
             return response()->json(
@@ -255,8 +298,6 @@ class ApiCommonController extends Controller
             $from = $from->format("Y/m/d");
             $to = new Carbon($params['to']);
             $to = $to->format("Y/m/d");
-            Log::debug('$from = '.$from);
-            Log::debug('$to = '.$to);
 
             $shift_info = new ShiftInformation();
             $shift_info->setUsercodeAttribute($code);
@@ -316,6 +357,8 @@ class ApiCommonController extends Controller
             $role = $this->getUserRole($chk_user_id, $target_date);
             if(!isset($role)) {
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_setting_role');
+                // エラー追加 20200121
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $chk_user_id, Config::get('const.LOG_MSG.not_setting_role')));
                 return response()->json(
                     ['result' => false, 'details' => $details,
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -324,20 +367,12 @@ class ApiCommonController extends Controller
             $subquery1 = DB::table($this->table_departments)
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->selectRaw('code as code')
-                ->where('apply_term_from', '<=',$target_date);
-            if (!$killvalue) {
-                $subquery1
-                    ->where('kill_from_date', '>',$target_date)
-                    ->where('is_deleted', '=', 0)
-                    ->groupBy('code');
-            } else {
-                $subquery1
-                    ->where('is_deleted', '=', 0)
-                    ->groupBy('code');
-            }
+                ->where('apply_term_from', '<=',$target_date)
+                ->where('is_deleted', '=', 0)
+                ->groupBy('code');
 
             if($role == Config::get('const.C025.general_user')){
-                $details = DB::table($this->table_departments)
+                $mainQuery = DB::table($this->table_departments)
                     ->JoinSub($subquery1, 't1', function ($join) { 
                         $join->on('t1.code', '=', $this->table_departments.'.code');
                         $join->on('t1.max_apply_term_from', '=', $this->table_departments.'.apply_term_from');
@@ -347,20 +382,36 @@ class ApiCommonController extends Controller
                         ->where($this->table_users.'.is_deleted', '=', 0);
                     })
                     ->select($this->table_departments.'.code',$this->table_departments.'.name')
-                    ->where($this->table_users.'.code','=',$chk_user_id)
-                    ->where($this->table_departments.'.is_deleted', 0)
-                    ->orderby($this->table_departments.'.code','asc')
-                    ->get();
-            } else {
-                $details = DB::table($this->table_departments)
-                    ->select($this->table_departments.'.code',$this->table_departments.'.name')
-                    ->JoinSub($subquery1, 't1', function ($join) { 
-                        $join->on('t1.code', '=', $this->table_departments.'.code');
-                        $join->on('t1.max_apply_term_from', '=', $this->table_departments.'.apply_term_from');
-                    })
-                    ->where($this->table_departments.'.is_deleted', 0)
-                    ->orderby($this->table_departments.'.code','asc')
-                    ->get();
+                    ->where($this->table_users.'.code','=',$chk_user_id);
+                    if (!$killvalue) {
+                        $mainQuery
+                            ->where($this->table_departments.'.kill_from_date', '>',$target_date)
+                            ->where($this->table_departments.'.is_deleted', 0)
+                            ->orderby($this->table_departments.'.code','asc');
+                    } else {
+                        $mainQuery
+                            ->where($this->table_departments.'.is_deleted', 0)
+                            ->orderby($this->table_departments.'.code','asc');
+                    }
+                    $details = $mainQuery->get();
+                } else {
+                    $mainQuery = DB::table($this->table_departments)
+                        ->select($this->table_departments.'.code',$this->table_departments.'.name')
+                        ->JoinSub($subquery1, 't1', function ($join) { 
+                            $join->on('t1.code', '=', $this->table_departments.'.code');
+                            $join->on('t1.max_apply_term_from', '=', $this->table_departments.'.apply_term_from');
+                        });
+                    if (!$killvalue) {
+                        $mainQuery
+                            ->where($this->table_departments.'.kill_from_date', '>',$target_date)
+                            ->where($this->table_departments.'.is_deleted', 0)
+                            ->orderby($this->table_departments.'.code','asc');
+                    } else {
+                        $mainQuery
+                            ->where($this->table_departments.'.is_deleted', 0)
+                            ->orderby($this->table_departments.'.code','asc');
+                    }
+                    $details = $mainQuery->get();
             }
             return response()->json(
                 ['result' => true, 'details' => $details,
@@ -675,7 +726,6 @@ class ApiCommonController extends Controller
                 ->select('code as code')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->where('apply_term_from', '<=',$target_date)
-                ->where('kill_from_date', '>',$target_date)
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
             $mainquery = DB::table($this->table_departments.' as t1')
@@ -684,6 +734,7 @@ class ApiCommonController extends Controller
                     $join->on('t1.code', '=', 't2.code');
                     $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
                 })
+                ->where('t1.kill_from_date', '>',$target_date)
                 ->where('t1.is_deleted', '=', 0);
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_departments, Config::get('const.LOG_MSG.subquery_illegal')).'$pe');
@@ -1531,6 +1582,26 @@ class ApiCommonController extends Controller
     }
     
     /**
+     * 時間差を秒まで求める（シリアルで返却）
+     *
+     * @return 時間差
+     */
+    public function diffSecoundSerial($time_from, $time_to){
+        Log::DEBUG('diffSecoundSerial $time_from = '.$time_from);
+        Log::DEBUG('diffSecoundSerial $time_to = '.$time_to);
+        Log::DEBUG('diffSecoundSerial strtotime $time_from = '.strtotime($time_from));
+        Log::DEBUG('diffSecoundSerial strtotime $time_to = '.strtotime($time_to));
+        $from = strtotime(date('Y-m-d H:i:ss',strtotime($time_from)));
+        $to   = strtotime(date('Y-m-d H:i:ss',strtotime($time_to))); 
+        $from = strtotime($time_from);
+        $to   = strtotime($time_to); 
+        Log::DEBUG('diffSecoundSerial $from = '.$from);
+        Log::DEBUG('diffSecoundSerial to = '.$to);
+        $interval = $to - $from;
+        return $interval;
+    }
+    
+    /**
      * インターバル時間を取得して分に変換する
      * 
      *  設定する時刻はDATEで
@@ -1553,7 +1624,6 @@ class ApiCommonController extends Controller
         }
         $hh = floor($interval);
         $mm = ($interval - floor($interval)) * 60;
-        Log::DEBUG('インターバル時間 = '.str_pad($hh, 2 , '0', STR_PAD_LEFT).":".str_pad($mm, 2 , '0', STR_PAD_LEFT).":00");
         return str_pad($hh, 2 , '0', STR_PAD_LEFT).":".str_pad($mm, 2 , '0', STR_PAD_LEFT).":00";
     }
     

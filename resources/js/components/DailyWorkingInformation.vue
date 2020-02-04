@@ -199,7 +199,6 @@
 </template>
 
 <script>
-import toasted from "vue-toasted";
 import moment from "moment";
 import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
@@ -249,7 +248,14 @@ export default {
   // マウント時
   mounted() {
     this.valuefromdate = this.defaultDate;
+    console.log('dailyworkingtime mounted getUserRole');
     this.getUserRole();
+    this.applytermdate = ""
+    if (this.valuefromdate) {
+      this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+    }
+    this.$refs.selectdepartmentlist.getList(this.applytermdate);
+    this.getUserSelected();
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -432,8 +438,12 @@ export default {
     // ----------------- 共通メソッド ----------------------------------
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
+      this.applytermdate = ""
+      if (this.valuefromdate) {
+        this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+      }
       this.$refs.selectuserlist.getList(
-        '',
+        this.applytermdate,
         this.valueUserkillcheck,
         this.getDo,
         this.selectedDepartmentValue,
@@ -445,6 +455,7 @@ export default {
       var res = response.data;
       if (res.result) {
         this.userrole = res.role;
+        console.log('dailyworkingtime getThenrole this.userrole = '+this.userrole);
       } else {
         if (res.messagedata.length > 0) {
           this.messageswal("エラー", res.messagedata, "error", true, false, true);

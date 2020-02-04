@@ -201,18 +201,31 @@
             <!-- panel contents -->
             <!-- .row -->
             <div class="row">
-              <!-- col -->
               <div class="col-md-12 pb-2">
-                <div class="btn-group d-flex">
-                  <btn-csv-download
-                    v-bind:csv-data="calcresults"
-                    v-bind:is-csvbutton="iscsvbutton"
-                    v-bind:csv-date="datejaFormat"
-                  >
-                  </btn-csv-download>
-                </div>
+                <!-- col -->
+                <btn-csv-download
+                  v-bind:btn-mode="'csvcalc'"
+                  v-bind:csv-data="calcresults"
+                  v-bind:is-csvbutton="iscsvbutton"
+                  v-bind:csv-date="datejaFormat"
+                >
+                </btn-csv-download>
+                <!-- /.col -->
               </div>
-              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <div class="row">
+              <div class="col-md-12 pb-2">
+                <!-- col -->
+                <btn-csv-download
+                  v-bind:btn-mode="'csvsalary'"
+                  v-bind:csv-data="calcresults"
+                  v-bind:is-csvbutton="iscsvbutton"
+                  v-bind:csv-date="datejaFormat"
+                >
+                </btn-csv-download>
+                <!-- /.col -->
+              </div>
             </div>
             <!-- /.row -->
             <!-- /.panel contents -->
@@ -452,6 +465,12 @@ export default {
   mounted() {
     this.valuefromym = this.defaultDate;
     this.getUserRole();
+    this.applytermdate = ""
+    if (this.valuefromdate) {
+      this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+    }
+    this.$refs.selectdepartmentlist.getList(this.applytermdate);
+    this.getUserSelected();
   },
   methods: {
     // バリデーション
@@ -614,7 +633,6 @@ export default {
     updNew: function(e) {
       this.serchorupdate = "update";
       this.validate = this.checkForm(e);
-      console.log("validate = " + this.validate);
       if (this.validate) {
         this.issearchbutton = true;
         this.isupdatebutton = true;
@@ -673,8 +691,13 @@ export default {
     // ----------------- 共通メソッド ----------------------------------
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
+      // 再取得
+      this.applytermdate = ""
+      if (this.valuefromdate) {
+          this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+      }
       this.$refs.selectuserlist.getList(
-        '',
+        this.applytermdate,
         this.valueUserkillcheck,
         this.getDo,
         this.selectedDepartmentValue,

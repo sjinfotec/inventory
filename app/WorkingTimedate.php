@@ -42,16 +42,23 @@ class WorkingTimedate extends Model
     private $working_timetable_no;          // タイムテーブルNo
     private $working_timetable_name;        // タイムテーブル名称
     private $array_attendance_time = [null,null,null,null,null];                    // 出勤時刻
+    private $array_attendance_time_positions = [null,null,null,null,null];          // 出勤位置情報
     private $array_leaving_time = [null,null,null,null,null];                       // 退勤時刻
+    private $array_leaving_time_positions = [null,null,null,null,null];             // 退勤位置情報
     private $array_missing_middle_time = [null,null,null,null,null];                // 私用外出時刻
+    private $array_missing_middle_time_positions = [null,null,null,null,null];      // 私用位置情報
     private $array_missing_middle_return_time = [null,null,null,null,null];         // 私用外出戻り時刻
-    private $array_public_going_out_time = [null,null,null,null,null];              // 公用外出時刻
-    private $array_public_going_out_return_time = [null,null,null,null,null];       // 公用外出戻り時刻
+    private $array_missing_middle_return_time_positions = [null,null,null,null,null];       // 私用外出戻り位置情報
+    private $array_public_going_out_time = [null,null,null,null,null];                      // 公用外出時刻
+    private $array_public_going_out_time_positions = [null,null,null,null,null];            // 公用外出位置情報
+    private $array_public_going_out_return_time = [null,null,null,null,null];               // 公用外出戻り時刻
+    private $array_public_going_out_return_time_positions = [null,null,null,null,null];     // 公用外出戻り位置情報
     private $total_working_times;           // 合計勤務時間
     private $regular_working_times;         // 所定労働時間
     private $out_of_regular_working_times;  // 所定外労働時間
     private $overtime_hours;                // 残業時間
     private $late_night_overtime_hours;     // 深夜残業時間
+    private $late_night_working_hours;      // 深夜労働時間
     private $legal_working_times;           // 法定労働時間
     private $out_of_legal_working_times;    // 法定外労働時間
     private $not_employment_working_hours;  // 未就労労働時間
@@ -209,10 +216,18 @@ class WorkingTimedate extends Model
 
     public function setAttendancetimeAttribute($index, $value)
     {
-        Log::DEBUG('$index = '.$index);
-        Log::DEBUG('$value = '.$value);
         $this->array_attendance_time[$index] = $value;
-        Log::DEBUG('$array_attendance_time = '.$this->array_attendance_time[$index]);
+    }
+
+    // 出勤位置情報
+    public function getAttendancetimepositionsAttribute($index)
+    {
+        return $this->array_attendance_time_positions[$index];
+    }
+
+    public function setAttendancetimepositionsAttribute($index, $value)
+    {
+        $this->array_attendance_time_positions[$index] = $value;
     }
 
     // 退勤時刻
@@ -226,6 +241,17 @@ class WorkingTimedate extends Model
         $this->array_leaving_time[$index] = $value;
     }
 
+    // 退勤位置情報
+    public function getLeavingtimepositionsAttribute($index)
+    {
+        return $this->array_leaving_time_positions[$index];
+    }
+
+    public function setLeavingtimepositionsAttribute($index, $value)
+    {
+        $this->array_leaving_time_positions[$index] = $value;
+    }
+
     // 私用外出時刻
     public function getMissingmiddletimeAttribute($index)
     {
@@ -235,6 +261,17 @@ class WorkingTimedate extends Model
     public function setMissingmiddletimeAttribute($index, $value)
     {
         $this->array_missing_middle_time[$index] = $value;
+    }
+
+    // 私用外出位置情報
+    public function getMissingmiddletimepositionsAttribute($index)
+    {
+        return $this->array_missing_middle_time_positions[$index];
+    }
+
+    public function setMissingmiddletimepositionsAttribute($index, $value)
+    {
+        $this->array_missing_middle_time_positions[$index] = $value;
     }
 
     // 私用外出戻り時刻
@@ -248,6 +285,17 @@ class WorkingTimedate extends Model
         $this->array_missing_middle_return_time[$index] = $value;
     }
 
+    // 私用外出戻り位置情報
+    public function getMissingmiddlereturntimepositionsAttribute($index)
+    {
+        return $this->array_missing_middle_return_time_positions[$index];
+    }
+
+    public function setMissingmiddlereturntimepositionsAttribute($index, $value)
+    {
+        $this->array_missing_middle_return_time_positions[$index] = $value;
+    }
+
     // 公用外出時刻
     public function getPublicgoingouttimeAttribute($index)
     {
@@ -259,6 +307,17 @@ class WorkingTimedate extends Model
         $this->array_public_going_out_time[$index] = $value;
     }
 
+    // 公用外出位置情報
+    public function getPublicgoingouttimepositionsAttribute($index)
+    {
+        return $this->array_public_going_out_time_positions[$index];
+    }
+
+    public function setPublicgoingouttimepositionsAttribute($index, $value)
+    {
+        $this->array_public_going_out_time_positions[$index] = $value;
+    }
+
     // 公用外出戻り時刻
     public function getPublicgoingoutreturntimeAttribute($index)
     {
@@ -268,6 +327,17 @@ class WorkingTimedate extends Model
     public function setPublicgoingoutreturntimeAttribute($index, $value)
     {
         $this->array_public_going_out_return_time[$index] = $value;
+    }
+
+    // 公用外出戻り位置情報
+    public function getPublicgoingoutreturntimepositionsAttribute($index)
+    {
+        return $this->array_public_going_out_return_time_positions[$index];
+    }
+
+    public function setPublicgoingoutreturntimepositionsAttribute($index, $value)
+    {
+        $this->array_public_going_out_return_time_positions[$index] = $value;
     }
 
     // 合計勤務時間
@@ -327,6 +397,18 @@ class WorkingTimedate extends Model
     public function setLatenightovertimehoursAttribute($value)
     {
         $this->late_night_overtime_hours = $value;
+    }
+
+
+    // 深夜労働時間
+    public function getLatenightworkinghoursAttribute()
+    {
+        return $this->late_night_working_hours;
+    }
+
+    public function setLatenightworkinghoursAttribute($value)
+    {
+        $this->late_night_working_hours = $value;
     }
 
 
@@ -1237,6 +1319,7 @@ class WorkingTimedate extends Model
                     $this->table.'.out_of_regular_working_times',
                     $this->table.'.overtime_hours',
                     $this->table.'.late_night_overtime_hours',
+                    $this->table.'.late_night_working_hours',
                     $this->table.'.legal_working_times',
                     $this->table.'.out_of_legal_working_times',
                     $this->table.'.not_employment_working_hours',
@@ -1276,6 +1359,67 @@ class WorkingTimedate extends Model
                     $this->table.'.created_user',
                     $this->table.'.updated_user',
                     $this->table.'.is_deleted');
+            $mainquery
+                ->selectRaw('X('.$this->table.'.attendance_time_positions_1) as x_attendance_time_positions_1')
+                ->selectRaw('Y('.$this->table.'.attendance_time_positions_1) as y_attendance_time_positions_1')
+                ->selectRaw('X('.$this->table.'.attendance_time_positions_2) as x_attendance_time_positions_2')
+                ->selectRaw('Y('.$this->table.'.attendance_time_positions_2) as y_attendance_time_positions_2')
+                ->selectRaw('X('.$this->table.'.attendance_time_positions_3) as x_attendance_time_positions_3')
+                ->selectRaw('Y('.$this->table.'.attendance_time_positions_3) as y_attendance_time_positions_3')
+                ->selectRaw('X('.$this->table.'.attendance_time_positions_4) as x_attendance_time_positions_4')
+                ->selectRaw('Y('.$this->table.'.attendance_time_positions_4) as y_attendance_time_positions_4')
+                ->selectRaw('X('.$this->table.'.attendance_time_positions_5) as x_attendance_time_positions_5')
+                ->selectRaw('Y('.$this->table.'.attendance_time_positions_5) as y_attendance_time_positions_5')
+                ->selectRaw('X('.$this->table.'.leaving_time_positions_1) as x_leaving_time_positions_1')
+                ->selectRaw('Y('.$this->table.'.leaving_time_positions_1) as y_leaving_time_positions_1')
+                ->selectRaw('X('.$this->table.'.leaving_time_positions_2) as x_leaving_time_positions_2')
+                ->selectRaw('Y('.$this->table.'.leaving_time_positions_2) as y_leaving_time_positions_2')
+                ->selectRaw('X('.$this->table.'.leaving_time_positions_3) as x_leaving_time_positions_3')
+                ->selectRaw('Y('.$this->table.'.leaving_time_positions_3) as y_leaving_time_positions_3')
+                ->selectRaw('X('.$this->table.'.leaving_time_positions_4) as x_leaving_time_positions_4')
+                ->selectRaw('Y('.$this->table.'.leaving_time_positions_4) as y_leaving_time_positions_4')
+                ->selectRaw('X('.$this->table.'.leaving_time_positions_5) as x_leaving_time_positions_5')
+                ->selectRaw('Y('.$this->table.'.leaving_time_positions_5) as y_leaving_time_positions_5')
+                ->selectRaw('X('.$this->table.'.missing_middle_time_positions_1) as x_missing_middle_time_positions_1')
+                ->selectRaw('Y('.$this->table.'.missing_middle_time_positions_1) as y_missing_middle_time_positions_1')
+                ->selectRaw('X('.$this->table.'.missing_middle_time_positions_2) as x_missing_middle_time_positions_2')
+                ->selectRaw('Y('.$this->table.'.missing_middle_time_positions_2) as y_missing_middle_time_positions_2')
+                ->selectRaw('X('.$this->table.'.missing_middle_time_positions_3) as x_missing_middle_time_positions_3')
+                ->selectRaw('Y('.$this->table.'.missing_middle_time_positions_3) as y_missing_middle_time_positions_3')
+                ->selectRaw('X('.$this->table.'.missing_middle_time_positions_4) as x_missing_middle_time_positions_4')
+                ->selectRaw('Y('.$this->table.'.missing_middle_time_positions_4) as y_missing_middle_time_positions_4')
+                ->selectRaw('X('.$this->table.'.missing_middle_time_positions_5) as x_missing_middle_time_positions_5')
+                ->selectRaw('Y('.$this->table.'.missing_middle_time_positions_5) as y_missing_middle_time_positions_5')
+                ->selectRaw('X('.$this->table.'.missing_middle_return_time_positions_1) as x_missing_middle_return_time_positions_1')
+                ->selectRaw('Y('.$this->table.'.missing_middle_return_time_positions_1) as y_missing_middle_return_time_positions_1')
+                ->selectRaw('X('.$this->table.'.missing_middle_return_time_positions_2) as x_missing_middle_return_time_positions_2')
+                ->selectRaw('Y('.$this->table.'.missing_middle_return_time_positions_2) as y_missing_middle_return_time_positions_2')
+                ->selectRaw('X('.$this->table.'.missing_middle_return_time_positions_3) as x_missing_middle_return_time_positions_3')
+                ->selectRaw('Y('.$this->table.'.missing_middle_return_time_positions_3) as y_missing_middle_return_time_positions_3')
+                ->selectRaw('X('.$this->table.'.missing_middle_return_time_positions_4) as x_missing_middle_return_time_positions_4')
+                ->selectRaw('Y('.$this->table.'.missing_middle_return_time_positions_4) as y_missing_middle_return_time_positions_4')
+                ->selectRaw('X('.$this->table.'.missing_middle_return_time_positions_5) as x_missing_middle_return_time_positions_5')
+                ->selectRaw('Y('.$this->table.'.missing_middle_return_time_positions_5) as y_missing_middle_return_time_positions_5')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_1) as x_public_going_out_time_positions_1')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_1) as y_public_going_out_time_positions_1')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_2) as x_public_going_out_time_positions_2')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_2) as y_public_going_out_time_positions_2')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_3) as x_public_going_out_time_positions_3')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_3) as y_public_going_out_time_positions_3')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_4) as x_public_going_out_time_positions_4')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_4) as y_public_going_out_time_positions_4')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_5) as x_public_going_out_time_positions_5')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_5) as y_public_going_out_time_positions_5')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_1) as x_public_going_out_return_time_positions_1')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_1) as y_public_going_out_return_time_positions_1')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_2) as x_public_going_out_return_time_positions_2')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_2) as y_public_going_out_return_time_positions_2')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_3) as x_public_going_out_return_time_positions_3')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_3) as y_public_going_out_return_time_positions_3')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_4) as x_public_going_out_return_time_positions_4')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_4) as y_public_going_out_return_time_positions_4')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_5) as x_public_going_out_return_time_positions_5')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_5) as y_public_going_out_return_time_positions_5');
 
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $date = date_create($this->param_date_from);
@@ -1390,6 +1534,7 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'out_of_regular_working_times', str_replace('{0}', $this->table.'.out_of_regular_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'overtime_hours', str_replace('{0}', $this->table.'.overtime_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'late_night_overtime_hours', str_replace('{0}', $this->table.'.late_night_overtime_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'late_night_working_hours', str_replace('{0}', $this->table.'.late_night_working_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'legal_working_times', str_replace('{0}', $this->table.'.legal_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'out_of_legal_working_times', str_replace('{0}', $this->table.'.out_of_legal_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'not_employment_working_hours', str_replace('{0}', $this->table.'.not_employment_working_hours', $case_where)))
@@ -1397,11 +1542,72 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'public_going_out_hours', str_replace('{0}', $this->table.'.public_going_out_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'missing_middle_hours', str_replace('{0}', $this->table.'.missing_middle_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'out_of_legal_working_holiday_hours', str_replace('{0}', $this->table.'.out_of_legal_working_holiday_hours', $case_where)))
-                ->selectRaw(str_replace('{1}', 'legal_working_holiday_hours', str_replace('{0}', $this->table.'.legal_working_holiday_hours', $case_where)));
+                ->selectRaw(str_replace('{1}', 'legal_working_holiday_hours', str_replace('{0}', $this->table.'.legal_working_holiday_hours', $case_where)))
+                ->selectRaw('X('.$this->table.'.attendance_time_positions_1) as x_attendance_time_positions_1')
+                ->selectRaw('Y('.$this->table.'.attendance_time_positions_1) as y_attendance_time_positions_1')
+                ->selectRaw('X('.$this->table.'.attendance_time_positions_2) as x_attendance_time_positions_2')
+                ->selectRaw('Y('.$this->table.'.attendance_time_positions_2) as y_attendance_time_positions_2')
+                ->selectRaw('X('.$this->table.'.attendance_time_positions_3) as x_attendance_time_positions_3')
+                ->selectRaw('Y('.$this->table.'.attendance_time_positions_3) as y_attendance_time_positions_3')
+                ->selectRaw('X('.$this->table.'.attendance_time_positions_4) as x_attendance_time_positions_4')
+                ->selectRaw('Y('.$this->table.'.attendance_time_positions_4) as y_attendance_time_positions_4')
+                ->selectRaw('X('.$this->table.'.attendance_time_positions_5) as x_attendance_time_positions_5')
+                ->selectRaw('Y('.$this->table.'.attendance_time_positions_5) as y_attendance_time_positions_5')
+                ->selectRaw('X('.$this->table.'.leaving_time_positions_1) as x_leaving_time_positions_1')
+                ->selectRaw('Y('.$this->table.'.leaving_time_positions_1) as y_leaving_time_positions_1')
+                ->selectRaw('X('.$this->table.'.leaving_time_positions_2) as x_leaving_time_positions_2')
+                ->selectRaw('Y('.$this->table.'.leaving_time_positions_2) as y_leaving_time_positions_2')
+                ->selectRaw('X('.$this->table.'.leaving_time_positions_3) as x_leaving_time_positions_3')
+                ->selectRaw('Y('.$this->table.'.leaving_time_positions_3) as y_leaving_time_positions_3')
+                ->selectRaw('X('.$this->table.'.leaving_time_positions_4) as x_leaving_time_positions_4')
+                ->selectRaw('Y('.$this->table.'.leaving_time_positions_4) as y_leaving_time_positions_4')
+                ->selectRaw('X('.$this->table.'.leaving_time_positions_5) as x_leaving_time_positions_5')
+                ->selectRaw('Y('.$this->table.'.leaving_time_positions_5) as y_leaving_time_positions_5')
+                ->selectRaw('X('.$this->table.'.missing_middle_time_positions_1) as x_missing_middle_time_positions_1')
+                ->selectRaw('Y('.$this->table.'.missing_middle_time_positions_1) as y_missing_middle_time_positions_1')
+                ->selectRaw('X('.$this->table.'.missing_middle_time_positions_2) as x_missing_middle_time_positions_2')
+                ->selectRaw('Y('.$this->table.'.missing_middle_time_positions_2) as y_missing_middle_time_positions_2')
+                ->selectRaw('X('.$this->table.'.missing_middle_time_positions_3) as x_missing_middle_time_positions_3')
+                ->selectRaw('Y('.$this->table.'.missing_middle_time_positions_3) as y_missing_middle_time_positions_3')
+                ->selectRaw('X('.$this->table.'.missing_middle_time_positions_4) as x_missing_middle_time_positions_4')
+                ->selectRaw('Y('.$this->table.'.missing_middle_time_positions_4) as y_missing_middle_time_positions_4')
+                ->selectRaw('X('.$this->table.'.missing_middle_time_positions_5) as x_missing_middle_time_positions_5')
+                ->selectRaw('Y('.$this->table.'.missing_middle_time_positions_5) as y_missing_middle_time_positions_5')
+                ->selectRaw('X('.$this->table.'.missing_middle_return_time_positions_1) as x_missing_middle_return_time_positions_1')
+                ->selectRaw('Y('.$this->table.'.missing_middle_return_time_positions_1) as y_missing_middle_return_time_positions_1')
+                ->selectRaw('X('.$this->table.'.missing_middle_return_time_positions_2) as x_missing_middle_return_time_positions_2')
+                ->selectRaw('Y('.$this->table.'.missing_middle_return_time_positions_2) as y_missing_middle_return_time_positions_2')
+                ->selectRaw('X('.$this->table.'.missing_middle_return_time_positions_3) as x_missing_middle_return_time_positions_3')
+                ->selectRaw('Y('.$this->table.'.missing_middle_return_time_positions_3) as y_missing_middle_return_time_positions_3')
+                ->selectRaw('X('.$this->table.'.missing_middle_return_time_positions_4) as x_missing_middle_return_time_positions_4')
+                ->selectRaw('Y('.$this->table.'.missing_middle_return_time_positions_4) as y_missing_middle_return_time_positions_4')
+                ->selectRaw('X('.$this->table.'.missing_middle_return_time_positions_5) as x_missing_middle_return_time_positions_5')
+                ->selectRaw('Y('.$this->table.'.missing_middle_return_time_positions_5) as y_missing_middle_return_time_positions_5')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_1) as x_public_going_out_time_positions_1')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_1) as y_public_going_out_time_positions_1')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_2) as x_public_going_out_time_positions_2')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_2) as y_public_going_out_time_positions_2')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_3) as x_public_going_out_time_positions_3')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_3) as y_public_going_out_time_positions_3')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_4) as x_public_going_out_time_positions_4')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_4) as y_public_going_out_time_positions_4')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_5) as x_public_going_out_time_positions_5')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_5) as y_public_going_out_time_positions_5')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_1) as x_public_going_out_return_time_positions_1')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_1) as y_public_going_out_return_time_positions_1')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_2) as x_public_going_out_return_time_positions_2')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_2) as y_public_going_out_return_time_positions_2')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_3) as x_public_going_out_return_time_positions_3')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_3) as y_public_going_out_return_time_positions_3')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_4) as x_public_going_out_return_time_positions_4')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_4) as y_public_going_out_return_time_positions_4')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_5) as x_public_going_out_return_time_positions_5')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_5) as y_public_going_out_return_time_positions_5');
 
             $mainquery
                 ->addselect($this->table.'.working_status');
-            $remarks_date_holiday_name = ' CASE ifnull('.$this->table.".holiday_name, '') WHEN '' THEN '' ELSE ".$this->table.'.holiday_name END as remark_holiday_name'; 
+            // $remarks_date_holiday_name = ' CASE ifnull('.$this->table.".holiday_name, '') WHEN '' THEN '' ELSE ".$this->table.'.holiday_name END as remark_holiday_name'; 
+            $remarks_date_holiday_name = $this->table_generalcodes.'.code_name as remark_holiday_name'; 
             $remarks_date_check_result = ' CASE ifnull('.$this->table.'.check_result, 0)';
             $remarks_date_check_result .= ' WHEN '.Config::get('const.C018.forget_stamp')." THEN '".Config::get('const.C018_NAME.forget_stamp')."' ";
             $remarks_date_check_result .= ' WHEN '.Config::get('const.C018.interval_stamp')." THEN '".Config::get('const.C018_NAME.interval_stamp')."' ";
@@ -1504,7 +1710,6 @@ class WorkingTimedate extends Model
             $subquery1 = $apicommon->getUserApplyTermSubquery($targetdate);
             // departmentsの最大適用開始日付subquery
             $subquery2 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
-
 
             $mainquery
                 ->leftJoin($this->table_user_holiday_kubuns, function ($join) { 
@@ -1700,6 +1905,7 @@ class WorkingTimedate extends Model
                 ->selectRaw('sum(ifnull('.$this->table.'.out_of_regular_working_times, 0)) as out_of_regular_working_times')
                 ->selectRaw('sum(ifnull('.$this->table.'.overtime_hours, 0)) as overtime_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.late_night_overtime_hours, 0)) as late_night_overtime_hours')
+                ->selectRaw('sum(ifnull('.$this->table.'.late_night_working_hours, 0)) as late_night_working_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.legal_working_times, 0)) as legal_working_times')
                 ->selectRaw('sum(ifnull('.$this->table.'.out_of_legal_working_times, 0)) as out_of_legal_working_times')
                 ->selectRaw('sum(ifnull('.$this->table.'.not_employment_working_hours, 0)) as not_employment_working_hours')
@@ -1782,6 +1988,7 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'out_of_regular_working_times', str_replace('{0}', 't1.out_of_regular_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'overtime_hours', str_replace('{0}', 't1.overtime_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'late_night_overtime_hours', str_replace('{0}', 't1.late_night_overtime_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'late_night_working_hours', str_replace('{0}', 't1.late_night_working_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'legal_working_times', str_replace('{0}', 't1.legal_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'out_of_legal_working_times', str_replace('{0}', 't1.out_of_legal_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'not_employment_working_hours', str_replace('{0}', 't1.not_employment_working_hours', $case_where)))
@@ -1976,9 +2183,51 @@ class WorkingTimedate extends Model
      *
      * @return void
      */
-    public function insertWorkingTimeDateFromTemp($array_subquery){
+    public function insertWorkingTimeDateFromTemp($temp_working_time_dates){
         try{
-            DB::table($this->table)->insert($array_subquery);
+            $item_data = '';
+            $temp_array = array();
+            foreach($temp_working_time_dates as $working_time_date) {
+                $temp_collect = collect($working_time_date);
+                for ($i=1;$i<=5;$i++) {
+                    if (isset($temp_collect['attendance_time_positions_'.$i]) && $temp_collect['attendance_time_positions_'.$i] != "") {
+                        $item_data = $temp_collect['attendance_time_positions_'.$i];
+                        $temp_collect['attendance_time_positions_'.$i] = DB::raw("(GeomFromText('POINT(".$item_data.")'))");
+                    }
+                }
+                for ($i=1;$i<=5;$i++) {
+                    if (isset($temp_collect['leaving_time_positions_'.$i]) && $temp_collect['leaving_time_positions_'.$i] != "") {
+                        $item_data = $temp_collect['leaving_time_positions_'.$i];
+                        $temp_collect['leaving_time_positions_'.$i] = DB::raw("(GeomFromText('POINT(".$item_data.")'))");
+                    }
+                }
+                for ($i=1;$i<=5;$i++) {
+                    if (isset($temp_collect['missing_middle_time_positions_'.$i]) && $temp_collect['missing_middle_time_positions_'.$i] != "") {
+                       $item_data = $temp_collect['missing_middle_time_positions_'.$i];
+                        $temp_collect['missing_middle_time_positions_'.$i] = DB::raw("(GeomFromText('POINT(".$item_data.")'))");
+                    }
+                }
+                for ($i=1;$i<=5;$i++) {
+                    if (isset($temp_collect['missing_middle_return_time_positions_'.$i]) && $temp_collect['missing_middle_return_time_positions_'.$i] != "") {
+                        $item_data = $temp_collect['missing_middle_return_time_positions_'.$i];
+                        $temp_collect['missing_middle_return_time_positions_'.$i] = DB::raw("(GeomFromText('POINT(".$item_data.")'))");
+                    }
+                }
+                for ($i=1;$i<=5;$i++) {
+                    if (isset($temp_collect['public_going_out_time_positions_'.$i]) && $temp_collect['public_going_out_time_positions_'.$i] != "") {
+                        $item_data = $temp_collect['public_going_out_time_positions_'.$i];
+                        $temp_collect['public_going_out_time_positions_'.$i] = DB::raw("(GeomFromText('POINT(".$item_data.")'))");
+                    }
+                }
+                for ($i=1;$i<=5;$i++) {
+                    if (isset($temp_collect['public_going_out_return_time_positions_'.$i]) && $temp_collect['public_going_out_return_time_positions_'.$i] != "") {
+                        $item_data = $temp_collect['public_going_out_return_time_positions_'.$i];
+                        $temp_collect['public_going_out_return_time_positions_'.$i] = DB::raw("(GeomFromText('POINT(".$item_data.")'))");
+                    }
+                }
+                $temp_array[] = $temp_collect->toArray();
+            } 
+            DB::table($this->table)->insert($temp_array);
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
             Log::error($pe->getMessage());

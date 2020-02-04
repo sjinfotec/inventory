@@ -404,17 +404,19 @@ class WorkingTimeTable extends Model
                 ->where('t1.no', $this->no)
                 ->where('t1.is_deleted', 0)
                 ->orderBy('t1.apply_term_from', 'desc')
+                ->orderBy('t1.working_time_kubun', 'asc')
+                ->orderBy('t1.id', 'asc')
                 ->get();
 
-            }catch(\PDOException $pe){
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-                Log::error($pe->getMessage());
-                throw $pe;
-            }catch(\Exception $e){
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-                Log::error($e->getMessage());
-                throw $e;
-            }
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     
         return $results;
     }

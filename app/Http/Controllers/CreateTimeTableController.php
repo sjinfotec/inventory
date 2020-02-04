@@ -311,6 +311,10 @@ class CreateTimeTableController extends Controller
                 $time_table->setWorkingtimekubunAttribute($details[$i]['working_time_kubun']);
                 $time_table->setFromtimeAttribute($details[$i]['from_time']);
                 $time_table->setTotimeAttribute($details[$i]['to_time']);
+                Log::debug('$i = '.$i);
+                Log::debug('$details[id] = '.$details[$i]['id']);
+                Log::debug('$details[from_time] = '.$details[$i]['from_time']);
+                Log::debug('$details[to_time] = '.$details[$i]['to_time']);
                 if ($details[$i]['id'] == "" || $details[$i]['id'] == null) {
                     $time_table->setCreateduserAttribute($user_code);
                     $time_table->setCreatedatAttribute($systemdate);

@@ -202,6 +202,7 @@ return [
     'C025' => [
         'value' => 'C025',
         'general_user' => 1,
+        'general_approver__user' => 5,
         'admin_user' => 10
     ],
  
@@ -399,6 +400,7 @@ return [
         'select_error' => 7,
         'interval_stamp' => 8,
         'max_time_over' => 9,
+        'dup_time_check' => 10,
         'other' => 99
     ],
  
@@ -438,6 +440,53 @@ return [
         'WA' => '警告',
         'NG' => 'エラー'
     ],
+ 
+    'FILE_DOWNLOAD_PATH' => [
+        'STORAGE' => 'private/'
+    ],
+ 
+    'FILE_DOWNLOAD_NAME' => [
+        'file1' => 'croud_install.zip',
+        'file2' => '',
+        'file3' => '',
+        'file4' => '',
+        'file5' => '',
+        'file6' => '',
+        'file7' => '',
+        'file8' => '',
+        'file9' => '',
+        'file10' => '',
+        'file11' => '',
+        'file12' => '',
+        'file13' => '',
+        'file14' => '',
+        'file15' => '',
+        'file16' => '',
+        'file17' => '',
+        'file18' => '',
+        'file19' => '',
+        'file20' => '',
+        'file21' => 'Installmanual.pdf',
+        'file22' => 'Installmanual.xlsx',
+        'file23' => 'Operationmanual(card_reader).pdf',
+        'file24' => 'Operationmanual(card_reader).xlsx',
+        'file25' => 'Operationmanual(traial).pdf',
+        'file26' => 'Operationmanual(traial).xlsx',
+        'file27' => 'Operationmanual(yayoi).pdf',
+        'file28' => 'Operationmanual(yayoi).xlsx',
+        'file29' => '',
+        'file30' => '',
+        'file31' => '',
+        'file32' => '',
+        'file33' => '',
+        'file34' => '',
+        'file35' => '',
+        'file36' => '',
+        'file37' => '',
+        'file38' => '',
+        'file39' => '',
+        'file40' => ''
+    ],
 
     'MSG_INFO' => [
         'past_closing' => '締日を過ぎていますが、集計しますか？',
@@ -476,7 +525,8 @@ return [
         'already_name' => 'すでに登録されている[{0}]名です',
         'already_item' => 'すでに登録されている[{0}]です',
         'not_found_data' => '該当するデータは見つかりませんでした。',
-        'parameter_illegal' => '不正なパラメータです。'
+        'parameter_illegal' => '不正なパラメータです。',
+        'file_download_error' => 'ファイルダウンロード失敗しました。'
     ],
 
     'LOG_MSG' => [
@@ -491,12 +541,14 @@ return [
         'unknown_error' => '不明なエラー',
         'mismatch_data' => 'データ不整合',
         'not_set_time_rounding ' => '時間の端数処理が設定されていない',
+        'not_setting_role' => 'ユーザー権限が設定されていない。user = [{0}]',
         'not_setting_timetable' => '期間内に該当する勤務時間がないかまたはタイムテーブルが設定されていない。',
         'non_approval_demandno' => '承認する申請番号なし。',
         'non_approval_demanddate' => '承認する申請日なし。',
         'subquery_illegal ' => 'subquery設定エラー',
         'where_illegal ' => 'WHERE句設定エラー',
-        'parameter_illegal' => '不正なパラメータ params = [{0}]'
+        'parameter_illegal' => '不正なパラメータ params = [{0}]',
+        'file_download_error' => 'ファイルダウンロード失敗しました。'
     ],
 
     'DEBUG_LEVEL' => 'DEBUG',
@@ -504,6 +556,18 @@ return [
     'DEBUG_LEVEL_VALUE' => [
         'NON' => 'NON',
         'DEBUG' => 'DEBUG'
+    ],
+
+    'EDITION' => [
+        'EDITION' => 3
+    ],
+
+    'EDITION_NAME' => [
+        'DEMO' => 1,
+        'TRIAL' => 2,
+        'CROUD' => 3,
+        'SSJJOO' => 4,
+        'CLIENT' => 5
     ]
 
 ];

@@ -91,6 +91,12 @@ Vue.component(
     require("./components/SettingShiftTime.vue").default
 );
 
+// 操作
+// パスワード変更
+Vue.component("user-pass", require("./components/UserPass.vue").default);
+// ダウンロード
+Vue.component("file-download", require("./components/FileDownload.vue").default);
+
 Vue.component(
     "btn-work-time",
     require("./components/BtnWorkTime.vue").default
@@ -120,8 +126,6 @@ Vue.component("input-time-disabled", require("./components/InputTimeDisabled.vue
 Vue.component("user-add", require("./components/UserAdd.vue").default);
 
 Vue.component("edit-user", require("./components/EditUser.vue").default);
-
-Vue.component("user-pass", require("./components/UserPass.vue").default);
 
 Vue.component(
     "create-department",
@@ -255,6 +259,11 @@ Vue.component(
 );
 
 Vue.component(
+    "department-set",
+    require("./components/DepartmentSet.vue").default
+);
+
+Vue.component(
     "input-timetablepicker",
     require("./components/InputTimeTableElTimepicker.vue").default
 );
@@ -265,6 +274,10 @@ Vue.component(
     "select-departmentlist",
     require("./components/SelectDepartmentList.vue").default
 );
+Vue.component(
+    "select-departmentlist-detail",
+    require("./components/SelectDepartmentListDetail.vue").default
+);
 
 Vue.component(
     "select-timetablelist",
@@ -274,6 +287,8 @@ Vue.component(
 Vue.component("select-user", require("./components/SelectUser.vue").default);
 
 Vue.component("select-userlist", require("./components/SelectUserList.vue").default);
+
+Vue.component("select-userlist-detail", require("./components/SelectUserListDetail.vue").default);
 
 Vue.component(
     "select-businessdaylist",

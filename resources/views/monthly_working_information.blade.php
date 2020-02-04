@@ -11,8 +11,8 @@
 								<!-- panel header -->
 								<div class="card-header bg-transparent pt-2 border-0">
 									<h1 class="float-left font-size-xl">
-                                        <img class="icon-size-rg mr-3" src="{{ asset('images/round-restore-w.svg') }}" alt="">月次集計
-                                    </h1>
+											<img class="icon-size-rg mr-3" src="{{ asset('images/round-restore-w.svg') }}" alt="">月次集計
+									</h1>
 								</div>
 								<!-- /.panel header -->
 							</div>

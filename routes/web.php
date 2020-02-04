@@ -49,8 +49,10 @@ Route::get('/approval/list_approval', 'ApprovalController@listApproval')->middle
 Route::post('/approval/make_approval', 'ApprovalController@makeApproval')->middleware('auth');
 // 承認設定
 Route::get('/confirm', 'ConfirmController@index')->middleware('auth');
+Route::post('/confirm/gettable', 'ConfirmController@gettable')->middleware('auth');
 Route::post('/confirm/show', 'ConfirmController@show')->middleware('auth');
 Route::post('/confirm/store', 'ConfirmController@store')->middleware('auth');
+Route::post('/confirm/del', 'ConfirmController@del')->middleware('auth');
 
 // カレンダー登録
 // Route::get('/setting-calendar', 'CreateCalendarController@index')->middleware('auth');
@@ -125,9 +127,13 @@ Route::post('/edit_user/del', 'UserAddController@del')->middleware('auth');
 Route::post('/edit_user/edit', 'UserAddController@edit')->middleware('auth');
 Route::post('/edit_user/fix', 'UserAddController@fixUser')->middleware('auth');
 Route::post('/edit_user/release_card_info', 'UserAddController@releaseCardInfo')->middleware('auth');
+// ------------------ 操作 --------------------------------
 // ユーザーパスワード変更
 Route::get('/user_pass', 'UserPassController@index')->middleware('auth');
 Route::post('/user_pass/passchange', 'UserPassController@passChange')->middleware('auth');
+// ファイルダウンロード
+Route::get('/file_download', 'FileDownloadController@index')->middleware('auth');
+Route::get('/file_download/getdownload', 'FileDownloadController@getfileDownload')->middleware('auth');
 // ------------------ 共通 --------------------------------
 // リスト取得
 Route::post('/get_departments_list', 'ApiCommonController@getDepartmentList')->middleware('auth');
@@ -146,5 +152,5 @@ Route::post('/get_closing_day', 'ApiCommonController@getClosingDay')->middleware
 // ユーザー権限取得
 Route::post('/get_login_user_role', 'ApiCommonController@getLoginUserRole')->middleware('auth');
 // ユーザー部署権限取得
-Route::get('/get_login_user_department', 'ApiCommonController@getLoginUserDepartment')->middleware('auth');
+Route::post('/get_login_user_department', 'ApiCommonController@getLoginUserDepartment')->middleware('auth');
 
