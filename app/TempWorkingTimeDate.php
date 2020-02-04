@@ -1410,6 +1410,7 @@ class TempWorkingTimeDate extends Model
                 }
             }
             for ($i=0;$i<count($this->array_leaving_time_positions);$i++) {
+                Log::debug('$this->array_leaving_time_positions[$i] = '.$this->array_leaving_time_positions[$i]);
                 if (isset($this->array_leaving_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
                         array('leaving_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_leaving_time_positions[$i].")'))"))
@@ -1421,6 +1422,7 @@ class TempWorkingTimeDate extends Model
                 }
             }
             for ($i=0;$i<count($this->array_missing_middle_time_positions);$i++) {
+                Log::debug('$this->array_missing_middle_time_positions[$i] = '.$this->array_missing_middle_time_positions[$i]);
                 if (isset($this->array_missing_middle_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
                         array('missing_middle_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_missing_middle_time_positions[$i].")'))"))
@@ -1432,6 +1434,7 @@ class TempWorkingTimeDate extends Model
                 }
             }
             for ($i=0;$i<count($this->array_missing_middle_return_time_positions);$i++) {
+                Log::debug('$this->array_missing_middle_return_time_positions[$i] = '.$this->array_missing_middle_return_time_positions[$i]);
                 if (isset($this->array_missing_middle_return_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
                         array('missing_middle_return_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_missing_middle_return_time_positions[$i].")'))"))
@@ -1443,6 +1446,7 @@ class TempWorkingTimeDate extends Model
                 }
             }
             for ($i=0;$i<count($this->array_public_going_out_time_positions);$i++) {
+                Log::debug('$this->array_public_going_out_time_positions[$i] = '.$this->array_public_going_out_time_positions[$i]);
                 if (isset($this->array_public_going_out_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
                         array('public_going_out_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_public_going_out_time_positions[$i].")'))"))
@@ -1454,6 +1458,7 @@ class TempWorkingTimeDate extends Model
                 }
             }
             for ($i=0;$i<count($this->array_public_going_out_return_time_positions);$i++) {
+                Log::debug('$this->array_public_going_out_return_time_positions[$i] = '.$this->array_public_going_out_return_time_positions[$i]);
                 if (isset($this->array_public_going_out_return_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
                         array('public_going_out_return_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_public_going_out_return_time_positions[$i].")'))"))

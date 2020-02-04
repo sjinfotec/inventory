@@ -995,6 +995,8 @@ class WorkTime extends Model
                     't4.name as department_name',
                     't5.code_name'
                 )
+                ->selectRaw('X(t1.positions) as x_positions')
+                ->selectRaw('Y(t1.positions) as y_positions')
                 ->where('t1.user_code', $this->user_code)
                 ->whereBetween('t1.record_time', [$this->param_start_date,$this->param_end_date])
                 ->where('t1.is_deleted', 0)
