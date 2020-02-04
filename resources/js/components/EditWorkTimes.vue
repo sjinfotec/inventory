@@ -599,6 +599,8 @@ export default {
           department_code: this.selectedDepartmentValue,
           record_time: "",
           mode: "",
+          x_positions: "",
+          y_positions: "",
           user_name: this.user_name,
           department_name: this.department_name,
           code_name: "",

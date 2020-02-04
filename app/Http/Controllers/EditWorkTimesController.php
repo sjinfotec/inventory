@@ -214,6 +214,7 @@ class EditWorkTimesController extends Controller
                 // 既に存在する場合は論理削除する
                 $work_time_model->delWorkTime();
             }
+            $work_time_model->setPositionsAttribute(null);
             $work_time_model->insertWorkTime();
         
             // 休暇登録
@@ -321,8 +322,14 @@ class EditWorkTimesController extends Controller
             // 既に存在するので論理削除する
             $work_time_model->setIdAttribute($details['id']);
             $work_time_model->delWorkTime();
+            $positions_data = null; 
+            if ((isset($details['x_positions']) && isset($details['y_positions']))) {
+                if (($details['x_positions'] != "") && ($details['y_positions'] != "")) {
+                    $positions_data = $details['x_positions'].' '.$details['y_positions'];
+                }
+            }
+            $work_time_model->setPositionsAttribute($positions_data);
             $work_time_model->insertWorkTime();
-        
             // 休暇登録
             if($details['kbn_flag'] == 1){     // 休暇区分のみ登録
                 $ymd = new Carbon($details['date']);
