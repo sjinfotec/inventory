@@ -135,12 +135,37 @@
                     <td class="text-center align-middle">{{ calcList.department_name }}</td>
                     <td class="text-center align-middle">{{ calcList.employment_status_name }}</td>
                     <td class="text-center align-middle">{{ calcList.user_name }}</td>
-                    <td class="text-center align-middle">{{ calcList.attendance_time }}</td>
-                    <td class="text-center align-middle">{{ calcList.leaving_time }}</td>
+                    <!-- <td class="text-center align-middle" v-if="calcList.x_attendance_time_positions"><button class="btn btn-success">{{ calcList.attendance_time }}</button></td> -->
+                    <!-- 出勤 -->
+                    <td class="text-center align-middle" v-if="calcList.x_attendance_time_positions">
+                      {{ calcList.attendance_time }} <img class="icon-size-sm svg_img orange600" src="/images/room-24px.svg" @click="showMap(calcList.attendance_time,calcList.user_name,calcList.x_attendance_time_positions,calcList.y_attendance_time_positions)" alt /></td>
+                    <td class="text-center align-middle" v-else >{{ calcList.attendance_time }}</td>
+                    <!-- 退勤 -->
+                    <td class="text-center align-middle" v-if="calcList.x_leaving_time_positions">
+                      {{ calcList.leaving_time }} <img class="icon-size-sm svg_img orange600" src="/images/room-24px.svg" @click="showMap(calcList.leaving_time,calcList.user_name,calcList.x_leaving_time_positions,calcList.y_leaving_time_positions)" alt /></td>
+                    <td class="text-center align-middle" v-else >{{ calcList.leaving_time }}</td>
+                    <!-- 私用外出　開始 -->
+                    <td class="text-center align-middle" v-if="calcList.x_public_going_out_time_positions">
+                      {{ calcList.public_going_out_time }} <img class="icon-size-sm svg_img orange600" src="/images/room-24px.svg" @click="showMap(calcList.public_going_out_time,calcList.user_name,calcList.x_public_going_out_time_positions,calcList.y_public_going_out_time_positions)" alt /></td>
+                    <td class="text-center align-middle" v-else >{{ calcList.public_going_out_time }}</td>
+                    <!-- 私用外出　終了 -->
+                    <td class="text-center align-middle" v-if="calcList.x_public_going_out_return_time_positions">
+                      {{ calcList.public_going_out_return_time }} <img class="icon-size-sm svg_img orange600" src="/images/room-24px.svg" @click="showMap(calcList.public_going_out_return_time,calcList.user_name,calcList.x_public_going_out_return_time_positions,calcList.y_public_going_out_return_time_positions)" alt /></td>
+                    <td class="text-center align-middle" v-else >{{ calcList.public_going_out_return_time }}</td>
+                    <!-- 公用外出　開始 -->
+                    <td class="text-center align-middle" v-if="calcList.x_missing_middle_time_positions">
+                      {{ calcList.missing_middle_time }} <img class="icon-size-sm svg_img orange600" src="/images/room-24px.svg" @click="showMap(calcList.missing_middle_time,calcList.user_name,calcList.x_missing_middle_time_positions,calcList.y_missing_middle_time_positions)" alt /></td>
+                    <td class="text-center align-middle" v-else >{{ calcList.missing_middle_time }}</td>
+                    <!-- 公用外出　終了 -->
+                    <td class="text-center align-middle" v-if="calcList.x_missing_middle_return_time_positions">
+                      {{ calcList.missing_middle_return_time }} <img class="icon-size-sm svg_img orange600" src="/images/room-24px.svg" @click="showMap(calcList.missing_middle_return_time,calcList.user_name,calcList.x_missing_middle_return_time_positions,calcList.y_missing_middle_return_time_positions)" alt /></td>
+                    <td class="text-center align-middle" v-else >{{ calcList.missing_middle_return_time }}</td>
+                
+                    <!-- <td class="text-center align-middle">{{ calcList.leaving_time }}</td>
                     <td class="text-center align-middle">{{ calcList.public_going_out_time }}</td>
                     <td class="text-center align-middle">{{ calcList.public_going_out_return_time }}</td>
                     <td class="text-center align-middle">{{ calcList.missing_middle_time }}</td>
-                    <td class="text-center align-middle">{{ calcList.missing_middle_return_time }}</td>
+                    <td class="text-center align-middle">{{ calcList.missing_middle_return_time }}</td> -->
                     <td class="text-center align-middle">{{ calcList.working_status_name }}</td>
                     <td class="text-center align-middle"
                       data-toggle="tooltip"
@@ -256,11 +281,31 @@
         </div>
       </div>
       <!-- /.row -->
+      <el-dialog
+          title="位置情報"
+          :visible.sync="dialogVisible"
+          width="80%"
+        >
+          <div class="col-xs-12 padding-dis-left margin-bottom-regular">
+            <div>
+              {{ user_name }} さんの　打刻時間 : {{ record_time }}
+            </div>
+        <div style="width: 100%; overflow: hidden; height:600px; width:1000px;">
+          <iframe v-bind:src="'https://www.google.com/maps/embed/v1/place?q='+longitude+','+latitude+'&key='+apiKey" width="100%" height="600" frameborder="0" style="border:0; margin-top: -150px;">
+          </iframe>
+        </div>
+        <div>
+          <span slot="footer" class="dialog-footer">
+            <el-button @click="dialogVisible = false">閉じる</el-button>
+            <!-- <el-button type="success" @click="dialogVisible = false">承認</el-button> -->
+          </span>
+          </div>
+          </div>
+        </el-dialog>
     </div>
   </div>
 </template>
 <script>
-
 export default {
   name: "dailyworkinginfotable",
   props: {
@@ -282,11 +327,23 @@ export default {
     predeterNightTimeName: {
       type: String,
       default: '深夜残業時間'
+    },
+    // TODO: 本来は .envに記載して取得したい
+    apiKey: {
+      type: String,
+      default: 'AIzaSyDmNKensj6Y3qEY9t0v1kbQqUxdOrhq3X8'
     }
   },
   // マウント時
   mounted() {
     console.log("dailyworkinginfotable  マウント");
+  },
+  created(){
+    // scriptjs(
+    //       "https://maps.googleapis.com/maps/api/js?key=AIzaSyDmNKensj6Y3qEY9t0v1kbQqUxdOrhq3X8&callback=initMap",
+    //       "loadGoogleMap"
+    //     );
+    // scriptjs.ready("loadGoogleMap", this.loadMap);
   },
   data: function() {
     return {
@@ -296,8 +353,31 @@ export default {
           position: 'absolute',
           top: '0px',
           left: '0px',
-      }
+      },
+      dialogVisible: false,
+      longitude:"",
+      latitude:"",
+      record_time:"",
+      user_name:""
     };
+  },
+  computed: {
+    latiTude: {
+        get: function() {
+            return this.latitude;
+        },
+        set: function(newValue) {
+            this.latitude = newValue;
+        }
+    },
+    longiTude: {
+        get: function() {
+            return this.longitude;
+        },
+        set: function(newValue) {
+            this.longitude = newValue;
+        }
+    }
   },
   methods: {
     // tooltips
@@ -308,7 +388,32 @@ export default {
       if (value2.length > 0) {
         this.edtString = this.edtString + '\n' + value2;
       }
+    },
+    // マップ表示
+    showMap: function(time,name,x,y){
+      console.log(x)
+      console.log(y)
+      console.log(time)
+      console.log(name)
+      this.latitude = x;
+      this.longitude = y;
+      this.user_name = name;
+      this.record_time = time;
+      this.dialogVisible = true;
+    // Let's draw the map
+      // var map = new google.maps.Map(document.getElementById("map_canvas1"), mapOptions);
+      // var myMarker = new google.maps.Marker({
+      //     // マーカーを置く緯度経度
+      //     position: new google.maps.LatLng(43.0751744,141.385728),
+      //     map: map
+      //   });
     }
   }
 };
 </script>
+<style scoped>
+.svg_img {
+  color: #dc143c;
+  cursor: pointer;
+}
+</style>

@@ -13,9 +13,9 @@ import VCalendar from "v-calendar";
 import VModal from "vue-js-modal";
 import Vue from "vue";
 import VueSwal from "vue-swal";
-import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
-import locale from 'element-ui/lib/locale/lang/ja'
+import ElementUI from "element-ui";
+import "element-ui/lib/theme-chalk/index.css";
+import locale from "element-ui/lib/locale/lang/ja";
 
 var options = {
     position: "bottom-center",
@@ -95,12 +95,12 @@ Vue.component(
 // パスワード変更
 Vue.component("user-pass", require("./components/UserPass.vue").default);
 // ダウンロード
-Vue.component("file-download", require("./components/FileDownload.vue").default);
-
 Vue.component(
-    "btn-work-time",
-    require("./components/BtnWorkTime.vue").default
+    "file-download",
+    require("./components/FileDownload.vue").default
 );
+
+Vue.component("btn-work-time", require("./components/BtnWorkTime.vue").default);
 
 Vue.component(
     "input-datepicker",
@@ -121,7 +121,10 @@ Vue.component("input-ym", require("./components/InputDateYm.vue").default);
 
 Vue.component("input-time", require("./components/InputTime.vue").default);
 
-Vue.component("input-time-disabled", require("./components/InputTimeDisabled.vue").default);
+Vue.component(
+    "input-time-disabled",
+    require("./components/InputTimeDisabled.vue").default
+);
 
 Vue.component("user-add", require("./components/UserAdd.vue").default);
 
@@ -228,15 +231,9 @@ Vue.component(
     require("./components/MessageDataServer.vue").default
 );
 
-Vue.component(
-    "setting-root",
-    require("./components/SettingRoot.vue").default
-);
+Vue.component("setting-root", require("./components/SettingRoot.vue").default);
 
-Vue.component(
-    "make-demand",
-    require("./components/MakeDemand.vue").default
-);
+Vue.component("make-demand", require("./components/MakeDemand.vue").default);
 
 Vue.component(
     "make-approval",
@@ -253,10 +250,7 @@ Vue.component(
     require("./components/WorkingChart.vue").default
 );
 
-Vue.component(
-    "company-set",
-    require("./components/CompanySet.vue").default
-);
+Vue.component("company-set", require("./components/CompanySet.vue").default);
 
 Vue.component(
     "department-set",
@@ -267,7 +261,6 @@ Vue.component(
     "input-timetablepicker",
     require("./components/InputTimeTableElTimepicker.vue").default
 );
-
 
 // 選択リスト
 Vue.component(
@@ -286,9 +279,15 @@ Vue.component(
 
 Vue.component("select-user", require("./components/SelectUser.vue").default);
 
-Vue.component("select-userlist", require("./components/SelectUserList.vue").default);
+Vue.component(
+    "select-userlist",
+    require("./components/SelectUserList.vue").default
+);
 
-Vue.component("select-userlist-detail", require("./components/SelectUserListDetail.vue").default);
+Vue.component(
+    "select-userlist-detail",
+    require("./components/SelectUserListDetail.vue").default
+);
 
 Vue.component(
     "select-businessdaylist",
@@ -334,6 +333,7 @@ Vue.component(
 
 const app = new Vue({
     el: "#app"
+    // render: h => h(App)
     // router, // ルーティングの定義を読み込む
     // components: { App }, // ルートコンポーネントの使用を宣言する
     // template: "<App />" // ルートコンポーネントを描画する
