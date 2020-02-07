@@ -192,7 +192,7 @@
                         <table class="table table-striped border-bottom font-size-sm text-nowrap">
                           <thead>
                             <tr>
-                              <td class="text-center align-middle w-15">No.</td>
+                              <td class="text-center align-middle w-10">No.</td>
                               <td class="text-center align-middle w-30">勤怠モード</td>
                               <td class="text-center align-middle w-30">時刻</td>
                               <td class="text-center align-middle w-35 mw-rem-10">休暇</td>
@@ -548,6 +548,7 @@ export default {
       this.selectedUserValue = value;
       this.user_name = arrayitem['name'];
       this.selectedName = this.user_name + "　" + this.date_name + "分勤怠編集" ;
+      this.selectMode = '';
     },
     // 勤怠モードが変更された場合の処理
     changeMode: function(index) {
@@ -779,6 +780,11 @@ export default {
         this.details = res.details;
         this.count = this.details.length;
         this.before_count = this.count;
+        if (res.details.length == 0) {
+          var messages = [];
+          messages.push("勤怠データありませんでした。\nプラスアイコンで追加できます。");
+          this.messageswal("確認", messages, "info", true, false, false);
+        }
       } else {
         if (res.messagedata.length > 0) {
           this.messageswal("エラー", res.messagedata, "error", true, false, true);
