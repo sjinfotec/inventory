@@ -95,7 +95,7 @@
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
-                  <a href="/file_download?filekbn=25">・操作説明書（トライアル版）（PDF 最新版） -- ファイル名：Operationmanual(traial).pdf</a>
+                  <a href="/file_download?filekbn=25">・操作マニュアル（設定編）（PDF 最新版） -- ファイル名：Operationmanual(setting).pdf</a>
                 </div>
               </div>
               <!-- /.col -->
@@ -106,7 +106,7 @@
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
-                  <a href="/file_download?filekbn=26">・操作説明書（トライアル版）（EXCEL 最新版） -- ファイル名：Operationmanual(traial).xlsx</a>
+                  <a href="/file_download?filekbn=26">・操作マニュアル（設定編）（EXCEL 最新版） -- ファイル名：Operationmanual(setting).xlsx</a>
                 </div>
               </div>
               <!-- /.col -->

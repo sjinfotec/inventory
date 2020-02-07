@@ -68,12 +68,24 @@ class EditWorkTimesController extends Controller
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
+            // 前日から翌日にする→当日に変更
             $target_ymd =  new Carbon($params['ymd']);
+            // $before_dt = $target_ymd->subDay();
+            // $year = $before_dt->format('Y');
+            // $month = $before_dt->format('m');
+            // $dd = $before_dt->format('d');
             $year = $target_ymd->format('Y');
             $month = $target_ymd->format('m');
             $dd = $target_ymd->format('d');
             $ymd_start = $year."/".$month."/".$dd." 00:00:00";
+
+            // $target_ymd =  new Carbon($params['ymd']);
+            // $after_dt = $target_ymd->addDay();
+            // $year = $after_dt->format('Y');
+            // $month = $after_dt->format('m');
+            // $dd = $after_dt->format('d');
             $ymd_end = $year."/".$month."/".$dd." 23:59:59";
+
             $closing_start = new Carbon($ymd_start);
             $closing_end = new Carbon($ymd_end);
             $closing_start = $closing_start->copy()->subMonth()->addDay()->format('Y/m/d H:i:s');
@@ -109,10 +121,10 @@ class EditWorkTimesController extends Controller
                     $before_date = $detail->date;
                 }
             }
-            if (count($details) == 0) {
+            /*if (count($details) == 0) {
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_found_data');
                 $result = false;
-            }
+            }*/
             return response()->json(
                 ['result' => $result, 'details' => $details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
