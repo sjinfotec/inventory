@@ -22,7 +22,10 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="target_fromdate"
-                    >指定日付<span class="color-red">[必須]</span></span>
+                    >
+                      指定日付
+                      <span class="color-red">[必須]</span>
+                    </span>
                   </div>
                   <input-datepicker
                     v-bind:default-date="valuefromdate"
@@ -32,7 +35,10 @@
                     v-on:clear-event="fromdateCleared"
                   ></input-datepicker>
                 </div>
-                <message-data v-bind:message-datas="messagedatasfromdate" v-bind:message-class="'warning'"></message-data>
+                <message-data
+                  v-bind:message-datas="messagedatasfromdate"
+                  v-bind:message-class="'warning'"
+                ></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -71,11 +77,14 @@
                     v-bind:add-new="false"
                     v-bind:date-value="''"
                     v-bind:kill-value="valueDepartmentkillcheck"
-                    v-bind:row-index=0
+                    v-bind:row-index="0"
                     v-on:change-event="departmentChanges"
                   ></select-departmentlist>
                 </div>
-                <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
+                <message-data
+                  v-bind:message-datas="messagedatadepartment"
+                  v-bind:message-class="'warning'"
+                ></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -87,7 +96,8 @@
                       for="target_users"
                     >氏 名</label>
                   </div>
-                  <select-userlist v-if="showuserlist"
+                  <select-userlist
+                    v-if="showuserlist"
                     ref="selectuserlist"
                     v-bind:blank-data="true"
                     v-bind:placeholder-data="'氏名を選択してください'"
@@ -96,18 +106,24 @@
                     v-bind:get-do="getDo"
                     v-bind:date-value="applytermdate"
                     v-bind:kill-value="valueUserkillcheck"
-                    v-bind:row-index=0
+                    v-bind:row-index="0"
                     v-bind:department-value="selectedDepartmentValue"
                     v-bind:employment-value="selectedEmploymentValue"
                     v-on:change-event="userChanges"
                   ></select-userlist>
                 </div>
-                <message-data v-bind:message-datas="messagedatauser" v-bind:message-class="'warning'"></message-data>
+                <message-data
+                  v-bind:message-datas="messagedatauser"
+                  v-bind:message-class="'warning'"
+                ></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
               <div class="col-md-6 pb-2">
-                <message-data-server v-bind:message-datas="messagedatasserver" v-bind:message-class="'warning'"></message-data-server>
+                <message-data-server
+                  v-bind:message-datas="messagedatasserver"
+                  v-bind:message-class="'warning'"
+                ></message-data-server>
               </div>
               <!-- /.col -->
             </div>
@@ -119,8 +135,8 @@
                 <btn-work-time
                   v-on:searchclick-event="searchclick"
                   v-bind:btn-mode="'search'"
-                  v-bind:is-push="issearchbutton">
-                </btn-work-time>
+                  v-bind:is-push="issearchbutton"
+                ></btn-work-time>
                 <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting>
               </div>
               <!-- /.col -->
@@ -129,8 +145,8 @@
                 <btn-work-time
                   v-on:switchclick-event="switchclick"
                   v-bind:btn-mode="btnmodeswitch"
-                  v-bind:is-push="isswitchbutton">
-                </btn-work-time>
+                  v-bind:is-push="isswitchbutton"
+                ></btn-work-time>
               </div>
               <!-- /.col -->
             </div>
@@ -156,6 +172,7 @@
           <daily-working-info-table
             v-bind:detail-or-total="'detail'"
             v-bind:calc-lists="calcresults"
+            v-bind:date-name="dateName"
             v-bind:predeter-time-name="predetertimename"
             v-bind:predeter-night-time-name="predeternighttimename"
             v-bind:btn-mode="btnmodeswitch"
@@ -200,21 +217,21 @@
 
 <script>
 import moment from "moment";
-import {dialogable} from '../mixins/dialogable.js';
-import {checkable} from '../mixins/checkable.js';
-import {requestable} from '../mixins/requestable.js';
+import { dialogable } from "../mixins/dialogable.js";
+import { checkable } from "../mixins/checkable.js";
+import { requestable } from "../mixins/requestable.js";
 
 export default {
   name: "dailyworkingtime",
-  mixins: [ dialogable, checkable, requestable ],
+  mixins: [dialogable, checkable, requestable],
   data: function() {
     return {
-      selectedDepartmentValue : "",
-      valueDepartmentkillcheck : false,
+      selectedDepartmentValue: "",
+      valueDepartmentkillcheck: false,
       showdepartmentlist: true,
-      selectedUserValue : "",
+      selectedUserValue: "",
       showuserlist: true,
-      valueUserkillcheck : false,
+      valueUserkillcheck: false,
       selectedEmploymentValue: "",
       getDo: 1,
       applytermdate: "",
@@ -248,9 +265,9 @@ export default {
   // マウント時
   mounted() {
     this.valuefromdate = this.defaultDate;
-    console.log('dailyworkingtime mounted getUserRole');
+    console.log("dailyworkingtime mounted getUserRole");
     this.getUserRole();
-    this.applytermdate = ""
+    this.applytermdate = "";
     if (this.valuefromdate) {
       this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
     }
@@ -270,14 +287,21 @@ export default {
       var required = true;
       var equalength = 0;
       var maxlength = 0;
-      var itemname = '指定日付';
-      chkArray = 
-        this.checkHeader(this.valuefromdate, required, equalength, maxlength, itemname);
+      var itemname = "指定日付";
+      chkArray = this.checkHeader(
+        this.valuefromdate,
+        required,
+        equalength,
+        maxlength,
+        itemname
+      );
       if (chkArray.length > 0) {
         if (this.messagedatasfromdate.length == 0) {
           this.messagedatasfromdate = chkArray;
         } else {
-          this.messagedatasfromdate = this.messagedatasfromdate.concat(chkArray);
+          this.messagedatasfromdate = this.messagedatasfromdate.concat(
+            chkArray
+          );
         }
         this.validate = false;
       }
@@ -286,26 +310,42 @@ export default {
         required = true;
         equalength = 0;
         maxlength = 0;
-        itemname = '所属部署';
-        chkArray = 
-          this.checkHeader(this.selectedDepartmentValue, required, equalength, maxlength, itemname);
+        itemname = "所属部署";
+        chkArray = this.checkHeader(
+          this.selectedDepartmentValue,
+          required,
+          equalength,
+          maxlength,
+          itemname
+        );
         if (chkArray.length > 0) {
           if (this.messagedatadepartment.length == 0) {
-            this.messagedatadepartment.push("一般ユーザーは所属部署は必ず入力してください。");
+            this.messagedatadepartment.push(
+              "一般ユーザーは所属部署は必ず入力してください。"
+            );
           } else {
-            this.messagedatadepartment = this.messagedatadepartment.concat(chkArray);
+            this.messagedatadepartment = this.messagedatadepartment.concat(
+              chkArray
+            );
           }
           this.validate = false;
         }
         required = true;
         equalength = 0;
         maxlength = 0;
-        itemname = '氏名';
-        chkArray = 
-          this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
+        itemname = "氏名";
+        chkArray = this.checkHeader(
+          this.selectedUserValue,
+          required,
+          equalength,
+          maxlength,
+          itemname
+        );
         if (chkArray.length > 0) {
           if (this.messagedatauser.length == 0) {
-            this.messagedatauser.push("一般ユーザーは氏名は必ず入力してください。");
+            this.messagedatauser.push(
+              "一般ユーザーは氏名は必ず入力してください。"
+            );
           } else {
             this.messagedatauser = this.messagedatauser.concat(chkArray);
           }
@@ -332,7 +372,7 @@ export default {
         this.stringtext = "日次集計 " + this.datejaFormat;
       }
       // 再取得
-      this.applytermdate = ""
+      this.applytermdate = "";
       if (this.valuefromdate) {
         this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
       }
@@ -341,7 +381,7 @@ export default {
     },
     // 指定日付がクリアされた場合の処理
     fromdateCleared: function() {
-      this.valuefromdate = ""
+      this.valuefromdate = "";
       this.applytermdate = "";
       this.stringtext = "";
     },
@@ -398,10 +438,14 @@ export default {
             }
             for (var key in this.calcresults) {
               this.isswitchvisible = true;
-              this.predetertimename = this.calcresults[key]['predeter_time_name'];
-              this.predeternighttimename = this.calcresults[key]['predeter_night_time_name'];
+              this.predetertimename = this.calcresults[key][
+                "predeter_time_name"
+              ];
+              this.predeternighttimename = this.calcresults[key][
+                "predeter_night_time_name"
+              ];
               break;
-            };
+            }
             this.$forceUpdate();
             this.messageshowsearch = false;
             this.issearchbutton = false;
@@ -420,14 +464,13 @@ export default {
       } else {
         this.btnmodeswitch = "basicswitch";
       }
-
     },
     // ------------------------ サーバー処理 ----------------------------
     // ログインユーザーの権限を取得
     getUserRole: function() {
       var arrayParams = [];
       this.postRequest("/get_login_user_role", arrayParams)
-        .then(response  => {
+        .then(response => {
           this.getThenrole(response);
         })
         .catch(reason => {
@@ -438,7 +481,7 @@ export default {
     // ----------------- 共通メソッド ----------------------------------
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
-      this.applytermdate = ""
+      this.applytermdate = "";
       if (this.valuefromdate) {
         this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
       }
@@ -455,10 +498,19 @@ export default {
       var res = response.data;
       if (res.result) {
         this.userrole = res.role;
-        console.log('dailyworkingtime getThenrole this.userrole = '+this.userrole);
+        console.log(
+          "dailyworkingtime getThenrole this.userrole = " + this.userrole
+        );
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.messageswal(
+            "エラー",
+            res.messagedata,
+            "error",
+            true,
+            false,
+            true
+          );
         } else {
           this.serverCatch("ユーザー権限", "取得");
         }
@@ -470,8 +522,7 @@ export default {
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
       this.messageswal("エラー", messages, "error", true, false, true);
     },
-
-    // クリアメソッド
+    //  クリアメソッド
     itemClear: function() {
       this.resresults = [];
       this.calcresults = [];

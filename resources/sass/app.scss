@@ -776,41 +776,69 @@ body {
 }
 
 .css-fukidashi {
-  position: relative;
+    position: relative;
 }
 .text {
-  width: w-15;
-  position: relative;
+    width: w-15;
+    position: relative;
 }
 .fukidashi {
-  display: none;
-  width: 1em;
-  height: 1em;
-  position: absolute;
-  vertical-align: middle;
-  top: 0;
-  left: 250px;
-  padding: 16px;
-  border-radius: 5px;
-  background: #33cc99;
-  color: #fff;
-  font-weight: bold;
+    display: none;
+    width: 1em;
+    height: 1em;
+    position: absolute;
+    vertical-align: middle;
+    top: 0;
+    left: 250px;
+    padding: 16px;
+    border-radius: 5px;
+    background: #33cc99;
+    color: #fff;
+    font-weight: bold;
 }
 .fukidashi:after {
-  position: absolute;
-  width: 0;
-  height: 0;
-  left: 0;
-  bottom: -19px;
-  margin-left: 10px;
-  border: solid transparent;
-  border-color: rgba(51, 204, 153, 0);
-  border-top-color: #33cc99;
-  border-width: 10px;
-  pointer-events: none;
-  content: "?";
+    position: absolute;
+    width: 0;
+    height: 0;
+    left: 0;
+    bottom: -19px;
+    margin-left: 10px;
+    border: solid transparent;
+    border-color: rgba(51, 204, 153, 0);
+    border-top-color: #33cc99;
+    border-width: 10px;
+    pointer-events: none;
+    content: "?";
 }
 .text:hover + .fukidashi {
-  display: block;
+    display: block;
 }
 
+.el-dialog__header {
+    background-color: #343a40 !important;
+    color: white !important;
+}
+
+.el-dialog__title {
+    color: white !important;
+}
+
+.el-dialog__body {
+    background-color: #343a40 !important;
+}
+
+.margin-left-regular {
+    margin-left: 20px;
+}
+
+.margin-top-regular {
+    margin-top: 20px;
+}
+
+.tex-align-center {
+    text-align: center;
+}
+
+.padding-dis-left {
+    padding-left: 0px !important;
+}

@@ -26,7 +26,8 @@
                       id="basic-addon1"
                     >所属部署</span>
                   </div>
-                  <select-departmentlist v-if="showdepartmentlist"
+                  <select-departmentlist
+                    v-if="showdepartmentlist"
                     ref="selectdepartmentlist"
                     v-bind:blank-data="true"
                     v-bind:placeholder-data="'部署を選択してください'"
@@ -34,7 +35,7 @@
                     v-bind:add-new="false"
                     v-bind:date-value="''"
                     v-bind:kill-value="valueDepartmentkillcheck"
-                    v-bind:row-index=0
+                    v-bind:row-index="0"
                     v-on:change-event="departmentChanges"
                   ></select-departmentlist>
                 </div>
@@ -47,9 +48,10 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       for="target_users"
-                    >氏 　名</label>
+                    >氏 名</label>
                   </div>
-                  <select-userlist v-if="showuserlist"
+                  <select-userlist
+                    v-if="showuserlist"
                     ref="selectuserlist"
                     v-bind:blank-data="false"
                     v-bind:placeholder-data="'氏名を選択すると編集モードになります'"
@@ -58,7 +60,7 @@
                     v-bind:get-do="getDo"
                     v-bind:date-value="applytermdate"
                     v-bind:kill-value="valueUserkillcheck"
-                    v-bind:row-index=0
+                    v-bind:row-index="0"
                     v-bind:department-value="selectedDepartmentValue"
                     v-bind:employment-value="''"
                     v-bind:management-value="'99'"
@@ -82,7 +84,7 @@
                     id="inlineCheckbox1"
                     v-model="valueDepartmentkillcheck"
                     @change="checkboxChangeDepartment"
-                  >
+                  />
                   <label class="form-check-label" for="inlineCheckbox1">※所属部署選択リストに廃止した部署も含める</label>
                 </div>
               </div>
@@ -96,7 +98,7 @@
                     id="inlineCheckbox2"
                     v-model="valueUserkillcheck"
                     @change="checkboxChangeUser"
-                  >
+                  />
                   <label class="form-check-label" for="inlineCheckbox1">※氏名選択リストに退職した氏名も含める</label>
                 </div>
               </div>
@@ -129,7 +131,10 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <ul class="error-red color-red">
-                  <li v-for="(messagevalidate,index) in messagevalidatesNew" v-bind:key="index">{{ messagevalidate }}</li>
+                  <li
+                    v-for="(messagevalidate,index) in messagevalidatesNew"
+                    v-bind:key="index"
+                  >{{ messagevalidate }}</li>
                 </ul>
               </div>
               <!-- /.col -->
@@ -146,7 +151,10 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                    >氏名<span class="color-red">[必須]</span></span>
+                    >
+                      氏名
+                      <span class="color-red">[必須]</span>
+                    </span>
                   </div>
                   <input
                     type="text"
@@ -192,7 +200,10 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                    >雇用形態<span class="color-red">[必須]</span></span>
+                    >
+                      雇用形態
+                      <span class="color-red">[必須]</span>
+                    </span>
                   </div>
                   <select-employmentstatuslist
                     ref="addselectemploymentstatuslist"
@@ -233,9 +244,13 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                    >所属部署<span class="color-red">[必須]</span></span>
+                    >
+                      所属部署
+                      <span class="color-red">[必須]</span>
+                    </span>
                   </div>
-                  <select-departmentlist v-if="showadddepartmentlist"
+                  <select-departmentlist
+                    v-if="showadddepartmentlist"
                     ref="addselectdepartmentlist"
                     v-bind:blank-data="true"
                     v-bind:placeholder-data="'所属部署を選択してください'"
@@ -252,7 +267,10 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                    >メールアドレス<span class="color-red">[必須]</span></span>
+                    >
+                      メールアドレス
+                      <span class="color-red">[必須]</span>
+                    </span>
                   </div>
                   <input
                     type="text"
@@ -278,7 +296,10 @@
                       data-toggle="tooltip"
                       data-placement="top"
                       v-bind:title="'登録は管理者が（半角英数字4-10文字）で決定入力します。'"
-                    >ログインID<span class="color-red">[必須]</span></span>
+                    >
+                      ログインID
+                      <span class="color-red">[必須]</span>
+                    </span>
                   </div>
                   <input
                     type="text"
@@ -326,7 +347,10 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       for="inputGroupSelect01"
-                    >勤怠管理<span class="color-red">[必須]</span></label>
+                    >
+                      勤怠管理
+                      <span class="color-red">[必須]</span>
+                    </label>
                   </div>
                   <select-generallist
                     v-bind:blank-data="false"
@@ -348,14 +372,16 @@
                       data-toggle="tooltip"
                       data-placement="top"
                       v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
-                    >タイムテーブル<span class="color-red">[必須]</span></span>
+                    >
+                      タイムテーブル
+                      <span class="color-red">[必須]</span>
+                    </span>
                   </div>
                   <select-timetablelist
                     :blank-data="true"
                     :selected-value="form.working_timetable_no"
                     v-on:change-event="addtimetableChanges"
-                  >
-                  </select-timetablelist>
+                  ></select-timetablelist>
                 </div>
               </div>
               <!-- /.col -->
@@ -370,7 +396,10 @@
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       for="inputGroupSelect02"
-                    >権限<span class="color-red">[必須]</span></label>
+                    >
+                      権限
+                      <span class="color-red">[必須]</span>
+                    </label>
                   </div>
                   <select-generallist
                     v-bind:blank-data="false"
@@ -440,7 +469,10 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <ul class="error-red color-red">
-                  <li v-for="(messagevalidate,index) in messagevalidatesEdt" v-bind:key="index">{{ messagevalidate }}</li>
+                  <li
+                    v-for="(messagevalidate,index) in messagevalidatesEdt"
+                    v-bind:key="index"
+                  >{{ messagevalidate }}</li>
                 </ul>
               </div>
               <!-- /.col -->
@@ -457,7 +489,7 @@
                 <!-- .row -->
                 <div class="row justify-content-between" v-if="item.result == 1">
                   <!-- panel header -->
-                  <div class="col-md-2 pb-2">
+                  <div class="col-md-3 padding-dis-left tex-align-center">
                     <col-note
                       v-bind:item-name="'No.' + (index+1) + ' 現在適用中'"
                       v-bind:item-control="'INFO'"
@@ -468,7 +500,7 @@
                 </div>
                 <div class="row justify-content-between" v-else>
                   <!-- panel header -->
-                  <div class="col-md-2 pb-2">
+                  <div class="col-md-3 padding-dis-left tex-align-center">
                     <col-note
                       v-bind:item-name="'No.' + (index+1)"
                       v-bind:item-control="'LIGHT'"
@@ -499,7 +531,10 @@
                         <span
                           class="input-group-text font-size-sm line-height-xs label-width-180"
                           id="basic-addon1"
-                        >適用開始日<span class="color-red">[必須]</span></span>
+                        >
+                          適用開始日
+                          <span class="color-red">[必須]</span>
+                        </span>
                       </div>
                       <input
                         type="date"
@@ -541,7 +576,10 @@
                         <span
                           class="input-group-text font-size-sm line-height-xs label-width-180"
                           id="basic-addon1"
-                        >氏名<span class="color-red">[必須]</span></span>
+                        >
+                          氏名
+                          <span class="color-red">[必須]</span>
+                        </span>
                       </div>
                       <input
                         type="text"
@@ -585,12 +623,12 @@
                         <span
                           class="input-group-text font-size-sm line-height-xs label-width-180"
                           id="basic-addon1"
-                        >雇用形態<span class="color-red">[必須]</span></span>
+                        >
+                          雇用形態
+                          <span class="color-red">[必須]</span>
+                        </span>
                       </div>
-                      <select
-                        class="custom-select"
-                        v-model="item.employment_status"
-                      >
+                      <select class="custom-select" v-model="item.employment_status">
                         <option value></option>
                         <option
                           v-for="elist in employStatusList"
@@ -630,12 +668,12 @@
                         <span
                           class="input-group-text font-size-sm line-height-xs label-width-180"
                           id="basic-addon1"
-                        >所属部署<span class="color-red">[必須]</span></span>
+                        >
+                          所属部署
+                          <span class="color-red">[必須]</span>
+                        </span>
                       </div>
-                      <select
-                        class="custom-select"
-                        v-model="item.department_code"
-                      >
+                      <select class="custom-select" v-model="item.department_code">
                         <option value></option>
                         <option
                           v-for="dlist in departmentList"
@@ -653,7 +691,10 @@
                         <span
                           class="input-group-text font-size-sm line-height-xs label-width-180"
                           id="basic-addon1"
-                        >メールアドレス<span class="color-red">[必須]</span></span>
+                        >
+                          メールアドレス
+                          <span class="color-red">[必須]</span>
+                        </span>
                       </div>
                       <input
                         type="email"
@@ -675,14 +716,12 @@
                         <span
                           class="input-group-text font-size-sm line-height-xs label-width-180"
                           id="basic-addon1"
-                        >ログインID<span class="color-red">[必須]</span></span>
+                        >
+                          ログインID
+                          <span class="color-red">[必須]</span>
+                        </span>
                       </div>
-                      <input
-                        type="text"
-                        class="form-control"
-                        v-model="item.code"
-                        name="code"
-                      />
+                      <input type="text" class="form-control" v-model="item.code" name="code" />
                     </div>
                   </div>
                   <!-- /.col -->
@@ -713,12 +752,12 @@
                         <span
                           class="input-group-text font-size-sm line-height-xs label-width-180"
                           id="basic-addon1"
-                        >勤怠管理<span class="color-red">[必須]</span></span>
+                        >
+                          勤怠管理
+                          <span class="color-red">[必須]</span>
+                        </span>
                       </div>
-                      <select
-                        class="custom-select"
-                        v-model="item.management"
-                      >
+                      <select class="custom-select" v-model="item.management">
                         <option value></option>
                         <option
                           v-for="mlist in generalList_m"
@@ -736,7 +775,10 @@
                         <span
                           class="input-group-text font-size-sm line-height-xs label-width-180"
                           id="basic-addon1"
-                        >タイムテーブル<span class="color-red">[必須]</span></span>
+                        >
+                          タイムテーブル
+                          <span class="color-red">[必須]</span>
+                        </span>
                       </div>
                       <select
                         class="custom-select"
@@ -762,12 +804,12 @@
                         <span
                           class="input-group-text font-size-sm line-height-xs label-width-180"
                           id="basic-addon1"
-                        >権限<span class="color-red">[必須]</span></span>
+                        >
+                          権限
+                          <span class="color-red">[必須]</span>
+                        </span>
                       </div>
-                      <select
-                        class="custom-select"
-                        v-model="item.role"
-                      >
+                      <select class="custom-select" v-model="item.role">
                         <option value></option>
                         <option
                           v-for="rlist in generalList_r"
@@ -785,27 +827,38 @@
                 <div class="row justify-content-between">
                   <div class="col-md-12 pb-2">
                     <div class="btn-group float-left">
-                      <button v-if="item.result != 0 && item.id != ''"
+                      <button
+                        v-if="item.result != 0 && item.id != ''"
                         type="button"
                         class="btn btn-success"
                         @click="fixclick(index)"
                       >この内容で更新する</button>
-                      <button v-if="item.id == ''"
+                      <button
+                        v-if="item.id == ''"
                         type="button"
                         class="btn btn-success"
                         @click="addClick(index)"
                       >この内容で追加する</button>
-                      <button v-if="item.result != 0 && item.id != ''"
+                      <button
+                        v-if="item.result != 0 && item.id != ''"
                         type="button"
                         class="btn btn-danger"
                         @click="delClick(index)"
                       >この内容を削除する</button>
-                      <button v-if="item.id == ''"
+                      <button
+                        v-if="item.result != 0 && item.id != ''"
+                        type="button"
+                        class="btn btn-warning"
+                        @click="confirmDialog()"
+                      >モバイル打刻URLを送信する</button>
+                      <button
+                        v-if="item.id == ''"
                         type="button"
                         class="btn btn-danger"
                         @click="rowDelClick(index)"
                       >行削除</button>
-                      <button v-if="item.result != 0 && item.id != '' && item.card_idm != '' && showrelease"
+                      <button
+                        v-if="item.result != 0 && item.id != '' && item.card_idm != '' && showrelease"
                         type="button"
                         class="btn btn-danger"
                         @click="releaseclick(index)"
@@ -819,9 +872,9 @@
               <!-- 現在適用中より過去 ----------------------------------------------------------------->
               <div v-else>
                 <!-- .row -->
-                <div class="row justify-content-between">
+                <div class="row justify-content-between margin-top-regular">
                   <!-- panel header -->
-                  <div class="col-md-2 pb-2">
+                  <div class="col-md-3 padding-dis-left tex-align-center">
                     <col-note
                       v-bind:item-name="'No.' + (index+1)"
                       v-bind:item-control="'LIGHT'"
@@ -932,10 +985,7 @@
                           id="basic-addon1"
                         >雇用形態</span>
                       </div>
-                      <select disabled
-                        class="custom-select"
-                        v-model="item.employment_status"
-                      >
+                      <select disabled class="custom-select" v-model="item.employment_status">
                         <option value></option>
                         <option
                           v-for="elist in employStatusList"
@@ -975,10 +1025,7 @@
                           id="basic-addon1"
                         >所属部署</span>
                       </div>
-                      <select disabled
-                        class="custom-select"
-                        v-model="item.department_code"
-                      >
+                      <select disabled class="custom-select" v-model="item.department_code">
                         <option value></option>
                         <option
                           v-for="dlist in departmentList"
@@ -1056,10 +1103,7 @@
                           id="basic-addon1"
                         >勤怠管理</span>
                       </div>
-                      <select disabled
-                        class="custom-select"
-                        v-model="item.management"
-                      >
+                      <select disabled class="custom-select" v-model="item.management">
                         <option value></option>
                         <option
                           v-for="mlist in generalList_m"
@@ -1079,7 +1123,8 @@
                           id="basic-addon1"
                         >タイムテーブル</span>
                       </div>
-                      <select disabled
+                      <select
+                        disabled
                         class="custom-select"
                         v-model="item.working_timetable_no"
                         data-toggle="tooltip"
@@ -1105,10 +1150,7 @@
                           id="basic-addon1"
                         >権限</span>
                       </div>
-                      <select disabled
-                        class="custom-select"
-                        v-model="item.role"
-                      >
+                      <select disabled class="custom-select" v-model="item.role">
                         <option value></option>
                         <option
                           v-for="rlist in generalList_r"
@@ -1132,30 +1174,59 @@
       </div>
     </div>
     <!-- /.panel -->
+    <el-dialog
+      v-bind:title="' モバイル打刻用URL送信'"
+      :visible.sync="dialogVisible"
+      width="50%"
+      center="true"
+    >
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">送信するモバイルのメールアドレスを入力してください</h5>
+          <h5 class="card-subtitle mb-2">{{ form.code }}</h5>
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text font-size-sm line-height-xs label-width-150">email</span>
+            </div>
+            <input
+              type="email"
+              class="form-control"
+              v-model="input_mobile_address"
+              maxlength="191"
+              name="input_mobile_address"
+            />
+          </div>
+          <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-warning" @click="sendUrl()">送信する</button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
   <!-- /main contentns row -->
 </template>
 <script>
 import toasted from "vue-toasted";
 import moment from "moment";
-import {dialogable} from '../mixins/dialogable.js';
-import {checkable} from '../mixins/checkable.js';
-import {requestable} from '../mixins/requestable.js';
+import { dialogable } from "../mixins/dialogable.js";
+import { checkable } from "../mixins/checkable.js";
+import { requestable } from "../mixins/requestable.js";
 
 export default {
   name: "EditUser",
-  mixins: [ dialogable, checkable, requestable ],
+  mixins: [dialogable, checkable, requestable],
   data() {
     return {
-      selectedDepartmentValue : "",
-      valueDepartmentkillcheck : false,
+      selectedDepartmentValue: "",
+      valueDepartmentkillcheck: false,
       showdepartmentlist: true,
       showadddepartmentlist: true,
-      selectedUserValue : "",
-      valueUserkillcheck : false,
-      isUsermanagement : true,
+      selectedUserValue: "",
+      valueUserkillcheck: false,
+      isUsermanagement: true,
       showuserlist: true,
-      selectedEmploymentValue : "",
+      selectedEmploymentValue: "",
       valueTimeTablekillcheck: false,
       selectMode: "",
       messagevalidatesNew: [],
@@ -1181,26 +1252,63 @@ export default {
       },
       count: 0,
       before_count: 0,
-      getDo : 1,
+      getDo: 1,
       departmentList: [],
       applytermdate: moment(new Date()).format("YYYYMMDD"),
       timetableList: [],
       generalList_m: [],
       generalList_r: [],
-      cardId: ""
+      cardId: "",
+      input_mobile_address: "",
+      dialogVisible: false,
+      latest_user_code: ""
     };
   },
   // マウント時
   mounted() {
     this.details = [];
-    this.getDepartmentList('');
+    this.getDepartmentList("");
     this.getGeneralList("C001");
-    this.getTimeTableList('');
+    this.getTimeTableList("");
     this.getGeneralList("C017");
     this.getGeneralList("C025");
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
+    sendUrl() {
+      const url = "/api/mail/inquiry";
+      const self = this;
+      //axiosでPOST送信
+      axios
+        .post(url, {
+          email: this.input_mobile_address,
+          login_id: this.latest_user_code
+        })
+        .then(res => {
+          console.log(res);
+          if (res.data.result) {
+            //メール送信完了画面に遷移する
+            this.dialogVisible = false;
+            this.messageswal("送信しました", "", "success", true, false, false);
+          } else {
+            self.errors = res.data.errors;
+          }
+        })
+        .catch(err => {
+          //例外処理を行う
+          console.log(err);
+        });
+    },
+    // 確認モーダル表示
+    confirmDialog() {
+      this.dialogVisible = true;
+      // 最新のユーザーコードを設定
+      this.details.forEach(element => {
+        if (element.result == 1) {
+          this.latest_user_code = element.code;
+        }
+      });
+    },
     checkFormStore: function() {
       this.messagevalidatesNew = [];
       var chkArray = [];
@@ -1209,9 +1317,14 @@ export default {
       var required = true;
       var equalength = 0;
       var maxlength = 191;
-      var itemname = '氏名';
-      chkArray = 
-        this.checkHeader(this.form.name, required, equalength, maxlength, itemname);
+      var itemname = "氏名";
+      chkArray = this.checkHeader(
+        this.form.name,
+        required,
+        equalength,
+        maxlength,
+        itemname
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesNew.length == 0) {
           this.messagevalidatesNew = chkArray;
@@ -1223,9 +1336,14 @@ export default {
       required = false;
       equalength = 0;
       maxlength = 30;
-      itemname = 'フリガナ';
-      chkArray = 
-        this.checkHeader(this.form.kana, required, equalength, maxlength, itemname);
+      itemname = "フリガナ";
+      chkArray = this.checkHeader(
+        this.form.kana,
+        required,
+        equalength,
+        maxlength,
+        itemname
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesNew.length == 0) {
           this.messagevalidatesNew = chkArray;
@@ -1237,9 +1355,14 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 0;
-      itemname = '雇用形態';
-      chkArray = 
-        this.checkHeader(this.form.employment_status, required, equalength, maxlength, itemname);
+      itemname = "雇用形態";
+      chkArray = this.checkHeader(
+        this.form.employment_status,
+        required,
+        equalength,
+        maxlength,
+        itemname
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesNew.length == 0) {
           this.messagevalidatesNew = chkArray;
@@ -1251,9 +1374,14 @@ export default {
       required = false;
       equalength = 0;
       maxlength = 191;
-      itemname = '役職';
-      chkArray = 
-        this.checkHeader(this.form.official_position, required, equalength, maxlength, itemname);
+      itemname = "役職";
+      chkArray = this.checkHeader(
+        this.form.official_position,
+        required,
+        equalength,
+        maxlength,
+        itemname
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesNew.length == 0) {
           this.messagevalidatesNew = chkArray;
@@ -1265,9 +1393,14 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 0;
-      itemname = '所属部署';
-      chkArray = 
-        this.checkHeader(this.form.department_code, required, equalength, maxlength, itemname);
+      itemname = "所属部署";
+      chkArray = this.checkHeader(
+        this.form.department_code,
+        required,
+        equalength,
+        maxlength,
+        itemname
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesNew.length == 0) {
           this.messagevalidatesNew = chkArray;
@@ -1279,9 +1412,14 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 191;
-      itemname = 'メールアドレス';
-      chkArray = 
-        this.checkHeader(this.form.email, required, equalength, maxlength, itemname);
+      itemname = "メールアドレス";
+      chkArray = this.checkHeader(
+        this.form.email,
+        required,
+        equalength,
+        maxlength,
+        itemname
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesNew.length == 0) {
           this.messagevalidatesNew = chkArray;
@@ -1293,9 +1431,14 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 10;
-      itemname = 'ログインＩＤ';
-      chkArray = 
-        this.checkHeader(this.form.code, required, equalength, maxlength, itemname);
+      itemname = "ログインＩＤ";
+      chkArray = this.checkHeader(
+        this.form.code,
+        required,
+        equalength,
+        maxlength,
+        itemname
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesNew.length == 0) {
           this.messagevalidatesNew = chkArray;
@@ -1307,9 +1450,14 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 0;
-      itemname = '勤怠管理対象';
-      chkArray = 
-        this.checkHeader(this.form.management, required, equalength, maxlength, itemname);
+      itemname = "勤怠管理対象";
+      chkArray = this.checkHeader(
+        this.form.management,
+        required,
+        equalength,
+        maxlength,
+        itemname
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesNew.length == 0) {
           this.messagevalidatesNew = chkArray;
@@ -1321,9 +1469,14 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 0;
-      itemname = 'タイムテーブル';
-      chkArray = 
-        this.checkHeader(this.form.working_timetable_no, required, equalength, maxlength, itemname);
+      itemname = "タイムテーブル";
+      chkArray = this.checkHeader(
+        this.form.working_timetable_no,
+        required,
+        equalength,
+        maxlength,
+        itemname
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesNew.length == 0) {
           this.messagevalidatesNew = chkArray;
@@ -1335,9 +1488,14 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 0;
-      itemname = '権限';
-      chkArray = 
-        this.checkHeader(this.form.role, required, equalength, maxlength, itemname);
+      itemname = "権限";
+      chkArray = this.checkHeader(
+        this.form.role,
+        required,
+        equalength,
+        maxlength,
+        itemname
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesNew.length == 0) {
           this.messagevalidatesNew = chkArray;
@@ -1359,9 +1517,15 @@ export default {
       var required = true;
       var equalength = 0;
       var maxlength = 0;
-      var itemname = '適用開始日';
-      chkArray = 
-        this.checkDetail(this.details[index].apply_term_from, required, equalength, maxlength, itemname, index+1);
+      var itemname = "適用開始日";
+      chkArray = this.checkDetail(
+        this.details[index].apply_term_from,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesEdt.length == 0) {
           this.messagevalidatesEdt = chkArray;
@@ -1370,13 +1534,19 @@ export default {
         }
       } else {
         // 適用中と比較
-        var chkdt = moment(this.details[index].apply_term_from).format('YYYYMMDD');
+        var chkdt = moment(this.details[index].apply_term_from).format(
+          "YYYYMMDD"
+        );
         var chksourcedt = "";
-        if (this.details[index].result == '2') {
-          for (var i=index+1;i<this.count;i++) {
-            chksourcedt = moment(this.details[i].apply_term_from).format('YYYYMMDD');
+        if (this.details[index].result == "2") {
+          for (var i = index + 1; i < this.count; i++) {
+            chksourcedt = moment(this.details[i].apply_term_from).format(
+              "YYYYMMDD"
+            );
             if (chkdt <= chksourcedt) {
-              this.messagevalidatesEdt.push("現在適用中の適用開始日付以前の日付は登録できません");
+              this.messagevalidatesEdt.push(
+                "現在適用中の適用開始日付以前の日付は登録できません"
+              );
             }
           }
         }
@@ -1385,9 +1555,15 @@ export default {
       required = false;
       equalength = 0;
       maxlength = 0;
-      itemname = '退職開始日';
-      chkArray =
-        this.checkDetail(this.details[index].kill_from_date, required, equalength, maxlength, itemname, index+1);
+      itemname = "退職開始日";
+      chkArray = this.checkDetail(
+        this.details[index].kill_from_date,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesEdt.length == 0) {
           this.messagevalidatesEdt = chkArray;
@@ -1399,9 +1575,15 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 10;
-      itemname = 'ログインＩＤ';
-      chkArray =
-        this.checkDetail(this.details[index].code, required, equalength, maxlength, itemname, index+1);
+      itemname = "ログインＩＤ";
+      chkArray = this.checkDetail(
+        this.details[index].code,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesEdt.length == 0) {
           this.messagevalidatesEdt = chkArray;
@@ -1413,9 +1595,15 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 8;
-      itemname = '部署コード';
-      chkArray =
-        this.checkDetail(this.details[index].department_code, required, equalength, maxlength, itemname, index+1);
+      itemname = "部署コード";
+      chkArray = this.checkDetail(
+        this.details[index].department_code,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesEdt.length == 0) {
           this.messagevalidatesEdt = chkArray;
@@ -1427,9 +1615,15 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 0;
-      itemname = '雇用形態';
-      chkArray =
-        this.checkDetail(this.details[index].employment_status, required, equalength, maxlength, itemname, index+1);
+      itemname = "雇用形態";
+      chkArray = this.checkDetail(
+        this.details[index].employment_status,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesEdt.length == 0) {
           this.messagevalidatesEdt = chkArray;
@@ -1441,9 +1635,15 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 191;
-      itemname = '氏名';
-      chkArray =
-        this.checkDetail(this.details[index].name, required, equalength, maxlength, itemname, index+1);
+      itemname = "氏名";
+      chkArray = this.checkDetail(
+        this.details[index].name,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesEdt.length == 0) {
           this.messagevalidatesEdt = chkArray;
@@ -1455,9 +1655,15 @@ export default {
       required = false;
       equalength = 0;
       maxlength = 30;
-      itemname = 'フリガナ';
-      chkArray =
-        this.checkDetail(this.details[index].kana, required, equalength, maxlength, itemname, index+1);
+      itemname = "フリガナ";
+      chkArray = this.checkDetail(
+        this.details[index].kana,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesEdt.length == 0) {
           this.messagevalidatesEdt = chkArray;
@@ -1469,9 +1675,15 @@ export default {
       required = false;
       equalength = 0;
       maxlength = 191;
-      itemname = '役職';
-      chkArray =
-        this.checkDetail(this.details[index].official_position, required, equalength, maxlength, itemname, index+1);
+      itemname = "役職";
+      chkArray = this.checkDetail(
+        this.details[index].official_position,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesEdt.length == 0) {
           this.messagevalidatesEdt = chkArray;
@@ -1483,9 +1695,15 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 191;
-      itemname = 'メールアドレス';
-      chkArray =
-        this.checkDetail(this.details[index].email, required, equalength, maxlength, itemname, index+1);
+      itemname = "メールアドレス";
+      chkArray = this.checkDetail(
+        this.details[index].email,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesEdt.length == 0) {
           this.messagevalidatesEdt = chkArray;
@@ -1497,9 +1715,15 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 191;
-      itemname = 'パスワード';
-      chkArray =
-        this.checkDetail(this.details[index].password, required, equalength, maxlength, itemname, index+1);
+      itemname = "パスワード";
+      chkArray = this.checkDetail(
+        this.details[index].password,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesEdt.length == 0) {
           this.messagevalidatesEdt = chkArray;
@@ -1511,9 +1735,15 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 0;
-      itemname = '勤怠管理対象';
-      chkArray =
-        this.checkDetail(this.details[index].management, required, equalength, maxlength, itemname, index+1);
+      itemname = "勤怠管理対象";
+      chkArray = this.checkDetail(
+        this.details[index].management,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesEdt.length == 0) {
           this.messagevalidatesEdt = chkArray;
@@ -1525,9 +1755,15 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 0;
-      itemname = 'タイムテーブルNo';
-      chkArray =
-        this.checkDetail(this.details[index].working_timetable_no, required, equalength, maxlength, itemname, index+1);
+      itemname = "タイムテーブルNo";
+      chkArray = this.checkDetail(
+        this.details[index].working_timetable_no,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesEdt.length == 0) {
           this.messagevalidatesEdt = chkArray;
@@ -1539,9 +1775,15 @@ export default {
       required = true;
       equalength = 0;
       maxlength = 0;
-      itemname = '権限';
-      chkArray =
-        this.checkDetail(this.details[index].role, required, equalength, maxlength, itemname, index+1);
+      itemname = "権限";
+      chkArray = this.checkDetail(
+        this.details[index].role,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
       if (chkArray.length > 0) {
         if (this.messagevalidatesEdt.length == 0) {
           this.messagevalidatesEdt = chkArray;
@@ -1555,25 +1797,25 @@ export default {
       return flag;
     },
     // ------------------------ イベント処理 ------------------------------------
-    
+
     // 部署選択が変更された場合の処理
     departmentChanges: function(value, arrayitem) {
       this.selectedDepartmentValue = value;
-      this.inputClear()
+      this.inputClear();
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       this.getUserSelected();
-      this.selectMode = '';
+      this.selectMode = "";
     },
     // 廃止チェックボックスが変更された場合の処理
     checkboxChangeDepartment: function() {
       this.refreshDepartmentList();
-      this.inputClear()
+      this.inputClear();
       this.selectedDepartmentValue = "";
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
       this.getUserSelected();
-      this.selectMode = '';
+      this.selectMode = "";
     },
     // ユーザー選択が変更された場合の処理
     userChanges: function(value, arrayitem) {
@@ -1582,18 +1824,18 @@ export default {
       this.messagevalidatesEdt = [];
       this.selectedUserValue = value;
       if (value == "" || value == null) {
-        this.selectMode = 'NEW';
+        this.selectMode = "NEW";
         this.form.department_code = this.selectedDepartmentValue;
-        this.refreshaddDepartmentList()
+        this.refreshaddDepartmentList();
       } else {
-        this.selectMode = 'EDT';
-        this.selectedUserName = arrayitem['name'];
+        this.selectMode = "EDT";
+        this.selectedUserName = arrayitem["name"];
         this.getItem();
       }
     },
     // 廃止チェックボックスが変更された場合の処理
     checkboxChangeUser: function() {
-      this.inputClear()
+      this.inputClear();
       this.refreshUserList();
     },
     // 新規作成部署選択が変更された場合の処理
@@ -1628,18 +1870,25 @@ export default {
       if (flag) {
         var messages = [];
         messages.push("この内容で登録しますか？");
-        this.messageswal("確認", messages, "info", true, true, true)
-          .then(result  => {
+        this.messageswal("確認", messages, "info", true, true, true).then(
+          result => {
             if (result) {
               this.store();
             }
-        });
-      // 項目数が多い場合以下コメントアウト
+          }
+        );
+        // 項目数が多い場合以下コメントアウト
       } else {
-        this.countswal("エラー", this.messagevalidatesNew, "error", true, false, true)
-          .then(result  => {
-            if (result) {
-            }
+        this.countswal(
+          "エラー",
+          this.messagevalidatesNew,
+          "error",
+          true,
+          false,
+          true
+        ).then(result => {
+          if (result) {
+          }
         });
       }
     },
@@ -1650,24 +1899,36 @@ export default {
       var flag = this.checkFormFix(index);
       if (flag) {
         var messages = [];
-        if (this.details[index].kill_from_date == "" || this.details[index].kill_from_date == null) {
+        if (
+          this.details[index].kill_from_date == "" ||
+          this.details[index].kill_from_date == null
+        ) {
           messages.push("この内容で更新しますか？");
         } else {
-          messages.push("退職日が入力されているため入力日より退職扱いとなります。");
+          messages.push(
+            "退職日が入力されているため入力日より退職扱いとなります。"
+          );
           messages.push("更新してよろしいですか？");
         }
-        this.messageswal("確認", messages, "info", true, true, true)
-          .then(result  => {
+        this.messageswal("確認", messages, "info", true, true, true).then(
+          result => {
             if (result) {
               this.FixDetail("更新", index);
             }
-        });
-      // 項目数が多い場合以下コメントアウト
+          }
+        );
+        // 項目数が多い場合以下コメントアウト
       } else {
-        this.countswal("エラー", this.messagevalidatesEdt, "error", true, false, true)
-          .then(result  => {
-            if (result) {
-            }
+        this.countswal(
+          "エラー",
+          this.messagevalidatesEdt,
+          "error",
+          true,
+          false,
+          true
+        ).then(result => {
+          if (result) {
+          }
         });
       }
     },
@@ -1678,24 +1939,36 @@ export default {
       var flag = this.checkFormFix(index);
       if (flag) {
         var messages = [];
-        if (this.details[index].kill_from_date == "" || this.details[index].kill_from_date == null) {
+        if (
+          this.details[index].kill_from_date == "" ||
+          this.details[index].kill_from_date == null
+        ) {
           messages.push("この内容で追加しますか？");
         } else {
-          messages.push("退職日が入力されているため入力日より退職扱いとなります。");
+          messages.push(
+            "退職日が入力されているため入力日より退職扱いとなります。"
+          );
           messages.push("追加してよろしいですか？");
         }
-        this.messageswal("確認", messages, "info", true, true, true)
-          .then(result  => {
+        this.messageswal("確認", messages, "info", true, true, true).then(
+          result => {
             if (result) {
               this.FixDetail("追加", index);
             }
-        });
-      // 項目数が多い場合以下コメントアウト
+          }
+        );
+        // 項目数が多い場合以下コメントアウト
       } else {
-        this.countswal("エラー", this.messagevalidatesEdt, "error", true, false, true)
-          .then(result  => {
-            if (result) {
-            }
+        this.countswal(
+          "エラー",
+          this.messagevalidatesEdt,
+          "error",
+          true,
+          false,
+          true
+        ).then(result => {
+          if (result) {
+          }
         });
       }
     },
@@ -1705,12 +1978,13 @@ export default {
       this.messagevalidatesEdt = [];
       var messages = [];
       messages.push("この内容を削除しますか？");
-      this.messageswal("確認", messages, "info", true, true, true)
-        .then(result  => {
+      this.messageswal("確認", messages, "info", true, true, true).then(
+        result => {
           if (result) {
             this.DelDetail(index);
           }
-      });
+        }
+      );
     },
     // プラス追加ボタンクリック処理
     appendRowClick: function() {
@@ -1718,7 +1992,9 @@ export default {
       this.messagevalidatesEdt = [];
       if (this.before_count < this.count) {
         var messages = [];
-        messages.push("１度に追加できる情報は１個です。追加してから再実行してください");
+        messages.push(
+          "１度に追加できる情報は１個です。追加してから再実行してください"
+        );
         this.messageswal("エラー", messages, "error", true, false, true);
       } else {
         var add_apply_term_from = this.details[0].apply_term_from;
@@ -1754,7 +2030,7 @@ export default {
           result: "2"
         };
         this.details.unshift(this.object);
-        this.count = this.details.length
+        this.count = this.details.length;
       }
     },
     // 行削除ボタンクリック処理
@@ -1764,16 +2040,17 @@ export default {
       if (this.checkRowData(index)) {
         var messages = [];
         messages.push("行削除してよろしいですか？");
-        this.messageswal("確認", messages, "info", true, true, true)
-          .then(result  => {
+        this.messageswal("確認", messages, "info", true, true, true).then(
+          result => {
             if (result) {
               this.details.splice(index, 1);
-              this.count = this.details.length
+              this.count = this.details.length;
             }
-        });
+          }
+        );
       } else {
         this.details.splice(index, 1);
-        this.count = this.details.length
+        this.count = this.details.length;
       }
     },
     // ICカード情報削除ボタンクリック処理
@@ -1782,19 +2059,23 @@ export default {
       this.messagevalidatesEdt = [];
       var messages = [];
       messages.push("カード情報の紐づけを解除しますか？");
-      this.messageswal("確認", messages, "info", true, true, true)
-        .then(result  => {
+      this.messageswal("確認", messages, "info", true, true, true).then(
+        result => {
           if (result) {
             this.ReleaseCard("解除", index);
           }
-      });
+        }
+      );
     },
     // -------------------- サーバー処理 ----------------------------
     // 氏名取得処理
     getItem() {
-      var arrayParams = { code : this.selectedUserValue, killvalue : this.isUsermanagement };
+      var arrayParams = {
+        code: this.selectedUserValue,
+        killvalue: this.isUsermanagement
+      };
       this.postRequest("/edit_user/get", arrayParams)
-        .then(response  => {
+        .then(response => {
           this.getThen(response);
         })
         .catch(reason => {
@@ -1803,9 +2084,9 @@ export default {
     },
     // 氏名登録処理
     store() {
-      var arrayParams = { details : this.form };
+      var arrayParams = { details: this.form };
       this.postRequest("/edit_user/store", arrayParams)
-        .then(response  => {
+        .then(response => {
           this.putThenHead(response, "登録");
         })
         .catch(reason => {
@@ -1814,9 +2095,9 @@ export default {
     },
     // 氏名更新処理（明細）
     FixDetail(kbnname, index) {
-      var arrayParams = { details : this.details[index] };
+      var arrayParams = { details: this.details[index] };
       this.postRequest("/edit_user/fix", arrayParams)
-        .then(response  => {
+        .then(response => {
           this.putThenDetail(response, kbnname);
         })
         .catch(reason => {
@@ -1825,9 +2106,9 @@ export default {
     },
     // 氏名削除処理（明細）
     DelDetail(index) {
-      var arrayParams = { id : this.details[index].id };
+      var arrayParams = { id: this.details[index].id };
       this.postRequest("/edit_user/del", arrayParams)
-        .then(response  => {
+        .then(response => {
           this.putThenDetail(response, "削除");
         })
         .catch(reason => {
@@ -1836,9 +2117,9 @@ export default {
     },
     // カード解除
     ReleaseCard(kbnname, index) {
-      var arrayParams = { card_idm : this.details[index].card_idm };
+      var arrayParams = { card_idm: this.details[index].card_idm };
       this.postRequest("/edit_user/release_card_info", arrayParams)
-        .then(response  => {
+        .then(response => {
           this.putThenCard(response, kbnname);
           this.details[index].card_idm = "";
           this.refreshreleaseCardbottun();
@@ -1848,13 +2129,16 @@ export default {
         });
     },
     // 部署選択リスト取得処理
-    getDepartmentList(targetdate){
-      if (targetdate == '') {
-          targetdate = moment(new Date()).format("YYYYMMDD");
+    getDepartmentList(targetdate) {
+      if (targetdate == "") {
+        targetdate = moment(new Date()).format("YYYYMMDD");
       }
-      var arrayParams = { targetdate : targetdate, killvalue: this.valueDepartmentkillcheck };
+      var arrayParams = {
+        targetdate: targetdate,
+        killvalue: this.valueDepartmentkillcheck
+      };
       this.postRequest("/get_departments_list", arrayParams)
-        .then(response  => {
+        .then(response => {
           this.getThendepartment(response);
         })
         .catch(reason => {
@@ -1863,14 +2147,14 @@ export default {
     },
     // タイムテーブル選択リスト取得処理
     getTimeTableList(targetdate) {
-      if (targetdate == '') {
+      if (targetdate == "") {
         targetdate = moment(new Date()).format("YYYYMMDD");
       }
-      this.postRequest("/get_time_table_list",
-        { targetdate: targetdate,
-          killvalue: this.valueTimeTablekillcheck
-        })
-        .then(response  => {
+      this.postRequest("/get_time_table_list", {
+        targetdate: targetdate,
+        killvalue: this.valueTimeTablekillcheck
+      })
+        .then(response => {
           this.getThentimetable(response);
         })
         .catch(reason => {
@@ -1878,37 +2162,49 @@ export default {
         });
     },
     // 氏名選択リスト取得処理
-    getUserList(targetdate){
-      if (targetdate == '') {
+    getUserList(targetdate) {
+      if (targetdate == "") {
         targetdate = moment(new Date()).format("YYYYMMDD");
       }
-      if (this.selectedDepartmentValue == "") { this.selectedDepartmentValue = null; }
-      if (this.selectedEmploymentValue == "") { this.selectedEmploymentValue = null; }
-      this.postRequest("/get_user_list",
-        { targetdate: targetdate,
-          killvalue: this.killValue,
-          getDo : this.getDo,
-          departmentcode : this.selectedDepartmentValue,
-          employmentcode : this.selectedEmploymentValue,
-          managementcode : "ALL"
-        })
-        .then(response  => {
+      if (this.selectedDepartmentValue == "") {
+        this.selectedDepartmentValue = null;
+      }
+      if (this.selectedEmploymentValue == "") {
+        this.selectedEmploymentValue = null;
+      }
+      this.postRequest("/get_user_list", {
+        targetdate: targetdate,
+        killvalue: this.killValue,
+        getDo: this.getDo,
+        departmentcode: this.selectedDepartmentValue,
+        employmentcode: this.selectedEmploymentValue,
+        managementcode: "ALL"
+      })
+        .then(response => {
           this.getThenuser(response);
-          if (this.selectedDepartmentValue == null) { this.selectedDepartmentValue = ""; }
-          if (this.selectedEmploymentValue == null) { this.selectedEmploymentValue = ""; }
+          if (this.selectedDepartmentValue == null) {
+            this.selectedDepartmentValue = "";
+          }
+          if (this.selectedEmploymentValue == null) {
+            this.selectedEmploymentValue = "";
+          }
           // 固有処理 END
         })
         .catch(reason => {
           this.serverCatch("氏名", "取得");
-          if (this.selectedDepartmentValue == null) { this.selectedDepartmentValue = ""; }
-          if (this.selectedEmploymentValue == null) { this.selectedEmploymentValue = ""; }
+          if (this.selectedDepartmentValue == null) {
+            this.selectedDepartmentValue = "";
+          }
+          if (this.selectedEmploymentValue == null) {
+            this.selectedEmploymentValue = "";
+          }
         });
     },
     // コード選択リスト取得処理
     getGeneralList(value) {
-      var arrayParams = { identificationid : value };
+      var arrayParams = { identificationid: value };
       this.postRequest("/get_general_list", arrayParams)
-        .then(response  => {
+        .then(response => {
           if (value == "C001") {
             this.getThenemployment(response, "雇用形態");
           }
@@ -1937,7 +2233,7 @@ export default {
     getUserSelected: function() {
       // managementcode=99 → すべて
       this.$refs.selectuserlist.getList(
-        '',
+        "",
         this.valueUserkillcheck,
         this.getDo,
         this.selectedDepartmentValue,
@@ -1955,7 +2251,14 @@ export default {
         this.before_count = this.count;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.messageswal(
+            "エラー",
+            res.messagedata,
+            "error",
+            true,
+            false,
+            true
+          );
         } else {
           this.serverCatch("氏名", "取得");
         }
@@ -1971,7 +2274,14 @@ export default {
         this.before_count = this.count;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.messageswal(
+            "エラー",
+            res.messagedata,
+            "error",
+            true,
+            false,
+            true
+          );
         } else {
           this.serverCatch("氏名", "取得");
         }
@@ -1984,7 +2294,14 @@ export default {
         this.departmentList = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.messageswal(
+            "エラー",
+            res.messagedata,
+            "error",
+            true,
+            false,
+            true
+          );
         } else {
           this.serverCatch("部署", "取得");
         }
@@ -1997,7 +2314,14 @@ export default {
         this.employStatusList = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.messageswal(
+            "エラー",
+            res.messagedata,
+            "error",
+            true,
+            false,
+            true
+          );
         } else {
           this.serverCatch("雇用形態", "取得");
         }
@@ -2010,7 +2334,14 @@ export default {
         this.timetableList = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.messageswal(
+            "エラー",
+            res.messagedata,
+            "error",
+            true,
+            false,
+            true
+          );
         } else {
           this.serverCatch("明細タイムテーブル", "取得");
         }
@@ -2023,7 +2354,14 @@ export default {
         this.generalList_m = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.messageswal(
+            "エラー",
+            res.messagedata,
+            "error",
+            true,
+            false,
+            true
+          );
         } else {
           this.serverCatch("明細勤怠管理", "取得");
         }
@@ -2036,7 +2374,14 @@ export default {
         this.generalList_r = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.messageswal(
+            "エラー",
+            res.messagedata,
+            "error",
+            true,
+            false,
+            true
+          );
         } else {
           this.serverCatch("明細権限", "取得");
         }
@@ -2048,11 +2393,25 @@ export default {
       var res = response.data;
       if (res.result) {
         messages.push("ユーザーを" + eventtext + "しました");
-        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+        this.messageswal(
+          eventtext + "完了",
+          messages,
+          "success",
+          true,
+          false,
+          true
+        );
         this.refreshUserList();
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.messageswal(
+            "警告",
+            res.messagedata,
+            "warning",
+            true,
+            false,
+            true
+          );
         } else {
           this.serverCatch("ユーザー", eventtext);
         }
@@ -2064,14 +2423,28 @@ export default {
       var res = response.data;
       if (res.result) {
         messages.push("ユーザーを" + eventtext + "しました");
-        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+        this.messageswal(
+          eventtext + "完了",
+          messages,
+          "success",
+          true,
+          false,
+          true
+        );
         this.refreshUserList();
         this.getItem();
         this.count = this.details.length;
         this.before_count = this.count;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.messageswal(
+            "警告",
+            res.messagedata,
+            "warning",
+            true,
+            false,
+            true
+          );
         } else {
           this.serverCatch("ユーザ", eventtext);
         }
@@ -2083,10 +2456,24 @@ export default {
       var res = response.data;
       if (res.result) {
         messages.push("ユーザーとカードの紐づけを解除しました");
-        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+        this.messageswal(
+          eventtext + "完了",
+          messages,
+          "success",
+          true,
+          false,
+          true
+        );
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.messageswal(
+            "警告",
+            res.messagedata,
+            "warning",
+            true,
+            false,
+            true
+          );
         } else {
           this.serverCatch("ユーザ", eventtext);
         }
@@ -2110,17 +2497,63 @@ export default {
       this.before_count = 0;
     },
     checkRowData(index) {
-      if (this.details[index].department_code != "" && this.details[index].department_code != null) { return true; }
-      if (this.details[index].employment_status != "" && this.details[index].employment_status != null) { return true; }
-      if (this.details[index].name != "" && this.details[index].name != null) { return true; }
-      if (this.details[index].kana != "" && this.details[index].kana != null) { return true; }
-      if (this.details[index].official_position != "" && this.details[index].official_position != null) { return true; }
-      if (this.details[index].working_timetable_no != "" && this.details[index].working_timetable_no != null) { return true; }
-      if (this.details[index].email != "" && this.details[index].email != null) { return true; }
-      if (this.details[index].password != "" && this.details[index].password != null) { return true; }
-      if (this.details[index].management != "" && this.details[index].management != null) { return true; }
-      if (this.details[index].role != "" && this.details[index].role != null) { return true; }
-      if (this.details[index].kill_from_date != "" && this.details[index].kill_from_date != null) { return true; }
+      if (
+        this.details[index].department_code != "" &&
+        this.details[index].department_code != null
+      ) {
+        return true;
+      }
+      if (
+        this.details[index].employment_status != "" &&
+        this.details[index].employment_status != null
+      ) {
+        return true;
+      }
+      if (this.details[index].name != "" && this.details[index].name != null) {
+        return true;
+      }
+      if (this.details[index].kana != "" && this.details[index].kana != null) {
+        return true;
+      }
+      if (
+        this.details[index].official_position != "" &&
+        this.details[index].official_position != null
+      ) {
+        return true;
+      }
+      if (
+        this.details[index].working_timetable_no != "" &&
+        this.details[index].working_timetable_no != null
+      ) {
+        return true;
+      }
+      if (
+        this.details[index].email != "" &&
+        this.details[index].email != null
+      ) {
+        return true;
+      }
+      if (
+        this.details[index].password != "" &&
+        this.details[index].password != null
+      ) {
+        return true;
+      }
+      if (
+        this.details[index].management != "" &&
+        this.details[index].management != null
+      ) {
+        return true;
+      }
+      if (this.details[index].role != "" && this.details[index].role != null) {
+        return true;
+      }
+      if (
+        this.details[index].kill_from_date != "" &&
+        this.details[index].kill_from_date != null
+      ) {
+        return true;
+      }
       return false;
     },
     // 最新リストの表示（部署）
