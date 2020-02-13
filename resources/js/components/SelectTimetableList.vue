@@ -106,7 +106,7 @@ export default {
               this.itemList.unshift(this.object);
             } else {
               var messages = [];
-              messages.push(kbn + "タイムテーブルが設定されていません。\n勤務帯時間設定でタイムテーブルを設定してください");
+              messages.push("タイムテーブルが設定されていません。\n勤務帯時間設定でタイムテーブルを設定してください");
               this.messageswal("確認", messages, "info", true, false, false);
             }
           }
