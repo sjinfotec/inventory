@@ -26,6 +26,7 @@ class UserModel extends Model
     private $official_position;
     private $password;                  
     private $email;                  
+    private $mobile_email;                  // モバイル用アドレス                 
     private $employment_status;                  
     private $kill_from_date;
     private $working_timetable_no;
@@ -136,6 +137,16 @@ class UserModel extends Model
     public function setEmailAttribute($value)
     {
         $this->email = $value;
+    }
+
+    public function getMobileEmailAttribute()
+    {
+        return $this->mobile_email;
+    }
+
+    public function setMobileEmailAttribute($value)
+    {
+        $this->mobile_email = $value;
     }
 
     public function getEmploymentstatusAttribute()
@@ -295,6 +306,7 @@ class UserModel extends Model
                     'kill_from_date' => $this->kill_from_date,
                     'working_timetable_no' => $this->working_timetable_no,
                     'email' => $this->email,
+                    'mobile_email' => $this->mobile_email,
                     'password' => $this->password,
                     'created_user'=>$this->created_user,
                     'created_at'=>$this->created_at,
@@ -333,6 +345,7 @@ class UserModel extends Model
                 'kill_from_date' => $this->kill_from_date,
                 'working_timetable_no' => $this->working_timetable_no,
                 'email' => $this->email,
+                'mobile_email' => $this->mobile_email,
                 'updated_user'=>$this->updated_user,
                 'updated_at' => $this->updated_at,
                 'management' => $this->management,
@@ -402,6 +415,7 @@ class UserModel extends Model
                     't1.official_position',
                     't1.working_timetable_no',
                     't1.email',
+                    't1.mobile_email',
                     't1.password',
                     't1.management',
                     't1.role'

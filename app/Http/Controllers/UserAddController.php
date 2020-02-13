@@ -113,6 +113,7 @@ class UserAddController extends Controller
             $users->setKillfromdateAttribute(Config::get('const.INIT_DATE.maxdate'));
             $users->setWorkingtimetablenoAttribute($data['working_timetable_no']);
             $users->setEmailAttribute($data['email']);
+            $users->setMobileEmailAttribute($data['mobile_email']);
             Log::debug('insert password = '.$data['password']);
             $users->setPasswordAttribute(bcrypt($data['password']));
             $users->setCreatedatAttribute($systemdate);
@@ -215,6 +216,7 @@ class UserAddController extends Controller
             $user_model->setKillfromdateAttribute($kill_from_date);
             $user_model->setWorkingtimetablenoAttribute($data['working_timetable_no']);
             $user_model->setEmailAttribute($data['email']);
+            $user_model->setMobileEmailAttribute($data['mobile_email']);
             $user_model->setCreatedatAttribute($systemdate);
             $user_model->setCreateduserAttribute($user_code);
             $user_model->setManagementAttribute($data['management']);

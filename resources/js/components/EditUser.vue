@@ -320,18 +320,17 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                      data-toggle="tooltip"
-                      data-placement="top"
-                      v-bind:title="'新規登録時はパスワードはログインIDとなります。'"
-                    >パスワード</span>
+                    >
+                      モバイル用アドレス
+                      <!-- <span class="color-red">[必須]</span> -->
+                    </span>
                   </div>
                   <input
                     type="text"
                     class="form-control"
-                    v-model="form.password"
-                    name="password"
-                    title="新規登録時はパスワードはログインIDとなります。"
-                    disabled
+                    v-model="form.mobile_email"
+                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$"
+                    name="mobile_email"
                   />
                 </div>
               </div>
@@ -408,6 +407,29 @@
                     v-bind:identification-id="'C025'"
                     v-on:change-event="addroleChange"
                   ></select-generallist>
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      id="basic-addon1"
+                      data-toggle="tooltip"
+                      data-placement="top"
+                      v-bind:title="'新規登録時はパスワードはログインIDとなります。'"
+                    >パスワード</span>
+                  </div>
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model="form.password"
+                    name="password"
+                    title="新規登録時はパスワードはログインIDとなります。"
+                    disabled
+                  />
                 </div>
               </div>
               <!-- /.col -->
@@ -732,6 +754,28 @@
                         <span
                           class="input-group-text font-size-sm line-height-xs label-width-180"
                           id="basic-addon1"
+                        >モバイル用アドレス</span>
+                      </div>
+                      <input
+                        type="email"
+                        maxlength="191"
+                        class="form-control"
+                        v-model="item.mobile_email"
+                        data-toggle="tooltip"
+                        data-placement="top"
+                        v-bind:title="'モバイル用メールアドレスを191文字以内で入力します'"
+                        name="mobile_email"
+                      />
+                    </div>
+                  </div>
+                  <!-- /.col -->
+                  <!-- .col -->
+                  <div class="col-md-6 pb-2">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span
+                          class="input-group-text font-size-sm line-height-xs label-width-180"
+                          id="basic-addon1"
                         >パスワード</span>
                       </div>
                       <input
@@ -849,7 +893,7 @@
                         v-if="item.result != 0 && item.id != ''"
                         type="button"
                         class="btn btn-warning"
-                        @click="confirmDialog()"
+                        @click="sendUrl()"
                       >モバイル打刻URLを送信する</button>
                       <button
                         v-if="item.id == ''"
@@ -1082,6 +1126,26 @@
                         <span
                           class="input-group-text font-size-sm line-height-xs label-width-180"
                           id="basic-addon1"
+                        >モバイル用アドレス</span>
+                      </div>
+                      <input
+                        type="email"
+                        maxlength="191"
+                        class="form-control"
+                        v-model="item.mobile_email"
+                        name="mobile_email"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                  <!-- /.col -->
+                  <!-- .col -->
+                  <div class="col-md-6 pb-2">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span
+                          class="input-group-text font-size-sm line-height-xs label-width-180"
+                          id="basic-addon1"
                         >パスワード</span>
                       </div>
                       <input
@@ -1171,6 +1235,7 @@
           <!-- /main contentns row -->
           <!-- ----------- 編集入力部 END ---------------- -->
         </div>
+        <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting>
       </div>
     </div>
     <!-- /.panel -->
@@ -1246,6 +1311,7 @@ export default {
         official_position: "",
         working_timetable_no: "",
         email: "",
+        mobile_email: "",
         password: "",
         management: "",
         role: ""
@@ -1259,9 +1325,10 @@ export default {
       generalList_m: [],
       generalList_r: [],
       cardId: "",
-      input_mobile_address: "",
+      mobile_address: "",
       dialogVisible: false,
-      latest_user_code: ""
+      latest_user_code: "",
+      messageshowsearch: false
     };
   },
   // マウント時
@@ -1275,39 +1342,45 @@ export default {
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
+    // モバイル端末へ打刻URL送信
     sendUrl() {
       const url = "/api/mail/inquiry";
       const self = this;
+      this.messageshowsearch = true;
+      this.details.forEach(element => {
+        if (element.result == 1) {
+          this.latest_user_code = element.code;
+          this.mobile_address = element.mobile_email;
+        }
+      });
       //axiosでPOST送信
       axios
         .post(url, {
-          email: this.input_mobile_address,
+          email: this.mobile_address,
           login_id: this.latest_user_code
         })
         .then(res => {
           console.log(res);
           if (res.data.result) {
             //メール送信完了画面に遷移する
-            this.dialogVisible = false;
-            this.messageswal("送信しました", "", "success", true, false, false);
+            this.htmlMessageSwal(
+              "送信完了",
+              "※メールが届かない場合は、お手数ですが「onedawnm.onedawn.net」へ手動で接続して下さい。",
+              "success",
+              true,
+              false,
+              false
+            );
           } else {
             self.errors = res.data.errors;
           }
+          this.messageshowsearch = false;
         })
         .catch(err => {
           //例外処理を行う
           console.log(err);
+          this.messageshowsearch = false;
         });
-    },
-    // 確認モーダル表示
-    confirmDialog() {
-      this.dialogVisible = true;
-      // 最新のユーザーコードを設定
-      this.details.forEach(element => {
-        if (element.result == 1) {
-          this.latest_user_code = element.code;
-        }
-      });
     },
     checkFormStore: function() {
       this.messagevalidatesNew = [];
@@ -1415,6 +1488,25 @@ export default {
       itemname = "メールアドレス";
       chkArray = this.checkHeader(
         this.form.email,
+        required,
+        equalength,
+        maxlength,
+        itemname
+      );
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesNew.length == 0) {
+          this.messagevalidatesNew = chkArray;
+        } else {
+          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
+        }
+      }
+      // mobile_email
+      required = false;
+      equalength = 0;
+      maxlength = 191;
+      itemname = "モバイル用アドレス";
+      chkArray = this.checkHeader(
+        this.form.mobile_email,
         required,
         equalength,
         maxlength,
@@ -1698,6 +1790,26 @@ export default {
       itemname = "メールアドレス";
       chkArray = this.checkDetail(
         this.details[index].email,
+        required,
+        equalength,
+        maxlength,
+        itemname,
+        index + 1
+      );
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesEdt.length == 0) {
+          this.messagevalidatesEdt = chkArray;
+        } else {
+          this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
+        }
+      }
+      // モバイル用アドレス
+      required = false;
+      equalength = 0;
+      maxlength = 191;
+      itemname = "モバイル用アドレス";
+      chkArray = this.checkDetail(
+        this.details[index].mobile_email,
         required,
         equalength,
         maxlength,
@@ -2247,6 +2359,7 @@ export default {
       var res = response.data;
       if (res.result) {
         this.details = res.details;
+        console.log(this.details);
         this.count = this.details.length;
         this.before_count = this.count;
       } else {
