@@ -464,7 +464,7 @@
         <div class="card shadow-pl" v-if="details.length">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:header-text1="'◆ユーザー情報編集'"
+            v-bind:header-text1="'◆　' + selectedUserName"
             v-bind:header-text2="''"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
@@ -473,11 +473,12 @@
           <div class="card-header bg-transparent pt-3 border-0">
             <h1 class="float-sm-left font-size-rg">
               <span>
-                <button class="btn btn-success btn-lg font-size-rg" v-on:click="appendRowClick">+</button>
+                <button
+                  class="btn btn-success btn-lg font-size-rg"
+                  v-on:click="appendRowClick"
+                >＋新規履歴追加</button>
               </span>
-              {{ this.selectedUserName }}
             </h1>
-            <span class="float-sm-right font-size-sm">「＋」アイコンで新規に追加することができます</span>
           </div>
           <!-- /.panel header -->
           <!-- ----------- 「＋」アイコン部 END ---------------- -->
@@ -504,732 +505,723 @@
             <!-- ----------- 項目部 START ---------------- -->
             <!-- panel contents -->
             <div v-for="(item,index) in details" v-bind:key="item.id">
-              <!-- item.result  1: 現在適用中 -->
-              <!-- item.result  2: 未来適用予定または -->
-              <!-- 現在適用中 ----------------------------------------------------------------->
-              <div v-if="item.result != ''">
-                <!-- .row -->
-                <div class="row justify-content-between" v-if="item.result == 1">
-                  <!-- panel header -->
-                  <div class="col-md-3 padding-dis-left tex-align-center">
-                    <col-note
-                      v-bind:item-name="'No.' + (index+1) + ' 現在適用中'"
-                      v-bind:item-control="'INFO'"
-                      v-bind:item-note="''"
-                    ></col-note>
+              <div class="card shadow-pl">
+                <div class="card-body pt-3">
+                  <!-- item.result  1: 現在適用中 -->
+                  <!-- item.result  2: 未来適用予定または -->
+                  <!-- 現在適用中 ----------------------------------------------------------------->
+                  <div v-if="item.result != ''">
+                    <!-- .row -->
+                    <div class="row justify-content-between" v-if="item.result == 1">
+                      <!-- panel header -->
+                      <div class="col-md-2 pb-2">
+                        <col-note
+                          v-bind:item-name="'No.' + (index+1) + ' 現在適用中'"
+                          v-bind:item-control="'INFO'"
+                          v-bind:item-note="''"
+                        ></col-note>
+                      </div>
+                      <!-- /.panel header -->
+                    </div>
+                    <div class="row justify-content-between" v-else>
+                      <!-- panel header -->
+                      <div class="col-md-2 pb-2">
+                        <col-note
+                          v-bind:item-name="'No.' + (index+1)"
+                          v-bind:item-control="'LIGHT'"
+                          v-bind:item-note="''"
+                        ></col-note>
+                      </div>
+                      <!-- /.panel header -->
+                    </div>
+                    <!-- /.row -->
+                    <!-- .row -->
+                    <div class="row justify-content-between">
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >
+                              適用開始日
+                              <span class="color-red">[必須]</span>
+                            </span>
+                          </div>
+                          <input
+                            type="date"
+                            class="form-control"
+                            v-model="item.apply_term_from"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            v-bind:title="'この情報を適用する開始日を入力します'"
+                            name="applytermfrom"
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >退職日</span>
+                          </div>
+                          <input
+                            type="date"
+                            class="form-control"
+                            v-model="item.kill_from_date"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            v-bind:title="'退職する日を入力します'"
+                            name="killfromdate"
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >
+                              氏名
+                              <span class="color-red">[必須]</span>
+                            </span>
+                          </div>
+                          <input
+                            type="text"
+                            class="form-control"
+                            maxlength="191"
+                            v-model="item.name"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            v-bind:title="'氏名を191文字以内で入力します'"
+                            name="name"
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >フリガナ</span>
+                          </div>
+                          <input
+                            type="text"
+                            class="form-control"
+                            maxlength="30"
+                            v-model="item.kana"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            v-bind:title="'フリガナを30文字以内で入力します'"
+                            name="kana"
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >
+                              雇用形態
+                              <span class="color-red">[必須]</span>
+                            </span>
+                          </div>
+                          <select class="custom-select" v-model="item.employment_status">
+                            <option value></option>
+                            <option
+                              v-for="elist in employStatusList"
+                              :value="elist.code"
+                              v-bind:key="elist.code"
+                            >{{ elist.code_name }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >役職</span>
+                          </div>
+                          <input
+                            type="text"
+                            class="form-control"
+                            maxlength="191"
+                            v-model="item.official_position"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            v-bind:title="'役職を191文字以内で入力します'"
+                            name="officialposition"
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >
+                              所属部署
+                              <span class="color-red">[必須]</span>
+                            </span>
+                          </div>
+                          <select class="custom-select" v-model="item.department_code">
+                            <option value></option>
+                            <option
+                              v-for="dlist in departmentList"
+                              :value="dlist.code"
+                              v-bind:key="dlist.code"
+                            >{{ dlist.name }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >
+                              メールアドレス
+                              <span class="color-red">[必須]</span>
+                            </span>
+                          </div>
+                          <input
+                            type="email"
+                            maxlength="191"
+                            class="form-control"
+                            v-model="item.email"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            v-bind:title="'メールアドレスを191文字以内で入力します'"
+                            name="email"
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >
+                              ログインID
+                              <span class="color-red">[必須]</span>
+                            </span>
+                          </div>
+                          <input type="text" class="form-control" v-model="item.code" name="code" />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >モバイル用アドレス</span>
+                          </div>
+                          <input
+                            type="email"
+                            maxlength="191"
+                            class="form-control"
+                            v-model="item.mobile_email"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            v-bind:title="'モバイル用メールアドレスを191文字以内で入力します'"
+                            name="mobile_email"
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >パスワード</span>
+                          </div>
+                          <input
+                            type="password"
+                            class="form-control"
+                            v-model="item.password"
+                            title="パスワードの変更はできません。"
+                            name="password"
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >
+                              勤怠管理
+                              <span class="color-red">[必須]</span>
+                            </span>
+                          </div>
+                          <select class="custom-select" v-model="item.management">
+                            <option value></option>
+                            <option
+                              v-for="mlist in generalList_m"
+                              :value="mlist.code"
+                              v-bind:key="mlist.code"
+                            >{{ mlist.code_name }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >
+                              タイムテーブル
+                              <span class="color-red">[必須]</span>
+                            </span>
+                          </div>
+                          <select
+                            class="custom-select"
+                            v-model="item.working_timetable_no"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
+                          >
+                            <option value></option>
+                            <option
+                              v-for="tlist in timetableList"
+                              :value="tlist.no"
+                              v-bind:key="tlist.no"
+                            >{{ tlist.name }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >
+                              権限
+                              <span class="color-red">[必須]</span>
+                            </span>
+                          </div>
+                          <select class="custom-select" v-model="item.role">
+                            <option value></option>
+                            <option
+                              v-for="rlist in generalList_r"
+                              :value="rlist.code"
+                              v-bind:key="rlist.code"
+                            >{{ rlist.code_name }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                    </div>
+                    <!-- /row -->
+                    <!-- .row -->
+                    <!-- ----------- ボタン部 START ---------------- -->
+                    <div class="row justify-content-between">
+                      <div class="col-md-12 pb-2">
+                        <div class="btn-group float-left">
+                          <button
+                            v-if="item.result != 0 && item.id != ''"
+                            type="button"
+                            class="btn btn-success"
+                            @click="fixclick(index)"
+                          >この内容で更新する</button>
+                          <button
+                            v-if="item.id == ''"
+                            type="button"
+                            class="btn btn-success"
+                            @click="addClick(index)"
+                          >この内容で追加する</button>
+                          <button
+                            v-if="item.result != 0 && item.id != ''"
+                            type="button"
+                            class="btn btn-danger"
+                            @click="delClick(index)"
+                          >この内容を削除する</button>
+                          <button
+                            v-if="item.result != 0 && item.id != ''"
+                            type="button"
+                            class="btn btn-warning"
+                            @click="sendUrl()"
+                          >モバイル打刻URLを送信する</button>
+                          <button
+                            v-if="item.id == ''"
+                            type="button"
+                            class="btn btn-danger"
+                            @click="rowDelClick(index)"
+                          >行削除</button>
+                          <button
+                            v-if="item.result != 0 && item.id != '' && item.card_idm != '' && showrelease"
+                            type="button"
+                            class="btn btn-danger"
+                            @click="releaseclick(index)"
+                          >カード情報を解除する</button>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /.row -->
+                    <!-- ----------- ボタン部 END ---------------- -->
                   </div>
-                  <!-- /.panel header -->
+                  <!-- 現在適用中より過去 ----------------------------------------------------------------->
+                  <div v-else>
+                    <!-- .row -->
+                    <div class="row justify-content-between">
+                      <!-- panel header -->
+                      <div class="col-md-2 pb-2">
+                        <col-note
+                          v-bind:item-name="'No.' + (index+1)"
+                          v-bind:item-control="'LIGHT'"
+                          v-bind:item-note="''"
+                        ></col-note>
+                      </div>
+                      <!-- /.panel header -->
+                    </div>
+                    <!-- /row -->
+                    <!-- .row -->
+                    <div class="row justify-content-between">
+                      <!-- panel contents -->
+                      <!-- panel header -->
+                      <daily-working-information-panel-header
+                        v-bind:header-text1="'◆ユーザー'"
+                        v-bind:header-text2="''"
+                        v-bind:class-text="'card-header col-12 bg-transparent pb-2 border-0'"
+                      ></daily-working-information-panel-header>
+                      <!-- /.panel header -->
+                    </div>
+                    <!-- /.row -->
+                    <!-- .row -->
+                    <div class="row justify-content-between">
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >適用開始日</span>
+                          </div>
+                          <input
+                            type="date"
+                            class="form-control"
+                            v-model="item.apply_term_from"
+                            name="applytermfrom"
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >退職日</span>
+                          </div>
+                          <input
+                            type="date"
+                            class="form-control"
+                            v-model="item.kill_from_date"
+                            name="killfromdate"
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >氏名</span>
+                          </div>
+                          <input
+                            type="text"
+                            class="form-control"
+                            maxlength="191"
+                            v-model="item.name"
+                            name="name"
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >フリガナ</span>
+                          </div>
+                          <input
+                            type="text"
+                            class="form-control"
+                            maxlength="30"
+                            v-model="item.kana"
+                            name="kana"
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >雇用形態</span>
+                          </div>
+                          <select disabled class="custom-select" v-model="item.employment_status">
+                            <option value></option>
+                            <option
+                              v-for="elist in employStatusList"
+                              :value="elist.code"
+                              v-bind:key="elist.code"
+                            >{{ elist.code_name }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >役職</span>
+                          </div>
+                          <input
+                            type="text"
+                            class="form-control"
+                            maxlength="191"
+                            v-model="item.official_position"
+                            name="officialposition"
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >所属部署</span>
+                          </div>
+                          <select disabled class="custom-select" v-model="item.department_code">
+                            <option value></option>
+                            <option
+                              v-for="dlist in departmentList"
+                              :value="dlist.code"
+                              v-bind:key="dlist.code"
+                            >{{ dlist.name }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >メールアドレス</span>
+                          </div>
+                          <input
+                            type="email"
+                            maxlength="191"
+                            class="form-control"
+                            v-model="item.email"
+                            name="email"
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >ログインID</span>
+                          </div>
+                          <input
+                            type="text"
+                            class="form-control"
+                            v-model="item.code"
+                            name="code"
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >モバイル用アドレス</span>
+                          </div>
+                          <input
+                            type="email"
+                            maxlength="191"
+                            class="form-control"
+                            v-model="item.mobile_email"
+                            name="mobile_email"
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >パスワード</span>
+                          </div>
+                          <input
+                            type="password"
+                            class="form-control"
+                            v-model="item.password"
+                            name="password"
+                            disabled
+                          />
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >勤怠管理</span>
+                          </div>
+                          <select disabled class="custom-select" v-model="item.management">
+                            <option value></option>
+                            <option
+                              v-for="mlist in generalList_m"
+                              :value="mlist.code"
+                              v-bind:key="mlist.code"
+                            >{{ mlist.code_name }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >タイムテーブル</span>
+                          </div>
+                          <select
+                            disabled
+                            class="custom-select"
+                            v-model="item.working_timetable_no"
+                            data-toggle="tooltip"
+                            data-placement="top"
+                            v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
+                          >
+                            <option value></option>
+                            <option
+                              v-for="tlist in timetableList"
+                              :value="tlist.no"
+                              v-bind:key="tlist.no"
+                            >{{ tlist.name }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                      <!-- .col -->
+                      <div class="col-md-6 pb-2">
+                        <div class="input-group">
+                          <div class="input-group-prepend">
+                            <span
+                              class="input-group-text font-size-sm line-height-xs label-width-180"
+                              id="basic-addon1"
+                            >権限</span>
+                          </div>
+                          <select disabled class="custom-select" v-model="item.role">
+                            <option value></option>
+                            <option
+                              v-for="rlist in generalList_r"
+                              :value="rlist.code"
+                              v-bind:key="rlist.code"
+                            >{{ rlist.code_name }}</option>
+                          </select>
+                        </div>
+                      </div>
+                      <!-- /.col -->
+                    </div>
+                    <!-- /row -->
+                  </div>
                 </div>
-                <div class="row justify-content-between" v-else>
-                  <!-- panel header -->
-                  <div class="col-md-3 padding-dis-left tex-align-center">
-                    <col-note
-                      v-bind:item-name="'No.' + (index+1)"
-                      v-bind:item-control="'LIGHT'"
-                      v-bind:item-note="''"
-                    ></col-note>
-                  </div>
-                  <!-- /.panel header -->
-                </div>
-                <!-- /.row -->
-                <!-- .row -->
-                <div class="row justify-content-between">
-                  <!-- panel contents -->
-                  <!-- panel header -->
-                  <daily-working-information-panel-header
-                    v-bind:header-text1="'◆ユーザー'"
-                    v-bind:header-text2="'ユーザー情報を入力します'"
-                    v-bind:class-text="'card-header col-12 bg-transparent pb-2 border-0'"
-                  ></daily-working-information-panel-header>
-                  <!-- /.panel header -->
-                </div>
-                <!-- /.row -->
-                <!-- .row -->
-                <div class="row justify-content-between">
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >
-                          適用開始日
-                          <span class="color-red">[必須]</span>
-                        </span>
-                      </div>
-                      <input
-                        type="date"
-                        class="form-control"
-                        v-model="item.apply_term_from"
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        v-bind:title="'この情報を適用する開始日を入力します'"
-                        name="applytermfrom"
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >退職日</span>
-                      </div>
-                      <input
-                        type="date"
-                        class="form-control"
-                        v-model="item.kill_from_date"
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        v-bind:title="'退職する日を入力します'"
-                        name="killfromdate"
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >
-                          氏名
-                          <span class="color-red">[必須]</span>
-                        </span>
-                      </div>
-                      <input
-                        type="text"
-                        class="form-control"
-                        maxlength="191"
-                        v-model="item.name"
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        v-bind:title="'氏名を191文字以内で入力します'"
-                        name="name"
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >フリガナ</span>
-                      </div>
-                      <input
-                        type="text"
-                        class="form-control"
-                        maxlength="30"
-                        v-model="item.kana"
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        v-bind:title="'フリガナを30文字以内で入力します'"
-                        name="kana"
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >
-                          雇用形態
-                          <span class="color-red">[必須]</span>
-                        </span>
-                      </div>
-                      <select class="custom-select" v-model="item.employment_status">
-                        <option value></option>
-                        <option
-                          v-for="elist in employStatusList"
-                          :value="elist.code"
-                          v-bind:key="elist.code"
-                        >{{ elist.code_name }}</option>
-                      </select>
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >役職</span>
-                      </div>
-                      <input
-                        type="text"
-                        class="form-control"
-                        maxlength="191"
-                        v-model="item.official_position"
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        v-bind:title="'役職を191文字以内で入力します'"
-                        name="officialposition"
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >
-                          所属部署
-                          <span class="color-red">[必須]</span>
-                        </span>
-                      </div>
-                      <select class="custom-select" v-model="item.department_code">
-                        <option value></option>
-                        <option
-                          v-for="dlist in departmentList"
-                          :value="dlist.code"
-                          v-bind:key="dlist.code"
-                        >{{ dlist.name }}</option>
-                      </select>
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >
-                          メールアドレス
-                          <span class="color-red">[必須]</span>
-                        </span>
-                      </div>
-                      <input
-                        type="email"
-                        maxlength="191"
-                        class="form-control"
-                        v-model="item.email"
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        v-bind:title="'メールアドレスを191文字以内で入力します'"
-                        name="email"
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >
-                          ログインID
-                          <span class="color-red">[必須]</span>
-                        </span>
-                      </div>
-                      <input type="text" class="form-control" v-model="item.code" name="code" />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >モバイル用アドレス</span>
-                      </div>
-                      <input
-                        type="email"
-                        maxlength="191"
-                        class="form-control"
-                        v-model="item.mobile_email"
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        v-bind:title="'モバイル用メールアドレスを191文字以内で入力します'"
-                        name="mobile_email"
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >パスワード</span>
-                      </div>
-                      <input
-                        type="password"
-                        class="form-control"
-                        v-model="item.password"
-                        title="パスワードの変更はできません。"
-                        name="password"
-                        disabled
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >
-                          勤怠管理
-                          <span class="color-red">[必須]</span>
-                        </span>
-                      </div>
-                      <select class="custom-select" v-model="item.management">
-                        <option value></option>
-                        <option
-                          v-for="mlist in generalList_m"
-                          :value="mlist.code"
-                          v-bind:key="mlist.code"
-                        >{{ mlist.code_name }}</option>
-                      </select>
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >
-                          タイムテーブル
-                          <span class="color-red">[必須]</span>
-                        </span>
-                      </div>
-                      <select
-                        class="custom-select"
-                        v-model="item.working_timetable_no"
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
-                      >
-                        <option value></option>
-                        <option
-                          v-for="tlist in timetableList"
-                          :value="tlist.no"
-                          v-bind:key="tlist.no"
-                        >{{ tlist.name }}</option>
-                      </select>
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >
-                          権限
-                          <span class="color-red">[必須]</span>
-                        </span>
-                      </div>
-                      <select class="custom-select" v-model="item.role">
-                        <option value></option>
-                        <option
-                          v-for="rlist in generalList_r"
-                          :value="rlist.code"
-                          v-bind:key="rlist.code"
-                        >{{ rlist.code_name }}</option>
-                      </select>
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                </div>
-                <!-- /row -->
-                <!-- .row -->
-                <!-- ----------- ボタン部 START ---------------- -->
-                <div class="row justify-content-between">
-                  <div class="col-md-12 pb-2">
-                    <div class="btn-group float-left">
-                      <button
-                        v-if="item.result != 0 && item.id != ''"
-                        type="button"
-                        class="btn btn-success"
-                        @click="fixclick(index)"
-                      >この内容で更新する</button>
-                      <button
-                        v-if="item.id == ''"
-                        type="button"
-                        class="btn btn-success"
-                        @click="addClick(index)"
-                      >この内容で追加する</button>
-                      <button
-                        v-if="item.result != 0 && item.id != ''"
-                        type="button"
-                        class="btn btn-danger"
-                        @click="delClick(index)"
-                      >この内容を削除する</button>
-                      <button
-                        v-if="item.result != 0 && item.id != ''"
-                        type="button"
-                        class="btn btn-warning"
-                        @click="sendUrl()"
-                      >モバイル打刻URLを送信する</button>
-                      <button
-                        v-if="item.id == ''"
-                        type="button"
-                        class="btn btn-danger"
-                        @click="rowDelClick(index)"
-                      >行削除</button>
-                      <button
-                        v-if="item.result != 0 && item.id != '' && item.card_idm != '' && showrelease"
-                        type="button"
-                        class="btn btn-danger"
-                        @click="releaseclick(index)"
-                      >カード情報を解除する</button>
-                    </div>
-                  </div>
-                </div>
-                <!-- /.row -->
-                <!-- ----------- ボタン部 END ---------------- -->
               </div>
-              <!-- 現在適用中より過去 ----------------------------------------------------------------->
-              <div v-else>
-                <!-- .row -->
-                <div class="row justify-content-between margin-top-regular">
-                  <!-- panel header -->
-                  <div class="col-md-3 padding-dis-left tex-align-center">
-                    <col-note
-                      v-bind:item-name="'No.' + (index+1)"
-                      v-bind:item-control="'LIGHT'"
-                      v-bind:item-note="''"
-                    ></col-note>
-                  </div>
-                  <!-- /.panel header -->
-                </div>
-                <!-- /row -->
-                <!-- .row -->
-                <div class="row justify-content-between">
-                  <!-- panel contents -->
-                  <!-- panel header -->
-                  <daily-working-information-panel-header
-                    v-bind:header-text1="'◆ユーザー'"
-                    v-bind:header-text2="''"
-                    v-bind:class-text="'card-header col-12 bg-transparent pb-2 border-0'"
-                  ></daily-working-information-panel-header>
-                  <!-- /.panel header -->
-                </div>
-                <!-- /.row -->
-                <!-- .row -->
-                <div class="row justify-content-between">
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >適用開始日</span>
-                      </div>
-                      <input
-                        type="date"
-                        class="form-control"
-                        v-model="item.apply_term_from"
-                        name="applytermfrom"
-                        disabled
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >退職日</span>
-                      </div>
-                      <input
-                        type="date"
-                        class="form-control"
-                        v-model="item.kill_from_date"
-                        name="killfromdate"
-                        disabled
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >氏名</span>
-                      </div>
-                      <input
-                        type="text"
-                        class="form-control"
-                        maxlength="191"
-                        v-model="item.name"
-                        name="name"
-                        disabled
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >フリガナ</span>
-                      </div>
-                      <input
-                        type="text"
-                        class="form-control"
-                        maxlength="30"
-                        v-model="item.kana"
-                        name="kana"
-                        disabled
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >雇用形態</span>
-                      </div>
-                      <select disabled class="custom-select" v-model="item.employment_status">
-                        <option value></option>
-                        <option
-                          v-for="elist in employStatusList"
-                          :value="elist.code"
-                          v-bind:key="elist.code"
-                        >{{ elist.code_name }}</option>
-                      </select>
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >役職</span>
-                      </div>
-                      <input
-                        type="text"
-                        class="form-control"
-                        maxlength="191"
-                        v-model="item.official_position"
-                        name="officialposition"
-                        disabled
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >所属部署</span>
-                      </div>
-                      <select disabled class="custom-select" v-model="item.department_code">
-                        <option value></option>
-                        <option
-                          v-for="dlist in departmentList"
-                          :value="dlist.code"
-                          v-bind:key="dlist.code"
-                        >{{ dlist.name }}</option>
-                      </select>
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >メールアドレス</span>
-                      </div>
-                      <input
-                        type="email"
-                        maxlength="191"
-                        class="form-control"
-                        v-model="item.email"
-                        name="email"
-                        disabled
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >ログインID</span>
-                      </div>
-                      <input
-                        type="text"
-                        class="form-control"
-                        v-model="item.code"
-                        name="code"
-                        disabled
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >モバイル用アドレス</span>
-                      </div>
-                      <input
-                        type="email"
-                        maxlength="191"
-                        class="form-control"
-                        v-model="item.mobile_email"
-                        name="mobile_email"
-                        disabled
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >パスワード</span>
-                      </div>
-                      <input
-                        type="password"
-                        class="form-control"
-                        v-model="item.password"
-                        name="password"
-                        disabled
-                      />
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >勤怠管理</span>
-                      </div>
-                      <select disabled class="custom-select" v-model="item.management">
-                        <option value></option>
-                        <option
-                          v-for="mlist in generalList_m"
-                          :value="mlist.code"
-                          v-bind:key="mlist.code"
-                        >{{ mlist.code_name }}</option>
-                      </select>
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >タイムテーブル</span>
-                      </div>
-                      <select
-                        disabled
-                        class="custom-select"
-                        v-model="item.working_timetable_no"
-                        data-toggle="tooltip"
-                        data-placement="top"
-                        v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
-                      >
-                        <option value></option>
-                        <option
-                          v-for="tlist in timetableList"
-                          :value="tlist.no"
-                          v-bind:key="tlist.no"
-                        >{{ tlist.name }}</option>
-                      </select>
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                  <!-- .col -->
-                  <div class="col-md-6 pb-2">
-                    <div class="input-group">
-                      <div class="input-group-prepend">
-                        <span
-                          class="input-group-text font-size-sm line-height-xs label-width-180"
-                          id="basic-addon1"
-                        >権限</span>
-                      </div>
-                      <select disabled class="custom-select" v-model="item.role">
-                        <option value></option>
-                        <option
-                          v-for="rlist in generalList_r"
-                          :value="rlist.code"
-                          v-bind:key="rlist.code"
-                        >{{ rlist.code_name }}</option>
-                      </select>
-                    </div>
-                  </div>
-                  <!-- /.col -->
-                </div>
-                <!-- /row -->
-              </div>
+              <!-- /panel contents -->
             </div>
-            <!-- /panel contents -->
             <!-- ----------- 項目部 END ---------------- -->
           </div>
           <!-- /main contentns row -->
@@ -1277,7 +1269,6 @@ import moment from "moment";
 import { dialogable } from "../mixins/dialogable.js";
 import { checkable } from "../mixins/checkable.js";
 import { requestable } from "../mixins/requestable.js";
-
 export default {
   name: "EditUser",
   mixins: [dialogable, checkable, requestable],
@@ -1932,6 +1923,7 @@ export default {
     // ユーザー選択が変更された場合の処理
     userChanges: function(value, arrayitem) {
       // 入力項目の部署クリア
+      this.selectMode = "";
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
       this.selectedUserValue = value;
@@ -2151,7 +2143,7 @@ export default {
       this.messagevalidatesEdt = [];
       if (this.checkRowData(index)) {
         var messages = [];
-        messages.push("行削除してよろしいですか？");
+        messages.push("履歴追加取り消ししてよろしいですか？");
         this.messageswal("確認", messages, "info", true, true, true).then(
           result => {
             if (result) {
@@ -2339,7 +2331,6 @@ export default {
           }
         });
     },
-
     // -------------------- 共通 ----------------------------
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
@@ -2359,7 +2350,6 @@ export default {
       var res = response.data;
       if (res.result) {
         this.details = res.details;
-        console.log(this.details);
         this.count = this.details.length;
         this.before_count = this.count;
       } else {
@@ -2692,4 +2682,3 @@ export default {
   }
 };
 </script>
-

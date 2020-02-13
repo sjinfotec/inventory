@@ -75,7 +75,7 @@
                     <span
                     class="input-group-text font-size-sm line-height-xs label-width-150"
                     id="basic-addon1"
-                    >所属部署<span class="color-red">[登録時必須]</span></span>
+                    >所属部署<font color="blue">[登録時必須]</font></span>
                   </div>
                   <select-departmentlist v-if="showdepartmentlist"
                     ref="selectdepartmentlist"
@@ -98,7 +98,7 @@
                     <label
                     class="input-group-text font-size-sm line-height-xs label-width-150"
                     for="target_users"
-                    >氏 　 　名<span class="color-red">[必須]</span></label>
+                    >氏名<span class="color-red">[必須]</span></label>
                   </div>
                   <select-userlist v-if="showuserlist"
                     ref="selectuserlist"
@@ -135,6 +135,7 @@
                     v-bind:date-value="''"
                     v-bind:kill-value="valueTimetablekillcheck"
                     v-bind:row-index=0
+                    v-bind:set-shift="false"
                     v-on:change-event="timetableChanges"
                   ></select-timetablelist>
                 </div>
