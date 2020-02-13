@@ -47,6 +47,10 @@ export default {
     rowIndex: {
         type: Number,
         default: 0
+    },
+    setShift: {
+        type: Boolean,
+        default: false
     }
   },
   data() {
@@ -71,8 +75,6 @@ export default {
     },
     // -------------------- サーバー処理 ----------------------------
     getList(targetdate){
-      console.log('getList in targetdate = ' + targetdate);
-      console.log('getList in this.killValue = ' + this.killValue);
       if (targetdate == '') {
           targetdate = moment(new Date()).format("YYYYMMDD");
       }
@@ -98,9 +100,15 @@ export default {
               this.itemList.unshift(this.object);
             }
           } else {
-            this.placeholderData = "はじめに「所定就業時間の登録」を選択してください"
-            this.object = { apply_term_from: "", name: "所定就業時間の登録", no: "" };
-            this.itemList.unshift(this.object);
+            if (this.setShift) {
+              this.placeholderData = "はじめに「所定就業時間の登録」を選択してください"
+              this.object = { apply_term_from: "", name: "所定就業時間の登録", no: "" };
+              this.itemList.unshift(this.object);
+            } else {
+              var messages = [];
+              messages.push(kbn + "タイムテーブルが設定されていません。\n勤務帯時間設定でタイムテーブルを設定してください");
+              this.messageswal("確認", messages, "info", true, false, false);
+            }
           }
           // 固有処理 end
       } else {

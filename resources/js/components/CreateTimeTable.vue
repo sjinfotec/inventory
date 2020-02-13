@@ -35,6 +35,7 @@
                     v-bind:date-value="''"
                     v-bind:kill-value="valuekillcheck"
                     v-bind:row-index=0
+                    v-bind:set-shift="true"
                     v-on:change-event="itemChanges"
                   ></select-timetablelist>
                 </div>

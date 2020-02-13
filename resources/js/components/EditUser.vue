@@ -1568,6 +1568,7 @@ export default {
     // ユーザー選択が変更された場合の処理
     userChanges: function(value, arrayitem) {
       // 入力項目の部署クリア
+      this.selectMode = '';
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
       this.selectedUserValue = value;
@@ -1753,7 +1754,7 @@ export default {
       this.messagevalidatesEdt = [];
       if (this.checkRowData(index)) {
         var messages = [];
-        messages.push("行削除してよろしいですか？");
+        messages.push("履歴追加取り消ししてよろしいですか？");
         this.messageswal("確認", messages, "info", true, true, true)
           .then(result  => {
             if (result) {

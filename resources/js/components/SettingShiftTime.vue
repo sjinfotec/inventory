@@ -135,6 +135,7 @@
                     v-bind:date-value="''"
                     v-bind:kill-value="valueTimetablekillcheck"
                     v-bind:row-index=0
+                    v-bind:set-shift="false"
                     v-on:change-event="timetableChanges"
                   ></select-timetablelist>
                 </div>
