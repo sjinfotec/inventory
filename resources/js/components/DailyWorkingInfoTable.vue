@@ -399,6 +399,7 @@
                 style="border:0; margin-top: -150px;"
               ></iframe>
               <div class="card-footer text-align-right padding-dis">
+                <span class="float-left">※機種の設定により位置情報が多少ずれる事があります。</span>
                 <el-button type="danger" @click="dialogVisible = false">閉じる</el-button>
               </div>
             </div>
