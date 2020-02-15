@@ -642,9 +642,10 @@ class DailyWorkingInformationController extends Controller
                             $attendance_target_flg = false;
                         }
                         $target_flg = $attendance_target_flg;
-                        if ($result->mode == Config::get('const.C012.leaving')) {
-                            $attendance_target_flg = false;
-                        }
+                        // -----------------------　20200215コメント化 --------------------- 
+                        // if ($result->mode == Config::get('const.C012.leaving')) {
+                        //     $attendance_target_flg = false;
+                        // }
                     }
                     if ($target_flg) {
                         Log::DEBUG('        集計対象判断 target_flg = true');
@@ -3364,6 +3365,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         } elseif ($ptn == '1') {    // 設定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
@@ -3377,6 +3379,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         } elseif ($ptn == '2') {    // 設定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
@@ -3390,6 +3393,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         } elseif ($ptn == '3') {    // 設定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
@@ -3403,6 +3407,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         } elseif ($ptn == '4') {    // 設定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
@@ -3416,6 +3421,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         } elseif ($ptn == '5') {    // ���定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
@@ -3429,6 +3435,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         } elseif ($ptn == '6') {    // ptn=1のnoteなし
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
@@ -3442,6 +3449,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         } else {
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute('0');
@@ -3456,6 +3464,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         }
 
         Log::DEBUG('---------------------- setNoInputTimePtn end ------------------------ ');
@@ -3588,6 +3597,10 @@ class DailyWorkingInformationController extends Controller
         } else {
             $this->array_working_timetable_no[] = 0;
         }
+        Log::DEBUG('------$result->mode = '.$result->mode);
+        Log::DEBUG('------$result->record_datetime = '.$result->record_datetime);
+        Log::DEBUG('------$result->x_positions = '.$result->x_positions);
+        Log::DEBUG('------$result->y_positions = '.$result->y_positions);
         if (isset($result->x_positions) && isset($result->y_positions)) {
             $this->array_mobile_positions[] = $result->x_positions.' '.$result->y_positions;
         } else {
@@ -3959,18 +3972,23 @@ class DailyWorkingInformationController extends Controller
                 if ($result->mode == Config::get('const.C005.missing_middle_time')) {
                     $missing_middle_time = $result->record_datetime;
                     if (isset($result->x_positions) && isset($result->y_positions)) {
-                        $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
+                        $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
                     } else {
-                        $missing_middle_time_time_positions = null;
+                        $missing_middle_time_positions = null;
                     }               
                 }
+                Log::DEBUG('    私用外出戻り?? = '.$result->mode);
                 if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
+                    Log::DEBUG('    私用外出戻り = '.$result->record_datetime);
+                    Log::DEBUG('    私用外出戻り = '.$result->x_positions);
+                    Log::DEBUG('    私用外出戻り = '.$result->y_positions);
                     $missing_middle_return_time = $result->record_datetime;
                     if (isset($result->x_positions) && isset($result->y_positions)) {
                         $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
                     } else {
                         $missing_middle_return_time_positions = null;
                     }               
+                    Log::DEBUG('    私用外出戻り missing_middle_return_time_positions = '.$missing_middle_return_time_positions);
                 }
                 if ($result->mode == Config::get('const.C005.public_going_out_time')) {
                     $public_going_out_time = $result->record_datetime;
@@ -4009,13 +4027,15 @@ class DailyWorkingInformationController extends Controller
                     // 計算セットフラグ　　calcTimes実行ならtrueにする
                     // ----------------------- 私用外出 -------------------------------------------
                     // 私用外出は複数ある可能性があるので私用外出計算は戻り時点で計算する。
-                    Log::DEBUG('        私用外出 $missing_middle_time = '.$missing_middle_time);
                     if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
+                        Log::DEBUG('        私用外出 $missing_middle_time = '.$missing_middle_time);
+                        Log::DEBUG('        私用外出 $missing_middle_time_positions = '.$missing_middle_time_positions);
                         $array_add_missing_middle_time[] = $missing_middle_time;
                         $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
                     }
-                    Log::DEBUG('        私用外出戻り $missing_middle_return_time = '.$missing_middle_return_time);
                     if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
+                        Log::DEBUG('        私用外出戻り $missing_middle_return_time = '.$missing_middle_return_time);
+                        Log::DEBUG('        私用外出戻り $array_add_missing_middle_return_time_positions = '.$missing_middle_return_time_positions);
                         $array_add_missing_middle_return_time[] = $missing_middle_return_time;
                         $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
                     }
@@ -4202,9 +4222,9 @@ class DailyWorkingInformationController extends Controller
                             if ($result->mode == Config::get('const.C005.missing_middle_time')) {
                                 $missing_middle_time = $result->record_datetime;
                                 if (isset($result->x_positions) && isset($result->y_positions)) {
-                                    $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
+                                    $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
                                 } else {
-                                    $missing_middle_time_time_positions = null;
+                                    $missing_middle_time_positions = null;
                                 }               
                             }
                             if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
@@ -4244,6 +4264,8 @@ class DailyWorkingInformationController extends Controller
                             $array_add_public_going_out_time_positions = array();
                             $array_add_public_going_out_return_time_positions = array();
                             if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
+                                Log::DEBUG('        私用外出 $missing_middle_time = '.$missing_middle_time);
+                                Log::DEBUG('        私用外出 $missing_middle_time_positions = '.$missing_middle_time_positions);
                                 $array_add_missing_middle_time[] = $missing_middle_time;
                                 $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
                             }
@@ -4301,19 +4323,23 @@ class DailyWorkingInformationController extends Controller
                     Log::DEBUG('    私用外出打刻時刻 = '.$missing_middle_time);
                     if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
                         $array_add_missing_middle_time[] = $missing_middle_time;
+                        $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
                     }
                     Log::DEBUG('    私用外出戻り打刻時刻 = '.$missing_middle_return_time);
                     if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
                         $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                        $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
                     }
                     // ----------------------- 公用外出 -------------------------------------------
                     Log::DEBUG('    公用外出打刻時刻 = '.$public_going_out_time);
                     if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
                         $array_add_public_going_out_time[] = $public_going_out_time;
+                        $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
                     }
                     Log::DEBUG('    公用外出戻り打刻時刻 = '.$public_going_out_return_time);
                     if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
                         $array_add_public_going_out_return_time[] = $public_going_out_return_time;
+                        $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
                     }
                     // ----------------------- 出勤 -------------------------------------------
                     Log::DEBUG('    出勤打刻時刻 = '.$attendance_time);
@@ -4325,6 +4351,7 @@ class DailyWorkingInformationController extends Controller
                     Log::DEBUG('    退勤打刻時刻 = '.$leaving_time);
                     if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                         $array_add_leaving_time[] = $leaving_time;
+                        $array_add_leaving_time_positions[] = $leaving_time_positions;
                     }
                     // 前のデータが計算対象であれば出力する
                     // 計算セットフラグ
@@ -4454,9 +4481,9 @@ class DailyWorkingInformationController extends Controller
                     if ($result->mode == Config::get('const.C005.missing_middle_time')) {
                         $missing_middle_time = $result->record_datetime;
                         if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
+                            $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
                         } else {
-                            $missing_middle_time_time_positions = null;
+                            $missing_middle_time_positions = null;
                         }               
                     }
                     if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
@@ -4618,9 +4645,9 @@ class DailyWorkingInformationController extends Controller
                         if ($result->mode == Config::get('const.C005.missing_middle_time')) {
                             $missing_middle_time = $result->record_datetime;
                             if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
+                                $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
                             } else {
-                                $missing_middle_time_time_positions = null;
+                                $missing_middle_time_positions = null;
                             }               
                         }
                         if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
@@ -4797,9 +4824,9 @@ class DailyWorkingInformationController extends Controller
                     if ($result->mode == Config::get('const.C005.missing_middle_time')) {
                         $missing_middle_time = $result->record_datetime;
                         if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
+                            $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
                         } else {
-                            $missing_middle_time_time_positions = null;
+                            $missing_middle_time_positions = null;
                         }               
                     }
                     if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
@@ -4956,9 +4983,9 @@ class DailyWorkingInformationController extends Controller
                         if ($result->mode == Config::get('const.C005.missing_middle_time')) {
                             $missing_middle_time = $result->record_datetime;
                             if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
+                                $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
                             } else {
-                                $missing_middle_time_time_positions = null;
+                                $missing_middle_time_positions = null;
                             }               
                         }
                         if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
@@ -5135,9 +5162,9 @@ class DailyWorkingInformationController extends Controller
                     if ($result->mode == Config::get('const.C005.missing_middle_time')) {
                         $missing_middle_time = $result->record_datetime;
                         if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
+                            $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
                         } else {
-                            $missing_middle_time_time_positions = null;
+                            $missing_middle_time_positions = null;
                         }               
                     }
                     if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
@@ -5295,9 +5322,9 @@ class DailyWorkingInformationController extends Controller
                         if ($result->mode == Config::get('const.C005.missing_middle_time')) {
                             $missing_middle_time = $result->record_datetime;
                             if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
+                                $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
                             } else {
-                                $missing_middle_time_time_positions = null;
+                                $missing_middle_time_positions = null;
                             }               
                         }
                         if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
@@ -5841,6 +5868,7 @@ class DailyWorkingInformationController extends Controller
         $temp_working_model->setWorkingtimetablenoAttribute($target_result->working_timetable_no);
         $temp_working_model->setWorkingtimetablenameAttribute($target_result->working_timetable_name);
         // 出勤打刻５回までチェック
+        Log::DEBUG('  出勤時刻設定 START ');
         $attendence_note_set = false;
         $array_add_attendance_time_cnt = count($array_add_attendance_time);
         if (!$this->chkWorkingTime($array_add_attendance_time, (int)(Config::get('const.ARRAY_MAX_INDEX.attendace_time')) )) {
@@ -5850,6 +5878,7 @@ class DailyWorkingInformationController extends Controller
         // 設定
         $array_decide_times = $this->decideWorkingTimeFrom($array_add_attendance_time, count($array_add_attendance_time));
         for ($i=0;$i<count($array_decide_times);$i++) {
+            Log::DEBUG('$array_decide_times[$i] = '.$array_decide_times[$i]);
             if ($i<count($array_decide_times)) {
                 $temp_working_model->setAttendancetimeAttribute($i, $array_decide_times[$i]);
                 if (isset($array_add_attendance_time_positions[$i])) {
@@ -5862,6 +5891,8 @@ class DailyWorkingInformationController extends Controller
                 $temp_working_model->setAttendancetimepositionsAttribute($i, null);
             }
         }
+        Log::DEBUG('  出勤時刻設定 END ');
+        Log::DEBUG('  退勤時刻設定 START ');
         // 退勤打刻５回までチェック 出勤でチェックエラー時はnote設定しない1
         if (!$this->chkWorkingTime($array_add_leaving_time,(int)(Config::get('const.ARRAY_MAX_INDEX.leaving_time')) )) {
             if ($attendence_note_set == false) {
@@ -5887,7 +5918,8 @@ class DailyWorkingInformationController extends Controller
                 $temp_working_model->setLeavingtimepositionsAttribute($i, null);
             }
         }
-
+        Log::DEBUG('  退勤時刻設定 END ');
+        Log::DEBUG('  中抜け時刻設定 START ');
         // 中抜け打刻５回までチェック
         $missing_middle_note_set = false;
         if (!$this->chkWorkingTime($array_add_missing_middle_time,(int)(Config::get('const.ARRAY_MAX_INDEX.missing_middle_time')) )) {
@@ -5896,9 +5928,12 @@ class DailyWorkingInformationController extends Controller
         }
         // 設定
         $array_decide_times = $this->decideWorkingTimeFrom($array_add_missing_middle_time, count($array_add_missing_middle_time));
+        Log::DEBUG('    中抜け count($array_decide_times) =  '.count($array_decide_times));
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
                 $temp_working_model->setMissingmiddletimeAttribute($i, $array_decide_times[$i]);
+                Log::DEBUG('    中抜け count($array_add_missing_middle_time_positions) =  '.count($array_add_missing_middle_time_positions));
+                Log::DEBUG('    中抜け $array_add_missing_middle_time_positions =  '.$array_add_missing_middle_time_positions[$i]);
                 if (isset($array_add_missing_middle_time_positions[$i])) {
                     $temp_working_model->setMissingmiddletimepositionsAttribute($i, $array_add_missing_middle_time_positions[$i]);
                 } else {
@@ -5909,6 +5944,8 @@ class DailyWorkingInformationController extends Controller
                 $temp_working_model->setMissingmiddletimepositionsAttribute($i, null);
             }
         }
+        Log::DEBUG('  中抜け時刻設定 END ');
+        Log::DEBUG('  中抜け戻り時刻設定 START ');
         // 中抜け戻り打刻５回までチェック
         if (!$this->chkWorkingTime($array_add_missing_middle_return_time,(int)(Config::get('const.ARRAY_MAX_INDEX.missing_middle_return_time')) )) {
             if ($missing_middle_note_set == false) {
@@ -5923,6 +5960,7 @@ class DailyWorkingInformationController extends Controller
             count($array_add_missing_middle_return_time),
             $array_add_missing_middle_time,
             count($array_add_missing_middle_time));
+        Log::DEBUG('    中抜け戻り count($array_decide_times) =  '.count($array_decide_times));
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
                 $temp_working_model->setMissingmiddlereturntimeAttribute($i, $array_decide_times[$i]);
@@ -5936,6 +5974,7 @@ class DailyWorkingInformationController extends Controller
                 $temp_working_model->setMissingmiddlereturntimepositionsAttribute($i, null);
             }
         }
+        Log::DEBUG('  中抜け戻り時刻設定 END ');
         // 公用外出打刻５回までチェック
         $public_going_out_note_set = false;
         if (!$this->chkWorkingTime($array_add_public_going_out_time,(int)(Config::get('const.ARRAY_MAX_INDEX.public_going_out_time')) )) {
@@ -6398,6 +6437,7 @@ class DailyWorkingInformationController extends Controller
         Log::DEBUG('---------------------- decideWorkingTimeFrom in ------------------------ ');
         $arrray_decide_times = array();
         for ($i=0;$i<$index;$i++) {
+            Log::DEBUG('  $target_array_time =  '.$target_array_time[$i]);
             if (count($target_array_time) > 0 && $i < count($target_array_time)){
                 $arrray_decide_times[$i] = $target_array_time[$i];
             } else {
@@ -6419,31 +6459,67 @@ class DailyWorkingInformationController extends Controller
     {
         Log::DEBUG('---------------------- decideWorkingTimeTo in ------------------------ ');
         $arrray_decide_times = array();
+        for ($i=0;$i<$index;$i++) {
+            Log::DEBUG('  $target_array_time =  '.$target_array_time[$i]);
+            if (count($target_array_time) > 0 && $i < count($target_array_time)){
+                $arrray_decide_times[$i] = $target_array_time[$i];
+            } else {
+                $arrray_decide_times[$i] = null;
+            }
+        }
+        Log::DEBUG('---------------------- decideWorkingTimeTo end ------------------------ ');
+
+        return $arrray_decide_times;
+    }
+ 
+    /**
+     * 終了打刻時刻設定値を決める
+     * 
+     *
+     * @return 
+     */
+    private function decideWorkingTimeTo20200215($target_array_time, $index, $from_array_time, $from_array_cnt)
+    {
+        Log::DEBUG('---------------------- decideWorkingTimeTo in ------------------------ ');
+        $arrray_decide_times = array();
         // 開始時刻より過去は設定しないため設定するindexも調整するためindexを別途準備
         $set_index = 0;
+        $set_j = 0;
+        $set_strat_j = 0;
         $set_flg = false;
+        Log::DEBUG('                 from_array_cnt = '.$from_array_cnt);
+        Log::DEBUG('                 count($target_array_time) = '.count($target_array_time));
         for ($i=0;$i<$from_array_cnt;$i++) {
             $set_flg = false;
-            for ($j=0;$j<$index;$j++) {
+            for ($j=$set_strat_j;$j<$index;$j++) {
                 if (count($target_array_time) > 0 && $i < count($target_array_time)){
                     // 開始時刻<target_array_timeを設定
+                    Log::DEBUG('                 $target_array_time[$j] = '.$target_array_time[$j]);
+                    Log::DEBUG('                 $from_array_time[$i] = '.$from_array_time[$i]);
                     if ($target_array_time[$j] > $from_array_time[$i]) {
                         $set_index++;
+                        Log::DEBUG('                 $set_index = '.$set_index);
                         $arrray_decide_times[$set_index-1] = $target_array_time[$j];
                         $set_flg = true;
+                        $set_j = $j;
+                        $set_strat_j = $j+1;
                         break;
                     }
                 }
             }
             if (!$set_flg) {
                 $set_index++;
-                $arrray_decide_times[$set_index-1] = null;
+                Log::DEBUG('                 $set_index = '.$set_index);
+                $arrray_decide_times[$set_index-1] = $target_array_time[$set_j];
+                Log::DEBUG('                 $arrray_decide_times[$set_index-1] = '.$arrray_decide_times[$set_index-1]);
+                $set_strat_j = $set_j+1;
             }
         }
 
         if ($from_array_cnt == 0) {
             $arrray_decide_times = $target_array_time;
         }
+        Log::DEBUG('                 count($arrray_decide_times) = '.count($arrray_decide_times));
         Log::DEBUG('---------------------- decideWorkingTimeTo end ------------------------ ');
 
         return $arrray_decide_times;

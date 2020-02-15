@@ -558,11 +558,19 @@ return [
         'DEBUG' => 'DEBUG'
     ],
 
+    'DISTRIBUTION' => [
+        'DISTRIBUTION' => 1
+    ],
+
+    'DISTRIBUTION_VALUE' => [
+        '43z' => 1
+    ],
+
     'EDITION' => [
         'EDITION' => 3
     ],
 
-    'EDITION_NAME' => [
+    'EDITION_VALUE' => [
         'DEMO' => 1,
         'TRIAL' => 2,
         'CROUD' => 3,

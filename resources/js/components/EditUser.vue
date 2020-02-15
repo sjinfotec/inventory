@@ -891,7 +891,7 @@
                             type="button"
                             class="btn btn-danger"
                             @click="rowDelClick(index)"
-                          >行削除</button>
+                          >履歴追加取り消し</button>
                           <button
                             v-if="item.result != 0 && item.id != '' && item.card_idm != '' && showrelease"
                             type="button"
