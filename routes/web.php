@@ -31,6 +31,9 @@ Route::get('/daily/show', 'DailyWorkingInformationController@show')->middleware(
 Route::get('/monthly', 'MonthlyWorkingInformationController@index')->middleware('auth');
 Route::get('/monthly/calc', 'MonthlyWorkingInformationController@calc')->middleware('auth');
 Route::get('/monthly/show', 'MonthlyWorkingInformationController@show')->middleware('auth');
+// 勤怠ログ集計
+Route::get('/attendancelog', 'AttendanceLogController@index')->middleware('auth');
+Route::post('/attendancelog/show', 'AttendanceLogController@show')->middleware('auth');
 // ------------------ 警告 --------------------------------
 // 日次警告通知
 Route::get('/daily_alert', 'DailyWorkingAlertController@index')->middleware('auth');
@@ -83,6 +86,9 @@ Route::post('/get_user_shift', 'ApiCommonController@getShiftInformation')->middl
 Route::post('/setting_shift_time/del', 'SttingShiftTimeController@del')->middleware('auth');
 Route::post('/setting_shift_time/store', 'SttingShiftTimeController@store')->middleware('auth');
 Route::post('/setting_shift_time/range_del', 'SttingShiftTimeController@rangeDel')->middleware('auth');
+// 勤怠ログ編集
+Route::get('/edit_attendancelog', 'EditAttendanceLogController@index')->middleware('auth');
+Route::post('/edit_attendancelog/show', 'EditAttendanceLogController@show')->middleware('auth');
 // ------------------ 設定 --------------------------------
 // 会社情報
 Route::get('/create_company_information', 'CreateCompanyInformationController@index')->middleware('auth');
