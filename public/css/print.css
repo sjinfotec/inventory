@@ -1,0 +1,52 @@
+/* global setteing */
+
+.print-only {
+	display: none;
+}
+
+.page-break-after {
+	page-break-after: always;
+}
+
+/* print setteing */
+
+@page {
+	size: A4;
+	margin: 5mm 2mm;
+ }
+
+@media print {
+
+	body {
+		padding-top: 0;
+	}
+
+	.print-none {
+		display: none;
+	}
+
+	.print-only {
+		display: block;
+	}
+
+	.table td {
+		padding: 0.5rem;
+	}
+
+	.font-size-rg {
+		font-size: 0.8rem;
+	}
+
+	.font-size-sm {
+		font-size: 0.6rem;
+	}
+
+	.card {
+		display: block;
+	}
+
+ 	.collapse:not(.show) {
+    	display: block;
+	}
+
+}
