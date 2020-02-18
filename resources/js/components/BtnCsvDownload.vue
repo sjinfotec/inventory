@@ -10,6 +10,11 @@
       v-bind:btn-mode="btnMode"
       v-bind:is-push="isCsvbutton">
     </btn-work-time>
+    <btn-work-time v-if="btnMode === 'csvlog'"
+      v-on:csvlog-event="downloadCSVLog"
+      v-bind:btn-mode="btnMode"
+      v-bind:is-push="isCsvbutton">
+    </btn-work-time>
   </div>
 </template>
 <script>
@@ -156,6 +161,93 @@ export default {
       let link = document.createElement("a");
       link.href = window.URL.createObjectURL(blob);
       link.download = moment().format('YYYYMMDDhhmmss') + "_" + this.csvDate + "次給与連携" + ".csv";
+      link.click();
+    },
+    downloadCSVLog() {
+      var csv = "";
+      var line = "";
+      var workingdate = "";
+      var attendance_time = "";
+      var leaving_time = "";
+      var pcstart_time = "";
+      var pcend_time = "";
+      var difference_reason = "";
+      // 1ユーザーごと
+      this.csvData.forEach(user => {
+        //  '\ufeff' + 
+        // タイトル
+        line =
+          this.csvDate +
+          "\r\n";
+        csv += line;
+        // 項目名
+        line =
+          "日付" +
+          "," +
+          "出勤時刻" +
+          "," +
+          "退勤時刻" +
+          "," +
+          "PC起動時刻" +
+          "," +
+          "PC終了時刻" +
+          "," +
+          "差異の理由" +
+          "\r\n";
+        csv += line;
+        user.date.forEach(record => {
+          workingdate = "";
+          attendance_time = "";
+          leaving_time = "";
+          pcstart_time = "";
+          pcend_time = "";
+          difference_reason = "";
+          if (record["working_date_name"] != "" && record["working_date_name"] != null) {
+            workingdate = record["working_date_name"];
+          }
+          if (record["attendance_time"] != "" && record["attendance_time"] != null) {
+            attendance_time = record["attendance_time"];
+          }
+          if (record["leaving_time"] != "" && record["leaving_time"] != null) {
+            leaving_time = record["leaving_time"];
+          }
+          if (record["pcstart_time"] != "" && record["pcstart_time"] != null) {
+            pcstart_time = record["pcstart_time"];
+          }
+          if (record["pcend_time"] != "" && record["pcend_time"] != null) {
+            pcend_time = record["pcend_time"];
+          }
+          if (record["difference_reason"] != "" && record["difference_reason"] != null) {
+            difference_reason = record["difference_reason"];
+          }
+          line =
+            workingdate +
+            "," +
+            attendance_time +
+            "," +
+            leaving_time +
+            "," +
+            pcstart_time +
+            "," +
+            pcend_time +
+            "," +  
+            difference_reason +
+            "\r\n";
+          csv += line;
+        });
+      });
+      // csvを文字コードの数値の配列に変換
+      const unicodeList = [];
+      for (let i = 0; i < csv.length; i += 1) {
+        unicodeList.push(csv.charCodeAt(i));
+      }
+      // 変換処理の実施
+      const shiftJisCodeList = encoding.convert(unicodeList, 'sjis', 'unicode');
+      const uInt8List = new Uint8Array(shiftJisCodeList);
+      let blob = new Blob([uInt8List], { type: "text/csv" });
+      let link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = moment().format('YYYYMMDDhhmmss') + "_" + this.csvDate + "次勤怠ログ" + ".csv";
       link.click();
     }
   }

@@ -1228,8 +1228,6 @@ class WorkingTimedate extends Model
      * @return sql取得結果
      */
     public function chkWorkingTimeData() {
-        Log::debug('chkWorkingTimeData in'.$this->param_date_from);
-        Log::debug('chkWorkingTimeData in'.$this->param_date_to);
 
         $this->massegedata = array();
         $result = true;
