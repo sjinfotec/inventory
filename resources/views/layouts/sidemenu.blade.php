@@ -20,9 +20,6 @@
                             <ul class="collapse show list-unstyled" id="collapseAggregate">
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/daily') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">日次集計</a></li>
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/monthly') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">月次集計</a></li>
-                                @if(Config::get('const.DISTRIBUTION.DISTRIBUTION') == Config::get('const.DISTRIBUTION_VALUE.43z') )
-                                    <li><a class="px-3 py-1 text-white d-block" href="{{ url('/attendancelog') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">勤怠ログ集計</a></li>
-                                @endif
                             </ul>
                             <h3 class="side-head p-3 font-size-rg">
                                 <span>警告通知</span>
