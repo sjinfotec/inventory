@@ -7,24 +7,39 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use App\Http\Controllers\ApiCommonController;
+use Carbon\Carbon;
 
 class AttendanceLog extends Model
 {
     protected $table = 'attendance_logs';
+    protected $table_users = 'users';
+    protected $table_work_times = 'work_times';
+    protected $table_generalcodes = 'generalcodes';
 
+    private $id;                                // id
     private $department_code;                   // 部署コード
     private $employment_status;                 // 雇用形態
     private $user_code;                         // ユーザー
     private $working_date;                      // 日付
-    private $mode;                              // 打刻モード
-    private $record_time;                       // 打刻時間
     private $event_mode;                        // ＰＣイベントモード
     private $event_time;                        // ＰＣイベント時間
+    private $difference_reason;                 // 差異理由
     private $created_user;    
     private $updated_user;                  
     private $created_at;                  
     private $updated_at;                  
     private $is_deleted;                  
+
+    // id
+    public function getIdAttribute()
+    {
+        return $this->id;
+    }
+
+    public function setIdAttribute($value)
+    {
+        $this->id = $value;
+    }
 
     // 部署コード
     public function getDepartmentcodeAttribute()
@@ -70,28 +85,6 @@ class AttendanceLog extends Model
         $this->working_date = $value;
     }
 
-    // 打刻モード
-    public function getModeAttribute()
-    {
-        return $this->mode;
-    }
-
-    public function setModeAttribute($value)
-    {
-        $this->mode = $value;
-    }
-
-    // 打刻時間
-    public function getRecordtimeAttribute()
-    {
-        return $this->record_time;
-    }
-
-    public function setRecordtimeAttribute($value)
-    {
-        $this->record_time = $value;
-    }
-
     // ＰＣイベントモード
     public function getEventmodeAttribute()
     {
@@ -113,6 +106,17 @@ class AttendanceLog extends Model
     public function setEventtimeAttribute($value)
     {
         $this->event_time = $value;
+    }
+
+    // 差異理由
+    public function getDifferencereasonAttribute()
+    {
+        return $this->difference_reason;
+    }
+
+    public function setDifferencereasonAttribute($value)
+    {
+        $this->difference_reason = $value;
     }
 
     // 作成ユーザー
@@ -167,10 +171,26 @@ class AttendanceLog extends Model
 
     // ------------- implements --------------
 
+    private $param_id;                          // id
     private $param_department_code;             // 部署コード
     private $param_employment_status;           // 雇用形態
     private $param_user_code;                   // ユーザー
     private $param_working_date;                // 日付
+    private $param_event_mode;                  // ＰＣイベントモード
+    private $param_event_time;                  // ＰＣイベント時間
+    private $param_working_date_from;           // 開始日付
+    private $param_working_date_to;             // 終了日付
+
+    // id
+    public function getParamidAttribute()
+    {
+        return $this->param_id;
+    }
+
+    public function setParamidAttribute($value)
+    {
+        $this->param_id = $value;
+    }
 
     // 部署コード
     public function getParamdepartmentcodeAttribute()
@@ -218,14 +238,67 @@ class AttendanceLog extends Model
         $this->param_working_date = $value;
     }
 
+
+    // 開始日付
+    public function getParamworkingdatefromAttribute()
+    {
+        return $this->param_working_date_from;
+    }
+
+    public function setParamworkingdatefromAttribute($value)
+    {
+        $this->param_working_date_from = $value;
+    }
+
+
+    // 終了日付
+    public function getParamworkingdatetoAttribute()
+    {
+        return $this->param_working_date_to;
+    }
+
+    public function setParamworkingdatetoAttribute($value)
+    {
+        $this->param_working_date_to = $value;
+    }
+
+    // ＰＣイベントモード
+    public function getParameventmodeAttribute()
+    {
+        return $this->param_event_mode;
+    }
+
+    public function setParameventmodeAttribute($value)
+    {
+        $this->param_event_mode = $value;
+    }
+
+    // ＰＣイベント時間
+    public function getParameventtimeAttribute()
+    {
+        return $this->param_event_time;
+    }
+
+    public function setParameventtimeAttribute($value)
+    {
+        $this->param_event_time = $value;
+    }
+
     /**
      * 検索
      *
      * @return void
      */
-    public function getDemandList($targetdate, $situation){
+    public function getAttendanceLogList($targetdate){
 
         try {
+            $dt = null;
+            if (isset($targetdate)) {
+                $dt = new Carbon($targetdate);
+            } else {
+                $dt = new Carbon();
+            }
+            $targetdate = $dt->format('Ymd');
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
             // usersの最大適用開始日付subquery
@@ -233,183 +306,201 @@ class AttendanceLog extends Model
             // departmentsの最大適用開始日付subquery
             $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
 
-            $subquery5 = DB::table($this->table)
-                ->select(
-                    $this->table.'.no',
-                    $this->table.'.doc_code',
-                    $this->table.'.seq',
-                    $this->table.'.department_code',
-                    $this->table.'.user_code');
-            $subquery5
-                ->selectRaw('MAX('.$this->table.'.log_no) as log_no')
-                ->where($this->table.'.user_code', '=', $this->param_user_code)
-                ->groupBy($this->table.'.no',
-                    $this->table.'.doc_code',
-                    $this->table.'.seq',
-                    $this->table.'.department_code',
-                    $this->table.'.user_code');
+            // ---------------- unionquery1 打刻 ----------------------------
+            // unionquery1    work_times
+            $unionquery1 = DB::table($this->table_users.' AS t1')
+                ->selectRaw("null as id");
+            $unionquery1
+                ->addSelect('t1.department_code as department_code')
+                ->addSelect('t4.name as department_name')
+                ->addSelect('t1.employment_status as employment_status')
+                ->addSelect('t5.code_name as employment_name')
+                ->addSelect('t1.code as user_code')
+                ->addSelect('t1.name as user_name')
+                ->addSelect('t2.mode as mode')
+                ->addSelect('t2.record_time as record_time')
+                ->addSelect('t1.management as user_management');
+            $unionquery1
+                ->selectRaw("DATE_FORMAT(t2.record_time, '%Y%m%d') as working_date")
+                ->selectRaw("null as difference_reason");
+            $unionquery1
+                ->join($this->table_work_times.' as t2', function ($join) { 
+                    $join->on('t2.user_code', '=', 't1.code');
+                    $join->on('t2.department_code', '=', 't1.department_code')
+                    ->where('t2.is_deleted', '=', 0);
+                });
+            $unionquery1
+                ->JoinSub($subquery3, 't3', function ($join) { 
+                    $join->on('t3.code', '=', 't1.code');
+                    $join->on('t3.max_apply_term_from', '=', 't1.apply_term_from');
+                });
+            $unionquery1
+                ->JoinSub($subquery4, 't4', function ($join) { 
+                    $join->on('t4.code', '=', 't1.department_code');
+                });
+            $unionquery1
+                ->leftJoin($this->table_generalcodes.' as t5', function ($join) { 
+                    $join->on('t5.code', '=', 't1.employment_status')
+                    ->where('t5.identification_id', '=', Config::get('const.C001.value'))
+                    ->where('t5.is_deleted', '=', 0);
+                });
 
-            $subquery6 = DB::table($this->table_demands)
+            // ---------------- unionquery2 イベント ----------------------------
+            // unionquery2    attendance_logs
+            $unionquery2 = DB::table($this->table_users.' AS t1')
                 ->select(
-                    $this->table_demands.'.no',
-                    $this->table_demands.'.doc_code',
-                    $this->table_demands.'.nmail_department_code',
-                    $this->table_demands.'.nmail_user_code',
-                    $this->table_demands.'.nmail_seq');
-            $subquery6
-                ->selectRaw('MAX('.$this->table_demands.'.log_no) as log_no')
-                ->where($this->table_demands.'.nmail_user_code', '=', $this->param_user_code)
-                ->groupBy($this->table_demands.'.no',
-                    $this->table_demands.'.doc_code',
-                    $this->table_demands.'.nmail_department_code',
-                    $this->table_demands.'.nmail_user_code',
-                    $this->table_demands.'.nmail_seq');
-
-            // mainqueryにsunqueryを組み込む
-            $mainquery = DB::table($this->table_users.' AS t1')
-                ->select(
-                    't6.id as id',
+                    't2.id',
                     't1.department_code as department_code',
-                    't3.name as department_name',
+                    't4.name as department_name',
+                    't1.employment_status as employment_status',
+                    't5.code_name as employment_name',
                     't1.code as user_code',
                     't1.name as user_name',
-                    't6.no',
-                    't6.doc_code',
-                    't9.code_name as doc_code_name',
-                    't6.log_no',
-                    't6.seq',
-                    't6.status',
-                    't12.code_name as status_name',
-                    't8.demand_date',
-                    't8.date_from',
-                    't8.date_to'
-                    );
-            $mainquery
-                ->selectRaw("DATE_FORMAT(t8.demand_date,'%Y年%m月%d日') as demand_date_name")
-                ->selectRaw("DATE_FORMAT(t8.date_from,'%Y年%m月%d日') as date_from_name")
-                ->selectRaw("DATE_FORMAT(t8.date_to,'%Y年%m月%d日') as date_to_name");
-            $mainquery
-                ->addselect('t8.demand_reason')
-                ->addselect('t8.before_after')
-                ->addselect('t10.code_name as before_after_name')
-                ->addselect('t6.mail_result')
-                ->addselect('t11.code_name as mail_result_name')
-                ->addselect('t6.mail_address')
-                ->addselect('t6.nmail_department_code')
-                ->addselect('t13.name as nmail_department_name')
-                ->addselect('t6.nmail_user_code')
-                ->addselect('t15.name as nmail_user_name')
-                ->addselect('t8.department_code')
-                ->addselect('t17.name as demand_department_name')
-                ->addselect('t8.user_code')
-                ->addselect('t19.name as demand_user_name')
-                ->addselect('t16.row_no as detail_row_no')
-                ->addselect('t16.working_item as detail_working_item')
-                ->addselect('t16.date_from as detail_date_from')
-                ->addselect('t16.time_from as detail_time_from')
-                ->addselect('t16.date_to as detail_date_to')
-                ->addselect('t16.time_to as detail_time_to')
-                ->addselect('t16.scheduled_time as detail_scheduled_time')
-                ->addselect('t16.demand_reason as detail_demand_reason');
-            $mainquery
-                ->JoinSub($subquery4, 't3', function ($join) { 
-                    $join->on('t3.code', '=', 't1.department_code');
+                    't2.event_mode as mode',
+                    't2.event_time as record_time',
+                    't1.management as user_management',
+                    't2.working_date as working_date',
+                    't2.difference_reason as difference_reason'
+                );
+            $unionquery2
+                ->join($this->table.' as t2', function ($join) { 
+                    $join->on('t2.user_code', '=', 't1.code');
+                    $join->on('t2.department_code', '=', 't1.department_code')
+                    ->where('t2.is_deleted', '=', 0);
                 })
-                ->JoinSub($subquery3, 't4', function ($join) { 
-                    $join->on('t4.code', '=', 't1.code');
-                    $join->on('t4.max_apply_term_from', '=', 't1.apply_term_from');
+                ->JoinSub($subquery3, 't3', function ($join) { 
+                    $join->on('t3.code', '=', 't1.code');
+                    $join->on('t3.max_apply_term_from', '=', 't1.apply_term_from');
                 })
-                ->JoinSub($subquery5, 't5', function ($join) { 
-                    $join->on('t5.department_code', '=', 't1.department_code');
-                    $join->on('t5.user_code', '=', 't1.code');
+                ->JoinSub($subquery4, 't4', function ($join) { 
+                    $join->on('t4.code', '=', 't1.department_code');
                 })
-                ->Join($this->table.' as t6', function ($join) { 
-                    $join->on('t6.no', '=', 't5.no');
-                    $join->on('t6.seq', '=', 't5.seq');
-                    $join->on('t6.log_no', '=', 't5.log_no');
-                })
-                ->JoinSub($subquery6, 't7', function ($join) { 
-                    $join->on('t7.no', '=', 't6.no');
-                    $join->on('t7.doc_code', '=', 't6.doc_code');
-                    $join->on('t7.nmail_seq', '=', 't6.seq');
-                })
-                ->Join($this->table_demands.' as t8', function ($join) { 
-                    $join->on('t8.no', '=', 't7.no');
-                    $join->on('t8.nmail_department_code', '=', 't7.nmail_department_code');
-                    $join->on('t8.nmail_user_code', '=', 't7.nmail_user_code');
-                    $join->on('t8.nmail_seq', '=', 't7.nmail_seq');
-                    $join->on('t8.log_no', '=', 't7.log_no');
-                })
-                ->leftJoin($this->table_generalcodes.' as t9', function ($join) { 
-                    $join->on('t9.code', '=', 't6.doc_code')
-                    ->where('t9.identification_id', '=', Config::get('const.C026.value'))
-                    ->where('t9.is_deleted', '=', 0);
-                })
-                ->leftJoin($this->table_generalcodes.' as t10', function ($join) { 
-                    $join->on('t10.code', '=', 't8.before_after')
-                    ->where('t10.identification_id', '=', Config::get('const.C029.value'))
-                    ->where('t10.is_deleted', '=', 0);
-                })
-                ->leftJoin($this->table_generalcodes.' as t11', function ($join) { 
-                    $join->on('t11.code', '=', 't6.mail_result')
-                    ->where('t11.identification_id', '=', Config::get('const.C030.value'))
-                    ->where('t11.is_deleted', '=', 0);
-                })
-                ->leftJoin($this->table_generalcodes.' as t12', function ($join) { 
-                    $join->on('t12.code', '=', 't6.status')
-                    ->where('t12.identification_id', '=', Config::get('const.C028.value'))
-                    ->where('t12.is_deleted', '=', 0);
-                })
-                ->JoinSub($subquery4, 't13', function ($join) { 
-                    $join->on('t13.code', '=', 't8.nmail_department_code');
-                })
-                ->JoinSub($subquery3, 't14', function ($join) { 
-                    $join->on('t14.code', '=', 't8.nmail_user_code');
-                })
-                ->Join($this->table_users.' as t15', function ($join) { 
-                    $join->on('t15.code', '=', 't8.nmail_user_code');
-                    $join->on('t15.apply_term_from', '=', 't14.max_apply_term_from')
-                    ->where('t15.is_deleted', '=', 0);
-                })
-                ->leftJoin($this->table_demand_details.' as t16', function ($join) { 
-                    $join->on('t16.no', '=', 't8.no');
-                    $join->on('t16.log_no', '=', 't8.log_no');
-                })
-                ->JoinSub($subquery4, 't17', function ($join) { 
-                    $join->on('t17.code', '=', 't8.department_code');
-                })
-                ->JoinSub($subquery3, 't18', function ($join) { 
-                    $join->on('t18.code', '=', 't8.user_code');
-                })
-                ->Join($this->table_users.' as t19', function ($join) { 
-                    $join->on('t19.code', '=', 't8.user_code');
-                    $join->on('t19.apply_term_from', '=', 't18.max_apply_term_from')
-                    ->where('t19.is_deleted', '=', 0);
+                ->leftJoin($this->table_generalcodes.' as t5', function ($join) { 
+                    $join->on('t5.code', '=', 't1.employment_status')
+                    ->where('t5.identification_id', '=', Config::get('const.C001.value'))
+                    ->where('t5.is_deleted', '=', 0);
                 });
-            $mainquery
-                ->where('t1.code', '=', $this->param_user_code);
-        
-            if (isset($this->param_doc_code)) {
-                $mainquery
-                    ->where('t5.doc_code', '=', $this->param_doc_code);
-            }
-        
-            if (isset($situation)) {
-                if ($situation == Config::get('const.C031.approval_requesting')) {
-                    $mainquery
-                        ->whereBetween('t6.status', [Config::get('const.C028.applying') , Config::get('const.C028.approving')]);
-                }
-            }
-            $mainquery
-                ->where('t1.is_deleted', '=', 0)
-                ->where('t15.is_deleted', '=', 0)
-                ->where('t19.is_deleted', '=', 0)
-                ->orderBy('t8.demand_date', 'asc')
-                ->orderBy('t8.no', 'asc');
 
-            if (isset($this->param_limit)) {
-                $mainquery
-                    ->limit($this->param_limit);
+            // unionquery1にunionquery2を組み込む
+            $unionquery1
+                ->union($unionquery2);
+            $unionquery1_sql= $unionquery1->toSql();
+
+            // ---------------- mainquery ----------------------------
+            $mainquery = DB::table(DB::raw('('.$unionquery1_sql.') as t1'))
+                ->select(
+                    't1.id',
+                    't1.department_code as department_code',
+                    't1.department_name as department_name',
+                    't1.employment_status as employment_status',
+                    't1.employment_name as employment_name',
+                    't1.user_code as user_code',
+                    't1.user_name as user_name',
+                    't1.mode as mode',
+                    't1.working_date as working_date',
+                    't1.record_time as record_time',
+                    't1.difference_reason as difference_reason',
+                    't1.user_management as user_management'
+                );
+            $mainquery
+                ->selectRaw("DATE_FORMAT(t1.record_time,'%H:%i') as scan_time")
+                ->selectRaw("DATE_FORMAT(t1.working_date, '%m月%d日') as working_date_name");
+            if(!empty($this->param_department_code)){
+                $mainquery->where('t1.department_code', $this->param_department_code);              //department_code指定
+            }
+            if(!empty($this->param_employment_status)){
+                $mainquery->where('t1.employment_status', $this->param_employment_status);          // 雇用形態指定
+            }
+            if(!empty($this->param_user_code)){
+                $mainquery->where('t1.user_code', $this->param_user_code);                          //user_code指定
+            } else {
+                $mainquery->where('t1.user_management','<',Config::get('const.C017.out_of_user'));
+            }
+            if(!empty($this->param_working_date_from) && !empty($this->param_working_date_to)){
+                $mainquery->where('t1.working_date', '>=', $this->param_working_date_from);         // 日付範囲指定
+                $mainquery->where('t1.working_date', '<=', $this->param_working_date_to);           // 日付範囲指定
+            }
+
+            $mainquery
+                ->orderBy('t1.department_code', 'asc')
+                ->orderBy('t1.user_code', 'asc')
+                ->orderBy('t1.working_date', 'asc')
+                ->orderBy('t1.record_time', 'asc');
+
+            $cnt = 0;
+            $array_setBindingsStr = array();
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>0);
+            // 適用期間日付の取得
+            $dt = null;
+            if (isset($targetdate)) {
+                $dt = new Carbon($targetdate);
+            } else {
+                $dt = new Carbon();
+            }
+            $target_date = $dt->format('Ymd');
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>$target_date);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>Config::get('const.C017.admin_user'));
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>0);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>$target_date);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>0);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>$target_date);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>0);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>Config::get('const.C001.value'));
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>0);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>0);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>$target_date);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>Config::get('const.C017.admin_user'));
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>0);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>$target_date);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>0);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>$target_date);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>0);
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>Config::get('const.C001.value'));
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>0);
+
+            if(!empty($this->param_department_code)){
+                $cnt += 1;
+                $array_setBindingsStr[] = array($cnt=>$this->param_department_code);
+            }
+            if(!empty($this->param_employment_status)){
+                $cnt += 1;
+                $array_setBindingsStr[] = array($cnt=>$this->param_employment_status);
+            }
+            if(!empty($this->param_user_code)){
+                $cnt += 1;
+                $array_setBindingsStr[] = array($cnt=>$this->param_user_code);
+            } else {
+                $cnt += 1;
+                $array_setBindingsStr[] = array($cnt=>Config::get('const.C017.out_of_user'));
+            }
+            if(!empty($this->param_working_date_from) && !empty($this->param_working_date_to)){
+                $cnt += 1;
+                $array_setBindingsStr[] = array($cnt=>$this->param_working_date_from);
+                $cnt += 1;
+                $array_setBindingsStr[] = array($cnt=>$this->param_working_date_to);
+            }
+            if (count($array_setBindingsStr) > 0) {
+                $mainquery->setBindings($array_setBindingsStr);
             }
 
             $results = $mainquery->get();
@@ -427,100 +518,74 @@ class AttendanceLog extends Model
     }
 
     /**
-     * 申請番号による取得
+     * 存在チェック
      *
-     * @return void
+     * @return boolean
      */
-    public function getDemandfromNo(){
-
-        try {
-            $mainquery = DB::table($this->table)
-                ->where($this->table.'.no', '=', $this->param_no);
-
-            if (isset($this->param_user_code)) {
-                $mainquery
-                    ->where($this->table.'.user_code', '=', $this->param_user_code);
-            }
-            if (isset($this->param_seq)) {
-                $mainquery
-                    ->where($this->table.'.seq', '=', $this->param_seq);
-            }
-            $mainquery
-                ->where($this->table.'.is_deleted', '=', 0)
-                ->orderBy($this->table.'.log_no', 'desc');
-
-            $results = $mainquery->get();
-    
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-        return $results;
-    }
-
-    /**
-     * 申請番号最大シーケンス取得
-     *
-     * @return void
-     */
-    public function getMaxSeq($targetdate){
-
+    public function isExist(){
         try {
             $mainquery = DB::table($this->table);
-            if (isset($this->param_doc_code)) {
+            if (!empty($this->param_department_code)) {
                 $mainquery
-                    ->where($this->table.'.doc_code', '=', $this->param_doc_code);
+                    ->where('department_code', '=', $this->param_department_code);
             }
-            $mainquery
-                ->where($this->table.'.demand_now', '=', $targetdate)
-                ->where($this->table.'.is_deleted', '=', 0);
-
-            $results = $mainquery>max('seq');
-
+            if (!empty($this->param_employment_status)) {
+                $mainquery
+                    ->where('employment_status', '=', $this->param_employment_status);
+            }
+            if (!empty($this->param_user_code)) {
+                $mainquery
+                    ->where('user_code', '=', $this->param_user_code);
+            }
+            if(!empty($this->param_working_date_from) && !empty($this->param_working_date_to)){
+                $mainquery->where('working_date', '>=', $this->param_working_date_from);         // 日付範囲指定
+                $mainquery->where('working_date', '<=', $this->param_working_date_to);           // 日付範囲指定
+            }
+            if (!empty($this->param_event_mode)) {
+                $mainquery
+                    ->where('event_mode', '=', $this->param_event_mode);
+            }
+            if (!empty($this->param_event_time)) {
+                $mainquery
+                    ->where('event_time', '=', $this->param_event_time);
+            }
+            $is_exists =$mainquery
+                ->where('is_deleted',0)
+                ->exists();
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_maxget_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_maxget_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
 
-        return $results;
+        return $is_exists;
     }
 
     /**
-     * 承認登録
+     * 登録
      *
      * @return void
      */
-    public function insertApproval(){
+    public function store(){
         try {
             DB::table($this->table)->insert(
                 [
-                    'no' => $this->no,
-                    'doc_code' => $this->doc_code,
-                    'log_no' => $this->log_no,
-                    'seq' => $this->seq,
-                    'status' => $this->status,
                     'department_code' => $this->department_code,
+                    'employment_status' => $this->employment_status,
                     'user_code' => $this->user_code,
-                    'approval_date' => $this->approval_date,
-                    'remand_reason' => $this->remand_reason,
-                    'mail_result' => $this->mail_result,
-                    'mail_address' => $this->mail_address,
-                    'nmail_department_code' => $this->nmail_department_code,
-                    'nmail_user_code' => $this->nmail_user_code,
+                    'working_date' => $this->working_date,
+                    'event_mode' => $this->event_mode,
+                    'event_time' => $this->event_time,
+                    'difference_reason' => $this->difference_reason,
                     'created_user' => $this->created_user,
                     'created_at'=>$this->created_at
                 ]
             );
+        
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
             Log::error($pe->getMessage());
@@ -530,5 +595,119 @@ class AttendanceLog extends Model
             Log::error($e->getMessage());
             throw $e;
         }
+    }
+
+    /**
+     * 更新（IDによる差異理由の更新）
+     *
+     * @return void
+     */
+    public function updReasonFromID(){
+        try {
+            DB::table($this->table)
+                ->where('id', $this->param_id)
+                ->update(
+                [
+                    'difference_reason' => $this->difference_reason,
+                    'updated_user' => $this->updated_user,
+                    'updated_at'=>$this->updated_at
+                ]
+            );
+        
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 更新（ＰＣイベントモードとＰＣイベント時間）
+     *
+     * @return boolean
+     */
+    public function updateEvent(){
+        try {
+            $mainquery = DB::table($this->table);
+            if (!empty($this->param_department_code)) {
+                $mainquery
+                    ->where('department_code', '=', $this->param_department_code);
+            }
+            if (!empty($this->param_employment_status)) {
+                $mainquery
+                    ->where('employment_status', '=', $this->param_employment_status);
+            }
+            if (!empty($this->param_user_code)) {
+                $mainquery
+                    ->where('user_code', '=', $this->param_user_code);
+            }
+            if(!empty($this->param_working_date)) {
+                $mainquery->where('working_date', '=', $this->param_working_date);
+            }
+            if(!empty($this->param_event_mode)) {
+                $mainquery->where('event_mode', '=', $this->param_event_mode);
+            }
+            if(!empty($this->param_event_time)) {
+                $mainquery->where('event_time', '=', $this->param_event_time);
+            }
+            $array_update = ['event_mode' => $this->event_mode, 'event_time' => $this->event_time ];
+            $result =$mainquery
+                ->where('is_deleted',0)
+                ->update($array_update);
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $result;
+    }
+
+    /**
+     * 物理削除
+     *
+     * @return boolean
+     */
+    public function delete(){
+        try {
+            $mainquery = DB::table($this->table);
+            if (!empty($this->param_department_code)) {
+                $mainquery
+                    ->where('department_code', '=', $this->param_department_code);
+            }
+            if (!empty($this->param_employment_status)) {
+                $mainquery
+                    ->where('employment_status', '=', $this->param_employment_status);
+            }
+            if (!empty($this->param_user_code)) {
+                $mainquery
+                    ->where('user_code', '=', $this->param_user_code);
+            }
+            if(!empty($this->param_working_date_from) && !empty($this->param_working_date_to)){
+                $mainquery->where('working_date', '>=', $this->param_working_date_from);         // 日付範囲指定
+                $mainquery->where('working_date', '<=', $this->param_working_date_to);           // 日付範囲指定
+            }
+            $is_exists =$mainquery
+                ->where('is_deleted',0)
+                ->delete();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $is_exists;
     }
 }

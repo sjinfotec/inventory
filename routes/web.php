@@ -88,7 +88,8 @@ Route::post('/setting_shift_time/store', 'SttingShiftTimeController@store')->mid
 Route::post('/setting_shift_time/range_del', 'SttingShiftTimeController@rangeDel')->middleware('auth');
 // 勤怠ログ編集
 Route::get('/edit_attendancelog', 'EditAttendanceLogController@index')->middleware('auth');
-Route::post('/edit_attendancelog/show', 'EditAttendanceLogController@show')->middleware('auth');
+Route::post('/edit_attendancelog/get', 'EditAttendanceLogController@get')->middleware('auth');
+Route::post('/edit_attendancelog/fix', 'EditAttendanceLogController@fix')->middleware('auth');
 // ------------------ 設定 --------------------------------
 // 会社情報
 Route::get('/create_company_information', 'CreateCompanyInformationController@index')->middleware('auth');

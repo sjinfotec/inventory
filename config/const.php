@@ -269,6 +269,20 @@ return [
         'approvaled' => 2
     ],
  
+    'C031' => [
+        'value' => 'C031',
+        'approval_requesting' => 1,
+        'approvaled' => 2
+    ],
+ 
+    'C033' => [
+        'value' => 'C033',
+        'pcstart' => 6005,
+        'pcend' => 6006,
+        'logon' => 7001,
+        'logout' => 7002
+    ],
+ 
     'C999' => [
         'value' => 'C999',
         'main' => 1,

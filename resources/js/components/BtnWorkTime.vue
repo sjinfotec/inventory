@@ -87,6 +87,10 @@
       <button type="button" class="btn btn-warning btn-lg font-size-rg w-100" :disabled="isPush">
         申請を差し戻し</button>
     </div>
+    <div v-if="btnMode === 'reasonstore'" class="btn-group d-flex" v-on:click="reasonstoreclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+        この内容で差異理由を登録する</button>
+    </div>
     <div v-if="btnMode === 'back'" class="btn-group d-flex" v-on:click="backclickBtn()">
       <button type="button" class="btn btn-outline-secondary btn-lg font-size-rg w-100" :disabled="isPush">
         戻る</button>
@@ -104,6 +108,11 @@
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
       <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
       給与計算用CSVファイルを出力する</button>
+    </div>
+    <div v-if="btnMode === 'csvlog'" class="btn-group d-flex" v-on:click="csvlogclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+      <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
+      勤怠ログCSVファイルを出力する</button>
     </div>
     <div v-if="btnMode === 'filedownload'" class="btn-group d-flex" v-on:click="filedownloadclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
@@ -197,6 +206,9 @@ export default {
     sendbackclickBtn : function() {
       this.$emit('sendbackclick-event',event);
     },
+    reasonstoreclickBtn : function() {
+      this.$emit('reasonstoreclick-event',event);
+    },
     backclickBtn : function() {
       this.$emit('backclick-event',event);
     },
@@ -211,6 +223,9 @@ export default {
     },
     csvsalaryclickBtn : function() {
       this.$emit('csvsalary-event',event);
+    },
+    csvlogclickBtn : function() {
+      this.$emit('csvlog-event',event);
     },
     filedownloadclickBtn : function() {
       this.$emit('filedownload-event',event);

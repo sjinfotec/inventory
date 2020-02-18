@@ -40,7 +40,7 @@
 		@endif
 		@can('admin-higher')
 			<edit-user></edit-user>
-		@canelse
+		@else
 			<edit-user></edit-user>
 		@endcan
 		<!-- /main contentns row -->
