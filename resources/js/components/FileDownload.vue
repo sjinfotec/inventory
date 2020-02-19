@@ -37,6 +37,17 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=2">・イベントログ取得インストール（64bitトライアル版 最新版） -- ファイル名：pceventlog.zip</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
               <!-- panel header -->
               <daily-working-information-panel-header
                 v-bind:header-text1="'◆説明書ダウンロード'"
@@ -129,6 +140,28 @@
               <div class="col-md-12 pb-2">
                 <div class="input-group">
                   <a href="/file_download?filekbn=28">・操作マニュアル（弥生給与ソフト連携）（EXCEL 最新版） -- ファイル名：Operationmanual(yayoi).xlsx</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=29">・操作マニュアル（イベントログ取得インストール）（PDF 最新版） -- ファイル名：pceventlogmanual.pdf</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=30">・操作マニュアル（イベントログ取得インストール）（EXCEL 最新版） -- ファイル名：pceventlogmanual.xlsx</a>
                 </div>
               </div>
               <!-- /.col -->
