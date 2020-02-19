@@ -461,7 +461,7 @@ return [
  
     'FILE_DOWNLOAD_NAME' => [
         'file1' => 'croud_install.zip',
-        'file2' => '',
+        'file2' => 'pceventlog.zip',
         'file3' => '',
         'file4' => '',
         'file5' => '',
@@ -488,8 +488,8 @@ return [
         'file26' => 'Operationmanual(setting).xlsx',
         'file27' => 'Operationmanual(yayoi).pdf',
         'file28' => 'Operationmanual(yayoi).xlsx',
-        'file29' => '',
-        'file30' => '',
+        'file29' => 'pceventlogmanual.pdf',
+        'file30' => 'pceventlogmanual.xlsx',
         'file31' => '',
         'file32' => '',
         'file33' => '',
