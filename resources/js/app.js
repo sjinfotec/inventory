@@ -79,6 +79,11 @@ Vue.component(
     require("./components/MonthlyWorkingAlert.vue").default
 );
 
+Vue.component(
+    "attendance-log",
+    require("./components/AttendanceLog.vue").default
+);
+
 Vue.component("app-component", require("./components/App.vue").default);
 
 Vue.component(
@@ -158,6 +163,11 @@ Vue.component(
 Vue.component(
     "edit-work-times",
     require("./components/EditWorkTimes.vue").default
+);
+
+Vue.component(
+    "edit_attendance-log",
+    require("./components/EditAttendanceLog.vue").default
 );
 
 Vue.component(

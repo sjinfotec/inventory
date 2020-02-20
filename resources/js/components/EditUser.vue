@@ -891,7 +891,7 @@
                             type="button"
                             class="btn btn-danger"
                             @click="rowDelClick(index)"
-                          >行削除</button>
+                          >履歴追加取り消し</button>
                           <button
                             v-if="item.result != 0 && item.id != '' && item.card_idm != '' && showrelease"
                             type="button"
@@ -1333,46 +1333,6 @@ export default {
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
-    // モバイル端末へ打刻URL送信
-    sendUrl() {
-      const url = "/api/mail/inquiry";
-      const self = this;
-      this.messageshowsearch = true;
-      this.details.forEach(element => {
-        if (element.result == 1) {
-          this.latest_user_code = element.code;
-          this.mobile_address = element.mobile_email;
-        }
-      });
-      //axiosでPOST送信
-      axios
-        .post(url, {
-          email: this.mobile_address,
-          login_id: this.latest_user_code
-        })
-        .then(res => {
-          console.log(res);
-          if (res.data.result) {
-            //メール送信完了画面に遷移する
-            this.htmlMessageSwal(
-              "送信完了",
-              "※メールが届かない場合は、お手数ですが「onedawnm.onedawn.net」へ手動で接続して下さい。",
-              "success",
-              true,
-              false,
-              false
-            );
-          } else {
-            self.errors = res.data.errors;
-          }
-          this.messageshowsearch = false;
-        })
-        .catch(err => {
-          //例外処理を行う
-          console.log(err);
-          this.messageshowsearch = false;
-        });
-    },
     checkFormStore: function() {
       this.messagevalidatesNew = [];
       var chkArray = [];
@@ -2329,6 +2289,46 @@ export default {
           if (value == "C025") {
             this.serverCatch("権限", "取得");
           }
+        });
+    },
+    // モバイル端末へ打刻URL送信
+    sendUrl() {
+      const url = "/api/mail/inquiry";
+      const self = this;
+      this.messageshowsearch = true;
+      this.details.forEach(element => {
+        if (element.result == 1) {
+          this.latest_user_code = element.code;
+          this.mobile_address = element.mobile_email;
+        }
+      });
+      //axiosでPOST送信
+      axios
+        .post(url, {
+          email: this.mobile_address,
+          login_id: this.latest_user_code
+        })
+        .then(res => {
+          console.log(res);
+          if (res.data.result) {
+            //メール送信完了画面に遷移する
+            this.htmlMessageSwal(
+              "送信完了",
+              "※メールが届かない場合は、お手数ですが「onedawnm.onedawn.net」へ手動で接続して下さい。",
+              "success",
+              true,
+              false,
+              false
+            );
+          } else {
+            self.errors = res.data.errors;
+          }
+          this.messageshowsearch = false;
+        })
+        .catch(err => {
+          //例外処理を行う
+          console.log(err);
+          this.messageshowsearch = false;
         });
     },
     // -------------------- 共通 ----------------------------

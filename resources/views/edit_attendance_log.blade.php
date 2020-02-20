@@ -11,7 +11,7 @@
 					<!-- panel header -->
 					<div class="card-header bg-transparent pt-2 border-0">
 						<h1 class="float-left font-size-xl">
-							<img class="icon-size-rg mr-3" src="{{ asset('images/round-restore-w.svg') }}" alt="">ユーザー情報設定
+							<img class="icon-size-rg mr-3" src="{{ asset('images/round-restore-w.svg') }}" alt="">勤怠ログ編集
 						</h1>
 					</div>
 					<!-- /.panel header -->
@@ -38,10 +38,6 @@
 		</div>
 		<!-- /main contentns row -->
 		@endif
-		@can('admin-higher')
-			<edit-user></edit-user>
-		@else
-			<edit-user></edit-user>
-		@endcan
+		<edit_attendance-log></edit_attendance-log>
 		<!-- /main contentns row -->
 @endsection

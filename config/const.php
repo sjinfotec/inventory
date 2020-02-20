@@ -269,6 +269,20 @@ return [
         'approvaled' => 2
     ],
  
+    'C031' => [
+        'value' => 'C031',
+        'approval_requesting' => 1,
+        'approvaled' => 2
+    ],
+ 
+    'C033' => [
+        'value' => 'C033',
+        'pcstart' => 6005,
+        'pcend' => 6006,
+        'logon' => 7001,
+        'logout' => 7002
+    ],
+ 
     'C999' => [
         'value' => 'C999',
         'main' => 1,
@@ -447,7 +461,7 @@ return [
  
     'FILE_DOWNLOAD_NAME' => [
         'file1' => 'croud_install.zip',
-        'file2' => '',
+        'file2' => 'pceventlog.zip',
         'file3' => '',
         'file4' => '',
         'file5' => '',
@@ -474,8 +488,8 @@ return [
         'file26' => 'Operationmanual(setting).xlsx',
         'file27' => 'Operationmanual(yayoi).pdf',
         'file28' => 'Operationmanual(yayoi).xlsx',
-        'file29' => '',
-        'file30' => '',
+        'file29' => 'pceventlogmanual.pdf',
+        'file30' => 'pceventlogmanual.xlsx',
         'file31' => '',
         'file32' => '',
         'file33' => '',
@@ -558,11 +572,19 @@ return [
         'DEBUG' => 'DEBUG'
     ],
 
+    'DISTRIBUTION' => [
+        'DISTRIBUTION' => 1
+    ],
+
+    'DISTRIBUTION_VALUE' => [
+        '43z' => 1
+    ],
+
     'EDITION' => [
         'EDITION' => 3
     ],
 
-    'EDITION_NAME' => [
+    'EDITION_VALUE' => [
         'DEMO' => 1,
         'TRIAL' => 2,
         'CROUD' => 3,

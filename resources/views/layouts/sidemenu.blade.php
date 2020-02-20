@@ -33,7 +33,7 @@
                                 <span>申請機能</span>
                                 <a class="float-right mb-1 font-size-sm line-height-xs btn btn-secondary btn-sm" data-toggle="collapse" href="#collapseAggregate" role="button" aria-expanded="true" aria-controls="collapseAggregate"><img class="icon-size-xs" src="{{ asset('images/round-expand-less-w.svg') }}" alt=""></a>
                             </h3>
-                            @if(Config::get('const.EDITION.EDITION') >= Config::get('const.EDITION_NAME.CROUD') )
+                            @if(Config::get('const.EDITION.EDITION') >= Config::get('const.EDITION_VALUE.CROUD') )
                             <ul class="collapse show list-unstyled" id="collapseAggregate">
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/demand') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">各種申請作成</a></li>
                                 @can('admin-midle')
@@ -43,7 +43,7 @@
                                     @endcan
                                 @endcan
                             </ul>
-                            @endif('admin-higher')
+                            @endif
                             <h3 class="side-head p-3 font-size-rg">
                                 <span>編集</span>
                                 <a class="float-right mb-1 font-size-sm line-height-xs btn btn-secondary btn-sm" data-toggle="collapse" href="#collapseEdit" role="button" aria-expanded="true" aria-controls="collapseEdit"><img class="icon-size-xs" src="{{ asset('images/round-expand-less-w.svg') }}" alt=""></a>
@@ -53,6 +53,9 @@
                                 <!-- <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_calendar') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-outlined-flag-w.svg') }}" alt="">カレンダー編集</a></li> -->
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/setting_shift_time') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-access-time-w.svg') }}" alt="">シフト編集</a></li>
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_work_times') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-access-time-w.svg') }}" alt="">勤怠編集</a></li>
+                                @if(Config::get('const.DISTRIBUTION.DISTRIBUTION') == Config::get('const.DISTRIBUTION_VALUE.43z') )
+                                    <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_attendancelog') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">勤怠ログ編集</a></li>
+                                @endif
                             </ul>
                             @endcan
                             <h3 class="side-head p-3 font-size-rg">
