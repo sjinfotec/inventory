@@ -548,16 +548,12 @@ export default {
     /* １ユーザーに複数レコードが存在する場合
        ２行目以降にはユーザー名を持っていないので、取得する
     */
-
     getUserNameByIndex(index, name) {
       if (index != 0) {
         for (let i = index; i >= 0; i--) {
-          console.log("name = " + this.calcLists[i].user_name);
           if (this.calcLists[i].user_name != "") {
             return this.calcLists[i].user_name;
           }
-          console.log(i);
-          // console.log(this.calcLists[index]);
         }
       } else {
         return name;
@@ -565,21 +561,12 @@ export default {
     },
     // マップ表示
     showMap: function(time, name, x, y, index, mode) {
-      console.log(x);
-      console.log(y);
-      console.log(time);
-      console.log(name);
-      console.log("index : " + index);
-      console.log("mode : " + mode);
-      console.log("mode_name : " + this.getMethodName(mode));
-      console.log("calcresult name " + this.calcLists[0].user_name);
       this.latitude = x;
       this.longitude = y;
       this.user_name = this.getUserNameByIndex(index, name);
       this.record_time = time;
       this.mode_name = this.getMethodName(mode);
       this.dialogVisible = true;
-      // this.show();
     },
     hide: function() {
       this.$modal.hide("hello-world");
