@@ -275,12 +275,102 @@
                     <td class="text-center align-middle">{{ calcList.department_name }}</td>
                     <td class="text-center align-middle">{{ calcList.employment_status_name }}</td>
                     <td class="text-center align-middle">{{ calcList.user_name }}</td>
-                    <td class="text-center align-middle">{{ calcList.attendance_time }}</td>
-                    <td class="text-center align-middle">{{ calcList.leaving_time }}</td>
-                    <td class="text-center align-middle">{{ calcList.public_going_out_time }}</td>
-                    <td class="text-center align-middle">{{ calcList.public_going_out_return_time }}</td>
-                    <td class="text-center align-middle">{{ calcList.missing_middle_time }}</td>
-                    <td class="text-center align-middle">{{ calcList.missing_middle_return_time }}</td>
+                    <!-- <td class="text-center align-middle">{{ calcList.attendance_time }}</td> -->
+                    <td
+                      class="text-center text-align-left"
+                      v-if="calcList.x_attendance_time_positions"
+                    >
+                      {{ calcList.attendance_time }}
+                      <img
+                        class="icon-size-sm svg_img orange600"
+                        src="/images/red_map_pin.svg"
+                        @click="showMap(calcList.attendance_time,calcList.user_name,calcList.x_attendance_time_positions,calcList.y_attendance_time_positions,index,mode_attendance)"
+                        alt
+                      />
+                    </td>
+                    <td class="text-center text-align-left" v-else>{{ calcList.attendance_time }}</td>
+                    <!-- <td class="text-center align-middle">{{ calcList.leaving_time }}</td> -->
+                    <td
+                      class="text-center text-align-left"
+                      v-if="calcList.x_leaving_time_positions"
+                    >
+                      {{ calcList.leaving_time }}
+                      <img
+                        class="icon-size-sm svg_img orange600"
+                        src="/images/red_map_pin.svg"
+                        @click="showMap(calcList.leaving_time,calcList.user_name,calcList.x_leaving_time_positions,calcList.y_leaving_time_positions,index,mode_leaving)"
+                        alt
+                      />
+                    </td>
+                    <td class="text-center text-align-left" v-else>{{ calcList.leaving_time }}</td>
+                    <!-- <td class="text-center align-middle">{{ calcList.public_going_out_time }}</td> -->
+                    <td
+                      class="text-center text-align-left"
+                      v-if="calcList.x_public_going_out_time_positions"
+                    >
+                      {{ calcList.public_going_out_time }}
+                      <img
+                        class="icon-size-sm svg_img orange600"
+                        src="/images/red_map_pin.svg"
+                        @click="showMap(calcList.public_going_out_time,calcList.user_name,calcList.x_public_going_out_time_positions,calcList.y_public_going_out_time_positions,index,mode_official_out_start)"
+                        alt
+                      />
+                    </td>
+                    <td
+                      class="text-center text-align-left"
+                      v-else
+                    >{{ calcList.public_going_out_time }}</td>
+                    <!-- <td class="text-center align-middle">{{ calcList.public_going_out_return_time }}</td> -->
+                    <td
+                      class="text-center text-align-left"
+                      v-if="calcList.x_public_going_out_return_time_positions"
+                    >
+                      {{ calcList.public_going_out_return_time }}
+                      <img
+                        class="icon-size-sm svg_img orange600"
+                        src="/images/red_map_pin.svg"
+                        @click="showMap(calcList.public_going_out_return_time,calcList.user_name,calcList.x_public_going_out_return_time_positions,calcList.y_public_going_out_return_time_positions,index,mode_official_out_end)"
+                        alt
+                      />
+                    </td>
+                    <td
+                      class="text-center text-align-left"
+                      v-else
+                    >{{ calcList.public_going_out_return_time }}</td>
+                    <!-- <td class="text-center align-middle">{{ calcList.missing_middle_time }}</td> -->
+                    <td
+                      class="text-center text-align-left"
+                      v-if="calcList.x_missing_middle_time_positions"
+                    >
+                      {{ calcList.missing_middle_time }}
+                      <img
+                        class="icon-size-sm svg_img orange600"
+                        src="/images/red_map_pin.svg"
+                        @click="showMap(calcList.missing_middle_time,calcList.user_name,calcList.x_missing_middle_time_positions,calcList.y_missing_middle_time_positions,index,mode_private_out_start)"
+                        alt
+                      />
+                    </td>
+                    <td
+                      class="text-center text-align-left"
+                      v-else
+                    >{{ calcList.missing_middle_time }}</td>
+                    <!-- <td class="text-center align-middle">{{ calcList.missing_middle_return_time }}</td> -->
+                    <td
+                      class="text-center text-align-left"
+                      v-if="calcList.x_missing_middle_return_time_positions"
+                    >
+                      {{ calcList.missing_middle_return_time }}
+                      <img
+                        class="icon-size-sm svg_img orange600"
+                        src="/images/red_map_pin.svg"
+                        @click="showMap(calcList.missing_middle_return_time,calcList.user_name,calcList.x_missing_middle_return_time_positions,calcList.y_missing_middle_return_time_positions,index,mode_private_out_end)"
+                        alt
+                      />
+                    </td>
+                    <td
+                      class="text-center text-align-left"
+                      v-else
+                    >{{ calcList.missing_middle_return_time }}</td>
                     <td class="text-center align-middle">{{ calcList.working_status_name }}</td>
                     <td
                       class="text-center align-middle"
