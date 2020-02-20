@@ -571,6 +571,60 @@ class ApiCommonController extends Controller
         }
             
     }
+
+    /** ユーザーの部署と雇用形態と権限取得
+     *
+     * @return list departments
+     */
+    public function getUserDepartmentEmploymentRole($user_id, $target_date){
+        try {
+            $dt = null;
+            if (isset($target_date)) {
+                $dt = new Carbon($target_date);
+            } else {
+                $dt = new Carbon();
+            }
+            $target_date = $dt->format('Ymd');
+            // usersの最大適用開始日付subquery
+            $subquery3 = $this->getUserApplyTermSubquery($target_date);
+            // departmentsの最大適用開始日付subquery
+            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date);
+            $mainquery = DB::table($this->table_users)
+                ->select(
+                    $this->table_users.'.code as code',
+                    $this->table_users.'.name as name',
+                    $this->table_users.'.department_code as department_code',
+                    't2.name as department_name',
+                    $this->table_users.'.employment_status as employment_status',
+                    't3.code_name as employment_name',
+                    $this->table_users.'.role as role')
+                ->JoinSub($subquery3, 't1', function ($join) { 
+                    $join->on('t1.code', '=', $this->table_users.'.code');
+                    $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
+                })
+                ->JoinSub($subquery4, 't2', function ($join) { 
+                    $join->on('t2.code', '=', $this->table_users.'.department_code');
+                })
+                ->leftJoin($this->table_generalcodes.' as t3', function ($join) { 
+                    $join->on('t3.code', '=', $this->table_users.'.employment_status')
+                    ->where('t3.identification_id', '=', Config::get('const.C001.value'))
+                    ->where('t3.is_deleted', '=', 0);
+                })
+                ->where($this->table_users.'.code', $user_id)
+                ->where($this->table_users.'.is_deleted', 0)
+                ->get();
+                return $mainquery;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+            
+    }
         
     /** ユーザーメールアドレス取得
      *

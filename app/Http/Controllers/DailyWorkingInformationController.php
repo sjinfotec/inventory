@@ -4510,7 +4510,7 @@ class DailyWorkingInformationController extends Controller
                             $public_going_out_return_time_positions = null;
                         }               
                     }
-                        $array_add_attendance_time = array();
+                    $array_add_attendance_time = array();
                     $array_add_leaving_time = array();
                     $array_add_missing_middle_time = array();
                     $array_add_missing_middle_return_time = array();
@@ -6032,8 +6032,13 @@ class DailyWorkingInformationController extends Controller
         Log::DEBUG('        所定労働時間 10進数　$array_calc_time[$index]           = '.$array_calc_time[$index]);
         Log::DEBUG('        未就労時間   10進数 $array_missing_middle_time[$index]  = '.$array_missing_middle_time[$index]);
         // -------------  debug ---------------------- end --------------
-        $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
-        $regular_calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+        $w_time = 0;
+        $regular_calc_time = 0;
+        // $array_calc_time[$index]=0はまだ退勤していないということ
+        if ($array_calc_time[$index] > 0) {
+            $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
+            $regular_calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+        }
         // -------------  debug ---------------------- start --------------
         Log::DEBUG('        所定労働時間　- 未就労時間　10進数　$w_time　　　　　　　　= '.$w_time);
         Log::DEBUG('        所定労働時間　- 未就労時間　60進数　$regular_calc_time    = '.$regular_calc_time);
@@ -6045,8 +6050,13 @@ class DailyWorkingInformationController extends Controller
         Log::DEBUG('        時間外労働時間 10進数　$array_calc_time[$index]           = '.$array_calc_time[$index]);
         Log::DEBUG('        未就労時間   10進数 $array_missing_middle_time[$index]  = '.$array_missing_middle_time[$index]);
         // -------------  debug ---------------------- end --------------
-        $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
-        $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+        $w_time = 0;
+        $calc_time = 0;
+        // $array_calc_time[$index]=0はまだ退勤していないということ
+        if ($array_calc_time[$index] > 0) {
+            $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
+            $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+        }
         // -------------  debug ---------------------- start --------------
         Log::DEBUG('        時間外労働時間- 未就労時間　10進数　$w_time　　　　　　　　= '.$w_time);
         Log::DEBUG('        時間外労働時間- 未就労時間　60進数　$calc_time            = '.$calc_time);
@@ -6110,8 +6120,13 @@ class DailyWorkingInformationController extends Controller
         Log::DEBUG('        深夜労働残業時間 $array_calc_time[$index]           = '.$array_calc_time[$index]);
         Log::DEBUG('        未就労時間       $array_missing_middle_time[$index]  = '.$array_missing_middle_time[$index]);
         // -------------  debug ---------------------- end --------------
-        $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
-        $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+        $w_time = 0;
+        $calc_time = 0;
+        // $array_calc_time[$index]=0はまだ退勤していないということ
+        if ($array_calc_time[$index] > 0) {
+            $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
+            $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+        }
         // -------------  debug ---------------------- start --------------
         Log::DEBUG('        深夜労働残業時間 10進数 $w_time           = '.$w_time);
         Log::DEBUG('        深夜労働残業時間 60進数 $calc_time        = '.$calc_time);
