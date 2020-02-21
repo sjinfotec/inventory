@@ -109,17 +109,9 @@ class DailyWorkingAlertController extends Controller
                 );
             }
             // 日付編集
-            $calender_model = new Calendar();
-            $calender_model->setDateAttribute(date_format(new Carbon($alert_form_date), 'Ymd'));
-            $calendars = $calender_model->getCalenderDate();
-            if (count($calendars) > 0) {
-                foreach ($calendars as $result) {
-                    if (isset($result->date_name)) {
-                        $date_name = $result->date_name;
-                    }
-                    break;
-                }
-            }
+            // 開始日付のフォーマット 2019年10月01日(火)
+            $date_name = $apicommon->getYMDWeek($alert_form_date);
+            
             $result_working = $details->where('business_kubun', Config::get('const.C007.basic'));
             if (count($result_working) == 0) {
                 Log::debug('count($result_working) = '.count($result_working));

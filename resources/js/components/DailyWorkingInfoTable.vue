@@ -20,6 +20,7 @@
                     <td class="text-center align-middle w-15">私用外出</td>
                     <td class="text-center align-middle w-15">私用外出戻り</td>
                     <td class="text-center align-middle w-15">勤務状態</td>
+                    <td class="text-center align-middle w-15">勤務帯</td>
                     <td
                       class="text-center align-middle w-15 color-royalblue"
                       data-toggle="tooltip"
@@ -55,6 +56,7 @@
                     <td class="text-center align-middle w-15">私用外出</td>
                     <td class="text-center align-middle w-15">私用外出戻り</td>
                     <td class="text-center align-middle w-15">勤務状態</td>
+                    <td class="text-center align-middle w-15">勤務帯</td>
                     <td
                       class="text-center align-middle w-15 color-royalblue"
                       data-toggle="tooltip"
@@ -247,6 +249,7 @@
                     <td class="text-center align-middle">{{ calcList.missing_middle_time }}</td>
                     <td class="text-center align-middle">{{ calcList.missing_middle_return_time }}</td>-->
                     <td class="text-center align-middle">{{ calcList.working_status_name }}</td>
+                    <td class="text-center align-middle">{{ calcList.working_timetable_name }}</td>
                     <td
                       class="text-center align-middle"
                       data-toggle="tooltip"
@@ -282,6 +285,7 @@
                     <td class="text-center align-middle">{{ calcList.missing_middle_time }}</td>
                     <td class="text-center align-middle">{{ calcList.missing_middle_return_time }}</td>
                     <td class="text-center align-middle">{{ calcList.working_status_name }}</td>
+                    <td class="text-center align-middle">{{ calcList.working_timetable_name }}</td>
                     <td
                       class="text-center align-middle"
                       data-toggle="tooltip"

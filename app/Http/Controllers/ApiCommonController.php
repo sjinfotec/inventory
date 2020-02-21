@@ -1193,6 +1193,31 @@ class ApiCommonController extends Controller
     }
 
     /**
+     * 日付のフォーマット YYYY年MM月DD日（WEEK）
+     *
+     * @param [type] $dt
+     * @param [type] $format
+     * @return array
+     */
+    public function getYMDWeek($dt){
+        // フォーマット 2019年10月01日(火)
+        $date_name = '';
+        $calender_model = new Calendar();
+        $calender_model->setDateAttribute(date_format(new Carbon($dt), 'Ymd'));
+        $calendars = $calender_model->getCalenderDate();
+        if (count($calendars) > 0) {
+            foreach ($calendars as $result) {
+                if (isset($result->date_name)) {
+                    $date_name = $result->date_name;
+                }
+                break;
+            }
+        }
+        return $date_name;
+    }
+
+
+    /**
      * 曜日取得
      *
      * @param [type] $dt
