@@ -36,6 +36,7 @@
                     <td class="text-center align-middle w-15">所定時間</td>
                     <td class="text-center align-middle w-15">{{ predeterTimeName }}</td>
                     <td class="text-center align-middle w-15">{{ predeterNightTimeName }}</td>
+                    <td class="text-center align-middle w-15">深夜労働時間</td>
                     <td
                       class="text-center align-middle w-15 color-royalblue"
                       data-toggle="tooltip"
@@ -68,6 +69,7 @@
                     <td class="text-center align-middle w-15">所定外時間</td>
                     <td class="text-center align-middle w-15">{{ predeterTimeName }}</td>
                     <td class="text-center align-middle w-15">{{ predeterNightTimeName }}</td>
+                    <td class="text-center align-middle w-15">深夜労働時間</td>
                     <td class="text-center align-middle w-15">法定時間</td>
                     <td class="text-center align-middle w-15">法定外時間</td>
                     <td
@@ -91,6 +93,7 @@
                     <td class="text-center align-middle w-15">所定時間</td>
                     <td class="text-center align-middle w-15">{{ predeterTimeName }}</td>
                     <td class="text-center align-middle w-15">{{ predeterNightTimeName }}</td>
+                    <td class="text-center align-middle w-15">深夜労働時間</td>
                     <td
                       class="text-center align-middle w-15"
                       data-toggle="tooltip"
@@ -119,6 +122,7 @@
                     <td class="text-center align-middle w-15">所定外時間</td>
                     <td class="text-center align-middle w-15">{{ predeterTimeName }}</td>
                     <td class="text-center align-middle w-15">{{ predeterNightTimeName }}</td>
+                    <td class="text-center align-middle w-15">深夜労働時間</td>
                     <td class="text-center align-middle w-15">法定時間</td>
                     <td class="text-center align-middle w-15">法定外時間</td>
                     <td
@@ -260,6 +264,7 @@
                     <td class="text-center align-middle">{{ calcList.regular_working_times }}</td>
                     <td class="text-center align-middle">{{ calcList.off_hours_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.late_night_overtime_hours }}</td>
+                    <td class="text-center align-middle">{{ calcList.late_night_working_hours }}</td>
                     <td
                       class="text-center align-middle"
                       data-toggle="tooltip"
@@ -387,6 +392,7 @@
                     <td class="text-center align-middle">{{ calcList.out_of_regular_working_times }}</td>
                     <td class="text-center align-middle">{{ calcList.off_hours_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.late_night_overtime_hours }}</td>
+                    <td class="text-center align-middle">{{ calcList.late_night_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.legal_working_times }}</td>
                     <td class="text-center align-middle">{{ calcList.out_of_legal_working_times }}</td>
                     <td
@@ -414,6 +420,7 @@
                     <td class="text-center align-middle">{{ calcList.regular_working_times }}</td>
                     <td class="text-center align-middle">{{ calcList.off_hours_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.late_night_overtime_hours }}</td>
+                    <td class="text-center align-middle">{{ calcList.late_night_working_hours }}</td>
                     <td
                       class="text-center align-middle"
                       data-toggle="tooltip"
@@ -445,6 +452,7 @@
                     <td class="text-center align-middle">{{ calcList.out_of_regular_working_times }}</td>
                     <td class="text-center align-middle">{{ calcList.off_hours_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.late_night_overtime_hours }}</td>
+                    <td class="text-center align-middle">{{ calcList.late_night_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.legal_working_times }}</td>
                     <td class="text-center align-middle">{{ calcList.out_of_legal_working_times }}</td>
                     <td
