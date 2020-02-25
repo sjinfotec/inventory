@@ -54,8 +54,7 @@ export default {
       var line = "";
       // タイトル
       line =
-        this.csvDate + "分"
-        "\r\n";
+        this.csvDate + "分" + "\r\n";
       csv += line;
       // 項目名
       line =
@@ -84,28 +83,34 @@ export default {
         "所定休日勤手当" +
         "\r\n";
       csv += line;
-      /*this.csvData.forEach(user => {
-
-        //  '\ufeff' + 
-        user.date.forEach(record => {
-          line =
-            record["user_code"] +
-            "," +
-            record["workingdate"] +
-            "," +
-            record["attendance"] +
-            "," +
-            record["leaving"] +
-            "," +
-            record["public_going_out_hours"] +
-            "," +
-            record["missing_middle_hours"] +
-            "," +  
-            record["remark_holiday_name"] +
-            "\r\n";
-          csv += line;
-        });
-      }); */
+      this.csvData.forEach(user => {
+        line =
+          user["user_code"] +
+          "," +
+          user["user_name"] +
+          "," +
+          user["total_working_status"] +
+          "," +
+          user["total_absence"] +
+          "," +
+          user["total_paid_holidays"] +
+          "," +
+          user["total_holiday_kubun"] +
+          "," +
+          user["not_employment_working_hours"] +
+          "," +  
+          user["overtime_hours"] +
+          "," +  
+          user["late_night_overtime_hours"] +
+          ",'" +  
+          user["late_night_working_hours"] +
+          "," +  
+          user["legal_working_holiday_hours"] +
+          "," +  
+          user["out_of_legal_working_holiday_hours"] +
+          "\r\n";
+        csv += line;
+      });
       // csvを文字コードの数値の配列に変換
       const unicodeList = [];
       for (let i = 0; i < csv.length; i += 1) {

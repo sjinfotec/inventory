@@ -36,6 +36,7 @@ class DailyWorkingInformationController extends Controller
     private $array_calc_time = array();
     private $array_calc_status = array();
     private $array_calc_note = array();
+    private $calc_late_night_working_hours = 0;     // 深夜労働時間arrayにしないで処理する
     // mobile位置情報
     private $array_calc_mobile_positions = array();
 
@@ -3475,6 +3476,7 @@ class DailyWorkingInformationController extends Controller
         $this->array_calc_mode = array();
         $this->array_calc_working_timetable_no = array();
         $this->array_calc_time = array();
+        $this->calc_late_night_working_hours = 0;
         $this->array_calc_status = array();
         $this->array_calc_note = array();
         $this->array_calc_late = array();
@@ -3738,6 +3740,8 @@ class DailyWorkingInformationController extends Controller
         for ($i=0;$i<count($array_working_time_kubun);$i++) {
             $array_public_going_out_time[$i] = 0; 
         }
+        // 深夜労働時間
+        $this->calc_late_night_working_hours = 0;
         // データ登録用出勤・退勤の労働時刻数配列
         $array_add_attendance_time = array();
         $array_add_attendance_time_positions = array();
@@ -4048,102 +4052,38 @@ class DailyWorkingInformationController extends Controller
                                 $array_add_public_going_out_return_time_positions);
                             Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
                             // 次データ計算事前処理
-                            for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                                $array_calc_time[$i] = 0; 
-                            }
-                            for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                                $array_missing_middle_time[$i] = 0; 
-                            }
-                            for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                                $array_public_going_out_time[$i] = 0; 
-                            }
-                            if ($result->mode == Config::get('const.C005.attendance_time')) {
-                                $attendance_time = $result->record_datetime;
-                                if (isset($result->x_positions) && isset($result->y_positions)) {
-                                    $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
-                                } else {
-                                    $attendance_time_positions = null;
-                                }               
-                            }
-                            if ($result->mode == Config::get('const.C005.leaving_time')) {
-                                $leaving_time = $result->record_datetime;
-                                if (isset($result->x_positions) && isset($result->y_positions)) {
-                                    $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
-                                } else {
-                                    $leaving_time_positions = null;
-                                }               
-                            }
-                            if ($result->mode == Config::get('const.C005.missing_middle_time')) {
-                                $missing_middle_time = $result->record_datetime;
-                                if (isset($result->x_positions) && isset($result->y_positions)) {
-                                    $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
-                                } else {
-                                    $missing_middle_time_positions = null;
-                                }               
-                            }
-                            if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
-                                $missing_middle_return_time = $result->record_datetime;
-                                if (isset($result->x_positions) && isset($result->y_positions)) {
-                                    $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                                } else {
-                                    $missing_middle_return_time_positions = null;
-                                }               
-                            }
-                            if ($result->mode == Config::get('const.C005.public_going_out_time')) {
-                                $public_going_out_time = $result->record_datetime;
-                                if (isset($result->x_positions) && isset($result->y_positions)) {
-                                    $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
-                                } else {
-                                    $public_going_out_time_positions = null;
-                                }               
-                            }
-                            if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
-                                $public_going_out_return_time = $result->record_datetime;
-                                if (isset($result->x_positions) && isset($result->y_positions)) {
-                                    $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                                } else {
-                                    $public_going_out_return_time_positions = null;
-                                }               
-                            }
-                            $array_add_attendance_time = array();
-                            $array_add_leaving_time = array();
-                            $array_add_missing_middle_time = array();
-                            $array_add_missing_middle_return_time = array();
-                            $array_add_public_going_out_time = array();
-                            $array_add_public_going_out_return_time = array();
-                            $array_add_attendance_time_positions = array();
-                            $array_add_leaving_time_positions = array();
-                            $array_add_missing_middle_time_positions = array();
-                            $array_add_missing_middle_return_time_positions = array();
-                            $array_add_public_going_out_time_positions = array();
-                            $array_add_public_going_out_return_time_positions = array();
-                            if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
-                                Log::DEBUG('        私用外出 $missing_middle_time = '.$missing_middle_time);
-                                Log::DEBUG('        私用外出 $missing_middle_time_positions = '.$missing_middle_time_positions);
-                                $array_add_missing_middle_time[] = $missing_middle_time;
-                                $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
-                            }
-                            if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                                $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                                $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
-                                Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
-                            }
-                            if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
-                                $array_add_public_going_out_time[] = $public_going_out_time;
-                                $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
-                            }
-                            if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                                $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                                $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
-                            }
-                            if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
-                                $array_add_attendance_time[] = $attendance_time;
-                                $array_add_attendance_time_positions[] = $attendance_time_positions;
-                            }
-                            if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                                $array_add_leaving_time[] = $leaving_time;
-                                $array_add_leaving_time_positions[] = $leaving_time_positions;
-                            }
+                            $array_result_NextData =
+                                $this->calcTempWorkingTimeDateNextData(
+                                    $array_working_time_kubun,
+                                    $result
+                                );
+                            $array_calc_time = $array_result_NextData['array_calc_time'];
+                            $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                            $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                            $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                            $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                            $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                            $array_add_missing_middle_return_time = $array_result_NextData['array_add_missing_middle_return_time'];
+                            $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                            $array_add_public_going_out_return_time = $array_result_NextData['array_add_public_going_out_return_time'];
+                            $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                            $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                            $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                            $array_add_missing_middle_return_time_positions = $array_result_NextData['array_add_missing_middle_return_time_positions'];
+                            $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                            $array_add_public_going_out_return_time_positions = $array_result_NextData['array_add_public_going_out_return_time_positions'];
+                            $attendance_time = $array_result_NextData['attendance_time'];
+                            $leaving_time = $array_result_NextData['leaving_time'];
+                            $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                            $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                            $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                            $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                            $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                            $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                            $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                            $missing_middle_return_time_positions = $array_result_NextData['missing_middle_return_time_positions'];
+                            $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                            $public_going_out_return_time_positions = $array_result_NextData['public_going_out_return_time_positions'];
                             // 同じ値にする
                             $before_date = $current_date;
                             $before_department_code = $current_department_code;
@@ -4307,108 +4247,38 @@ class DailyWorkingInformationController extends Controller
                     $before_holiday_department_code = $current_department_code;
                     $before_holiday_kubun = $result->holiday_kubun;
                     // 次データ計算事前処理
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_calc_time[$i] = 0; 
-                    }
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_missing_middle_time[$i] = 0; 
-                    }
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_public_going_out_time[$i] = 0; 
-                    }
-                    if ($result->mode == Config::get('const.C005.attendance_time')) {
-                        $attendance_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $attendance_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.leaving_time')) {
-                        $leaving_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $leaving_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.missing_middle_time')) {
-                        $missing_middle_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $missing_middle_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
-                        $missing_middle_return_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $missing_middle_return_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.public_going_out_time')) {
-                        $public_going_out_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $public_going_out_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
-                        $public_going_out_return_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $public_going_out_return_time_positions = null;
-                        }               
-                    }
-                    $array_add_attendance_time = array();
-                    $array_add_leaving_time = array();
-                    $array_add_missing_middle_time = array();
-                    $array_add_missing_middle_return_time = array();
-                    $array_add_public_going_out_time = array();
-                    $array_add_public_going_out_return_time = array();
-                    $array_add_attendance_time_positions = array();
-                    $array_add_leaving_time_positions = array();
-                    $array_add_missing_middle_time_positions = array();
-                    $array_add_missing_middle_return_time_positions = array();
-                    $array_add_public_going_out_time_positions = array();
-                    $array_add_public_going_out_return_time_positions = array();
-                    Log::DEBUG('        addTempWorkingTimeDate後 $result->current_calc  '.$result->current_calc);
-                    Log::DEBUG('        addTempWorkingTimeDate後 $result->mode  '.$result->mode);
-                    Log::DEBUG('        addTempWorkingTimeDate後 $leaving_time  '.$leaving_time);
-                    Log::DEBUG('        addTempWorkingTimeDate後 count($array_add_attendance_time)  '.count($array_add_attendance_time));
-                    Log::DEBUG('        count($array_add_attendance_time_positions)  '.count($array_add_attendance_time_positions));
-                    //if ($result->current_calc == '1') {             // 当日分である場合
-                        if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
-                            $array_add_missing_middle_time[] = $missing_middle_time;
-                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                            $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
-                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
-                            $array_add_public_going_out_time[] = $public_going_out_time;
-                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                            $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
-                            $array_add_attendance_time[] = $attendance_time;
-                            $array_add_attendance_time_positions[] = $attendance_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                            $array_add_leaving_time[] = $leaving_time;
-                            $array_add_leaving_time_positions[] = $leaving_time_positions;
-                        }
-                    //}
-                    Log::DEBUG('        $array_add_leaving_time  '.count($array_add_leaving_time));
+                    $array_result_NextData =
+                        $this->calcTempWorkingTimeDateNextData(
+                            $array_working_time_kubun,
+                            $result
+                        );
+                    $array_calc_time = $array_result_NextData['array_calc_time'];
+                    $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                    $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                    $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                    $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                    $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                    $array_add_missing_middle_return_time = $array_result_NextData['array_add_missing_middle_return_time'];
+                    $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                    $array_add_public_going_out_return_time = $array_result_NextData['array_add_public_going_out_return_time'];
+                    $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                    $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                    $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                    $array_add_missing_middle_return_time_positions = $array_result_NextData['array_add_missing_middle_return_time_positions'];
+                    $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                    $array_add_public_going_out_return_time_positions = $array_result_NextData['array_add_public_going_out_return_time_positions'];
+                    $attendance_time = $array_result_NextData['attendance_time'];
+                    $leaving_time = $array_result_NextData['leaving_time'];
+                    $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                    $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                    $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                    $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                    $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                    $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                    $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                    $missing_middle_return_time_positions = $array_result_NextData['missing_middle_return_time_positions'];
+                    $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                    $public_going_out_return_time_positions = $array_result_NextData['public_going_out_return_time_positions'];
                     // 同じ値にする
                     $before_user_code = $current_user_code; 
                     $before_result = $result;
@@ -4469,102 +4339,40 @@ class DailyWorkingInformationController extends Controller
                             $array_add_public_going_out_time_positions,
                             $array_add_public_going_out_return_time,
                             $array_add_public_going_out_return_time_positions);
-                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
+                        Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
                         // 次データ計算事前処理
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_calc_time[$i] = 0; 
-                        }
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_missing_middle_time[$i] = 0; 
-                        }
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_public_going_out_time[$i] = 0; 
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time')) {
-                            $attendance_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $attendance_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time')) {
-                            $leaving_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $leaving_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_time')) {
-                            $missing_middle_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $missing_middle_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
-                            $missing_middle_return_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $missing_middle_return_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time')) {
-                            $public_going_out_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $public_going_out_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
-                            $public_going_out_return_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $public_going_out_return_time_positions = null;
-                            }               
-                        }
-                                $array_add_attendance_time = array();
-                        $array_add_leaving_time = array();
-                        $array_add_missing_middle_time = array();
-                        $array_add_missing_middle_return_time = array();
-                        $array_add_public_going_out_time = array();
-                        $array_add_public_going_out_return_time = array();
-                        $array_add_attendance_time_positions = array();
-                        $array_add_leaving_time_positions = array();
-                        $array_add_missing_middle_time_positions = array();
-                        $array_add_missing_middle_return_time_positions = array();
-                        $array_add_public_going_out_time_positions = array();
-                        $array_add_public_going_out_return_time_positions = array();
-                        if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
-                            $array_add_missing_middle_time[] = $missing_middle_time;
-                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
-                            }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                            $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
-                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
-                            $array_add_public_going_out_time[] = $public_going_out_time;
-                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                            $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
-                            $array_add_attendance_time[] = $attendance_time;
-                            $array_add_attendance_time_positions[] = $attendance_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                            $array_add_leaving_time[] = $leaving_time;
-                            $array_add_leaving_time_positions[] = $leaving_time_positions;
-                        }
+                        $array_result_NextData =
+                            $this->calcTempWorkingTimeDateNextData(
+                                $array_working_time_kubun,
+                                $result
+                            );
+                        $array_calc_time = $array_result_NextData['array_calc_time'];
+                        $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                        $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                        $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                        $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                        $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                        $array_add_missing_middle_return_time = $array_result_NextData['array_add_missing_middle_return_time'];
+                        $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                        $array_add_public_going_out_return_time = $array_result_NextData['array_add_public_going_out_return_time'];
+                        $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                        $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                        $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                        $array_add_missing_middle_return_time_positions = $array_result_NextData['array_add_missing_middle_return_time_positions'];
+                        $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                        $array_add_public_going_out_return_time_positions = $array_result_NextData['array_add_public_going_out_return_time_positions'];
+                        $attendance_time = $array_result_NextData['attendance_time'];
+                        $leaving_time = $array_result_NextData['leaving_time'];
+                        $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                        $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                        $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                        $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                        $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                        $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                        $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                        $missing_middle_return_time_positions = $array_result_NextData['missing_middle_return_time_positions'];
+                        $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                        $public_going_out_return_time_positions = $array_result_NextData['public_going_out_return_time_positions'];
                         // 同じ値にする
                         $before_date = $current_date;
                         $before_department_code = $current_department_code;
@@ -4650,102 +4458,38 @@ class DailyWorkingInformationController extends Controller
                     $before_holiday_department_code = $current_department_code;
                     $before_holiday_kubun = $result->holiday_kubun;
                     // 次データ計算事前処理
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_calc_time[$i] = 0; 
-                    }
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_missing_middle_time[$i] = 0; 
-                    }
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_public_going_out_time[$i] = 0; 
-                    }
-                    if ($result->mode == Config::get('const.C005.attendance_time')) {
-                        $attendance_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $attendance_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.leaving_time')) {
-                        $leaving_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $leaving_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.missing_middle_time')) {
-                        $missing_middle_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $missing_middle_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
-                        $missing_middle_return_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $missing_middle_return_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.public_going_out_time')) {
-                        $public_going_out_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $public_going_out_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
-                        $public_going_out_return_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $public_going_out_return_time_positions = null;
-                        }               
-                    }
-                        $array_add_attendance_time = array();
-                    $array_add_leaving_time = array();
-                    $array_add_missing_middle_time = array();
-                    $array_add_missing_middle_return_time = array();
-                    $array_add_public_going_out_time = array();
-                    $array_add_public_going_out_return_time = array();
-                    $array_add_attendance_time_positions = array();
-                    $array_add_leaving_time_positions = array();
-                    $array_add_missing_middle_time_positions = array();
-                    $array_add_missing_middle_return_time_positions = array();
-                    $array_add_public_going_out_time_positions = array();
-                    $array_add_public_going_out_return_time_positions = array();
-                    //if ($result->current_calc == '1') {             // 当日分である場合
-                        if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
-                            $array_add_missing_middle_time[] = $missing_middle_time;
-                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                            $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
-                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
-                            $array_add_public_going_out_time[] = $public_going_out_time;
-                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                            $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
-                            $array_add_attendance_time[] = $attendance_time;
-                            $array_add_attendance_time_positions[] = $attendance_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                            $array_add_leaving_time[] = $leaving_time;
-                            $array_add_leaving_time_positions[] = $leaving_time_positions;
-                        }
-                    //}
+                    $array_result_NextData =
+                        $this->calcTempWorkingTimeDateNextData(
+                            $array_working_time_kubun,
+                            $result
+                        );
+                    $array_calc_time = $array_result_NextData['array_calc_time'];
+                    $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                    $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                    $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                    $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                    $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                    $array_add_missing_middle_return_time = $array_result_NextData['array_add_missing_middle_return_time'];
+                    $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                    $array_add_public_going_out_return_time = $array_result_NextData['array_add_public_going_out_return_time'];
+                    $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                    $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                    $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                    $array_add_missing_middle_return_time_positions = $array_result_NextData['array_add_missing_middle_return_time_positions'];
+                    $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                    $array_add_public_going_out_return_time_positions = $array_result_NextData['array_add_public_going_out_return_time_positions'];
+                    $attendance_time = $array_result_NextData['attendance_time'];
+                    $leaving_time = $array_result_NextData['leaving_time'];
+                    $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                    $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                    $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                    $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                    $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                    $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                    $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                    $missing_middle_return_time_positions = $array_result_NextData['missing_middle_return_time_positions'];
+                    $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                    $public_going_out_return_time_positions = $array_result_NextData['public_going_out_return_time_positions'];
                     // 同じ値にする
                     $before_department_code = $current_department_code;
                     $before_user_code = $current_user_code; 
@@ -4807,102 +4551,40 @@ class DailyWorkingInformationController extends Controller
                             $array_add_public_going_out_time_positions,
                             $array_add_public_going_out_return_time,
                             $array_add_public_going_out_return_time_positions);
-                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
+                        Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
                         // 次データ計算事前処理
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_calc_time[$i] = 0; 
-                        }
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_missing_middle_time[$i] = 0; 
-                        }
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_public_going_out_time[$i] = 0; 
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time')) {
-                            $attendance_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $attendance_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time')) {
-                            $leaving_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $leaving_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_time')) {
-                            $missing_middle_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $missing_middle_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
-                            $missing_middle_return_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $missing_middle_return_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time')) {
-                            $public_going_out_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $public_going_out_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
-                            $public_going_out_return_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $public_going_out_return_time_positions = null;
-                            }               
-                        }
-                                $array_add_attendance_time = array();
-                        $array_add_leaving_time = array();
-                        $array_add_missing_middle_time = array();
-                        $array_add_missing_middle_return_time = array();
-                        $array_add_public_going_out_time = array();
-                        $array_add_public_going_out_return_time = array();
-                        $array_add_attendance_time_positions = array();
-                        $array_add_leaving_time_positions = array();
-                        $array_add_missing_middle_time_positions = array();
-                        $array_add_missing_middle_return_time_positions = array();
-                        $array_add_public_going_out_time_positions = array();
-                        $array_add_public_going_out_return_time_positions = array();
-                        if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
-                            $array_add_missing_middle_time[] = $missing_middle_time;
-                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                            $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
-                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
-                            $array_add_public_going_out_time[] = $public_going_out_time;
-                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                            $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
-                            $array_add_attendance_time[] = $attendance_time;
-                            $array_add_attendance_time_positions[] = $attendance_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                            $array_add_leaving_time[] = $leaving_time;
-                            $array_add_leaving_time_positions[] = $leaving_time_positions;
-                        }
+                        $array_result_NextData =
+                            $this->calcTempWorkingTimeDateNextData(
+                                $array_working_time_kubun,
+                                $result
+                            );
+                        $array_calc_time = $array_result_NextData['array_calc_time'];
+                        $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                        $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                        $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                        $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                        $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                        $array_add_missing_middle_return_time = $array_result_NextData['array_add_missing_middle_return_time'];
+                        $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                        $array_add_public_going_out_return_time = $array_result_NextData['array_add_public_going_out_return_time'];
+                        $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                        $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                        $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                        $array_add_missing_middle_return_time_positions = $array_result_NextData['array_add_missing_middle_return_time_positions'];
+                        $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                        $array_add_public_going_out_return_time_positions = $array_result_NextData['array_add_public_going_out_return_time_positions'];
+                        $attendance_time = $array_result_NextData['attendance_time'];
+                        $leaving_time = $array_result_NextData['leaving_time'];
+                        $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                        $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                        $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                        $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                        $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                        $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                        $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                        $missing_middle_return_time_positions = $array_result_NextData['missing_middle_return_time_positions'];
+                        $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                        $public_going_out_return_time_positions = $array_result_NextData['public_going_out_return_time_positions'];
                         // 同じ値にする
                         $before_date = $current_date;
                         $before_department_code = $current_department_code;
@@ -4988,102 +4670,38 @@ class DailyWorkingInformationController extends Controller
                     $before_holiday_department_code = $current_department_code;
                     $before_holiday_kubun = $result->holiday_kubun;
                     // 次データ計算事前処理
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_calc_time[$i] = 0; 
-                    }
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_missing_middle_time[$i] = 0; 
-                    }
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_public_going_out_time[$i] = 0; 
-                    }
-                    if ($result->mode == Config::get('const.C005.attendance_time')) {
-                        $attendance_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $attendance_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.leaving_time')) {
-                        $leaving_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $leaving_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.missing_middle_time')) {
-                        $missing_middle_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $missing_middle_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
-                        $missing_middle_return_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $missing_middle_return_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.public_going_out_time')) {
-                        $public_going_out_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $public_going_out_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
-                        $public_going_out_return_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $public_going_out_return_time_positions = null;
-                        }               
-                    }
-                        $array_add_attendance_time = array();
-                    $array_add_leaving_time = array();
-                    $array_add_missing_middle_time = array();
-                    $array_add_missing_middle_return_time = array();
-                    $array_add_public_going_out_time = array();
-                    $array_add_public_going_out_return_time = array();
-                    $array_add_attendance_time_positions = array();
-                    $array_add_leaving_time_positions = array();
-                    $array_add_missing_middle_time_positions = array();
-                    $array_add_missing_middle_return_time_positions = array();
-                    $array_add_public_going_out_time_positions = array();
-                    $array_add_public_going_out_return_time_positions = array();
-                    //if ($result->current_calc == '1') {             // 当日分である場合
-                        if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
-                            $array_add_missing_middle_time[] = $missing_middle_time;
-                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                            $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
-                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
-                            $array_add_public_going_out_time[] = $public_going_out_time;
-                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                            $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
-                            $array_add_attendance_time[] = $attendance_time;
-                            $array_add_attendance_time_positions[] = $attendance_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                            $array_add_leaving_time[] = $leaving_time;
-                            $array_add_leaving_time_positions[] = $leaving_time_positions;
-                        }
-                    //}
+                    $array_result_NextData =
+                        $this->calcTempWorkingTimeDateNextData(
+                            $array_working_time_kubun,
+                            $result
+                        );
+                    $array_calc_time = $array_result_NextData['array_calc_time'];
+                    $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                    $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                    $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                    $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                    $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                    $array_add_missing_middle_return_time = $array_result_NextData['array_add_missing_middle_return_time'];
+                    $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                    $array_add_public_going_out_return_time = $array_result_NextData['array_add_public_going_out_return_time'];
+                    $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                    $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                    $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                    $array_add_missing_middle_return_time_positions = $array_result_NextData['array_add_missing_middle_return_time_positions'];
+                    $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                    $array_add_public_going_out_return_time_positions = $array_result_NextData['array_add_public_going_out_return_time_positions'];
+                    $attendance_time = $array_result_NextData['attendance_time'];
+                    $leaving_time = $array_result_NextData['leaving_time'];
+                    $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                    $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                    $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                    $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                    $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                    $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                    $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                    $missing_middle_return_time_positions = $array_result_NextData['missing_middle_return_time_positions'];
+                    $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                    $public_going_out_return_time_positions = $array_result_NextData['public_going_out_return_time_positions'];
                     // 同じ値にする
                     $before_date = $current_date;
                     $before_department_code = $current_department_code;
@@ -5146,102 +4764,40 @@ class DailyWorkingInformationController extends Controller
                             $array_add_public_going_out_time_positions,
                             $array_add_public_going_out_return_time,
                             $array_add_public_going_out_return_time_positions);
-                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
+                        Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
                         // 次データ計算事前処理
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_calc_time[$i] = 0; 
-                        }
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_missing_middle_time[$i] = 0; 
-                        }
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_public_going_out_time[$i] = 0; 
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time')) {
-                            $attendance_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $attendance_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time')) {
-                            $leaving_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $leaving_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_time')) {
-                            $missing_middle_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $missing_middle_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
-                            $missing_middle_return_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $missing_middle_return_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time')) {
-                            $public_going_out_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $public_going_out_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
-                            $public_going_out_return_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $public_going_out_return_time_positions = null;
-                            }               
-                        }
-                                $array_add_attendance_time = array();
-                        $array_add_leaving_time = array();
-                        $array_add_missing_middle_time = array();
-                        $array_add_missing_middle_return_time = array();
-                        $array_add_public_going_out_time = array();
-                        $array_add_public_going_out_return_time = array();
-                        $array_add_attendance_time_positions = array();
-                        $array_add_leaving_time_positions = array();
-                        $array_add_missing_middle_time_positions = array();
-                        $array_add_missing_middle_return_time_positions = array();
-                        $array_add_public_going_out_time_positions = array();
-                        $array_add_public_going_out_return_time_positions = array();
-                        if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
-                            $array_add_missing_middle_time[] = $missing_middle_time;
-                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                            $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
-                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
-                            $array_add_public_going_out_time[] = $public_going_out_time;
-                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                            $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
-                            $array_add_attendance_time[] = $attendance_time;
-                            $array_add_attendance_time_positions[] = $attendance_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                            $array_add_leaving_time[] = $leaving_time;
-                            $array_add_leaving_time_positions[] = $leaving_time_positions;
-                        }
+                        $array_result_NextData =
+                            $this->calcTempWorkingTimeDateNextData(
+                                $array_working_time_kubun,
+                                $result
+                            );
+                        $array_calc_time = $array_result_NextData['array_calc_time'];
+                        $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                        $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                        $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                        $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                        $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                        $array_add_missing_middle_return_time = $array_result_NextData['array_add_missing_middle_return_time'];
+                        $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                        $array_add_public_going_out_return_time = $array_result_NextData['array_add_public_going_out_return_time'];
+                        $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                        $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                        $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                        $array_add_missing_middle_return_time_positions = $array_result_NextData['array_add_missing_middle_return_time_positions'];
+                        $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                        $array_add_public_going_out_return_time_positions = $array_result_NextData['array_add_public_going_out_return_time_positions'];
+                        $attendance_time = $array_result_NextData['attendance_time'];
+                        $leaving_time = $array_result_NextData['leaving_time'];
+                        $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                        $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                        $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                        $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                        $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                        $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                        $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                        $missing_middle_return_time_positions = $array_result_NextData['missing_middle_return_time_positions'];
+                        $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                        $public_going_out_return_time_positions = $array_result_NextData['public_going_out_return_time_positions'];
                         // 同じ値にする
                         $before_date = $current_date;
                         $before_department_code = $current_department_code;
@@ -5438,195 +4994,228 @@ class DailyWorkingInformationController extends Controller
                             // ------------------ DEBUG end ----------------------------------------
                         }
                     }
+                    if ($working_times != 0) {
+                        // 打刻時間内に休憩時間を含んでいる場合、休憩時間累計を求めて減算する
+                        //  計算対象のタイムテーブルの開始終了日時の範囲内に休憩開始終了時刻がある場合で
+                        $braek_time = 0;
+                        $braek_time = $apicommon->calcBetweenBreakTime(
+                            $target_from_time,
+                            $target_to_time,
+                            $current_date,
+                            $timetables,
+                            $working_timetable_no,
+                            $working_time_calc_from,
+                            $working_time_calc_to);
+                        Log::DEBUG('            休憩時間累計      braek_time = '.$braek_time."  ".$braek_time / 60 / 60);
+                        $working_times -= $braek_time;
+                    }
                 } else {
                     // 深夜労働残業時間
-                    $w_time = 0;
-                    // target_to_timeは退勤時刻
-                    // 退勤時刻 > 深夜残業開始の場合
                     // ------------------ DEBUG strat ----------------------------------------
                     Log::DEBUG('           【深夜労働残業時間 計算開始】');
-                    Log::DEBUG('            ここまでの累計労働時間  working_times = '.$working_times."  ".$working_times / 60 / 60);
                     // ------------------ DEBUG end ----------------------------------------
+                    // 退勤時刻 > 深夜労働時間開始時刻
                     if ($target_to_time > $working_time_calc_from) {
-                        // ------------------ DEBUG strat ----------------------------------------
-                        Log::DEBUG('　　　　　　 退勤時刻 >  設定開始時刻の場合');
-                        Log::DEBUG('　　　　　　 退勤時刻  target_to_time = '.$target_to_time);
-                        Log::DEBUG('　　　　　　 設定開始時刻  working_time_calc_from = '.$working_time_calc_from);
-                        // ------------------ DEBUG end ----------------------------------------
-                        // ここまでに計算された労働時間と私用外出時間から労働時間を算出
-                        $index = (int)(Config::get('const.C004.regular_working_time'))-1;
-                        $w_time += $array_calc_time[$index];
-                        // ------------------ DEBUG strat ----------------------------------------
-                        Log::DEBUG('　　　　　　 所定労働時間加算　$array_calc_time[$index]  = '.$array_calc_time[$index]);
-                        Log::DEBUG('　　　　　　 加算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
-                        // ------------------ DEBUG end ----------------------------------------
-                        $index = (int)(Config::get('const.C004.regular_working_breaks_time'))-1;
-                        $w_time -= $array_calc_time[$index];
-                        // ------------------ DEBUG strat ----------------------------------------
-                        Log::DEBUG('　　　　　　 所定休憩時間減算　$array_calc_time[$index]  = '.$array_calc_time[$index]);
-                        Log::DEBUG('　　　　　　 減算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
-                        // ------------------ DEBUG end ----------------------------------------
-                        $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
-                        $w_time += $array_calc_time[$index];
-                        // ------------------ DEBUG strat ----------------------------------------
-                        Log::DEBUG('　　　　　　 時間外時間加算　$array_calc_time[$index]  = '.$array_calc_time[$index]);
-                        Log::DEBUG('　　　　　　 加算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
-                        // ------------------ DEBUG end ----------------------------------------
-                        $index = (int)(Config::get('const.C004.regular_working_time'))-1;
-                        $w_time -= $array_gouing_out_time[$index];
-                        // ------------------ DEBUG strat ----------------------------------------
-                        Log::DEBUG('　　　　　　 所定労働時間内私用外出減算　$array_gouing_out_time[$index]  = '.$array_gouing_out_time[$index]);
-                        Log::DEBUG('　　　　　　 減算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
-                        // ------------------ DEBUG end ----------------------------------------
-                        $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
-                        $w_time -= $array_gouing_out_time[$index];
-                        // ------------------ DEBUG strat ----------------------------------------
-                        Log::DEBUG('　　　　　　 時間外私用外出減算　$array_gouing_out_time[$index]  = '.$array_gouing_out_time[$index]);
-                        Log::DEBUG('　　　　　　 減算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
-                        // ------------------ DEBUG end ----------------------------------------
-                        // ここまでに計算された労働時間が8Hを超えている場合は深夜残業を計算する
-                        // ------------------ DEBUG strat ----------------------------------------
-                        Log::DEBUG('　　　　　　 ここまでに計算された労働時間が8Hを超えている場合は深夜残業を計算する ');
-                        Log::DEBUG('　　　　　　 基準時間  = '.(double)Config::get('const.C002.legal_working_hours_day') * 60 * 60);
-                        // ------------------ DEBUG end ----------------------------------------
-                        if ($w_time > (double)Config::get('const.C002.legal_working_hours_day') * 60 * 60) {
-                            // 退勤時刻<=深夜残業終了
-                            if ($target_to_time <= $working_time_calc_to) {
-                                // 出勤時刻<=深夜残業開始
-                                if ($target_from_time <= $working_time_calc_from) {
-                                    // 深夜残業開始から退勤時刻を深夜残業とする
+                        // 深夜残業時間集計
+                        // 出勤時刻から休憩時間を含めた基準時間（8時間後）を求める
+                        $after_legal_working_hours_day = Config::get('const.C002.legal_working_hours_day') * 60 * 60;
+                        $after_target_from_time = $target_from_time;
+                        $after_daytime = "";            // 実働8時間後時刻
+                        // 休憩時間がなくなるまで実働8時間後を求める
+                        while(true){
+                            $after_daytime = $apicommon->getAfterDayTime(
+                                $after_target_from_time,
+                                $after_legal_working_hours_day,
+                                'Y-m-d H:i:s');
+                            Log::DEBUG('　　　　　　 計算後時刻  = '.$after_daytime);
+                            $braek_time = $apicommon->calcBetweenBreakTime(
+                                $after_target_from_time,
+                                $after_daytime,
+                                $current_date,
+                                $timetables,
+                                $working_timetable_no,
+                                null, null);
+                            if ($braek_time == 0) {
+                                break;
+                            }
+                            Log::DEBUG('　　　　　　 休憩時間  = '.$braek_time);
+                            $after_target_from_time = $after_daytime;
+                            // $braek_timeは秒数なので
+                            $after_legal_working_hours_day = $braek_time;
+                        }
+                        Log::DEBUG('　　　　　　 出勤時刻から休憩時間を含めた基準時間（8時間後）を求める ');
+                        Log::DEBUG('　　　　　　 実働8時間後時刻  = '.$after_daytime);
+                        // 実働8時間後時刻 < 深夜労働時間開始時刻
+                        if ($after_daytime < $working_time_calc_from) {
+                            // 退勤時刻 > 深夜労働時間開始時刻
+                            if ($target_to_time > $working_time_calc_from) {
+                                // 退勤時刻 < 深夜労働時間終了時刻
+                                if ($target_to_time < $working_time_calc_to) {
+                                    // 深夜労働時間開始時刻から退勤時刻を深夜残業時間とする
                                     $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $target_to_time);
-                                    Log::DEBUG('　　　　　　深夜残業開始から退勤時刻を深夜残業とする = '.$calc_times);
+                                    Log::DEBUG('　　　　　　深夜労働時間開始時刻から退勤時刻を深夜残業時間とする = '.$calc_times);
                                 } else {
-                                    // 出勤時刻から退勤時刻を深夜残業とする
-                                    $calc_times = $apicommon->diffTimeSerial($target_from_time, $target_to_time);
-                                    Log::DEBUG('　　　　　　出勤時刻から退勤時刻を深夜残業とする = '.$calc_times);
-                                }
-                            } else {
-                                // 出勤時刻<=深夜残業開始
-                                if ($target_from_time <= $working_time_calc_from) {
-                                    // 深夜残業開始から深夜残業終了を深夜残業とする
+                                    // 深夜労働時間開始時刻から深夜労働時間終了時刻を深夜残業時間とする
                                     $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
-                                    Log::DEBUG('　　　　　　深夜残業開始から深夜残業終了を深夜残業とする = '.$calc_times);
-                                } else {
-                                    // 出勤時刻から深夜残業終了を深夜残業とする
-                                    $calc_times = $apicommon->diffTimeSerial($target_from_time, $working_time_calc_to);
-                                    Log::DEBUG('　　　　　　出勤時刻から深夜残業終了を深夜残業とする = '.$calc_times);
+                                    Log::DEBUG('　　　　　　深夜労働時間開始時刻から深夜労働時間終了時刻を深夜残業時間とする = '.$calc_times);
                                 }
                             }
-                            $working_times += $calc_times;
-                            // ------------------ DEBUG strat ----------------------------------------
-                            Log::DEBUG('　　　　　　 労働時間が8H超えため、深夜労働残業時間を計算');
-                            Log::DEBUG('　　　　　　 退勤時刻<=深夜残業終了か？ $target_to_time = '.$target_to_time);
-                            Log::DEBUG('　　　　　　 退勤時刻<=深夜残業終了か？ $working_time_calc_from = '.$working_time_calc_from);
-                            Log::DEBUG('　　　　　　 退勤時刻<=深夜残業終了か？ $working_time_calc_to = '.$working_time_calc_to);
-                            Log::DEBUG('　　　　　　 計算結果　$calc_times  = '.$calc_times."  ".$calc_times / 60 / 60);
-                            Log::DEBUG('　　　　　　 累計計算結果　$working_times  = '.$working_times."  ".$working_times / 60 / 60);
-                            // ------------------ DEBUG end ----------------------------------------
-                        }
-                        // さらにシフト勤務などは所定労働時間と重複する時間となりうるので、重複時間があれば減算する。
-                        Log::DEBUG('　　　　　　 タイムテーブルNO = '.$working_timetable_no);
-                        $filtered_regular = 
-                            $timetables->where('no', $working_timetable_no)->where('working_time_kubun', Config::get('const.C004.regular_working_time'));
-                        foreach($filtered_regular as $result_regular) {
-                            Log::DEBUG('　　　　　　 重複時間 $result_regular->from_time = '.$result_regular->from_time);
-                            Log::DEBUG('　　　　　　 重複時間 $result_regular->to_time = '.$result_regular->to_time);
-                            // 所定労働時間登録の開始時間
-                            $from_time_regular = $result_regular->from_time;
-                            // 所定労働時間登録の終了時間
-                            $to_time_regular = $result_regular->to_time;
-                            if (isset($from_time_regular) && isset($to_time_regular)) {
-                                // from_time_regular日付付与
-                                // fromdate
-                                $working_time_calc_from_regular = 
-                                    $apicommon->convTimeToDateFrom($from_time_regular, $current_date, $target_from_time, $target_to_time);         
-                                // to_time_regular日付付与
-                                $working_time_calc_to_regular = 
-                                    $apicommon->convTimeToDateTo($from_time_regular, $to_time_regular, $current_date, $target_from_time, $target_to_time);         
-                                Log::DEBUG('　　　　　　 重複時間 所定労働時間 $working_time_calc_from_regular = '.$working_time_calc_from_regular);
-                                Log::DEBUG('　　　　　　 重複時間 所定労働時間 $working_time_calc_to_regular = '.$working_time_calc_to_regular);
-                                Log::DEBUG('　　　　　　 重複時間 所定労働時間 $working_time_calc_from = '.$working_time_calc_from);
-                                Log::DEBUG('　　　　　　 重複時間 所定労働時間 $working_time_calc_to = '.$working_time_calc_to);
-                                if (($working_time_calc_from > $working_time_calc_from_regular && $working_time_calc_from < $working_time_calc_to_regular) ||
-                                    ($working_time_calc_to > $working_time_calc_from_regular && $working_time_calc_to < $working_time_calc_to_regular)) {
-                                    // 時間登録の終了時間<=所定労働時間登録終了
-                                    if ($working_time_calc_to <= $working_time_calc_to_regular) {
-                                        // 所定労働時間登録開始<= 時間登録の開始時間
-                                        if ($working_time_calc_from_regular <= $working_time_calc_from) {
-                                            // 時間登録の開始時間から時間登録の終了時間を計算する
-                                            $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
-                                        } else {
-                                            // 所定労働時間登録開始から時間登録の終了を計算する
-                                            $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from_regular, $working_time_calc_to);
-                                        }
+                        } else {
+                            // 実働8時間後時刻 < 深夜労働時間終了時刻
+                            if ($after_daytime < $working_time_calc_to) {
+                                // 退勤時刻 > 実働8時間後時刻
+                                if ($target_to_time > $after_daytime) {
+                                    // 退勤時刻 < 深夜労働時間終了時刻
+                                    if ($target_to_time < $working_time_calc_to) {
+                                        // 実働8時間後時刻から退勤時刻を深夜残業時間とする
+                                        $calc_times = $apicommon->diffTimeSerial($after_daytime, $target_to_time);
+                                        Log::DEBUG('　　　　　　実働8時間後時刻から退勤時刻を深夜残業時間とする = '.$calc_times);
                                     } else {
-                                        // 所定労働時間登録開始<=時間登録の開始時間
-                                        if ($working_time_calc_from_regular <= $working_time_calc_from) {
-                                            // 時間登録の開始時間から所定労働時間登録終了を計算する
-                                            $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to_regular);
-                                        } else {
-                                            // 所定労働時間登録開始から所定労働時間登録終了を計算する
-                                            $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from_regular, $working_time_calc_to_regular);
-                                        }
+                                        // 深夜労働時間開始時刻から深夜労働時間終了時刻を深夜残業時間とする
+                                        $calc_times = $apicommon->diffTimeSerial($after_daytime, $working_time_calc_to);
+                                        Log::DEBUG('　　　　　　実働8時間後時刻から深夜労働時間終了時刻を深夜残業時間とする = '.$calc_times);
                                     }
                                 }
                             }
-                            break;
-                        }       
-                        Log::DEBUG('$calc_times_regular = '.$calc_times_regular);
-                        $working_times -= $calc_times_regular;
-                        Log::DEBUG('$working_times = '.$working_times);
+                        }
+                        // 深夜労働時間集計
+                        $w_time = 0;
+                        // 退勤時刻 <= 深夜労働時間終了時刻
+                        if ($target_to_time <= $working_time_calc_to) {
+                            // 出勤時刻 <= 深夜労働時間開始時刻
+                            if ($target_from_time <= $working_time_calc_from) {
+                                // 深夜労働時間開始時刻から退勤時刻を深夜労働時間とする
+                                $w_time = $apicommon->diffTimeSerial($working_time_calc_from, $target_to_time);
+                                Log::DEBUG('　　　　　　深夜労働時間開始時刻から退勤時刻を深夜労働時間とする = '.$w_time);
+                            } else {
+                                // 出勤時刻から退勤時刻を深夜労働時間とする
+                                $w_time = $apicommon->diffTimeSerial($target_from_time, $target_to_time);
+                                Log::DEBUG('　　　　　　出勤時刻から退勤時刻を深夜労働時間とする = '.$w_time);
+                            }
+                        } else {
+                            // 出勤時刻 <= 深夜労働時間開始時刻
+                            if ($target_from_time <= $working_time_calc_from) {
+                                // 深夜労働時間開始時刻から深夜労働時間終了時刻を深夜労働時間とする
+                                $w_time = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
+                                Log::DEBUG('　　　　　　深夜労働時間開始時刻から深夜労働時間終了時刻を深夜労働時間とする = '.$w_time);
+                            } else {
+                                // 出勤時刻から深夜労働時間終了時刻を深夜労働時間とする
+                                $w_time = $apicommon->diffTimeSerial($target_from_time, $working_time_calc_to);
+                                Log::DEBUG('　　　　　　出勤時刻から深夜労働時間終了時刻を深夜労働時間とする = '.$w_time);
+                            }
+                        }
+                        $this->calc_late_night_working_hours += ($w_time - $calc_times);
+                        $working_times += $calc_times;
+                        // ------------------ DEBUG strat ----------------------------------------
+                        Log::DEBUG('　　　　　　 深夜労働残業時間を計算 = '.$calc_times );
+                        Log::DEBUG('　　　　　　 深夜労働残業時間を累計計算 = '.$working_times );
+                        Log::DEBUG('　　　　　　 w_time = '.$w_time );
+                        Log::DEBUG('　　　　　　 深夜労働時間集計を計算 $w_time - $calc_times = '.($w_time - $calc_times));
+                        Log::DEBUG('　　　　　　 深夜労働時間集計を累計計算 = '.$this->calc_late_night_working_hours);
+                        // ------------------ DEBUG end ----------------------------------------
+                        // さらにシフト勤務などは所定労働時間と重複する時間となりうるので、重複時間があれば減算する。
+                        // Log::DEBUG('　　　　　　 タイムテーブルNO = '.$working_timetable_no);
+                        // $filtered_regular = 
+                        //     $timetables->where('no', $working_timetable_no)->where('working_time_kubun', Config::get('const.C004.regular_working_time'));
+                        // foreach($filtered_regular as $result_regular) {
+                        //     Log::DEBUG('　　　　　　 重複時間 $result_regular->from_time = '.$result_regular->from_time);
+                        //     Log::DEBUG('　　　　　　 重複時間 $result_regular->to_time = '.$result_regular->to_time);
+                        //     // 所定労働時間登録の開始時間
+                        //     $from_time_regular = $result_regular->from_time;
+                        //     // 所定労働時間登録の終了時間
+                        //     $to_time_regular = $result_regular->to_time;
+                        //     if (isset($from_time_regular) && isset($to_time_regular)) {
+                        //         // from_time_regular日付付与
+                        //         // fromdate
+                        //         $working_time_calc_from_regular = 
+                        //             $apicommon->convTimeToDateFrom($from_time_regular, $current_date, $target_from_time, $target_to_time);         
+                        //         // to_time_regular日付付与
+                        //         $working_time_calc_to_regular = 
+                        //             $apicommon->convTimeToDateTo($from_time_regular, $to_time_regular, $current_date, $target_from_time, $target_to_time);         
+                        //         Log::DEBUG('　　　　　　 重複時間 所定労働時間 $working_time_calc_from_regular = '.$working_time_calc_from_regular);
+                        //         Log::DEBUG('　　　　　　 重複時間 所定労働時間 $working_time_calc_to_regular = '.$working_time_calc_to_regular);
+                        //         Log::DEBUG('　　　　　　 重複時間 所定労働時間 $working_time_calc_from = '.$working_time_calc_from);
+                        //         Log::DEBUG('　　　　　　 重複時間 所定労働時間 $working_time_calc_to = '.$working_time_calc_to);
+                        //         if (($working_time_calc_from > $working_time_calc_from_regular && $working_time_calc_from < $working_time_calc_to_regular) ||
+                        //             ($working_time_calc_to > $working_time_calc_from_regular && $working_time_calc_to < $working_time_calc_to_regular)) {
+                        //             // 時間登録の終了時間<=所定労働時間登録終了
+                        //             if ($working_time_calc_to <= $working_time_calc_to_regular) {
+                        //                 // 所定労働時間登録開始<= 時間登録の開始時間
+                        //                 if ($working_time_calc_from_regular <= $working_time_calc_from) {
+                        //                     // 時間登録の開始時間から時間登録の終了時間を計算する
+                        //                     $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
+                        //                 } else {
+                        //                     // 所定労働時間登録開始から時間登録の終了を計算する
+                        //                     $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from_regular, $working_time_calc_to);
+                        //                 }
+                        //             } else {
+                        //                 // 所定労働時間登録開始<=時間登録の開始時間
+                        //                 if ($working_time_calc_from_regular <= $working_time_calc_from) {
+                        //                     // 時間登録の開始時間から所定労働時間登録終了を計算する
+                        //                     $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to_regular);
+                        //                 } else {
+                        //                     // 所定労働時間登録開始から所定労働時間登録終了を計算する
+                        //                     $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from_regular, $working_time_calc_to_regular);
+                        //                 }
+                        //             }
+                        //         }
+                        //     }
+                        //     break;
+                        // }       
+                        // Log::DEBUG('$calc_times_regular = '.$calc_times_regular);
+                        // $working_times -= $calc_times_regular;
+                        // Log::DEBUG('$working_times = '.$working_times);
                     }
                 }
                 // 休憩時間を含んでいる場合、休憩時間累計（所定労働時間内の休憩時間を累計することになる）
-                if ($working_times != 0) {
-                    // 休憩時間を含んでいる場合、休憩時間累計を求めて減算する
-                    $filtered = $timetables->where('no', $working_timetable_no)
-                        ->where('working_time_kubun', Config::get('const.C004.regular_working_breaks_time'));
-                    // 休憩時間帯は複数あるかも
-                    foreach($filtered as $result_breaks_time) {
-                        $from_time = $result_breaks_time->from_time;        // 休憩開始時刻
-                        $to_time = $result_breaks_time->to_time;            // 休憩終了時刻
-                        Log::DEBUG('休憩時間 from_time = '.$from_time);
-                        Log::DEBUG('休憩時間 to_time = '.$to_time);
-                        if (isset($from_time) && isset($to_time)) {
-                            // from_time日付付与
-                            $time_calc_from = 
-                                $apicommon->convTimeToDateFrom($from_time, $current_date, $target_from_time, $target_to_time);         
-                            // to_time日付付与
-                            $time_calc_to = 
-                                $apicommon->convTimeToDateTo($from_time, $to_time, $current_date, $target_from_time, $target_to_time);         
-                            Log::DEBUG('休憩時間 time_calc_from = '.$time_calc_from);
-                            Log::DEBUG('休憩時間 time_calc_to = '.$time_calc_to);
-                            Log::DEBUG('休憩時間 working_time_calc_from = '.$working_time_calc_from);
-                            Log::DEBUG('休憩時間 working_time_calc_to = '.$working_time_calc_to);
-                            Log::DEBUG('休憩時間 target_from_time = '.$target_from_time);
-                            Log::DEBUG('休憩時間 target_to_time = '.$target_to_time);
-                            //  計算対象のタイムテーブルの開始終了日時の範囲内に休憩開始終了時刻がある場合で
-                            if (($time_calc_from > $working_time_calc_from && $time_calc_from < $working_time_calc_to) ||
-                                ($time_calc_to > $working_time_calc_from && $time_calc_to < $working_time_calc_to)) {
-                                //  出退勤時間の範囲内に休憩開始終了時刻がある場合に計算する
-                                if (($time_calc_from > $target_from_time && $time_calc_from < $target_to_time) ||
-                                    ($time_calc_to > $target_from_time && $time_calc_to < $target_to_time)) {
-                                    if ($target_from_time > $time_calc_from) {
-                                        $time_calc_from = $target_from_time;
-                                    }
-                                    if ($target_to_time < $time_calc_to) {
-                                        $time_calc_to = $target_to_time;
-                                    }
-                                    Log::DEBUG('time_calc_from = '.$time_calc_from);
-                                    Log::DEBUG('time_calc_to = '.$time_calc_to);
-                                    if ($time_calc_from < $time_calc_to) {
-                                        $calc_times = $apicommon->diffTimeSerial($time_calc_from, $time_calc_to);
-                                        Log::DEBUG('休憩時間 calc_times = '.$calc_times);
-                                        $working_times -= $calc_times;
-                                        Log::DEBUG('休憩時間 $working_times = '.$working_times);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                // if ($working_times != 0) {
+                //     // 休憩時間を含んでいる場合、休憩時間累計を求めて減算する
+                //     $filtered = $timetables->where('no', $working_timetable_no)
+                //         ->where('working_time_kubun', Config::get('const.C004.regular_working_breaks_time'));
+                //     // 休憩時間帯は複数あるかも
+                //     foreach($filtered as $result_breaks_time) {
+                //         $from_time = $result_breaks_time->from_time;        // 休憩開始時刻
+                //         $to_time = $result_breaks_time->to_time;            // 休憩終了時刻
+                //         Log::DEBUG('休憩時間 from_time = '.$from_time);
+                //         Log::DEBUG('休憩時間 to_time = '.$to_time);
+                //         if (isset($from_time) && isset($to_time)) {
+                //             // from_time日付付与
+                //             $time_calc_from = 
+                //                 $apicommon->convTimeToDateFrom($from_time, $current_date, $target_from_time, $target_to_time);         
+                //             // to_time日付付与
+                //             $time_calc_to = 
+                //                 $apicommon->convTimeToDateTo($from_time, $to_time, $current_date, $target_from_time, $target_to_time);         
+                //             Log::DEBUG('休憩時間 time_calc_from = '.$time_calc_from);
+                //             Log::DEBUG('休憩時間 time_calc_to = '.$time_calc_to);
+                //             Log::DEBUG('休憩時間 working_time_calc_from = '.$working_time_calc_from);
+                //             Log::DEBUG('休憩時間 working_time_calc_to = '.$working_time_calc_to);
+                //             Log::DEBUG('休憩時間 target_from_time = '.$target_from_time);
+                //             Log::DEBUG('休憩時間 target_to_time = '.$target_to_time);
+                //             //  計算対象のタイムテーブルの開始終了日時の範囲内に休憩開始終了時刻がある場合で
+                //             if (($time_calc_from > $working_time_calc_from && $time_calc_from < $working_time_calc_to) ||
+                //                 ($time_calc_to > $working_time_calc_from && $time_calc_to < $working_time_calc_to)) {
+                //                 //  出退勤時間の範囲内に休憩開始終了時刻がある場合に計算する
+                //                 if (($time_calc_from > $target_from_time && $time_calc_from < $target_to_time) ||
+                //                     ($time_calc_to > $target_from_time && $time_calc_to < $target_to_time)) {
+                //                     if ($target_from_time > $time_calc_from) {
+                //                         $time_calc_from = $target_from_time;
+                //                     }
+                //                     if ($target_to_time < $time_calc_to) {
+                //                         $time_calc_to = $target_to_time;
+                //                     }
+                //                     Log::DEBUG('time_calc_from = '.$time_calc_from);
+                //                     Log::DEBUG('time_calc_to = '.$time_calc_to);
+                //                     if ($time_calc_from < $time_calc_to) {
+                //                         $calc_times = $apicommon->diffTimeSerial($time_calc_from, $time_calc_to);
+                //                         Log::DEBUG('休憩時間 calc_times = '.$calc_times);
+                //                         $working_times -= $calc_times;
+                //                         Log::DEBUG('休憩時間 $working_times = '.$working_times);
+                //                     }
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
             }
         }
         // ------------------ DEBUG strat ----------------------------------------
@@ -6000,6 +5589,12 @@ class DailyWorkingInformationController extends Controller
         // -------------  debug ---------------------- end --------------
         $temp_working_model->setLatenightovertimehoursAttribute($calc_time);
         $total_time = $total_time + $calc_time;
+        // 深夜労働時間
+        $w_time = round($this->calc_late_night_working_hours / 60 / 60,2);
+        $temp_working_model->setLatenightworkinghoursAttribute($w_time);
+        Log::DEBUG('        深夜労働時間   $this->calc_late_night_working_hours              = '.$this->calc_late_night_working_hours);
+        Log::DEBUG('        深夜労働時間   $w_time              = '.$w_time);
+        $total_time = $total_time + $w_time;
         // -------------  debug ---------------------- start --------------
         Log::DEBUG('        トータル労働時間   $total_time              = '.$total_time);
         // -------------  debug ---------------------- end --------------
@@ -6407,6 +6002,181 @@ class DailyWorkingInformationController extends Controller
         return $arrray_decide_times;
     }
  
+    /**
+     * calcTempWorkingTimeDateの次データ計算のための準備
+     * 
+     */
+    private function calcTempWorkingTimeDateNextData(
+        $array_working_time_kubun,
+        $result
+        )
+    {
+        $array_result_set0 = $this->setArrayTimeSet0(
+            $array_working_time_kubun
+        );
+        $array_calc_time = $array_result_set0['array_calc_time'];
+        $array_missing_middle_time = $array_result_set0['array_missing_middle_time'];
+        $array_public_going_out_time = $array_result_set0['array_public_going_out_time'];
+        $array_add_attendance_time = array();
+        $array_add_leaving_time = array();
+        $array_add_missing_middle_time = array();
+        $array_add_missing_middle_return_time = array();
+        $array_add_public_going_out_time = array();
+        $array_add_public_going_out_return_time = array();
+        $array_add_attendance_time_positions = array();
+        $array_add_leaving_time_positions = array();
+        $array_add_missing_middle_time_positions = array();
+        $array_add_missing_middle_return_time_positions = array();
+        $array_add_public_going_out_time_positions = array();
+        $array_add_public_going_out_return_time_positions = array();
+        $attendance_time = "";
+        $leaving_time = "";
+        $missing_middle_time = "";
+        $missing_middle_return_time = "";
+        $public_going_out_time = "";
+        $public_going_out_return_time = "";
+        $attendance_time_positions = "";
+        $leaving_time_positions = "";
+        $missing_middle_time_positions = "";
+        $missing_middle_return_time_positions = "";
+        $public_going_out_time_positions = "";
+        $public_going_out_return_time_positions = "";
+
+        $array_time_position = array();
+        if ($result->mode == Config::get('const.C005.attendance_time')) {
+            $array_time_position = $this->setTimePosition($result);
+            $attendance_time = $array_time_position['result_time'];
+            $attendance_time_positions =  $array_time_position['result_time_positions'];
+            if ($attendance_time <> ''){
+                $array_add_attendance_time[] = $attendance_time;
+                $array_add_attendance_time_positions[] = $attendance_time_positions;
+            }
+            Log::DEBUG('                 attendance_time = '.$attendance_time);
+            Log::DEBUG('                 count array_add_attendance_time = '.count($array_add_attendance_time));
+        }
+        if ($result->mode == Config::get('const.C005.leaving_time')) {
+            $array_time_position = $this->setTimePosition($result);
+            $leaving_time = $array_time_position['result_time'];
+            $leaving_time_positions =  $array_time_position['result_time_positions'];
+            if ($leaving_time <> ''){
+                $array_add_leaving_time[] = $leaving_time;
+                $array_add_leaving_time_positions[] = $leaving_time_positions;
+            }
+            Log::DEBUG('                 leaving_time = '.$leaving_time);
+        }
+        if ($result->mode == Config::get('const.C005.missing_middle_time')) {
+            $array_time_position = $this->setTimePosition($result);
+            $missing_middle_time = $array_time_position['result_time'];
+            $missing_middle_time_positions =  $array_time_position['result_time_positions'];
+            if ($missing_middle_time <> ''){
+                $array_add_missing_middle_time[] = $missing_middle_time;
+                $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
+            }
+            Log::DEBUG('                 missing_middle_time = '.$missing_middle_time);
+        }
+        if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
+            $array_time_position = $this->setTimePosition($result);
+            $missing_middle_return_time = $array_time_position['result_time'];
+            $missing_middle_return_time_positions =  $array_time_position['result_time_positions'];
+            if ($missing_middle_return_time <> ''){
+                $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
+            }
+            Log::DEBUG('                 missing_middle_return_time = '.$missing_middle_return_time);
+        }
+        if ($result->mode == Config::get('const.C005.public_going_out_time')) {
+            $array_time_position = $this->setTimePosition($result);
+            $public_going_out_time = $array_time_position['result_time'];
+            $public_going_out_time_positions =  $array_time_position['result_time_positions'];
+            if ($public_going_out_time <> ''){
+                $array_add_public_going_out_time[] = $public_going_out_time;
+                $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
+            }
+            Log::DEBUG('                 public_going_out_time = '.$public_going_out_time);
+        }
+        if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
+            $array_time_position = $this->setTimePosition($result);
+            $public_going_out_return_time = $array_time_position['result_time'];
+            $public_going_out_return_time_positions =  $array_time_position['result_time_positions'];
+            if ($public_going_out_return_time <> ''){
+                $array_add_public_going_out_return_time[] = $public_going_out_return_time;
+                $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
+            }
+            Log::DEBUG('                 public_going_out_return_time = '.$public_going_out_return_time);
+        }
+
+        $this->calc_late_night_working_hours = 0;
+        return array(
+            'array_calc_time' => $array_calc_time,
+            'array_missing_middle_time' => $array_missing_middle_time,
+            'array_public_going_out_time' => $array_public_going_out_time,
+            'array_add_attendance_time' => $array_add_attendance_time,
+            'array_add_leaving_time' => $array_add_leaving_time,
+            'array_add_missing_middle_time' => $array_add_missing_middle_time,
+            'array_add_missing_middle_return_time' => $array_add_missing_middle_return_time,
+            'array_add_public_going_out_time' => $array_add_public_going_out_time,
+            'array_add_public_going_out_return_time' => $array_add_public_going_out_return_time,
+            'array_add_attendance_time_positions' => $array_add_attendance_time_positions,
+            'array_add_leaving_time_positions' => $array_add_leaving_time_positions,
+            'array_add_missing_middle_time_positions' => $array_add_missing_middle_time_positions,
+            'array_add_missing_middle_return_time_positions' => $array_add_missing_middle_return_time_positions,
+            'array_add_public_going_out_time_positions' => $array_add_public_going_out_time_positions,
+            'array_add_public_going_out_return_time_positions' => $array_add_public_going_out_return_time_positions,
+            'attendance_time' => $attendance_time,
+            'leaving_time' => $leaving_time,
+            'missing_middle_time' => $missing_middle_time,
+            'missing_middle_return_time' => $missing_middle_return_time,
+            'public_going_out_time' => $public_going_out_time,
+            'public_going_out_return_time' => $public_going_out_return_time,
+            'attendance_time_positions' => $attendance_time_positions,
+            'leaving_time_positions' => $leaving_time_positions,
+            'missing_middle_time_positions' => $missing_middle_time_positions,
+            'missing_middle_return_time_positions' => $missing_middle_return_time_positions,
+            'public_going_out_time_positions' => $public_going_out_time_positions,
+            'public_going_out_return_time_positions' => $public_going_out_return_time_positions
+        );
+    }
+
+    /**
+     * 労働時間数配列初期化
+     * 
+     */
+    private function setArrayTimeSet0(
+        $array_working_time_kubun
+        )
+    {
+        $array_calc_time = array(); 
+        $array_missing_middle_time = array(); 
+        $array_public_going_out_time = array(); 
+        for ($i=0;$i<count($array_working_time_kubun);$i++) {
+            $array_calc_time[$i] = 0; 
+            $array_missing_middle_time[$i] = 0; 
+            $array_public_going_out_time[$i] = 0; 
+        }
+
+        return array(
+            'array_calc_time' => $array_calc_time,
+            'array_missing_middle_time' => $array_missing_middle_time,
+            'array_public_going_out_time' => $array_public_going_out_time
+        );
+    }
+ 
+    /**
+     * 時刻と位置情報の設定
+     * 
+     */
+    private function setTimePosition($result)
+    {
+        $result_time = $result->record_datetime;
+        if (isset($result->x_positions) && isset($result->y_positions)) {
+            $result_time_positions = $result->x_positions.' '.$result->y_positions;
+        } else {
+            $result_time_positions = null;
+        }
+
+        return array('result_time' => $result_time , 'result_time_positions' => $result_time_positions);
+    }
+
     /**
      * 勤怠集計結果コレクション設定
      * 

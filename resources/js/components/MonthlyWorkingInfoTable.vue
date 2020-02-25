@@ -20,6 +20,7 @@
                     <td class="text-center align-middle w-15">所定時間</td>
                     <td class="text-center align-middle w-15">残業時間</td>
                     <td class="text-center align-middle w-15">深夜残業時間</td>
+                    <td class="text-center align-middle w-15">深夜労働時間</td>
                     <td class="text-center align-middle w-15">公用外出時間</td>
                     <td class="text-center align-middle w-15">私用外出時間</td>
                     <td class="text-center align-middle w-15"
@@ -47,6 +48,7 @@
                     <td class="text-center align-middle w-15">所定外時間</td>
                     <td class="text-center align-middle w-15">残業時間</td>
                     <td class="text-center align-middle w-15">深夜残業時間</td>
+                    <td class="text-center align-middle w-15">深夜労働時間</td>
                     <td class="text-center align-middle w-15">法定時間</td>
                     <td class="text-center align-middle w-15">法定外時間</td>
                     <td class="text-center align-middle w-15">公用外出時間</td>
@@ -74,6 +76,7 @@
                     <td class="text-center align-middle w-15">所定時間</td>
                     <td class="text-center align-middle w-15">残業時間</td>
                     <td class="text-center align-middle w-15">深夜残業時間</td>
+                    <td class="text-center align-middle w-15">深夜労働時間</td>
                     <td class="text-center align-middle w-15">公用外出時間</td>
                     <td class="text-center align-middle w-15">私用外出時間</td>
                     <td class="text-center align-middle w-15"
@@ -100,6 +103,7 @@
                     <td class="text-center align-middle w-15">所定外時間</td>
                     <td class="text-center align-middle w-15">残業時間</td>
                     <td class="text-center align-middle w-15">深夜残業時間</td>
+                    <td class="text-center align-middle w-15">深夜労働時間</td>
                     <td class="text-center align-middle w-15">法定時間</td>
                     <td class="text-center align-middle w-15">法定外時間</td>
                     <td class="text-center align-middle w-15">公用外出時間</td>
@@ -131,6 +135,7 @@
                     <td class="text-center align-middle">{{ calcLists.regular_working_times }}</td>
                     <td class="text-center align-middle">{{ calcLists.off_hours_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcLists.late_night_overtime_hours }}</td>
+                    <td class="text-center align-middle">{{ calcLists.late_night_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcLists.public_going_out_hours }}</td>
                     <td class="text-center align-middle">{{ calcLists.missing_middle_hours }}</td>
                     <td class="text-center align-middle"
@@ -159,6 +164,7 @@
                     <td class="text-center align-middle">{{ calcLists.out_of_regular_working_times }}</td>
                     <td class="text-center align-middle">{{ calcLists.off_hours_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcLists.late_night_overtime_hours }}</td>
+                    <td class="text-center align-middle">{{ calcLists.late_night_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcLists.legal_working_times }}</td>
                     <td class="text-center align-middle">{{ calcLists.out_of_legal_working_times }}</td>
                     <td class="text-center align-middle">{{ calcLists.public_going_out_hours }}</td>
@@ -188,6 +194,7 @@
                     <td class="text-center align-middle">{{ calcList.regular_working_times }}</td>
                     <td class="text-center align-middle">{{ calcList.off_hours_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.late_night_overtime_hours }}</td>
+                    <td class="text-center align-middle">{{ calcList.late_night_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.public_going_out_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.missing_middle_hours }}</td>
                     <td class="text-center align-middle"
@@ -216,6 +223,7 @@
                     <td class="text-center align-middle">{{ calcList.out_of_regular_working_times }}</td>
                     <td class="text-center align-middle">{{ calcList.off_hours_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.late_night_overtime_hours }}</td>
+                    <td class="text-center align-middle">{{ calcList.late_night_working_hours }}</td>
                     <td class="text-center align-middle">{{ calcList.legal_working_times }}</td>
                     <td class="text-center align-middle">{{ calcList.out_of_legal_working_times }}</td>
                     <td class="text-center align-middle">{{ calcList.public_going_out_hours }}</td>

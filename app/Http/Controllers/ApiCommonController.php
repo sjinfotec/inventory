@@ -1418,6 +1418,26 @@ class ApiCommonController extends Controller
         $dt = new Carbon($target_date);
         return date_format($dt->addDay(), $str_format);
     }
+    
+
+    /**
+     * 指定時間（スタンプ）後を求める
+     *
+     * @return 指定時間後（前）
+     */
+    public function getAfterDayTime($target_date, $add_time, $str_format){
+        Log::DEBUG('             指定時間後を求める target_date = '.$target_date);
+        Log::DEBUG('             指定時間後を求める add_time = '.$add_time);
+        Log::DEBUG('             指定時間後を求める str_format = '.$str_format);
+        $dt = new Carbon($target_date);
+        if ($add_time > 0) {
+            return date_format($dt->addSecond($add_time), $str_format);
+        } elseif($add_time == 0) {
+            return date_format($dt, $str_format);
+        } else {
+            return date_format($dt->subSecond(0 - $add_time), $str_format);
+        }
+    }
  
     /**
      * 法定法定外休日判定
@@ -1630,6 +1650,77 @@ class ApiCommonController extends Controller
             $chk_result = false;
         }
         return $chk_result;
+    }
+
+    /**
+     * 時間範囲内に休憩時間が何時間あるか（日次集計用）
+     * 
+     *      前提
+     *          target_from_datetime <= target_to_datetime
+     *
+     * @return 
+     */
+    public function calcBetweenBreakTime(
+        $target_from_datetime, $target_to_datetime, $current_date,
+        $timetables, $working_timetable_no,
+        $setting_from_datetime, $setting_to_datetime){
+
+        Log::DEBUG(' ----------------- calcBetweenBreakTime in ----------------- ');
+        Log::DEBUG('                   $target_from_datetime = '.$target_from_datetime);
+        Log::DEBUG('                   $target_to_datetime = '.$target_to_datetime);
+        Log::DEBUG('                   $current_date = '.$current_date);
+        Log::DEBUG('                   $working_timetable_no = '.$working_timetable_no);
+        Log::DEBUG('                   $setting_from_datetime = '.$setting_from_datetime);
+        Log::DEBUG('                   $setting_to_datetime = '.$setting_to_datetime);
+        // 休憩時間を含んでいる場合、休憩時間累計を求めて減算する
+        $filtered = $timetables->where('no', $working_timetable_no)
+            ->where('working_time_kubun', Config::get('const.C004.regular_working_breaks_time'));
+        // 休憩時間帯は複数あるかも
+        $calc_times = 0;
+        foreach($filtered as $result_breaks_time) {
+            $from_time = $result_breaks_time->from_time;        // 休憩開始時刻
+            $to_time = $result_breaks_time->to_time;            // 休憩終了時刻
+            Log::DEBUG('                   setting休憩時間 from_time = '.$from_time);
+            Log::DEBUG('                   setting休憩時間 to_time = '.$to_time);
+            if (isset($from_time) && isset($to_time)) {
+                // from_time日付付与
+                $time_calc_from = 
+                    $this->convTimeToDateFrom($from_time, $current_date, $target_from_datetime, $target_to_datetime);         
+                // to_time日付付与
+                $time_calc_to = 
+                    $this->convTimeToDateTo($from_time, $to_time, $current_date, $target_from_datetime, $target_to_datetime);         
+                Log::DEBUG('                   休憩時間 time_calc_from = '.$time_calc_from);
+                Log::DEBUG('                   休憩時間 time_calc_to = '.$time_calc_to);
+                $chk_time = true;
+                if (isset($setting_from_datetime) && isset($setting_to_datetime)) {
+                    // タイムテーブル設定時刻のチェックを行う場合
+                    // タイムテーブル時間範囲内に休憩開始終了時刻がある場合に計算する
+                    if (($time_calc_from <= $setting_from_datetime || $time_calc_from >= $setting_to_datetime) &&
+                        ($time_calc_to <= $setting_from_datetime || $time_calc_to >= $setting_to_datetime)) {
+                        $chk_time = false;
+                    }
+                }
+                if ($chk_time) {
+                    //  指定時間範囲内に休憩開始終了時刻がある場合に計算する
+                    if (($time_calc_from > $target_from_datetime && $time_calc_from < $target_to_datetime) ||
+                        ($time_calc_to > $target_from_datetime && $time_calc_to < $target_to_datetime)) {
+                        if ($target_from_datetime > $time_calc_from) {
+                            $time_calc_from = $target_from_datetime;
+                        }
+                        if ($target_to_datetime < $time_calc_to) {
+                            $time_calc_to = $target_to_datetime;
+                        }
+                        Log::DEBUG('                   集計開始時刻 time_calc_from = '.$time_calc_from);
+                        Log::DEBUG('                   集計終了時刻 time_calc_to = '.$time_calc_to);
+                        if ($time_calc_from < $time_calc_to) {
+                            $calc_times += $this->diffTimeSerial($time_calc_from, $time_calc_to);
+                        }
+                    }
+                }
+            }
+        }
+        Log::DEBUG('                   集計結果 calc_times = '.$calc_times);
+        return $calc_times;
     }
 
     /**

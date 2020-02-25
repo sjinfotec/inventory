@@ -140,6 +140,15 @@ class MonthlyWorkingInformationController extends Controller
                         }
                     }
                 }
+                if(!isset($record['attendance']) && !isset($record['leaving'])){
+                    if(!isset($record['late_night_working_hours'])){
+                        $working_time_dates[$index1]['date'][$index2]['late_night_working_hours'] = "";
+                    } else{
+                        if($record['late_night_working_hours'] == "00:00"){
+                            $working_time_dates[$index1]['date'][$index2]['late_night_working_hours'] = "";
+                        }
+                    }
+                }
             }
         }
         
@@ -511,7 +520,8 @@ class MonthlyWorkingInformationController extends Controller
             'total_working_times' => $result->total_working_times,
             'regular_working_times' => $result->regular_working_times,
             'off_hours_working_hours' => $result->off_hours_working_hours,
-            'late_night_overtime_hours' => $result->late_night_overtime_hours
+            'late_night_overtime_hours' => $result->late_night_overtime_hours,
+            'late_night_working_hours' => $result->late_night_working_hours
         );
     }
 
@@ -538,10 +548,13 @@ class MonthlyWorkingInformationController extends Controller
                 'out_of_regular_working_times' => $working_time_sum_result->out_of_regular_working_times,
                 'overtime_hours' => $working_time_sum_result->overtime_hours,
                 'late_night_overtime_hours' => $working_time_sum_result->late_night_overtime_hours,
+                'late_night_working_hours' => $working_time_sum_result->late_night_working_hours,
                 'legal_working_times' => $working_time_sum_result->legal_working_times,
                 'out_of_legal_working_times' => $working_time_sum_result->out_of_legal_working_times,
                 'not_employment_working_hours' => $working_time_sum_result->not_employment_working_hours,
                 'off_hours_working_hours' => $working_time_sum_result->off_hours_working_hours,
+                'legal_working_holiday_hours' => $working_time_sum_result->legal_working_holiday_hours,
+                'out_of_legal_working_holiday_hours' => $working_time_sum_result->out_of_legal_working_holiday_hours,
                 'public_going_out_hours' => $working_time_sum_result->public_going_out_hours,
                 'missing_middle_hours' => $working_time_sum_result->missing_middle_hours,
                 'total_working_status' => $working_time_sum_result->total_working_status,
