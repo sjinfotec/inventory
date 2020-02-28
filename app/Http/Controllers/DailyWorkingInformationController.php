@@ -3763,6 +3763,7 @@ class DailyWorkingInformationController extends Controller
         $before_holiday_kubun = null;
         $before_holiday_set = false;
 
+        $apicommon = new ApiCommonController();
         // ユーザー単位処理
         $temp_calc_model = new TempCalcWorkingTime();
         $worktimes = $temp_calc_model->getTempCalcWorkingtime();
@@ -3911,7 +3912,8 @@ class DailyWorkingInformationController extends Controller
                                         $missing_middle_time,
                                         $missing_middle_return_time,
                                         $array_calc_time,
-                                        $array_missing_middle_time);
+                                        $array_missing_middle_time
+                                    );
                                 Log::DEBUG('        私用外出データ　$i =  '.$i);
                                 Log::DEBUG('        私用外出データ　array_working_time_kubun[$i] =  '.$array_working_time_kubun[$i]);
                                 Log::DEBUG('        私用外出データ　array_missing_middle_time[$i] =  '.$array_missing_middle_time[$i]);
@@ -3950,7 +3952,8 @@ class DailyWorkingInformationController extends Controller
                                         $public_going_out_time,
                                         $public_going_out_return_time,
                                         $array_calc_time,
-                                        $array_public_going_out_time);
+                                        $array_public_going_out_time
+                                    );
                                 Log::DEBUG('        公用外出データ　$i =  '.$i);
                                 Log::DEBUG('        公用外出データ　array_working_time_kubun[$i] =  '.$array_working_time_kubun[$i]);
                                 Log::DEBUG('        公用外出データ　array_public_going_out_time[$i] =  '.$array_public_going_out_time[$i]);
@@ -3985,9 +3988,10 @@ class DailyWorkingInformationController extends Controller
                                         $array_working_time_kubun[$i],
                                         $current_date,
                                         $attendance_time,
-                                        $leaving_time,
+                                        $apicommon->roundTimeByTime($current_date, $leaving_time, $result->time_unit, $result->time_rounding),
                                         $array_calc_time,
-                                        $array_missing_middle_time);
+                                        $array_missing_middle_time
+                                    );
                                 Log::DEBUG('        退勤データ　$i =  '.$i);
                                 Log::DEBUG('        退勤データ　array_working_time_kubun[$i] =  '.$array_working_time_kubun[$i]);
                                 Log::DEBUG('        退勤データ　array_calc_time[$i] =  '.$array_calc_time[$i]);
@@ -4003,7 +4007,7 @@ class DailyWorkingInformationController extends Controller
                                         $array_working_time_kubun[$i],
                                         $current_date,
                                         $attendance_time,
-                                        $leaving_time);
+                                        $apicommon->roundTimeByTime($current_date, $leaving_time, $result->time_unit, $result->time_rounding));
                             }
                         }
                         // 出勤退勤時刻を初期化して次の計算準備
@@ -4929,8 +4933,8 @@ class DailyWorkingInformationController extends Controller
                 // ------------------ DEBUG strat ----------------------------------------
                 Log::DEBUG(' 　　　　　　working_time_kubun = '.$working_time_kubun);
                 Log::DEBUG('            working_time_from_time = '.$working_time_from_time);
-                Log::DEBUG('　　　　　　 出勤時刻  target_from_time = '.$target_from_time);
-                Log::DEBUG('            退勤時刻  target_to_time = '.$target_to_time);
+                Log::DEBUG('　　　　　　 出勤時刻または外出  target_from_time = '.$target_from_time);
+                Log::DEBUG('            退勤時刻または戻り  target_to_time = '.$target_to_time);
                 Log::DEBUG('            設定開始時刻  working_time_calc_from = '.$working_time_calc_from);
                 Log::DEBUG('            設定終了時刻  working_time_calc_to = '.$working_time_calc_to);
                 Log::DEBUG('            inc = '.$inc);
@@ -5493,7 +5497,8 @@ class DailyWorkingInformationController extends Controller
         // $array_calc_time[$index]=0はまだ退勤していないということ
         if ($array_calc_time[$index] > 0) {
             $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
-            $regular_calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+            //$regular_calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+            $regular_calc_time = round($w_time / 60 / 60,2);
         }
         // -------------  debug ---------------------- start --------------
         Log::DEBUG('        所定労働時間　- 未就労時間　10進数　$w_time　　　　　　　　= '.$w_time);
@@ -5511,7 +5516,8 @@ class DailyWorkingInformationController extends Controller
         // $array_calc_time[$index]=0はまだ退勤していないということ
         if ($array_calc_time[$index] > 0) {
             $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
-            $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+            // $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+            $calc_time = round($w_time / 60 / 60,2);
         }
         // -------------  debug ---------------------- start --------------
         Log::DEBUG('        時間外労働時間- 未就労時間　10進数　$w_time　　　　　　　　= '.$w_time);
@@ -5581,7 +5587,8 @@ class DailyWorkingInformationController extends Controller
         // $array_calc_time[$index]=0はまだ退勤していないということ
         if ($array_calc_time[$index] > 0) {
             $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
-            $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+            // $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+            $calc_time = round($w_time / 60 / 60,2);
         }
         // -------------  debug ---------------------- start --------------
         Log::DEBUG('        深夜労働残業時間 10進数 $w_time           = '.$w_time);
@@ -5774,8 +5781,10 @@ class DailyWorkingInformationController extends Controller
             $calc_missing_time += $array_missing_middle_time[$i];
             Log::DEBUG('        不就労時間 私用外出時間 = '.$array_missing_middle_time[$i]);
         }
-        $calc_time = round($apicommon->roundTime($calc_time + $calc_missing_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-        $calc_missing_time = round($apicommon->roundTime($calc_missing_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+        // $calc_time = round($apicommon->roundTime($calc_time + $calc_missing_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+        $calc_time = round(($calc_time + $calc_missing_time) / 60 / 60,2);
+        $calc_missing_time = round($calc_missing_time / 60 / 60,2);
+        // $calc_missing_time = round($apicommon->roundTime($calc_missing_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
         Log::DEBUG('$target_user_code = '.$target_user_code.'        不就労時間（休憩時間＋私用外出時間） =  '. $calc_time.' + '.$calc_missing_time);
         $temp_working_model->setMissingmiddlehoursAttribute($calc_missing_time);
         // 公用外出時間
@@ -5787,7 +5796,8 @@ class DailyWorkingInformationController extends Controller
         // 合計勤務時間
         $temp_working_model->setTotalworkingtimesAttribute($total_time);
 
-        $calc_time = round($apicommon->roundTime($calc_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+        // $calc_time = round($apicommon->roundTime($calc_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+        $calc_time = round($calc_time / 60 / 60,2);
         $temp_working_model->setPublicgoingouthoursAttribute($calc_time);
         $temp_working_model->setWorkingtimetablenoAttribute($target_result->working_timetable_no);
         $temp_working_model->setWorkingstatusAttribute($working_status);

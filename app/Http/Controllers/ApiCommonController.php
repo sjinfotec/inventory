@@ -1831,6 +1831,267 @@ class ApiCommonController extends Controller
     
 
     /**
+     * 時間丸め処理（時間丸めする）
+     *
+     * @return 分で返却
+     */
+    public function roundTimeByTime($round_date, $round_time, $time_unit, $time_rounding){
+
+        $result_round_time = $round_time;
+        Log::DEBUG('roundTimeByTime $result_round_time = '.$result_round_time);
+        $dt = new Carbon($result_round_time);
+        $target_h = $dt->format("H");
+        $target_i = $dt->format("i");
+        $target_s = $dt->format("s");
+        $w_time_h = (int)$target_h;
+        $w_time_i = (int)$target_i;
+        $result_w_time_h = $target_h;
+        $result_w_time_i = $target_i;
+        Log::DEBUG('roundTimeByTime $target_h = '.$target_h);
+        Log::DEBUG('roundTimeByTime $target_i = '.$target_i);
+        Log::DEBUG('roundTimeByTime $target_s = '.$target_s);
+        if ($time_rounding == Config::get('const.C010.round_half_up')) {
+            // 四捨五入
+            if ($time_unit == Config::get('const.C009.round1')) {
+                $result_round_time = $round_time;
+            } elseif ($time_unit == Config::get('const.C009.round5')) {
+                if ($w_time_i <= 2) {
+                    $result_w_time_i = "00";
+                } elseif ($w_time_i <= 7) {
+                    $result_w_time_i = "05";
+                } elseif ($w_time_i <= 12) {
+                    $result_w_time_i = "10";
+                } elseif ($w_time_i <= 17) {
+                    $result_w_time_i = "15";
+                } elseif ($w_time_i <= 22) {
+                    $result_w_time_i = "20";
+                } elseif ($w_time_i <= 27) {
+                    $result_w_time_i = "25";
+                } elseif ($w_time_i <= 32) {
+                    $result_w_time_i = "30";
+                } elseif ($w_time_i <= 37) {
+                    $result_w_time_i = "35";
+                } elseif ($w_time_i <= 42) {
+                    $result_w_time_i = "40";
+                } elseif ($w_time_i <= 47) {
+                    $result_w_time_i = "45";
+                } elseif ($w_time_i <= 52) {
+                    $result_w_time_i = "50";
+                } elseif ($w_time_i <= 57) {
+                    $result_w_time_i = "55";
+                } else {
+                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
+                    $result_w_time_i = "00";
+                }
+                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
+                $result_round_time = $dt->format("Y-m-d H:i:s");
+            } elseif ($time_unit == Config::get('const.C009.round10')) {
+                if ($w_time_i <= 4) {
+                    $result_w_time_i = "00";
+                } elseif ($w_time_i <= 14) {
+                    $result_w_time_i = "10";
+                } elseif ($w_time_i <= 24) {
+                    $result_w_time_i = "20";
+                } elseif ($w_time_i <= 34) {
+                    $result_w_time_i = "30";
+                } elseif ($w_time_i <= 44) {
+                    $result_w_time_i = "40";
+                } elseif ($w_time_i <= 54) {
+                    $result_w_time_i = "50";
+                } else {
+                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
+                    $result_w_time_i = "00";
+                }
+                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
+                $result_round_time = $dt->format("Y-m-d H:i:s");
+            } elseif ($time_unit == Config::get('const.C009.round15')) {
+                if ($w_time_i <= 6) {
+                    $result_w_time_i = "00";
+                } elseif ($w_time_i <= 21) {
+                    $result_w_time_i = "15";
+                } elseif ($w_time_i <= 36) {
+                    $result_w_time_i = "30";
+                } elseif ($w_time_i <= 51) {
+                    $result_w_time_i = "45";
+                } else {
+                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
+                    $result_w_time_i = "00";
+                }
+                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
+                $result_round_time = $dt->format("Y-m-d H:i:s");
+            } elseif ($time_unit == Config::get('const.C009.round30')) {
+                if ($w_time_i <= 12) {
+                    $result_w_time_i = "00";
+                } elseif ($w_time_i <= 42) {
+                    $result_w_time_i = "30";
+                } else {
+                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
+                    $result_w_time_i = "00";
+                }
+                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
+                $result_round_time = $dt->format("Y-m-d H:i:s");
+            } elseif ($time_unit == Config::get('const.C009.round60')) {
+                $result_round_time = $round_time;
+            }
+        } elseif ($time_rounding == Config::get('const.C010.round_down')) {
+            // 切り捨て
+            if ($time_unit == Config::get('const.C009.round1')) {
+                $result_round_time = $round_time;
+            } elseif ($time_unit == Config::get('const.C009.round5')) {
+                if ($w_time_i <= 4) {
+                    $result_w_time_i = "00";
+                } elseif ($w_time_i <= 9) {
+                    $result_w_time_i = "05";
+                } elseif ($w_time_i <= 14) {
+                    $result_w_time_i = "10";
+                } elseif ($w_time_i <= 19) {
+                    $result_w_time_i = "15";
+                } elseif ($w_time_i <= 24) {
+                    $result_w_time_i = "20";
+                } elseif ($w_time_i <= 29) {
+                    $result_w_time_i = "25";
+                } elseif ($w_time_i <= 34) {
+                    $result_w_time_i = "30";
+                } elseif ($w_time_i <= 39) {
+                    $result_w_time_i = "35";
+                } elseif ($w_time_i <= 44) {
+                    $result_w_time_i = "40";
+                } elseif ($w_time_i <= 49) {
+                    $result_w_time_i = "45";
+                } elseif ($w_time_i <= 54) {
+                    $result_w_time_i = "50";
+                } else {
+                    $result_w_time_i = "55";
+                }
+                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
+                $result_round_time = $dt->format("Y-m-d H:i:s");
+            } elseif ($time_unit == Config::get('const.C009.round10')) {
+                if ($w_time_i <= 9) {
+                    $result_w_time_i = "00";
+                } elseif ($w_time_i <= 19) {
+                    $result_w_time_i = "10";
+                } elseif ($w_time_i <= 29) {
+                    $result_w_time_i = "20";
+                } elseif ($w_time_i <= 39) {
+                    $result_w_time_i = "30";
+                } elseif ($w_time_i <= 49) {
+                    $result_w_time_i = "40";
+                } else {
+                    $result_w_time_i = "50";
+                }
+                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
+                $result_round_time = $dt->format("Y-m-d H:i:s");
+            } elseif ($time_unit == Config::get('const.C009.round15')) {
+                if ($w_time_i <= 14) {
+                    $result_w_time_i = "00";
+                } elseif ($w_time_i <= 29) {
+                    $result_w_time_i = "15";
+                } elseif ($w_time_i <= 44) {
+                    $result_w_time_i = "30";
+                } else {
+                    $result_w_time_i = "45";
+                }
+                Log::DEBUG('roundTimeByTime $substr($round_time,11) = '.substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
+                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
+                Log::DEBUG('roundTimeByTime $dt = '.$dt);
+                $result_round_time = $dt->format("Y-m-d H:i:s");
+            } elseif ($time_unit == Config::get('const.C009.round30')) {
+                if ($w_time_i <= 29) {
+                    $result_w_time_i = "00";
+                } else {
+                    $result_w_time_i = "30";
+                }
+                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
+                $result_round_time = $dt->format("Y-m-d H:i:s");
+            } elseif ($time_unit == Config::get('const.C009.round60')) {
+                $result_round_time = $round_time;
+            }
+        } elseif ($time_rounding == Config::get('const.C010.round_up')) {
+            // 切り上げ
+            if ($time_unit == Config::get('const.C009.round1')) {
+                $result_round_time = $round_time;
+            } elseif ($time_unit == Config::get('const.C009.round5')) {
+                if ($w_time_i <= 5) {
+                    $result_w_time_i = "05";
+                } elseif ($w_time_i <= 10) {
+                    $result_w_time_i = "10";
+                } elseif ($w_time_i <= 15) {
+                    $result_w_time_i = "15";
+                } elseif ($w_time_i <= 20) {
+                    $result_w_time_i = "20";
+                } elseif ($w_time_i <= 25) {
+                    $result_w_time_i = "25";
+                } elseif ($w_time_i <= 30) {
+                    $result_w_time_i = "30";
+                } elseif ($w_time_i <= 35) {
+                    $result_w_time_i = "35";
+                } elseif ($w_time_i <= 40) {
+                    $result_w_time_i = "40";
+                } elseif ($w_time_i <= 45) {
+                    $result_w_time_i = "45";
+                } elseif ($w_time_i <= 50) {
+                    $result_w_time_i = "50";
+                } elseif ($w_time_i <= 55) {
+                    $result_w_time_i = "55";
+                } else {
+                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
+                    $result_w_time_i = "00";
+                }
+                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
+                $result_round_time = $dt->format("Y-m-d H:i:s");
+            } elseif ($time_unit == Config::get('const.C009.round10')) {
+                if ($w_time_i <= 10) {
+                    $result_w_time_i = "10";
+                } elseif ($w_time_i <= 20) {
+                    $result_w_time_i = "20";
+                } elseif ($w_time_i <= 30) {
+                    $result_w_time_i = "30";
+                } elseif ($w_time_i <= 40) {
+                    $result_w_time_i = "40";
+                } elseif ($w_time_i <= 50) {
+                    $result_w_time_i = "50";
+                } else {
+                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
+                    $result_w_time_i = "00";
+                }
+                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
+                $result_round_time = $dt->format("Y-m-d H:i:s");
+            } elseif ($time_unit == Config::get('const.C009.round15')) {
+                if ($w_time_i <= 15) {
+                    $result_w_time_i = "15";
+                } elseif ($w_time_i <= 30) {
+                    $result_w_time_i = "30";
+                } elseif ($w_time_i <= 45) {
+                    $result_w_time_i = "45";
+                } else {
+                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
+                    $result_w_time_i = "00";
+                }
+                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
+                $result_round_time = $dt->format("Y-m-d H:i:s");
+            } elseif ($time_unit == Config::get('const.C009.round30')) {
+                if ($w_time_i <= 30) {
+                    $result_w_time_i = "30";
+                } else {
+                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
+                    $result_w_time_i = "00";
+                }
+                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
+                $result_round_time = $dt->format("Y-m-d H:i:s");
+            } elseif ($time_unit == Config::get('const.C009.round60')) {
+                $result_round_time = $round_time;
+            }
+        } elseif ($time_unit == Config::get('const.C010.non')) {
+            $result_round_time = $round_time;
+        } else {
+            $result_round_time = $round_time;
+        }
+        Log::DEBUG('roundTimeByTime $result_round_time = '.$result_round_time);
+
+        return $result_round_time;
+    }
+
+    /**
      * 時間丸め処理（シリアルで丸めする）
      *
      * @return 分で返却
