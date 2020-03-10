@@ -108,7 +108,7 @@
                 @yield('content')
                 @if(Auth::check())
                 <!-- main contentns row -->
-                <div class="row justify-content-between">
+                <div class="row justify-content-between print-none">
                     <!-- .panel -->
                     <div class="col-md p-3">
                         <div class="text-center">

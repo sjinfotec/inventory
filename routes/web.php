@@ -25,12 +25,12 @@ Route::get('/home', 'HomeController@index')->name('home');
 // ------------------ 集計 --------------------------------
 // 日次集計
 Route::get('/daily', 'DailyWorkingInformationController@index')->middleware('auth');
-Route::get('/daily/calc', 'DailyWorkingInformationController@show')->middleware('auth');
+Route::post('/daily/calc', 'DailyWorkingInformationController@show')->middleware('auth');
 Route::get('/daily/show', 'DailyWorkingInformationController@show')->middleware('auth');
 // 月次集計
 Route::get('/monthly', 'MonthlyWorkingInformationController@index')->middleware('auth');
-Route::get('/monthly/calc', 'MonthlyWorkingInformationController@calc')->middleware('auth');
-Route::get('/monthly/show', 'MonthlyWorkingInformationController@show')->middleware('auth');
+Route::post('/monthly/calc', 'MonthlyWorkingInformationController@calc')->middleware('auth');
+Route::post('/monthly/show', 'MonthlyWorkingInformationController@show')->middleware('auth');
 // 勤怠ログ集計
 Route::get('/attendancelog', 'AttendanceLogController@index')->middleware('auth');
 Route::post('/attendancelog/show', 'AttendanceLogController@show')->middleware('auth');
@@ -116,9 +116,9 @@ Route::post('/create_time_table/add', 'CreateTimeTableController@add')->middlewa
 // カレンダー設定
 Route::get('/setting_calendar', 'EditCalendarController@index')->middleware('auth');
 Route::post('/setting_calendar/get', 'EditCalendarController@getDetail')->middleware('auth');
-Route::post('/setting_calendar/store', 'EditCalendarController@store')->middleware('auth');
 Route::post('/setting_calendar/fix', 'EditCalendarController@fix')->middleware('auth');
 Route::post('/setting_calendar/init', 'EditCalendarController@init')->middleware('auth');
+Route::post('/setting_calendar/copyinit', 'EditCalendarController@copyinit')->middleware('auth');
 // ユーザー情報設定
 // Route::get('/user_add', 'UserAddController@index')->middleware('auth');
 // Route::post('/user_add/store', 'UserAddController@store')->middleware('auth');

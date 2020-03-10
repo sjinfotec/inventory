@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Config;
 use App\Http\Requests\StoreUserPost;
 use Illuminate\Support\Facades\Auth;
 use App\UserModel;
+use App\Calendar;
 use Carbon\Carbon;
 
 class UserAddController extends Controller
@@ -71,7 +72,11 @@ class UserAddController extends Controller
                 }
             }
             // insert
-            $this->insert($details);
+            $result = $this->insert($details);
+            if (!$result) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "calendarparam", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+            }
             return response()->json(
                 ['result' => $result,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -114,7 +119,6 @@ class UserAddController extends Controller
             $users->setWorkingtimetablenoAttribute($data['working_timetable_no']);
             $users->setEmailAttribute($data['email']);
             $users->setMobileEmailAttribute($data['mobile_email']);
-            Log::debug('insert password = '.$data['password']);
             $users->setPasswordAttribute(bcrypt($data['password']));
             $users->setCreatedatAttribute($systemdate);
             $users->setCreateduserAttribute($user_code);
@@ -122,7 +126,19 @@ class UserAddController extends Controller
             $users->setRoleAttribute($data['role']);
             // insert
             $users->insertNewUser();
-            DB::commit();
+            // calendar作成
+            // $calendar_model = new Calendar();
+            // $calendar_model->setUsercodeAttribute($data['code']);
+            // $calendar_model->setCreateduserAttribute($user_code);
+            // $calendar_model->setCreatedatAttribute($systemdate);
+            // $result = $calendar_model->storeByUser();
+            $result = true;
+            if ($result) {
+                DB::commit();
+            } else {
+                DB::rollBack();
+            }
+            return $result;
         }catch(\PDOException $pe){
             Log::error($pe->getMessage());
             DB::rollBack();

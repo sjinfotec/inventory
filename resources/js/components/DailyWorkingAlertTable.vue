@@ -15,13 +15,13 @@
                 <td class="text-center align-middle w-15">直前打刻時刻</td>
                 <td class="text-center align-middle w-15">直前打刻モード</td>
                 <td
-                  class="text-center align-middle w-15"
+                  class="text-center align-middle w-20 mw-rem-10"
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="'出退勤間インターバル時間警告の法定警告'"
                 >法定警告内容</td>
                 <td
-                  class="text-center align-middle w-15"
+                  class="text-center align-middle w-20 mw-rem-10"
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="'カード打刻内容の確認'"
@@ -34,43 +34,43 @@
                 class="card-body mb-3 py-0 pt-4 border-top"
               >
                 <td class="text-center align-middle">{{ alertList.record_date_name }}</td>
-                <td class="text-center align-middle">{{ alertList.employment_status_name }}</td>
-                <td class="text-center align-middle">{{ alertList.department_name }}</td>
-                <td class="text-center align-middle">{{ alertList.user_name }}</td>
-                <td class="text-center align-middle">{{ alertList.current_record_time }}</td>
-                <td class="text-center align-middle">{{ alertList.current_mode_name }}</td>
-                <td class="text-center align-middle">{{ alertList.before_record_time }}</td>
-                <td class="text-center align-middle">{{ alertList.before_mode_name }}</td>
+                <td class="text-left align-middle">{{ alertList.employment_status_name }}</td>
+                <td class="text-left align-middle">{{ alertList.department_name }}</td>
+                <td class="text-left align-middle">{{ alertList.user_name }}</td>
+                <td class="text-left align-middle">{{ alertList.current_record_time }}</td>
+                <td class="text-left align-middle">{{ alertList.current_mode_name }}</td>
+                <td class="text-left align-middle">{{ alertList.before_record_time }}</td>
+                <td class="text-left align-middle">{{ alertList.before_mode_name }}</td>
                 <td
-                  class="text-center align-middle"
+                  class="text-left align-middle"
                   data-toggle="tooltip"
                   data-placement="top"
                   v-if="alertList.interval_alaert === 1"
                   v-bind:title="'退勤してから出勤までの時間が規定時間以内であること'"
                 >出退勤間インターバル時間警告</td>
                 <td
-                  class="text-center align-middle"
+                  class="text-left align-middle"
                   data-toggle="tooltip"
                   data-placement="top"
                   v-if="alertList.interval_alaert !== 1"
                   v-bind:title="'退勤してから出勤までの時間が規定時間以内であること'"
                 ></td>
                 <td
-                  class="text-center align-middle"
+                  class="text-left align-middle"
                   data-toggle="tooltip"
                   data-placement="top"
                   v-if="alertList.hit_alert === 1"
                   v-bind:title="'カード打刻内容の確認'"
                 >打刻ミス</td>
                 <td
-                  class="text-center align-middle"
+                  class="text-left align-middle"
                   data-toggle="tooltip"
                   data-placement="top"
                   v-if="alertList.holiday_alert === 1"
                   v-bind:title="'出勤日にカード打刻なし'"
                 >打刻なし（出勤日）</td>
                 <td
-                  class="text-center align-middle"
+                  class="text-left align-middle"
                   data-toggle="tooltip"
                   data-placement="top"
                   v-if="alertList.hit_alert !== 1 && alertList.holiday_alert !== 1"
@@ -99,3 +99,8 @@ export default {
   }
 };
 </script>
+<style scoped>
+.table th, .table td {
+    padding: 0rem !important;
+}
+</style>

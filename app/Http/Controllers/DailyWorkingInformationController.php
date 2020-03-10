@@ -74,64 +74,213 @@ class DailyWorkingInformationController extends Controller
     public function show(Request $request){
 
         Log::debug('------------- 日次集計開始 show in----------------');
-        Log::debug('    パラメータ  $request->datefrom= '.$request->datefrom);
-        Log::debug('    パラメータ  $request->dateto = '.$request->dateto);
-        $calc_result = true;
-        $add_result = true;
-        // reqestクエリーセット
-        $datefrom = null;
-        if(isset($request->datefrom)){
-            $datefrom = $request->datefrom;
-        }
-        $dateto = null;
-        if(isset($request->dateto)){
-            $dateto = $request->dateto;
-        }
-        $employmentstatus = null;
-        if(isset($request->employmentstatus)){
-            $employmentstatus = $request->employmentstatus;
-        }
-        $departmentcode = null;
-        if(isset($request->departmentcode)){
-            $departmentcode =$request->departmentcode;
-        }
-        $usercode = null;
-        if(isset($request->usercode)){
-            $usercode = $request->usercode;
-        }
-
+        $this->array_messagedata = array();
+        $array_working_time_dates = array();
+        $working_time_sum = new collection();
         $apicommon = new ApiCommonController();
-        $work_time = new WorkTime();
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['calcresults' => $array_working_time_dates,
+                    'sumresults' => $working_time_sum,
+                    'datename' => "",
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['datefrom'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "datefrom", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['calcresults' => $array_working_time_dates,
+                    'sumresults' => $working_time_sum,
+                    'datename' => "",
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            // 開始日付のフォーマット 2019年10月01日(火)
+            $datefrom = $params['datefrom'];
+            $date_name = $apicommon->getYMDWeek($datefrom);
+            if (!isset($params['dateto'])) {
+                return response()->json(
+                    ['calcresults' => $array_working_time_dates,
+                    'sumresults' => $working_time_sum,
+                    'datename' => $date_name,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            // パラメータセット
+            $employmentstatus = null;
+            $departmentcode = null;
+            $usercode = null;
+            $dateto = $params['dateto'];
+            if (isset($params['employmentstatus'])) {
+                $employmentstatus = $params['employmentstatus'];
+            }
+            if (isset($params['departmentcode'])) {
+                $departmentcode = $params['departmentcode'];
+            }
+            if (isset($params['usercode'])) {
+                $usercode = $params['usercode'];
+            }
+            // showCalc implement
+            $array_impl_showCalc = array (
+                'datefrom' => $datefrom,
+                'dateto' => $dateto,
+                'employmentstatus' => $employmentstatus,
+                'departmentcode' => $departmentcode,
+                'usercode' => $usercode
+            );
+            $array_result_showCalc = $this->showCalc($array_impl_showCalc);
+            if (count($this->array_messagedata) > 0) {
+                return response()->json(
+                    ['calcresults' => $array_working_time_dates,
+                    'sumresults' => $working_time_sum,
+                    'datename' => "",
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $array_working_time_dates = $array_result_showCalc['array_working_time_dates'];
+            $working_time_sum = $array_result_showCalc['working_time_sum'];
 
+            Log::debug('------------- 日次集計開始 show end----------------');
+            return response()->json(
+                ['calcresults' => $array_working_time_dates,
+                    'sumresults' => $working_time_sum,
+                    'datename' => $date_name,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 日次集計計算 
+     *
+     * @return void
+     */
+    public function showCalc($params){
+
+        Log::debug('------------- 日次集計開始 showCalc in----------------');
         $business_kubun = "";
+        $datefrom = $params['datefrom'];
+        $dateto = $params['dateto'];
+        $employmentstatus = $params['employmentstatus'];
+        $departmentcode = $params['departmentcode'];
+        $usercode = $params['usercode'];
+        $array_result_calcMain = array();
+        try {
+            $apicommon = new ApiCommonController();
+            $work_time = new WorkTime();
+            // パラメータのチェック
+            $array_chk_work_time = $this->chkWorkingTimeData($params);
+            $chk_work_time = $array_chk_work_time['result'];
+            if ($chk_work_time) {
+                $work_time = $array_chk_work_time['work_time'];
+                // 休日判定
+                // jdgBusinessKbn implement
+                $array_impl_jdgBusinessKbn = array (
+                    'departmentcode' => $departmentcode,
+                    'employmentstatus' => $employmentstatus,
+                    'usercode' => $usercode,
+                    'datefrom' => $datefrom
+                );
+                $business_kubun = $apicommon->jdgBusinessKbn($array_impl_jdgBusinessKbn);
+                if (!isset($business_kubun)) {
+                    $dt = date_format(new Carbon($datefrom), 'Y年m月d日');
+                    $this->array_messagedata[] = 
+                        array( Config::get('const.RESPONCE_ITEM.message') => str_replace('{0}', $dt, Config::get('const.MSG_ERROR.not_setting_calendar')));
+                    Log::error(str_replace('{0}', $datefrom, Config::get('const.MSG_ERROR.not_setting_calendar')));
+                    $chk_work_time = false;
+                }
+            }
+            if ($chk_work_time) {
+                // calcMain implement
+                $array_impl_calcMain = array (
+                    'work_time' => $work_time,
+                    'datefrom' => $datefrom,
+                    'dateto' => $dateto,
+                    'employmentstatus' => $employmentstatus,
+                    'departmentcode' => $departmentcode,
+                    'usercode' => $usercode,
+                    'business_kubun' => $business_kubun
+                );
+                $array_result_calcMain = $this->calcMain($array_impl_calcMain);
+            }
+            Log::debug('------------- 日次集計開始 showCalc end ---------------');
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $array_result_calcMain;
+    }
+
+    /**
+     * パラメータのチェック 
+     *
+     * @return void
+     */
+    public function chkWorkingTimeData($param){
+
+        try {
+            // 打刻時刻を取得
+            $work_time = new WorkTime();
+            $work_time->setParamDatefromAttribute($param['datefrom']);
+            $work_time->setParamDatetoAttribute($param['dateto']);
+            $work_time->setParamemploymentstatusAttribute($param['employmentstatus']);
+            $work_time->setParamDepartmentcodeAttribute($param['departmentcode']);
+            $work_time->setParamUsercodeAttribute($param['usercode']);
+            $result = $work_time->chkWorkingTimeData();
+            if (!$result) {
+                $this->array_messagedata[] =  array( Config::get('const.RESPONCE_ITEM.message') => $work_time->getMassegedataAttribute());
+            }
+            return array (
+                'result' => $result,
+                'work_time' => $work_time
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+    }
+
+    /**
+     * 日次集計計算 
+     *
+     * @return void
+     */
+    public function calcMain($params){
+
+        Log::debug('------------- 日次集計開始 showCalcMain in----------------');
+        $work_time = $params['work_time'];
+        $datefrom = $params['datefrom'];
+        $dateto = $params['dateto'];
+        $employmentstatus = $params['employmentstatus'];
+        $departmentcode = $params['departmentcode'];
+        $usercode = $params['usercode'];
+        $business_kubun = $params['business_kubun'];
+        // 変数初期化
         $working_time_dates = new collection();
         $array_working_time_dates = array();
-        $array_working_time_attendances = array();
         $working_time_sum = new collection();
-
-        // 打刻時刻を取得
-        $work_time->setParamDatefromAttribute($datefrom);
-        $work_time->setParamDatetoAttribute($dateto);
-        $work_time->setParamemploymentstatusAttribute($employmentstatus);
-        $work_time->setParamDepartmentcodeAttribute($departmentcode);
-        $work_time->setParamUsercodeAttribute($usercode);
-        // パラメータのチェック
-        // datefromとdatetoがあるが、このメソッドではdatefrom=datetoであること
-        $chk_work_time = $work_time->chkWorkingTimeData();
-        if ($chk_work_time) {
-            // 休日判定
-            $business_kubun = $apicommon->jdgBusinessKbn($datefrom);
-            if (!isset($business_kubun)) {
-                $dt = date_format(new Carbon($datefrom), 'Y年m月d日');
-                $this->array_messagedata[] = 
-                    array( Config::get('const.RESPONCE_ITEM.message') => str_replace('{0}', $dt, Config::get('const.MSG_ERROR.not_setting_calendar')));
-                Log::error(str_replace('{0}', $datefrom, Config::get('const.MSG_ERROR.not_setting_calendar')));
-                $chk_work_time = false;
-            }
-        } else {
-            $this->array_messagedata[] =  array( Config::get('const.RESPONCE_ITEM.message') => $work_time->getMassegedataAttribute());
-        }
-        if ($chk_work_time) {
+        DB::beginTransaction();
+        try {
             // -------------- debug -------------- start --------
             if ($business_kubun == 1) {
                 Log::debug('------------- 集計開始 日付 = '.$datefrom.' 出勤日　business_kubun = '.$business_kubun );
@@ -143,89 +292,80 @@ class DailyWorkingInformationController extends Controller
             // -------------- debug -------------- end --------
             // パラメータの内容でworking_time_datesを削除
             $working_model = new WorkingTimedate();
-            DB::beginTransaction();
-            try{
+            $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
+            $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
+            $working_model->setParamEmploymentStatusAttribute($employmentstatus);
+            $working_model->setParamDepartmentcodeAttribute($departmentcode);
+            if ($working_model->isExistsWorkingTimeDate()) {
+                $working_model->delWorkingTimeDate();
+            }
+            // 日次集計
+            // addDailyCalc implement
+            $array_impl_addDailyCalc = array (
+                'work_time' => $work_time,
+                'datefrom' => $datefrom,
+                'dateto' => $dateto,
+                'employmentstatus' => $employmentstatus,
+                'departmentcode' => $departmentcode,
+                'usercode' => $usercode,
+                'business_kubun' => $business_kubun
+            );
+            $addCalc = $this->addDailyCalc($array_impl_addDailyCalc);
+            if ($addCalc) {
                 $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
                 $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
                 $working_model->setParamEmploymentStatusAttribute($employmentstatus);
                 $working_model->setParamDepartmentcodeAttribute($departmentcode);
-                if ($working_model->isExistsWorkingTimeDate()) {
-                    $working_model->delWorkingTimeDate();
-                }
-                // 日次集計
-                $addCalc = $this->addDailyCalc(
-                    $work_time,
-                    $datefrom,
-                    $dateto,
-                    $employmentstatus,
-                    $departmentcode,
-                    $usercode,
-                    $business_kubun);
-                if ($addCalc) {
-                    $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
-                    $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
-                    $working_model->setParamEmploymentStatusAttribute($employmentstatus);
-                    $working_model->setParamDepartmentcodeAttribute($departmentcode);
-                    $working_model->setParamUsercodeAttribute($usercode);
-                    // 集計結果
-                    $working_time_dates = 
-                        $working_model->getWorkingTimeDateTimeFormat(
-                            Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'),
-                            $working_model->getParamdatefromAttribute(), $business_kubun);
-                    // 合計結果
-                    if (count($working_time_dates) > 0) {
-                        $working_time_sum = $working_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'));
-                    } else {
-                        $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_workintime'));
-                    }
+                $working_model->setParamUsercodeAttribute($usercode);
+                // 集計結果
+                $working_time_dates = 
+                    $working_model->getWorkingTimeDateTimeFormat(
+                        Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'),
+                        $working_model->getParamdatefromAttribute(), $business_kubun);
+                // 合計結果
+                if (count($working_time_dates) > 0) {
+                    $working_time_sum = $working_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'));
                 } else {
-                    $add_result = false;
+                    $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_workintime'));
+                }
+
+                // 勤怠集計結果コレクション設定
+                $json_working_time_dates = $working_time_dates->toJson();
+                $dict_working_time_dates = json_decode ($json_working_time_dates, true);
+                foreach ($dict_working_time_dates as $key => $value) {
+                    $array_working_time_attendances = array();
+                    $time_cnt = 1;
+                    $array_working_time_attendances = array_merge($array_working_time_attendances, $this->setCollect_Working_time($value, $time_cnt, true));
+                    for ($i=$time_cnt+1; $i<6; $i++) {
+                        $array_working_time_attendances = array_merge($array_working_time_attendances, $this->setCollect_Working_time($value, $i, false));
+                    }
+                    // 集計結果配列設定
+                    $array_w = array();
+                    $array_w = $this->setArray_Working_time($value, $array_working_time_attendances);
+                    for ($i=0;$i<count($array_w);$i++) {
+                        $array_working_time_dates[] = $array_w[$i];
+                    }
                 }
                 DB::commit();
-                Log::debug('------------- 集計終了 日付 = '.$datefrom.' business_kubun = '.$business_kubun );
-            }catch(\PDOException $pe){
+            } else {
                 DB::rollBack();
-                $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
-            }catch(\Exception $e){
-                DB::rollBack();
-                $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
-                $add_result = false;
             }
-        } else {
-            Log::debug('------------- パラメータのチェック NG  ----------------');
-            $add_result = false;
+
+            Log::debug('------------- 集計終了 日付 = '.$datefrom.' business_kubun = '.$business_kubun );
+        }catch(\PDOException $pe){
+            DB::rollBack();
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
+            throw $pe;
+        }catch(\Exception $e){
+            DB::rollBack();
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
+            throw $e;
         }
 
-        // 勤怠集計結果コレクション設定
-        $json_working_time_dates = $working_time_dates->toJson();
-        $dict_working_time_dates = json_decode ($json_working_time_dates, true);
-        foreach ($dict_working_time_dates as $key => $value) {
-            $array_working_time_attendances = array();
-            $time_cnt = 1;
-            $array_working_time_attendances = array_merge($array_working_time_attendances, $this->setCollect_Working_time($value, $time_cnt, true));
-            for ($i=$time_cnt+1; $i<6; $i++) {
-                $array_working_time_attendances = array_merge($array_working_time_attendances, $this->setCollect_Working_time($value, $i, false));
-            }
-            // 集計結果配列設定
-            $array_w = array();
-            $array_w = $this->setArray_Working_time($value, $array_working_time_attendances);
-            for ($i=0;$i<count($array_w);$i++) {
-                $array_working_time_dates[] = $array_w[$i];
-            }
-        }
-
-        // 開始日付のフォーマット 2019年10月01日(火)
-        $date_name = $apicommon->getYMDWeek($datefrom);
-
-        Log::debug('    集計結果　$array_working_time_dates = '.count($array_working_time_dates));
-        Log::debug('    合計結果  $working_time_sum = '.count($working_time_sum));
-        Log::debug('    メッセージ  $array_messagedata = '.count($this->array_messagedata));
-
-        return response()->json(
-            ['calcresults' => $array_working_time_dates,
-                'sumresults' => $working_time_sum,
-                'datename' => $date_name,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
+        return array (
+            'array_working_time_dates' => $array_working_time_dates,
+            'working_time_sum' => $working_time_sum
+        );
     }
 
     /**
@@ -233,8 +373,15 @@ class DailyWorkingInformationController extends Controller
      *
      * @return void
      */
-    public function addDailyCalc($work_time, $datefrom, $dateto, $employmentstatus, $departmentcode, $usercode, $business_kubun) {
-        Log::DEBUG('---------------------- addDailyCalc in ------------------------ '.$datefrom);
+    public function addDailyCalc($params) {
+        Log::DEBUG('---------------------- addDailyCalc in ------------------------ ');
+        $work_time = $params['work_time'];
+        $datefrom = $params['datefrom'];
+        $dateto = $params['dateto'];
+        $employmentstatus = $params['employmentstatus'];
+        $departmentcode = $params['departmentcode'];
+        $usercode = $params['usercode'];
+        $business_kubun = $params['business_kubun'];
 
         $calc_result = true;
         $add_result = true;
@@ -243,7 +390,7 @@ class DailyWorkingInformationController extends Controller
         $temp_working_model = new TempWorkingTimeDate();
         $apicommon = new ApiCommonController();
         // シフト打刻を取得するために$datetoの翌日をParamDatetoを再設定
-        $nextdt =$apicommon->getNextDay($dateto, 'Y/m/d');
+        $nextdt = $apicommon->getNextDay($dateto, 'Y/m/d');
         // getWorkTimegetParamDatetoAttributeしている
         $work_time->setParamDatetoAttribute($nextdt);
         // 終了日付で検索（最新の情報として）
@@ -256,9 +403,7 @@ class DailyWorkingInformationController extends Controller
                 $temp_working_model->delTempWorkingTimeDate();
                 try{
                     // 日次集計計算登録
-                    Log::debug('---------------- 日次集計計算登録(temp_calc_workingtimes) start -----------------------');
                     $calc_result = $this->calcWorkingTimeDate($work_time_results, $work_time->getParamDatefromAttribute(), $business_kubun);
-                    Log::debug('---------------- 日次集計計算登録(temp_calc_workingtimes) end -----------------------');
                     if ($calc_result) {
                         // タイムテーブルを取得
                         $timetable_model = new WorkingTimeTable();
@@ -268,13 +413,9 @@ class DailyWorkingInformationController extends Controller
                         $timetable_model->setParamDepartmentcodeAttribute($departmentcode);
                         $timetables = $timetable_model->getWorkingTimeTableJoin();
                         if (count($timetables) > 0) {
-                            Log::debug('---------------- タイムテーブルあり -----------------------');
-                            Log::debug('---------------- 日次集計登録(temp_working_time_dates) start -----------------------');
                             // 日次集計
                             $add_result = $this->calcTempWorkingTimeDate($timetables);
-                            Log::debug('---------------- 日次集計登録(temp_working_time_dates) end -----------------------');
                         } else {
-                            Log::debug('---------------- タイムテーブルなし -----------------------');
                             $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_setting_timetable'));
                             Log::error(Config::get('const.LOG_MSG.not_setting_timetable'));
                             $add_result = false;
@@ -284,19 +425,13 @@ class DailyWorkingInformationController extends Controller
                         Log::error(Config::get('const.LOG_MSG.not_workintime'));
                         $add_result = false;
                     }
-                    //DB::commit();
-                    //Log::debug('temporary commit');
                 }catch(\PDOException $pe){
-                    //DB::rollBack();
-                    //Log::debug('temporary rollBack');
                     $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                     Log::error(Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                     Log::error($pe->getMessage());
                     $add_result = false;
                     throw $pe;
                 }catch(\Exception $e){
-                    //DB::rollBack();
-                    //Log::debug('temporary rollBack');
                     $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
                     Log::error(Config::get('const.LOG_MSG.data_error_dailycalc'));
                     Log::error($e->getMessage());
@@ -304,8 +439,6 @@ class DailyWorkingInformationController extends Controller
                     throw $e;
                 }
             }catch(\PDOException $pe){
-                //DB::rollBack();
-                //Log::debug('temporary rollBack');
                 $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                 Log::error($pe->getMessage());
                 $add_result = false;
@@ -313,7 +446,6 @@ class DailyWorkingInformationController extends Controller
             }
         } else {
             $add_result = false;
-            Log::debug(Config::get('const.MSG_ERROR.not_workintime'));
             $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_workintime'));
         }
 
@@ -321,44 +453,26 @@ class DailyWorkingInformationController extends Controller
         $working_time_dates = new Collection();
         $working_time_sum = new Collection();
         if ($add_result) {
-            Log::debug(' ---- datefrom = '.$datefrom);
-            Log::debug(' ---- dateto = '.$dateto);
             $temp_working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
             $temp_working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
             $temp_working_model->setParamEmploymentStatusAttribute($employmentstatus);
             $temp_working_model->setParamDepartmentcodeAttribute($departmentcode);
             $temp_working_model->setParamUsercodeAttribute($usercode);
             try{
-                Log::debug('出勤・退勤データtempから登録 ');
                 $temp_working_time_dates = $temp_working_model->getTempWorkingTimeDateUserJoin($dateto);
-                Log::debug('temp_working_time_dates =  '.count($temp_working_time_dates));
                 if (count($temp_working_time_dates) > 0) {
-                    Log::debug('isset $temp_working_time_dates true ');
                     $working_model = new WorkingTimedate();
                     $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
                     $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
                     $working_model->setParamEmploymentStatusAttribute($employmentstatus);
                     $working_model->setParamDepartmentcodeAttribute($departmentcode);
                     $working_model->setParamUsercodeAttribute($usercode);
-                    //DB::beginTransaction();
-                    //Log::debug(' calc beginTransaction ');
                     try{
-                        //if ($working_model->isExistsWorkingTimeDate()) {
-                        //    Log::debug(' $delWorkingTimeDate  ');
-                         //   $working_model->delWorkingTimeDate();
-                        //};
-                        Log::debug(' $insertWorkingTimeDateFromTemp  ');
                         $working_model->insertWorkingTimeDateFromTemp($temp_working_time_dates);
-                        //DB::commit();
-                        //Log::debug(' calc commit ');
                     }catch(\PDOException $pe){
-                        //DB::rollBack();
-                        //Log::debug(' calc rollBack ');
                         $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
                         throw $pe;
                     }catch(\Exception $e){
-                        //DB::rollBack();
-                        //Log::debug(' calc rollBack ');
                         $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                         $add_result = false;
                         throw $e;
@@ -883,21 +997,27 @@ class DailyWorkingInformationController extends Controller
                 if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
                 if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
                 if (isset($before_result)) {
+                    Log::DEBUG('        打刻ないデータ before_result あり');
                     if ($before_result->department_code != $result->department_code ||
                         $before_result->user_code != $result->user_code ||
                         $before_result->user_working_date != $result->user_working_date ||
                         $before_holiday_kubun != $user_holiday_kubun) {
-                        if (!$before_out_flg) {
-                            $temp_non_date_flg = true;
-                        }
+                        // if (!$before_out_flg) {
+                        //     $temp_non_date_flg = true;
+                        // }
+                        Log::DEBUG('        打刻ないデータ 日付とユーザー休暇区分が１件前と同じでない');
+                        $temp_non_date_flg = $before_out_flg;       // 20200303修正
                     } else {
-                        if (!$before_out_flg) {
-                            $temp_non_date_flg = true;
-                        }
+                        // if (!$before_out_flg) {
+                        //     $temp_non_date_flg = true;
+                        // }
+                        Log::DEBUG('        打刻ないデータ 日付とユーザー休暇区分が１件前と同じ');
+                        $temp_non_date_flg = $before_out_flg;       // 20200303修正
                     }
                 }
                 // 1件前の日付がnullである場合、いきなり対象日付がないということなので出力
                 if (!$before_out_flg) {
+                    Log::DEBUG('        打刻ないデータ いきなり対象日付がない');
                     $temp_non_date_flg = true;
                 }
                 try{
@@ -6061,8 +6181,6 @@ class DailyWorkingInformationController extends Controller
                 $array_add_attendance_time[] = $attendance_time;
                 $array_add_attendance_time_positions[] = $attendance_time_positions;
             }
-            Log::DEBUG('                 attendance_time = '.$attendance_time);
-            Log::DEBUG('                 count array_add_attendance_time = '.count($array_add_attendance_time));
         }
         if ($result->mode == Config::get('const.C005.leaving_time')) {
             $array_time_position = $this->setTimePosition($result);
@@ -6342,7 +6460,9 @@ class DailyWorkingInformationController extends Controller
                     'calendars_business_kubun' => $working_time["calendars_business_kubun"],
                     'working_time_name' => $working_time["working_time_name"],
                     'predeter_time_name' => $working_time["predeter_time_name"],
-                    'predeter_night_time_name' => $working_time["predeter_night_time_name"]
+                    'predeter_time_secondname' => $working_time["predeter_time_secondname"],
+                    'predeter_night_time_name' => $working_time["predeter_night_time_name"],
+                    'predeter_night_time_secondname' => $working_time["predeter_night_time_secondname"]
                 );
             } else {
                 $array_working_time_dates[] = array(
@@ -6424,7 +6544,9 @@ class DailyWorkingInformationController extends Controller
                     'calendars_business_kubun' => '',
                     'working_time_name' => '',
                     'predeter_time_name' => '',
-                    'predeter_night_time_name' => ''
+                    'predeter_time_secondname' => '',
+                    'predeter_night_time_name' => '',
+                    'predeter_night_time_secondname' => ''
                 );
             }
         }

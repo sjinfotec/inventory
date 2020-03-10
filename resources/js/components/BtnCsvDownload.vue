@@ -128,21 +128,33 @@ export default {
     downloadCSVSalary() {
       var csv = "";
       var line = "";
+      var attendance = "";
+      var leaving = "";
       var workingdate = "";
       // 1ユーザーごと
       this.csvData.forEach(user => {
         //  '\ufeff' + 
         user.date.forEach(record => {
-          if ((record["attendance"] != "" && record["attendance"] != null) || (record["remark_holiday_name"] != "" && record["remark_holiday_name"] != null)) {
+          if (record["attendance"] == null) {
+            attendance = "";
+          } else {
+            attendance = record["attendance"];
+          }
+          if (record["leaving"] == null) {
+            leaving = "";
+          } else {
+            leaving = record["leaving"];
+          }
+          if ((attendance != "") || (leaving != "") || (record["remark_holiday_name"] != "" && record["remark_holiday_name"] != null)) {
             workingdate = record["workingdate"].substr(0,4) + "/" + record["workingdate"].substr(4,2) + "/" +  record["workingdate"].substr(6,2);
             line =
               record["user_code"] +
               "," +
               workingdate +
               "," +
-              record["attendance"] +
+              attendance +
               "," +
-              record["leaving"] +
+              leaving +
               "," +
               record["public_going_out_hours"] +
               "," +

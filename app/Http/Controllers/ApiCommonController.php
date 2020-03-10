@@ -265,8 +265,8 @@ class ApiCommonController extends Controller
                 );
             }
             $params = $request->keyparams;
-            if (!isset($params['code'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "code", Config::get('const.LOG_MSG.parameter_illegal')));
+            if (!isset($params['usercode'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "usercode", Config::get('const.LOG_MSG.parameter_illegal')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
                 return response()->json(
                     ['result' => false, 'details' => $details,
@@ -289,23 +289,26 @@ class ApiCommonController extends Controller
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
-            $code = $params['code'];
-            $no = "";
+            $departmentcode = null;
+            if (isset($params['departmentcode'])) {
+                $departmentcode = $params['departmentcode'];
+            }
+            $usercode = $params['usercode'];
+            $no = null;
             if (isset($params['no'])) {
                 $no = $params['no'];
             }
             $from = new Carbon($params['from']);
-            $from = $from->format("Y/m/d");
+            $from = $from->format("Ymd");
             $to = new Carbon($params['to']);
-            $to = $to->format("Y/m/d");
+            $to = $to->format("Ymd");
 
             $shift_info = new ShiftInformation();
-            $shift_info->setUsercodeAttribute($code);
-            if ($no != "") {
-                $shift_info->setParamWorkingtimetablenoAttribute($no);
-            }
-            $shift_info->setStarttargetdateAttribute($from);
-            $shift_info->setEndtargetdateAttribute($to);
+            $shift_info->setParamdepartmentcodeAttribute($departmentcode);
+            $shift_info->setParamusercodeAttribute($usercode);
+            $shift_info->setParamWorkingtimetablenoAttribute($no);
+            $shift_info->setParamfromdateAttribute($from);
+            $shift_info->setParamtodateAttribute($to);
             $details = $shift_info->getUserShift();
 
             return response()->json(
@@ -313,8 +316,6 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-            Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
@@ -609,11 +610,15 @@ class ApiCommonController extends Controller
                     $join->on('t3.code', '=', $this->table_users.'.employment_status')
                     ->where('t3.identification_id', '=', Config::get('const.C001.value'))
                     ->where('t3.is_deleted', '=', 0);
-                })
-                ->where($this->table_users.'.code', $user_id)
+                });
+            if (isset($user_id)) {
+                $mainquery    
+                    ->where($this->table_users.'.code', $user_id);
+            }
+            $data = $mainquery    
                 ->where($this->table_users.'.is_deleted', 0)
                 ->get();
-                return $mainquery;
+            return $data;
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
@@ -1203,6 +1208,8 @@ class ApiCommonController extends Controller
         // フォーマット 2019年10月01日(火)
         $date_name = '';
         $calender_model = new Calendar();
+        $calender_model->setParamfromdateAttribute(date_format(new Carbon($dt), 'Ymd'));
+
         $calender_model->setDateAttribute(date_format(new Carbon($dt), 'Ymd'));
         $calendars = $calender_model->getCalenderDate();
         if (count($calendars) > 0) {
@@ -1445,12 +1452,19 @@ class ApiCommonController extends Controller
      *
      * @return 
      */
-    public function jdgBusinessKbn($target_date)
+    public function jdgBusinessKbn($params)
     {
+        $departmentcode = $params['departmentcode'];
+        $employmentstatus = $params['employmentstatus'];
+        $usercode = $params['usercode'];
+        $datefrom = $params['datefrom'];
         // 指定日が休日かどうか
         $business_kubun = null;
         $calender_model = new Calendar();
-        $calender_model->setDateAttribute(date_format(new Carbon($target_date), 'Ymd'));
+        $calender_model->setParamdepartmentcodeAttribute($departmentcode);
+        $calender_model->setParamemploymentstatusAttribute($employmentstatus);
+        $calender_model->setParamusercodeAttribute($usercode);
+        $calender_model->setParamfromdateAttribute($datefrom);
         $calendars = $calender_model->getCalenderDate();
         if (count($calendars) > 0) {
             foreach ($calendars as $result) {

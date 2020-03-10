@@ -302,19 +302,32 @@ export default {
     // ------------------------ サーバー処理 ----------------------------
     // 日次警告取得処理
     getItem() {
-      var arrayParams = {
-        alert_form_date : moment(this.valuefromdate).format("YYYYMMDD"),
-        employmentstatus : this.selectedEmploymentValue,
-        departmentcode : this.selectedDepartmentValue,
-        usercode : this.selectedUserValue
-      };
-      this.postRequest("/daily_alert/show", arrayParams)
-        .then(response  => {
-          this.getThen(response);
-        })
-        .catch(reason => {
-          this.serverCatch("日次警告", "取得");
-        });
+      // 処理中メッセージ表示
+      this.$swal({
+        title: "処　理　中...",
+        html: "",
+        allowOutsideClick: false, //枠外をクリックしても画面を閉じない
+        showConfirmButton: false,
+        showCancelButton: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+          var arrayParams = {
+            alert_form_date : moment(this.valuefromdate).format("YYYYMMDD"),
+            employmentstatus : this.selectedEmploymentValue,
+            departmentcode : this.selectedDepartmentValue,
+            usercode : this.selectedUserValue
+          };
+          this.postRequest("/daily_alert/show", arrayParams)
+            .then(response  => {
+              this.$swal.close();
+              this.getThen(response);
+            })
+            .catch(reason => {
+              this.$swal.close();
+              this.serverCatch("日次警告", "取得");
+            });
+        }
+      });
     },
     // ログインユーザーの権限を取得
     getUserRole: function() {

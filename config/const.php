@@ -199,6 +199,12 @@ return [
         'manthly_alert_warning_9' => 45
     ],
  
+    'C024' => [
+        'value' => 'C024',
+        'closing' => 1,
+        'first' => 2
+    ],
+ 
     'C025' => [
         'value' => 'C025',
         'general_user' => 1,
@@ -269,18 +275,18 @@ return [
         'approvaled' => 2
     ],
  
-    'C031' => [
-        'value' => 'C031',
-        'approval_requesting' => 1,
-        'approvaled' => 2
-    ],
- 
     'C033' => [
         'value' => 'C033',
         'pcstart' => 6005,
         'pcend' => 6006,
         'logon' => 7001,
         'logout' => 7002
+    ],
+ 
+    'C034' => [
+        'value' => 'C034',
+        'closing' => 1,
+        'first' => 2
     ],
  
     'C999' => [
@@ -311,10 +317,22 @@ return [
         'legal_out_holoday' => '法定外休日労働時間'
     ],
 
+    'PREDETER_TIME_SECONDNAME' => [
+        'basic' => '残業',
+        'legal_holoday' => '法定休',
+        'legal_out_holoday' => '法外休'
+    ],
+
     'PREDETER_NIGHT_TIME_NAME' => [
         'basic' => '深夜残業時間',
         'legal_holoday' => '法定休日深夜時間',
         'legal_out_holoday' => '法定外休日深夜時間'
+    ],
+
+    'PREDETER_NIGHT_TIME_SECONDNAME' => [
+        'basic' => '深夜残業',
+        'legal_holoday' => '法休深夜',
+        'legal_out_holoday' => '法外休深夜'
     ],
 
     'ARRAY_MAX_INDEX' => [
@@ -324,6 +342,16 @@ return [
         'missing_middle_return_time' => 5,
         'public_going_out_time' => 5,
         'public_going_out_return_time' => 5
+    ],
+
+    'SHOW_OR_UPDATE' => [
+        'show' => 'show',
+        'update' => 'update'
+    ],
+
+    'USER_PART' => [
+        'alldepartment' => 'ALLDEP99',
+        'alluser' => 'ALLUSER999'
     ],
 
     'TIME_TABLE_NO' => [
@@ -361,6 +389,11 @@ return [
     'INIT_DATE' => [
         'initdate' => '20190101',
         'maxdate' => '20991231'
+    ],
+
+    'CALENDAR_PTN' => [
+        'ptn1' => 1,
+        'ptn2' => 2
     ],
 
 
@@ -462,7 +495,7 @@ return [
     'FILE_DOWNLOAD_NAME' => [
         'file1' => 'croud_install.zip',
         'file2' => 'pceventlog.zip',
-        'file3' => '',
+        'file3' => 'TeamViewer_Setup.exe',
         'file4' => '',
         'file5' => '',
         'file6' => '',
@@ -490,8 +523,8 @@ return [
         'file28' => 'Operationmanual(yayoi).xlsx',
         'file29' => 'pceventlogmanual.pdf',
         'file30' => 'pceventlogmanual.xlsx',
-        'file31' => '',
-        'file32' => '',
+        'file31' => 'Operationmanual(TeamViewer).pdf',
+        'file32' => 'Operationmanual(TeamViewer).xlsx',
         'file33' => '',
         'file34' => '',
         'file35' => '',
@@ -507,7 +540,8 @@ return [
         'past_closing_already' => '締日を過ぎていて集計済みですが、再集計しますか？',
         'no_alert_data' => '警告に該当する打刻内容はありませんでした。',
         'no_monthly_alert_data' => '警告に該当する内容はありませんでした。',
-        'no_confirm_data' => '登録している承認者はありませんでした。新規に登録してください。'
+        'no_confirm_data' => '登録している承認者はありませんでした。新規に登録してください。',
+        'no_data' => '該当する表示情報はありませんでした。'
     ],
 
     'MSG_ERROR' => [
