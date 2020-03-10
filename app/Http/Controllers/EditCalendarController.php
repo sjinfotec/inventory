@@ -319,6 +319,7 @@ class EditCalendarController extends Controller
      */
     public function init(Request $request){
         try {
+            Log::debug('初期設定 init = ');
             $this->array_messagedata = array();
             $details = array();
             $formdata = array();
@@ -480,6 +481,7 @@ class EditCalendarController extends Controller
                 // }
             } else {
                 if ($displaykbn == Config::get('const.C024.closing')) {
+                    Log::debug('$displaykbn = closing');
                     // 期首月取得
                     $setting_model = new Setting();
                     $setting_model->setParamYearAttribute($dateyear);
@@ -497,12 +499,15 @@ class EditCalendarController extends Controller
                         return false;
                     }
                 } else {
+                    Log::debug('$displaykbn = 0101');
                     $dt = new Carbon($dateyear.'0101');
                     $fromdate = new Carbon($dateyear.'0101');
                     $todate = $fromdate;
                     $todate->addYear()->subDay();
+                    $fromdate = new Carbon($dateyear.'0101');
                 }
             }
+            Log::debug('$fromdate = '.$fromdate);
             Log::debug('$todate = '.$todate);
             // 削除
             if ($employmentstatus == "") { $employmentstatus = null; }
