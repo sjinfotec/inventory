@@ -28,7 +28,7 @@
                     </span>
                   </div>
                   <input-datepicker
-                    v-bind:default-date="valuefromdate"
+                    v-bind:default-date="valuedate"
                     v-bind:date-format="DatePickerFormat"
                     v-bind:place-holder="'指定日付を選択してください'"
                     v-on:change-event="fromdateChanges"
@@ -137,7 +137,7 @@
                   v-bind:btn-mode="'search'"
                   v-bind:is-push="issearchbutton"
                 ></btn-work-time>
-                <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting>
+                <!-- <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting> -->
               </div>
               <!-- /.col -->
               <!-- col -->
@@ -160,40 +160,69 @@
     <!-- main contentns row -->
     <div class="row justify-content-between">
       <!-- .panel -->
-      <div class="col-md pt-3 align-self-stretch">
+      <div class="col-md pt-3 align-self-stretch" v-if="calcresults.length">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
             v-bind:header-text1="stringtext"
-            v-bind:header-text2="''"
+            v-bind:header-text2="'時間の単位は　時:分　です'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <!-- panel body -->
-          <daily-working-info-table
-            v-bind:detail-or-total="'detail'"
-            v-bind:calc-lists="calcresults"
-            v-bind:date-name="dateName"
-            v-bind:predeter-time-name="predetertimename"
-            v-bind:predeter-night-time-name="predeternighttimename"
-            v-bind:btn-mode="btnmodeswitch"
-          ></daily-working-info-table>
+          <div class="card-body pt-2">
+            <!-- ----------- 選択ボタン類 START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-3 pb-2">
+                <btn-work-time
+                  v-on:gosubateclick-event="gosubateclick"
+                  v-bind:btn-mode="'gosubdate'"
+                  v-bind:is-display="isgosubdatebutton"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+              <!-- col -->
+              <div class="col-md-3 pb-2">
+                <btn-work-time
+                  v-on:goaddateclick-event="goaddateclick"
+                  v-bind:btn-mode="'goadddate'"
+                  v-bind:is-display="isgoadddatebutton"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- ----------- 選択ボタン類 END ---------------- -->
+          </div>
+          <div>
+            <div class="card-body mb-3 border-top">
+              <!-- ----------- 日次集計テーブル START ---------------- -->
+              <daily-working-info-table
+                v-bind:detail-or-total="'detail'"
+                v-bind:calc-lists="calcresults"
+                v-bind:date-name="dateName"
+                v-bind:predeter-time-name="predetertimename"
+                v-bind:predeter-night-time-name="predeternighttimename"
+                v-bind:predeter-time-secondname="predetertimesecondname"
+                v-bind:predeter-night-time-secondname="predeternighttimesecondname"
+                v-bind:btn-mode="btnmodeswitch"
+              ></daily-working-info-table>
+              <!-- ----------- 日次集計テーブル END ---------------- -->
+            </div>
+          </div>
           <!-- /panel body -->
         </div>
-      </div>
-      <!-- /.panel -->
-    </div>
-    <!-- /main contentns row -->
-    <!-- main contentns row -->
-    <div>
-      <!-- .panel -->
-      <div class="col-md pt-3">
-        <div class="card shadow-pl">
+        <div class="card shadow-pl" v-if="sumresults.length">
           <!-- panel header -->
           <daily-working-information-panel-header
             v-bind:header-text1="'合計'"
             v-bind:header-text2="'集計日の合計が表示されます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
+          <!-- panel body -->
           <div class="card-body pt-2">
             <!-- panel contents -->
             <!-- .row -->
@@ -202,16 +231,18 @@
               v-bind:calc-lists="sumresults"
               v-bind:predeter-time-name="predetertimename"
               v-bind:predeter-night-time-name="predeternighttimename"
+              v-bind:predeter-time-secondname="predetertimesecondname"
+              v-bind:predeter-night-time-secondname="predeternighttimesecondname"
               v-bind:btn-mode="btnmodeswitch"
             ></daily-working-info-table>
             <!-- /.row -->
             <!-- /panel contents -->
           </div>
         </div>
-        <!-- /panel -->
       </div>
-      <!-- /main contentns row -->
+      <!-- /.panel -->
     </div>
+    <!-- /main contentns row -->
   </div>
 </template>
 
@@ -226,6 +257,7 @@ export default {
   mixins: [dialogable, checkable, requestable],
   data: function() {
     return {
+      valuedate: "",
       selectedDepartmentValue: "",
       valueDepartmentkillcheck: false,
       showdepartmentlist: true,
@@ -236,6 +268,7 @@ export default {
       getDo: 1,
       applytermdate: "",
       valuefromdate: "",
+      valuesubadddate: "",
       userrole: "",
       DatePickerFormat: "yyyy年MM月dd日",
       defaultDate: new Date(),
@@ -252,9 +285,13 @@ export default {
       messagedatauser: [],
       predetertimename: "",
       predeternighttimename: "",
+      predetertimesecondname: "",
+      predeternighttimesecondname: "",
       dateName: "",
       messageshowsearch: false,
       issearchbutton: false,
+      isgosubdatebutton: false,
+      isgoadddatebutton: false,
       btnmodeswitch: "basicswitch",
       isswitchbutton: false,
       isswitchvisible: false,
@@ -264,12 +301,13 @@ export default {
   },
   // マウント時
   mounted() {
-    this.valuefromdate = this.defaultDate;
-    console.log("dailyworkingtime mounted getUserRole");
+    this.valuedate = this.defaultDate;
+    this.valuefromdate = moment(this.defaultDate).format("YYYYMMDD");
+    this.valuesubadddate = this.valuefromdate;
     this.getUserRole();
     this.applytermdate = "";
     if (this.valuefromdate) {
-      this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+      this.applytermdate = this.valuefromdate;
     }
     this.$refs.selectdepartmentlist.getList(this.applytermdate);
     this.getUserSelected();
@@ -289,7 +327,7 @@ export default {
       var maxlength = 0;
       var itemname = "指定日付";
       chkArray = this.checkHeader(
-        this.valuefromdate,
+        this.valuedate,
         required,
         equalength,
         maxlength,
@@ -362,26 +400,31 @@ export default {
     // 指定日付が変更された場合の処理
     fromdateChanges: function(value) {
       moment.locale("ja");
-      this.valuefromdate = value;
-      if (this.valuefromdate == null || this.valuefromdate == "") {
+      this.stringtext = "";
+      this.valuedate = value;
+      this.valuefromdate = moment(value).format("YYYYMMDD");
+      this.valuesubadddate = this.valuefromdate;
+      if (this.valuedate == null || this.valuedate == "") {
         this.stringtext = "";
       } else {
-        this.datejaFormat = moment(this.valuefromdate).format(
+        this.datejaFormat = moment(this.valuedate).format(
           "YYYY年MM月DD日 (ddd)"
         );
         this.stringtext = "日次集計 " + this.datejaFormat;
       }
       // 再取得
       this.applytermdate = "";
-      if (this.valuefromdate) {
-        this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+      if (this.valuedate) {
+        this.applytermdate = moment(this.valuedate).format("YYYYMMDD");
       }
       this.$refs.selectdepartmentlist.getList(this.applytermdate);
       this.getUserSelected();
     },
     // 指定日付がクリアされた場合の処理
     fromdateCleared: function() {
+      this.valuedate = "";
       this.valuefromdate = "";
+      this.valuesubadddate = "";
       this.applytermdate = "";
       this.stringtext = "";
     },
@@ -403,58 +446,21 @@ export default {
     userChanges: function(value, arrayitem) {
       this.selectedUserValue = value;
     },
-    // 集計開始ボタンがクリックされた場合の処理
+    // 表示するボタンがクリックされた場合の処理
     searchclick: function(e) {
       this.isswitchvisible = false;
+      this.valuesubadddate = "";
       this.validate = this.checkForm(e);
       if (this.validate) {
         this.issearchbutton = true;
         this.messageshowsearch = true;
+        // 入力項目クリア
         this.itemClear();
-        this.$axios
-          .get("/daily/calc", {
-            params: {
-              datefrom: moment(this.valuefromdate).format("YYYYMMDD"),
-              dateto: moment(this.valuefromdate).format("YYYYMMDD"),
-              employmentstatus: this.selectedEmploymentValue,
-              departmentcode: this.selectedDepartmentValue,
-              usercode: this.selectedUserValue
-            }
-          })
-          .then(response => {
-            this.resresults = response.data;
-            if (this.resresults.calcresults != null) {
-              this.calcresults = this.resresults.calcresults;
-            }
-            if (this.resresults.sumresults != null) {
-              this.sumresults = this.resresults.sumresults;
-            }
-            if (this.resresults.datename != null) {
-              this.dateName = this.resresults.datename;
-              this.stringtext = "日次集計 " + this.dateName;
-            }
-            if (this.resresults.messagedata != null) {
-              this.messagedatasserver = this.resresults.messagedata;
-            }
-            for (var key in this.calcresults) {
-              this.isswitchvisible = true;
-              this.predetertimename = this.calcresults[key][
-                "predeter_time_name"
-              ];
-              this.predeternighttimename = this.calcresults[key][
-                "predeter_night_time_name"
-              ];
-              break;
-            }
-            this.$forceUpdate();
-            this.messageshowsearch = false;
-            this.issearchbutton = false;
-          })
-          .catch(reason => {
-            this.messageshowsearch = false;
-            this.issearchbutton = false;
-            alert("日次集計エラー");
-          });
+        this.valuesubadddate = moment(this.valuedate).format("YYYYMMDD");
+        this.selectedName = this.user_name + "　" + moment(this.valuesubadddate).format("YYYY年MM月DD日") + "分勤怠編集" ;
+        this.getItem(moment(this.valuedate).format("YYYYMMDD"));
+        this.isgosubdatebutton = true;
+        this.isgoadddatebutton = true;
       }
     },
     // 詳細表示ボタンがクリックされた場合の処理
@@ -463,6 +469,40 @@ export default {
         this.btnmodeswitch = "detailswitch";
       } else {
         this.btnmodeswitch = "basicswitch";
+      }
+    },
+    //前日ボタンクリック処理
+    gosubateclick(e) {
+      this.issearchbutton = true;
+      this.messageshowsearch = true;
+      // 入力項目クリア
+      this.itemClear();
+      this.messagevalidatesSearch = [];
+      this.messagevalidatesEdt = [];
+      if (this.checkForm(e)) {
+        this.valuesubadddate = moment(this.valuesubadddate).subtract(1, 'days').format("YYYYMMDD");
+        this.datejaFormat = moment(this.valuesubadddate).format(
+          "YYYY年MM月DD日 (ddd)"
+        );
+        this.stringtext = "日次集計 " + this.datejaFormat;
+        this.getItem(this.valuesubadddate);
+      }
+    },
+    //翌日ボタンクリック処理
+    goaddateclick(e) {
+      this.issearchbutton = true;
+      this.messageshowsearch = true;
+      // 入力項目クリア
+      this.itemClear();
+      this.messagevalidatesSearch = [];
+      this.messagevalidatesEdt = [];
+      if (this.checkForm(e)) {
+        this.valuesubadddate = moment(this.valuesubadddate).add(1, 'days').format("YYYYMMDD");
+        this.datejaFormat = moment(this.valuesubadddate).format(
+          "YYYY年MM月DD日 (ddd)"
+        );
+        this.stringtext = "日次集計 " + this.datejaFormat;
+        this.getItem(this.valuesubadddate);
       }
     },
     // ------------------------ サーバー処理 ----------------------------
@@ -477,13 +517,44 @@ export default {
           this.serverCatch("ユーザー権限", "取得");
         });
     },
+    // 日次集計取得処理
+    getItem(datevalue) {
+      // 処理中メッセージ表示
+      this.$swal({
+        title: "処　理　中...",
+        html: "",
+        allowOutsideClick: false, //枠外をクリックしても画面を閉じない
+        showConfirmButton: false,
+        showCancelButton: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+          this.postRequest("/daily/calc",
+            { datefrom : datevalue,
+              dateto : datevalue,
+              employmentstatus : this.selectedEmploymentValue,
+              departmentcode : this.selectedDepartmentValue,
+              usercode : this.selectedUserValue
+            })
+            .then(response  => {
+              this.$swal.close();
+              this.getThen(response);
+            })
+            .catch(reason => {
+              this.$swal.close();
+              this.messageshowsearch = false;
+              this.issearchbutton = false;
+              this.serverCatch("日次集計","取得");
+            });
+        }
+      });
+    },
 
     // ----------------- 共通メソッド ----------------------------------
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
       this.applytermdate = "";
-      if (this.valuefromdate) {
-        this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+      if (this.valuedate) {
+        this.applytermdate = moment(this.valuedate).format("YYYYMMDD");
       }
       this.$refs.selectuserlist.getList(
         this.applytermdate,
@@ -498,9 +569,6 @@ export default {
       var res = response.data;
       if (res.result) {
         this.userrole = res.role;
-        console.log(
-          "dailyworkingtime getThenrole this.userrole = " + this.userrole
-        );
       } else {
         if (res.messagedata.length > 0) {
           this.messageswal(
@@ -515,6 +583,42 @@ export default {
           this.serverCatch("ユーザー権限", "取得");
         }
       }
+    },
+    // 取得正常処理
+    getThen(response) {
+      this.resresults = response.data;
+      if (this.resresults.calcresults != null) {
+        this.calcresults = this.resresults.calcresults;
+      }
+      if (this.resresults.sumresults != null) {
+        this.sumresults = this.resresults.sumresults;
+      }
+      if (this.resresults.datename != null) {
+        this.dateName = this.resresults.datename;
+        this.stringtext = "日次集計 " + this.dateName;
+      }
+      if (this.resresults.messagedata != null) {
+        this.messagedatasserver = this.resresults.messagedata;
+      }
+      for (var key in this.calcresults) {
+        this.isswitchvisible = true;
+        this.predetertimename = this.calcresults[key][
+          "predeter_time_name"
+        ];
+        this.predeternighttimename = this.calcresults[key][
+          "predeter_night_time_name"
+        ];
+        this.predetertimesecondname = this.calcresults[key][
+          "predeter_time_secondname"
+        ];
+        this.predeternighttimesecondname = this.calcresults[key][
+          "predeter_night_time_secondname"
+        ];
+        break;
+      }
+      this.$forceUpdate();
+      this.messageshowsearch = false;
+      this.issearchbutton = false;
     },
     // 異常処理
     serverCatch(kbn, eventtext) {

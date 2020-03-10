@@ -20,6 +20,14 @@
         <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt="">申請一覧を表示する（直近10件）</button> -->
         申請一覧を表示する（直近10件）</button>
     </div>
+    <div v-if="btnMode === 'gosubdate' && isDisplay === true" class="btn-group d-flex" v-on:click="gosubdateclickBtn()">
+      <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
+        前日</button>
+    </div>
+    <div v-if="btnMode === 'goadddate' && isDisplay === true" class="btn-group d-flex" v-on:click="goadddateclickBtn()">
+      <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
+        翌日</button>
+    </div>
 
     <div v-if="btnMode === 'update'" class="btn-group d-flex" v-on:click="updateclickBtn()">
       <button type="button" 
@@ -36,10 +44,17 @@
     <div v-if="btnMode === 'init'" class="btn-group d-flex" v-on:click="initclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
         <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-restore-b.svg" alt="">初期設定をする</button> -->
-        初期設定をする</button>
+        この条件でカレンダー設定する</button>
+    </div>
+    <div v-if="btnMode === 'copyinit'" class="btn-group d-flex" v-on:click="copyinitclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+        この条件での前月分を複写設定する</button>
     </div>
     <div v-if="btnMode === 'store'" class="btn-group d-flex" v-on:click="storeclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">この内容で登録する</button>
+    </div>
+    <div v-if="btnMode === 'initstore'" class="btn-group d-flex" v-on:click="initstoreclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">この内容で設定する</button>
     </div>
     <div v-if="btnMode === 'makedemand'" class="btn-group d-flex" v-on:click="makedemandclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
@@ -143,6 +158,10 @@ export default {
           default: false,
           type: Boolean
       },
+      isDisplay: {
+          default: true,
+          type: Boolean
+      },
       btnName: {
           default: false,
           type: Boolean
@@ -170,8 +189,14 @@ export default {
     initclickBtn : function() {
       this.$emit('initclick-event',event);
     },
+    copyinitclickBtn : function() {
+      this.$emit('copyinitclick-event',event);
+    },
     storeclickBtn : function() {
       this.$emit('storeclick-event',event);
+    },
+    initstoreclickBtn : function() {
+      this.$emit('initstoreclick-event',event);
     },
     makedemandclickBtn : function() {
       this.$emit('makedemandclick-event',event);
@@ -217,6 +242,12 @@ export default {
     },
     listdemandclickBtn : function() {
       this.$emit('listdemandclick-event',event);
+    },
+    gosubdateclickBtn : function() {
+      this.$emit('gosubateclick-event',event);
+    },
+    goadddateclickBtn : function() {
+      this.$emit('goaddateclick-event',event);
     },
     csvcalcclickBtn : function() {
       this.$emit('csvcalc-event',event);

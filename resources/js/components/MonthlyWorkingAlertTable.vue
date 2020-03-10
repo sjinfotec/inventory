@@ -558,3 +558,8 @@ export default {
   }
 };
 </script>
+<style scoped>
+.table th, .table td {
+    padding: 0rem !important;
+}
+</style>

@@ -884,13 +884,6 @@ class TempCalcWorkingTime extends Model
      * @return void
      */
     public function insertTempCalcWorkingtime(){
-        Log::debug('        <<<< insertTempCalcWorkingtime  $this->working_date = '.$this->working_date);
-        Log::debug('        <<<< insertTempCalcWorkingtime  $this->user_code = '.$this->user_code);
-        Log::debug('        <<<< insertTempCalcWorkingtime  $this->working_timetable_from_time = ('.$this->working_timetable_from_time.')');
-        Log::debug('        <<<< insertTempCalcWorkingtime  $this->working_timetable_to_time = ('.$this->working_timetable_to_time.')');
-        Log::debug('        <<<< insertTempCalcWorkingtime  $this->shift_from_time = ('.$this->shift_from_time.')');
-        Log::debug('        <<<< insertTempCalcWorkingtime  $this->shift_to_time = ('.$this->shift_to_time.')');
-        Log::debug('        <<<< insertTempCalcWorkingtime  $this->record_datetime = ('.$this->record_datetime.')');
         try{
             if (isset($this->positions)) {
                 DB::table($this->table)->insert(

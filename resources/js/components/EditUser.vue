@@ -1889,6 +1889,7 @@ export default {
       this.selectedUserValue = value;
       if (value == "" || value == null) {
         this.selectMode = "NEW";
+        this.newItemClear();
         this.form.department_code = this.selectedDepartmentValue;
         this.refreshaddDepartmentList();
       } else {
@@ -2495,7 +2496,8 @@ export default {
       var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("ユーザーを" + eventtext + "しました");
+        messages.push("ユーザーを" + eventtext + "しました。");
+        messages.push("カレンダー設定にてユーザーのカレンダーを設定してください");
         this.messageswal(
           eventtext + "完了",
           messages,
@@ -2598,6 +2600,18 @@ export default {
       this.selectMode = "";
       this.count = 0;
       this.before_count = 0;
+    },
+    // 新規作成用
+    newItemClear() {
+      this.form.id = "";
+      this.form.code = "";
+      this.form.name = "";
+      this.form.kana = "";
+      this.form.kill_from_date = "";
+      this.form.official_position = "";
+      this.form.email = "";
+      this.form.mobile_email = "";
+      this.form.password = "";
     },
     checkRowData(index) {
       if (

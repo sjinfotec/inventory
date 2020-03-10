@@ -11,9 +11,8 @@ export const dialogable = {
             title,
             arrayMessage,
             icon,
-            okbtn,
-            cancelbtn,
-            dangerMode
+            showConfirmButton,
+            showCancelButton
         ) {
             this.messagedata = this.arrayTostring(arrayMessage);
             let self = this;
@@ -22,15 +21,11 @@ export const dialogable = {
                     title: title,
                     text: self.messagedata,
                     icon: icon,
-                    buttons: {
-                        cancel: cancelbtn,
-                        ok: okbtn
-                    },
-                    allowOutsideClick: false, //枠外をクリックしても画面を閉じない
-                    grow: "fullscreen",
-                    dangerMode: dangerMode
+                    showCancelButton: showCancelButton,
+                    showConfirmButton: showConfirmButton,
+                    allowOutsideClick: false //枠外をクリックしても画面を閉じない
                 }).then(result => {
-                    resolve(result);
+                    resolve(result.value);
                 });
             });
         },
@@ -39,8 +34,8 @@ export const dialogable = {
             title,
             html,
             icon,
-            okbtn,
-            cancelbtn,
+            showConfirmButton,
+            showCancelButton,
             dangerMode
         ) {
             let self = this;
@@ -49,21 +44,17 @@ export const dialogable = {
                     title: title,
                     text: html,
                     icon: icon,
-                    buttons: {
-                        cancel: cancelbtn,
-                        ok: okbtn
-                    },
+                    showCancelButton: showCancelButton,
+                    showConfirmButton: showConfirmButton,
                     allowOutsideClick: false, //枠外をクリックしても画面を閉じない
-                    grow: "fullscreen",
-                    dangerMode: dangerMode,
                     html: true
                 }).then(result => {
-                    resolve(result);
+                    resolve(result.value);
                 });
             });
         },
         // エラー個数メッセージ表示
-        countswal(title, arrayMessage, icon, okbtn, cancelbtn, dangerMode) {
+        countswal(title, arrayMessage, icon, showConfirmButton, showCancelButton, dangerMode) {
             if (icon == "warning") {
                 this.messagedata =
                     arrayMessage.length + "個の警告メッセージがあります。";
@@ -83,15 +74,11 @@ export const dialogable = {
                     title: title,
                     text: self.messagedata,
                     icon: icon,
-                    buttons: {
-                        cancel: cancelbtn,
-                        ok: okbtn
-                    },
-                    allowOutsideClick: false, //枠外をクリックしても画面を閉じない
-                    grow: "fullscreen",
-                    dangerMode: dangerMode
+                    showCancelButton: showCancelButton,
+                    showConfirmButton: showConfirmButton,
+                    allowOutsideClick: false //枠外をクリックしても画面を閉じない
                 }).then(result => {
-                    resolve(result);
+                    resolve(result.value);
                 });
             });
         },
@@ -102,15 +89,24 @@ export const dialogable = {
             return new Promise(function(resolve, reject) {
                 self.$swal({
                     title: title,
-                    text: self.messagedata,
-                    icon: icon,
+                    html: self.messagedata,
                     allowOutsideClick: false, //枠外をクリックしても画面を閉じない
                     showConfirmButton: false,
-                    grow: "fullscreen",
                     onBeforeOpen: () => {
-                        Swal.showLoading();
+                        self.$swal.showLoading();
                     }
                 });
+                // self.$swal({
+                //     title: title,
+                //     text: self.messagedata,
+                //     icon: icon,
+                //     allowOutsideClick: false, //枠外をクリックしても画面を閉じない
+                //     showConfirmButton: false,
+                //     grow: "fullscreen",
+                //     onBeforeOpen: () => {
+                //         Swal.showLoading();
+                //     }
+                // });
             });
         },
         // -------------------------- private メソッド ------------------------

@@ -35,7 +35,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      class="input-group-text font-size-sm line-height-xs label-width-200"
                       id="basic-addon1"
                     >開始日付<span class="color-red">[必須]</span></span>
                   </div>
@@ -54,7 +54,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      class="input-group-text font-size-sm line-height-xs label-width-200"
                       id="basic-addon1"
                     >終了日付<span class="color-red">[必須]</span></span>
                   </div>
@@ -73,7 +73,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                    class="input-group-text font-size-sm line-height-xs label-width-150"
+                    class="input-group-text font-size-sm line-height-xs label-width-200"
                     id="basic-addon1"
                     >所属部署<font color="blue">[登録時必須]</font></span>
                   </div>
@@ -96,7 +96,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
-                    class="input-group-text font-size-sm line-height-xs label-width-150"
+                    class="input-group-text font-size-sm line-height-xs label-width-200"
                     for="target_users"
                     >氏名<span class="color-red">[必須]</span></label>
                   </div>
@@ -122,9 +122,9 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                    class="input-group-text font-size-sm line-height-xs label-width-150"
+                    class="input-group-text font-size-sm line-height-xs label-width-200"
                     id="basic-addon1"
-                    >タイムテーブル選択</span>
+                    >タイムテーブル<font color="blue">[登録時必須]</font></span>
                   </div>
                   <select-timetablelist v-if="showtimetablelist"
                     ref="selecttimetablelist"
@@ -150,8 +150,8 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
-                  v-on:condstoreclick-event="condstoreClick"
-                  v-bind:btn-mode="'condstore'"
+                  v-on:searchclick-event="searchClick"
+                  v-bind:btn-mode="'search'"
                   v-bind:is-push="false"
                 ></btn-work-time>
               </div>
@@ -163,8 +163,8 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
-                  v-on:searchclick-event="searchClick"
-                  v-bind:btn-mode="'search'"
+                  v-on:condstoreclick-event="condstoreClick"
+                  v-bind:btn-mode="'condstore'"
                   v-bind:is-push="false"
                 ></btn-work-time>
               </div>
@@ -517,14 +517,32 @@ export default {
       if (this.valuetodate) {
         this.todate = moment(this.valuetodate).format("YYYYMMDD");
       }
-      var arrayParams = { code : this.selectedUserValue, no : this.selectedTimetableValue, from: this.fromdate, to: this.todate };
-      this.postRequest("/get_user_shift", arrayParams)
-        .then(response  => {
-          this.getThen(response);
-        })
-        .catch(reason => {
-          this.serverCatch("シフト", "取得");
-        });
+      // 処理中メッセージ表示
+      this.$swal({
+        title: "処　理　中...",
+        html: "",
+        allowOutsideClick: false, //枠外をクリックしても画面を閉じない
+        showConfirmButton: false,
+        showCancelButton: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+          var arrayParams = {
+            departmentcode : this.selectedDepartmentValue,
+            usercode : this.selectedUserValue,
+            no : this.selectedTimetableValue,
+            from: this.fromdate,
+            to: this.todate };
+          this.postRequest("/get_user_shift", arrayParams)
+            .then(response  => {
+              this.$swal.close();
+              this.getThen(response);
+            })
+            .catch(reason => {
+              this.$swal.close();
+              this.serverCatch("シフト", "取得");
+          });
+        }
+      });
     },
     // 締日取得処理
     getclosingItem() {

@@ -12,7 +12,9 @@ import toasted from "vue-toasted";
 import VCalendar from "v-calendar";
 import VModal from "vue-js-modal";
 import Vue from "vue";
-import VueSwal from "vue-swal";
+// import VueSwal from "vue-swal";
+import VueSweetalert2 from 'vue-sweetalert2'
+import 'sweetalert2/dist/sweetalert2.min.css';
 import ElementUI from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
 import locale from "element-ui/lib/locale/lang/ja";
@@ -27,8 +29,9 @@ var options = {
 Vue.use(toasted, options);
 Vue.use(VCalendar);
 Vue.use(VModal);
-Vue.use(VueSwal);
+// Vue.use(VueSwal);
 Vue.use(ElementUI, { locale });
+Vue.use(VueSweetalert2);
 
 Vue.prototype.$axios = axios;
 // Vue.prototype.$toasted = toasted;
@@ -270,6 +273,11 @@ Vue.component(
 Vue.component(
     "input-timetablepicker",
     require("./components/InputTimeTableElTimepicker.vue").default
+);
+// テーブル関係
+Vue.component(
+    "table-calendarmonth",
+    require("./components/TableCalendarMonth.vue").default
 );
 
 // 選択リスト

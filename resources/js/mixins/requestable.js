@@ -9,7 +9,9 @@ export const requestable =  {
     // post
     postRequest: function(url, arrayparams) {
       let self = this;
-      if (arrayparams.length != 0) {
+      // 連想配列はObject.keys(arrayparams).length
+      var len = Object.keys(arrayparams).length;
+      if (len != 0) {
         return new Promise( function (resolve, reject) {
           self.$axios
           .post(url, {

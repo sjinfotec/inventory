@@ -2,16 +2,31 @@
   <div>
     <!-- main contentns row -->
     <div class="row justify-content-between print-none">
+      <!-- ========================== 検索部 START ========================== -->
       <!-- .panel -->
       <div class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:header-text1="'年月を指定して集計を表示する'"
+            v-bind:header-text1="'開始日付から終了日付までの集計を表示する'"
             v-bind:header-text2="'雇用形態や所属部署でフィルタリングして表示できます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="card-body pt-2">
+            <!-- ----------- メッセージ部 START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between" v-if="messagevalidatesSearch.length">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <ul class="error-red color-red">
+                  <li v-for="(messagevalidate,index) in messagevalidatesSearch" v-bind:key="index">{{ messagevalidate }}</li>
+                </ul>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- ----------- メッセージ部 END ---------------- -->
+            <!-- ----------- 選択リスト START ---------------- -->
             <!-- panel contents -->
             <!-- .row -->
             <div class="row justify-content-between">
@@ -22,42 +37,35 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-120"
                       id="basic-addon1"
-                    >指定年月<span class="color-red">[必須]</span></span>
+                    >開始日付<span class="color-red">[必須]</span></span>
                   </div>
                   <input-datepicker
-                    v-bind:default-date="valuefromym"
+                    v-bind:default-date="valuefromdate"
                     v-bind:date-format="DatePickerFormat"
-                    v-bind:place-holder="'指定日付を選択してください'"
+                    v-bind:place-holder="'開始日付を選択してください'"
                     v-on:change-event="fromdateChanges"
                     v-on:clear-event="fromdateCleared"
                   ></input-datepicker>
                 </div>
-                <message-data v-bind:message-datas="messagedatasfromdate" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
-                    <label
+                    <span
                       class="input-group-text font-size-sm line-height-xs label-width-120"
-                      for="inputGroupSelect01"
-                    >集計区分<span class="color-red">[必須]</span></label>
+                      id="basic-addon1"
+                    >終了日付<span class="color-red">[必須]</span></span>
                   </div>
-                  <select-generallist
-                    v-bind:blank-data="false"
-                    v-bind:placeholder-data="'集計区分を選択してください'"
-                    v-bind:selected-value="selecteTallyvalue"
-                    v-bind:add-new="false"
-                    v-bind:get-do="'1'"
-                    v-bind:date-value="''"
-                    v-bind:kill-value="false"
-                    v-bind:row-index="'0'"
-                    v-bind:identification-id="'C016'"
-                    v-on:change-event="displayChange"
-                  ></select-generallist>
+                  <input-datepicker
+                    v-bind:default-date="valuetodate"
+                    v-bind:date-format="DatePickerFormat"
+                    v-bind:place-holder="'終了日付を選択してください'"
+                    v-on:change-event="fromtoChanges"
+                    v-on:clear-event="fromtoCleared"
+                  ></input-datepicker>
                 </div>
-                <message-data v-bind:message-datas="messagedatadisplay" v-bind:message-class="'warning'"></message-data>
               </div>
               <!-- /.col -->
               <!-- .col -->
@@ -135,6 +143,8 @@
               <!-- /.col -->
             </div>
             <!-- /.row -->
+            <!-- ----------- 選択リスト END ---------------- -->
+            <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- col -->
@@ -144,7 +154,6 @@
                   v-bind:btn-mode="'search'"
                   v-bind:is-push="issearchbutton">
                 </btn-work-time>
-                <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting>
               </div>
               <!-- /.col -->
               <!-- col -->
@@ -156,10 +165,6 @@
                 </btn-work-time>
               </div>
               <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
@@ -167,11 +172,12 @@
                   v-bind:btn-mode="'update'"
                   v-bind:is-push="isupdatebutton">
                 </btn-work-time>
-                <message-waiting v-bind:is-message-show="messageshowupdate"></message-waiting>
+                <message-waiting v-bind:is-message-show="messagewaiting"></message-waiting>
               </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
+            <!-- ----------- ボタン部 END ---------------- -->
             <!-- /.panel contents -->
           </div>
         </div>
@@ -180,7 +186,8 @@
     </div>
     <!-- /main contentns row -->
     <!-- main contentns row -->
-    <div class="row justify-content-between">
+    <!-- ========================== 表示部 START ========================== -->
+    <div class="row justify-content-between" v-if="serchorshow === 'show'">
       <!-- .panel -->
       <div class="col-md pt-3 align-self-stretch">
         <div class="card shadow-pl">
@@ -199,6 +206,7 @@
           <!-- panel body -->
           <div class="card-body mb-3 py-0 pt-4 border-top print-none">
             <!-- panel contents -->
+            <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
             <div class="row">
               <div class="col-md-12 pb-2">
@@ -228,6 +236,7 @@
               </div>
             </div>
             <!-- /.row -->
+            <!-- ----------- ボタン部 END ---------------- -->
             <!-- /.panel contents -->
           </div>
           <!-- /panel body -->
@@ -239,7 +248,8 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <h1 class="float-md-left font-size-rg">{{ company_name }}</h1>
-                <span class="float-md-right font-size-sm">{{ datejaFormat }}</span>
+                <!-- <span class="float-md-right font-size-sm">{{ datejaFormat }}</span> -->
+                <span class="float-md-right font-size-sm">時間の単位は　時間:分　です</span>
               </div>
               <!-- /.col -->
             </div>
@@ -375,9 +385,10 @@
       </div>
       <!-- /.panel -->
     </div>
+    <!-- ========================== 表示部 END ========================== -->
     <!-- /main contentns row -->
     <!-- main contentns row -->
-    <div class="row justify-content-between print-none">
+    <div class="row justify-content-between print-none" v-if="serchorshow === 'show'">
       <!-- .panel -->
       <div class="col-md pt-3">
         <div class="card shadow-pl">
@@ -399,6 +410,41 @@
             <!-- /panel contents -->
           </div>
           <!-- /collapse -->
+          <!-- panel body -->
+          <div class="card-body mb-3 py-0 pt-4 border-top print-none">
+            <!-- panel contents -->
+            <!-- ----------- ボタン部 START ---------------- -->
+            <!-- .row -->
+            <div class="row">
+              <div class="col-md-12 pb-2">
+                <!-- col -->
+                <btn-csv-download
+                  v-bind:btn-mode="'csvcalc'"
+                  v-bind:csv-data="calcresults"
+                  v-bind:is-csvbutton="iscsvbutton"
+                  v-bind:csv-date="datejaFormat"
+                >
+                </btn-csv-download>
+                <!-- /.col -->
+              </div>
+            </div>
+            <!-- /.row -->
+            <div class="row">
+              <div class="col-md-12 pb-2">
+                <!-- col -->
+                <btn-csv-download
+                  v-bind:btn-mode="'csvsalary'"
+                  v-bind:csv-data="calcresults"
+                  v-bind:is-csvbutton="iscsvbutton"
+                  v-bind:csv-date="datejaFormat"
+                >
+                </btn-csv-download>
+                <!-- /.col -->
+              </div>
+            </div>
+            <!-- /.row -->
+            <!-- ----------- ボタン部 END ---------------- -->
+          </div>
         </div>
         <!-- /panel -->
       </div>
@@ -407,7 +453,6 @@
   </div>
 </template>
 <script>
-import toasted from "vue-toasted";
 import moment from "moment";
 import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
@@ -418,134 +463,229 @@ export default {
   mixins: [ dialogable, checkable, requestable ],
   data: function() {
     return {
+      valuefromdate: "",
+      valuetodate: "",
+      messagevalidatesSearch: [],
+      DatePickerFormat: "yyyy年MM月dd日",
+      applytermdate: "",
+      selectedEmploymentValue: "",
+      getDo: 1,
       selectedDepartmentValue : "",
       valueDepartmentkillcheck : false,
-      showdepartmentlist: true,
       selectedUserValue : "",
-      showuserlist: true,
       valueUserkillcheck : false,
-      selectedEmploymentValue: "",
-      company_name: "",
-      valuefromym: "",
-      selecteTallyvalue: "",
-      getDo: 1,
-      applytermdate: "",
-
-      valuefromdate: "",
-      userrole: "",
-      DatePickerFormat: "yyyy年MM月",
-      defaultDate: new Date(),
-      stringtext: "",
-      stringtext2: "",
-      datejaFormat: "",
-      hrefindex: "",
-      resresults: [],
-      calcresults: [],
-      sumresults: [],
-      serchorupdate: "",
+      showuserlist: true,
       messagedatasserver: [],
-      messagedatasfromdate: [],
-      messagedatastodate: [],
-      messagedatadisplay: [],
-      messagedatadepartment: [],
-      messagedatauser: [],
-      messageshowsearch: false,
+      isswitchvisible: false,
+      validate: false,
+      messagewaiting: false,
       messageshowupdate: false,
       issearchbutton: false,
       isupdatebutton: false,
       iscsvbutton: true,
       btnmodeswitch: "basicswitch",
       isswitchbutton: false,
-      isswitchvisible: false,
-      validate: false,
-      initialized: false
+      serchorshow: "search",
+      company_name: "",
+      userrole: "",
+      stringtext: "",
+      stringtext2: "",
+      datejaFormat: "",
+      resresults: [],
+      calcresults: [],
+      sumresults: [],
+      messagedatasserver: [],
+      messagedatadepartment: [],
+      messagedatauser: []
     };
   },
   // マウント時
   mounted() {
-    this.valuefromym = this.defaultDate;
+    // 今月初末を取得
+    const defaultfromDate = moment().startOf('month');
+    const defaulttoDate = moment().endOf('month');
+    this.valuefromdate = new Date(defaultfromDate);
+    this.valuetodate = new Date(defaulttoDate);
     this.getUserRole();
     this.applytermdate = ""
-    if (this.valuefromdate) {
-      this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+    if (this.valuetodate) {
+      this.applytermdate = moment(this.valuetodate).format("YYYYMMDD");
     }
     this.$refs.selectdepartmentlist.getList(this.applytermdate);
     this.getUserSelected();
+    this.showorupdate = "search";
   },
   methods: {
-    // バリデーション
-    checkForm: function(e) {
-      this.validate = true;
-      this.messagedatasserver = [];
-      this.messagedatasfromdate = [];
-      this.messagedatadisplay = [];
-      this.messagedatadepartment = [];
-      this.messagedatauser = [];
-      if (!this.valuefromym) {
-        this.messagedatasfromdate.push("指定年月は必ず入力してください。");
-        this.validate = false;
-      }
-      if (!this.selecteTallyvalue) {
-        this.messagedatadisplay.push("集計区分は必ず入力してください。");
-        this.validate = false;
-      }
-      if (this.serchorupdate == "update") {
-        if (!this.selectedUserValue) {
-          if (!this.selectedDepartmentValue) {
-            this.messagedatadepartment.push("指定年月締め一括集計の場合は所属部署は必ず入力してください。");
-            this.validate = false;
-          }
-        }
-        if (this.userrole < "8") {
-          if (!this.selectedUserValue) {
-            this.messagedatauser.push("氏名は必ず入力してください。");
-            this.validate = false;
-          }
-        }
-      } else {
-        if (this.userrole < "8") {
-          if (!this.selectedDepartmentValue) {
-            this.messagedatadepartment.push("所属部署は必ず入力してください。");
-            this.validate = false;
-          }
-          if (!this.selectedUserValue) {
-            this.messagedatauser.push("氏名は必ず入力してください。");
-            this.validate = false;
-          }
+    // ------------------------ バリデーション ------------------------------------
+    // 検索時のバリデーション
+    checkFormSearch: function(e) {
+      this.messagevalidatesSearch = [];
+      var chkArray = [];
+      var flag = true;
+      // 開始日付
+      var required = true;
+      var equalength = 0;
+      var maxlength = 0;
+      var itemname = '開始日付';
+      chkArray = 
+        this.checkHeader(this.valuefromdate, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesSearch.length == 0) {
+          this.messagevalidatesSearch = chkArray;
+        } else {
+          this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
         }
       }
-
-      if (this.validate) {
-        return this.validate;
+      // 終了日付
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '終了日付';
+      chkArray = 
+        this.checkHeader(this.valuetodate, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesSearch.length == 0) {
+          this.messagevalidatesSearch = chkArray;
+        } else {
+          this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
+        }
+      }
+      // 氏名
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '氏名';
+      if (this.userrole < "8") {
+        chkArray = 
+          this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
+        if (chkArray.length > 0) {
+          if (this.messagevalidatesSearch.length == 0) {
+            this.messagevalidatesSearch = chkArray;
+          } else {
+            this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
+          }
+        }
+      }
+      if (this.messagevalidatesSearch.length > 0) {
+        flag  = false;
       }
 
       e.preventDefault();
+      return flag;
     },
-    // 指定年月が変更された場合の処理
+    // 最新更新時のバリデーション
+    checkFormupdNew: function(e) {
+      this.messagevalidatesSearch = [];
+      var chkArray = [];
+      var flag = true;
+      // 開始日付
+      var required = true;
+      var equalength = 0;
+      var maxlength = 0;
+      var itemname = '開始日付';
+      chkArray = 
+        this.checkHeader(this.valuefromdate, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesSearch.length == 0) {
+          this.messagevalidatesSearch = chkArray;
+        } else {
+          this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
+        }
+      }
+      // 終了日付
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '終了日付';
+      chkArray = 
+        this.checkHeader(this.valuetodate, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesSearch.length == 0) {
+          this.messagevalidatesSearch = chkArray;
+        } else {
+          this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
+        }
+      }
+      // 部署
+      // required = true;
+      // equalength = 0;
+      // maxlength = 0;
+      // itemname = '部署';
+      // chkArray = 
+      //   this.checkHeader(this.selectedDepartmentValue, required, equalength, maxlength, itemname);
+      // if (chkArray.length > 0) {
+      //   if (this.messagevalidatesSearch.length == 0) {
+      //     this.messagedatadepartment.push("指定年月締め一括集計の場合は所属部署は必ず入力してください。");
+      //   } else {
+      //     this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
+      //   }
+      // }
+      // 氏名
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '氏名';
+      if (this.userrole < "8") {
+        chkArray = 
+          this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
+        if (chkArray.length > 0) {
+          if (this.messagevalidatesSearch.length == 0) {
+            this.messagevalidatesSearch = chkArray;
+          } else {
+            this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
+          }
+        }
+      }
+
+      if (this.messagevalidatesSearch.length > 0) {
+        flag  = false;
+      }
+
+      e.preventDefault();
+      return flag;
+    },
+    // ------------------------ イベント処理 ------------------------------------
+    
+    // 開始日付が変更された場合の処理
     fromdateChanges: function(value) {
-      this.valuefromym = value;
+      this.valuefromdate = value;
+      var fromm = moment(this.valuefromdate).format("MM");
+      var tom = moment(this.valuetodate).format("MM");
+      if (fromm != tom) {
+        this.valuetodate =  new Date(moment(this.valuefromdate).endOf('month'));
+      }
+      // パネルに表示
+      this.setPanelHeader();
+    },
+    // 開始日付がクリアされた場合の処理
+    fromdateCleared: function() {
+      this.valuefromdate = "";
+      // パネルに表示
+      this.setPanelHeader();
+    },
+    // 終了日付が変更された場合の処理
+    fromtoChanges: function(value, arrayitem) {
+      this.valuetodate = value;
       // パネルに表示
       this.setPanelHeader();
       // 再取得
       this.applytermdate = ""
-      if (this.valuefromdate) {
-          this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+      if (this.valuetodate) {
+          this.applytermdate = moment(this.valuetodate).format("YYYYMMDD");
       }
       this.$refs.selectdepartmentlist.getList(this.applytermdate);
       this.getUserSelected();
     },
-    // 指定日付がクリアされた場合の処理
-    fromdateCleared: function() {
-      this.valuefromym = ""
+    // 終了日付がクリアされた場合の処理
+    fromtoCleared: function() {
+      this.valuetodate = "";
       // パネルに表示
       this.setPanelHeader();
+      // 再取得
+      this.applytermdate = moment(new Date()).format("YYYYMMDD");
+      this.$refs.selectdepartmentlist.getList(this.applytermdate);
+      this.getUserSelected();
       this.applytermdate = "";
-      this.valuefromdate = "";
-    },
-    // 表示区分が変更された場合の処理
-    displayChange: function(value, name) {
-      this.selecteTallyvalue = value;
-      this.setPanelHeader();
     },
     // 雇用形態が変更された場合の処理
     employmentChanges: function(value) {
@@ -567,53 +707,16 @@ export default {
     },
     // 表示ボタンがクリックされた場合の処理
     searchclick: function(e) {
-      this.serchorupdate = "search";
       this.isswitchvisible = false;
-      this.validate = this.checkForm(e);
+      this.validate = this.checkFormSearch(e);
       if (this.validate) {
         this.issearchbutton = true;
         this.isupdatebutton = true;
         this.iscsvbutton = true;
-        this.messageshowsearch = true;
+        this.messagewaiting = true;
+        // 入力項目クリア
         this.itemClear();
-        this.$axios
-          .get("/monthly/show", {
-            params: {
-              datefrom: moment(this.valuefromdate).format("YYYYMM"),
-              displaykbn: this.selecteTallyvalue,
-              employmentstatus: this.selectedEmploymentValue,
-              departmentcode: this.selectedDepartmentValue,
-              usercode: this.selectedUserValue
-            }
-          })
-          .then(response => {
-            this.resresults = response.data;
-            if (this.resresults.calcresults != null) {
-              this.calcresults = this.resresults.calcresults;
-              if (Object.keys(this.calcresults).length > 0) {
-                this.iscsvbutton = false;
-                this.isswitchvisible = true;
-              }
-            }
-            if (this.resresults.sumresults != null) {
-              this.sumresults = this.resresults.sumresults;
-            }
-            this.company_name = this.resresults.company_name;
-            if (this.resresults.messagedata != null) {
-              this.messagedatasserver = this.resresults.messagedata;
-            }
-            this.messageshowsearch = false;
-            this.issearchbutton = false;
-            this.isupdatebutton = false;
-            this.$forceUpdate();
-          })
-          .catch(reason => {
-            this.messageshowsearch = false;
-            this.issearchbutton = false;
-            this.isupdatebutton = false;
-            this.iscsvbutton = true;
-            alert("月次集計エラー");
-          });
+        this.getItem("show");
       }
     },
     // 詳細表示ボタンがクリックされた場合の処理
@@ -623,57 +726,27 @@ export default {
       } else {
         this.btnmodeswitch = "basicswitch";
       }
-
     },
     // 最新更新開始ボタンがクリックされた場合の処理
     updateclick: function(e) {
-      this.infoDialog(e, 'update','確認','集計してよろしいですか？');
-    },
-    // 最新更新開始ボタンがクリックされた場合の処理
-    updNew: function(e) {
-      this.serchorupdate = "update";
-      this.validate = this.checkForm(e);
-      if (this.validate) {
-        this.issearchbutton = true;
-        this.isupdatebutton = true;
-        this.iscsvbutton = true;
-        this.messageshowupdate = true;
-        this.itemClear();
-        this.$axios
-          .get("/monthly/calc", {
-            params: {
-              datefrom: moment(this.valuefromdate).format("YYYYMM"),
-              displaykbn: this.selecteTallyvalue,
-              employmentstatus: this.selectedEmploymentValue,
-              departmentcode: this.selectedDepartmentValue,
-              usercode: this.selectedUserValue
+      var messages = [];
+      messages.push("一括集計してよろしいですか？");
+      this.messageswal("確認", messages, "info", true, true, true)
+        .then(result  => {
+          if (result) {
+            this.isswitchvisible = false;
+            this.validate = this.checkFormupdNew(e);
+            if (this.validate) {
+              this.issearchbutton = true;
+              this.isupdatebutton = true;
+              this.iscsvbutton = true;
+              this.messagewaiting = true;
+              // 入力項目クリア
+              this.itemClear();
+              this.getItem("update");
             }
-          })
-          .then(response => {
-            this.resresults = response.data;
-            if (this.resresults.calcresults != null) {
-              this.calcresults = this.resresults.calcresults;
-            }
-            if (this.resresults.sumresults != null) {
-              this.sumresults = this.resresults.sumresults;
-            }
-            this.company_name = this.resresults.company_name;
-            if (this.resresults.messagedata != null) {
-              this.messagedatasserver = this.resresults.messagedata;
-            }
-            this.messageshowupdate = false;
-            this.issearchbutton = false;
-            this.isupdatebutton = false;
-            this.$forceUpdate();
-          })
-          .catch(reason => {
-            this.messageshowupdate = false;
-            this.issearchbutton = false;
-            this.isupdatebutton = false;
-            this.iscsvbutton = true;
-            alert("月次集計最新更新エラー");
-          });
-      }
+          }
+      });
     },
     // ------------------------ サーバー処理 ----------------------------
     // ログインユーザーの権限を取得
@@ -687,14 +760,66 @@ export default {
           this.serverCatch("ユーザー権限", "取得");
         });
     },
+    // 月次集計取得処理
+    getItem(showorupdate) {
+      // 処理中メッセージ表示
+      this.$swal({
+        title: "処　理　中...",
+        html: "",
+        allowOutsideClick: false, //枠外をクリックしても画面を閉じない
+        showConfirmButton: false,
+        showCancelButton: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+          this.postRequest("/monthly/show",
+            { showorupdate : showorupdate,
+              datefrom : moment(this.valuefromdate).format("YYYYMMDD"),
+              dateto : moment(this.valuetodate).format("YYYYMMDD"),
+              employmentstatus : this.selectedEmploymentValue,
+              departmentcode : this.selectedDepartmentValue,
+              usercode : this.selectedUserValue
+            })
+            .then(response  => {
+              this.$swal.close();
+              this.getThen(response);
+            })
+            .catch(reason => {
+              this.$swal.close();
+              this.issearchbutton = false;
+              this.isupdatebutton = false;
+              this.serverCatch("月次集計","取得");
+            });
+        }
+      });
+    },
+    // 最新更新
+    // updNew: function() {
+    //   this.postRequest("/monthly/calc",
+    //     { datefrom : moment(this.valuefromdate).format("YYYYMMDD"),
+    //       dateto : moment(this.valuetodate).format("YYYYMMDD"),
+    //       employmentstatus : this.selectedEmploymentValue,
+    //       departmentcode : this.selectedDepartmentValue,
+    //       usercode : this.selectedUserValue
+    //     })
+    //     .then(response  => {
+    //       this.getThenupdNew(response);
+    //     })
+    //     .catch(reason => {
+    //       this.messagewaiting = false;
+    //       this.issearchbutton = false;
+    //       this.isupdatebutton = false;
+    //       this.iscsvbutton = true;
+    //       this.serverCatch("月次集計最新更新","取得");
+    //     });
+    // },
 
     // ----------------- 共通メソッド ----------------------------------
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
       // 再取得
       this.applytermdate = ""
-      if (this.valuefromdate) {
-          this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+      if (this.valuetodate) {
+          this.applytermdate = moment(this.valuetodate).format("YYYYMMDD");
       }
       this.$refs.selectuserlist.getList(
         this.applytermdate,
@@ -717,77 +842,106 @@ export default {
         }
       }
     },
+    // 取得正常処理
+    getThen(response) {
+      this.resresults = response.data;
+      if (this.resresults.calcresults != null) {
+        this.calcresults = this.resresults.calcresults;
+        if (Object.keys(this.calcresults).length > 0) {
+          this.iscsvbutton = false;
+          this.isswitchvisible = true;
+        }
+      }
+      if (this.resresults.sumresults != null) {
+        this.sumresults = this.resresults.sumresults;
+      }
+      this.company_name = this.resresults.company_name;
+      if (this.resresults.messagedata.length == 0) {
+        this.serchorshow = "show";
+      } else {
+        this.messageswal("エラー", this.resresults.messagedata, "error", true, false, true);
+        this.serchorshow = "search";
+      }
+      this.messagewaiting = false;
+      this.issearchbutton = false;
+      this.isupdatebutton = false;
+      this.$forceUpdate();
+    },
+    // 最新更新正常処理
+    // getThenupdNew(response) {
+    //   this.resresults = response.data;
+    //   if (this.resresults.calcresults != null) {
+    //     this.calcresults = this.resresults.calcresults;
+    //   }
+    //   if (this.resresults.sumresults != null) {
+    //     this.sumresults = this.resresults.sumresults;
+    //   }
+    //   this.company_name = this.resresults.company_name;
+    //   if (this.resresults.messagedata != null) {
+    //     this.messageswal(
+    //       "エラー",
+    //       res.messagedata,
+    //       "error",
+    //       true,
+    //       false,
+    //       true
+    //     );
+    //     this.messageshowupdate = false;
+    //     this.issearchbutton = false;
+    //     this.isupdatebutton = false;
+    //     this.showorupdate = "search";
+    //     this.$forceUpdate();
+    //   } else {
+    //     this.messageshowupdate = false;
+    //     this.issearchbutton = false;
+    //     this.isupdatebutton = false;
+    //     this.showorupdate = "show";
+    //     this.$forceUpdate();
+    //   }
+    // },
     // 異常処理
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
       this.messageswal("エラー", messages, "error", true, false, true);
-    },
-    // 確認ダイアログ処理
-    infoDialog: function(e, value, title, text) {
-      this.$swal({
-        title: title,
-        text: text,
-        icon: 'info',
-        buttons: true,
-        dangerMode: true
-      }).then(willDelete => {
-        if (willDelete) {
-          if (value === 'update') {
-            this.itemClear();
-            this.updNew(e);
-          }
-        }
-      });
+      this.messagewaiting = false;
+      this.serchorshow = "search";
     },
     // クリアメソッド
     itemClear: function() {
       this.resresults = [];
       this.calcresults = [];
       this.sumresults = [];
-      this.serchorupdate = "";
       this.messagedatasserver = [];
-      this.messagedatasfromdate = [];
-      this.messagedatastodate = [];
-      this.messagedatadisplay = [];
       this.messagedatadepartment = [];
       this.messagedatauser = [];
     },
     // 集計パネルヘッダ文字列編集処理
     setPanelHeader: function() {
+      var fromtext = "";
+      var totext = "";
       moment.locale("ja");
-      if (this.valuefromym == null || this.valuefromym == "") {
-        this.stringtext = "";
-      } else {
-        this.valuefromdate = this.valuefromym;
-        if (this.selecteTallyvalue == null || this.selecteTallyvalue == "") {
-          this.stringtext = "";
-        } else {
-          if (
-            moment(this.valuefromdate).format("YYYYMM") !=
-            moment().format("YYYYMM")
-          ) {
-            this.valuefromdate = moment(this.valuefromdate)
-              .endOf("month")
-              .format("YYYYMMDD");
-          } else {
-            this.valuefromdate = moment().format("YYYYMMDD");
-          }
-          this.datejaFormat = moment(this.valuefromdate).format("YYYY年MM月");
-          if (this.selecteTallyvalue == "1") {
-            this.stringtext =
-              "月次集計 " + this.datejaFormat + "分を〆日で集計";
-          } else {
-            if (this.selecteTallyvalue == "2") {
-              this.stringtext =
-                "月次集計 " + this.datejaFormat + "分を1日から月末で集計";
-            } else {
-              this.stringtext = "";
-            }
-          }
-        }
+      if (this.valuefromdate != null && this.valuefromdate != "") {
+        fromtext = moment(this.valuefromdate).format("YYYY年MM月DD日");
       }
+      if (this.valuetodate != null && this.valuetodate != "") {
+        totext = moment(this.valuetodate).format("YYYY年MM月DD日");
+      }
+      if (fromtext != "" && totext != "") {
+        fromtext = fromtext + "から";
+      }
+      this.datejaFormat = fromtext + totext;
+      this.stringtext = this.datejaFormat + "分を集計";
     }
   }
 };
 </script>
+<style scoped>
+.table th, .table td {
+    padding: 0.4rem !important;
+}
+
+.mw-rem-3 {
+  min-width: 3rem !important;
+}
+</style>

@@ -954,7 +954,7 @@ class TempWorkingTimeDate extends Model
 
         // 日次労働時間取得SQL作成
         $this->targetdate = $targetdate;
-        if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
+        // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
         try{
             $subquery1 = DB::table($this->table)
                 ->select(
@@ -1285,10 +1285,10 @@ class TempWorkingTimeDate extends Model
                     ->where('t1.role', '<', Config::get('const.C017.admin_user'))
                     ->get();
 
-            if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
-                \Log::debug('sql_debug_log', ['getAlertData' => \DB::getQueryLog()]);
-                \DB::disableQueryLog();
-            }
+            // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
+            //     \Log::debug('sql_debug_log', ['getAlertData' => \DB::getQueryLog()]);
+            //     \DB::disableQueryLog();
+            // }
                         
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
@@ -1309,9 +1309,6 @@ class TempWorkingTimeDate extends Model
      * @return void
      */
     public function insertTempWorkingTimeDate(){
-        Log::debug('        <<<< insertTempWorkingTimeDate  $this->working_date = '.$this->working_date);
-        Log::debug('        <<<< insertTempWorkingTimeDate  $this->user_code = '.$this->user_code);
-        Log::debug('        <<<< insertTempWorkingTimeDate  $this->user_name = '.$this->user_name);
         try{
             $array_insert_items = array(
                 'working_date' => $this->working_date,
@@ -1410,7 +1407,6 @@ class TempWorkingTimeDate extends Model
                 }
             }
             for ($i=0;$i<count($this->array_leaving_time_positions);$i++) {
-                Log::debug('$this->array_leaving_time_positions[$i] = '.$this->array_leaving_time_positions[$i]);
                 if (isset($this->array_leaving_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
                         array('leaving_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_leaving_time_positions[$i].")'))"))
@@ -1422,7 +1418,6 @@ class TempWorkingTimeDate extends Model
                 }
             }
             for ($i=0;$i<count($this->array_missing_middle_time_positions);$i++) {
-                Log::debug('$this->array_missing_middle_time_positions[$i] = '.$this->array_missing_middle_time_positions[$i]);
                 if (isset($this->array_missing_middle_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
                         array('missing_middle_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_missing_middle_time_positions[$i].")'))"))
@@ -1434,7 +1429,6 @@ class TempWorkingTimeDate extends Model
                 }
             }
             for ($i=0;$i<count($this->array_missing_middle_return_time_positions);$i++) {
-                Log::debug('$this->array_missing_middle_return_time_positions[$i] = '.$this->array_missing_middle_return_time_positions[$i]);
                 if (isset($this->array_missing_middle_return_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
                         array('missing_middle_return_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_missing_middle_return_time_positions[$i].")'))"))
@@ -1446,7 +1440,6 @@ class TempWorkingTimeDate extends Model
                 }
             }
             for ($i=0;$i<count($this->array_public_going_out_time_positions);$i++) {
-                Log::debug('$this->array_public_going_out_time_positions[$i] = '.$this->array_public_going_out_time_positions[$i]);
                 if (isset($this->array_public_going_out_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
                         array('public_going_out_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_public_going_out_time_positions[$i].")'))"))
@@ -1458,7 +1451,6 @@ class TempWorkingTimeDate extends Model
                 }
             }
             for ($i=0;$i<count($this->array_public_going_out_return_time_positions);$i++) {
-                Log::debug('$this->array_public_going_out_return_time_positions[$i] = '.$this->array_public_going_out_return_time_positions[$i]);
                 if (isset($this->array_public_going_out_return_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
                         array('public_going_out_return_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_public_going_out_return_time_positions[$i].")'))"))

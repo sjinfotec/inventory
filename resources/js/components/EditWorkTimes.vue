@@ -164,8 +164,33 @@
           <!-- ----------- 「＋」アイコン部 END ---------------- -->
           <!-- ----------- 編集入力部 START ---------------- -->
           <!-- main contentns row -->
+          <div class="card-body pt-2">
+            <!-- ----------- 選択ボタン類 START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-3 pb-2">
+                <btn-work-time
+                  v-on:gosubateclick-event="gosubateclick"
+                  v-bind:btn-mode="'gosubdate'"
+                  v-bind:is-push="isgosubdatebutton"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+              <!-- col -->
+              <div class="col-md-3 pb-2">
+                <btn-work-time
+                  v-on:goaddateclick-event="goaddateclick"
+                  v-bind:btn-mode="'goadddate'"
+                  v-bind:is-push="isgoadddatebutton"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- ----------- 選択ボタン類 END ---------------- -->
+          </div>
           <div class="card-body pt-2" v-if="details.length">
-            <!-- panel contents -->
             <!-- ----------- メッセージ部 START ---------------- -->
             <!-- .row -->
             <div class="row justify-content-between" v-if="messagevalidatesEdt.length">
@@ -328,7 +353,6 @@
   </div>
 </template>
 <script>
-import toasted from "vue-toasted";
 import Datepicker from "vuejs-datepicker";
 import { ja } from "vuejs-datepicker/dist/locale";
 import moment from "moment";
@@ -361,8 +385,9 @@ export default {
       generalList_c013: [],
       count: 0,
       before_count: 0,
-
       valuefromdate: "",
+      valuesubadddate: "",
+
       valueuser: "",
       messagevalidatesSearch: [],
       messagevalidatesEdt: [],
@@ -370,6 +395,8 @@ export default {
       messageshowsearch: [],
       messagedatasfromdate: [],
       issearchbutton: false,
+      isgosubdatebutton: false,
+      isgoadddatebutton: false,
       valueBusinessDay: "",
       valueholiDay: "",
       year: "",
@@ -397,6 +424,7 @@ export default {
   mounted() {
     this.valuedate = this.defaultDate;
     this.valuefromdate = moment(this.defaultDate).format("YYYYMMDD");
+    this.valuesubadddate = this.valuefromdate;
     this.date_name = moment(this.defaultDate).format("YYYY年MM月DD日");
     this.getGeneralList("C005");
     this.getGeneralList("C013");
@@ -502,6 +530,7 @@ export default {
     fromdateChanges: function(value) {
       this.valuedate = value;
       this.valuefromdate = moment(value).format("YYYYMMDD");
+      this.valuesubadddate = this.valuefromdate;
       this.date_name = moment(value).format("YYYY年MM月DD日");
       this.selectedName = this.user_name + "　" + this.date_name + "分勤怠編集" ;
       // ユーザー選択コンポーネントの取得メソッドを実行
@@ -518,6 +547,7 @@ export default {
     fromdateCleared: function() {
       this.valuedate = "";
       this.valuefromdate = "";
+      this.valuesubadddate = "";
       this.applytermdate = "";
       this.date_name = "";
       this.selectedName = this.user_name + "　" + this.date_name + "分勤怠編集" ;
@@ -582,9 +612,38 @@ export default {
       this.inputClear();
       this.messagevalidatesSearch = [];
       this.messagevalidatesEdt = [];
+      this.valuesubadddate = "";
       if (this.checkFormSearch()) {
         this.selectMode = 'EDT';
-        this.getItem();
+        this.valuesubadddate = moment(this.valuedate).format("YYYYMMDD");
+        this.selectedName = this.user_name + "　" + moment(this.valuesubadddate).format("YYYY年MM月DD日") + "分勤怠編集" ;
+        this.getItem(moment(this.valuedate).format("YYYYMMDD"));
+      }
+    },
+    //前日ボタンクリック処理
+    gosubateclick() {
+      // 入力項目クリア
+      this.inputClear();
+      this.messagevalidatesSearch = [];
+      this.messagevalidatesEdt = [];
+      if (this.checkFormSearch()) {
+        this.selectMode = 'EDT';
+        this.valuesubadddate = moment(this.valuesubadddate).subtract(1, 'days').format("YYYYMMDD");
+        this.selectedName = this.user_name + "　" + moment(this.valuesubadddate).format("YYYY年MM月DD日") + "分勤怠編集" ;
+        this.getItem(this.valuesubadddate);
+      }
+    },
+    //翌日ボタンクリック処理
+    goaddateclick() {
+      // 入力項目クリア
+      this.inputClear();
+      this.messagevalidatesSearch = [];
+      this.messagevalidatesEdt = [];
+      if (this.checkFormSearch()) {
+        this.selectMode = 'EDT';
+        this.valuesubadddate = moment(this.valuesubadddate).add(1, 'days').format("YYYYMMDD");
+        this.selectedName = this.user_name + "　" + moment(this.valuesubadddate).format("YYYY年MM月DD日") + "分勤怠編集" ;
+        this.getItem(this.valuesubadddate);
       }
     },
     // プラス追加ボタンクリック処理
@@ -607,7 +666,7 @@ export default {
           code_name: "",
           kbn_flag: 0,
           user_holiday_kbn: "",
-          date: moment(this.valuedate).format("YYYY/MM/DD"),
+          date: moment(this.valuesubadddate).format("YYYY/MM/DD"),
           time: ""
           };
         this.details.push(this.object);
@@ -686,8 +745,9 @@ export default {
     },
     // -------------------- サーバー処理 ----------------------------
     // 勤怠取得処理
-    getItem() {
-      this.postRequest("/edit_work_times/get", { ymd : this.valuefromdate, code : this.selectedUserValue})
+    getItem(datevalue) {
+      this.postRequest("/edit_work_times/get",
+        { ymd : datevalue, code : this.selectedUserValue})
         .then(response  => {
           this.getThen(response);
         })
@@ -821,15 +881,14 @@ export default {
     },
     // 更新系正常処理（明細）
     putThenDetail(response, eventtext) {
-      var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("勤怠編集を" + eventtext + "しました");
-        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
-        this.getItem();
+        this.$toasted.show('勤怠編集を' + eventtext + 'しました', this.$toasted.options);
+        this.getItem(this.valuesubadddate);
         this.count = this.details.length;
         this.before_count = this.count;
       } else {
+        console.log('false');
         if (res.messagedata.length > 0) {
           this.messageswal("警告", res.messagedata, "warning", true, false, true);
         } else {
