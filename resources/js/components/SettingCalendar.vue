@@ -255,7 +255,7 @@
           <!-- panel header -->
           <div class="card-header bg-transparent pt-3 border-0">
             <h1 class="float-sm-left font-size-rg">
-              {{ detailsEdt['department_name'] }}：{{ detailsEdt['employment_name'] }}【 {{ detailsEdt['user_name'] }}】
+              【 {{ detailsEdt['user_name'] }}】{{ detailsEdt['department_name'] }}：{{ detailsEdt['employment_name'] }}
             </h1>
           </div>
           <!-- /.panel header -->
@@ -603,13 +603,13 @@ export default {
         }
       ],
       formweekdays: [
-        '日曜日',
         '月曜日',
         '火曜日',
         '水曜日',
         '木曜日',
         '金曜日',
-        '土曜日'
+        '土曜日',
+        '日曜日'
       ],
       form: {
         initptn : 1,
@@ -1115,18 +1115,6 @@ export default {
         parammonth = moment(this.valuemonth).format("MM");
       }
       var paramselectedC024Value = this.selectedC024Value;
-      var tempbusiness = ["","","","","","",""];
-      var set_i = 0;
-      for (var i=0; i<this.form.initptn_business.length; i++) {
-        // sunday=6,monday=0....,saturday=5
-        if (i == 0) {
-            set_i = 6;
-        } else {
-            set_i = i - 1;
-        }
-        tempbusiness[set_i] = this.form.initptn_business[i];
-      }
-        this.form.initptn_business = tempbusiness;
       // 処理中メッセージ表示
       this.$swal({
         title: "処　理　中...",

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use App\Http\Controllers\ApiCommonController;
+use Carbon\Carbon;
 
 
 class Calendar extends Model
@@ -753,10 +754,11 @@ class Calendar extends Model
                     $mainquery
                         ->selectRaw($case_sql);
                 }
-                $data = $mainquery
+                $systemdate = Carbon::now();
+                $data = $mainquery            
                     ->selectRaw("'".$this->created_user."' as created_user")
                     ->selectRaw('null as updated_user')
-                    ->selectRaw('now() as created_at')
+                    ->selectRaw("'".$systemdate."' as created_at")
                     ->selectRaw('null as updated_at')
                     ->leftJoinSub($subquery5, 't3', function ($join) { 
                         $join->on('t3.public_holidays_date', '=', 't2.dt');
@@ -884,7 +886,6 @@ class Calendar extends Model
      * @return void
      */
     public function makeUserCalendar(){
-        Log::debug('makeUserCalendar in ');
         try {
             $mainquery = DB::table($this->table)
                 ->select($this->table.'.date');
@@ -896,10 +897,11 @@ class Calendar extends Model
                     $this->table.'.business_kubun',
                     $this->table.'.holiday_kubun'
                 );
+            $systemdate = Carbon::now();
             $mainquery
                 ->selectRaw("'".$this->created_user."' as created_user")
                 ->selectRaw('null as updated_user')
-                ->selectRaw('now() as created_at')
+                ->selectRaw("'".$systemdate."' as created_at")
                 ->selectRaw('null as updated_at')
                 ->selectRaw('0 as is_deleted');
             $result = $mainquery->where($this->table.'.user_code', "=", Config::get('const.user_part.alluser'))->get();

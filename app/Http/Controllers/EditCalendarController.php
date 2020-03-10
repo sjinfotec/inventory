@@ -481,25 +481,20 @@ class EditCalendarController extends Controller
                 // }
             } else {
                 if ($displaykbn == Config::get('const.C024.closing')) {
-                    Log::debug('$displaykbn = closing');
                     // 期首月取得
                     $setting_model = new Setting();
                     $setting_model->setParamYearAttribute($dateyear);
                     $begining = $setting_model->getBeginingMonth();
                     if (isset($begining)) {
-                        Log::debug('$dt = '.$dateyear.str_pad($begining, 2, "0", STR_PAD_LEFT).'01');
                         $fromdate = new Carbon($dateyear.str_pad($begining, 2, "0", STR_PAD_LEFT).'01');
                         $dt1 = new Carbon($dateyear.str_pad($begining, 2, "0", STR_PAD_LEFT).'01');
-                        Log::debug('$fromdate = '.$fromdate);
                         $todate = $dt1;
                         $todate->addYear()->subDay();
-                        Log::debug('$fromdate = '.$fromdate);
                     } else {
                         $this->array_messagedata[] =  array(Config::get('const.RESPONCE_ITEM.message') =>Config::get('const.MSG_ERROR.not_setting_beginning_month'));
                         return false;
                     }
                 } else {
-                    Log::debug('$displaykbn = 0101');
                     $dt = new Carbon($dateyear.'0101');
                     $fromdate = new Carbon($dateyear.'0101');
                     $todate = $fromdate;
@@ -509,38 +504,57 @@ class EditCalendarController extends Controller
             }
             Log::debug('$fromdate = '.$fromdate);
             Log::debug('$todate = '.$todate);
-            // 削除
+            $dtfrom = $fromdate;
             if ($employmentstatus == "") { $employmentstatus = null; }
             if ($departmentcode == "") { $departmentcode = null; }
             if ($usercode == "") { $usercode = null; }
-            $calendar_model->getParamdepartmentcodeAttribute($employmentstatus);
-            $calendar_model->getParamemploymentstatusAttribute($departmentcode);
-            $calendar_model->setParamusercodeAttribute($usercode);
-            $calendar_model->setParamfromdateAttribute(date_format($fromdate, 'Ymd'));
-            $calendar_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
-            $calendar_model->delDate();
             // 作成
             $apicommon = new ApiCommonController();
             $users_datas = $apicommon->getUserDepartmentEmploymentRole($usercode, date_format($todate, 'Ymd'));
             $dt = $fromdate;
-            $dt->subDay();
-            $calendar_model->setParamfromdateAttribute(date_format($dt, 'Ymd'));
-            $calendar_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
+            $dt->copy()->subDay();
             $user = Auth::user();
             $login_user_code = $user->code;
             $calendar_model->setCreateduserAttribute($login_user_code);
             foreach($users_datas as $users_data) {
-                $calendar_model->setDepartmentcodeAttribute($users_data->department_code);
-                $calendar_model->setEmploymentstatusAttribute($users_data->employment_status);
-                $calendar_model->setUsercodeAttribute($users_data->code);
-                $results = $calendar_model->getCalenderDateYear($ptn, $formdata);
-                $temp_array = array();
-                foreach($results as $result) {
-                    $temp_collect = collect($result);
-                    $temp_array[] = $temp_collect->toArray();
+                $isins = true;
+                if (isset($employmentstatus)) {
+                    if ($employmentstatus != $users_data->employment_status) {
+                        $isins = false;
+                    }
                 }
-                if (count($temp_array) > 0) {
-                    $results = $calendar_model->insCalenderDateYear($temp_array);
+                if (isset($departmentcode)) {
+                    if ($departmentcode != $users_data->department_code) {
+                        $isins = false;
+                    }
+                }
+                if (isset($usercode)) {
+                    if ($usercode != $users_data->code) {
+                        $isins = false;
+                    }
+                }
+                if ($isins) {
+                    $calendar_model->getParamemploymentstatusAttribute($users_data->employment_status);
+                    $calendar_model->getParamdepartmentcodeAttribute($users_data->department_code);
+                    $calendar_model->setParamusercodeAttribute($users_data->code);
+                    $calendar_model->setParamfromdateAttribute(date_format($dtfrom, 'Ymd'));
+                    $calendar_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
+                    // 削除
+                    $calendar_model->delDate();
+                    // 作成
+                    $calendar_model->setParamfromdateAttribute(date_format($dt, 'Ymd'));
+                    $calendar_model->setEmploymentstatusAttribute($users_data->employment_status);
+                    $calendar_model->setDepartmentcodeAttribute($users_data->department_code);
+                    $calendar_model->setUsercodeAttribute($users_data->code);
+                    $results = $calendar_model->getCalenderDateYear($ptn, $formdata);
+                    $temp_array = array();
+                    foreach($results as $result) {
+                        $temp_collect = collect($result);
+                        $temp_array[] = $temp_collect->toArray();
+                    }
+                    if (count($temp_array) > 0) {
+                        $results = $calendar_model->insCalenderDateYear($temp_array);
+                    }
                 }
             } 
 
