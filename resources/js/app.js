@@ -8,13 +8,14 @@ require("./bootstrap");
 
 window.Vue = require("vue");
 import axios from "axios";
+import router from "./router";
 import toasted from "vue-toasted";
 import VCalendar from "v-calendar";
 import VModal from "vue-js-modal";
 import Vue from "vue";
 // import VueSwal from "vue-swal";
-import VueSweetalert2 from 'vue-sweetalert2'
-import 'sweetalert2/dist/sweetalert2.min.css';
+import VueSweetalert2 from "vue-sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
 import ElementUI from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
 import locale from "element-ui/lib/locale/lang/ja";
@@ -350,9 +351,9 @@ Vue.component(
  */
 
 const app = new Vue({
-    el: "#app"
+    el: "#app",
     // render: h => h(App)
-    // router, // ルーティングの定義を読み込む
+    router // ルーティングの定義を読み込む
     // components: { App }, // ルートコンポーネントの使用を宣言する
     // template: "<App />" // ルートコンポーネントを描画する
 });
