@@ -485,7 +485,7 @@ export default {
         }
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("取得");
         }
@@ -495,12 +495,11 @@ export default {
     putThenHead(response, eventtext) {
       var messages = [];
       var res = response.data;
-      if (res.result) {
-        messages.push("会社情報を" + eventtext + "しました");
-        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+      if (res.result) {0
+        this.$toasted.show("会社情報を" + eventtext + "しました");
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch(eventtext);
         }
@@ -508,8 +507,9 @@ export default {
     },
     // 異常処理
     serverCatch(eventtext) {
+      var messages = [];
       messages.push("会社情報" + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     inputClear() {
       this.details = [];

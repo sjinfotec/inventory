@@ -17,6 +17,7 @@ use App\Demand;
 use App\Confirm;
 use App\Company;
 use App\UserHolidayKubun;
+use App\ApprovalRouteNo;
 
 
 
@@ -29,6 +30,7 @@ class ApiCommonController extends Controller
     protected $table_users = 'users';
     protected $table_departments = 'departments';
     protected $table_working_timetables = 'working_timetables';
+    protected $table_approval_route_nos = 'approval_route_nos';
 
     private $array_messagedata = array();
 
@@ -953,6 +955,56 @@ class ApiCommonController extends Controller
             throw $e;
         }
 
+    }
+
+    /**
+     * 承認リスト取得
+     *
+     * @return list
+     */
+    public function getApprovalroutenoList(Request $request){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            $approval_route_no_model = new ApprovalRouteNo();
+            $details = $approval_route_no_model->getList();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 承認明細リスト取得
+     *
+     * @return list
+     */
+    public function getApprovalauthorizerList(){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            $approval_authorizers_model = new ApprovalAuthorizer();
+            $details = $approval_authorizers_model->getList();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
     /**

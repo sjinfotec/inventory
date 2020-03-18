@@ -9,7 +9,7 @@
           <!-- panel header -->
           <daily-working-information-panel-header
             v-bind:header-text1="'年月を指定してカレンダーを設定する'"
-            v-bind:header-text2="'前月を当月に複写設定も可能です。'"
+            v-bind:header-text2="'全従業員共通または部署ごと個人ごとに設定可能です。'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="card-body pt-2">
@@ -44,12 +44,18 @@
                       id="basic-addon1"
                     >指定月<font color="blue">[表示時必須]</font></span>
                   </div>
-                  <input-datepicker
-                    v-bind:default-date="valuemonth"
-                    v-bind:date-format="'MM月'"
-                    v-on:change-event="frommonthChanges"
-                    v-on:clear-event="frommonthCleared"
-                  ></input-datepicker>
+                  <div class="form-control p-0">
+                    <input
+                      type="number"
+                      name="frommonth"
+                      title="指定月"
+                      max="12"
+                      min="1"
+                      step="1"
+                      class="form-control"
+                      v-model="valuemonth"
+                    />
+                  </div>
                 </div>
               </div>
               <!-- /.col -->
@@ -143,6 +149,28 @@
               <!-- /.col -->
             </div>
             <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between" v-if="messagevalidatesInit.length">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <ul class="error-red color-red">
+                  <li v-for="(messagevalidate,index) in messagevalidatesInit" v-bind:key="index">{{ messagevalidate }}</li>
+                </ul>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between" v-if="messagevalidatesCopyinit.length">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <ul class="error-red color-red">
+                  <li v-for="(messagevalidate,index) in messagevalidatesCopyinit" v-bind:key="index">{{ messagevalidate }}</li>
+                </ul>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
             <!-- ----------- メッセージ部 END ---------------- -->
             <!-- ----------- 選択ボタン類 START ---------------- -->
             <!-- .row -->
@@ -186,32 +214,6 @@
             <!-- /.row -->
             <!-- ----------- 選択ボタン類 END ---------------- -->
           </div>
-          <!-- ----------- メッセージ部 START ---------------- -->
-          <!-- .row -->
-          <div class="row justify-content-between" v-if="messagevalidatesInit.length">
-            <!-- col -->
-            <div class="col-md-12 pb-2">
-              <ul class="error-red color-red">
-                <li v-for="(messagevalidate,index) in messagevalidatesInit" v-bind:key="index">{{ messagevalidate }}</li>
-              </ul>
-            </div>
-            <!-- /.col -->
-          </div>
-          <!-- /.row -->
-          <!-- ----------- メッセージ部 END ---------------- -->
-          <!-- ----------- メッセージ部 START ---------------- -->
-          <!-- .row -->
-          <div class="row justify-content-between" v-if="messagevalidatesCopyinit.length">
-            <!-- col -->
-            <div class="col-md-12 pb-2">
-              <ul class="error-red color-red">
-                <li v-for="(messagevalidate,index) in messagevalidatesCopyinit" v-bind:key="index">{{ messagevalidate }}</li>
-              </ul>
-            </div>
-            <!-- /.col -->
-          </div>
-          <!-- /.row -->
-          <!-- ----------- メッセージ部 END ---------------- -->
           <!-- panel contents -->
         </div>
       </div>
@@ -393,7 +395,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
-                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGroupSelect01"
                     >設定区分<span class="color-red">[必須]</span></label>
                   </div>
@@ -626,7 +628,7 @@ export default {
     this.year = moment(this.valueym).format("YYYY");
     this.month = moment(this.valueym).format("MM");
     this.valueyear = this.defaultYm;
-    this.valuemonth = this.defaultYm;
+    this.valuemonth = this.month;
     this.getGeneralList("C007");
     this.getGeneralList("C008");
   },
@@ -661,6 +663,11 @@ export default {
       itemname = '指定月';
       chkArray = 
         this.checkHeader(this.valuemonth, required, equalength, maxlength, itemname);
+      if (chkArray.length == 0) {
+        if (this.valuemonth < 1 || this.valuemonth > 12) {
+          chkArray.push("1月から12月を入力してください。");
+        }
+      }
       if (chkArray.length > 0) {
         if (this.messagevalidatesDsp.length == 0) {
           this.messagevalidatesDsp = chkArray;
@@ -668,6 +675,7 @@ export default {
           this.messagevalidatesDsp = this.messagevalidatesDsp.concat(chkArray);
         }
       }
+
 
       if (this.messagevalidatesDsp.length > 0) {
         flag = false;
@@ -720,6 +728,23 @@ export default {
           this.messagevalidatesInit = this.messagevalidatesInit.concat(chkArray);
         }
       }
+      // 指定月
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '指定月';
+      if (this.valuemonth != "" && this.valuemonth != null ) {
+        if (this.valuemonth < 1 || this.valuemonth > 12) {
+          chkArray.push("1月から12月を入力してください。");
+        }
+      }
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesInit.length == 0) {
+          this.messagevalidatesInit = chkArray;
+        } else {
+          this.messagevalidatesInit = this.messagevalidatesInit.concat(chkArray);
+        }
+      }
 
       if (this.messagevalidatesInit.length > 0) {
         flag = false;
@@ -741,25 +766,13 @@ export default {
         equalength = 0;
         maxlength = 0;
         itemname = '設定区分選択';
-        if (this.valuemonth == null || this.valuemonth == "") {
-          chkArray = 
-            this.checkHeader(this.selectedC024Value, required, equalength, maxlength, itemname);
-          if (chkArray.length > 0) {
-            if (this.messagevalidatesInitstore.length == 0) {
-              this.messagevalidatesInitstore = chkArray;
-            } else {
-              this.messagevalidatesInitstore = this.messagevalidatesInitstore.concat(chkArray);
-            }
-          }
-        } else {
-          chkArray = 
-            this.checkHeader(this.selectedC034Value, required, equalength, maxlength, itemname);
-          if (chkArray.length > 0) {
-            if (this.messagevalidatesInitstore.length == 0) {
-              this.messagevalidatesInitstore = chkArray;
-            } else {
-              this.messagevalidatesInitstore = this.messagevalidatesInitstore.concat(chkArray);
-            }
+        chkArray = 
+          this.checkHeader(this.selectedC024Value, required, equalength, maxlength, itemname);
+        if (chkArray.length > 0) {
+          if (this.messagevalidatesInitstore.length == 0) {
+            this.messagevalidatesInitstore = chkArray;
+          } else {
+            this.messagevalidatesInitstore = this.messagevalidatesInitstore.concat(chkArray);
           }
         }
       }
@@ -956,7 +969,6 @@ export default {
     },
     // 明細編集ボタンクリックされた場合の処理
     detailEdtClick: function(e, arrayitem) {
-      console.log('arrayitem[rowIndex] = ' + arrayitem['rowIndex']);
       var index = arrayitem['rowIndex'];
       this.selectMode = 'EDT';
       this.isinitbutton = false;
@@ -981,9 +993,16 @@ export default {
       var flag = this.checkFormInit();
       if (flag) {
         this.selectMode = 'INT';
-        this.isinitbutton = true;
-        // パネルに表示
-        this.setPanelHeader();
+        if (this.valuemonth == "" || this.valuemonth == null) {
+          this.frommonthCleared();
+        } else {
+          if (this.valuemonth > 0) {
+            this.frommonthChanges(this.valuemonth);
+          } else {
+            this.frommonthCleared();
+          }
+        }
+        this.selectMode = 'INT';
       // 項目数が多い場合以下コメントアウト
       // } else {
       //   this.countswal("エラー", this.messagevalidatesInit, "error", true, false, true)
@@ -1004,7 +1023,7 @@ export default {
       if (flag) {
         var messages = [];
         messages.push("この内容で更新しますか？");
-        this.messageswal("確認", messages, "info", true, true, true)
+        this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
               this.FixDetail("更新");
@@ -1029,9 +1048,10 @@ export default {
       var flag = this.checkFormInitstore();
       if (flag) {
         var messages = [];
-        messages.push("指定年（月）に登録しているデータを上書きしますが、初期設定登録してもよろしいですか？");
+        messages.push("指定年（月）に登録しているデータを上書きしますが、");
+        messages.push("初期設定登録してもよろしいですか？");
         messages.push("※指定期間が長いと処理には数分かかる場合があります。");
-        this.messageswal("確認", messages, "info", true, true, true)
+        this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
               this.initStore("初期設定登録", this.form.initptn);
@@ -1092,20 +1112,33 @@ export default {
       if (this.valuemonth != "") {
         parammonth = moment(this.valuemonth).format("MM");
       }
-      var arrayParams = {
-        dateyear : moment(this.valueyear).format("YYYY"),
-        datemonth : parammonth,
-        employmentstatus : this.selectedEmploymentValue,
-        departmentcode : this.selectedDepartmentValue,
-        usercode : this.selectedUserValue
-      };
-      this.postRequest("/setting_calendar/get", arrayParams)
-        .then(response  => {
-          this.getThen(response);
-        })
-        .catch(reason => {
-          this.serverCatch("カレンダー", "取得");
-        });
+      // 処理中メッセージ表示
+      this.$swal({
+        title: "処　理　中...",
+        html: "",
+        allowOutsideClick: false, //枠外をクリックしても画面を閉じない
+        showConfirmButton: false,
+        showCancelButton: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+          var arrayParams = {
+            dateyear : moment(this.valueyear).format("YYYY"),
+            datemonth : parammonth,
+            employmentstatus : this.selectedEmploymentValue,
+            departmentcode : this.selectedDepartmentValue,
+            usercode : this.selectedUserValue
+          };
+          this.postRequest("/setting_calendar/get", arrayParams)
+            .then(response  => {
+              this.$swal.close();
+              this.getThen(response);
+            })
+            .catch(reason => {
+              this.$swal.close();
+              this.serverCatch("カレンダー", "取得");
+            });
+        }
+      });
     },
     // カレンダー登録処理
     initStore(eventname, ptn) {
@@ -1226,7 +1259,7 @@ export default {
         this.detail_dates = res.detail_dates;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false)
         } else {
           this.serverCatch("カレンダー", "取得");
         }
@@ -1238,11 +1271,9 @@ export default {
       var res = response.data;
       if (res.result) {
         this.$toasted.show("カレンダーを" + eventtext + "しました");
-        // messages.push("カレンダーを" + eventtext + "しました");
-        // this.messageswal(eventtext + "完了", messages, "success", true, false, true);
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false)
         } else {
           this.serverCatch("カレンダー",eventtext);
         }
@@ -1254,11 +1285,9 @@ export default {
       var res = response.data;
       if (res.result) {
         this.$toasted.show("カレンダーを" + eventtext + "しました");
-        // messages.push("カレンダーを" + eventtext + "しました");
-        // this.messageswal(eventtext + "完了", messages, "success", true, false, true);
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false)
         } else {
           this.serverCatch("カレンダー", eventtext);
         }
@@ -1268,7 +1297,7 @@ export default {
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false)
     },
     // 取得正常処理（明細出勤区分）
     getThenbusinesskbn(response) {
@@ -1277,7 +1306,7 @@ export default {
         this.BusinessDayList = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false)
         } else {
           this.serverCatch("出勤区分", "取得");
         }
@@ -1290,7 +1319,7 @@ export default {
         this.HoliDayList = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false)
         } else {
           this.serverCatch("休暇区分", "取得");
         }

@@ -93,11 +93,6 @@ class EditCalendarController extends Controller
             }
             $year = $params['dateyear'];
             $month = $params['datemonth'];
-            Log::debug('departmentcode = '.$departmentcode);
-            Log::debug('employmentstatus = '.$employmentstatus);
-            Log::debug('usercode = '.$usercode);
-            Log::debug('dateyear = '.$year);
-            Log::debug('datemonth = '.$month);
             // 検索日付期間設定
             $search_y_m = $year."".$month;
             $dt1 = new Carbon($search_y_m.'15');
@@ -319,7 +314,6 @@ class EditCalendarController extends Controller
      */
     public function init(Request $request){
         try {
-            Log::debug('初期設定 init = ');
             $this->array_messagedata = array();
             $details = array();
             $formdata = array();
@@ -379,21 +373,13 @@ class EditCalendarController extends Controller
             $dateyear = $params['dateyear'];
             // 設定されている場合
             $datemonth = null;
-            Log::debug('datemonth = '.$datemonth);
             if (isset($params['datemonth'])) {
-                Log::debug('datemonth true = '.$params['datemonth']);
                 $datemonth = $params['datemonth'];
             }
             $displaykbn = null;
             if (isset($params['displaykbn'])) {
                 $displaykbn = $params['displaykbn'];
             }
-            Log::debug('departmentcode = '.$departmentcode);
-            Log::debug('employmentstatus = '.$employmentstatus);
-            Log::debug('usercode = '.$usercode);
-            Log::debug('displaykbn = '.$displaykbn);
-            Log::debug('dateyear = '.$dateyear);
-            Log::debug('datemonth = '.$datemonth);
             // showCalc implement
             $array_impl_initCalendar = array (
                 'ptn' => $ptn,
@@ -502,8 +488,6 @@ class EditCalendarController extends Controller
                     $fromdate = new Carbon($dateyear.'0101');
                 }
             }
-            Log::debug('$fromdate = '.$fromdate);
-            Log::debug('$todate = '.$todate);
             $dtfrom = $fromdate;
             if ($employmentstatus == "") { $employmentstatus = null; }
             if ($departmentcode == "") { $departmentcode = null; }
@@ -511,8 +495,7 @@ class EditCalendarController extends Controller
             // 作成
             $apicommon = new ApiCommonController();
             $users_datas = $apicommon->getUserDepartmentEmploymentRole($usercode, date_format($todate, 'Ymd'));
-            $dt = $fromdate;
-            $dt->copy()->subDay();
+            $dt = $fromdate->copy()->subDay();
             $user = Auth::user();
             $login_user_code = $user->code;
             $calendar_model->setCreateduserAttribute($login_user_code);

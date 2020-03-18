@@ -571,13 +571,12 @@ export default {
         this.userrole = res.role;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal(
+          this.htmlMessageSwal(
             "エラー",
             res.messagedata,
             "error",
             true,
-            false,
-            true
+            false
           );
         } else {
           this.serverCatch("ユーザー権限", "取得");
@@ -624,7 +623,7 @@ export default {
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     //  クリアメソッド
     itemClear: function() {

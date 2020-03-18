@@ -533,7 +533,7 @@ export default {
     reasonstoreClick: function() {
       var messages = [];
       messages.push("この内容で登録しますか？");
-      this.messageswal("確認", messages, "info", true, true, true).then(
+      this.htmlMessageSwal("確認", messages, "info", true, true).then(
         result => {
           if (result) {
             this.FixDetail("登録");
@@ -645,7 +645,7 @@ export default {
         this.userrole = res.role;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("ユーザー権限", "取得");
         }
@@ -665,11 +665,11 @@ export default {
         } else {
           var messages = [];
           messages.push("該当するデータはありませんでした。");
-          this.messageswal("確認", messages, "info", true, false, false);
+          this.htmlMessageSwal("確認", messages, "info", true, false);
         }
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("勤怠ログ", "取得");
         }
@@ -680,26 +680,11 @@ export default {
       var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("勤怠ログを" + eventtext + "しました");
-        this.messageswal(
-          eventtext + "完了",
-          messages,
-          "success",
-          true,
-          false,
-          true
-        );
+        this.$toasted.show("勤怠ログを" + eventtext + "しました");
         this.getItem();
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal(
-            "警告",
-            res.messagedata,
-            "warning",
-            true,
-            false,
-            true
-          );
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch("勤怠ログ", eventtext);
         }
@@ -709,7 +694,7 @@ export default {
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     // クリアメソッド
     inputClear() {

@@ -8,6 +8,7 @@
         <div class="col-12">
           <div class="table-responsive">
             <table class="table table-striped border-bottom font-size-sm text-nowrap">
+            <!-- <table class="table"> -->
               <thead>
                 <tr>
                   <td class="text-center align-middle w-20 mw-rem-10">部署</td>
@@ -72,6 +73,6 @@ export default {
 </script>
 <style scoped>
 .table th, .table td {
-    padding: 0rem !important;
+    padding: 0.1rem !important;
 }
 </style>

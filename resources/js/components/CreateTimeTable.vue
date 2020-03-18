@@ -957,7 +957,6 @@
   </div>
 </template>
 <script>
-import toasted from "vue-toasted";
 import moment from "moment";
 import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
@@ -1379,7 +1378,7 @@ export default {
       if (flag) {
         var messages = [];
         messages.push("この内容で登録しますか？");
-        this.messageswal("確認", messages, "info", true, true, true)
+        this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
               this.store();
@@ -1426,7 +1425,7 @@ export default {
     delClick(index) {
       var messages = [];
       messages.push("この内容を削除しますか？");
-      this.messageswal("確認", messages, "info", true, true, true)
+      this.htmlMessageSwal("確認", messages, "info", true, true)
         .then(result  => {
           if (result) {
             this.DelDetail(index);
@@ -1438,7 +1437,7 @@ export default {
       if (this.before_count < this.count) {
         var messages = [];
         messages.push("１度に追加できる情報は１個です。追加してから再実行してください");
-        this.messageswal("エラー", messages, "error", true, false, true);
+        this.htmlMessageSwal("エラー", messages, "error", true, false);
       } else {
         var no = this.details[0].no;
         var name = this.details[0].name;
@@ -1465,7 +1464,7 @@ export default {
       if (this.checkRowData(index)) {
         var messages = [];
         messages.push("行削除してよろしいですか？");
-        this.messageswal("確認", messages, "info", true, true, true)
+        this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
               for( var i=((index-1) * 7);i<7;i++ ) {
@@ -1487,7 +1486,6 @@ export default {
     // タイムテーブル取得処理
     getItem() {
       this.details = [];
-      var messages = [];
       this.postRequest("/create_time_table/get", { no : this.selectedValue, killvalue : this.valuekillcheck})
         .then(response  => {
           this.getThen(response);
@@ -1506,7 +1504,7 @@ export default {
         })
         .catch(reason => {
           messages.push("タイムテーブル登録に失敗しました");
-          this.messageswal("エラー", messages, "error", true, false, true);
+          this.htmlMessageSwal("エラー", messages, "error", true, false);
         });
     },
     // タイムテーブル更新処理（明細）
@@ -1519,7 +1517,7 @@ export default {
         })
         .catch(reason => {
           messages.push("タイムテーブル" + eventtext + "に失敗しました");
-          this.messageswal("エラー", messages, "error", true, false, true);
+          this.htmlMessageSwal("エラー", messages, "error", true, false);
         });
     },
     // タイムテーブル削除処理（明細）
@@ -1532,7 +1530,7 @@ export default {
         })
         .catch(reason => {
           messages.push("タイムテーブル削除に失敗しました");
-          this.messageswal("エラー", messages, "error", true, false, true);
+          this.htmlMessageSwal("エラー", messages, "error", true, false);
         });
     },
     // 前月締日取得処理
@@ -1554,7 +1552,7 @@ export default {
         })
         .catch(reason => {
           messages.push("締日取得エラー。集計方法基本設定の締日設定を確認してください。");
-          this.messageswal("エラー", messages, "error", true, false, true);
+          this.htmlMessageSwal("エラー", messages, "error", true, false);
         });
     },
     // -------------------- 共通 ----------------------------
@@ -1562,7 +1560,7 @@ export default {
     fix_normal_confirm: function(index, eventtext) {
       var messages = [];
       messages.push("この内容で" + eventtext + "しますか？");
-      this.messageswal("確認", messages, "info", true, true, true)
+      this.htmlMessageSwal("確認", messages, "info", true, true)
         .then(result  => {
           if (result) {
             this.FixDetail(index, eventtext);
@@ -1572,10 +1570,11 @@ export default {
     // 締日チェックNGの場合
     fix_warning_confirm: function(index, eventtext) {
       var messages = [];
-      messages.push(
-        "適用開始日が前月の締日" + moment(this.closingYmd).format('YYYY年MM月DD日') + "以前ですが" + "\n" + "前月締日以前のデータは自動集計されないため、" + "\n" + "月次集計の一括集計を行う必要があります。" + "\n" + "この内容で編集を確定しますか？"
-      );
-      this.messageswal("確認", messages, "info", true, true, true)
+      messages.push("適用開始日が前月の締日" + moment(this.closingYmd).format('YYYY年MM月DD日') + "以前ですが");
+      messages.push("前月締日以前のデータは自動集計されないため、");
+      messages.push("月次集計の一括集計を行う必要があります。");
+      messages.push("この内容で編集を確定しますか？");
+      this.htmlMessageSwal("確認", messages, "info", true, true)
         .then(result  => {
           if (result) {
             this.FixDetail(index, eventtext);
@@ -1592,7 +1591,7 @@ export default {
         this.before_count = this.count;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           serverCatch("取得")
         }
@@ -1600,16 +1599,14 @@ export default {
     },
     // 更新系正常処理
     putThenHead(response, eventtext) {
-      var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("タイムテーブルを" + eventtext + "しました");
-        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+        this.$toasted.show("タイムテーブルを" + eventtext + "しました");
         this.refreshItemList();
         this.form.no = res.no;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           serverCatch(eventtext)
         }
@@ -1617,18 +1614,16 @@ export default {
     },
     // 更新系正常処理（明細）
     putThenDetail(response, eventtext) {
-      var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("タイムテーブルを" + eventtext + "しました");
-        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+        this.$toasted.show("タイムテーブルを" + eventtext + "しました");
         this.refreshItemList();
         this.getItem();
         this.count = this.details.length / 7;
         this.before_count = this.count;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           serverCatch(eventtext)
         }
@@ -1636,8 +1631,9 @@ export default {
     },
     // 異常処理
     serverCatch(eventtext) {
+      var messages = [];
       messages.push("タイムテーブル情報" + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     inputClear() {
       this.details = [];

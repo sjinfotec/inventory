@@ -48,8 +48,9 @@ export default {
     },
     // 異常処理
     serverCatch(eventtext) {
+      var messages = [];
       messages.push("会社名" + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     }
   }
 };

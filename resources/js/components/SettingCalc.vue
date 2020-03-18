@@ -1040,7 +1040,7 @@ export default {
         }
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("取得");
         }
@@ -1051,11 +1051,10 @@ export default {
       var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("労働時間基本設定を" + eventtext + "しました");
-        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+        this.$toasted.show("労働時間基本設定を" + eventtext + "しました");
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch(eventtext);
         }
@@ -1065,7 +1064,7 @@ export default {
     serverCatch(eventtext) {
       var messages = [];
       messages.push("労働時間基本設定" + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     // 取得正常処理（明細時間単位リスト）
     getThentimeUnit(response) {
@@ -1074,7 +1073,7 @@ export default {
         this.TimeUnitList = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("時間単位", "取得");
         }
@@ -1087,7 +1086,7 @@ export default {
         this.TimeRoundingList = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("時間の丸め", "取得");
         }
