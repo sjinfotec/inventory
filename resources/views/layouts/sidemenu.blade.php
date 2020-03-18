@@ -39,7 +39,7 @@
                                 @can('admin-midle')
                                     <li><a class="px-3 py-1 text-white d-block" href="{{ url('/approval') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">各種申請承認</a></li>
                                     @can('admin-higher')
-                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/confirm') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">承認者ルート設定</a></li>
+                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/approvalroot') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">承認者ルート設定</a></li>
                                     @endcan
                                 @endcan
                             </ul>

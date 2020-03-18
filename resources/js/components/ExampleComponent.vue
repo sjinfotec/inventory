@@ -277,7 +277,7 @@
                     .catch(reason => {
                         var messages = [];
                         messages.push("氏名選択リスト作成エラー");
-                        this.messageswal("エラー", messages, "error", true, false, true);
+                        this.htmlMessageSwal("エラー", messages, "error", true, false);
                     });
             },
             // 部署選択リスト取得処理
@@ -345,7 +345,7 @@
                     // 固有処理 end
                 } else {
                     if (res.messagedata.length > 0) {
-                        this.messageswal("エラー", res.messagedata, "error", true, false, true);
+                        this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
                     } else {
                         this.serverCatch("取得");
                     }
@@ -358,13 +358,13 @@
                 if (res.result) {
                     // 固有処理 START
                     messages.push("部署を" + eventtext + "しました");
-                    this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+                    this.htmlMessageSwal(eventtext + "完了", messages, "success", true, false);
                     this.refreshItemList();
                     this.form.code = res.code;
                     // 固有処理 end
                 } else {
                     if (res.messagedata.length > 0) {
-                        this.messageswal("警告", res.messagedata, "warning", true, false, true);
+                        this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
                     } else {
                         this.serverCatch(eventtext);
                     }
@@ -377,7 +377,7 @@
                 if (res.result) {
                     // 固有処理 START
                     messages.push("部署を" + eventtext + "しました");
-                    this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+                    this.htmlMessageSwal(eventtext + "完了", messages, "success", true, false);
                     this.refreshItemList();
                     this.getItem();
                     this.count = this.details.length;
@@ -385,7 +385,7 @@
                     // 固有処理 end
                 } else {
                     if (res.messagedata.length > 0) {
-                        this.messageswal("警告", res.messagedata, "warning", true, false, true);
+                        this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
                     } else {
                         this.serverCatch(eventtext);
                     }
@@ -395,7 +395,7 @@
             serverCatch(eventtext) {
                 var messages = [];
                 messages.push("部署情報" + eventtext + "に失敗しました");
-                this.messageswal("エラー", messages, "error", true, false, true);
+                this.htmlMessageSwal("エラー", messages, "error", true, false);
             },
             refreshtDepartmentList() {
                 // 最新リストの表示

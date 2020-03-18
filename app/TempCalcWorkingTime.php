@@ -70,6 +70,11 @@ class TempCalcWorkingTime extends Model
     private $check_result;                      // 打刻チェック結果
     private $check_max_times;                   // 打刻回数最大チェック結果
     private $check_interval;                    // インターバルチェック結果
+    private $work_times_id;                     // 打刻時刻テーブルID
+    private $editor_department_code;            // 編集部署コード
+    private $editor_department_name;            // 編集部署名
+    private $editor_user_code;                  // 編集ユーザーコード
+    private $editor_user_name;                  // 編集ユーザー名
     private $positions;                         // 位置情報
     private $systemdate;
 
@@ -671,6 +676,61 @@ class TempCalcWorkingTime extends Model
         $this->positions = $value;
     }
 
+    // 打刻時刻テーブルID
+    public function getWorktimesidAttribute()
+    {
+        return $this->work_times_id;
+    }
+
+    public function setWorktimesidAttribute($value)
+    {
+        $this->work_times_id = $value;
+    }
+
+    // 編集部署コード
+    public function getEditordepartmentcodeAttribute()
+    {
+        return $this->editor_department_code;
+    }
+
+    public function setEditordepartmentcodeAttribute($value)
+    {
+        $this->editor_department_code = $value;
+    }
+
+    // 編集ユーザーコード
+    public function getEditorusercodeAttribute()
+    {
+        return $this->editor_user_code;
+    }
+
+    public function setEditorusercodeAttribute($value)
+    {
+        $this->editor_user_code = $value;
+    }
+
+    // 編集部署名
+    public function getEditordepartmentnameAttribute()
+    {
+        return $this->editor_department_name;
+    }
+
+    public function setEditordepartmentnameAttribute($value)
+    {
+        $this->editor_department_name = $value;
+    }
+
+    // 編集ユーザー名
+    public function getEditorusernameAttribute()
+    {
+        return $this->editor_user_name;
+    }
+
+    public function setEditorusernameAttribute($value)
+    {
+        $this->editor_user_name = $value;
+    }
+
 
     public function getSystemDateAttribute()
     {
@@ -690,7 +750,6 @@ class TempCalcWorkingTime extends Model
     private $param_employment_status;           // 雇用形態
     private $param_department_code;             // 部署
     private $param_user_code;                   // ユーザー
-
     private $array_record_time;                 // 日付範囲配列
     private $massegedata;                       // メッセージ
 
@@ -836,7 +895,12 @@ class TempCalcWorkingTime extends Model
                 't1.pattern as pattern',
                 't1.check_result as check_result',
                 't1.check_max_times as check_max_times',
-                't1.check_interval as check_interval'
+                't1.check_interval as check_interval',
+                't1.work_times_id as work_times_id',
+                't1.editor_department_code as editor_department_code',
+                't1.editor_department_name as editor_department_name',
+                't1.editor_user_code as editor_user_code',
+                't1.editor_user_name as editor_user_name'
             );
             $mainquery
                 ->selectRaw('X(t1.positions) as x_positions')
@@ -938,6 +1002,11 @@ class TempCalcWorkingTime extends Model
                         'check_max_times' => $this->check_max_times,
                         'check_interval' => $this->check_interval,
                         'positions' => DB::raw("(GeomFromText('POINT(".$this->positions.")'))"),
+                        'work_times_id' => $this->work_times_id,
+                        'editor_department_code' => $this->editor_department_code,
+                        'editor_department_name' => $this->editor_department_name,
+                        'editor_user_code' => $this->editor_user_code,
+                        'editor_user_name' => $this->editor_user_name,
                         'created_at'=>$this->systemdate
                     ]
                 );
@@ -994,6 +1063,11 @@ class TempCalcWorkingTime extends Model
                         'check_max_times' => $this->check_max_times,
                         'check_interval' => $this->check_interval,
                         'positions' => null,
+                        'work_times_id' => $this->work_times_id,
+                        'editor_department_code' => $this->editor_department_code,
+                        'editor_department_name' => $this->editor_department_name,
+                        'editor_user_code' => $this->editor_user_code,
+                        'editor_user_name' => $this->editor_user_name,
                         'created_at'=>$this->systemdate
                     ]
                 );

@@ -7,16 +7,16 @@
           <div class="col-12 p-0">
             <table class="table table-striped border-bottom font-size-sm text-nowrap">
               <thead>
-                <tr v-if="detailOrTotal === 'detail' && btnMode ==='basicswitch'">
+                <tr v-if="detailOrTotal === 'detail' && btnMode ==='basicswitch'" bgcolor="#e3f0fb">
                   <td class="text-center align-middle w-15 mw-rem-5">部署</td>
                   <td class="text-center align-middle w-15 mw-rem-10">雇用形態</td>
                   <td class="text-center align-middle w-15 mw-rem-10">氏名</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">出勤</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">退勤</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">公外</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">公外戻</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">私外</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">私外戻</td>
+                  <td class="text-left align-middle w-15 mw-rem-4">出勤</td>
+                  <td class="text-left align-middle w-15 mw-rem-4">退勤</td>
+                  <td class="text-left align-middle w-15 mw-rem-4">公外</td>
+                  <td class="text-left align-middle w-15 mw-rem-4">公外戻</td>
+                  <td class="text-left align-middle w-15 mw-rem-4">私外</td>
+                  <td class="text-left align-middle w-15 mw-rem-4">私外戻</td>
                   <td class="text-center align-middle w-15 mw-rem-5">勤務状態</td>
                   <td class="text-center align-middle w-15 mw-rem-10">勤務帯</td>
                   <td
@@ -44,16 +44,22 @@
                   >不就労時間</td>
                   <td class="text-center align-middle w-35 mw-rem-15">備考</td>
                 </tr>
-                <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'">
+                <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'" bgcolor="#e3f0fb">
                   <td class="text-center align-middle w-15 mw-rem-5">部署</td>
                   <td class="text-center align-middle w-15 mw-rem-10">雇用形態</td>
                   <td class="text-center align-middle w-15 mw-rem-10">氏名</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">出勤</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">退勤</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">公外</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">公外戻</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">私外</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">私外戻</td>
+                  <td class="text-left align-middle w-15 mw-rem-4">出勤</td>
+                  <td class="text-center align-middle w-15 mw-rem-10">編集氏名</td>
+                  <td class="text-left align-middle w-15 mw-rem-4">退勤</td>
+                  <td class="text-center align-middle w-15 mw-rem-10">編集氏名</td>
+                  <td class="text-left align-middle w-15 mw-rem-4">公外</td>
+                  <td class="text-center align-middle w-15 mw-rem-10">編集氏名</td>
+                  <td class="text-left align-middle w-15 mw-rem-4">公外戻</td>
+                  <td class="text-center align-middle w-15 mw-rem-10">編集氏名</td>
+                  <td class="text-left align-middle w-15 mw-rem-4">私外</td>
+                  <td class="text-center align-middle w-15 mw-rem-10">編集氏名</td>
+                  <td class="text-left align-middle w-15 mw-rem-4">私外戻</td>
+                  <td class="text-center align-middle w-15 mw-rem-10">編集氏名</td>
                   <td class="text-center align-middle w-15 mw-rem-5">勤務状態</td>
                   <td class="text-center align-middle w-15 mw-rem-10">勤務帯</td>
                   <td
@@ -79,7 +85,7 @@
                   >不就労時間</td>
                   <td class="text-center align-middle w-35 mw-rem-15">備考</td>
                 </tr>
-                <tr v-if="detailOrTotal === 'total' && btnMode ==='basicswitch'">
+                <tr v-if="detailOrTotal === 'total' && btnMode ==='basicswitch'" bgcolor="#e3fbef">
                   <td
                     class="text-center align-middle w-15 mw-rem-5 color-royalblue"
                     data-toggle="tooltip"
@@ -108,7 +114,7 @@
                   <td class="text-center align-middle w-15 mw-rem-5">欠勤者数</td>
                   <td class="text-center align-middle w-35 mw-rem-15">備考</td>
                 </tr>
-                <tr v-if="detailOrTotal === 'total' && btnMode ==='detailswitch'">
+                <tr v-if="detailOrTotal === 'total' && btnMode ==='detailswitch'" bgcolor="#e3fbef">
                   <td
                     class="text-center align-middle w-15 color-royalblue"
                     data-toggle="tooltip"
@@ -148,108 +154,126 @@
                   <td class="text-left align-middle">{{ calcList.department_name }}</td>
                   <td class="text-left align-middle">{{ calcList.employment_status_name }}</td>
                   <td class="text-left align-middle">{{ calcList.user_name }}</td>
-                  <!-- <td class="text-center align-middle" v-if="calcList.x_attendance_time_positions"><button class="btn btn-success">{{ calcList.attendance_time }}</button></td> -->
                   <!-- 出勤 -->
-                  <td
-                    class="text-center text-align-center"
-                    v-if="calcList.x_attendance_time_positions"
+                  <daily-working-info-time-table
+                    v-bind:calc-list="{
+                      x_positions: calcList.x_attendance_time_position,
+                      y_positions: calcList.y_attendance_time_positions,
+                      editor_department_code: calcList.attendance_editor_department_code,
+                      editor_department_name: calcList.attendance_editor_department_name,
+                      editor_user_name: calcList.attendance_editor_user_name,
+                      working_time: calcList.attendance_time,
+                    }"
+                    v-on:click-event="showMap(
+                        calcList.attendance_time,
+                        calcList.user_name,
+                        calcList.x_attendance_time_positions,
+                        calcList.y_attendance_time_positions,
+                        index,
+                        mode_attendance)"
                   >
-                    {{ calcList.attendance_time }}
-                    <img
-                      class="icon-size-sm svg_img orange600"
-                      src="/images/red_map_pin.svg"
-                      @click="showMap(calcList.attendance_time,calcList.user_name,calcList.x_attendance_time_positions,calcList.y_attendance_time_positions,index,mode_attendance)"
-                      alt
-                    />
-                  </td>
-                  <td class="text-center text-align-center" v-else>{{ calcList.attendance_time }}</td>
+                  </daily-working-info-time-table>
+                  <!-- /出勤 -->
                   <!-- 退勤 -->
-                  <td
-                    class="text-center text-align-center"
-                    v-if="calcList.x_leaving_time_positions"
+                  <daily-working-info-time-table
+                    v-bind:calc-list="{
+                      x_positions: calcList.x_leaving_time_positions,
+                      y_positions: calcList.y_leaving_time_positions,
+                      editor_department_code: calcList.leaving_editor_department_code,
+                      editor_department_name: calcList.leaving_editor_department_name,
+                      editor_user_name: calcList.attendance_editor_user_name,
+                      working_time: calcList.leaving_time,
+                    }"
+                    v-on:click-event="showMap(
+                        calcList.leaving_time,
+                        calcList.user_name,
+                        calcList.x_leaving_time_positions,
+                        calcList.y_leaving_time_positions,
+                        index,
+                        mode_leaving)"
                   >
-                    {{ calcList.leaving_time }}
-                    <img
-                      class="icon-size-sm svg_img orange600"
-                      src="/images/red_map_pin.svg"
-                      @click="showMap(calcList.leaving_time,calcList.user_name,calcList.x_leaving_time_positions,calcList.y_leaving_time_positions,index,mode_leaving)"
-                      alt
-                    />
-                  </td>
-                  <td class="text-center text-align-center" v-else>{{ calcList.leaving_time }}</td>
-                  <!-- 私用外出　開始 -->
-                  <td
-                    class="text-center text-align-center"
-                    v-if="calcList.x_public_going_out_time_positions"
-                  >
-                    {{ calcList.public_going_out_time }}
-                    <img
-                      class="icon-size-sm svg_img orange600"
-                      src="/images/red_map_pin.svg"
-                      @click="showMap(calcList.public_going_out_time,calcList.user_name,calcList.x_public_going_out_time_positions,calcList.y_public_going_out_time_positions,index,mode_official_out_start)"
-                      alt
-                    />
-                  </td>
-                  <td
-                    class="text-center text-align-center"
-                    v-else
-                  >{{ calcList.public_going_out_time }}</td>
-                  <!-- 私用外出　終了 -->
-                  <td
-                    class="text-center text-align-center"
-                    v-if="calcList.x_public_going_out_return_time_positions"
-                  >
-                    {{ calcList.public_going_out_return_time }}
-                    <img
-                      class="icon-size-sm svg_img orange600"
-                      src="/images/red_map_pin.svg"
-                      @click="showMap(calcList.public_going_out_return_time,calcList.user_name,calcList.x_public_going_out_return_time_positions,calcList.y_public_going_out_return_time_positions,index,mode_official_out_end)"
-                      alt
-                    />
-                  </td>
-                  <td
-                    class="text-center text-align-center"
-                    v-else
-                  >{{ calcList.public_going_out_return_time }}</td>
+                  </daily-working-info-time-table>
+                  <!-- /退勤 -->
                   <!-- 公用外出　開始 -->
-                  <td
-                    class="text-center text-align-center"
-                    v-if="calcList.x_missing_middle_time_positions"
+                  <daily-working-info-time-table
+                    v-bind:calc-list="{
+                      x_positions: calcList.x_public_going_out_time_positions,
+                      y_positions: calcList.y_public_going_out_time_positions,
+                      editor_department_code: calcList.public_editor_department_code,
+                      editor_department_name: calcList.public_editor_department_name,
+                      editor_user_name: calcList.public_editor_user_name,
+                      working_time: calcList.lpublic_going_out_time,
+                    }"
+                    v-on:click-event="showMap(
+                        calcList.lpublic_going_out_time,
+                        calcList.user_name,
+                        calcList.x_public_going_out_time_positions,
+                        calcList.y_public_going_out_time_positions,
+                        index,
+                        mode_official_out_start)"
                   >
-                    {{ calcList.missing_middle_time }}
-                    <img
-                      class="icon-size-sm svg_img orange600"
-                      src="/images/red_map_pin.svg"
-                      @click="showMap(calcList.missing_middle_time,calcList.user_name,calcList.x_missing_middle_time_positions,calcList.y_missing_middle_time_positions,index,mode_private_out_start)"
-                      alt
-                    />
-                  </td>
-                  <td
-                    class="text-center text-align-center"
-                    v-else
-                  >{{ calcList.missing_middle_time }}</td>
-                  <!-- 公用外出　終了 -->
-                  <td
-                    class="text-center text-align-center"
-                    v-if="calcList.x_missing_middle_return_time_positions"
+                  </daily-working-info-time-table>
+                  <!-- /公用外出　終了 -->
+                  <!-- 公用外出戻り　開始 -->
+                  <daily-working-info-time-table
+                    v-bind:calc-list="{
+                      x_positions: calcList.x_public_going_out_return_time_positions,
+                      y_positions: calcList.y_public_going_out_return_time_positions,
+                      editor_department_code: calcList.public_return_editor_department_code,
+                      editor_department_name: calcList.public_return_editor_department_name,
+                      editor_user_name: calcList.public_return_editor_user_name,
+                      working_time: calcList.public_going_out_return_time,
+                    }"
+                    v-on:click-event="showMap(
+                        calcList.public_going_out_return_time,
+                        calcList.user_name,
+                        calcList.x_public_going_out_return_time_positions,
+                        calcList.y_public_going_out_return_time_positions,
+                        index,
+                        mode_official_out_end)"
                   >
-                    {{ calcList.missing_middle_return_time }}
-                    <img
-                      class="icon-size-sm svg_img orange600"
-                      src="/images/red_map_pin.svg"
-                      @click="showMap(calcList.missing_middle_return_time,calcList.user_name,calcList.x_missing_middle_return_time_positions,calcList.y_missing_middle_return_time_positions,index,mode_private_out_end)"
-                      alt
-                    />
-                  </td>
-                  <td
-                    class="text-center text-align-center"
-                    v-else
-                  >{{ calcList.missing_middle_return_time }}</td>
-                  <!-- <td class="text-center align-middle">{{ calcList.leaving_time }}</td>
-                  <td class="text-center align-middle">{{ calcList.public_going_out_time }}</td>
-                  <td class="text-center align-middle">{{ calcList.public_going_out_return_time }}</td>
-                  <td class="text-center align-middle">{{ calcList.missing_middle_time }}</td>
-                  <td class="text-center align-middle">{{ calcList.missing_middle_return_time }}</td>-->
+                  </daily-working-info-time-table>
+                  <!-- /公用外出戻り　終了 -->
+                  <!-- 私用外出　開始 -->
+                  <daily-working-info-time-table
+                    v-bind:calc-list="{
+                      x_positions: calcList.x_missing_middle_time_positions,
+                      y_positions: calcList.y_missing_middle_time_positions,
+                      editor_department_code: calcList.missing_editor_department_code,
+                      editor_department_name: calcList.missing_editor_department_name,
+                      editor_user_name: calcList.missing_editor_user_name,
+                      working_time: calcList.missing_middle_time,
+                    }"
+                    v-on:click-event="showMap(
+                        calcList.missing_middle_time,
+                        calcList.user_name,
+                        calcList.x_missing_middle_time_positions,
+                        calcList.y_missing_middle_time_positions,
+                        index,
+                        mode_private_out_start)"
+                  >
+                  </daily-working-info-time-table>
+                  <!-- /私用外出　終了 -->
+                  <!-- 私用外出戻り　開始 -->
+                  <daily-working-info-time-table
+                    v-bind:calc-list="{
+                      x_positions: calcList.x_missing_middle_return_time_positions,
+                      y_positions: calcList.y_missing_middle_return_time_positions,
+                      editor_department_code: calcList.missing_return_editor_department_code,
+                      editor_department_name: calcList.missing_return_editor_department_name,
+                      editor_user_name: calcList.missing_return_editor_user_name,
+                      working_time: calcList.missing_middle_return_time,
+                    }"
+                    v-on:click-event="showMap(
+                        calcList.missing_middle_return_time,
+                        calcList.user_name,
+                        calcList.x_missing_middle_return_time_positions,
+                        calcList.y_missing_middle_return_time_positions,
+                        index,
+                        mode_private_out_end)"
+                  >
+                  </daily-working-info-time-table>
+                  <!-- /私用外出戻り　終了 -->
                   <td class="text-center align-middle">{{ calcList.working_status_name }}</td>
                   <td class="text-center align-middle">{{ calcList.working_timetable_name }}</td>
                   <td
@@ -281,102 +305,188 @@
                   <td class="text-left align-middle">{{ calcList.department_name }}</td>
                   <td class="text-left align-middle">{{ calcList.employment_status_name }}</td>
                   <td class="text-left align-middle">{{ calcList.user_name }}</td>
-                  <!-- <td class="text-center align-middle">{{ calcList.attendance_time }}</td> -->
-                  <td
-                    class="text-center text-align-center"
-                    v-if="calcList.x_attendance_time_positions"
+                  <!-- 出勤 -->
+                  <daily-working-info-time-table
+                    v-bind:calc-list="{
+                      x_positions: calcList.x_attendance_time_position,
+                      y_positions: calcList.y_attendance_time_positions,
+                      editor_department_code: calcList.attendance_editor_department_code,
+                      editor_department_name: calcList.attendance_editor_department_name,
+                      editor_user_name: calcList.attendance_editor_user_name,
+                      working_time: calcList.attendance_time,
+                    }"
+                    v-on:click-event="showMap(
+                        calcList.attendance_time,
+                        calcList.user_name,
+                        calcList.x_attendance_time_positions,
+                        calcList.y_attendance_time_positions,
+                        index,
+                        mode_attendance)"
                   >
-                    {{ calcList.attendance_time }}
-                    <img
-                      class="icon-size-sm svg_img orange600"
-                      src="/images/red_map_pin.svg"
-                      @click="showMap(calcList.attendance_time,calcList.user_name,calcList.x_attendance_time_positions,calcList.y_attendance_time_positions,index,mode_attendance)"
-                      alt
-                    />
-                  </td>
-                  <td class="text-center text-align-center" v-else>{{ calcList.attendance_time }}</td>
-                  <!-- <td class="text-center align-middle">{{ calcList.leaving_time }}</td> -->
+                  </daily-working-info-time-table>
                   <td
-                    class="text-center text-align-center"
-                    v-if="calcList.x_leaving_time_positions"
+                    class="text-left text-align-left"
+                    v-if="calcList.attendance_editor_department_name"
                   >
-                    {{ calcList.leaving_time }}
-                    <img
-                      class="icon-size-sm svg_img orange600"
-                      src="/images/red_map_pin.svg"
-                      @click="showMap(calcList.leaving_time,calcList.user_name,calcList.x_leaving_time_positions,calcList.y_leaving_time_positions,index,mode_leaving)"
-                      alt
-                    />
-                  </td>
-                  <td class="text-center text-align-center" v-else>{{ calcList.leaving_time }}</td>
-                  <!-- <td class="text-center align-middle">{{ calcList.public_going_out_time }}</td> -->
-                  <td
-                    class="text-center text-align-center"
-                    v-if="calcList.x_public_going_out_time_positions"
-                  >
-                    {{ calcList.public_going_out_time }}
-                    <img
-                      class="icon-size-sm svg_img orange600"
-                      src="/images/red_map_pin.svg"
-                      @click="showMap(calcList.public_going_out_time,calcList.user_name,calcList.x_public_going_out_time_positions,calcList.y_public_going_out_time_positions,index,mode_official_out_start)"
-                      alt
-                    />
+                    {{ calcList.attendance_editor_department_name }}：{{ calcList.attendance_editor_user_name }}
                   </td>
                   <td
-                    class="text-center text-align-center"
+                    class="text-left text-align-left"
                     v-else
-                  >{{ calcList.public_going_out_time }}</td>
-                  <!-- <td class="text-center align-middle">{{ calcList.public_going_out_return_time }}</td> -->
-                  <td
-                    class="text-center text-align-center"
-                    v-if="calcList.x_public_going_out_return_time_positions"
                   >
-                    {{ calcList.public_going_out_return_time }}
-                    <img
-                      class="icon-size-sm svg_img orange600"
-                      src="/images/red_map_pin.svg"
-                      @click="showMap(calcList.public_going_out_return_time,calcList.user_name,calcList.x_public_going_out_return_time_positions,calcList.y_public_going_out_return_time_positions,index,mode_official_out_end)"
-                      alt
-                    />
+                  </td>
+                  <!-- /出勤 -->
+                  <!-- 退勤 -->
+                  <daily-working-info-time-table
+                    v-bind:calc-list="{
+                      x_positions: calcList.x_leaving_time_positions,
+                      y_positions: calcList.y_leaving_time_positions,
+                      editor_department_code: calcList.leaving_editor_department_code,
+                      editor_department_name: calcList.leaving_editor_department_name,
+                      editor_user_name: calcList.attendance_editor_user_name,
+                      working_time: calcList.leaving_time,
+                    }"
+                    v-on:click-event="showMap(
+                        calcList.leaving_time,
+                        calcList.user_name,
+                        calcList.x_leaving_time_positions,
+                        calcList.y_leaving_time_positions,
+                        index,
+                        mode_leaving)"
+                  >
+                  </daily-working-info-time-table>
+                  <td
+                    class="text-left text-align-left"
+                    v-if="calcList.leaving_editor_department_name"
+                  >
+                    {{ calcList.leaving_editor_department_name }}：{{ calcList.attendance_editor_user_name }}
                   </td>
                   <td
-                    class="text-center text-align-center"
+                    class="text-left text-align-left"
                     v-else
-                  >{{ calcList.public_going_out_return_time }}</td>
-                  <!-- <td class="text-center align-middle">{{ calcList.missing_middle_time }}</td> -->
-                  <td
-                    class="text-center text-align-center"
-                    v-if="calcList.x_missing_middle_time_positions"
                   >
-                    {{ calcList.missing_middle_time }}
-                    <img
-                      class="icon-size-sm svg_img orange600"
-                      src="/images/red_map_pin.svg"
-                      @click="showMap(calcList.missing_middle_time,calcList.user_name,calcList.x_missing_middle_time_positions,calcList.y_missing_middle_time_positions,index,mode_private_out_start)"
-                      alt
-                    />
+                  </td>
+                  <!-- /退勤 -->
+                  <!-- 公用外出　開始 -->
+                  <daily-working-info-time-table
+                    v-bind:calc-list="{
+                      x_positions: calcList.x_public_going_out_time_positions,
+                      y_positions: calcList.y_public_going_out_time_positions,
+                      editor_department_code: calcList.public_editor_department_code,
+                      editor_department_name: calcList.public_editor_department_name,
+                      editor_user_name: calcList.public_editor_user_name,
+                      working_time: calcList.lpublic_going_out_time,
+                    }"
+                    v-on:click-event="showMap(
+                        calcList.lpublic_going_out_time,
+                        calcList.user_name,
+                        calcList.x_public_going_out_time_positions,
+                        calcList.y_public_going_out_time_positions,
+                        index,
+                        mode_official_out_start)"
+                  >
+                  </daily-working-info-time-table>
+                  <td
+                    class="text-left text-align-left"
+                    v-if="calcList.public_editor_department_name"
+                  >
+                    {{ calcList.public_editor_department_name }}：{{ calcList.public_editor_user_name }}
                   </td>
                   <td
-                    class="text-center text-align-center"
+                    class="text-left text-align-left"
                     v-else
-                  >{{ calcList.missing_middle_time }}</td>
-                  <!-- <td class="text-center align-middle">{{ calcList.missing_middle_return_time }}</td> -->
-                  <td
-                    class="text-center text-align-center"
-                    v-if="calcList.x_missing_middle_return_time_positions"
                   >
-                    {{ calcList.missing_middle_return_time }}
-                    <img
-                      class="icon-size-sm svg_img orange600"
-                      src="/images/red_map_pin.svg"
-                      @click="showMap(calcList.missing_middle_return_time,calcList.user_name,calcList.x_missing_middle_return_time_positions,calcList.y_missing_middle_return_time_positions,index,mode_private_out_end)"
-                      alt
-                    />
+                  <!-- /公用外出　終了 -->
+                  <!-- 公用外出戻り　開始 -->
+                  <daily-working-info-time-table
+                    v-bind:calc-list="{
+                      x_positions: calcList.x_public_going_out_return_time_positions,
+                      y_positions: calcList.y_public_going_out_return_time_positions,
+                      editor_department_code: calcList.public_return_editor_department_code,
+                      editor_department_name: calcList.public_return_editor_department_name,
+                      editor_user_name: calcList.public_return_editor_user_name,
+                      working_time: calcList.public_going_out_return_time,
+                    }"
+                    v-on:click-event="showMap(
+                        calcList.public_going_out_return_time,
+                        calcList.user_name,
+                        calcList.x_public_going_out_return_time_positions,
+                        calcList.y_public_going_out_return_time_positions,
+                        index,
+                        mode_official_out_end)"
+                  >
+                  </daily-working-info-time-table>
+                  <td
+                    class="text-left text-align-left"
+                    v-if="calcList.public_return_editor_department_name"
+                  >
+                    {{ calcList.public_return_editor_department_name }}：{{ calcList.public_return_editor_user_name }}
                   </td>
                   <td
-                    class="text-center text-align-center"
+                    class="text-left text-align-left"
                     v-else
-                  >{{ calcList.missing_middle_return_time }}</td>
+                  >
+                  <!-- /公用外出戻り　終了 -->
+                  <!-- 私用外出　開始 -->
+                  <daily-working-info-time-table
+                    v-bind:calc-list="{
+                      x_positions: calcList.x_missing_middle_time_positions,
+                      y_positions: calcList.y_missing_middle_time_positions,
+                      editor_department_code: calcList.missing_editor_department_code,
+                      editor_department_name: calcList.missing_editor_department_name,
+                      editor_user_name: calcList.missing_editor_user_name,
+                      working_time: calcList.missing_middle_time,
+                    }"
+                    v-on:click-event="showMap(
+                        calcList.missing_middle_time,
+                        calcList.user_name,
+                        calcList.x_missing_middle_time_positions,
+                        calcList.y_missing_middle_time_positions,
+                        index,
+                        mode_private_out_start)"
+                  >
+                  </daily-working-info-time-table>
+                  <td
+                    class="text-left text-align-left"
+                    v-if="calcList.missing_editor_department_name"
+                  >
+                    {{ calcList.missing_editor_department_name }}：{{ calcList.missing_editor_user_name }}
+                  </td>
+                  <td
+                    class="text-left text-align-left"
+                    v-else
+                  >
+                  <!-- /私用外出　終了 -->
+                  <!-- 私用外出戻り　開始 -->
+                  <daily-working-info-time-table
+                    v-bind:calc-list="{
+                      x_positions: calcList.x_missing_middle_return_time_positions,
+                      y_positions: calcList.y_missing_middle_return_time_positions,
+                      editor_department_code: calcList.missing_return_editor_department_code,
+                      editor_department_name: calcList.missing_return_editor_department_name,
+                      editor_user_name: calcList.missing_return_editor_user_name,
+                      working_time: calcList.missing_middle_return_time,
+                    }"
+                    v-on:click-event="showMap(
+                        calcList.missing_middle_return_time,
+                        calcList.user_name,
+                        calcList.x_missing_middle_return_time_positions,
+                        calcList.y_missing_middle_return_time_positions,
+                        index,
+                        mode_private_out_end)"
+                  >
+                  </daily-working-info-time-table>
+                  <td
+                    class="text-left text-align-left"
+                    v-if="calcList.missing_return_editor_department_name"
+                  >
+                    {{ calcList.missing_return_editor_department_name }}：{{ calcList.missing_return_editor_user_name }}
+                  </td>
+                  <td
+                    class="text-left text-align-left"
+                    v-else
+                  >
+                  <!-- /私用外出戻り　終了 -->
                   <td class="text-center align-middle">{{ calcList.working_status_name }}</td>
                   <td class="text-center align-middle">{{ calcList.working_timetable_name }}</td>
                   <td
@@ -717,11 +827,23 @@ export default {
   color: chartreuse;
 }
 
+table {
+   border-collapse: collapse !important;
+   border: 1px solid #95c5ed !important;
+}
+
 .table th, .table td {
     padding: 0rem !important;
+    border-style: solid dashed !important;
+    border-width: 1px !important;
+    border-color: #95c5ed #dee2e6 !important;
 }
 
 .mw-rem-3 {
   min-width: 3rem;
+}
+
+.mw-rem-4 {
+  min-width: 4rem;
 }
 </style>

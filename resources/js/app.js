@@ -48,21 +48,24 @@ Vue.prototype.$axios = axios;
 // const files = require.context('./', true, /\.vue$/i);
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default));
 
+// 日次集計
 Vue.component(
     "daily-working-information",
     require("./components/DailyWorkingInformation.vue").default
 );
-
 Vue.component(
     "daily-working-information-panel-header",
     require("./components/DailyWorkingInformationPanelHeader.vue").default
 );
-
 Vue.component(
     "daily-working-info-table",
     require("./components/DailyWorkingInfoTable.vue").default
 );
-
+Vue.component(
+    "daily-working-info-time-table",
+    require("./components/DailyWorkingInfoTimeTable.vue").default
+);
+// 日次警告
 Vue.component(
     "daily-working-alert",
     require("./components/DailyWorkingAlert.vue").default
@@ -244,8 +247,10 @@ Vue.component(
     "message-data-server",
     require("./components/MessageDataServer.vue").default
 );
-
-Vue.component("setting-root", require("./components/SettingRoot.vue").default);
+// 申請
+//  承認ルート作成
+Vue.component("create-approvalroot", require("./components/CreateApprovalRouteNo.vue").default);
+Vue.component("setting-root", require("./components/SettingRoot.vue").default); // 削除予定
 
 Vue.component("make-demand", require("./components/MakeDemand.vue").default);
 
@@ -336,6 +341,11 @@ Vue.component(
 Vue.component(
     "select-generallist",
     require("./components/SelectGeneralList.vue").default
+);
+
+Vue.component(
+    "select-approvalrouteList",
+    require("./components/SelectApprovalRouteList.vue").default
 );
 
 // 使えないコントロールなので途中で断念した（sizeとか）。使用不可

@@ -50,12 +50,14 @@ Route::post('/demand/make_demand', 'DemandController@makeDemand')->middleware('a
 Route::get('/approval', 'ApprovalController@index')->middleware('auth');
 Route::get('/approval/list_approval', 'ApprovalController@listApproval')->middleware('auth');
 Route::post('/approval/make_approval', 'ApprovalController@makeApproval')->middleware('auth');
-// 承認設定
+// 承認設定 いずれ削除　ConfirmControllerも
 Route::get('/confirm', 'ConfirmController@index')->middleware('auth');
 Route::post('/confirm/gettable', 'ConfirmController@gettable')->middleware('auth');
 Route::post('/confirm/show', 'ConfirmController@show')->middleware('auth');
 Route::post('/confirm/store', 'ConfirmController@store')->middleware('auth');
 Route::post('/confirm/del', 'ConfirmController@del')->middleware('auth');
+// 承認設定
+Route::get('/approvalroot', 'CreateApprovalRouteNoController@index')->middleware('auth');
 
 // カレンダー登録
 // Route::get('/setting-calendar', 'CreateCalendarController@index')->middleware('auth');
@@ -154,6 +156,7 @@ Route::post('/get_general_list', 'ApiCommonController@getRequestGeneralList')->m
 Route::post('/get_demand_list', 'ApiCommonController@getDemandList')->middleware('auth');
 Route::post('/get_confirm_list', 'ApiCommonController@getConfirmlList')->middleware('auth');
 Route::post('/get_company_info_apply', 'ApiCommonController@getCompanyInfoApply')->middleware('auth');
+Route::post('/approval_root_list', 'ApiCommonController@getApprovalroutenoList')->middleware('auth');
 // 締日取得
 Route::post('/get_closing_day', 'ApiCommonController@getClosingDay')->middleware('auth');
 // ユーザー権限取得

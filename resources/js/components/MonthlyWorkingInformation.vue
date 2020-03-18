@@ -172,7 +172,6 @@
                   v-bind:btn-mode="'update'"
                   v-bind:is-push="isupdatebutton">
                 </btn-work-time>
-                <message-waiting v-bind:is-message-show="messagewaiting"></message-waiting>
               </div>
               <!-- /.col -->
             </div>
@@ -478,7 +477,6 @@ export default {
       messagedatasserver: [],
       isswitchvisible: false,
       validate: false,
-      messagewaiting: false,
       messageshowupdate: false,
       issearchbutton: false,
       isupdatebutton: false,
@@ -713,7 +711,6 @@ export default {
         this.issearchbutton = true;
         this.isupdatebutton = true;
         this.iscsvbutton = true;
-        this.messagewaiting = true;
         // 入力項目クリア
         this.itemClear();
         this.getItem("show");
@@ -731,7 +728,7 @@ export default {
     updateclick: function(e) {
       var messages = [];
       messages.push("一括集計してよろしいですか？");
-      this.messageswal("確認", messages, "info", true, true, true)
+      this.htmlMessageSwal("確認", messages, "info", true, true)
         .then(result  => {
           if (result) {
             this.isswitchvisible = false;
@@ -740,7 +737,6 @@ export default {
               this.issearchbutton = true;
               this.isupdatebutton = true;
               this.iscsvbutton = true;
-              this.messagewaiting = true;
               // 入力項目クリア
               this.itemClear();
               this.getItem("update");
@@ -836,7 +832,7 @@ export default {
         this.userrole = res.role;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("ユーザー権限", "取得");
         }
@@ -859,10 +855,9 @@ export default {
       if (this.resresults.messagedata.length == 0) {
         this.serchorshow = "show";
       } else {
-        this.messageswal("エラー", this.resresults.messagedata, "error", true, false, true);
+        this.htmlMessageSwal("エラー", this.resresults.messagedata, "error", true, false);
         this.serchorshow = "search";
       }
-      this.messagewaiting = false;
       this.issearchbutton = false;
       this.isupdatebutton = false;
       this.$forceUpdate();
@@ -903,8 +898,7 @@ export default {
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
-      this.messagewaiting = false;
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
       this.serchorshow = "search";
     },
     // クリアメソッド

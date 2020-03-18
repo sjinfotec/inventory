@@ -149,7 +149,7 @@ export default {
         // 固有処理 end
       } else {
         if (res.messagedata.length > 0) {
-            this.messageswal("エラー", res.messagedata, "error", true, false, true);
+            this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
             this.serverCatch("氏名");
         }
@@ -159,7 +159,7 @@ export default {
     serverCatch(kbn) {
       var messages = [];
       messages.push(kbn + "選択リスト作成に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     // -------------------- 共通 ----------------------------
     // 選択テキスト取得

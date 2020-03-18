@@ -154,11 +154,11 @@
           <div class="card-header bg-transparent pt-3 border-0">
             <h1 class="float-sm-left font-size-rg">
               <span>
-                <button class="btn btn-success btn-lg font-size-rg" v-on:click="appendRowClick">+</button>
+                <button class="btn btn-success btn-lg font-size-rg" v-if="userrole === 9" v-on:click="appendRowClick">+</button>
               </span>
               {{ this.selectedName }}
             </h1>
-            <span class="float-sm-right font-size-sm">「＋」アイコンで新規に追加することができます</span>
+            <span class="float-sm-right font-size-sm" v-if="userrole === 9">「＋」アイコンで新規に追加することができます</span>
           </div>
           <!-- /.panel header -->
           <!-- ----------- 「＋」アイコン部 END ---------------- -->
@@ -279,7 +279,7 @@
                                 </div>
                               </td>
                               <td v-else></td>
-                              <td class="text-center align-middle">
+                              <td class="text-center align-middle" v-if="userrole === 9">
                                 <div class="btn-group" v-if="details[index].id != ''">
                                   <button
                                     type="button"
@@ -295,7 +295,7 @@
                                   >この内容で追加する</button>
                                 </div>
                               </td>
-                              <td class="text-center align-middle">
+                              <td class="text-center align-middle" v-if="userrole === 9">
                                 <div class="btn-group" v-if="details[index].id != ''">
                                   <button
                                     type="button"
@@ -387,6 +387,7 @@ export default {
       before_count: 0,
       valuefromdate: "",
       valuesubadddate: "",
+      userrole: null,
 
       valueuser: "",
       messagevalidatesSearch: [],
@@ -428,6 +429,7 @@ export default {
     this.date_name = moment(this.defaultDate).format("YYYY年MM月DD日");
     this.getGeneralList("C005");
     this.getGeneralList("C013");
+    this.getUserRole();
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -650,8 +652,9 @@ export default {
     appendRowClick: function() {
       if (this.before_count < this.count) {
         var messages = [];
-        messages.push("１度に追加できる情報は１個です。追加してから再実行してください");
-        this.messageswal("エラー", messages, "error", true, false, true);
+        messages.push("１度に追加できる情報は１個です。");
+        messages.push("追加してから再実行してください。");
+        this.htmlMessageSwal("エラー", messages, "error", true, false);
       } else {
         this.object = {
           id: "",
@@ -679,7 +682,7 @@ export default {
       if (flag) {
         var messages = [];
         messages.push("この内容で更新しますか？");
-        this.messageswal("確認", messages, "info", true, true, true)
+        this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
               this.FixDetail("更新", index);
@@ -700,7 +703,7 @@ export default {
       if (flag) {
         var messages = [];
         messages.push("この内容で追加しますか？");
-        this.messageswal("確認", messages, "info", true, true, true)
+        this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
               this.addDetail(index);
@@ -719,7 +722,7 @@ export default {
     delClick(index) {
       var messages = [];
       messages.push("この行内容を削除しますか？");
-      this.messageswal("確認", messages, "info", true, true, true)
+      this.htmlMessageSwal("確認", messages, "info", true, true)
         .then(result  => {
           if (result) {
             this.DelDetail(index);
@@ -731,7 +734,7 @@ export default {
       if (this.checkRowData(index)) {
         var messages = [];
         messages.push("行削除してよろしいですか？");
-        this.messageswal("確認", messages, "info", true, true, true)
+        this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
               this.details.splice(index, 1);
@@ -744,6 +747,17 @@ export default {
       }
     },
     // -------------------- サーバー処理 ----------------------------
+    // ログインユーザーの権限を取得
+    getUserRole: function() {
+      var arrayParams = [];
+      this.postRequest("/get_login_user_role", arrayParams)
+        .then(response  => {
+          this.getThenrole(response);
+        })
+        .catch(reason => {
+          this.serverCatch("ユーザー権限", "取得");
+        });
+    },
     // 勤怠取得処理
     getItem(datevalue) {
       this.postRequest("/edit_work_times/get",
@@ -800,10 +814,10 @@ export default {
           this.serverCatch("勤怠編集", kbnname);
         });
     },
-    // 部署削除処理（明細）
+    // 勤怠削除処理（明細）
     DelDetail(index) {
       var messages = [];
-      var arrayParams = { id : this.details[index].id };
+      var arrayParams = { details : this.details[index] };
       this.postRequest("/edit_work_times/del", arrayParams)
         .then(response  => {
           this.putThenDetail(response, "削除");
@@ -814,6 +828,19 @@ export default {
     },
 
     // -------------------- 共通 ----------------------------
+    // 取得正常処理（ユーザー権限）
+    getThenrole(response) {
+      var res = response.data;
+      if (res.result) {
+        this.userrole = res.role;
+      } else {
+        if (res.messagedata.length > 0) {
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
+        } else {
+          this.serverCatch("ユーザー権限", "取得");
+        }
+      }
+    },
     // 部署選択コンポーネント取得メソッド
     getDepartmentSelected: function() {
       this.$refs.selectdepartmentlist.getList(
@@ -842,12 +869,13 @@ export default {
         this.before_count = this.count;
         if (res.details.length == 0) {
           var messages = [];
-          messages.push("勤怠データありませんでした。\nプラスアイコンで追加できます。");
-          this.messageswal("確認", messages, "info", true, false, false);
+          messages.push("勤怠データありませんでした。");
+          messages.push("プラスアイコンで追加できます。");
+          this.htmlMessageSwal("確認", messages, "info", true, false);
         }
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("勤怠編集", "取得");
         }
@@ -860,7 +888,7 @@ export default {
         this.generalList_c005 = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("勤怠モード選択リスト", "取得");
         }
@@ -873,7 +901,7 @@ export default {
         this.generalList_c013 = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("明細勤怠休暇区分選択リスト管理", "取得");
         }
@@ -890,7 +918,7 @@ export default {
       } else {
         console.log('false');
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch("勤怠編集", eventtext);
         }
@@ -900,7 +928,7 @@ export default {
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     inputClear() {
       this.details = [];
@@ -911,7 +939,6 @@ export default {
       if (this.details[index].mode != "" && this.details[index].mode != null) { return true; }
       if (this.details[index].time != "" && this.details[index].time != null) { return true; }
       if (this.details[index].user_holiday_kbn != "" && this.details[index].user_holiday_kbn != null) { return true; }
-      console.log('checkRowData false');
       return false;
     },
     refreshDepartmentList() {

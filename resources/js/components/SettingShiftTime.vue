@@ -485,7 +485,7 @@ export default {
     store_confirm: function() {
       var messages = [];
       messages.push("このデータで登録しますか？");
-      this.messageswal("確認", messages, "info", true, true, true)
+      this.htmlMessageSwal("確認", messages, "info", true, true)
         .then(result  => {
           if (result) {
             this.store("追加");
@@ -495,11 +495,11 @@ export default {
     // 締日登録確認
     store_warniong_confirm: function(state) {
       var messages = [];
-      messages.push("前月の締日" + moment(this.closingYmd).format('YYYY年MM月DD日') + "以前のデータが含まれますが");
-      messages.push("前月締日以前のデータは自動集計されません");
-      messages.push("月次集計での手動集計が必要となります");
+      messages.push("前月の締日" + moment(this.closingYmd).format('YYYY年MM月DD日') + "以前のデータが含まれますが、");
+      messages.push("前月締日以前のデータは自動集計されません。");
+      messages.push("月次集計での手動集計が必要となります。");
       messages.push("このデータで登録しますか？");
-      this.messageswal("確認", messages, "info", true, true, true)
+      this.htmlMessageSwal("確認", messages, "info", true, true)
         .then(result  => {
           if (result) {
             this.store("追加");
@@ -601,11 +601,11 @@ export default {
         if (this.details.length == 0) {
           var messages = [];
           messages.push("該当期間に登録されている期間はありません");
-          this.messageswal("エラー", messages, "error", true, false, true);
+          this.htmlMessageSwal("エラー", messages, "error", true, false);
         }
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("シフト", "取得");
         }
@@ -625,7 +625,7 @@ export default {
         }
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("締日", "取得");
         }
@@ -636,11 +636,10 @@ export default {
       var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("シフトを" + eventtext + "しました");
-        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+        this.$toasted.show("シフトを" + eventtext + "しました");
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch("シフト",eventtext);
         }
@@ -650,7 +649,7 @@ export default {
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     }
   }
 };

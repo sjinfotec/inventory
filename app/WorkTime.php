@@ -32,13 +32,16 @@ class WorkTime extends Model
     private $check_result;                  // 打刻チェック結果
     private $check_max_time;                // 打刻回数最大チェック結果
     private $check_interval;                // インターバルチェック結果
+    private $is_editor;                     // 編集フラグ
+    private $editor_department_code;        // 編集部署コード
+    private $editor_user_code;              // 編集ユーザーコード
     private $created_user;                  // 作成ユーザー
     private $updated_user;                  // 修正ユーザー
     private $is_deleted;                    // 削除フラグ
     private $systemdate;
     private $positions;                     // 緯度経度
 
-    // ユーザーコード
+    // ID
     public function getIdAttribute()
     {
         return $this->id;
@@ -129,6 +132,39 @@ class WorkTime extends Model
     public function setCheckintervalAttribute($value)
     {
         $this->check_interval = $value;
+    }
+
+    // 編集フラグ
+    public function getIseditorAttribute()
+    {
+        return $this->is_editor;
+    }
+
+    public function setIseditorAttribute($value)
+    {
+        $this->is_editor = $value;
+    }
+
+    // 編集部署コード
+    public function getEditordepartmentcodeAttribute()
+    {
+        return $this->editor_department_code;
+    }
+
+    public function setEditordepartmentcodeAttribute($value)
+    {
+        $this->editor_department_code = $value;
+    }
+
+    // 編集ユーザーコード
+    public function getEditorusercodeAttribute()
+    {
+        return $this->editor_user_code;
+    }
+
+    public function setEditorusercodeAttribute($value)
+    {
+        $this->editor_user_code = $value;
     }
 
 
@@ -357,6 +393,9 @@ class WorkTime extends Model
      */
     public function insertWorkTime(){
         try {
+            if ($this->check_result == "" || $this->check_result == null) { $this->check_result = 0; }
+            if ($this->check_max_time == "" || $this->check_max_time == null) { $this->check_max_time = 0; }
+            if ($this->check_interval == "" || $this->check_interval == null) { $this->check_interval = 0; }
             if(isset($this->positions)){
                 DB::table($this->table)->insert(
                     [
@@ -367,6 +406,9 @@ class WorkTime extends Model
                         'check_result' => $this->check_result,
                         'check_max_time' => $this->check_max_time,
                         'check_interval' => $this->check_interval,
+                        'is_editor' => $this->is_editor,
+                        'editor_department_code' => $this->editor_department_code,
+                        'editor_user_code' => $this->editor_user_code,
                         'created_user' => $this->created_user,
                         'created_at'=>$this->systemdate,
                         'positions' => DB::raw("(GeomFromText('POINT(".$this->positions.")'))")
@@ -382,6 +424,9 @@ class WorkTime extends Model
                         'check_result' => $this->check_result,
                         'check_max_time' => $this->check_max_time,
                         'check_interval' => $this->check_interval,
+                        'is_editor' => $this->is_editor,
+                        'editor_department_code' => $this->editor_department_code,
+                        'editor_user_code' => $this->editor_user_code,
                         'created_user' => $this->created_user,
                         'created_at'=>$this->systemdate
                     ]
@@ -413,7 +458,6 @@ class WorkTime extends Model
                         'work_times.',
                         'work_times.end_date'
                         )
-                // ->where('tasks.department_code',$department_code)
                 ->limit(1)
                 ->get();
         }catch(\PDOException $pe){
@@ -498,6 +542,7 @@ class WorkTime extends Model
             // subquery1    work_times
             $subquery1 = DB::table($this->table)
                 ->select(
+                    $this->table.'.id as record_datetime_id',
                     $this->table.'.user_code as user_code',
                     $this->table.'.department_code as department_code',
                     $this->table.'.record_time as record_datetime',
@@ -505,6 +550,9 @@ class WorkTime extends Model
                     $this->table.'.check_result as check_result',
                     $this->table.'.check_max_time as check_max_time',
                     $this->table.'.check_interval as check_interval',
+                    $this->table.'.is_editor as is_editor',
+                    $this->table.'.editor_department_code as editor_department_code',
+                    $this->table.'.editor_user_code as editor_user_code',
                     $this->table.'.is_deleted as is_deleted'
                 )
                 ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%Y') as record_year")
@@ -547,6 +595,7 @@ class WorkTime extends Model
             // subquery2    shift_informations
             $mainquery = DB::table($this->table_users.' AS t1')
                 ->select(
+                    't2.record_datetime_id as record_datetime_id',
                     't1.code as user_code',
                     't1.name as user_name',
                     't1.department_code as department_code',
@@ -562,6 +611,7 @@ class WorkTime extends Model
                     't2.check_result as check_result',
                     't2.check_max_time as check_max_time',
                     't2.check_interval as check_interval',
+                    't2.is_deleted as is_deleted',
                     't2.x_positions as x_positions',
                     't2.y_positions as y_positions',
                     't3.weekday_kubun as weekday_kubun',
@@ -583,7 +633,12 @@ class WorkTime extends Model
                     't4.year as year',
                     't14.holiday_kubun as user_holiday_kubun',
                     't14.working_date as user_working_date',
-                    't15.code_name as user_holiday_name'
+                    't15.code_name as user_holiday_name',
+                    't2.is_editor as is_editor',
+                    't2.editor_department_code as editor_department_code',
+                    't2.editor_user_code as editor_user_code',
+                    't16.name as editor_department_name',
+                    't17.name as editor_user_code_name'
                 );
             $mainquery
                 ->selectRaw('ifnull(t9.shift_no, t6.no) as working_timetable_no ')
@@ -672,6 +727,17 @@ class WorkTime extends Model
                     ->where('t15.identification_id', '=', Config::get('const.C013.value'))
                     ->where('t14.is_deleted', '=', 0)
                     ->where('t15.is_deleted', '=', 0);
+                })
+                ->leftJoinSub($subquery4, 't16', function ($join) { 
+                    $join->on('t16.code', '=', 't2.editor_department_code');
+                })
+                ->leftJoin($this->table_users.' as t17', function ($join) { 
+                    $join->on('t17.code', '=', 't2.editor_user_code')
+                    ->where('t17.is_deleted', '=', 0);
+                })
+                ->leftJoinSub($subquery3, 't18', function ($join) { 
+                    $join->on('t18.code', '=', 't17.code');
+                    $join->on('t18.max_apply_term_from', '=', 't17.apply_term_from');
                 });
 
             if(!empty($this->param_employment_status)){
@@ -685,11 +751,6 @@ class WorkTime extends Model
             } else {
                 $mainquery->where('t1.management','<',Config::get('const.C017.admin_user'));
             }
-            $mainquery
-                ->JoinSub($subquery3, 't14', function ($join) { 
-                    $join->on('t14.code', '=', 't1.code');
-                    $join->on('t14.max_apply_term_from', '=', 't1.apply_term_from');
-                });
             /*if ($business_kubun != Config::get('const.C007.basic')) {
                 $mainquery->whereNotNull('t2.record_datetime');
             }*/
@@ -1026,7 +1087,11 @@ class WorkTime extends Model
                 ->where('id', $this->id)
                 ->where('is_deleted', 0)
                 ->update([
+                    'is_editor' => 1,
+                    'editor_department_code' => $this->editor_department_code,
+                    'editor_user_code' => $this->editor_user_code,
                     'is_deleted' => 1,
+                    'updated_user' => $this->updated_user,
                     'updated_at' => $this->systemdate
                     ]);
         }catch(\PDOException $pe){
@@ -1347,7 +1412,7 @@ class WorkTime extends Model
                         , CASE IFNULL(t6.mode, 0) 
                             WHEN 1 THEN CASE IFNULL(t5.mode, 0) 
                             WHEN 2 THEN CASE 
-                                WHEN IFNULL(TIMEDIFF(t6.record_time, t5.record_time), 0) < '00:00:00' 
+                                WHEN IFNULL(TIMEDIFF(t6.record_time, t5.record_time), 0) < ? 
                                 THEN 1 
                                 ELSE 0 
                                 END 
@@ -1598,7 +1663,11 @@ class WorkTime extends Model
                                 , t1.user_code asc
                                 , t1.department_code asc";
             // バインド
+            // インターバル時間取得
+            $apicommon = new ApiCommonController();
+            $interval_time = $apicommon->getIntevalMinute($this->param_end_date);
             $array_setBindingsStr = array();
+            $array_setBindingsStr[] = $interval_time;
             $array_setBindingsStr[] = $this->param_date_from;
             $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = 0;

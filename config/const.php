@@ -116,7 +116,9 @@ return [
         'absence_work' => 15,
         'late_work' => 16,
         'leave_early_work' => 17,
-        'max_break_value' => 14
+        'deemed_business_trip' => 18,
+        'deemed_direct_go' => 19,
+        'deemed_direct_return' => 20
     ],
 
     'C014' => [
