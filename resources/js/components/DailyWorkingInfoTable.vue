@@ -202,10 +202,10 @@
                       editor_department_code: calcList.public_editor_department_code,
                       editor_department_name: calcList.public_editor_department_name,
                       editor_user_name: calcList.public_editor_user_name,
-                      working_time: calcList.lpublic_going_out_time,
+                      working_time: calcList.public_going_out_time,
                     }"
                     v-on:click-event="showMap(
-                        calcList.lpublic_going_out_time,
+                        calcList.public_going_out_time,
                         calcList.user_name,
                         calcList.x_public_going_out_time_positions,
                         calcList.y_public_going_out_time_positions,
@@ -375,10 +375,10 @@
                       editor_department_code: calcList.public_editor_department_code,
                       editor_department_name: calcList.public_editor_department_name,
                       editor_user_name: calcList.public_editor_user_name,
-                      working_time: calcList.lpublic_going_out_time,
+                      working_time: calcList.public_going_out_time,
                     }"
                     v-on:click-event="showMap(
-                        calcList.lpublic_going_out_time,
+                        calcList.public_going_out_time,
                         calcList.user_name,
                         calcList.x_public_going_out_time_positions,
                         calcList.y_public_going_out_time_positions,
