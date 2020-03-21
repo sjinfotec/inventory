@@ -8,7 +8,7 @@
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:header-text1="'年月を指定してカレンダーを設定する'"
+            v-bind:header-text1="'年（または月）を指定して出勤カレンダーを設定する'"
             v-bind:header-text2="'全従業員共通または部署ごと個人ごとに設定可能です。'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
@@ -26,12 +26,25 @@
                       id="basic-addon1"
                     >指定年<span class="color-red">[必須]</span></span>
                   </div>
-                  <input-datepicker
+                  <div class="form-control p-0">
+                    <input
+                      type="number"
+                      name="fromyear"
+                      title="指定年"
+                      max="2050"
+                      v-bind:min="year"
+                      step="1"
+                      class="form-control"
+                      v-model="valueyear"
+                      v-on:onblur="fromyearChanges"
+                    />
+                  </div>
+                  <!-- <input-datepicker
                     v-bind:default-date="valueyear"
                     v-bind:date-format="'yyyy年'"
                     v-on:change-event="fromyearChanges"
                     v-on:clear-event="fromyearCleared"
-                  ></input-datepicker>
+                  ></input-datepicker> -->
                 </div>
               </div>
               <!-- /.col -->
@@ -54,6 +67,7 @@
                       step="1"
                       class="form-control"
                       v-model="valuemonth"
+                      v-on:onblur="frommonthChanges"
                     />
                   </div>
                 </div>
@@ -161,15 +175,15 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between" v-if="messagevalidatesCopyinit.length">
+            <!-- <div class="row justify-content-between" v-if="messagevalidatesCopyinit.length"> -->
               <!-- col -->
-              <div class="col-md-12 pb-2">
+              <!-- <div class="col-md-12 pb-2">
                 <ul class="error-red color-red">
                   <li v-for="(messagevalidate,index) in messagevalidatesCopyinit" v-bind:key="index">{{ messagevalidate }}</li>
                 </ul>
-              </div>
+              </div> -->
               <!-- /.col -->
-            </div>
+            <!-- </div> -->
             <!-- /.row -->
             <!-- ----------- メッセージ部 END ---------------- -->
             <!-- ----------- 選択ボタン類 START ---------------- -->
@@ -227,7 +241,7 @@
           <!-- panel header -->
           <daily-working-information-panel-header
             v-bind:header-text1="'◆カレンダー表示'"
-            v-bind:header-text2="'設定済みのカレンダーを編集できます。'"
+            v-bind:header-text2="stringtext"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <!-- main contentns row -->
@@ -369,7 +383,7 @@
           <!-- panel header -->
           <daily-working-information-panel-header
             v-bind:header-text1="'◆カレンダー設定'"
-            v-bind:header-text2="'上記条件および設定内容でカレンダーを設定します。'"
+            v-bind:header-text2="stringtext"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <!-- ----------- メッセージ部 START ---------------- -->
@@ -567,6 +581,7 @@ export default {
       valuemonth: "",
       year: "",
       month: "",
+      datejaFormat: "",
       issearchbutton: false,
       isinitbutton: false,
       isfixbutton: false,
@@ -627,10 +642,11 @@ export default {
     this.valueym = this.defaultYm;
     this.year = moment(this.valueym).format("YYYY");
     this.month = moment(this.valueym).format("MM");
-    this.valueyear = this.defaultYm;
+    this.valueyear = this.year;
     this.valuemonth = this.month;
     this.getGeneralList("C007");
     this.getGeneralList("C008");
+    this.setPanelHeader();
   },
   created() {
     this.form.initptn = this.formptns.find(formptn => formptn.checked).value
@@ -640,15 +656,20 @@ export default {
     // バリデーション（表示）
     checkFormEdt: function() {
       this.messagevalidatesDsp = [];
-      var chkArray = [];
       var flag = true;
       // 指定年
+      var chkArray = [];
       var required = true;
       var equalength = 0;
       var maxlength = 0;
       var itemname = '指定年';
       chkArray = 
         this.checkHeader(this.valueyear, required, equalength, maxlength, itemname);
+      if (chkArray.length == 0) {
+        if (this.valueyear < 2000 || this.valuemonth > 2050) {
+          chkArray.push("正しい年を入力してください。");
+        }
+      }
       if (chkArray.length > 0) {
         if (this.messagevalidatesDsp.length == 0) {
           this.messagevalidatesDsp = chkArray;
@@ -657,6 +678,7 @@ export default {
         }
       }
       // 指定月
+      chkArray = [];
       required = true;
       equalength = 0;
       maxlength = 0;
@@ -685,9 +707,9 @@ export default {
     // バリデーション（更新）
     checkFormFix: function() {
       this.messagevalidatesEdt = [];
-      var chkArray = [];
       var flag = true;
       // 営業日区分
+      var chkArray = [];
       var required = true;
       var equalength = 0;
       var maxlength = 0;
@@ -712,15 +734,20 @@ export default {
     // バリデーション（初期設定）
     checkFormInit: function() {
       this.messagevalidatesInit = [];
-      var chkArray = [];
       var flag = true;
       // 指定年
+      var chkArray = [];
       var required = true;
       var equalength = 0;
       var maxlength = 0;
       var itemname = '指定年';
       chkArray = 
         this.checkHeader(this.valueyear, required, equalength, maxlength, itemname);
+      if (chkArray.length == 0) {
+        if (this.valueyear < 2000 || this.valuemonth > 2050) {
+          chkArray.push("正しい年を入力してください。");
+        }
+      }
       if (chkArray.length > 0) {
         if (this.messagevalidatesInit.length == 0) {
           this.messagevalidatesInit = chkArray;
@@ -729,6 +756,7 @@ export default {
         }
       }
       // 指定月
+      chkArray = [];
       required = true;
       equalength = 0;
       maxlength = 0;
@@ -754,13 +782,13 @@ export default {
     // バリデーション（初期設定登録）
     checkFormInitstore: function() {
       this.messagevalidatesInitstore = [];
-      var chkArray = [];
       var flag = true;
       var required = true;
       var equalength = 0;
       var maxlength = 0;
       var itemname = '';
       // // 設定区分選択
+      var chkArray = [];
       if (this.showC024list) {
         required = true;
         equalength = 0;
@@ -801,15 +829,20 @@ export default {
     // バリデーション（複写設定）
     checkFormCopyinit: function() {
       this.messagevalidatesCopyinit = [];
-      var chkArray = [];
       var flag = true;
       // 指定年
+      var chkArray = [];
       var required = true;
       var equalength = 0;
       var maxlength = 0;
       var itemname = '指定年';
       chkArray = 
         this.checkHeader(this.valueyear, required, equalength, maxlength, itemname);
+      if (chkArray.length == 0) {
+        if (this.valueyear < 2000 || this.valuemonth > 2050) {
+          chkArray.push("正しい年を入力してください。");
+        }
+      }
       if (chkArray.length > 0) {
         if (this.messagevalidatesCopyinit.length == 0) {
           this.messagevalidatesCopyinit = chkArray;
@@ -818,6 +851,7 @@ export default {
         }
       }
       // 指定月
+      chkArray = [];
       required = true;
       equalength = 0;
       maxlength = 0;
@@ -1122,7 +1156,7 @@ export default {
         onBeforeOpen: () => {
           this.$swal.showLoading();
           var arrayParams = {
-            dateyear : moment(this.valueyear).format("YYYY"),
+            dateyear : moment(this.valueyear + '0115').format("YYYY"),
             datemonth : parammonth,
             employmentstatus : this.selectedEmploymentValue,
             departmentcode : this.selectedDepartmentValue,
@@ -1159,7 +1193,7 @@ export default {
           this.$swal.showLoading();
           var arrayParams = {
             ptn : ptn,
-            dateyear : moment(this.valueyear).format("YYYY"),
+            dateyear : moment(this.valueyear + '0115').format("YYYY"),
             datemonth : parammonth,
             displaykbn : paramselectedC024Value,
             employmentstatus : this.selectedEmploymentValue,
@@ -1197,7 +1231,7 @@ export default {
         onBeforeOpen: () => {
           this.$swal.showLoading();
           var arrayParams = {
-            dateyear : moment(this.valueyear).format("YYYY"),
+            dateyear : moment(this.valueyear + '0115').format("YYYY"),
             datemonth : parammonth,
             employmentstatus : this.selectedEmploymentValue,
             departmentcode : this.selectedDepartmentValue,
@@ -1332,49 +1366,32 @@ export default {
     setPanelHeader: function() {
       moment.locale("ja");
       var datejaFormat = "";
-      if (this.valueyear == null || this.valueyear == "") {
-        this.stringtext = "";
-      } else {
+      this.stringtext = "";
+      if (this.valueyear != null && this.valueyear != "") {
         if (this.valuemonth != null && this.valuemonth != "") {
-          datejaFormat +=  moment(this.valuemonth).format("MM月");
-          if (this.selectedC034Value == null || this.selectedC034Value == "") {
-            this.stringtext = "";
+          datejaFormat +=  moment(this.valueyear + this.valuemonth + '15').format("YYYY年MM月");
+          if (this.selectMode == 'INT') {
+            this.stringtext =
+              datejaFormat + "のカレンダーを1日から設定";
           } else {
-            datejaFormat = moment(this.valueyear).format("YYYY年");
-            if (this.valuemonth != null && this.valuemonth != "") {
-              datejaFormat +=  moment(this.valuemonth).format("MM月");
-            }
-            if (this.selectedC034Value == "2") {
-              this.stringtext =
-                datejaFormat + "のカレンダーを1日から設定";
-            } else {
-              if (this.selectedC034Value == "1") {
-                this.stringtext =
-                  datejaFormat + "のカレンダーを前月締日+1日から設定";
-              } else {
-                this.stringtext = "";
-              }
-            }
+            this.stringtext =
+              datejaFormat + "のカレンダーを1日から表示";
           }
         } else {
-          if (this.selectedC024Value == null || this.selectedC024Value == "") {
-            this.stringtext = "";
-          } else {
-            datejaFormat = moment(this.valueyear).format("YYYY年");
-            if (this.selectedC024Value == "2") {
+          datejaFormat +=  moment(this.valueyear + '0115').format("YYYY年");
+          if (this.selectedC024Value != null && this.selectedC024Value != "") {
+            if (this.selectedC024Value == "1") {
               this.stringtext =
-                datejaFormat + "のカレンダーを1月1日から設定";
+                datejaFormat + "のカレンダーを期首月１日から設定";
             } else {
-              if (this.selectedC024Value == "1") {
-                this.stringtext =
-                  datejaFormat + "のカレンダーを期首月1日から設定";
-              } else {
-                this.stringtext = "";
-              }
+              this.stringtext =
+                datejaFormat + "のカレンダーを１月１日から設定";
             }
           }
         }
       }
+      console.log('this.datejaFormat = ' + this.datejaFormat);
+      console.log('this.stringtext = ' + this.stringtext);
     },
     // 最新リストの表示
     refreshC024C034list(showC024, showC034) {

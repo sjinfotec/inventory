@@ -211,7 +211,7 @@ return [
         'value' => 'C025',
         'general_user' => 1,
         'general_approver__user' => 5,
-        'admin_user' => 10
+        'admin_user' => 9
     ],
  
     'C026' => [

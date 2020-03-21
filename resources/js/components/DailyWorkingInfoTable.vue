@@ -396,6 +396,7 @@
                     class="text-left text-align-left"
                     v-else
                   >
+                  </td>
                   <!-- /公用外出　終了 -->
                   <!-- 公用外出戻り　開始 -->
                   <daily-working-info-time-table
@@ -426,6 +427,7 @@
                     class="text-left text-align-left"
                     v-else
                   >
+                  </td>
                   <!-- /公用外出戻り　終了 -->
                   <!-- 私用外出　開始 -->
                   <daily-working-info-time-table
@@ -456,6 +458,7 @@
                     class="text-left text-align-left"
                     v-else
                   >
+                  </td>
                   <!-- /私用外出　終了 -->
                   <!-- 私用外出戻り　開始 -->
                   <daily-working-info-time-table
@@ -486,6 +489,7 @@
                     class="text-left text-align-left"
                     v-else
                   >
+                  </td>
                   <!-- /私用外出戻り　終了 -->
                   <td class="text-center align-middle">{{ calcList.working_status_name }}</td>
                   <td class="text-center align-middle">{{ calcList.working_timetable_name }}</td>

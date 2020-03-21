@@ -75,6 +75,7 @@ Route::get('/edit_work_times', 'EditWorkTimesController@index')->middleware('aut
 Route::post('/edit_work_times/get', 'EditWorkTimesController@get')->middleware('auth');
 Route::post('/edit_work_times/store', 'EditWorkTimesController@store')->middleware('auth');
 Route::post('/edit_work_times/fix', 'EditWorkTimesController@fix')->middleware('auth');
+Route::post('/edit_work_times/fixtime', 'EditWorkTimesController@fixtime')->middleware('auth');
 Route::post('/edit_work_times/del', 'EditWorkTimesController@del')->middleware('auth');
 Route::post('/edit_work_times/add', 'EditWorkTimesController@add')->middleware('auth');
 // シフト
@@ -163,4 +164,6 @@ Route::post('/get_closing_day', 'ApiCommonController@getClosingDay')->middleware
 Route::post('/get_login_user_role', 'ApiCommonController@getLoginUserRole')->middleware('auth');
 // ユーザー部署権限取得
 Route::post('/get_login_user_department', 'ApiCommonController@getLoginUserDepartment')->middleware('auth');
+// ユーザー所定時刻取得
+Route::post('/get_working_hours', 'ApiCommonController@getWorkingHours')->middleware('auth');
 
