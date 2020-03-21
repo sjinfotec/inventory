@@ -80,16 +80,16 @@ export default {
       }
     }
   },
-  // マウント時
-  mounted() {
-    this.selectedvalue = this.selectedValue;
-  },
   created() {
     if (this.arrayRole.length == 0) {
       this.getList(this.dateValue, this.killValue, this.initlist, this.departmentValue, this.employmentValue, this.managementValue, null);
     } else {
       this.getList(this.dateValue, this.killValue, this.initlist, this.departmentValue, this.employmentValue, this.managementValue, this.arrayRole);
     }
+  },
+  // マウント時
+  mounted() {
+    this.selectedvalue = this.selectedValue;
   },
   methods: {
     // ------------------------ イベント処理 ------------------------------------

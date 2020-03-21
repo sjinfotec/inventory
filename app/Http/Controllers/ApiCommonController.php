@@ -92,6 +92,7 @@ class ApiCommonController extends Controller
             if (isset($params['employmentcode'])) {
                 $employmentcode =  $params['employmentcode'];
             }
+
             $managementcode = Config::get('const.C017.admin_user');
             if (isset($params['managementcode'])) {
                 $managementcode =  $params['managementcode'];
@@ -230,6 +231,7 @@ class ApiCommonController extends Controller
                     }
                 }
             }
+
             return response()->json(
                 ['result' => true, 'details' => $details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -706,7 +708,81 @@ class ApiCommonController extends Controller
             throw $e;
         }
     }
+
+    /**
+     * ユーザー所定時刻取得
+     *
+     * @param Request
+     * @return list
+     */
+    public function getWorkingHours(Request $request){
         
+        $this->array_messagedata = array();
+        $workingHours = array();
+        $result = true;
+        try{
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $workingHours,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['target_date'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "target_date", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $workingHours,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (!isset($params['user_code'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "user_code", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $workingHours,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $target_date = $params['target_date'];
+            $user_code = $params['user_code'];
+            $department_code = "";
+            if (isset($params['department_code'])) {
+                $department_code = $params['department_code'];
+            } else {
+                // department_code取得する
+                $datas = $this->getUserDepartmentEmploymentRole($user_code, $target_date);
+                foreach ($datas as $item) {
+                    if (isset($item->department_code)) {
+                        $department_code = $item->department_code;
+                    }
+                    break;
+                }
+            }
+            // usersのworking_timetables_noまたはshift_informationsのworking_timetables_noより取得
+            $time_tables = new WorkingTimeTable();
+            $target_dateYmd = new Carbon($target_date);
+            $time_tables->setParamdatefromAttribute(date_format($target_dateYmd, 'Ymd'));
+            $time_tables->setParamdatetoAttribute(date_format($target_dateYmd, 'Ymd'));
+            $time_tables->setParamDepartmentcodeAttribute($department_code);
+            $time_tables->setParamUsercodeAttribute($user_code);
+            $workingHours = $time_tables->getWorkingTimeTable();
+            return response()->json(
+                ['result' => true, 'details' => $workingHours,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+    
     /** 会社情報取得
      *
      * @return list departments
@@ -767,6 +843,30 @@ class ApiCommonController extends Controller
         return $subquery;
     }
         
+    /** ユーザー適用期間開始サブクエリー作成（SQL）
+     *
+     * @return string サブクエリー
+     */
+    public function makeUserApplyTermSql($apply_date, $role){
+        $makeSql = "";
+        $makeSql .= " select ";
+        $makeSql .= "   code as code ";
+        $makeSql .= "   ,MAX(apply_term_from) as max_apply_term_from ";
+        $makeSql .= " from ";
+        $makeSql .= " ".$this->table_users." ";
+        $makeSql .= " where ? = ? ";
+        if (!empty($apply_date)) {
+            $makeSql .= " and apply_term_from <= ? ";
+        }
+        if (!empty($role)) {
+            $makeSql .= " and role <= ? ";
+        }
+        $makeSql .= " and is_deleted = ? ";
+        $makeSql .= " group by code ";
+
+        return $makeSql;
+    }
+        
     /** 部署適用期間開始サブクエリー作成
      *
      * @return string サブクエリー
@@ -807,6 +907,41 @@ class ApiCommonController extends Controller
             throw $e;
         }
         return $mainquery;
+    }
+        
+    /** 部署適用期間開始サブクエリー作成（SQL）
+     *
+     * @return string サブクエリー
+     */
+    public function makeDepartmentApplyTermSql($apply_date, $kill_date){
+        $makeSql = "";
+        $makeSql .= " select ";
+        $makeSql .= "   t1.code as code ";
+        $makeSql .= "   ,t1.name as name ";
+        $makeSql .= " from ";
+        $makeSql .= " ".$this->table_departments." as t1 ";
+        $makeSql .= "   inner join ( ";
+        $makeSql .= "     select ";
+        $makeSql .= "       code as code ";
+        $makeSql .= "       , MAX(apply_term_from) as max_apply_term_from ";
+        $makeSql .= "     from ";
+        $makeSql .= "       ".$this->table_departments;
+        $makeSql .= "     where ? = ? ";
+        if (!empty($apply_date)) {
+            $makeSql .= "   and apply_term_from <= ? ";
+        }
+        $makeSql .= "       and is_deleted = ? ";
+        $makeSql .= "     group by code ";
+        $makeSql .= "   )  as t2 ";
+        $makeSql .= "   on t1.code = t2.code ";
+        $makeSql .= "   and t1.apply_term_from = t2.max_apply_term_from ";
+        $makeSql .= " where ? = ? ";
+        if (!empty($kill_date)) {
+            $makeSql .= "   and t1.kill_from_date >= ? ";
+        }
+        $makeSql .= "       and t1.is_deleted = ? ";
+
+        return $makeSql;
     }
         
     /** タイムテーブル適用期間開始サブクエリー作成
@@ -854,6 +989,41 @@ class ApiCommonController extends Controller
             Log::error($e->getMessage());
             throw $e;
         }
+    }
+        
+    /** タイムテーブル適用期間開始サブクエリー作成（SQL）
+     *
+     * @return string サブクエリー
+     */
+    public function makeWorkingTimeTableApplyTermSql($apply_date){
+        $makeSql = "";
+        $makeSql .= " select ";
+        $makeSql .= "   t1.no as no ";
+        $makeSql .= "   ,t1.name as name ";
+        $makeSql .= "   ,t1.from_time as from_time ";
+        $makeSql .= "   ,t1.to_time as to_time ";
+        $makeSql .= "   ,t1.working_time_kubun as working_time_kubun ";
+        $makeSql .= " from ";
+        $makeSql .= " ".$this->table_working_timetables." as t1 ";
+        $makeSql .= "   inner join ( ";
+        $makeSql .= "     select ";
+        $makeSql .= "       no as no ";
+        $makeSql .= "       , MAX(apply_term_from) as max_apply_term_from ";
+        $makeSql .= "     from ";
+        $makeSql .= "       ".$this->table_working_timetables;
+        $makeSql .= "     where ? = ? ";
+        if (!empty($apply_date)) {
+            $makeSql .= "   and apply_term_from <= ? ";
+        }
+        $makeSql .= "       and is_deleted = ? ";
+        $makeSql .= "     group by no ";
+        $makeSql .= "   )  as t2 ";
+        $makeSql .= "   on t1.no = t2.no ";
+        $makeSql .= "   and t1.apply_term_from = t2.max_apply_term_from ";
+        $makeSql .= " where ? = ? ";
+        $makeSql .= "   and t1.is_deleted = ? ";
+
+        return $makeSql;
     }
 
     /**
@@ -1587,11 +1757,6 @@ class ApiCommonController extends Controller
     public function convTimeToDateFrom($from_time, $current_date, $target_from_time, $target_to_time){
 
         Log::DEBUG('         ------------- convTimeToDateFrom in ');
-
-        Log::DEBUG('from_time = '.$from_time);
-        Log::DEBUG('current_date = '.$current_date);
-        Log::DEBUG('target_from_time = '.$target_from_time);
-        Log::DEBUG('target_to_time = '.$target_to_time);
         $current_date_ymd = date_format(new Carbon($current_date),'Ymd');
         $target_from_ymd = date_format(new Carbon($target_from_time),'Ymd');
         $target_from_his = date_format(new Carbon($target_from_time),'His');

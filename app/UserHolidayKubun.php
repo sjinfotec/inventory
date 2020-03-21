@@ -189,14 +189,14 @@ class UserHolidayKubun extends Model
      */
     public function getDetail(){
         try {
-            $mainQuery = DB::table($this->table)
+            $mainquery = DB::table($this->table)
             ->where('working_date', $this->param_date_from)
             ->where('user_code', $this->param_user_code);
 
             if(!empty($this->param_department_code)){
                 $mainquery->where('department_code', $this->param_department_code);          // department_code指定
             }
-            $datas = $mainQuery->where('is_deleted', 0)->get();
+            $datas = $mainquery->where('is_deleted', 0)->get();
 
             return $datas;
         }catch(\PDOException $pe){
@@ -245,13 +245,18 @@ class UserHolidayKubun extends Model
      */
     public function delKbn(){
         try {
-            DB::table($this->table)
-            ->where('working_date', $this->working_date)
-            ->where('user_code', $this->user_code)
-            ->where('is_deleted', 0)
-            ->update([
-                'is_deleted' => 1,
-                'updated_at' => $this->systemdate
+            $mainquery = DB::table($this->table)
+            ->where('working_date', $this->param_date_from)
+            ->where('user_code', $this->param_user_code);
+
+            if(!empty($this->param_department_code)){
+                $mainquery->where('department_code', $this->param_department_code);          // department_code指定
+            }
+            $mainquery
+                ->where('is_deleted', 0)
+                ->update([
+                    'is_deleted' => 1,
+                    'updated_at' => $this->systemdate
                 ]);
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$pe');
@@ -271,10 +276,14 @@ class UserHolidayKubun extends Model
      */
     public function isExistsKbn(){
         try {
-            $is_exists = DB::table($this->table)
-                ->where('working_date', $this->working_date)
-                ->where('user_code', $this->user_code)
-                ->exists();
+            $mainquery = DB::table($this->table)
+            ->where('working_date', $this->param_date_from)
+            ->where('user_code', $this->param_user_code);
+
+            if(!empty($this->param_department_code)){
+                $mainquery->where('department_code', $this->param_department_code);          // department_code指定
+            }
+            $is_exists = $mainquery->exists();
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
             Log::error($pe->getMessage());
