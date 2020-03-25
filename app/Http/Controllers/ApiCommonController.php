@@ -2450,4 +2450,92 @@ class ApiCommonController extends Controller
         }
     }
 
+    /**
+     * お知らせ取得
+     *
+     * @return list
+     */
+    public function getPostInformations(Request $request){
+        // $details = new Collection();
+        try {
+            $details =
+                DB::table('post_informations')
+                    ->select('id','content','created_at')
+                    ->where('is_deleted', 0)
+                    ->orderby('created_at','desc')
+                    ->get();
+
+            // foreach($details as $item){
+            //     $temp_date = new Carbon($item->created_at);
+            //     $item->created_at = $temp_date->format('Y年m月d日');
+            // }
+            return $details;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'post_informations', Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', 'post_informations', Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * お知らせ登録
+     *
+     * @return list
+     */
+    public function insertPostInformations(Request $request){
+        $response = collect();
+        $usercode = Auth::user()->code;
+        $content = $request->content;
+        $systemdate = Carbon::now();
+        // 新規登録
+        DB::beginTransaction();
+        try{
+            DB::table('post_informations')->insert(
+                ['user_code' => $usercode, 'content' => $content ,'created_at' => $systemdate]
+            );
+            DB::commit();
+            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
+        }catch(\PDOException $pe){
+            DB::rollBack();
+            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.insert_error'));
+
+        }catch(\Exception $e){
+            DB::rollBack();
+            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.insert_error'));
+            Log::error(str_replace('{0}', 'post_informations', Config::get('const.LOG_MSG.data_insert_erorr')));
+            Log::error($e->getMessage());
+        }
+    }
+
+    /**
+     * お知らせ削除
+     *
+     * @return list
+     */
+    public function delPostInformations(Request $request){
+        $response = collect();
+        $id = $request->id;
+        $systemdate = Carbon::now();
+        // 新規登録
+        DB::beginTransaction();
+        try{
+            DB::table('post_informations')->where('id', $id)->update(['is_deleted' => 1,'updated_at' => $systemdate]);
+            DB::commit();
+            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
+        }catch(\PDOException $pe){
+            DB::rollBack();
+            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.insert_error'));
+
+        }catch(\Exception $e){
+            DB::rollBack();
+            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.insert_error'));
+            Log::error(str_replace('{0}', 'post_informations', Config::get('const.LOG_MSG.data_insert_erorr')));
+            Log::error($e->getMessage());
+        }
+    }
+
 }

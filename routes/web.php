@@ -20,7 +20,7 @@ Auth::routes();
 //     return view('app');
 // })->where('any', '.*');
 
-Route::get('/', 'DailyWorkingInformationController@index')->middleware('auth');
+Route::get('/', 'HomeController@index')->middleware('auth');
 Route::get('/home', 'HomeController@index')->name('home');
 // ------------------ 集計 --------------------------------
 // 日次集計
@@ -160,4 +160,10 @@ Route::post('/get_closing_day', 'ApiCommonController@getClosingDay')->middleware
 Route::post('/get_login_user_role', 'ApiCommonController@getLoginUserRole')->middleware('auth');
 // ユーザー部署権限取得
 Route::post('/get_login_user_department', 'ApiCommonController@getLoginUserDepartment')->middleware('auth');
+// お知らせ取得
+Route::get('/get_post_informations', 'ApiCommonController@getPostInformations')->middleware('auth');
+Route::post('/insert_post_informations', 'ApiCommonController@insertPostInformations')->middleware('auth');
+Route::post('/del_post_informations', 'ApiCommonController@delPostInformations')->middleware('auth');
+
+
 
