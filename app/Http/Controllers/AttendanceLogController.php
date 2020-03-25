@@ -20,6 +20,7 @@ class AttendanceLogController extends Controller
      */
     public function index()
     {
-        return view('attendance_log');
+        $user = Auth::user();
+        return view('attendance_log', compact('user'));
     }
 }

@@ -38,6 +38,7 @@
 		</div>
 		<!-- /main contentns row -->
 		@endif
-		<edit_attendance-log></edit_attendance-log>
+		<edit_attendance-log v-bind:authusers="{{ $authusers }}">
+		</edit_attendance-log>
 		<!-- /main contentns row -->
 @endsection

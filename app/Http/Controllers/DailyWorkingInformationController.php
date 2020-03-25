@@ -4840,8 +4840,8 @@ class DailyWorkingInformationController extends Controller
                                         $working_timetable_no,
                                         $array_working_time_kubun[$i],
                                         $current_date,
-                                        $attendance_time,
-                                        $apicommon->roundTimeByTime($current_date, $leaving_time, $result->time_unit, $result->time_rounding),
+                                        $apicommon->roundTimeByTimeStart($current_date, $attendance_time, $result->time_unit, $result->time_rounding),
+                                        $apicommon->roundTimeByTimeEnd($current_date, $leaving_time, $result->time_unit, $result->time_rounding),
                                         $array_calc_time,
                                         $array_missing_middle_time
                                     );
@@ -4854,8 +4854,8 @@ class DailyWorkingInformationController extends Controller
                                         $working_timetable_no,
                                         $array_working_time_kubun[$i],
                                         $current_date,
-                                        $attendance_time,
-                                        $apicommon->roundTimeByTime($current_date, $leaving_time, $result->time_unit, $result->time_rounding));
+                                        $apicommon->roundTimeByTimeStart($current_date, $attendance_time, $result->time_unit, $result->time_rounding),
+                                        $apicommon->roundTimeByTimeEnd($current_date, $leaving_time, $result->time_unit, $result->time_rounding));
                             }
                         }
                         // 出勤退勤時刻を初期化して次の計算準備
@@ -7280,6 +7280,9 @@ class DailyWorkingInformationController extends Controller
         }
         // 合計勤務時間
         $total_time = 0;
+        $total_time_regular_calc_time = 0;
+        $total_time_over_time = 0;
+        $total_time_over_time_1 = 0;
         // 残業時間
         $overtime_hours = 0;
         $index = (int)(Config::get('const.C004.regular_working_time'))-1;
@@ -7289,7 +7292,8 @@ class DailyWorkingInformationController extends Controller
         if ($array_calc_time[$index] > 0) {
             $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
             //$regular_calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-            $regular_calc_time = round($w_time / 60 / 60,2);
+            $total_time_regular_calc_time = $w_time;
+            $regular_calc_time = round(($w_time / 60 / 60) + 0.005,2);
         }
         // 時間外労働時間
         $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
@@ -7299,7 +7303,9 @@ class DailyWorkingInformationController extends Controller
         if ($array_calc_time[$index] > 0) {
             $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
             // $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-            $calc_time = round($w_time / 60 / 60,2);
+            // $calc_time = round($w_time / 60 / 60,2);
+            $total_time_over_time = $w_time;
+            $calc_time = round(($w_time / 60 / 60) + 0.005,2);
         }
         // 平日は時間外労働時間＝残業時間
         // ---- 取り消し--休日は所定労働時間+時間外労働時間>8の場合、所定労働時間+時間外労働時間-8=残業時間
@@ -7308,10 +7314,13 @@ class DailyWorkingInformationController extends Controller
         $legal_working_holiday_hours = 0;               // 法定休日労働時間
         if ($target_result->business_kubun == Config::get('const.C007.basic')) {
             $temp_working_model->setOffhoursworkinghoursAttribute($calc_time);
+            $total_time_over_time_1 = $total_time_over_time;
         } else {
+            $total_time_over_time_1 = $total_time_regular_calc_time + $total_time_over_time;
             $temp_calc = $regular_calc_time + $calc_time;       // 所定労働時間+時間外労働時間
             $calc_time = $temp_calc;
             $regular_calc_time = 0;
+            $total_time_regular_calc_time = 0;
             /*if ($temp_calc > Config::get('const.C002.legal_working_hours_day')) {
                 $regular_calc_time = Config::get('const.C002.legal_working_hours_day');
                 $calc_time = $temp_calc - Config::get('const.C002.legal_working_hours_day');
@@ -7329,8 +7338,8 @@ class DailyWorkingInformationController extends Controller
             }
         }
         $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);   // 所定労働時間
-        $total_time = $total_time + $regular_calc_time;
-        $total_time = $total_time + $calc_time;
+        $total_time = $total_time_regular_calc_time + $total_time_over_time_1;
+        // $total_time = $total_time + $calc_time;
         $overtime_hours = $overtime_hours + $calc_time;
         // 深夜労働残業時間
         $index = (int)(Config::get('const.C004.out_of_regular_night_working_time'))-1;
@@ -7340,13 +7349,17 @@ class DailyWorkingInformationController extends Controller
         if ($array_calc_time[$index] > 0) {
             $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
             // $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-            $calc_time = round($w_time / 60 / 60,2);
+            // $calc_time = round($w_time / 60 / 60,2);
+            $total_time = $total_time + $w_time;
+            $calc_time = round(($w_time / 60 / 60) + 0.005,2);
         }
         $temp_working_model->setLatenightovertimehoursAttribute($calc_time);
-        $total_time = $total_time + $calc_time;
+        // $total_time = $total_time + $calc_time;
         // 深夜労働時間
-        $w_time = round($this->calc_late_night_working_hours / 60 / 60,2);
+        // $w_time = round($this->calc_late_night_working_hours / 60 / 60,2);
+        $w_time = round(($this->calc_late_night_working_hours / 60 / 60) + 0.005,2);
         $temp_working_model->setLatenightworkinghoursAttribute($w_time);
+        $total_time = round(($total_time / 60 / 60) + 0.005,2);
         // $total_time = $total_time + $w_time;
         // 残業時間
         $temp_working_model->setOvertimehoursAttribute($overtime_hours);
@@ -7444,14 +7457,16 @@ class DailyWorkingInformationController extends Controller
                     }
                 }
             }
-
             if ($regular_calc_time > 0) {
-                $w_calc_time = ($w_time / 60 / 60) - ($w_break_time / 60 / 60) - $regular_calc_time;
+                $w_calc_time = $w_time - $w_break_time - $total_time_regular_calc_time;
+                if ($w_calc_time < 0) { $w_calc_time = 0; }
+                if ($w_calc_time > 0) { $w_calc_time = round(($w_calc_time / 60 / 60) + 0.005,2); }
                 $temp_working_model->setNotemploymentworkinghoursAttribute($w_calc_time);
             } else {
                 // 欠勤の場合は規則所定労働時間を不就労に設定
                 if ($target_result->holiday_kubun == Config::get('const.C013.absence_work')) {
-                    $w_calc_time = ($w_time / 60 / 60) - ($w_break_time / 60 / 60);
+                    $w_calc_time = round(($w_time / 60 / 60) + 0.005,2) - round(($w_break_time / 60 / 60) + 0.005,2);
+                    if ($w_calc_time < 0) { $w_calc_time = 0; }
                     $temp_working_model->setNotemploymentworkinghoursAttribute($w_calc_time);
                 } else {
                     $temp_working_model->setNotemploymentworkinghoursAttribute(0);
@@ -7472,8 +7487,10 @@ class DailyWorkingInformationController extends Controller
             $calc_missing_time += $array_missing_middle_time[$i];
         }
         // $calc_time = round($apicommon->roundTime($calc_time + $calc_missing_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-        $calc_time = round(($calc_time + $calc_missing_time) / 60 / 60,2);
-        $calc_missing_time = round($calc_missing_time / 60 / 60,2);
+        // $calc_time = round(($calc_time + $calc_missing_time) / 60 / 60,2);
+        $calc_time = round((($calc_time + $calc_missing_time) / 60 / 60) + 0.005,2);
+        // $calc_missing_time = round($calc_missing_time / 60 / 60,2);
+        $calc_missing_time = round(($calc_missing_time / 60 / 60) + 0.005,2);
         // $calc_missing_time = round($apicommon->roundTime($calc_missing_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
         $temp_working_model->setMissingmiddlehoursAttribute($calc_missing_time);
         // 公用外出時間
@@ -7485,7 +7502,8 @@ class DailyWorkingInformationController extends Controller
         $temp_working_model->setTotalworkingtimesAttribute($total_time);
 
         // $calc_time = round($apicommon->roundTime($calc_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-        $calc_time = round($calc_time / 60 / 60,2);
+        // $calc_time = round($calc_time / 60 / 60,2);
+        $calc_time = round(($calc_time / 60 / 60) + 0.005,2);
         $temp_working_model->setPublicgoingouthoursAttribute($calc_time);
         $temp_working_model->setWorkingtimetablenoAttribute($target_result->working_timetable_no);
         $temp_working_model->setWorkingstatusAttribute($working_status);

@@ -27,6 +27,7 @@ var options = {
     type: "info"
 };
 
+
 Vue.use(toasted, options);
 Vue.use(VCalendar);
 Vue.use(VModal);
@@ -170,11 +171,6 @@ Vue.component(
 Vue.component(
     "edit-work-times",
     require("./components/EditWorkTimes.vue").default
-);
-
-Vue.component(
-    "edit_attendance-log",
-    require("./components/EditAttendanceLog.vue").default
 );
 
 Vue.component(
@@ -352,6 +348,18 @@ Vue.component(
 Vue.component(
     "select-elcommonlist",
     require("./components/SelectElCommonList.vue").default
+);
+
+// 勤怠ログ
+// 勤怠ログ登録
+Vue.component(
+    "store_attendance-log",
+    require("./components/StoreAttendanceLog.vue").default
+);
+// 勤怠ログ編集
+Vue.component(
+    "edit_attendance-log",
+    require("./components/EditAttendanceLog.vue").default
 );
 
 /**

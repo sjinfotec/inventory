@@ -710,4 +710,44 @@ class AttendanceLog extends Model
 
         return $is_exists;
     }
+
+    /**
+     * 最大登録日付取得
+     *
+     * @return boolean
+     */
+    public function getWorkingdate(){
+        try {
+            $mainquery = DB::table($this->table);
+            if (!empty($this->param_department_code)) {
+                $mainquery
+                    ->where('department_code', '=', $this->param_department_code);
+            }
+            if (!empty($this->param_employment_status)) {
+                $mainquery
+                    ->where('employment_status', '=', $this->param_employment_status);
+            }
+            if (!empty($this->param_user_code)) {
+                $mainquery
+                    ->where('user_code', '=', $this->param_user_code);
+            }
+            if(!empty($this->param_working_date_from) && !empty($this->param_working_date_to)){
+                $mainquery->where('working_date', '>=', $this->param_working_date_from);         // 日付範囲指定
+                $mainquery->where('working_date', '<=', $this->param_working_date_to);           // 日付範囲指定
+            }
+            $maxdate =$mainquery
+                ->where('is_deleted',0)
+                ->max('working_date');
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $maxdate;
+    }
 }
