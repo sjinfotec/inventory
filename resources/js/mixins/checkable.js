@@ -69,6 +69,7 @@ export const checkable =  {
       }
       return this.checkmessagedata;
     }
+
     // -------------------------- private メソッド ------------------------
   }
 }

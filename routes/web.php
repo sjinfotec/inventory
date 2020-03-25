@@ -89,9 +89,13 @@ Route::post('/get_user_shift', 'ApiCommonController@getShiftInformation')->middl
 Route::post('/setting_shift_time/del', 'SttingShiftTimeController@del')->middleware('auth');
 Route::post('/setting_shift_time/store', 'SttingShiftTimeController@store')->middleware('auth');
 Route::post('/setting_shift_time/range_del', 'SttingShiftTimeController@rangeDel')->middleware('auth');
+// 勤怠ログ登録
+Route::get('/store_attendancelog', 'StoreAttendanceLogController@index')->middleware('auth');
+Route::post('/store_attendancelog/store', 'StoreAttendanceLogController@store')->middleware('auth');
 // 勤怠ログ編集
 Route::get('/edit_attendancelog', 'EditAttendanceLogController@index')->middleware('auth');
 Route::post('/edit_attendancelog/get', 'EditAttendanceLogController@get')->middleware('auth');
+Route::post('/edit_attendancelog/store', 'EditAttendanceLogController@store')->middleware('auth');
 Route::post('/edit_attendancelog/fix', 'EditAttendanceLogController@fix')->middleware('auth');
 // ------------------ 設定 --------------------------------
 // 会社情報
