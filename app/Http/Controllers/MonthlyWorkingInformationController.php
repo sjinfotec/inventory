@@ -100,12 +100,6 @@ class MonthlyWorkingInformationController extends Controller
             if (isset($params['usercode'])) {
                 $usercode = $params['usercode'];
             }
-            Log::debug('     パラメータ  $showorupdate = '.$showorupdate);
-            Log::debug('     パラメータ  $datefrom = '.$datefrom);
-            Log::debug('     パラメータ  $dateto = '.$dateto);
-            Log::debug('     パラメータ  $employmentstatus = '.$employmentstatus);
-            Log::debug('     パラメータ  $departmentcode = '.$departmentcode);
-            Log::debug('     パラメータ  $usercode = '.$usercode);
             // 会社名を取得
             $company_name = Config::get('const.MEMO_DATA.MEMO_DATA_015');
             $company_model = new Company();
@@ -132,6 +126,7 @@ class MonthlyWorkingInformationController extends Controller
                 );
                 // 月次最新集計
                 if ($showorupdate == Config::get('const.SHOW_OR_UPDATE.update')) {
+                    $te = set_time_limit(180);
                     $this->showupdate($array_impl_showCalc);
                 }
                 // 月次集計
@@ -262,11 +257,6 @@ class MonthlyWorkingInformationController extends Controller
             if (isset($params['usercode'])) {
                 $usercode = $params['usercode'];
             }
-            Log::debug('     パラメータ  $datefrom = '.$datefrom);
-            Log::debug('     パラメータ  $dateto = '.$dateto);
-            Log::debug('     パラメータ  $employmentstatus = '.$employmentstatus);
-            Log::debug('     パラメータ  $departmentcode = '.$departmentcode);
-            Log::debug('     パラメータ  $usercode = '.$usercode);
             // パラメータのチェック
             // 集計用日付設定
             $workingtimedate_model->setParamdatefromAttribute($datefrom);
@@ -283,15 +273,15 @@ class MonthlyWorkingInformationController extends Controller
                     'usercode' => $usercode
                 );
                 // 月次最新集計
+                Log::debug('  set_time_limit ');
+                $te = set_time_limit(180);
+                Log::debug('  $te = '.$te);
                 $this->showupdate($array_impl_showCalc);
             } else {
                 $this->array_messagedata =  $array_messagedata->concat($workingtimedate_model->getMassegedataAttribute());
             }
     
             Log::debug('------------- 最新更新集計 開始 monthly calc end----------------');
-            Log::debug('  結果 array_user count = '.count($this->array_user));
-            Log::debug('  結果 working_time_sum count = '.count($working_time_sum));
-            Log::debug('  結果 $this->array_messagedata count = '.count($this->array_messagedata));
             return response()->json(
                 ['calcresults' => $this->array_user, 'sumresults' => $working_time_sum, 'company_name' => $company_name,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
