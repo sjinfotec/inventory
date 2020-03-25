@@ -39,7 +39,7 @@
         @mouseover="edttooltips('update')"
       >
         <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt=""> -->
-        指定年月締め一括集計</button>
+        指定年月締め一括集計（指定範囲により数分程度時間要する場合があります）</button>
     </div>
     <div v-if="btnMode === 'init'" class="btn-group d-flex" v-on:click="initclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
