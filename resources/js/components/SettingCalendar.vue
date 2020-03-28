@@ -245,6 +245,19 @@
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <!-- main contentns row -->
+          <!-- ----------- 一括編集部 START ---------------- -->
+          <!-- panel contents -->
+          <!-- .row -->
+          <div class="col-md-3 pb-2 w-15 text-center align-middle">
+            <col-note
+              v-bind:item-name="'個別編集'"
+              v-bind:item-control="'INFO'"
+              v-bind:item-note="''"
+              data-toggle="tooltip"
+              data-placement="top"
+            ></col-note>
+          </div>
+          <!-- /.row -->
           <!-- ----------- 項目部 START ---------------- -->
           <table-calendarmonth
             v-bind:detail-dates="detail_dates"
@@ -253,6 +266,108 @@
             v-on:detaileditclick-event="detailEdtClick"
           ></table-calendarmonth>
           <!-- ----------- 項目部 END ---------------- -->
+          <!-- .row -->
+          <div class="col-md-3 pb-2 w-15 text-center align-middle">
+            <col-note
+              v-bind:item-name="'一括編集'"
+              v-bind:item-control="'INFO'"
+              v-bind:item-note="''"
+              data-toggle="tooltip"
+              data-placement="top"
+            ></col-note>
+          </div>
+          <!-- /.row -->
+          <div class="card-body pt-2">
+            <!-- ----------- メッセージ部 START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between" v-if="messagevalidatesBatch.length">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <ul class="error-red color-red">
+                  <li v-for="(messagevalidate,index) in messagevalidatesBatch" v-bind:key="index">{{ messagevalidate }}</li>
+                </ul>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- ----------- メッセージ部 END ---------------- -->
+            <!-- .row -->
+            <div class="row">
+              <div class="col-12">
+                <div class="table-responsive">
+                  <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                    <thead>
+                      <tr>
+                        <td class="text-center align-middle w-10 mw-rem-3">開始日<span class="color-red">[必須]</span></td>
+                        <td class="text-center align-middle w-10 mw-rem-3">終了日</td>
+                        <td class="text-center align-middle w-30">営業日区分<span class="color-red">[必須]</span></td>
+                        <td class="text-center align-middle w-30">休暇区分</td>
+                        <td class="text-center align-middle w-20">操作</td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="text-left align-middle">
+                          <input
+                            type="number"
+                            name="fromday"
+                            title="開始日"
+                            v-bind:max="date_endof"
+                            min="1"
+                            step="1"
+                            class="form-control"
+                            v-model="valuefromday"
+                          />
+                        </td>
+                        <td class="text-left align-middle">
+                          <input
+                            type="number"
+                            name="today"
+                            title="終了日"
+                            v-bind:max="date_endof"
+                            min="1"
+                            step="1"
+                            class="form-control"
+                            v-model="valuetoday"
+                          />
+                        </td>
+                        <td class="text-center align-middle">
+                          <select class="form-control" v-model="businessbatch" @change="businessbatchChanges(businessbatch)">
+                            <option value></option>
+                            <option
+                              v-for="blist in BusinessDayList"
+                              :value="blist.code"
+                              v-bind:key="blist.code"
+                            >{{ blist.code_name }}</option>
+                          </select>
+                        </td>
+                        <td class="text-center align-middle">
+                          <select class="form-control" v-model="holidaybatch" @change="holiDaybatchChanges(holidaybatch)">
+                            <option value></option>
+                            <option
+                              v-for="hlist in HoliDayList"
+                              :value="hlist.code"
+                              v-bind:key="hlist.code"
+                            >{{ hlist.code_name }}</option>
+                          </select>
+                        </td>
+                        <td class="text-center align-middle">
+                          <div class="btn-group">
+                            <button
+                              type="button"
+                              class="btn btn-success"
+                              @click="fixbatchclick()"
+                            >この内容で一括更新する</button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <!-- /.row -->
+          </div>
           <!-- /main contentns row -->
         </div>
       </div>
@@ -317,9 +432,9 @@
                     <table class="table table-striped border-bottom font-size-sm text-nowrap">
                       <thead>
                         <tr>
-                          <td class="text-left align-middle w-10 mw-rem-5">日付</td>
-                          <td class="text-left align-middle w-35 mw-rem-10">営業日区分<span class="color-red">[必須]</span></td>
-                          <td class="text-left align-middle w-35 mw-rem-10">休暇区分</td>
+                          <td class="text-center align-middle w-10 mw-rem-5">日付</td>
+                          <td class="text-center align-middle w-35 mw-rem-10">営業日区分<span class="color-red">[必須]</span></td>
+                          <td class="text-center align-middle w-35 mw-rem-10">休暇区分</td>
                         </tr>
                       </thead>
                       <tbody>
@@ -592,6 +707,7 @@ export default {
       messagevalidatesEdt: [],
       messagevalidatesInitstore: [],
       messagevalidatesCopyinit: [],
+      messagevalidatesBatch: [],
       showC034list: true,
       selectedC034Value: "",
       valueC034killcheck: false,
@@ -634,7 +750,13 @@ export default {
         initptn_holiday : ["","","","","","",""]
       },
       detailsEdt: [],
-      detailsEdtlength: 0
+      detailsEdtlength: 0,
+      valuefromday : "",
+      valuetoday : "",
+      businessbatch : "",
+      holidaybatch : "",
+      input_date : moment().format("YYYYMMDD"),
+      date_endof : moment().endOf('month').format("DD")
     };
   },
   // マウント時
@@ -666,7 +788,7 @@ export default {
       chkArray = 
         this.checkHeader(this.valueyear, required, equalength, maxlength, itemname);
       if (chkArray.length == 0) {
-        if (this.valueyear < 2000 || this.valuemonth > 2050) {
+        if (this.valueyear < 2000 || this.valueyear > 2050) {
           chkArray.push("正しい年を入力してください。");
         }
       }
@@ -744,7 +866,7 @@ export default {
       chkArray = 
         this.checkHeader(this.valueyear, required, equalength, maxlength, itemname);
       if (chkArray.length == 0) {
-        if (this.valueyear < 2000 || this.valuemonth > 2050) {
+        if (this.valueyear < 2000 || this.valueyear > 2050) {
           chkArray.push("正しい年を入力してください。");
         }
       }
@@ -839,7 +961,7 @@ export default {
       chkArray = 
         this.checkHeader(this.valueyear, required, equalength, maxlength, itemname);
       if (chkArray.length == 0) {
-        if (this.valueyear < 2000 || this.valuemonth > 2050) {
+        if (this.valueyear < 2000 || this.valueyear > 2050) {
           chkArray.push("正しい年を入力してください。");
         }
       }
@@ -867,6 +989,85 @@ export default {
       }
 
       if (this.messagevalidatesCopyinit.length > 0) {
+        flag = false;
+      }
+      return flag;
+    },
+    // バリデーション（一括更新）
+    checkFormBatch: function() {
+      this.messagevalidatesBatch = [];
+      var flag = true;
+      // 開始日
+      var chkArray = [];
+      var required = true;
+      var equalength = 0;
+      var maxlength = 0;
+      var itemname = '開始日';
+      chkArray = 
+        this.checkHeader(this.valuefromday, required, equalength, maxlength, itemname);
+      if (chkArray.length == 0) {
+        if (this.valuefromday < 1 || this.valuefromday > this.date_endof) {
+          chkArray.push("開始日に正しい日付を入力してください。");
+        }
+      }
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesBatch.length == 0) {
+          this.messagevalidatesBatch = chkArray;
+        } else {
+          this.messagevalidatesBatch = this.messagevalidatesBatch.concat(chkArray);
+        }
+      }
+      // 終了日
+      chkArray = [];
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '終了日';
+      if (this.valuetoday != "" && this.valuetoday != null) {
+        if (this.valuetoday < 1 || this.valuetoday > this.date_endof) {
+          chkArray.push("終了日に正しい日付を入力してください。");
+        }
+        if (chkArray.length > 0) {
+          if (this.messagevalidatesBatch.length == 0) {
+            this.messagevalidatesBatch = chkArray;
+          } else {
+            this.messagevalidatesBatch = this.messagevalidatesBatch.concat(chkArray);
+          }
+        }
+      }
+
+      if (this.messagevalidatesBatch.length == 0) {
+        if (this.valuetoday != "" && this.valuetoday != null) {
+          if (this.valuefromday > this.valuetoday) {
+            chkArray.push("開始日　＞　終了日となっています。");
+          }
+          if (chkArray.length > 0) {
+            if (this.messagevalidatesBatch.length == 0) {
+              this.messagevalidatesBatch = chkArray;
+            } else {
+              this.messagevalidatesBatch = this.messagevalidatesBatch.concat(chkArray);
+            }
+          }
+        }
+      }
+
+      // 営業日区分
+      chkArray = [];
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '営業日区分';
+      chkArray = 
+        this.checkHeader(this.businessbatch, required, equalength, maxlength, itemname, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesBatch.length == 0) {
+          this.messagevalidatesBatch = chkArray;
+        } else {
+          this.messagevalidatesBatch = this.messagevalidatesBatch.concat(chkArray);
+        }
+      }
+
+      if (this.messagevalidatesBatch.length > 0) {
         flag = false;
       }
       return flag;
@@ -973,6 +1174,20 @@ export default {
       }
     },
     // 出勤区分がクリアされた場合の処理
+    businessbatchChanges: function(value) {
+      if (value < 2) {
+        this.holidaybatch = null;
+      }
+    },
+    // 休暇区分がクリアされた場合の処理
+    holiDaybatchChanges: function(value) {
+      if (value < 1) {
+        this.businessbatch = 1;
+      } else {
+        this.businessbatch = 3;
+      }
+    },
+    // 出勤区分がクリアされた場合の処理
     formbusinessDayChanges: function(value, index) {
       if (value < 2) {
         this.initptn_holiday[index] = null;
@@ -990,11 +1205,7 @@ export default {
     searchclick() {
       // 入力項目クリア
       this.inputClear();
-      this.messagevalidatesInit = [];
-      this.messagevalidatesDsp = [];
-      this.messagevalidatesEdt = [];
-      this.messagevalidatesInitstore = [];
-      this.messagevalidatesCopyinit = [];
+      this.messageClear();
       if (this.checkFormEdt()) {
         this.selectMode = 'DSP';
         this.isinitbutton = false;
@@ -1019,11 +1230,7 @@ export default {
     initclick() {
       // 入力項目クリア
       this.inputClear();
-      this.messagevalidatesInit = [];
-      this.messagevalidatesDsp = [];
-      this.messagevalidatesEdt = [];
-      this.messagevalidatesInitstore = [];
-      this.messagevalidatesCopyinit = [];
+      this.messageClear();
       var flag = this.checkFormInit();
       if (flag) {
         this.selectMode = 'INT';
@@ -1048,11 +1255,7 @@ export default {
     },
     //更新ボタンクリック処理
     fixclick() {
-      this.messagevalidatesInit = [];
-      this.messagevalidatesDsp = [];
-      this.messagevalidatesEdt = [];
-      this.messagevalidatesInitstore = [];
-      this.messagevalidatesCopyinit = [];
+      this.messageClear();
       var flag = this.checkFormFix();
       if (flag) {
         var messages = [];
@@ -1074,11 +1277,7 @@ export default {
     },
     //初期設定登録ボタンクリック処理
     initstoreclick() {
-      this.messagevalidatesInit = [];
-      this.messagevalidatesDsp = [];
-      this.messagevalidatesEdt = [];
-      this.messagevalidatesInitstore = [];
-      this.messagevalidatesCopyinit = [];
+      this.messageClear();
       var flag = this.checkFormInitstore();
       if (flag) {
         var messages = [];
@@ -1104,11 +1303,7 @@ export default {
     copyinitclick() {
       // 入力項目クリア
       this.inputClear();
-      this.messagevalidatesInit = [];
-      this.messagevalidatesDsp = [];
-      this.messagevalidatesEdt = [];
-      this.messagevalidatesInitstore = [];
-      this.messagevalidatesCopyinit = [];
+      this.messageClear();
       var flag = this.checkFormCopyinit();
       if (flag) {
         this.selectMode = 'INT';
@@ -1122,6 +1317,28 @@ export default {
       //       if (result) {
       //       }
       //   });
+      }
+    },
+    // 一括更新ボタンクリック処理
+    fixbatchclick() {
+      this.messageClear();
+      var flag = this.checkFormBatch();
+      if (flag) {
+        var messages = [];
+        messages.push("この内容で一括更新しますか？");
+        this.htmlMessageSwal("確認", messages, "info", true, true)
+          .then(result  => {
+            if (result) {
+              this.FixDetailbatch("一括更新");
+            }
+        });
+      // 項目数が多い場合以下コメントアウト
+      } else {
+        this.countswal("エラー", this.messagevalidatesBatch, "error", true, false, true)
+          .then(result  => {
+            if (result) {
+            }
+        });
       }
     },
 
@@ -1143,9 +1360,17 @@ export default {
     // カレンダー取得処理
     getItem() {
       var parammonth = null;
+      this.input_date = null;
       if (this.valuemonth != "") {
         parammonth = moment(this.valuemonth).format("MM");
+        this.input_date = moment(this.valueyear + this.valuemonth.padStart(2, "0") + '15').format("YYYYMMDD");
+      } else {
+        // 本来ありえない
+        parammonth = moment().format("MM");
+        this.input_date = tmoment(this.valueyear + '0115').format("YYYYMMDD");
       }
+      this.date_endof = moment(this.input_date).endOf('month').format("DD");
+
       // 処理中メッセージ表示
       this.$swal({
         title: "処　理　中...",
@@ -1260,6 +1485,35 @@ export default {
           this.serverCatch("カレンダー", eventname);
         });
     },
+    // カレンダー一括更新処理
+    FixDetailbatch(eventname) {
+      var paramfromdate = null;
+      var paramtodate = null;
+      if (this.valuemonth != "") {
+        paramfromdate = moment(this.valueyear + this.valuemonth.padStart(2, "0") + this.valuefromday.padStart(2, "0")).format("YYYYMMDD");
+        if (this.valuetoday != "") {
+          paramtodate = moment(this.valueyear + this.valuemonth.padStart(2, "0") + this.valuetoday.padStart(2, "0")).format("YYYYMMDD");
+        } else {
+          paramtodate = paramfromdate;
+        }
+        var arrayParams = {
+            employmentstatus : this.selectedEmploymentValue,
+            departmentcode : this.selectedDepartmentValue,
+            usercode : this.selectedUserValue,
+            fromdate : paramfromdate,
+            todate : paramtodate,
+            businessdays: this.businessbatch,
+            holidays : this.holidaybatch
+        };
+        this.postRequest("/setting_calendar/fixbatch", arrayParams)
+          .then(response  => {
+            this.putThenBatch(response, eventname);
+          })
+          .catch(reason => {
+            this.serverCatch("カレンダー", eventname);
+          });
+      }
+    },
     // コード選択リスト取得処理
     getGeneralList(value) {
       var arrayParams = { identificationid : value };
@@ -1327,6 +1581,23 @@ export default {
         }
       }
     },
+    // 一括更新系正常処理
+    putThenBatch(response, eventtext) {
+      var messages = [];
+      var res = response.data;
+      if (res.result) {
+        this.$toasted.show("カレンダーを" + eventtext + "しました");
+      } else {
+        if (res.messagedata.length > 0) {
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false)
+        } else {
+          this.serverCatch("カレンダー", eventtext);
+        }
+      }
+      this.selectMode = 'DSP';
+      this.isinitbutton = false;
+      this.getItem();
+    },
     // 異常処理
     serverCatch(kbn, eventtext) {
       var messages = [];
@@ -1362,6 +1633,15 @@ export default {
     inputClear() {
       this.details = [];
     },
+    // メッセージクリア
+    messageClear() {
+      this.messagevalidatesInit = [];
+      this.messagevalidatesDsp = [];
+      this.messagevalidatesEdt = [];
+      this.messagevalidatesInitstore = [];
+      this.messagevalidatesCopyinit = [];
+      this.messagevalidatesBatch = [];
+    },
     // 集計パネルヘッダ文字列編集処理
     setPanelHeader: function() {
       moment.locale("ja");
@@ -1390,8 +1670,6 @@ export default {
           }
         }
       }
-      console.log('this.datejaFormat = ' + this.datejaFormat);
-      console.log('this.stringtext = ' + this.stringtext);
     },
     // 最新リストの表示
     refreshC024C034list(showC024, showC034) {
@@ -1414,7 +1692,12 @@ export default {
 };
 </script>
 <style scoped>
+
 .table th, .table td {
     padding: 0rem !important;
+}
+
+.mw-rem-3 {
+  min-width: 3rem;
 }
 </style>

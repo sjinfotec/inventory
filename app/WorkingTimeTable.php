@@ -155,6 +155,7 @@ class WorkingTimeTable extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
 
+    private $param_no;                          // タイムテーブルNo
     private $param_date_from;                   // 開始日付
     private $param_date_to;                     // 終了日付
     private $param_employment_status;           // 雇用形態
@@ -163,6 +164,17 @@ class WorkingTimeTable extends Model
 
     private $massegedata;                       // メッセージ
 
+
+    // タイムテーブルNo
+    public function getParamnoAttribute()
+    {
+        return $this->param_no;
+    }
+
+    public function setParamnoAttribute($value)
+    {
+        $this->param_no = $value;
+    }
 
     // 開始日付
     public function getParamdatefromAttribute()
@@ -713,6 +725,7 @@ class WorkingTimeTable extends Model
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 9999;
             $array_setBindingsStr[] = 0;
             //
             $array_setBindingsStr[] = Config::get('const.C004.regular_working_time');
@@ -744,6 +757,61 @@ class WorkingTimeTable extends Model
                 $array_setBindingsStr[] = $this->param_user_code;
             }
             $array_setBindingsStr[] = 0;
+            $result = DB::select($sqlString, $array_setBindingsStr);
+        
+            return $result;
+    
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * タイムテーブル編集
+     * @return void
+     */
+    public function edtWorkingTime(){
+        try {
+            //
+            $dt = $this->param_date_from;
+            $dt1 = new Carbon($dt);
+            $target_today = $dt1->format('Y-m-d');
+            $target_addtoday = $dt1->addDay()->format('Y-m-d');
+   
+            $apicommon = new ApiCommonController();
+            // working_timetablesの最大適用開始日付subquery
+            $subquery33 = $apicommon->makeWorkingTimeTableApplyTermSql($this->param_date_from);
+
+            $sqlString = $subquery33;
+            if (!empty($this->param_no)) {
+                $sqlString .= "   and t1.no = ? ";
+            }
+            $sqlString .= "order by t1.no asc ";
+            $sqlString .= ", t1.working_time_kubun asc ";
+        
+            // バインド
+            $array_setBindingsStr = array();
+            //
+            // subquery33
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if (!empty($this->param_date_from)) {
+                $array_setBindingsStr[] = $this->param_date_from;
+            }
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 9999;
+            $array_setBindingsStr[] = 0;
+            if (!empty($this->param_no)) {
+                $array_setBindingsStr[] = $this->param_no;
+            }
             $result = DB::select($sqlString, $array_setBindingsStr);
         
             return $result;

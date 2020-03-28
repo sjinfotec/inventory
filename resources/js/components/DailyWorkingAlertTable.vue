@@ -92,10 +92,6 @@ export default {
     alertLists: {
       type: Array
     }
-  },
-  // マウント時
-  mounted() {
-    console.log(this.name + "マウント");
   }
 };
 </script>

@@ -229,17 +229,12 @@ class EditCalendarController extends Controller
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
-            if (!isset($params['holidays'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "holidays", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
             $details = $params['details'];
             $businessdays = $params['businessdays'];
-            $holidays = $params['holidays'];
+            $holidays = null;
+            if (isset($params['holidays'])) {
+                $holidays = $params['holidays'];
+            }
             $converts = array();
             // details に入力された区分を上書き
             foreach ($details['array_user_date_data'] as $index => $detail) {
@@ -290,11 +285,140 @@ class EditCalendarController extends Controller
 
             foreach ($params['converts'] as $data) {
                 $calendar_model->setParamfromdateAttribute($data['date']);
-                $calendar_model->setDateAttribute($data['date']);
                 $calendar_model->setBusinesskubunAttribute($data['businessdays']);
                 $calendar_model->setHolidaykubunAttribute($data['holidays']);
                 $calendar_model->updateCalendar();
             }
+            DB::commit();
+
+        }catch(\PDOException $pe){
+            DB::rollBack();
+            throw $pe;
+        }catch(\Exception $e){
+            DB::rollBack();
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+    
+    /**
+     * 一括更新
+     *
+     * @param [type] $converts
+     * @return void
+     */
+    public function fixbatch(Request $request){
+        $this->array_messagedata = array();
+        $details = array();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['fromdate'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "fromdate", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (!isset($params['businessdays'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "businessdays", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $employmentstatus = null;
+            if (isset($params['employmentstatus'])) {
+                if ($params['employmentstatus'] != "") {
+                    $employmentstatus = $params['employmentstatus'];
+                }
+            }
+            $departmentcode = null;
+            if (isset($params['departmentcode'])) {
+                if ($params['departmentcode'] != "") {
+                    $departmentcode = $params['departmentcode'];
+                }
+            }
+            $usercode = null;
+            if (isset($params['usercode'])) {
+                if ($params['usercode'] != "") {
+                    $usercode = $params['usercode'];
+                }
+            }
+            $holidays = null;
+            if (isset($params['holidays'])) {
+                if ($params['holidays'] != "") {
+                    $holidays = $params['holidays'];
+                }
+            }
+            $todate = null;
+            if (isset($params['todate'])) {
+                if ($params['todate'] != "") {
+                    $todate = $params['todate'];
+                }
+            }
+            $fromdate = $params['fromdate'];
+            $businessdays = $params['businessdays'];
+            // fixDataBatch implement
+            $array_impl_fixDataBatch = array (
+                'department_code' => $departmentcode,
+                'employment_status' => $employmentstatus,
+                'user_code' => $usercode,
+                'fromdate' => $fromdate,
+                'todate' => $todate,
+                'businessdays' => $businessdays,
+                'holidays' => $holidays
+            );
+            $this->fixDataBatch($array_impl_fixDataBatch);
+            return response()->json(
+                ['result' => $result,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 一括更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function fixDataBatch($params){
+        $systemdate = Carbon::now();
+        $user = Auth::user();
+        $user_code = $user->code;
+        $calendar_model = new Calendar();
+
+        DB::beginTransaction();
+        try{
+            $calendar_model->setParamdepartmentcodeAttribute($params['department_code']);
+            $calendar_model->setParamemploymentstatusAttribute($params['employment_status']);
+            $calendar_model->setParamusercodeAttribute($params['user_code']);
+            $calendar_model->setUpdatedatAttribute($systemdate);
+            $calendar_model->setParamfromdateAttribute($params['fromdate']);
+            $calendar_model->setParamtodateAttribute($params['todate']);
+            $calendar_model->setBusinesskubunAttribute($params['businessdays']);
+            $calendar_model->setHolidaykubunAttribute($params['holidays']);
+            $calendar_model->updateCalendar();
             DB::commit();
 
         }catch(\PDOException $pe){

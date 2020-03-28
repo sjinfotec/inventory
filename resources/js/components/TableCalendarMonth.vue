@@ -11,24 +11,24 @@
             <!-- <table class="table"> -->
               <thead>
                 <tr>
-                  <td class="text-center align-middle w-20 mw-rem-10">部署</td>
-                  <td class="text-center align-middle w-20 mw-rem-10">雇用形態</td>
-                  <td class="text-center align-middle w-20 mw-rem-10">氏名</td>
-                  <td class="text-left align-middle w-20 mw-rem-5" v-if="isEdtbutton">操作</td>
+                  <td class="text-center align-middle mw-rem-10">部署</td>
+                  <td class="text-center align-middle mw-rem-10">雇用形態</td>
+                  <td class="text-center align-middle mw-rem-15">氏名</td>
+                  <td class="text-center align-middle mw-rem-2-6" v-if="isEdtbutton">操作</td>
                   <td v-for="(item,rowIndex) in detailDates" v-bind:key="item.date"
-                    class="text-center align-middle w-20 mw-rem-5">{{ item['date_name'] }}</td>
+                    class="text-center align-middle mw-rem-5">{{ item['date_name'] }}</td>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(item1,rowIndex1) in details" v-bind:key="item1['user_code']">
-                  <td class="text-left align-middle">{{ item1['department_name'] }}</td>
-                  <td class="text-left align-middle">{{ item1['employment_name'] }}</td>
-                  <td class="text-left align-middle">{{ item1['user_name'] }}</td>
-                  <td  style="text-align:center" v-if="isEdtbutton"
+                  <td class="text-left align-middle mw-rem-10">{{ item1['department_name'] }}</td>
+                  <td class="text-left align-middle mw-rem-10">{{ item1['employment_name'] }}</td>
+                  <td class="text-left align-middle mw-rem-15">{{ item1['user_name'] }}</td>
+                  <td class="text-center align-middle mw-rem-2-6" style="text-align:center" v-if="isEdtbutton"
                     <input type="button" value="編集" v-on:click="detailEdtClick(rowIndex1)">
                   </td>
                   <td v-for="(item2,rowIndex2) in item1['array_user_date_data']" v-bind:key="item2['date']"
-                    class="text-center align-middle">
+                    class="text-center align-middle mw-rem-5">
                     {{ item2['business_kubun_name'] }}
                   </td>
                 </tr>
@@ -72,7 +72,26 @@ export default {
 };
 </script>
 <style scoped>
-.table th, .table td {
-    padding: 0.1rem !important;
+
+thead, tbody {
+  display: block !important;
 }
+
+tbody {
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
+  height: 360px !important;
+}
+
+.table th, .table td {
+    padding: 0rem !important;
+    border-style: solid dashed !important;
+    border-width: 1px !important;
+    border-color: #95c5ed #dee2e6 !important;
+}
+
+.mw-rem-2-6 {
+  min-width: 2.6rem;
+}
+
 </style>
