@@ -124,6 +124,7 @@ Route::post('/create_time_table/add', 'CreateTimeTableController@add')->middlewa
 Route::get('/setting_calendar', 'EditCalendarController@index')->middleware('auth');
 Route::post('/setting_calendar/get', 'EditCalendarController@getDetail')->middleware('auth');
 Route::post('/setting_calendar/fix', 'EditCalendarController@fix')->middleware('auth');
+Route::post('/setting_calendar/fixbatch', 'EditCalendarController@fixbatch')->middleware('auth');
 Route::post('/setting_calendar/init', 'EditCalendarController@init')->middleware('auth');
 Route::post('/setting_calendar/copyinit', 'EditCalendarController@copyinit')->middleware('auth');
 // ユーザー情報設定

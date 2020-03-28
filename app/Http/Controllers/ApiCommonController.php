@@ -21,6 +21,69 @@ use App\ApprovalRouteNo;
 
 
 
+/**
+ * 共通API
+ *
+ *      1.適用期間開始サブクエリー作成
+ *          ユーザー適用期間開始サブクエリー作成    : getUserApplyTermSubquery, makeUserApplyTermSql                        : users
+ *          部署適用期間開始サブクエリー作成        : getDepartmentApplyTermSubquery, makeDepartmentApplyTermSql            : departments
+*          タイムテーブル適用期間開始サブクエリー作成  : getTimetableApplyTermSubquery, makeWorkingTimeTableApplyTermSql    : working_timetables
+ *      2.リスト作成
+ *          ユーザーリスト取得          : getUserList               : users
+ *          部署リスト取得              : getDepartmentList         : departments
+ *          タイムテーブルリスト取得     : getTimeTableList         : working_timetables
+ *          承認リスト取得              : getApprovalroutenoList    : approvals 
+ *          承認明細リスト取得          : getApprovalauthorizerList : approval_authorizers
+ *          営業日区分リスト取得        : getBusinessDayList        : generalcodes
+ *          休暇区分リスト取得          : getHoliDayList            : generalcodes
+ *          個人休暇リスト取得          : getUserLeaveKbnList       : generalcodes
+ *          モードリスト取得            : getModeList               : generalcodes
+ *          共通コードリスト取得        : getRequestGeneralList     : generalcodes
+ *          共通コードリスト取得        : getGeneralList            : generalcodes
+ *          承認者リスト取得            : getConfirmlList           : confirms
+ *      3.ユーザ情報取得
+ *          シフト情報取得                              : getShiftInformation               : ShiftInformation        
+ *          ログインユーザー部署ロール取得（画面から）      : getLoginUserDepartment            
+ *          ログインユーザー権限取得（画面から）            : getLoginUserRole                  
+ *          ユーザー権限取得                            : getUserRole                       : users                   
+ *          ユーザー部署取得                            : getUserDepartment                 : users 
+ *          ユーザーの部署と雇用形態と権限取得          : getUserDepartmentEmploymentRole      : users
+ *          ユーザーメールアドレス取得                  : getUserMailAddress                : users      
+ *          ユーザー休暇区分取得                        : getUserHolidaykbn                 : UserHolidayKubun              
+ *          ユーザー所定時刻取得                        : getWorkingHours                   : WorkingTimeTable             
+ *      4.その他情報取得
+ *          会社情報取得                                : getCompanyInfoApply       : Company
+ *          指定月締日取得（画面から）                  : getClosingDay              : Setting   
+ *          指定月締日取得                              : getCommonClosingDay       : Setting  
+ *          曜日取得                                    : getWeekDay
+ *          日付のフォーマット YYYY年MM月DD日（WEEK）    : getYMDWeek                 : Calendar       
+ *      5.算出情報取得
+ *          翌日を求める                                            : getNextDay
+ *          指定時間（スタンプ）後を求める                          : getAfterDayTime
+ *          時間範囲内に休憩時間が何時間あるか求める（日次集計用）      : calcBetweenBreakTime
+ *          時間差を求める（時間）                                  : diffTimeTime
+ *          時間差を求める（シリアルで返却）                        : diffTimeSerial
+ *          時間差を秒まで求める（シリアルで返却）                  : diffSecoundSerial
+ *          時間丸め処理（時間丸めする：出勤用）                    : roundTimeByTimeStart
+ *          時間丸め処理（時間丸めする：退勤用）                    : roundTimeByTimeEnd
+ *          時間丸め処理（シリアルで丸めする）                      : roundTime
+ *      6.判定・チェック
+ *          法定法定外休日判定              : jdgBusinessKbn    : Calendar
+ *          時間範囲内であるか判定          : chkBetweenTime
+ *          出勤時間差をチェック            : chkInteval        : Setting
+ *          打刻のモードチェック            : chkMode
+ *      7.変換
+ *          時刻日付変換                            : convTimeToDate
+ *          時刻日付変換                            : convTimeToDateTarget
+ *          時刻日付変換from                        : convTimeToDateFrom
+ *          時刻日付変換to                          : convTimeToDateTo
+ *          インターバル時間を取得して分に変換する    : getIntevalMinute
+ *      8.設定
+ *          タイムテーブルの分解            : analyzeTimeTable
+ *          reqestクエリーセット            : setRequestQeury
+ * 
+ *
+ */
 class ApiCommonController extends Controller
 {
 
@@ -34,6 +97,229 @@ class ApiCommonController extends Controller
 
     private $array_messagedata = array();
 
+    // -------------  1.適用期間開始サブクエリー作成  start ---------------------------------------------- //
+
+    /** ユーザー適用期間開始サブクエリー作成
+     *
+     * @return string サブクエリー
+     */
+    public function getUserApplyTermSubquery($targetdate){
+        try {
+            // 適用期間日付の取得
+            $dt = null;
+            if (isset($targetdate)) {
+                $dt = new Carbon($targetdate);
+            } else {
+                $dt = new Carbon();
+            }
+            $target_date = $dt->format('Ymd');
+
+            // usersの最大適用開始日付subquery
+            $subquery = DB::table($this->table_users)
+                ->select('code as code')
+                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('apply_term_from', '<=',$target_date)
+                ->where('role', '<', Config::get('const.C017.admin_user'))
+                ->where('is_deleted', '=', 0)
+                ->groupBy('code');
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.subquery_illegal')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.subquery_illegal')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+        return $subquery;
+    }
+        
+    /** ユーザー適用期間開始サブクエリー作成（SQL）
+     *
+     * @return string サブクエリー
+     */
+    public function makeUserApplyTermSql($apply_date, $role){
+        $makeSql = "";
+        $makeSql .= " select ";
+        $makeSql .= "   code as code ";
+        $makeSql .= "   ,MAX(apply_term_from) as max_apply_term_from ";
+        $makeSql .= " from ";
+        $makeSql .= " ".$this->table_users." ";
+        $makeSql .= " where ? = ? ";
+        if (!empty($apply_date)) {
+            $makeSql .= " and apply_term_from <= ? ";
+        }
+        if (!empty($role)) {
+            $makeSql .= " and role <= ? ";
+        }
+        $makeSql .= " and is_deleted = ? ";
+        $makeSql .= " group by code ";
+
+        return $makeSql;
+    }
+        
+    /** 部署適用期間開始サブクエリー作成
+     *
+     * @return string サブクエリー
+     */
+    public function getDepartmentApplyTermSubquery($targetdate){
+        try {
+            // 適用期間日付の取得
+            $dt = null;
+            if (isset($targetdate)) {
+                $dt = new Carbon($targetdate);
+            } else {
+                $dt = new Carbon();
+            }
+            $target_date = $dt->format('Ymd');
+
+            // departmentsの最大適用開始日付subquery
+            $subquery1 = DB::table($this->table_departments)
+                ->select('code as code')
+                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('apply_term_from', '<=',$target_date)
+                ->where('is_deleted', '=', 0)
+                ->groupBy('code');
+            $mainquery = DB::table($this->table_departments.' as t1')
+                ->select('t1.code as code', 't1.name as name')
+                ->JoinSub($subquery1, 't2', function ($join) { 
+                    $join->on('t1.code', '=', 't2.code');
+                    $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
+                })
+                ->where('t1.kill_from_date', '>',$target_date)
+                ->where('t1.is_deleted', '=', 0);
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_departments, Config::get('const.LOG_MSG.subquery_illegal')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_departments, Config::get('const.LOG_MSG.subquery_illegal')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+        return $mainquery;
+    }
+        
+    /** 部署適用期間開始サブクエリー作成（SQL）
+     *
+     * @return string サブクエリー
+     */
+    public function makeDepartmentApplyTermSql($apply_date, $kill_date){
+        $makeSql = "";
+        $makeSql .= " select ";
+        $makeSql .= "   t1.code as code ";
+        $makeSql .= "   ,t1.name as name ";
+        $makeSql .= " from ";
+        $makeSql .= " ".$this->table_departments." as t1 ";
+        $makeSql .= "   inner join ( ";
+        $makeSql .= "     select ";
+        $makeSql .= "       code as code ";
+        $makeSql .= "       , MAX(apply_term_from) as max_apply_term_from ";
+        $makeSql .= "     from ";
+        $makeSql .= "       ".$this->table_departments;
+        $makeSql .= "     where ? = ? ";
+        if (!empty($apply_date)) {
+            $makeSql .= "   and apply_term_from <= ? ";
+        }
+        $makeSql .= "       and is_deleted = ? ";
+        $makeSql .= "     group by code ";
+        $makeSql .= "   )  as t2 ";
+        $makeSql .= "   on t1.code = t2.code ";
+        $makeSql .= "   and t1.apply_term_from = t2.max_apply_term_from ";
+        $makeSql .= " where ? = ? ";
+        if (!empty($kill_date)) {
+            $makeSql .= "   and t1.kill_from_date >= ? ";
+        }
+        $makeSql .= "       and t1.is_deleted = ? ";
+
+        return $makeSql;
+    }
+        
+    /** タイムテーブル適用期間開始サブクエリー作成
+     *
+     * @return string サブクエリー
+     */
+    public function getTimetableApplyTermSubquery($targetdate){
+        try {
+            // 適用期間日付の取得
+            $dt = null;
+            if (isset($targetdate)) {
+                $dt = new Carbon($targetdate);
+            } else {
+                $dt = new Carbon();
+            }
+            $target_date = $dt->format('Ymd');
+
+            // departmentsの最大適用開始日付subquery
+            $subquery1 = DB::table($this->table_working_timetables)
+                ->select('no as no')
+                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('apply_term_from', '<=',$target_date)
+                ->where('is_deleted', '=', 0)
+                ->groupBy('no');
+            $subquery2 = DB::table($this->table_working_timetables.' as t1')
+                ->select(
+                    't1.no as no',
+                    't1.name as name',
+                    't1.from_time as from_time',
+                    't1.to_time as to_time',
+                    't1.working_time_kubun as working_time_kubun'
+                )
+                ->JoinSub($subquery1, 't2', function ($join) { 
+                    $join->on('t1.no', '=', 't2.no');
+                    $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
+                })
+                ->where('t1.is_deleted', '=', 0);
+                return $subquery2;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_working_timetables, Config::get('const.LOG_MSG.subquery_illegal')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_working_timetables, Config::get('const.LOG_MSG.subquery_illegal')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+        
+    /** タイムテーブル適用期間開始サブクエリー作成（SQL）
+     *
+     * @return string サブクエリー
+     */
+    public function makeWorkingTimeTableApplyTermSql($apply_date){
+        $makeSql = "";
+        $makeSql .= " select ";
+        $makeSql .= "   t1.no as no ";
+        $makeSql .= "   ,t1.name as name ";
+        $makeSql .= "   ,t1.from_time as from_time ";
+        $makeSql .= "   ,t1.to_time as to_time ";
+        $makeSql .= "   ,t1.working_time_kubun as working_time_kubun ";
+        $makeSql .= " from ";
+        $makeSql .= " ".$this->table_working_timetables." as t1 ";
+        $makeSql .= "   inner join ( ";
+        $makeSql .= "     select ";
+        $makeSql .= "       no as no ";
+        $makeSql .= "       , MAX(apply_term_from) as max_apply_term_from ";
+        $makeSql .= "     from ";
+        $makeSql .= "       ".$this->table_working_timetables;
+        $makeSql .= "     where ? = ? ";
+        if (!empty($apply_date)) {
+            $makeSql .= "   and apply_term_from <= ? ";
+        }
+        $makeSql .= "       and is_deleted = ? ";
+        $makeSql .= "     group by no ";
+        $makeSql .= "   )  as t2 ";
+        $makeSql .= "   on t1.no = t2.no ";
+        $makeSql .= "   and t1.apply_term_from = t2.max_apply_term_from ";
+        $makeSql .= " where ? = ? ";
+        $makeSql .= "   and t1.no not in ? ";
+        $makeSql .= "   and t1.is_deleted = ? ";
+
+        return $makeSql;
+    }
+    // -------------  １．適用期間開始サブクエリー作成  end ---------------------------------------------- //
+
+    // -------------  2.リスト作成  start -------------------------------------------------------------- //
     /**
      * ユーザーリスト取得
      *
@@ -245,87 +531,6 @@ class ApiCommonController extends Controller
             Log::error($e->getMessage());
             throw $e;
         }
-
-    }
-
-    /**
-     * ユーザーのシフト情報取得
-     *
-     * @return void
-     */
-    public function getShiftInformation(Request $request){
-        $this->array_messagedata = array();
-        $details = new Collection();
-        $result = true;
-        try {
-            // パラメータチェック
-            $params = array();
-            if (!isset($request->keyparams)) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => $details,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $params = $request->keyparams;
-            if (!isset($params['usercode'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "usercode", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => $details,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            if (!isset($params['from'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "from", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => $details,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            if (!isset($params['to'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "to", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => $details,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $departmentcode = null;
-            if (isset($params['departmentcode'])) {
-                $departmentcode = $params['departmentcode'];
-            }
-            $usercode = $params['usercode'];
-            $no = null;
-            if (isset($params['no'])) {
-                $no = $params['no'];
-            }
-            $from = new Carbon($params['from']);
-            $from = $from->format("Ymd");
-            $to = new Carbon($params['to']);
-            $to = $to->format("Ymd");
-
-            $shift_info = new ShiftInformation();
-            $shift_info->setParamdepartmentcodeAttribute($departmentcode);
-            $shift_info->setParamusercodeAttribute($usercode);
-            $shift_info->setParamWorkingtimetablenoAttribute($no);
-            $shift_info->setParamfromdateAttribute($from);
-            $shift_info->setParamtodateAttribute($to);
-            $details = $shift_info->getUserShift();
-
-            return response()->json(
-                ['result' => true, 'details' => $details,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
     }
         
     /** 部署リスト取得
@@ -432,7 +637,406 @@ class ApiCommonController extends Controller
             throw $e;
         }
     }
-        
+
+    /**
+     * タイムテーブルリスト取得
+     *
+     * @return list
+     */
+    public function getTimeTableList(){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            $time_tables = new WorkingTimeTable();
+            $details = $time_tables->getTimeTables();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+    }
+
+    /**
+     * 承認リスト取得
+     *
+     * @return list
+     */
+    public function getApprovalroutenoList(Request $request){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            $approval_route_no_model = new ApprovalRouteNo();
+            $details = $approval_route_no_model->getList();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 承認明細リスト取得
+     *
+     * @return list
+     */
+    public function getApprovalauthorizerList(){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            $approval_authorizers_model = new ApprovalAuthorizer();
+            $details = $approval_authorizers_model->getList();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 営業日区分リスト取得
+     *
+     * @return list
+     */
+    public function getBusinessDayList(){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            $details =
+                DB::table($this->table_generalcodes)
+                    ->where('identification_id', Config::get('const.C007.value'))
+                    ->where('is_deleted', 0)
+                    ->orderby('sort_seq','asc')
+                    ->get();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+    
+    /**
+     * 休暇区分リスト取得
+     *
+     * @return list
+     */
+    public function getHoliDayList(){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            $details =
+                DB::table($this->table_generalcodes)
+                    ->where('identification_id', Config::get('const.C008.value'))
+                    ->where('is_deleted', 0)
+                    ->orderby('sort_seq','asc')
+                    ->get();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 個人休暇リスト取得
+     *
+     * @return list
+     */
+    public function getUserLeaveKbnList(){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            $details =
+                DB::table($this->table_generalcodes)
+                    ->where('identification_id', 'C013')
+                    ->where('is_deleted', 0)
+                    ->orderby('sort_seq','asc')
+                    ->get();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * モードリスト取得
+     *
+     * @return list
+     */
+    public function getModeList(){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            $details =
+                DB::table($this->table_generalcodes)
+                    ->where('identification_id', 'C005')
+                    ->where('is_deleted', 0)
+                    ->orderby('sort_seq','asc')
+                    ->get();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 共通コードリスト取得（Request）
+     *
+     * @return list
+     */
+    public function getRequestGeneralList(Request $request){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try{
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['identificationid'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "identificationid", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $details = $this->getGeneralList($params['identificationid']);
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 共通コードリスト取得
+     *
+     * @return list
+     */
+    public function getGeneralList($identification_id){
+        $details = new Collection();
+        try {
+            $details =
+                DB::table($this->table_generalcodes)
+                    ->where('identification_id', $identification_id)
+                    ->where('is_deleted', 0)
+                    ->orderby('sort_seq','asc')
+                    ->get();
+            return $details;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 承認者リスト取得
+     *
+     * @return list
+     */
+    public function getConfirmlList(Request $request){
+        $codeList = new Collection();
+        try {
+            // パラメータチェック
+            if (isset($request->getdo)) {
+                $getdo = $request->getdo;
+            } else {
+                $getdo = 1;
+            }
+            if ($getdo != 1) { return null; }
+
+            $dt = null;
+            if (isset($targetdate)) {
+                $dt = new Carbon($targetdate);
+            } else {
+                $dt = new Carbon();
+            }
+            $target_date = $dt->format('Ymd');
+            if (isset($request->orFinal)) {
+                $orFinal = $request->orFinal;
+            } else {
+                $orFinal = "";
+            }
+            if (isset($request->mainorsub)) {
+                $mainorsub = $request->mainorsub;
+            } else {
+                $mainorsub = "";
+            }
+            $confirm_model = new Confirm();
+            $confirm_model->setParamSeqAttribute($orFinal);
+            $confirm_model->setParamMainsubAttribute($mainorsub);
+            $codeList = $confirm_model->selectConfirmList($target_date);
+        }catch(\PDOException $pe){
+            return $codeList;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            return $codeList;
+        }
+        return $codeList;
+    }
+    // -------------  2.リスト作成  end -------------------------------------------------------------- //
+
+    // -------------  3.ユーザ情報取得  start -------------------------------------------------------- //
+    /**
+     * ユーザーのシフト情報取得
+     *
+     * @return void
+     */
+    public function getShiftInformation(Request $request){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['usercode'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "usercode", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (!isset($params['from'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "from", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (!isset($params['to'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "to", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $departmentcode = null;
+            if (isset($params['departmentcode'])) {
+                $departmentcode = $params['departmentcode'];
+            }
+            $usercode = $params['usercode'];
+            $no = null;
+            if (isset($params['no'])) {
+                $no = $params['no'];
+            }
+            $from = new Carbon($params['from']);
+            $from = $from->format("Ymd");
+            $to = new Carbon($params['to']);
+            $to = $to->format("Ymd");
+
+            $shift_info = new ShiftInformation();
+            $shift_info->setParamdepartmentcodeAttribute($departmentcode);
+            $shift_info->setParamusercodeAttribute($usercode);
+            $shift_info->setParamWorkingtimetablenoAttribute($no);
+            $shift_info->setParamfromdateAttribute($from);
+            $shift_info->setParamtodateAttribute($to);
+            $details = $shift_info->getUserShift();
+
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
     /** ユーザー部署ロール取得（画面から）
      *
      * @return list departments
@@ -484,7 +1088,7 @@ class ApiCommonController extends Controller
             Log::error($e->getMessage());
             throw $e;
         }
-   }
+    }
         
     /** ユーザー権限取得
      *
@@ -782,8 +1386,12 @@ class ApiCommonController extends Controller
             throw $e;
         }
     }
+    // -------------  3.ユーザ情報取得  end -------------------------------------------------------- //
+        
     
-    /** 会社情報取得
+    // -------------  4.その他情報取得  start ------------------------------------------------------ //
+    /**
+     *  会社情報取得
      *
      * @return list departments
      */
@@ -807,227 +1415,9 @@ class ApiCommonController extends Controller
         }
 
     }
-        
-    /** ユーザー適用期間開始サブクエリー作成
-     *
-     * @return string サブクエリー
-     */
-    public function getUserApplyTermSubquery($targetdate){
-        try {
-            // 適用期間日付の取得
-            $dt = null;
-            if (isset($targetdate)) {
-                $dt = new Carbon($targetdate);
-            } else {
-                $dt = new Carbon();
-            }
-            $target_date = $dt->format('Ymd');
-
-            // usersの最大適用開始日付subquery
-            $subquery = DB::table($this->table_users)
-                ->select('code as code')
-                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->where('apply_term_from', '<=',$target_date)
-                ->where('role', '<', Config::get('const.C017.admin_user'))
-                ->where('is_deleted', '=', 0)
-                ->groupBy('code');
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.subquery_illegal')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.subquery_illegal')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-        return $subquery;
-    }
-        
-    /** ユーザー適用期間開始サブクエリー作成（SQL）
-     *
-     * @return string サブクエリー
-     */
-    public function makeUserApplyTermSql($apply_date, $role){
-        $makeSql = "";
-        $makeSql .= " select ";
-        $makeSql .= "   code as code ";
-        $makeSql .= "   ,MAX(apply_term_from) as max_apply_term_from ";
-        $makeSql .= " from ";
-        $makeSql .= " ".$this->table_users." ";
-        $makeSql .= " where ? = ? ";
-        if (!empty($apply_date)) {
-            $makeSql .= " and apply_term_from <= ? ";
-        }
-        if (!empty($role)) {
-            $makeSql .= " and role <= ? ";
-        }
-        $makeSql .= " and is_deleted = ? ";
-        $makeSql .= " group by code ";
-
-        return $makeSql;
-    }
-        
-    /** 部署適用期間開始サブクエリー作成
-     *
-     * @return string サブクエリー
-     */
-    public function getDepartmentApplyTermSubquery($targetdate){
-        try {
-            // 適用期間日付の取得
-            $dt = null;
-            if (isset($targetdate)) {
-                $dt = new Carbon($targetdate);
-            } else {
-                $dt = new Carbon();
-            }
-            $target_date = $dt->format('Ymd');
-
-            // departmentsの最大適用開始日付subquery
-            $subquery1 = DB::table($this->table_departments)
-                ->select('code as code')
-                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->where('apply_term_from', '<=',$target_date)
-                ->where('is_deleted', '=', 0)
-                ->groupBy('code');
-            $mainquery = DB::table($this->table_departments.' as t1')
-                ->select('t1.code as code', 't1.name as name')
-                ->JoinSub($subquery1, 't2', function ($join) { 
-                    $join->on('t1.code', '=', 't2.code');
-                    $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
-                })
-                ->where('t1.kill_from_date', '>',$target_date)
-                ->where('t1.is_deleted', '=', 0);
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_departments, Config::get('const.LOG_MSG.subquery_illegal')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_departments, Config::get('const.LOG_MSG.subquery_illegal')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-        return $mainquery;
-    }
-        
-    /** 部署適用期間開始サブクエリー作成（SQL）
-     *
-     * @return string サブクエリー
-     */
-    public function makeDepartmentApplyTermSql($apply_date, $kill_date){
-        $makeSql = "";
-        $makeSql .= " select ";
-        $makeSql .= "   t1.code as code ";
-        $makeSql .= "   ,t1.name as name ";
-        $makeSql .= " from ";
-        $makeSql .= " ".$this->table_departments." as t1 ";
-        $makeSql .= "   inner join ( ";
-        $makeSql .= "     select ";
-        $makeSql .= "       code as code ";
-        $makeSql .= "       , MAX(apply_term_from) as max_apply_term_from ";
-        $makeSql .= "     from ";
-        $makeSql .= "       ".$this->table_departments;
-        $makeSql .= "     where ? = ? ";
-        if (!empty($apply_date)) {
-            $makeSql .= "   and apply_term_from <= ? ";
-        }
-        $makeSql .= "       and is_deleted = ? ";
-        $makeSql .= "     group by code ";
-        $makeSql .= "   )  as t2 ";
-        $makeSql .= "   on t1.code = t2.code ";
-        $makeSql .= "   and t1.apply_term_from = t2.max_apply_term_from ";
-        $makeSql .= " where ? = ? ";
-        if (!empty($kill_date)) {
-            $makeSql .= "   and t1.kill_from_date >= ? ";
-        }
-        $makeSql .= "       and t1.is_deleted = ? ";
-
-        return $makeSql;
-    }
-        
-    /** タイムテーブル適用期間開始サブクエリー作成
-     *
-     * @return string サブクエリー
-     */
-    public function getTimetableApplyTermSubquery($targetdate){
-        try {
-            // 適用期間日付の取得
-            $dt = null;
-            if (isset($targetdate)) {
-                $dt = new Carbon($targetdate);
-            } else {
-                $dt = new Carbon();
-            }
-            $target_date = $dt->format('Ymd');
-
-            // departmentsの最大適用開始日付subquery
-            $subquery1 = DB::table($this->table_working_timetables)
-                ->select('no as no')
-                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->where('apply_term_from', '<=',$target_date)
-                ->where('is_deleted', '=', 0)
-                ->groupBy('no');
-            $subquery2 = DB::table($this->table_working_timetables.' as t1')
-                ->select(
-                    't1.no as no',
-                    't1.name as name',
-                    't1.from_time as from_time',
-                    't1.to_time as to_time',
-                    't1.working_time_kubun as working_time_kubun'
-                )
-                ->JoinSub($subquery1, 't2', function ($join) { 
-                    $join->on('t1.no', '=', 't2.no');
-                    $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
-                })
-                ->where('t1.is_deleted', '=', 0);
-                return $subquery2;
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_working_timetables, Config::get('const.LOG_MSG.subquery_illegal')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_working_timetables, Config::get('const.LOG_MSG.subquery_illegal')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
-        
-    /** タイムテーブル適用期間開始サブクエリー作成（SQL）
-     *
-     * @return string サブクエリー
-     */
-    public function makeWorkingTimeTableApplyTermSql($apply_date){
-        $makeSql = "";
-        $makeSql .= " select ";
-        $makeSql .= "   t1.no as no ";
-        $makeSql .= "   ,t1.name as name ";
-        $makeSql .= "   ,t1.from_time as from_time ";
-        $makeSql .= "   ,t1.to_time as to_time ";
-        $makeSql .= "   ,t1.working_time_kubun as working_time_kubun ";
-        $makeSql .= " from ";
-        $makeSql .= " ".$this->table_working_timetables." as t1 ";
-        $makeSql .= "   inner join ( ";
-        $makeSql .= "     select ";
-        $makeSql .= "       no as no ";
-        $makeSql .= "       , MAX(apply_term_from) as max_apply_term_from ";
-        $makeSql .= "     from ";
-        $makeSql .= "       ".$this->table_working_timetables;
-        $makeSql .= "     where ? = ? ";
-        if (!empty($apply_date)) {
-            $makeSql .= "   and apply_term_from <= ? ";
-        }
-        $makeSql .= "       and is_deleted = ? ";
-        $makeSql .= "     group by no ";
-        $makeSql .= "   )  as t2 ";
-        $makeSql .= "   on t1.no = t2.no ";
-        $makeSql .= "   and t1.apply_term_from = t2.max_apply_term_from ";
-        $makeSql .= " where ? = ? ";
-        $makeSql .= "   and t1.is_deleted = ? ";
-
-        return $makeSql;
-    }
 
     /**
-     * 指定月締日取得（Request）
+     * 指定月締日取得（画面から）
      *
      * @return list
      */
@@ -1102,351 +1492,6 @@ class ApiCommonController extends Controller
     }
 
     /**
-     * タイムテーブルリスト取得
-     *
-     * @return list
-     */
-    public function getTimeTableList(){
-        $this->array_messagedata = array();
-        $details = new Collection();
-        $result = true;
-        try {
-            $time_tables = new WorkingTimeTable();
-            $details = $time_tables->getTimeTables();
-
-            return response()->json(
-                ['result' => $result, 'details' => $details,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error($e->getMessage());
-            throw $e;
-        }
-
-    }
-
-    /**
-     * 承認リスト取得
-     *
-     * @return list
-     */
-    public function getApprovalroutenoList(Request $request){
-        $this->array_messagedata = array();
-        $details = new Collection();
-        $result = true;
-        try {
-            $approval_route_no_model = new ApprovalRouteNo();
-            $details = $approval_route_no_model->getList();
-
-            return response()->json(
-                ['result' => $result, 'details' => $details,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * 承認明細リスト取得
-     *
-     * @return list
-     */
-    public function getApprovalauthorizerList(){
-        $this->array_messagedata = array();
-        $details = new Collection();
-        $result = true;
-        try {
-            $approval_authorizers_model = new ApprovalAuthorizer();
-            $details = $approval_authorizers_model->getList();
-
-            return response()->json(
-                ['result' => $result, 'details' => $details,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * 営業日区分リスト取得
-     *
-     * @return list
-     */
-    public function getBusinessDayList(){
-        $this->array_messagedata = array();
-        $details = new Collection();
-        $result = true;
-        try {
-            $details =
-                DB::table($this->table_generalcodes)
-                    ->where('identification_id', Config::get('const.C007.value'))
-                    ->where('is_deleted', 0)
-                    ->orderby('sort_seq','asc')
-                    ->get();
-
-            return response()->json(
-                ['result' => $result, 'details' => $details,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
-    
-    /**
-     * 休暇区分リスト取得
-     *
-     * @return list
-     */
-    public function getHoliDayList(){
-        $this->array_messagedata = array();
-        $details = new Collection();
-        $result = true;
-        try {
-            $details =
-                DB::table($this->table_generalcodes)
-                    ->where('identification_id', Config::get('const.C008.value'))
-                    ->where('is_deleted', 0)
-                    ->orderby('sort_seq','asc')
-                    ->get();
-
-            return response()->json(
-                ['result' => $result, 'details' => $details,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * 個人休暇リスト取得
-     *
-     * @return list
-     */
-    public function getUserLeaveKbnList(){
-        $this->array_messagedata = array();
-        $details = new Collection();
-        $result = true;
-        try {
-            $details =
-                DB::table($this->table_generalcodes)
-                    ->where('identification_id', 'C013')
-                    ->where('is_deleted', 0)
-                    ->orderby('sort_seq','asc')
-                    ->get();
-
-            return response()->json(
-                ['result' => $result, 'details' => $details,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * モードリスト取得
-     *
-     * @return list
-     */
-    public function getModeList(){
-        $this->array_messagedata = array();
-        $details = new Collection();
-        $result = true;
-        try {
-            $details =
-                DB::table($this->table_generalcodes)
-                    ->where('identification_id', 'C005')
-                    ->where('is_deleted', 0)
-                    ->orderby('sort_seq','asc')
-                    ->get();
-
-            return response()->json(
-                ['result' => $result, 'details' => $details,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * コードリスト取得（Request）
-     *
-     * @return list
-     */
-    public function getRequestGeneralList(Request $request){
-        $this->array_messagedata = array();
-        $details = new Collection();
-        $result = true;
-        try{
-            // パラメータチェック
-            $params = array();
-            if (!isset($request->keyparams)) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => $details,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $params = $request->keyparams;
-            if (!isset($params['identificationid'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "identificationid", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => $details,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $details = $this->getGeneralList($params['identificationid']);
-            return response()->json(
-                ['result' => true, 'details' => $details,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * コードリスト取得
-     *
-     * @return list
-     */
-    public function getGeneralList($identification_id){
-        $details = new Collection();
-        try {
-            $details =
-                DB::table($this->table_generalcodes)
-                    ->where('identification_id', $identification_id)
-                    ->where('is_deleted', 0)
-                    ->orderby('sort_seq','asc')
-                    ->get();
-            return $details;
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
-
-    /**
-     * 承認者リスト取得
-     *
-     * @return list
-     */
-    public function getConfirmlList(Request $request){
-        $codeList = new Collection();
-        try {
-            // パラメータチェック
-            if (isset($request->getdo)) {
-                $getdo = $request->getdo;
-            } else {
-                $getdo = 1;
-            }
-            if ($getdo != 1) { return null; }
-
-            $dt = null;
-            if (isset($targetdate)) {
-                $dt = new Carbon($targetdate);
-            } else {
-                $dt = new Carbon();
-            }
-            $target_date = $dt->format('Ymd');
-            if (isset($request->orFinal)) {
-                $orFinal = $request->orFinal;
-            } else {
-                $orFinal = "";
-            }
-            if (isset($request->mainorsub)) {
-                $mainorsub = $request->mainorsub;
-            } else {
-                $mainorsub = "";
-            }
-            $confirm_model = new Confirm();
-            $confirm_model->setParamSeqAttribute($orFinal);
-            $confirm_model->setParamMainsubAttribute($mainorsub);
-            $codeList = $confirm_model->selectConfirmList($target_date);
-        }catch(\PDOException $pe){
-            return $codeList;
-        }catch(\Exception $e){
-            Log::error($e->getMessage());
-            return $codeList;
-        }
-        return $codeList;
-    }
-
-    /**
-     * 日付のフォーマット YYYY年MM月DD日（WEEK）
-     *
-     * @param [type] $dt
-     * @param [type] $format
-     * @return array
-     */
-    public function getYMDWeek($dt){
-        // フォーマット 2019年10月01日(火)
-        $date_name = '';
-        $calender_model = new Calendar();
-        $calender_model->setParamfromdateAttribute(date_format(new Carbon($dt), 'Ymd'));
-
-        $calender_model->setDateAttribute(date_format(new Carbon($dt), 'Ymd'));
-        $calendars = $calender_model->getCalenderDate();
-        if (count($calendars) > 0) {
-            foreach ($calendars as $result) {
-                if (isset($result->date_name)) {
-                    $date_name = $result->date_name;
-                }
-                break;
-            }
-        }
-        return $date_name;
-    }
-
-
-    /**
      * 曜日取得
      *
      * @param [type] $dt
@@ -1495,148 +1540,35 @@ class ApiCommonController extends Controller
 
         return $what_weekday;
     }
-    
 
     /**
-     * タイムテーブルの分解
+     * 日付のフォーマット YYYY年MM月DD日（WEEK）
      *
-     * @return 
+     * @param [type] $dt
+     * @param [type] $format
+     * @return array
      */
-    public function analyzeTimeTable($timetables, $working_time_kubun, $working_timetable_no){
-        Log::DEBUG('        タイムテーブルの分解 analyzeTimeTable in $working_time_kubun = '.$working_time_kubun);
-        Log::DEBUG('        タイムテーブルの分解 analyzeTimeTable in $working_timetable_no = '.$working_timetable_no);
-        $array_times = array();
-        if ($working_time_kubun != Config::get('const.C004.out_of_regular_working_time')) {
-            $filtered = $timetables->where('no', $working_timetable_no)->where('working_time_kubun', $working_time_kubun);
-            foreach($filtered as $result_time) {
-                Log::DEBUG('            $filtered from_time = '. $result_time->from_time);
-                Log::DEBUG('            $filtered to_time = '.$result_time->to_time);
-                if (isset($result_time->from_time) && isset($result_time->to_time)) {
-                    $array_times[] = array('from_time' => $result_time->from_time , 'to_time' => $result_time->to_time);
+    public function getYMDWeek($dt){
+        // フォーマット 2019年10月01日(火)
+        $date_name = '';
+        $calender_model = new Calendar();
+        $calender_model->setParamfromdateAttribute(date_format(new Carbon($dt), 'Ymd'));
+
+        $calender_model->setDateAttribute(date_format(new Carbon($dt), 'Ymd'));
+        $calendars = $calender_model->getCalenderDate();
+        if (count($calendars) > 0) {
+            foreach ($calendars as $result) {
+                if (isset($result->date_name)) {
+                    $date_name = $result->date_name;
                 }
+                break;
             }
-        } else {
-            // 時間外労働時間は画面からの入力がないため、所定労働時間と休憩と深夜労働時間の時間以外を時間外労働時間とする
-            $array_sets = array();
-            for ($i=0;$i<24;$i++) {
-                for ($j=0;$j<60;$j++) {
-                    $array_sets[$i][$j] = 0;
-                }
-            }
-            $filtered = $timetables
-                ->where('no', $working_timetable_no)
-                ->where('working_time_kubun', '!=', Config::get('const.C004.out_of_regular_working_time'))
-                ->sortBy('from_time');
-            foreach($filtered as $result_time) {
-                if (isset($result_time->from_time) && isset($result_time->to_time)) {
-                    Log::DEBUG('            analyzeTimeTable $result_time->from_time = '.$result_time->from_time);
-                    Log::DEBUG('            analyzeTimeTable $result_time->to_time = '.$result_time->to_time);
-                    $dt = new Carbon('2019-08-01 '.$result_time->from_time);
-                    $check_from_hour = date_format($dt, 'H');
-                    $check_from_minute = date_format($dt, 'i');
-                    $dt = new Carbon('2019-08-01 '.$result_time->to_time);
-                    $check_to_hour = date_format($dt, 'H');
-                    $check_to_minute = date_format($dt, 'i');
-                    Log::DEBUG('            analyzeTimeTable check_from_hour = '.$check_from_hour);
-                    Log::DEBUG('            analyzeTimeTable check_from_minute = '.$check_from_minute);
-                    Log::DEBUG('            analyzeTimeTable check_to_hour = '.$check_to_hour);
-                    Log::DEBUG('            analyzeTimeTable check_to_minute = '.$check_to_hour);
-                    if ($result_time->from_time < $result_time->to_time) {
-                        for ($i=(int)$check_from_hour;$i<=$check_to_hour;$i++) {
-                            if ($i == (int)$check_from_hour) {      // １回目
-                                $minute_from = (int)$check_from_minute;
-                                if ($check_from_hour == $check_to_hour) {
-                                    $minute_to = (int)$check_to_minute;
-                                } else {
-                                    $minute_to = 60;
-                                }
-                            } elseif ($i == $check_to_hour) {   // 最後
-                                $minute_from = 0;
-                                $minute_to = (int)$check_to_minute;
-                            } else {
-                                $minute_from = 0;
-                                $minute_to = 60;
-                            }
-                            for ($j=$minute_from;$j<$minute_to;$j++) {
-                                $array_sets[$i][$j] = 1;
-                            }
-                        }
-                    } else {
-                        // fromから2400まで
-                        for ($i=(int)$check_from_hour;$i<24;$i++) {
-                            if ($i == (int)$check_from_hour) {      // １回目
-                                $minute_from = (int)$check_from_minute;
-                                $minute_to = 60;
-                            } else {
-                                $minute_from = 0;
-                                $minute_to = 60;
-                            }
-                            for ($j=$minute_from;$j<$minute_to;$j++) {
-                                $array_sets[$i][$j] = 1;
-                            }
-                        }
-                        // 0からtoまで
-                        for ($i=0;$i<=(int)$check_to_hour;$i++) {
-                            if ($i == 0) {      // １回目
-                                $minute_from = 0;
-                                if (0 == $check_to_hour) {
-                                    $minute_to = (int)$check_to_minute;
-                                } else {
-                                    $minute_to = 60;
-                                }
-                            } elseif ($i == $check_to_hour) {   // 最後
-                                $minute_from = 0;
-                                $minute_to = (int)$check_to_minute;
-                            } else {
-                                $minute_from = 0;
-                                $minute_to = 60;
-                            }
-                            for ($j=$minute_from;$j<$minute_to;$j++) {
-                                $array_sets[$i][$j] = 1;
-                            }
-                        }
-                    }
-                    // 配列=0の範囲を設定する
-                    $temp_times = array();
-                    $temp_from_time = "";
-                    $temp_to_time = "";
-                    $save_i = 0;
-                    $save_j = 0;
-                    for ($i=0;$i<24;$i++) {
-                        for ($j=0;$j<60;$j++) {
-                            if ($array_sets[$i][$j] == 0) {
-                                if ($temp_from_time == "") {
-                                    $temp_from_time = str_pad($i,2,0,STR_PAD_LEFT).':'.str_pad($j,2,0,STR_PAD_LEFT).':00';
-                                }
-                            } else {
-                                if ($temp_from_time == "") {
-                                    $temp_to_time ="";
-                                } else {
-                                    $temp_to_time = str_pad($i,2,0,STR_PAD_LEFT).':'.str_pad($j,2,0,STR_PAD_LEFT).':00';
-                                    $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
-                                    $temp_from_time ="";
-                                    $temp_to_time ="";
-                                }
-                            }
-                            $save_j = $j;
-                        }
-                        $save_i = $i;
-                    }
-                    if ($temp_from_time != "") {
-                        $temp_from_time = str_pad($save_i,2,0,STR_PAD_LEFT).':'.str_pad($save_j,2,0,STR_PAD_LEFT).':00';
-                        $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
-                    }
-                }
-            }
-            $array_times = $temp_times;
         }
-        foreach($array_times as $item) {
-            Log::DEBUG('             タイムテーブルの分解 result --- analyzeTimeTable in $array_time from_time = '.$item['from_time']);
-            Log::DEBUG('             タイムテーブルの分解 result --- analyzeTimeTable in $array_time to_time = '.$item['to_time']);
-        }
-        return $array_times;
+        return $date_name;
     }
-    
+    // -------------  4.その他情報取得  end ------------------------------------------------------ //
+
+    // -------------  5.算出情報取得  start ------------------------------------------------------ //
 
     /**
      * 翌日を求める
@@ -1647,7 +1579,6 @@ class ApiCommonController extends Controller
         $dt = new Carbon($target_date);
         return date_format($dt->addDay(), $str_format);
     }
-    
 
     /**
      * 指定時間（スタンプ）後を求める
@@ -1655,9 +1586,6 @@ class ApiCommonController extends Controller
      * @return 指定時間後（前）
      */
     public function getAfterDayTime($target_date, $add_time, $str_format){
-        Log::DEBUG('             指定時間後を求める target_date = '.$target_date);
-        Log::DEBUG('             指定時間後を求める add_time = '.$add_time);
-        Log::DEBUG('             指定時間後を求める str_format = '.$str_format);
         $dt = new Carbon($target_date);
         if ($add_time > 0) {
             return date_format($dt->addSecond($add_time), $str_format);
@@ -1667,224 +1595,9 @@ class ApiCommonController extends Controller
             return date_format($dt->subSecond(0 - $add_time), $str_format);
         }
     }
- 
-    /**
-     * 法定法定外休日判定
-     * 
-     *
-     * @return 
-     */
-    public function jdgBusinessKbn($params)
-    {
-        $departmentcode = $params['departmentcode'];
-        $employmentstatus = $params['employmentstatus'];
-        $usercode = $params['usercode'];
-        $datefrom = $params['datefrom'];
-        // 指定日が休日かどうか
-        $business_kubun = null;
-        $calender_model = new Calendar();
-        $calender_model->setParamdepartmentcodeAttribute($departmentcode);
-        $calender_model->setParamemploymentstatusAttribute($employmentstatus);
-        $calender_model->setParamusercodeAttribute($usercode);
-        $calender_model->setParamfromdateAttribute($datefrom);
-        $calendars = $calender_model->getCalenderDate();
-        if (count($calendars) > 0) {
-            foreach ($calendars as $result) {
-                if (isset($result->business_kubun)) {
-                    $business_kubun = $result->business_kubun;
-                }
-                break;
-            }
-        }
-
-        return $business_kubun;
-    }
 
     /**
-     * 時刻日付変換
-     *      target_time <= basic_time の場合は basic_dateの翌日+target_time に変換
-     *      target_time >  basic_time の場合は basic_date +target_time に変換
-     * @return 日付時刻
-     */
-    public function convTimeToDate($target_time, $basic_time, $basic_date){
-        // 日付付与
-        $convDateTime = null;
-        $dt = new Carbon($basic_time);
-        if ($target_time < date_format($dt, 'H:i:s')) {
-            $dt = new Carbon($target_time);
-            $convDateTime = $this->getNextDay($basic_date, 'Y-m-d').' '.date_format($dt, 'H:i:s');
-        } else {
-            $dt = new Carbon($basic_date);
-            $convDateTime = date_format($dt, 'Y-m-d').' '.$target_time;
-        }
-
-        return $convDateTime;
-    }
-
-    /**
-     * 時刻日付変換
-     *      target_timeがbasic_from_timeから24:00:00の時刻内であるときはbasic_from_timeと同じ日付を設定
-     *      上記以外は
-     *      target_timeが00:00:00からbasic_to_timeの時刻内であるときはbasic_to_timeと同じ日付を設定
-     * @return 日付時刻
-     */
-    public function convTimeToDateTarget($target_time, $basic_from_time, $basic_to_time){
-        // 日付付与
-        $dt_from = new Carbon($basic_from_time);
-        $dt_from_ymd = date_format($dt_from, 'Y-m-d');
-        $dt_from23 = new Carbon($dt_from_ymd.' 23:59:59');
-        $dt_from24 = $dt_from23->addSecond();
-        $dt_target_time = new Carbon($dt_from_ymd.' '.$target_time);
-        if ($dt_target_time >= $dt_from && $dt_target_time <= $dt_from24) {
-            return $dt_target_time;
-        }
-
-        $dt_from = new Carbon($basic_to_time);
-        $dt_from_ymd = date_format($dt_from, 'Y-m-d');
-        $dt_from00 = new Carbon($dt_from_ymd.' 00:00:00');
-        $dt_target_time = new Carbon($dt_from_ymd.' '.$target_time);
-        if ($dt_target_time >= $dt_from00 && $dt_target_time <= $dt_from) {
-            return $dt_target_time;
-        }
-
-        return null;
-    }
-
-    /**
-     * 時刻日付変換from
-     * @return 日付時刻
-     */
-    public function convTimeToDateFrom($from_time, $current_date, $target_from_time, $target_to_time){
-
-        Log::DEBUG('         ------------- convTimeToDateFrom in ');
-        $current_date_ymd = date_format(new Carbon($current_date),'Ymd');
-        $target_from_ymd = date_format(new Carbon($target_from_time),'Ymd');
-        $target_from_his = date_format(new Carbon($target_from_time),'His');
-        $target_to_ymd = date_format(new Carbon($target_to_time),'Ymd');
-        $target_to_his = date_format(new Carbon($target_to_time),'His');
-        Log::DEBUG('current_date_ymd = '.$current_date_ymd);
-        Log::DEBUG('target_from_ymd = '.$target_from_ymd);
-        Log::DEBUG('target_to_ymd = '.$target_to_ymd);
-        Log::DEBUG('target_from_his = '.$target_from_his);
-        Log::DEBUG('target_to_his = '.$target_to_his);
-        // 日付付与
-        $cnv_from_date = null;
-        if ($current_date_ymd == $target_from_ymd) {
-            if ($target_from_his > $from_time && $from_time >= Config::get('const.C015.night_to')) {
-                //$cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
-                $cnv_from_date = new Carbon($target_from_ymd.' '.$from_time);
-                Log::DEBUG('cnv_from_date if then= '.$cnv_from_date);
-            } else {
-                if ($from_time >= Config::get('const.C015.night_to')) {
-                    $cnv_from_date = new Carbon($target_from_ymd.' '.$from_time);
-                } else {
-                    $w_edt_date = new Carbon($target_from_ymd);
-                    $w_edt_date = date_format($w_edt_date->addDay(),'Y-m-d');
-                    $cnv_from_date = new Carbon($w_edt_date.' '.$from_time);
-                }
-                Log::DEBUG('cnv_from_date if else= '.$cnv_from_date);
-            }
-        } else {
-            //$cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
-            $cnv_from_date = new Carbon($target_from_ymd.' '.$from_time);
-            Log::DEBUG('cnv_from_date i$current_date_ymd != $target_from_ymd '.$cnv_from_date);
-        }
-        Log::DEBUG('         ------------- convTimeToDateFrom end '.$cnv_from_date);
-
-        return $cnv_from_date;
-    }
-
-    /**
-     * 時刻日付変換to
-     * @return 日付時刻
-     */
-    public function convTimeToDateTo($from_time, $to_time, $current_date, $target_from_time, $target_to_time){
-
-        Log::DEBUG('         ------------- convTimeToDateTo in ');
-
-        Log::DEBUG('from_time = '.$from_time);
-        Log::DEBUG('to_time = '.$to_time);
-        Log::DEBUG('current_date = '.$current_date);
-        Log::DEBUG('target_from_time = '.$target_from_time);
-        Log::DEBUG('target_to_time = '.$target_to_time);
-
-        $current_date_ymd = date_format(new Carbon($current_date),'Ymd');
-        $target_from_ymd = date_format(new Carbon($target_from_time),'Ymd');    // 打刻時刻
-        $target_from_his = date_format(new Carbon($target_from_time),'His');    // 打刻時刻
-        $target_to_ymd = date_format(new Carbon($target_to_time),'Ymd');        // 打刻時刻
-        $target_to_his = date_format(new Carbon($target_to_time),'His');        // 打刻時刻
-        Log::DEBUG('current_date_ymd = '.$current_date_ymd);
-        Log::DEBUG('target_from_ymd = '.$target_from_ymd);
-        Log::DEBUG('target_to_ymd = '.$target_to_ymd);
-        Log::DEBUG('target_from_his = '.$target_from_his);
-        Log::DEBUG('target_to_his = '.$target_to_his);
-        // 日付付与
-        $cnv_to_date = null;
-        if ($current_date_ymd == $target_to_ymd) {
-            if ($from_time > $to_time) {
-                //$cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
-                $cnv_to_date = $this->getNextDay($target_to_ymd, 'Y-m-d').' '.$to_time;
-                Log::DEBUG('cnv_to_date if then= '.$cnv_to_date);
-            } else {
-                if ($target_to_his < $to_time) {
-                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
-                    Log::DEBUG('cnv_to_date if then= '.$cnv_to_date);
-                } else {
-                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
-                    Log::DEBUG('cnv_to_date if else= '.$cnv_to_date);
-                }
-            }
-        } else {
-            if ($from_time > $to_time) {
-                if ($target_to_his < $to_time) {
-                    //$cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
-                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
-                    Log::DEBUG('cnv_to_date if then= '.$cnv_to_date);
-                } else {
-                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
-                    Log::DEBUG('cnv_to_date if else= '.$cnv_to_date);
-                }
-            } else {
-                if ($to_time >= Config::get('const.C015.night_to')) {
-                    $cnv_to_date = new Carbon($current_date_ymd.' '.$to_time);
-                    Log::DEBUG('cnv_to_date if else= '.$cnv_to_date);
-                } else {
-                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
-                    Log::DEBUG('cnv_to_date if else= '.$cnv_to_date);
-                }
-            }
-        }
-        Log::DEBUG('         ------------- convTimeToDateTo end '.$cnv_to_date);
-
-        return $cnv_to_date;
-    }
-
-    /**
-     * 時間範囲内であるか判定
-     * 
-     *      target_from_datetime～target_to_datetimeはchk_from_datetime～chk_to_datetimeの範囲内に一部または全部あるか判定
-     *      前提
-     *          target_from_datetime <= target_to_datetime
-     *          chk_from_datetime <= chk_to_datetime
-     *
-     * @return 
-     */
-    public function chkBetweenTime($target_from_datetime, $target_to_datetime, $chk_from_datetime, $chk_to_datetime){
-
-        $chk_result = true;
-
-        if ($target_from_datetime <=  $chk_from_datetime) {
-            if ($target_to_datetime <=  $chk_from_datetime) {
-                $chk_result = false;
-            }
-        } elseif ($target_from_datetime >=  $chk_to_datetime) {
-            $chk_result = false;
-        }
-        return $chk_result;
-    }
-
-    /**
-     * 時間範囲内に休憩時間が何時間あるか（日次集計用）
+     * 時間範囲内に休憩時間が何時間あるか求める（日次集計用）
      * 
      *      前提
      *          target_from_datetime <= target_to_datetime
@@ -1895,14 +1608,6 @@ class ApiCommonController extends Controller
         $target_from_datetime, $target_to_datetime, $current_date,
         $timetables, $working_timetable_no,
         $setting_from_datetime, $setting_to_datetime){
-
-        Log::DEBUG(' ----------------- calcBetweenBreakTime in ----------------- ');
-        Log::DEBUG('                   $target_from_datetime = '.$target_from_datetime);
-        Log::DEBUG('                   $target_to_datetime = '.$target_to_datetime);
-        Log::DEBUG('                   $current_date = '.$current_date);
-        Log::DEBUG('                   $working_timetable_no = '.$working_timetable_no);
-        Log::DEBUG('                   $setting_from_datetime = '.$setting_from_datetime);
-        Log::DEBUG('                   $setting_to_datetime = '.$setting_to_datetime);
         // 休憩時間を含んでいる場合、休憩時間累計を求めて減算する
         $filtered = $timetables->where('no', $working_timetable_no)
             ->where('working_time_kubun', Config::get('const.C004.regular_working_breaks_time'));
@@ -1911,8 +1616,6 @@ class ApiCommonController extends Controller
         foreach($filtered as $result_breaks_time) {
             $from_time = $result_breaks_time->from_time;        // 休憩開始時刻
             $to_time = $result_breaks_time->to_time;            // 休憩終了時刻
-            Log::DEBUG('                   setting休憩時間 from_time = '.$from_time);
-            Log::DEBUG('                   setting休憩時間 to_time = '.$to_time);
             if (isset($from_time) && isset($to_time)) {
                 // from_time日付付与
                 $time_calc_from = 
@@ -1920,8 +1623,6 @@ class ApiCommonController extends Controller
                 // to_time日付付与
                 $time_calc_to = 
                     $this->convTimeToDateTo($from_time, $to_time, $current_date, $target_from_datetime, $target_to_datetime);         
-                Log::DEBUG('                   休憩時間 time_calc_from = '.$time_calc_from);
-                Log::DEBUG('                   休憩時間 time_calc_to = '.$time_calc_to);
                 $chk_time = true;
                 if (isset($setting_from_datetime) && isset($setting_to_datetime)) {
                     // タイムテーブル設定時刻のチェックを行う場合
@@ -1941,8 +1642,6 @@ class ApiCommonController extends Controller
                         if ($target_to_datetime < $time_calc_to) {
                             $time_calc_to = $target_to_datetime;
                         }
-                        Log::DEBUG('                   集計開始時刻 time_calc_from = '.$time_calc_from);
-                        Log::DEBUG('                   集計終了時刻 time_calc_to = '.$time_calc_to);
                         if ($time_calc_from < $time_calc_to) {
                             $calc_times += $this->diffTimeSerial($time_calc_from, $time_calc_to);
                         }
@@ -1950,7 +1649,6 @@ class ApiCommonController extends Controller
                 }
             }
         }
-        Log::DEBUG('                   集計結果 calc_times = '.$calc_times);
         return $calc_times;
     }
 
@@ -1960,8 +1658,6 @@ class ApiCommonController extends Controller
      * @return 時間差
      */
     public function diffTimeTime($time_from, $time_to){
-        $from = strtotime(date('Y-m-d H:i:00',strtotime($time_from)));
-        $to   = strtotime(date('Y-m-d H:i:00',strtotime($time_to))); 
         $from = new Carbon($from);
         $to   = new Carbon($to); 
         $interval = $from->diff($to);
@@ -1988,78 +1684,13 @@ class ApiCommonController extends Controller
      * @return 時間差
      */
     public function diffSecoundSerial($time_from, $time_to){
-        Log::DEBUG('diffSecoundSerial $time_from = '.$time_from);
-        Log::DEBUG('diffSecoundSerial $time_to = '.$time_to);
-        Log::DEBUG('diffSecoundSerial strtotime $time_from = '.strtotime($time_from));
-        Log::DEBUG('diffSecoundSerial strtotime $time_to = '.strtotime($time_to));
         $from = strtotime(date('Y-m-d H:i:ss',strtotime($time_from)));
         $to   = strtotime(date('Y-m-d H:i:ss',strtotime($time_to))); 
         $from = strtotime($time_from);
         $to   = strtotime($time_to); 
-        Log::DEBUG('diffSecoundSerial $from = '.$from);
-        Log::DEBUG('diffSecoundSerial to = '.$to);
         $interval = $to - $from;
         return $interval;
     }
-    
-    /**
-     * インターバル時間を取得して分に変換する
-     * 
-     *  設定する時刻はDATEで
-     *
-     * @return インターバル時間 (H:i:s)
-     */
-    public function getIntevalMinute($target_date){
-        // 設定項目よりインターバル時間を取得
-        $setting_model = new Setting();
-        $dt = new Carbon($target_date);
-        $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
-        $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
-        $settings = $setting_model->getSettingDatas();
-        $interval = 0;
-        foreach($settings as $setting) {
-            if (isset($setting->interval)) {
-                $interval = $setting->interval;
-                break;
-            }
-        }
-        $hh = floor($interval);
-        $mm = ($interval - floor($interval)) * 60;
-        return str_pad($hh, 2 , '0', STR_PAD_LEFT).":".str_pad($mm, 2 , '0', STR_PAD_LEFT).":00";
-    }
-    
-    /**
-     * 出勤時間差をチェック
-     * 
-     *  設定する時刻はDATETIMEで
-     *
-     * @return 時間差
-     */
-    public function chkInteval($target_datetime, $before_datetime){
-        // 設定項目よりインターバル時間を取得
-        $setting_model = new Setting();
-        $dt = new Carbon($target_datetime);
-        $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
-        $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
-        $settings = $setting_model->getSettingDatas();
-        $interval = 0;
-        foreach($settings as $setting) {
-            if (isset($setting->interval)) {
-                $interval = $setting->interval;
-                break;
-            }
-        }
-        // 設定されていない場合はチェック不要
-        if ($interval == 0) {return true;}
-        // $target_datetime - $before_datetime <= $interval であること
-        $diffInterval = $this->diffTimeSerial($before_datetime, $target_datetime);
-        // $intervalも$diffIntervalもシリアル値
-        if ($diffInterval < $interval * 60 * 60) {
-            return Config::get('const.C018.interval_stamp');
-        }
-        return Config::get('const.RESULT_CODE.normal');
-    }
-    
 
     /**
      * 時間丸め処理（時間丸めする：出勤用）
@@ -2688,6 +2319,98 @@ class ApiCommonController extends Controller
 
         return $result_round_time;
     }
+
+    // -------------  5.算出情報取得  end ------------------------------------------------------- //
+    
+    // -------------  6.判定・チェック start ----------------------------------------------------- //
+ 
+    /**
+     * 法定法定外休日判定
+     * 
+     *
+     * @return 
+     */
+    public function jdgBusinessKbn($params)
+    {
+        $departmentcode = $params['departmentcode'];
+        $employmentstatus = $params['employmentstatus'];
+        $usercode = $params['usercode'];
+        $datefrom = $params['datefrom'];
+        // 指定日が休日かどうか
+        $business_kubun = null;
+        $calender_model = new Calendar();
+        $calender_model->setParamdepartmentcodeAttribute($departmentcode);
+        $calender_model->setParamemploymentstatusAttribute($employmentstatus);
+        $calender_model->setParamusercodeAttribute($usercode);
+        $calender_model->setParamfromdateAttribute($datefrom);
+        $calendars = $calender_model->getCalenderDate();
+        if (count($calendars) > 0) {
+            foreach ($calendars as $result) {
+                if (isset($result->business_kubun)) {
+                    $business_kubun = $result->business_kubun;
+                }
+                break;
+            }
+        }
+
+        return $business_kubun;
+    }
+
+    /**
+     * 時間範囲内であるか判定
+     * 
+     *      target_from_datetime～target_to_datetimeはchk_from_datetime～chk_to_datetimeの範囲内に一部または全部あるか判定
+     *      前提
+     *          target_from_datetime <= target_to_datetime
+     *          chk_from_datetime <= chk_to_datetime
+     *
+     * @return 
+     */
+    public function chkBetweenTime($target_from_datetime, $target_to_datetime, $chk_from_datetime, $chk_to_datetime){
+
+        $chk_result = true;
+
+        if ($target_from_datetime <=  $chk_from_datetime) {
+            if ($target_to_datetime <=  $chk_from_datetime) {
+                $chk_result = false;
+            }
+        } elseif ($target_from_datetime >=  $chk_to_datetime) {
+            $chk_result = false;
+        }
+        return $chk_result;
+    }
+    
+    /**
+     * 出勤時間差をチェック
+     * 
+     *  設定する時刻はDATETIMEで
+     *
+     * @return 時間差
+     */
+    public function chkInteval($target_datetime, $before_datetime){
+        // 設定項目よりインターバル時間を取得
+        $setting_model = new Setting();
+        $dt = new Carbon($target_datetime);
+        $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
+        $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
+        $settings = $setting_model->getSettingDatas();
+        $interval = 0;
+        foreach($settings as $setting) {
+            if (isset($setting->interval)) {
+                $interval = $setting->interval;
+                break;
+            }
+        }
+        // 設定されていない場合はチェック不要
+        if ($interval == 0) {return true;}
+        // $target_datetime - $before_datetime <= $interval であること
+        $diffInterval = $this->diffTimeSerial($before_datetime, $target_datetime);
+        // $intervalも$diffIntervalもシリアル値
+        if ($diffInterval < $interval * 60 * 60) {
+            return Config::get('const.C018.interval_stamp');
+        }
+        return Config::get('const.RESULT_CODE.normal');
+    }
     
     /**
      * 打刻のモードチェック
@@ -2752,6 +2475,337 @@ class ApiCommonController extends Controller
         }
         return Config::get('const.C018.forget_stamp');
     }
+    // -------------  6.判定・チェック end ----------------------------------------------------- //
+
+
+    // -------------  7.変換 start ------------------------------------------------------------ //
+    
+    /**
+     * 時刻日付変換
+     *      target_time <= basic_time の場合は basic_dateの翌日+target_time に変換
+     *      target_time >  basic_time の場合は basic_date +target_time に変換
+     * @return 日付時刻
+     */
+    public function convTimeToDate($target_time, $basic_time, $basic_date){
+        // 日付付与
+        $convDateTime = null;
+        $dt = new Carbon($basic_time);
+        if ($target_time < date_format($dt, 'H:i:s')) {
+            $dt = new Carbon($target_time);
+            $convDateTime = $this->getNextDay($basic_date, 'Y-m-d').' '.date_format($dt, 'H:i:s');
+        } else {
+            $dt = new Carbon($basic_date);
+            $convDateTime = date_format($dt, 'Y-m-d').' '.$target_time;
+        }
+
+        return $convDateTime;
+    }
+
+    /**
+     * 時刻日付変換
+     *      target_timeがbasic_from_timeから24:00:00の時刻内であるときはbasic_from_timeと同じ日付を設定
+     *      上記以外は
+     *      target_timeが00:00:00からbasic_to_timeの時刻内であるときはbasic_to_timeと同じ日付を設定
+     * @return 日付時刻
+     */
+    public function convTimeToDateTarget($target_time, $basic_from_time, $basic_to_time){
+        // 日付付与
+        $dt_from = new Carbon($basic_from_time);
+        $dt_from_ymd = date_format($dt_from, 'Y-m-d');
+        $dt_from23 = new Carbon($dt_from_ymd.' 23:59:59');
+        $dt_from24 = $dt_from23->addSecond();
+        $dt_target_time = new Carbon($dt_from_ymd.' '.$target_time);
+        if ($dt_target_time >= $dt_from && $dt_target_time <= $dt_from24) {
+            return $dt_target_time;
+        }
+
+        $dt_from = new Carbon($basic_to_time);
+        $dt_from_ymd = date_format($dt_from, 'Y-m-d');
+        $dt_from00 = new Carbon($dt_from_ymd.' 00:00:00');
+        $dt_target_time = new Carbon($dt_from_ymd.' '.$target_time);
+        if ($dt_target_time >= $dt_from00 && $dt_target_time <= $dt_from) {
+            return $dt_target_time;
+        }
+
+        return null;
+    }
+
+    /**
+     * 時刻日付変換from
+     * @return 日付時刻
+     */
+    public function convTimeToDateFrom($from_time, $current_date, $target_from_time, $target_to_time){
+
+        Log::DEBUG('         ------------- convTimeToDateFrom in ');
+        $current_date_ymd = date_format(new Carbon($current_date),'Ymd');
+        $target_from_ymd = date_format(new Carbon($target_from_time),'Ymd');
+        $target_from_his = date_format(new Carbon($target_from_time),'His');
+        $target_to_ymd = date_format(new Carbon($target_to_time),'Ymd');
+        $target_to_his = date_format(new Carbon($target_to_time),'His');
+        // 日付付与
+        $cnv_from_date = null;
+        if ($current_date_ymd == $target_from_ymd) {
+            if ($target_from_his > $from_time && $from_time >= Config::get('const.C015.night_to')) {
+                //$cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
+                $cnv_from_date = new Carbon($target_from_ymd.' '.$from_time);
+            } else {
+                if ($from_time >= Config::get('const.C015.night_to')) {
+                    $cnv_from_date = new Carbon($target_from_ymd.' '.$from_time);
+                } else {
+                    $w_edt_date = new Carbon($target_from_ymd);
+                    $w_edt_date = date_format($w_edt_date->addDay(),'Y-m-d');
+                    $cnv_from_date = new Carbon($w_edt_date.' '.$from_time);
+                }
+            }
+        } else {
+            //$cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
+            $cnv_from_date = new Carbon($target_from_ymd.' '.$from_time);
+        }
+        Log::DEBUG('         ------------- convTimeToDateFrom end '.$cnv_from_date);
+
+        return $cnv_from_date;
+    }
+
+    /**
+     * 時刻日付変換to
+     * @return 日付時刻
+     */
+    public function convTimeToDateTo($from_time, $to_time, $current_date, $target_from_time, $target_to_time){
+
+        Log::DEBUG('         ------------- convTimeToDateTo in ');
+
+        $current_date_ymd = date_format(new Carbon($current_date),'Ymd');
+        $target_from_ymd = date_format(new Carbon($target_from_time),'Ymd');    // 打刻時刻
+        $target_from_his = date_format(new Carbon($target_from_time),'His');    // 打刻時刻
+        $target_to_ymd = date_format(new Carbon($target_to_time),'Ymd');        // 打刻時刻
+        $target_to_his = date_format(new Carbon($target_to_time),'His');        // 打刻時刻
+        // 日付付与
+        $cnv_to_date = null;
+        if ($current_date_ymd == $target_to_ymd) {
+            if ($from_time > $to_time) {
+                //$cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                $cnv_to_date = $this->getNextDay($target_to_ymd, 'Y-m-d').' '.$to_time;
+            } else {
+                if ($target_to_his < $to_time) {
+                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
+                } else {
+                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
+                }
+            }
+        } else {
+            if ($from_time > $to_time) {
+                if ($target_to_his < $to_time) {
+                    //$cnv_to_date = new Carbon($target_to_ymd.' '.$target_to_his);
+                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
+                } else {
+                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
+                }
+            } else {
+                if ($to_time >= Config::get('const.C015.night_to')) {
+                    $cnv_to_date = new Carbon($current_date_ymd.' '.$to_time);
+                } else {
+                    $cnv_to_date = new Carbon($target_to_ymd.' '.$to_time);
+                }
+            }
+        }
+        Log::DEBUG('         ------------- convTimeToDateTo end '.$cnv_to_date);
+
+        return $cnv_to_date;
+    }
+    
+    /**
+     * インターバル時間を取得して分に変換する
+     * 
+     *  設定する時刻はDATEで
+     *
+     * @return インターバル時間 (H:i:s)
+     */
+    public function getIntevalMinute($target_date){
+        // 設定項目よりインターバル時間を取得
+        $setting_model = new Setting();
+        $dt = new Carbon($target_date);
+        $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
+        $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
+        $settings = $setting_model->getSettingDatas();
+        $interval = 0;
+        foreach($settings as $setting) {
+            if (isset($setting->interval)) {
+                $interval = $setting->interval;
+                break;
+            }
+        }
+        $hh = floor($interval);
+        $mm = ($interval - floor($interval)) * 60;
+        return str_pad($hh, 2 , '0', STR_PAD_LEFT).":".str_pad($mm, 2 , '0', STR_PAD_LEFT).":00";
+    }
+    // -------------  7.変換 end -------------------------------------------------------------- //
+
+    // -------------  8.設定 start ------------------------------------------------------------ //
+
+    /**
+     * タイムテーブルの分解
+     *
+     * @return 
+     */
+    public function analyzeTimeTable($timetables, $working_time_kubun, $working_timetable_no){
+        Log::DEBUG('        タイムテーブルの分解 analyzeTimeTable in $working_time_kubun = '.$working_time_kubun);
+        Log::DEBUG('        タイムテーブルの分解 analyzeTimeTable in $working_timetable_no = '.$working_timetable_no);
+        $array_times = array();
+        if ($working_time_kubun != Config::get('const.C004.out_of_regular_working_time')) {
+            $filtered = $timetables->where('no', $working_timetable_no)->where('working_time_kubun', $working_time_kubun);
+            foreach($filtered as $result_time) {
+                if (isset($result_time->from_time) && isset($result_time->to_time)) {
+                    $array_times[] = array('from_time' => $result_time->from_time , 'to_time' => $result_time->to_time);
+                }
+            }
+        } else {
+            // 時間外労働時間は画面からの入力がないため、所定労働時間と休憩と深夜労働時間の時間以外を時間外労働時間とする
+            $array_sets = array();
+            for ($i=0;$i<24;$i++) {
+                for ($j=0;$j<60;$j++) {
+                    $array_sets[$i][$j] = 0;
+                }
+            }
+            $filtered = $timetables
+                ->where('no', $working_timetable_no)
+                ->where('working_time_kubun', '!=', Config::get('const.C004.out_of_regular_working_time'))
+                ->sortBy('from_time');
+            foreach($filtered as $result_time) {
+                if (isset($result_time->from_time) && isset($result_time->to_time)) {
+                    $dt = new Carbon('2019-08-01 '.$result_time->from_time);
+                    $check_from_hour = date_format($dt, 'H');
+                    $check_from_minute = date_format($dt, 'i');
+                    $dt = new Carbon('2019-08-01 '.$result_time->to_time);
+                    $check_to_hour = date_format($dt, 'H');
+                    $check_to_minute = date_format($dt, 'i');
+                    if ($result_time->from_time < $result_time->to_time) {
+                        for ($i=(int)$check_from_hour;$i<=$check_to_hour;$i++) {
+                            if ($i == (int)$check_from_hour) {      // １回目
+                                $minute_from = (int)$check_from_minute;
+                                if ($check_from_hour == $check_to_hour) {
+                                    $minute_to = (int)$check_to_minute;
+                                } else {
+                                    $minute_to = 60;
+                                }
+                            } elseif ($i == $check_to_hour) {   // 最後
+                                $minute_from = 0;
+                                $minute_to = (int)$check_to_minute;
+                            } else {
+                                $minute_from = 0;
+                                $minute_to = 60;
+                            }
+                            for ($j=$minute_from;$j<$minute_to;$j++) {
+                                $array_sets[$i][$j] = 1;
+                            }
+                        }
+                    } else {
+                        // fromから2400まで
+                        for ($i=(int)$check_from_hour;$i<24;$i++) {
+                            if ($i == (int)$check_from_hour) {      // １回目
+                                $minute_from = (int)$check_from_minute;
+                                $minute_to = 60;
+                            } else {
+                                $minute_from = 0;
+                                $minute_to = 60;
+                            }
+                            for ($j=$minute_from;$j<$minute_to;$j++) {
+                                $array_sets[$i][$j] = 1;
+                            }
+                        }
+                        // 0からtoまで
+                        for ($i=0;$i<=(int)$check_to_hour;$i++) {
+                            if ($i == 0) {      // １回目
+                                $minute_from = 0;
+                                if (0 == $check_to_hour) {
+                                    $minute_to = (int)$check_to_minute;
+                                } else {
+                                    $minute_to = 60;
+                                }
+                            } elseif ($i == $check_to_hour) {   // 最後
+                                $minute_from = 0;
+                                $minute_to = (int)$check_to_minute;
+                            } else {
+                                $minute_from = 0;
+                                $minute_to = 60;
+                            }
+                            for ($j=$minute_from;$j<$minute_to;$j++) {
+                                $array_sets[$i][$j] = 1;
+                            }
+                        }
+                    }
+                    // 配列=0の範囲を設定する
+                    $temp_times = array();
+                    $temp_from_time = "";
+                    $temp_to_time = "";
+                    $save_i = 0;
+                    $save_j = 0;
+                    for ($i=0;$i<24;$i++) {
+                        for ($j=0;$j<60;$j++) {
+                            if ($array_sets[$i][$j] == 0) {
+                                if ($temp_from_time == "") {
+                                    $temp_from_time = str_pad($i,2,0,STR_PAD_LEFT).':'.str_pad($j,2,0,STR_PAD_LEFT).':00';
+                                }
+                            } else {
+                                if ($temp_from_time == "") {
+                                    $temp_to_time ="";
+                                } else {
+                                    $temp_to_time = str_pad($i,2,0,STR_PAD_LEFT).':'.str_pad($j,2,0,STR_PAD_LEFT).':00';
+                                    $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
+                                    $temp_from_time ="";
+                                    $temp_to_time ="";
+                                }
+                            }
+                            $save_j = $j;
+                        }
+                        $save_i = $i;
+                    }
+                    if ($temp_from_time != "") {
+                        $temp_from_time = str_pad($save_i,2,0,STR_PAD_LEFT).':'.str_pad($save_j,2,0,STR_PAD_LEFT).':00';
+                        $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
+                    }
+                }
+            }
+            $array_times = $temp_times;
+        }
+        foreach($array_times as $item) {
+            Log::DEBUG('             タイムテーブルの分解 result --- analyzeTimeTable in $array_time from_time = '.$item['from_time']);
+            Log::DEBUG('             タイムテーブルの分解 result --- analyzeTimeTable in $array_time to_time = '.$item['to_time']);
+        }
+        return $array_times;
+    }
+    
+    
+    /**
+     * タイムテーブル労働開始終了時間テーブル設定
+     * 
+     * @return 時間差
+     */
+    public function setWorkingStartEndTimeTable($target_date){
+        // タイムテーブル取得（所定時間と休憩時間）
+        // 設定項目よりインターバル時間を取得
+        $setting_model = new Setting();
+        $dt = new Carbon($target_datetime);
+        $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
+        $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
+        $settings = $setting_model->getSettingDatas();
+        $interval = 0;
+        foreach($settings as $setting) {
+            if (isset($setting->interval)) {
+                $interval = $setting->interval;
+                break;
+            }
+        }
+        // 設定されていない場合はチェック不要
+        if ($interval == 0) {return true;}
+        // $target_datetime - $before_datetime <= $interval であること
+        $diffInterval = $this->diffTimeSerial($before_datetime, $target_datetime);
+        // $intervalも$diffIntervalもシリアル値
+        if ($diffInterval < $interval * 60 * 60) {
+            return Config::get('const.C018.interval_stamp');
+        }
+        return Config::get('const.RESULT_CODE.normal');
+    }
+    
 
     /**
      * reqestクエリーセット
@@ -2767,5 +2821,6 @@ class ApiCommonController extends Controller
             return null;
         }
     }
+    // -------------  8.設定 end ----------------------------------------------------------- //
 
 }

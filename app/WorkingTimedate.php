@@ -2364,6 +2364,7 @@ class WorkingTimedate extends Model
                 $mainquery = $this->setWhereSqlUsers($mainquery);
                 $result = $mainquery
                     ->where($this->table.'.is_deleted', 0)
+                    ->distinct()
                     ->orderBy($this->table_calendars.'.date', 'asc')
                     ->orderBy($this->table_users.'.department_code', 'asc')
                     ->orderBy($this->table_users.'.employment_status', 'asc')
@@ -2372,6 +2373,7 @@ class WorkingTimedate extends Model
             } elseif ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic')) {
                 $mainquery = $this->setWhereSqlUsers($mainquery);
                 $result = $mainquery
+                    ->distinct()
                     ->orderBy($this->table_users.'.department_code', 'asc')
                     ->orderBy($this->table_users.'.employment_status', 'asc')
                     ->orderBy($this->table_users.'.code', 'asc')
