@@ -80,16 +80,16 @@ export default {
       }
     }
   },
-  // マウント時
-  mounted() {
-    this.selectedvalue = this.selectedValue;
-  },
   created() {
     if (this.arrayRole.length == 0) {
       this.getList(this.dateValue, this.killValue, this.initlist, this.departmentValue, this.employmentValue, this.managementValue, null);
     } else {
       this.getList(this.dateValue, this.killValue, this.initlist, this.departmentValue, this.employmentValue, this.managementValue, this.arrayRole);
     }
+  },
+  // マウント時
+  mounted() {
+    this.selectedvalue = this.selectedValue;
   },
   methods: {
     // ------------------------ イベント処理 ------------------------------------
@@ -138,7 +138,7 @@ export default {
         // 固有処理 end
       } else {
         if (res.messagedata.length > 0) {
-            this.messageswal("エラー", res.messagedata, "error", true, false, true);
+            this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
             this.serverCatch("氏名");
         }
@@ -148,7 +148,7 @@ export default {
     serverCatch(kbn) {
       var messages = [];
       messages.push(kbn + "選択リスト作成に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     // 選択テキスト取得
     getText : function(value) {

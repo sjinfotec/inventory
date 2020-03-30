@@ -16,7 +16,7 @@ class WorkingTimeTable extends Model
     protected $table_users = 'users';
     protected $table_temp_calc_workingtimes = 'temp_calc_workingtimes';
     protected $table_generalcodes = 'generalcodes';
-    // protected $guarded = array('id');
+    protected $table_shift_informations = 'shift_informations';
 
     private $id;
     private $no;                  
@@ -155,6 +155,7 @@ class WorkingTimeTable extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
 
+    private $param_no;                          // タイムテーブルNo
     private $param_date_from;                   // 開始日付
     private $param_date_to;                     // 終了日付
     private $param_employment_status;           // 雇用形態
@@ -163,6 +164,17 @@ class WorkingTimeTable extends Model
 
     private $massegedata;                       // メッセージ
 
+
+    // タイムテーブルNo
+    public function getParamnoAttribute()
+    {
+        return $this->param_no;
+    }
+
+    public function setParamnoAttribute($value)
+    {
+        $this->param_no = $value;
+    }
 
     // 開始日付
     public function getParamdatefromAttribute()
@@ -563,6 +575,256 @@ class WorkingTimeTable extends Model
         }
 
         return $is_exists;
+    }
+
+    /**
+     * 該当日付のタイムテーブル取得
+     * @return void
+     */
+    public function getWorkingTimeTable(){
+        try {
+            //
+            $dt = $this->param_date_from;
+            $dt1 = new Carbon($dt);
+            $target_today = $dt1->format('Y-m-d');
+            $target_addtoday = $dt1->addDay()->format('Y-m-d');
+   
+            $apicommon = new ApiCommonController();
+            // usersの最大適用開始日付subquery
+            $subquery31 = $apicommon->makeUserApplyTermSql($this->param_date_to, Config::get('const.C025.admin_user'));
+            // departmentsの最大適用開始日付subquery
+            $subquery32 = $apicommon->makeDepartmentApplyTermSql($this->param_date_to, $this->param_date_to);
+            // working_timetablesの最大適用開始日付subquery
+            $subquery33 = $apicommon->makeWorkingTimeTableApplyTermSql($this->param_date_to);
+            // shift_informationsの最大適用開始日付subquery
+            $subquery34 = "";
+            $subquery34 .= " select ";
+            $subquery34 .= "   t1.target_date ";
+            $subquery34 .= "   ,t1.user_code as user_code ";
+            $subquery34 .= "   ,t1.department_code as department_code ";
+            $subquery34 .= "   ,t1.working_timetable_no as working_timetable_no ";
+            $subquery34 .= "   ,t1.is_deleted as is_deleted ";
+            $subquery34 .= " from ";
+            $subquery34 .= "   ".$this->table_shift_informations." as t1 ";
+
+            $sqlString = "";
+            $sqlString .= " select ";
+            $sqlString .= "   t1.code as user_code ";
+            $sqlString .= "   ,t1.name as user_name ";
+            $sqlString .= "   ,t32.code as department_code ";
+            $sqlString .= "   ,t32.name as department_name ";
+            $sqlString .= "   ,case ifnull(t34.working_timetable_no,0) ";
+            $sqlString .= "     when 0 then t33.no ";
+            $sqlString .= "     else t35.no ";
+            $sqlString .= "    end as working_timetable_no ";
+            $sqlString .= "   ,case ifnull(t34.working_timetable_no,0) ";
+            $sqlString .= "     when 0 then t33.name ";
+            $sqlString .= "     else t35.name ";
+            $sqlString .= "    end as working_timetable_name ";
+            $sqlString .= "   ,case ifnull(t34.working_timetable_no,0) ";
+            $sqlString .= "     when 0 then concat(?, ' ', t33.from_time) ";
+            $sqlString .= "     else concat(?, ' ', t35.from_time) ";
+            $sqlString .= "    end as working_timetable_from_record_time ";
+            $sqlString .= "   ,case ifnull(t34.working_timetable_no,0) ";
+            $sqlString .= "      when 0 then date_format(t33.from_time, '%H:%i') ";
+            $sqlString .= "      else date_format(t35.from_time, '%H:%i') ";
+            $sqlString .= "    end as working_timetable_from_time ";
+            $sqlString .= "   ,case ifnull(t34.working_timetable_no,0) ";
+            $sqlString .= "     when 0 then ";
+            $sqlString .= "       case t33.to_time < t33.from_time ";
+            $sqlString .= "         when true then concat(?, ' ', t33.to_time)";
+            $sqlString .= "         else concat(?, ' ', t33.to_time)";
+            $sqlString .= "       end ";
+            $sqlString .= "     else ";
+            $sqlString .= "       case t35.to_time < t35.from_time ";
+            $sqlString .= "         when true then concat(?, ' ', t35.to_time)";
+            $sqlString .= "         else concat(?, ' ', t35.to_time)";
+            $sqlString .= "       end ";
+            $sqlString .= "    end as working_timetable_to_record_time ";
+            $sqlString .= "   ,case ifnull(t34.working_timetable_no,0) ";
+            $sqlString .= "      when 0 then date_format(t33.to_time, '%H:%i') ";
+            $sqlString .= "      else date_format(t35.to_time, '%H:%i') ";
+            $sqlString .= "    end as working_timetable_to_time ";
+            $sqlString .= " from ";
+            $sqlString .= "   ".$this->table_users." as t1 ";
+            $sqlString .= "   left join ( ";
+            $sqlString .= "   ".$subquery31. " ";
+            $sqlString .= "   ) as t31 ";
+            $sqlString .= "   on t31.code = t1.code ";
+            $sqlString .= "   and t31.max_apply_term_from = t1.apply_term_from ";
+            $sqlString .= "   left join ( ";
+            $sqlString .= "   ".$subquery32. " ";
+            $sqlString .= "   ) as t32 ";
+            $sqlString .= "   on t32.code = t1.department_code ";
+            $sqlString .= "   left join ( ";
+            $sqlString .= "   ".$subquery33. " ";
+            $sqlString .= "   ) as t33 ";
+            $sqlString .= "   on t33.no = t1.working_timetable_no ";
+            $sqlString .= "   and t33.working_time_kubun = ? ";
+            $sqlString .= "   left join ( ";
+            $sqlString .= "   ".$subquery34. " ";
+            $sqlString .= "   ) as t34 ";
+            $sqlString .= "   on t34.user_code = t1.code ";
+            $sqlString .= "   and t34.department_code = t1.department_code ";
+            $sqlString .= "   and t34.target_date = ? ";
+            $sqlString .= "   and t34.is_deleted = ? ";
+            $sqlString .= "   left join ( ";
+            $sqlString .= "   ".$subquery33. " ";
+            $sqlString .= "   ) as t35 ";
+            $sqlString .= "   on t35.no = t34.working_timetable_no ";
+            $sqlString .= "   and t35.working_time_kubun = ? ";
+            $sqlString .= " where ";
+            $sqlString .= "   ? = ? ";
+            if (!empty($this->param_date_to)) {
+                $sqlString .= "   and t1.kill_from_date >= ? ";
+            }
+            if (!empty($this->param_department_code)) {
+                $sqlString .= "   and t1.department_code = ? ";
+            }
+            if (!empty($this->param_user_code)) {
+                $sqlString .= "   and t1.code = ? ";
+            }
+            $sqlString .= "   and t1.is_deleted = ? ";
+        
+            // バインド
+            $array_setBindingsStr = array();
+            //
+            $array_setBindingsStr[] = $target_today;
+            $array_setBindingsStr[] = $target_today;
+            $array_setBindingsStr[] = $target_addtoday;
+            $array_setBindingsStr[] = $target_today;
+            $array_setBindingsStr[] = $target_addtoday;
+            $array_setBindingsStr[] = $target_today;
+            // subquery31
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if (!empty($this->param_date_to)) {
+                $array_setBindingsStr[] = $this->param_date_to;
+            }
+            $array_setBindingsStr[] = Config::get('const.C025.admin_user');
+            $array_setBindingsStr[] = 0;
+            // subquery32
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if (!empty($this->param_date_to)) {
+                $array_setBindingsStr[] = $this->param_date_to;
+            }
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if (!empty($this->param_date_to)) {
+                $array_setBindingsStr[] = $this->param_date_to;
+            }
+            $array_setBindingsStr[] = 0;
+            // subquery33
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if (!empty($this->param_date_to)) {
+                $array_setBindingsStr[] = $this->param_date_to;
+            }
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 9999;
+            $array_setBindingsStr[] = 0;
+            //
+            $array_setBindingsStr[] = Config::get('const.C004.regular_working_time');
+            // subquery34
+            //
+            $array_setBindingsStr[] = $this->param_date_from;
+            $array_setBindingsStr[] = 0;
+            // subquery33
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if (!empty($this->param_date_to)) {
+                $array_setBindingsStr[] = $this->param_date_to;
+            }
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 0;
+            //
+            $array_setBindingsStr[] =  Config::get('const.C004.regular_working_time');
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if (!empty($this->param_date_to)) {
+                $array_setBindingsStr[] = $this->param_date_to;
+            }
+            if (!empty($this->param_department_code)) {
+                $array_setBindingsStr[] = $this->param_department_code;
+            }
+            if (!empty($this->param_user_code)) {
+                $array_setBindingsStr[] = $this->param_user_code;
+            }
+            $array_setBindingsStr[] = 0;
+            $result = DB::select($sqlString, $array_setBindingsStr);
+        
+            return $result;
+    
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * タイムテーブル編集
+     * @return void
+     */
+    public function edtWorkingTime(){
+        try {
+            //
+            $dt = $this->param_date_from;
+            $dt1 = new Carbon($dt);
+            $target_today = $dt1->format('Y-m-d');
+            $target_addtoday = $dt1->addDay()->format('Y-m-d');
+   
+            $apicommon = new ApiCommonController();
+            // working_timetablesの最大適用開始日付subquery
+            $subquery33 = $apicommon->makeWorkingTimeTableApplyTermSql($this->param_date_from);
+
+            $sqlString = $subquery33;
+            if (!empty($this->param_no)) {
+                $sqlString .= "   and t1.no = ? ";
+            }
+            $sqlString .= "order by t1.no asc ";
+            $sqlString .= ", t1.working_time_kubun asc ";
+        
+            // バインド
+            $array_setBindingsStr = array();
+            //
+            // subquery33
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if (!empty($this->param_date_from)) {
+                $array_setBindingsStr[] = $this->param_date_from;
+            }
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 9999;
+            $array_setBindingsStr[] = 0;
+            if (!empty($this->param_no)) {
+                $array_setBindingsStr[] = $this->param_no;
+            }
+            $result = DB::select($sqlString, $array_setBindingsStr);
+        
+            return $result;
+    
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
 }

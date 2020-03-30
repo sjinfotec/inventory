@@ -48,23 +48,50 @@ class ApiGetAttendanceResultController extends Controller
                 $user_datas = $user->getUserCardData($card_id);
                 if (count($user_datas) > 0) {
                     foreach($user_datas as $user_data) {
-                        $array_chkAttendance_result = $this->chkAttendance($user_data, $mode, $systemdate);
+                        // chkAttendance implement
+                        $array_impl_chkAttendance = array (
+                            'user_data' => $user_data,
+                            'mode' => $mode,
+                            'systemdate' => $systemdate
+                        );
+                        $array_chkAttendance_result = $this->chkAttendance($array_impl_chkAttendance);
                         if($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.normal')){
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
-                            $this->insertTable($user_data, $mode, $card_id, $array_chkAttendance_result, $systemdate);
+                            // insertTable implement
+                            $array_impl_insertTable = array (
+                                'user_data' => $user_data,
+                                'mode' => $mode,
+                                'card_id' => $card_id,
+                                'array_chkAttendance_result' => $array_chkAttendance_result,
+                                'systemdate' => $systemdate
+                            );
+                            $this->insertTable($array_impl_insertTable);
                         } elseif($array_chkAttendance_result[0] == Config::get('const.C018.forget_stamp')) {
                             // エラー追加 20200121
-                            Log::error('打刻登録 NG mode_illegal user = '.$user.' '.Config::get('const.RESULT_CODE.mode_illegal'));
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.mode_illegal'));
-                            $this->insertTable($user_data, $mode, $card_id, $array_chkAttendance_result, $systemdate);
+                            // insertTable implement
+                            $array_impl_insertTable = array (
+                                'user_data' => $user_data,
+                                'mode' => $mode,
+                                'card_id' => $card_id,
+                                'array_chkAttendance_result' => $array_chkAttendance_result,
+                                'systemdate' => $systemdate
+                            );
+                            $this->insertTable($array_impl_insertTable);
                         } elseif($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.dup_time_check')) {
-                            Log::debug('check_interval result = dup_time_check');
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.dup_time_check'));
                         } else {
                             // エラー追加 20200121
-                            Log::error('打刻登録 NG unknown user = '.$user.' '.Config::get('const.RESULT_CODE.unknown'));
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.unknown'));
-                            $this->insertTable($user_data, $mode, $card_id, $array_chkAttendance_result, $systemdate);
+                            // insertTable implement
+                            $array_impl_insertTable = array (
+                                'user_data' => $user_data,
+                                'mode' => $mode,
+                                'card_id' => $card_id,
+                                'array_chkAttendance_result' => $array_chkAttendance_result,
+                                'systemdate' => $systemdate
+                            );
+                            $this->insertTable($array_impl_insertTable);
                         }
                         $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
                         $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
@@ -74,12 +101,10 @@ class ApiGetAttendanceResultController extends Controller
                     }
                 } else {
                     // エラー追加 20200121
-                    Log::error('カード情報取得 NG user_not_exsits user = '.$user.' '.Config::get('const.RESULT_CODE.user_not_exsits'));
                     $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.user_not_exsits'));
                 }
             }else{  // カード情報が存在しない
                 // エラー追加 20200121
-                Log::error('カード情報取得 NG card_not_exsits user = '.$user.' '.Config::get('const.RESULT_CODE.card_not_exsits'));
                 $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.card_not_exsits'));
             }
 
@@ -88,7 +113,7 @@ class ApiGetAttendanceResultController extends Controller
             throw $pe;
         }catch(\Exception $e){
             Log::error(str_replace('{0}', 'work_times', Config::get('const.LOG_MSG.data_insert_erorr')));
-            Log::error($pe->getMessage());
+            Log::error($e->getMessage());
             throw $e;
         }
     }
@@ -125,7 +150,12 @@ class ApiGetAttendanceResultController extends Controller
      * @param [type] $mode
      * @return void
      */
-    private function chkAttendance($user_data, $mode, $systemdate){
+    private function chkAttendance($params){
+        // パラメータ
+        $user_data = $params['user_data'];
+        $mode = $params['mode'];
+        $systemdate = $params['systemdate'];
+
         $apicommon = new ApiCommonController();
         $work_time_model = new WorkTime();
         $work_time_model->setParamDepartmentcodeAttribute($user_data->department_code);
@@ -200,13 +230,32 @@ class ApiGetAttendanceResultController extends Controller
      * @param [type] $id
      * @return void
      */
-    public function insertTable($user_data, $mode, $card_id, $array_check_result, $systemdate) {
+    private function insertTable($params) {
+        // パラメータ
+        $user_data = $params['user_data'];
+        $mode = $params['mode'];
+        $card_id = $params['card_id'];
+        $array_chkAttendance_result = $params['array_chkAttendance_result'];
+        $systemdate = $params['systemdate'];
 
         try{
             // 打刻データ登録
             DB::beginTransaction();
-            $this->insertTime($user_data, $mode, $array_check_result, $systemdate);
-            $this->insertTimeLogs($user_data, $mode, $card_id, $systemdate);
+            // insertTime implement
+            $array_impl_insertTime = array (
+                'user_data' => $user_data,
+                'mode' => $mode,
+                'array_chkAttendance_result' => $array_chkAttendance_result,
+                'systemdate' => $systemdate
+            );
+            $this->insertTime($array_impl_insertTime);
+            $array_impl_insertTimeLogs = array (
+                'user_data' => $user_data,
+                'mode' => $mode,
+                'card_id' => $card_id,
+                'systemdate' => $systemdate
+            );
+            $this->insertTimeLogs($array_impl_insertTimeLogs);
             DB::commit();
         }catch(\PDOException $pe){
             DB::rollBack();
@@ -226,7 +275,12 @@ class ApiGetAttendanceResultController extends Controller
      * @param [type] $id
      * @return void
      */
-    public function insertTime($user_data, $mode, $array_check_result, $systemdate) {
+    private function insertTime($params) {
+        // パラメータ
+        $user_data = $params['user_data'];
+        $mode = $params['mode'];
+        $array_chkAttendance_result = $params['array_chkAttendance_result'];
+        $systemdate = $params['systemdate'];
 
         try{
             $work_time = new WorkTime();
@@ -234,9 +288,10 @@ class ApiGetAttendanceResultController extends Controller
             $work_time->setDepartmentcodeAttribute($user_data->department_code);
             $work_time->setRecordtimeAttribute($systemdate);
             $work_time->setModeAttribute($mode);
-            $work_time->setCheckresultAttribute($array_check_result[0]);
-            $work_time->setCheckmaxtimeAttribute($array_check_result[1]);
-            $work_time->setCheckintervalAttribute($array_check_result[2]);
+            $work_time->setCheckresultAttribute($array_chkAttendance_result[0]);
+            $work_time->setCheckmaxtimeAttribute($array_chkAttendance_result[1]);
+            $work_time->setCheckintervalAttribute($array_chkAttendance_result[2]);
+            $work_time->setIseditorAttribute(false);
             $work_time->setCreateduserAttribute($user_data->code);
             $work_time->setSystemDateAttribute($systemdate);
             $work_time->insertWorkTime();
@@ -256,7 +311,12 @@ class ApiGetAttendanceResultController extends Controller
      * @param [type] $id
      * @return void
      */
-    public function insertTimeLogs($user_data, $mode, $card_id, $systemdate) {
+    private function insertTimeLogs($params) {
+        // パラメータ
+        $user_data = $params['user_data'];
+        $mode = $params['mode'];
+        $card_id = $params['card_id'];
+        $systemdate = $params['systemdate'];
 
         try{
             $work_time_log = new WorkTimeLog();

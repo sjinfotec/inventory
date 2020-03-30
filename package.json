@@ -29,6 +29,7 @@
     "encoding-japanese": "^1.0.30",
     "file-saver": "^2.0.2",
     "formvuelar": "^1.1.13",
+    "fs": "0.0.1-security",
     "moment": "^2.24.0",
     "v-calendar": "^1.0.0-beta.16",
     "vue-apexcharts": "^1.5.1",

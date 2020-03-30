@@ -32,13 +32,16 @@ class WorkTime extends Model
     private $check_result;                  // 打刻チェック結果
     private $check_max_time;                // 打刻回数最大チェック結果
     private $check_interval;                // インターバルチェック結果
+    private $is_editor;                     // 編集フラグ
+    private $editor_department_code;        // 編集部署コード
+    private $editor_user_code;              // 編集ユーザーコード
     private $created_user;                  // 作成ユーザー
     private $updated_user;                  // 修正ユーザー
     private $is_deleted;                    // 削除フラグ
     private $systemdate;
     private $positions;                     // 緯度経度
 
-    // ユーザーコード
+    // ID
     public function getIdAttribute()
     {
         return $this->id;
@@ -129,6 +132,39 @@ class WorkTime extends Model
     public function setCheckintervalAttribute($value)
     {
         $this->check_interval = $value;
+    }
+
+    // 編集フラグ
+    public function getIseditorAttribute()
+    {
+        return $this->is_editor;
+    }
+
+    public function setIseditorAttribute($value)
+    {
+        $this->is_editor = $value;
+    }
+
+    // 編集部署コード
+    public function getEditordepartmentcodeAttribute()
+    {
+        return $this->editor_department_code;
+    }
+
+    public function setEditordepartmentcodeAttribute($value)
+    {
+        $this->editor_department_code = $value;
+    }
+
+    // 編集ユーザーコード
+    public function getEditorusercodeAttribute()
+    {
+        return $this->editor_user_code;
+    }
+
+    public function setEditorusercodeAttribute($value)
+    {
+        $this->editor_user_code = $value;
     }
 
 
@@ -357,6 +393,9 @@ class WorkTime extends Model
      */
     public function insertWorkTime(){
         try {
+            if ($this->check_result == "" || $this->check_result == null) { $this->check_result = 0; }
+            if ($this->check_max_time == "" || $this->check_max_time == null) { $this->check_max_time = 0; }
+            if ($this->check_interval == "" || $this->check_interval == null) { $this->check_interval = 0; }
             if(isset($this->positions)){
                 DB::table($this->table)->insert(
                     [
@@ -367,6 +406,9 @@ class WorkTime extends Model
                         'check_result' => $this->check_result,
                         'check_max_time' => $this->check_max_time,
                         'check_interval' => $this->check_interval,
+                        'is_editor' => $this->is_editor,
+                        'editor_department_code' => $this->editor_department_code,
+                        'editor_user_code' => $this->editor_user_code,
                         'created_user' => $this->created_user,
                         'created_at'=>$this->systemdate,
                         'positions' => DB::raw("(GeomFromText('POINT(".$this->positions.")'))")
@@ -382,6 +424,9 @@ class WorkTime extends Model
                         'check_result' => $this->check_result,
                         'check_max_time' => $this->check_max_time,
                         'check_interval' => $this->check_interval,
+                        'is_editor' => $this->is_editor,
+                        'editor_department_code' => $this->editor_department_code,
+                        'editor_user_code' => $this->editor_user_code,
                         'created_user' => $this->created_user,
                         'created_at'=>$this->systemdate
                     ]
@@ -413,7 +458,6 @@ class WorkTime extends Model
                         'work_times.',
                         'work_times.end_date'
                         )
-                // ->where('tasks.department_code',$department_code)
                 ->limit(1)
                 ->get();
         }catch(\PDOException $pe){
@@ -498,6 +542,7 @@ class WorkTime extends Model
             // subquery1    work_times
             $subquery1 = DB::table($this->table)
                 ->select(
+                    $this->table.'.id as record_datetime_id',
                     $this->table.'.user_code as user_code',
                     $this->table.'.department_code as department_code',
                     $this->table.'.record_time as record_datetime',
@@ -505,6 +550,9 @@ class WorkTime extends Model
                     $this->table.'.check_result as check_result',
                     $this->table.'.check_max_time as check_max_time',
                     $this->table.'.check_interval as check_interval',
+                    $this->table.'.is_editor as is_editor',
+                    $this->table.'.editor_department_code as editor_department_code',
+                    $this->table.'.editor_user_code as editor_user_code',
                     $this->table.'.is_deleted as is_deleted'
                 )
                 ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%Y') as record_year")
@@ -547,6 +595,7 @@ class WorkTime extends Model
             // subquery2    shift_informations
             $mainquery = DB::table($this->table_users.' AS t1')
                 ->select(
+                    't2.record_datetime_id as record_datetime_id',
                     't1.code as user_code',
                     't1.name as user_name',
                     't1.department_code as department_code',
@@ -562,6 +611,7 @@ class WorkTime extends Model
                     't2.check_result as check_result',
                     't2.check_max_time as check_max_time',
                     't2.check_interval as check_interval',
+                    't2.is_deleted as is_deleted',
                     't2.x_positions as x_positions',
                     't2.y_positions as y_positions',
                     't3.weekday_kubun as weekday_kubun',
@@ -583,7 +633,12 @@ class WorkTime extends Model
                     't4.year as year',
                     't14.holiday_kubun as user_holiday_kubun',
                     't14.working_date as user_working_date',
-                    't15.code_name as user_holiday_name'
+                    't15.code_name as user_holiday_name',
+                    't2.is_editor as is_editor',
+                    't2.editor_department_code as editor_department_code',
+                    't2.editor_user_code as editor_user_code',
+                    't16.name as editor_department_name',
+                    't17.name as editor_user_code_name'
                 );
             $mainquery
                 ->selectRaw('ifnull(t9.shift_no, t6.no) as working_timetable_no ')
@@ -672,6 +727,17 @@ class WorkTime extends Model
                     ->where('t15.identification_id', '=', Config::get('const.C013.value'))
                     ->where('t14.is_deleted', '=', 0)
                     ->where('t15.is_deleted', '=', 0);
+                })
+                ->leftJoinSub($subquery4, 't16', function ($join) { 
+                    $join->on('t16.code', '=', 't2.editor_department_code');
+                })
+                ->leftJoin($this->table_users.' as t17', function ($join) { 
+                    $join->on('t17.code', '=', 't2.editor_user_code')
+                    ->where('t17.is_deleted', '=', 0);
+                })
+                ->leftJoinSub($subquery3, 't18', function ($join) { 
+                    $join->on('t18.code', '=', 't17.code');
+                    $join->on('t18.max_apply_term_from', '=', 't17.apply_term_from');
                 });
 
             if(!empty($this->param_employment_status)){
@@ -685,16 +751,12 @@ class WorkTime extends Model
             } else {
                 $mainquery->where('t1.management','<',Config::get('const.C017.admin_user'));
             }
-            $mainquery
-                ->JoinSub($subquery3, 't14', function ($join) { 
-                    $join->on('t14.code', '=', 't1.code');
-                    $join->on('t14.max_apply_term_from', '=', 't1.apply_term_from');
-                });
             /*if ($business_kubun != Config::get('const.C007.basic')) {
                 $mainquery->whereNotNull('t2.record_datetime');
             }*/
             $result = $mainquery
                 ->where('t1.is_deleted', '=', 0)
+                ->distinct()
                 ->orderBy('t1.department_code', 'asc')
                 ->orderBy('t1.employment_status', 'asc')
                 ->orderBy('t1.code', 'asc')
@@ -755,8 +817,8 @@ class WorkTime extends Model
                     $join->on('t2.user_code', '=', 't1.user_code');
                     $join->on('t2.department_code', '=', 't1.department_code')
                     ->where('t2.holiday_kubun', '>', 0);
-                })
-                ->whereNull('t2.working_date');
+                });
+                // ->whereNull('t2.working_date');      休日出勤の場合はあるためコメントアウト
 
             $subquery = $subquery12->toSql();
 
@@ -847,8 +909,8 @@ class WorkTime extends Model
                     $join->on('t2.user_code', '=', 't1.user_code');
                     $join->on('t2.department_code', '=', 't1.department_code')
                     ->where('t2.holiday_kubun', '>', 0);
-                })
-                ->whereNull('t2.working_date');
+                });
+                // ->whereNull('t2.working_date');      休日出勤の場合はあるためコメントアウト
 
             $subquery = $subquery12->toSql();
 
@@ -1026,7 +1088,11 @@ class WorkTime extends Model
                 ->where('id', $this->id)
                 ->where('is_deleted', 0)
                 ->update([
+                    'is_editor' => 1,
+                    'editor_department_code' => $this->editor_department_code,
+                    'editor_user_code' => $this->editor_user_code,
                     'is_deleted' => 1,
+                    'updated_user' => $this->updated_user,
                     'updated_at' => $this->systemdate
                     ]);
         }catch(\PDOException $pe){
@@ -1271,14 +1337,14 @@ class WorkTime extends Model
                 , t1.department_code as department_code
                 , t1.department_name as department_name
                 , t1.current_record_date as current_record_date
-                , t1.current_record_time as current_record_time
+                , DATE_FORMAT(t1.current_record_time, '%m月%d日 %H:%i')as current_record_time
                 , CONCAT(
                     DATE_FORMAT(t1.current_record_date, '%Y年%m月%d日'), '(', SUBSTRING('月火水木金土日', CONVERT(t2.weekday_kubun + 1, char), 1), ')'
                     ) as record_date_name
                 , t1.current_mode as current_mode
                 , t1.current_mode_name as current_mode_name
                 , t1.before_record_date as before_record_date
-                , t1.before_record_time as before_record_time
+                , DATE_FORMAT(t1.before_record_time, '%m月%d日 %H:%i')as before_record_time
                 , t1.before_mode as before_mode
                 , t1.before_mode_name as before_mode_name
                 , t1.hit_alert as hit_alert
@@ -1286,137 +1352,228 @@ class WorkTime extends Model
                 , t1.holiday_alert as holiday_alert
                 , t2.business_kubun as business_kubun
             from
+            (
                 (
-                    (
-                    select
-                        t3.user_code as user_code
-                        , t8.name as user_name
-                        , t8.management as user_management
-                        , t8.employment_status as employment_status
-                        , t10.code_name as employment_status_name
-                        , t3.department_code as department_code
-                        , t9.name as department_name
-                        , DATE_FORMAT(t6.record_time, '%Y%m%d') as current_record_date
-                        , t6.record_time as current_record_time
-                        , t6.mode as current_mode
-                        , t12.code_name as current_mode_name
-                        , CASE IFNULL(t6.mode, 0) 
-                            WHEN 0 THEN 0 
-                            WHEN 1 THEN CASE IFNULL(t5.mode, 0) 
-                            WHEN 0 THEN 0 
-                            WHEN 2 THEN 0 
-                            ELSE 1 
-                            END 
-                            WHEN 2 THEN CASE IFNULL(t5.mode, 0) 
-                            WHEN 0 THEN 0 
-                            WHEN 1 THEN 0 
-                            WHEN 22 THEN 0 
-                            WHEN 12 THEN 0 
-                            ELSE 1 
-                            END 
-                            WHEN 21 THEN CASE IFNULL(t5.mode, 0) 
-                            WHEN 0 THEN 0 
-                            WHEN 1 THEN 0 
-                            WHEN 22 THEN 0 
-                            WHEN 12 THEN 0 
-                            ELSE 1 
-                            END 
-                            WHEN 22 THEN CASE IFNULL(t5.mode, 0) 
-                            WHEN 0 THEN 0 
-                            WHEN 21 THEN 0 
-                            ELSE 1 
-                            END 
-                            WHEN 11 THEN CASE IFNULL(t5.mode, 0) 
-                            WHEN 0 THEN 0 
-                            WHEN 1 THEN 0 
-                            WHEN 22 THEN 0 
-                            WHEN 12 THEN 0 
-                            ELSE 1 
-                            END 
-                            WHEN 12 THEN CASE IFNULL(t5.mode, 0) 
-                            WHEN 0 THEN 0 
-                            WHEN 11 THEN 0 
-                            ELSE 1 
-                            END 
-                            END as hit_alert
-                        , DATE_FORMAT(t5.record_time, '%Y%m%d') as before_record_date
-                        , t5.record_time as before_record_time
-                        , t5.mode as before_mode
-                        , t11.code_name as before_mode_name
-                        , TIMEDIFF(t6.record_time, t5.record_time) as diff_time
-                        , CASE IFNULL(t6.mode, 0) 
-                            WHEN 1 THEN CASE IFNULL(t5.mode, 0) 
-                            WHEN 2 THEN CASE 
-                                WHEN IFNULL(TIMEDIFF(t6.record_time, t5.record_time), 0) < '00:00:00' 
-                                THEN 1 
-                                ELSE 0 
-                                END 
+                select
+                    t3.user_code as user_code
+                    , t8.name as user_name
+                    , t8.management as user_management
+                    , t8.employment_status as employment_status
+                    , t10.code_name as employment_status_name
+                    , t3.department_code as department_code
+                    , t9.name as department_name
+                    , DATE_FORMAT(t6.record_time, '%Y%m%d') as current_record_date
+                    , t6.record_time as current_record_time
+                    , t6.mode as current_mode
+                    , t12.code_name as current_mode_name
+                    , CASE IFNULL(t6.mode, 0) 
+                        WHEN 0 THEN 0 
+                        WHEN 1 THEN CASE IFNULL(t5.mode, 0) 
+                        WHEN 0 THEN 0 
+                        WHEN 2 THEN 0 
+                        ELSE 1 
+                        END 
+                        WHEN 2 THEN CASE IFNULL(t5.mode, 0) 
+                        WHEN 0 THEN 0 
+                        WHEN 1 THEN 0 
+                        WHEN 22 THEN 0 
+                        WHEN 12 THEN 0 
+                        ELSE 1 
+                        END 
+                        WHEN 21 THEN CASE IFNULL(t5.mode, 0) 
+                        WHEN 0 THEN 0 
+                        WHEN 1 THEN 0 
+                        WHEN 22 THEN 0 
+                        WHEN 12 THEN 0 
+                        ELSE 1 
+                        END 
+                        WHEN 22 THEN CASE IFNULL(t5.mode, 0) 
+                        WHEN 0 THEN 0 
+                        WHEN 21 THEN 0 
+                        ELSE 1 
+                        END 
+                        WHEN 11 THEN CASE IFNULL(t5.mode, 0) 
+                        WHEN 0 THEN 0 
+                        WHEN 1 THEN 0 
+                        WHEN 22 THEN 0 
+                        WHEN 12 THEN 0 
+                        ELSE 1 
+                        END 
+                        WHEN 12 THEN CASE IFNULL(t5.mode, 0) 
+                        WHEN 0 THEN 0 
+                        WHEN 11 THEN 0 
+                        ELSE 1 
+                        END 
+                        END as hit_alert
+                    , DATE_FORMAT(t5.record_time, '%Y%m%d') as before_record_date
+                    , t5.record_time as before_record_time
+                    , t5.mode as before_mode
+                    , t11.code_name as before_mode_name
+                    , TIMEDIFF(t6.record_time, t5.record_time) as diff_time
+                    , CASE IFNULL(t6.mode, 0) 
+                        WHEN 1 THEN CASE IFNULL(t5.mode, 0) 
+                        WHEN 2 THEN CASE 
+                            WHEN IFNULL(TIMEDIFF(t6.record_time, t5.record_time), 0) < ? 
+                            THEN 1 
                             ELSE 0 
                             END 
-                            ELSE 0 
-                            END as interval_alaert
-                        , 0 as holiday_alert 
-                    from
-                        work_times as t3 
-                        left join ( 
+                        ELSE 0 
+                        END 
+                        ELSE 0 
+                        END as interval_alaert
+                    , 0 as holiday_alert 
+                from
+                    work_times as t3 
+                    left join ( 
+                        select
+                            t1.user_code as user_code
+                            , t1.department_code as department_code
+                            , MAX(t1.record_time) as max_record_time
+                            , t2.record_time as record_time 
+                        from
+                            work_times as t1 
+                            inner join ( 
                             select
                                 t1.user_code as user_code
                                 , t1.department_code as department_code
-                                , MAX(t1.record_time) as max_record_time
-                                , t2.record_time as record_time 
+                                , t1.record_time as record_time 
                             from
                                 work_times as t1 
-                                inner join ( 
+                            where
+                                t1.record_time between ? and ? 
+                                and t1.is_deleted = ?
+                            ) as t2 
+                            on t2.user_code = t1.user_code 
+                                and t2.department_code = t1.department_code 
+                                and t2.record_time > t1.record_time 
+                                and t1.is_deleted = ? 
+                        group by
+                            t1.user_code
+                            , t1.department_code
+                            , t2.record_time
+                    ) as t4 
+                    on t4.user_code = t3.user_code 
+                        and t4.department_code = t3.department_code 
+                    inner join ( 
+                        select
+                            t1.user_code as user_code
+                            , t1.department_code as department_code
+                            , t1.record_time as record_time
+                            , t1.mode as mode 
+                        from
+                            work_times as t1 
+                        where
+                            t1.is_deleted = ?
+                        ) as t5 
+                    on t5.user_code = t4.user_code 
+                        and t5.department_code = t4.department_code 
+                        and t5.record_time = t4.max_record_time 
+                    inner join ( 
+                        select
+                            t1.user_code as user_code
+                            , t1.department_code as department_code
+                            , t1.record_time as record_time
+                            , t1.mode as mode 
+                        from
+                            work_times as t1 
+                        where
+                            t1.is_deleted = ?
+                    ) as t6 
+                    on t6.user_code = t4.user_code 
+                        and t6.department_code = t4.department_code 
+                        and t6.record_time = t4.record_time 
+                    inner join ( 
+                        select
+                            code as code
+                            , MAX(apply_term_from) as max_apply_term_from 
+                        from
+                            users 
+                        where
+                            apply_term_from <= ?
+                            and role < ?
+                            and is_deleted = ?
+                        group by
+                            code
+                    ) as t7 
+                    on t7.code = t3.user_code 
+                    inner join users as t8 
+                    on t8.code = t7.code 
+                        and t8.apply_term_from = t7.max_apply_term_from 
+                        and t8.is_deleted = ?
+                    left join ( 
+                        select
+                            t1.code as code
+                            , t1.name as name 
+                        from
+                            departments as t1 
+                            inner join ( 
                                 select
-                                    t1.user_code as user_code
-                                    , t1.department_code as department_code
-                                    , t1.record_time as record_time 
+                                    code as code
+                                    , MAX(apply_term_from) as max_apply_term_from 
                                 from
-                                    work_times as t1 
+                                    departments 
                                 where
-                                    t1.record_time between ? and ? 
-                                    and t1.is_deleted = ?
-                                ) as t2 
-                                on t2.user_code = t1.user_code 
-                                    and t2.department_code = t1.department_code 
-                                    and t2.record_time > t1.record_time 
-                                    and t1.is_deleted = ? 
-                            group by
-                                t1.user_code
-                                , t1.department_code
-                                , t2.record_time
-                        ) as t4 
-                        on t4.user_code = t3.user_code 
-                            and t4.department_code = t3.department_code 
-                        inner join ( 
-                            select
-                                t1.user_code as user_code
-                                , t1.department_code as department_code
-                                , t1.record_time as record_time
-                                , t1.mode as mode 
-                            from
-                                work_times as t1 
-                            where
-                                t1.is_deleted = ?
-                            ) as t5 
-                        on t5.user_code = t4.user_code 
-                            and t5.department_code = t4.department_code 
-                            and t5.record_time = t4.max_record_time 
-                        inner join ( 
-                            select
-                                t1.user_code as user_code
-                                , t1.department_code as department_code
-                                , t1.record_time as record_time
-                                , t1.mode as mode 
-                            from
-                                work_times as t1 
-                            where
-                                t1.is_deleted = ?
-                        ) as t6 
-                        on t6.user_code = t4.user_code 
-                            and t6.department_code = t4.department_code 
-                            and t6.record_time = t4.record_time 
-                        inner join ( 
+                                    apply_term_from <= ?
+                                    and is_deleted = ?
+                                group by
+                                    code
+                            ) as t2 
+                            on t1.code = t2.code 
+                                and t1.apply_term_from = t2.max_apply_term_from 
+                        where
+                            t1.kill_from_date > ?
+                            and t1.is_deleted = ?
+                    ) as t9 
+                    on t9.code = t3.department_code 
+                    left join generalcodes as t10 
+                    on t10.code = t8.employment_status 
+                        and t10.identification_id = ?
+                        and t10.is_deleted = ?
+                    left join generalcodes as t11 
+                    on t11.code = t5.mode 
+                        and t11.identification_id = ?
+                        and t11.is_deleted = ?
+                    left join generalcodes as t12 
+                    on t12.code = t6.mode 
+                        and t12.identification_id = ?
+                        and t12.is_deleted = ? 
+                where
+                  t3.record_time between ? and ? 
+                  and t3.is_deleted = ?
+                ) 
+                union ( 
+                    select
+                      t1.user_code as user_code
+                      , t1.user_name as user_name
+                      , t1.user_management as user_management
+                      , t1.employment_status as employment_status
+                      , t10.code_name as employment_status_name
+                      , t1.department_code as department_code
+                      , t9.name as department_name
+                      , t1.date as current_record_date
+                      , null as current_record_time
+                      , null as current_mode
+                      , null as current_mode_name
+                      , 0 as hit_alert
+                      , t2.record_date as before_record_date
+                      , null as before_record_time
+                      , null as before_mode
+                      , null as before_mode_name
+                      , null as diff_time
+                      , 0 as interval_alaert
+                      , 1 as holiday_alert 
+                    from
+                    ( 
+                        select
+                            t1.code as user_code
+                            , t1.name as user_name
+                            , t1.management as user_management
+                            , t1.employment_status as employment_status
+                            , t1.department_code as department_code
+                            , DATE_FORMAT(calendars.date, '%Y%m%d') as date 
+                        from
+                            users as t1 
+                            inner join ( 
                             select
                                 code as code
                                 , MAX(apply_term_from) as max_apply_term_from 
@@ -1428,151 +1585,60 @@ class WorkTime extends Model
                                 and is_deleted = ?
                             group by
                                 code
-                        ) as t7 
-                        on t7.code = t3.user_code 
-                        inner join users as t8 
-                        on t8.code = t7.code 
-                            and t8.apply_term_from = t7.max_apply_term_from 
-                            and t8.is_deleted = ?
-                        left join ( 
-                            select
-                                t1.code as code
-                                , t1.name as name 
-                            from
-                                departments as t1 
-                                inner join ( 
-                                    select
-                                        code as code
-                                        , MAX(apply_term_from) as max_apply_term_from 
-                                    from
-                                        departments 
-                                    where
-                                        apply_term_from <= ?
-                                        and is_deleted = ?
-                                    group by
-                                        code
-                                ) as t2 
-                                on t1.code = t2.code 
-                                    and t1.apply_term_from = t2.max_apply_term_from 
-                            where
-                                t1.kill_from_date > ?
-                                and t1.is_deleted = ?
-                        ) as t9 
-                        on t9.code = t3.department_code 
-                        left join generalcodes as t10 
-                        on t10.code = t8.employment_status 
-                            and t10.identification_id = ?
-                            and t10.is_deleted = ?
-                        left join generalcodes as t11 
-                        on t11.code = t5.mode 
-                            and t11.identification_id = ?
-                            and t11.is_deleted = ?
-                        left join generalcodes as t12 
-                        on t12.code = t6.mode 
-                            and t12.identification_id = ?
-                            and t12.is_deleted = ? 
-                    where
-                      t3.record_time between ? and ? 
-                      and t3.is_deleted = ?
-                    ) 
-                    union ( 
+                            ) as t3 
+                            on t3.code = t1.code 
+                            and t3.max_apply_term_from = t1.apply_term_from 
+                            cross join calendars
+                    ) AS t1 
+                    left join ( 
                         select
-                          t1.user_code as user_code
-                          , t1.user_name as user_name
-                          , t1.user_management as user_management
-                          , t1.employment_status as employment_status
-                          , t10.code_name as employment_status_name
-                          , t1.department_code as department_code
-                          , t9.name as department_name
-                          , t1.date as current_record_date
-                          , null as current_record_time
-                          , null as current_mode
-                          , null as current_mode_name
-                          , 0 as hit_alert
-                          , t2.record_date as before_record_date
-                          , null as before_record_time
-                          , null as before_mode
-                          , null as before_mode_name
-                          , null as diff_time
-                          , 0 as interval_alaert
-                          , 1 as holiday_alert 
+                            t1.user_code as user_code
+                            , t1.department_code as department_code
+                            , DATE_FORMAT(t1.record_time, '%Y%m%d') as record_date 
                         from
-                        ( 
-                            select
-                                t1.code as user_code
-                                , t1.name as user_name
-                                , t1.management as user_management
-                                , t1.employment_status as employment_status
-                                , t1.department_code as department_code
-                                , DATE_FORMAT(calendars.date, '%Y%m%d') as date 
-                            from
-                                users as t1 
-                                inner join ( 
+                            work_times as t1
+                    ) as t2 
+                    on t2.user_code = t1.user_code 
+                        and t2.department_code = t1.department_code 
+                        and t2.record_date = t1.date 
+                    left join ( 
+                        select
+                            t1.code as code
+                            , t1.name as name 
+                        from
+                            departments as t1 
+                            inner join ( 
                                 select
                                     code as code
                                     , MAX(apply_term_from) as max_apply_term_from 
                                 from
-                                    users 
+                                    departments 
                                 where
                                     apply_term_from <= ?
-                                    and role < ?
                                     and is_deleted = ?
                                 group by
                                     code
-                                ) as t3 
-                                on t3.code = t1.code 
-                                and t3.max_apply_term_from = t1.apply_term_from 
-                                cross join calendars
-                        ) AS t1 
-                        left join ( 
-                            select
-                                t1.user_code as user_code
-                                , t1.department_code as department_code
-                                , DATE_FORMAT(t1.record_time, '%Y%m%d') as record_date 
-                            from
-                                work_times as t1
-                        ) as t2 
-                        on t2.user_code = t1.user_code 
-                            and t2.department_code = t1.department_code 
-                            and t2.record_date = t1.date 
-                        left join ( 
-                            select
-                                t1.code as code
-                                , t1.name as name 
-                            from
-                                departments as t1 
-                                inner join ( 
-                                    select
-                                        code as code
-                                        , MAX(apply_term_from) as max_apply_term_from 
-                                    from
-                                        departments 
-                                    where
-                                        apply_term_from <= ?
-                                        and is_deleted = ?
-                                    group by
-                                        code
-                                ) as t2 
-                                on t2.code = t1.code 
-                                and t2.max_apply_term_from =  t1.apply_term_from
-                            where
-                                t1.kill_from_date > ?
-                                and t1.is_deleted = ?
-                        ) as t9 
-                        on t9.code = t1.department_code 
-                        left join generalcodes as t10 
-                        on t10.code = t1.employment_status 
-                            and t10.identification_id = ?
-                            and t10.is_deleted = ?
+                            ) as t2 
+                            on t2.code = t1.code 
+                            and t2.max_apply_term_from =  t1.apply_term_from
                         where
-                            t1.date between ? and ? 
-                            and t2.record_date is null
-                    )
-                ) as t1 
-                left join calendars as t2 
-                on t2.department_code = t1.department_code 
-                    and t2.user_code = t1.user_code 
-                    and t2.date = t1.current_record_date ";
+                            t1.kill_from_date > ?
+                            and t1.is_deleted = ?
+                    ) as t9 
+                    on t9.code = t1.department_code 
+                    left join generalcodes as t10 
+                    on t10.code = t1.employment_status 
+                        and t10.identification_id = ?
+                        and t10.is_deleted = ?
+                    where
+                        t1.date between ? and ? 
+                        and t2.record_date is null
+                )
+            ) as t1 
+            left join calendars as t2 
+            on t2.department_code = t1.department_code 
+                and t2.user_code = t1.user_code 
+                and t2.date = t1.current_record_date ";
             // 条件
             $sqlString .= "where 1 = 1 ";
             if(!empty($this->param_employment_status)){
@@ -1586,7 +1652,7 @@ class WorkTime extends Model
             } else {
                 $sqlString .= "and t1.user_management < ? ";
             }
-            $sqlString .= "and t2.business_kubun = ? ";
+            // $sqlString .= "and t2.business_kubun = ? ";
             $sqlString .= "and t2.is_deleted = ? ";
             $sqlString .= "and (
                                 t1.hit_alert > ?
@@ -1598,7 +1664,11 @@ class WorkTime extends Model
                                 , t1.user_code asc
                                 , t1.department_code asc";
             // バインド
+            // インターバル時間取得
+            $apicommon = new ApiCommonController();
+            $interval_time = $apicommon->getIntevalMinute($this->param_end_date);
             $array_setBindingsStr = array();
+            $array_setBindingsStr[] = $interval_time;
             $array_setBindingsStr[] = $this->param_date_from;
             $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = 0;
@@ -1644,7 +1714,7 @@ class WorkTime extends Model
             } else {
                 $array_setBindingsStr[] = Config::get('const.C017.out_of_user');
             }
-            $array_setBindingsStr[] = Config::get('const.C007.basic');
+            // $array_setBindingsStr[] = Config::get('const.C007.basic');
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 0;

@@ -501,7 +501,6 @@ class Calendar extends Model
                     ->where('t7.is_deleted', '=', 0);
             });
     
-            Log::debug('$this->paramdepartmentcode = '.$this->paramdepartmentcode);
             if(!empty($this->paramdepartmentcode)) {
                 $mainquery
                     ->where($this->table.'.department_code',$this->paramdepartmentcode);
@@ -556,6 +555,7 @@ class Calendar extends Model
      * @return void
      */
     public function getCalenderDate(){
+        // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
         try {
             $mainquery = DB::table($this->table)
                 ->select(
@@ -602,6 +602,11 @@ class Calendar extends Model
             }
             $mainquery->where($this->table.'.is_deleted',0);
             $result = $mainquery->get();
+            
+            // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
+            //     \Log::debug('sql_debug_log', ['getCalenderDate' => \DB::getQueryLog()]);
+            //     \DB::disableQueryLog();
+            // }
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());

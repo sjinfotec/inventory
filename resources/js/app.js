@@ -27,6 +27,7 @@ var options = {
     type: "info"
 };
 
+
 Vue.use(toasted, options);
 Vue.use(VCalendar);
 Vue.use(VModal);
@@ -52,21 +53,24 @@ Vue.component(
     require("./components/HomeComponent.vue").default
 );
 
+// 日次集計
 Vue.component(
     "daily-working-information",
     require("./components/DailyWorkingInformation.vue").default
 );
-
 Vue.component(
     "daily-working-information-panel-header",
     require("./components/DailyWorkingInformationPanelHeader.vue").default
 );
-
 Vue.component(
     "daily-working-info-table",
     require("./components/DailyWorkingInfoTable.vue").default
 );
-
+Vue.component(
+    "daily-working-info-time-table",
+    require("./components/DailyWorkingInfoTimeTable.vue").default
+);
+// 日次警告
 Vue.component(
     "daily-working-alert",
     require("./components/DailyWorkingAlert.vue").default
@@ -174,11 +178,6 @@ Vue.component(
 );
 
 Vue.component(
-    "edit_attendance-log",
-    require("./components/EditAttendanceLog.vue").default
-);
-
-Vue.component(
     "create-company-information",
     require("./components/CreateCompanyInformation.vue").default
 );
@@ -248,8 +247,10 @@ Vue.component(
     "message-data-server",
     require("./components/MessageDataServer.vue").default
 );
-
-Vue.component("setting-root", require("./components/SettingRoot.vue").default);
+// 申請
+//  承認ルート作成
+Vue.component("create-approvalroot", require("./components/CreateApprovalRouteNo.vue").default);
+Vue.component("setting-root", require("./components/SettingRoot.vue").default); // 削除予定
 
 Vue.component("make-demand", require("./components/MakeDemand.vue").default);
 
@@ -342,10 +343,27 @@ Vue.component(
     require("./components/SelectGeneralList.vue").default
 );
 
+Vue.component(
+    "select-approvalrouteList",
+    require("./components/SelectApprovalRouteList.vue").default
+);
+
 // 使えないコントロールなので途中で断念した（sizeとか）。使用不可
 Vue.component(
     "select-elcommonlist",
     require("./components/SelectElCommonList.vue").default
+);
+
+// 勤怠ログ
+// 勤怠ログ登録
+Vue.component(
+    "store_attendance-log",
+    require("./components/StoreAttendanceLog.vue").default
+);
+// 勤怠ログ編集
+Vue.component(
+    "edit_attendance-log",
+    require("./components/EditAttendanceLog.vue").default
 );
 
 /**

@@ -1935,7 +1935,7 @@ export default {
       if (flag) {
         var messages = [];
         messages.push("この内容で登録しますか？");
-        this.messageswal("確認", messages, "info", true, true, true).then(
+        this.htmlMessageSwal("確認", messages, "info", true, true).then(
           result => {
             if (result) {
               this.store();
@@ -1975,7 +1975,7 @@ export default {
           );
           messages.push("更新してよろしいですか？");
         }
-        this.messageswal("確認", messages, "info", true, true, true).then(
+        this.htmlMessageSwal("確認", messages, "info", true, true).then(
           result => {
             if (result) {
               this.FixDetail("更新", index);
@@ -2015,7 +2015,7 @@ export default {
           );
           messages.push("追加してよろしいですか？");
         }
-        this.messageswal("確認", messages, "info", true, true, true).then(
+        this.htmlMessageSwal("確認", messages, "info", true, true).then(
           result => {
             if (result) {
               this.FixDetail("追加", index);
@@ -2043,7 +2043,7 @@ export default {
       this.messagevalidatesEdt = [];
       var messages = [];
       messages.push("この内容を削除しますか？");
-      this.messageswal("確認", messages, "info", true, true, true).then(
+      this.htmlMessageSwal("確認", messages, "info", true, true).then(
         result => {
           if (result) {
             this.DelDetail(index);
@@ -2060,7 +2060,7 @@ export default {
         messages.push(
           "１度に追加できる情報は１個です。追加してから再実行してください"
         );
-        this.messageswal("エラー", messages, "error", true, false, true);
+        this.htmlMessageSwal("エラー", messages, "error", true, false);
       } else {
         var add_apply_term_from = this.details[0].apply_term_from;
         var add_kill_from_date = this.details[0].kill_from_date;
@@ -2105,7 +2105,7 @@ export default {
       if (this.checkRowData(index)) {
         var messages = [];
         messages.push("履歴追加取り消ししてよろしいですか？");
-        this.messageswal("確認", messages, "info", true, true, true).then(
+        this.htmlMessageSwal("確認", messages, "info", true, true).then(
           result => {
             if (result) {
               this.details.splice(index, 1);
@@ -2124,7 +2124,7 @@ export default {
       this.messagevalidatesEdt = [];
       var messages = [];
       messages.push("カード情報の紐づけを解除しますか？");
-      this.messageswal("確認", messages, "info", true, true, true).then(
+      this.htmlMessageSwal("確認", messages, "info", true, true).then(
         result => {
           if (result) {
             this.ReleaseCard("解除", index);
@@ -2318,7 +2318,6 @@ export default {
               "※メールが届かない場合は、お手数ですが「onedawnm.onedawn.net」へ手動で接続して下さい。",
               "success",
               true,
-              false,
               false
             );
           } else {
@@ -2355,14 +2354,7 @@ export default {
         this.before_count = this.count;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal(
-            "エラー",
-            res.messagedata,
-            "error",
-            true,
-            false,
-            true
-          );
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("氏名", "取得");
         }
@@ -2378,14 +2370,7 @@ export default {
         this.before_count = this.count;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal(
-            "エラー",
-            res.messagedata,
-            "error",
-            true,
-            false,
-            true
-          );
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("氏名", "取得");
         }
@@ -2398,14 +2383,7 @@ export default {
         this.departmentList = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal(
-            "エラー",
-            res.messagedata,
-            "error",
-            true,
-            false,
-            true
-          );
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("部署", "取得");
         }
@@ -2418,14 +2396,7 @@ export default {
         this.employStatusList = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal(
-            "エラー",
-            res.messagedata,
-            "error",
-            true,
-            false,
-            true
-          );
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("雇用形態", "取得");
         }
@@ -2438,14 +2409,7 @@ export default {
         this.timetableList = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal(
-            "エラー",
-            res.messagedata,
-            "error",
-            true,
-            false,
-            true
-          );
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("明細タイムテーブル", "取得");
         }
@@ -2458,14 +2422,7 @@ export default {
         this.generalList_m = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal(
-            "エラー",
-            res.messagedata,
-            "error",
-            true,
-            false,
-            true
-          );
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("明細勤怠管理", "取得");
         }
@@ -2478,14 +2435,7 @@ export default {
         this.generalList_r = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal(
-            "エラー",
-            res.messagedata,
-            "error",
-            true,
-            false,
-            true
-          );
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("明細権限", "取得");
         }
@@ -2498,25 +2448,11 @@ export default {
       if (res.result) {
         messages.push("ユーザーを" + eventtext + "しました。");
         messages.push("カレンダー設定にてユーザーのカレンダーを設定してください");
-        this.messageswal(
-          eventtext + "完了",
-          messages,
-          "success",
-          true,
-          false,
-          true
-        );
+        this.htmlMessageSwal(eventtext + "完了", messages, "error", true, false);
         this.refreshUserList();
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal(
-            "警告",
-            res.messagedata,
-            "warning",
-            true,
-            false,
-            true
-          );
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch("ユーザー", eventtext);
         }
@@ -2527,29 +2463,14 @@ export default {
       var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("ユーザーを" + eventtext + "しました");
-        this.messageswal(
-          eventtext + "完了",
-          messages,
-          "success",
-          true,
-          false,
-          true
-        );
+        this.$toasted.show("ユーザーを" + eventtext + "しました");
         this.refreshUserList();
         this.getItem();
         this.count = this.details.length;
         this.before_count = this.count;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal(
-            "警告",
-            res.messagedata,
-            "warning",
-            true,
-            false,
-            true
-          );
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch("ユーザ", eventtext);
         }
@@ -2560,25 +2481,10 @@ export default {
       var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("ユーザーとカードの紐づけを解除しました");
-        this.messageswal(
-          eventtext + "完了",
-          messages,
-          "success",
-          true,
-          false,
-          true
-        );
+        this.$toasted.show("ユーザーとカードの紐づけを解除しました");
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal(
-            "警告",
-            res.messagedata,
-            "warning",
-            true,
-            false,
-            true
-          );
+          this.htmlMessageSwal( "警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch("ユーザ", eventtext);
         }
@@ -2588,7 +2494,7 @@ export default {
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     inputClear() {
       this.details = [];

@@ -9,7 +9,7 @@
             <div class="col-12 p-0">
               <table class="table table-striped border-bottom font-size-sm text-nowrap">
                 <thead>
-                  <tr v-if="detailOrTotal === 'detail' && btnMode ==='basicswitch'">
+                  <tr v-if="detailOrTotal === 'detail' && btnMode ==='basicswitch'" bgcolor="#e3f0fb">
                     <td class="text-center align-middle w-15 mw-rem-7">雇用形態</td>
                     <td class="text-center align-middle w-15 mw-rem-5 color-royalblue"
                       data-toggle="tooltip"
@@ -36,7 +36,7 @@
                     <td class="text-center align-middle w-15 mw-rem-5">遅刻日数</td>
                     <td class="text-center align-middle w-15 mw-rem-5">欠勤日数</td>
                   </tr>
-                  <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'">
+                  <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'" bgcolor="#e3f0fb">
                     <td class="text-center align-middle w-15 mw-rem-7">雇用形態</td>
                     <td class="text-center align-middle w-15 mw-rem-3 color-royalblue"
                       data-toggle="tooltip"
@@ -294,8 +294,17 @@ export default {
 };
 </script>
 <style scoped>
+
+table {
+   border-collapse: collapse !important;
+   border: 1px solid #95c5ed !important;
+}
+
 .table th, .table td {
     padding: 0rem !important;
+    border-style: solid dashed !important;
+    border-width: 1px !important;
+    border-color: #95c5ed #dee2e6 !important;
 }
 
 .mw-rem-3 {

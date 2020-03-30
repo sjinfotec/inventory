@@ -31,16 +31,46 @@ class TempWorkingTimeDate extends Model
     private $working_timetable_name;        // タイムテーブル名称
     private $array_attendance_time = [null,null,null,null,null];                    // 出勤時刻
     private $array_attendance_time_positions = [null,null,null,null,null];          // 出勤位置情報
+    private $array_attendance_time_id = [null,null,null,null,null];                 // 出勤打刻時刻テーブルID
+    private $array_attendance_editor_department_code = [null,null,null,null,null];  // 出勤編集部署コード
+    private $array_attendance_editor_user_code = [null,null,null,null,null];        // 出勤編集ユーザーコード
+    private $array_attendance_editor_department_name = [null,null,null,null,null];  // 出勤編集部署名
+    private $array_attendance_editor_user_name = [null,null,null,null,null];        // 出勤編集ユーザー名
     private $array_leaving_time = [null,null,null,null,null];                       // 退勤時刻
     private $array_leaving_time_positions = [null,null,null,null,null];             // 退勤位置情報
+    private $array_leaving_time_id = [null,null,null,null,null];                    // 退勤打刻時刻テーブルID
+    private $array_leaving_editor_department_code = [null,null,null,null,null];     // 退勤編集部署コード
+    private $array_leaving_editor_user_code = [null,null,null,null,null];           // 退勤編集ユーザーコード
+    private $array_leaving_editor_department_name = [null,null,null,null,null];     // 退勤編集部署名
+    private $array_leaving_editor_user_name = [null,null,null,null,null];           // 退勤編集ユーザー名
     private $array_missing_middle_time = [null,null,null,null,null];                // 私用外出時刻
-    private $array_missing_middle_time_positions = [null,null,null,null,null];      // 私用位置情報
-    private $array_missing_middle_return_time = [null,null,null,null,null];         // 私用外出戻り時刻
+    private $array_missing_middle_time_positions = [null,null,null,null,null];      // 私用外出位置情報
+    private $array_missing_middle_time_id = [null,null,null,null,null];             // 私用外出打刻時刻テーブルID
+    private $array_missing_editor_department_code = [null,null,null,null,null];     // 私用外出編集部署コード
+    private $array_missing_editor_user_code = [null,null,null,null,null];           // 私用外出編集ユーザーコード
+    private $array_missing_editor_department_name = [null,null,null,null,null];     // 私用外出編集部署名
+    private $array_missing_editor_user_name = [null,null,null,null,null];           // 私用外出編集ユーザー名
+    private $array_missing_middle_return_time = [null,null,null,null,null];                 // 私用外出戻り時刻
     private $array_missing_middle_return_time_positions = [null,null,null,null,null];       // 私用外出戻り位置情報
+    private $array_missing_middle_return_time_id = [null,null,null,null,null];              // 私用外出戻り打刻時刻テーブルID
+    private $array_missing_return_editor_department_code = [null,null,null,null,null];      // 私用外出戻り編集部署コード
+    private $array_missing_return_editor_user_code = [null,null,null,null,null];            // 私用外出戻り編集ユーザーコード
+    private $array_missing_return_editor_department_name = [null,null,null,null,null];      // 私用外出戻り編集部署名
+    private $array_missing_return_editor_user_name = [null,null,null,null,null];            // 私用外出戻り編集ユーザー名
     private $array_public_going_out_time = [null,null,null,null,null];                      // 公用外出時刻
     private $array_public_going_out_time_positions = [null,null,null,null,null];            // 公用外出位置情報
+    private $array_public_going_out_time_id = [null,null,null,null,null];                   // 公用外出打刻時刻テーブルID
+    private $array_public_editor_department_code = [null,null,null,null,null];              // 公用外出編集部署コード
+    private $array_public_editor_user_code = [null,null,null,null,null];                    // 公用外出編集ユーザーコード
+    private $array_public_editor_department_name = [null,null,null,null,null];              // 公用外出編集部署名
+    private $array_public_editor_user_name = [null,null,null,null,null];                    // 公用外出編集ユーザー名
     private $array_public_going_out_return_time = [null,null,null,null,null];               // 公用外出戻り時刻
     private $array_public_going_out_return_time_positions = [null,null,null,null,null];     // 公用外出戻り位置情報
+    private $array_public_going_out_return_time_id = [null,null,null,null,null];            // 公用外出戻り打刻時刻テーブルID
+    private $array_public_return_editor_department_code = [null,null,null,null,null];       // 公用外出戻り編集部署コード
+    private $array_public_return_editor_user_code = [null,null,null,null,null];             // 公用外出戻り編集ユーザーコード
+    private $array_public_return_editor_department_name = [null,null,null,null,null];       // 公用外出戻り編集部署名
+    private $array_public_return_editor_user_name = [null,null,null,null,null];             // 公用外出戻り編集ユーザー名
     private $total_working_times;           // 合計勤務時間
     private $regular_working_times;         // 所定労働時間
     private $out_of_regular_working_times;  // 所定外労働時間
@@ -81,8 +111,8 @@ class TempWorkingTimeDate extends Model
     private $pattern;                       // 打刻パターン
     private $check_result;                  // 打刻チェック結果
     private $check_max_times;               // 打刻回数最大チェック結果
-    private $check_interval;                // 位置情報
-    private $positions;                     // インターバルチェック結果
+    private $check_interval;                // インターバルチェック結果
+    private $positions;                     // 位置情報
     private $fixedtime;                     // 確定
     private $systemdate;
 
@@ -225,6 +255,65 @@ class TempWorkingTimeDate extends Model
         $this->array_attendance_time_positions[$index] = $value;
     }
 
+    // 出勤打刻時刻テーブルID
+    public function getAttendancetimeidAttribute($index)
+    {
+        return $this->array_attendance_time_id[$index];
+    }
+
+    public function setAttendancetimeidAttribute($index, $value)
+    {
+        if ($value == "") {
+            $this->array_attendance_time_id[$index] = null;
+        } else {
+            $this->array_attendance_time_id[$index] = $value;
+        }
+    }
+
+    // 出勤編集部署コード
+    public function getAttendanceeditordepartmentcodeAttribute($index)
+    {
+        return $this->array_attendance_editor_department_code[$index];
+    }
+
+    public function setAttendanceeditordepartmentcodeAttribute($index, $value)
+    {
+        $this->array_attendance_editor_department_code[$index] = $value;
+    }
+
+    // 出勤編集ユーザーコード
+    public function getAttendanceeditorusercodeAttribute($index)
+    {
+        return $this->array_attendance_editor_user_code[$index];
+    }
+
+    public function setAttendanceeditorusercodeAttribute($index, $value)
+    {
+        $this->array_attendance_editor_user_code[$index] = $value;
+    }
+
+    // 出勤編集部署名
+    public function getAttendanceeditordepartmentnameAttribute($index)
+    {
+        return $this->array_attendance_editor_department_name[$index];
+    }
+
+    public function setAttendanceeditordepartmentnameAttribute($index, $value)
+    {
+        $this->array_attendance_editor_department_name[$index] = $value;
+    }
+
+    // 出勤編集ユーザー名
+    public function getAttendanceeditorusernameAttribute($index)
+    {
+        return $this->array_attendance_editor_user_name[$index];
+    }
+
+    public function setAttendanceeditorusernameAttribute($index, $value)
+    {
+        $this->array_attendance_editor_user_name[$index] = $value;
+    }
+
     // 退勤時刻
     public function getLeavingtimeAttribute($index)
     {
@@ -245,6 +334,65 @@ class TempWorkingTimeDate extends Model
     public function setLeavingtimepositionsAttribute($index, $value)
     {
         $this->array_leaving_time_positions[$index] = $value;
+    }
+
+    // 退勤打刻時刻テーブルID
+    public function getLeavingtimeidAttribute($index)
+    {
+        return $this->array_leaving_time_id[$index];
+    }
+
+    public function setLeavingtimeidAttribute($index, $value)
+    {
+        if ($value == "") {
+            $this->array_leaving_time_id[$index] = null;
+        } else {
+            $this->array_leaving_time_id[$index] = $value;
+        }
+    }
+
+    // 退勤編集部署コード
+    public function getLeavingeditordepartmentcodeAttribute($index)
+    {
+        return $this->array_leaving_editor_department_code[$index];
+    }
+
+    public function setLeavingeditordepartmentcodeAttribute($index, $value)
+    {
+        $this->array_leaving_editor_department_code[$index] = $value;
+    }
+
+    // 退勤編集ユーザーコード
+    public function getLeavingeditorusercodeAttribute($index)
+    {
+        return $this->array_leaving_editor_user_code[$index];
+    }
+
+    public function setLeavingeditorusercodeAttribute($index, $value)
+    {
+        $this->array_leaving_editor_user_code[$index] = $value;
+    }
+
+    // 退勤編集部署名
+    public function getLeavingeditordepartmentnameAttribute($index)
+    {
+        return $this->array_leaving_editor_department_name[$index];
+    }
+
+    public function setLeavingeditordepartmentnameAttribute($index, $value)
+    {
+        $this->array_leaving_editor_department_name[$index] = $value;
+    }
+
+    // 退勤編集ユーザー名
+    public function getLeavingeditorusernameAttribute($index)
+    {
+        return $this->array_leaving_editor_user_name[$index];
+    }
+
+    public function setLeavingeditorusernameAttribute($index, $value)
+    {
+        $this->array_leaving_editor_user_name[$index] = $value;
     }
 
     // 私用外出時刻
@@ -269,6 +417,65 @@ class TempWorkingTimeDate extends Model
         $this->array_missing_middle_time_positions[$index] = $value;
     }
 
+    // 私用外出打刻時刻テーブルID
+    public function getMissingmiddletimeidAttribute($index)
+    {
+        return $this->array_missing_middle_time_id[$index];
+    }
+
+    public function setMissingmiddletimeidAttribute($index, $value)
+    {
+        if ($value == "") {
+            $this->array_missing_middle_time_id[$index] = null;
+        } else {
+            $this->array_missing_middle_time_id[$index] = $value;
+        }
+    }
+
+    // 私用外出編集部署コード
+    public function getMissingeditordepartmentcodeAttribute($index)
+    {
+        return $this->array_missing_editor_department_code[$index];
+    }
+
+    public function setMissingeditordepartmentcodeAttribute($index, $value)
+    {
+        $this->array_missing_editor_department_code[$index] = $value;
+    }
+
+    // 私用外出編集ユーザーコード
+    public function getMissingeditorusercodeAttribute($index)
+    {
+        return $this->array_missing_editor_user_code[$index];
+    }
+
+    public function setMissingeditorusercodeAttribute($index, $value)
+    {
+        $this->array_missing_editor_user_code[$index] = $value;
+    }
+
+    // 私用外出編集部署名
+    public function getMissingeditordepartmentnameAttribute($index)
+    {
+        return $this->array_missing_editor_department_name[$index];
+    }
+
+    public function setMissingeditordepartmentnameAttribute($index, $value)
+    {
+        $this->array_missing_editor_department_name[$index] = $value;
+    }
+
+    // 私用外出編集ユーザー名
+    public function getMissingeditorusernameAttribute($index)
+    {
+        return $this->array_missing_editor_user_name[$index];
+    }
+
+    public function setMissingeditorusernameAttribute($index, $value)
+    {
+        $this->array_missing_editor_user_name[$index] = $value;
+    }
+
     // 私用外出戻り時刻
     public function getMissingmiddlereturntimeAttribute($index)
     {
@@ -289,6 +496,66 @@ class TempWorkingTimeDate extends Model
     public function setMissingmiddlereturntimepositionsAttribute($index, $value)
     {
         $this->array_missing_middle_return_time_positions[$index] = $value;
+    }
+
+    // 私用外出戻り打刻時刻テーブルID
+    public function getMissingmiddlereturntimeidAttribute($index)
+    {
+        return $this->array_missing_middle_return_time_id[$index];
+    }
+
+    public function setMissingmiddlereturntimeidAttribute($index, $value)
+    {
+        if ($value == "") {
+            $this->array_missing_middle_return_time_id[$index] = null;
+        } else {
+            $this->array_missing_middle_return_time_id[$index] = $value;
+        }
+    }
+
+    // 私用外出戻り編集部署コード
+    public function getMissingreturneditordepartmentcodeAttribute($index)
+    {
+        return $this->array_missing_return_editor_department_code[$index];
+    }
+
+    public function setMissingreturneditordepartmentcodeAttribute($index, $value)
+    {
+        $this->array_missing_return_editor_department_code[$index] = $value;
+    }
+
+    // 私用外出戻り編集ユーザーコード
+    public function getMissingreturneditorusercodeAttribute($index)
+    {
+        return $this->array_missing_return_editor_user_code[$index];
+    }
+
+    public function setMissingreturneditorusercodeAttribute($index, $value)
+    {
+        $this->array_missing_return_editor_user_code[$index] = $value;
+    }
+
+    // 私用外出戻り編集部署名
+    public function getMissingreturneditordepartmentnameAttribute($index)
+    {
+        return $this->array_missing_return_editor_department_name[$index];
+    }
+
+    public function setMissingreturneditordepartmentnameAttribute($index, $value)
+    {
+        $this->array_missing_return_editor_department_name[$index] = $value;
+    }
+
+
+    // 私用外出戻り編集ユーザー名
+    public function getMissingreturneditorusernameAttribute($index)
+    {
+        return $this->array_missing_return_editor_user_name[$index];
+    }
+
+    public function setMissingreturneditorusernameAttribute($index, $value)
+    {
+        $this->array_missing_return_editor_user_name[$index] = $value;
     }
 
     // 公用外出時刻
@@ -313,6 +580,65 @@ class TempWorkingTimeDate extends Model
         $this->array_public_going_out_time_positions[$index] = $value;
     }
 
+    // 公用外出打刻時刻テーブルID
+    public function getPublicgoingouttimeidAttribute($index)
+    {
+        return $this->array_public_going_out_time_id[$index];
+    }
+
+    public function setPublicgoingouttimeidAttribute($index, $value)
+    {
+        if ($value == "") {
+            $this->array_public_going_out_time_id[$index] = null;
+        } else {
+            $this->array_public_going_out_time_id[$index] = $value;
+        }
+    }
+
+    // 公用外出編集部署コード
+    public function getPubliceditordepartmentcodeAttribute($index)
+    {
+        return $this->array_public_editor_department_code[$index];
+    }
+
+    public function setPubliceditordepartmentcodeAttribute($index, $value)
+    {
+        $this->array_public_editor_department_code[$index] = $value;
+    }
+
+    // 公用外出編集ユーザーコード
+    public function getPubliceditorusercodeAttribute($index)
+    {
+        return $this->array_public_editor_user_code[$index];
+    }
+
+    public function setPubliceditorusercodeAttribute($index, $value)
+    {
+        $this->array_public_editor_user_code[$index] = $value;
+    }
+
+    // 公用外出編集部署名
+    public function getPubliceditordepartmentnameAttribute($index)
+    {
+        return $this->array_public_editor_department_name[$index];
+    }
+
+    public function setPubliceditordepartmentnameAttribute($index, $value)
+    {
+        $this->array_public_editor_department_name[$index] = $value;
+    }
+
+    // 公用外出編集ユーザー名
+    public function getPubliceditorusernameAttribute($index)
+    {
+        return $this->array_public_editor_user_name[$index];
+    }
+
+    public function setPubliceditorusernameAttribute($index, $value)
+    {
+        $this->array_public_editor_user_name[$index] = $value;
+    }
+
     // 公用外出戻り時刻
     public function getPublicgoingoutreturntimeAttribute($index)
     {
@@ -333,6 +659,65 @@ class TempWorkingTimeDate extends Model
     public function setPublicgoingoutreturntimepositionsAttribute($index, $value)
     {
         $this->array_public_going_out_return_time_positions[$index] = $value;
+    }
+
+    // 公用外出戻り打刻時刻テーブルID
+    public function getPublicgoingoutreturntimeidAttribute($index)
+    {
+        return $this->array_public_going_out_return_time_id[$index];
+    }
+
+    public function setPublicgoingoutreturntimeidAttribute($index, $value)
+    {
+        if ($value == "") {
+            $this->array_public_going_out_return_time_id[$index] = null;
+        } else {
+            $this->array_public_going_out_return_time_id[$index] = $value;
+        }
+    }
+
+    // 公用外出戻り編集部署コード
+    public function getPublicreturneditordepartmentcodeAttribute($index)
+    {
+        return $this->array_public_return_editor_department_code[$index];
+    }
+
+    public function setPublicreturneditordepartmentcodeAttribute($index, $value)
+    {
+        $this->array_public_return_editor_department_code[$index] = $value;
+    }
+
+    // 公用外出戻り編集ユーザーコード
+    public function getPublicreturneditorusercodeAttribute($index)
+    {
+        return $this->array_public_return_editor_user_code[$index];
+    }
+
+    public function setPublicreturneditorusercodeAttribute($index, $value)
+    {
+        $this->array_public_return_editor_user_code[$index] = $value;
+    }
+
+    // 公用外出戻り編集部署名
+    public function getPublicreturneditordepartmentnameAttribute($index)
+    {
+        return $this->array_public_return_editor_department_name[$index];
+    }
+
+    public function setPublicreturneditordepartmentnameAttribute($index, $value)
+    {
+        $this->array_public_return_editor_department_name[$index] = $value;
+    }
+
+    // 公用外出戻り編集ユーザー名
+    public function getPublicreturneditorusernameAttribute($index)
+    {
+        return $this->array_public_return_editor_user_name[$index];
+    }
+
+    public function setPublicreturneditorusernameAttribute($index, $value)
+    {
+        $this->array_public_return_editor_user_name[$index] = $value;
     }
 
     // 合計勤務時間
@@ -973,31 +1358,181 @@ class TempWorkingTimeDate extends Model
                     $this->table.'.attendance_time_3',
                     $this->table.'.attendance_time_4',
                     $this->table.'.attendance_time_5',
+                    $this->table.'.attendance_time_id_1',
+                    $this->table.'.attendance_time_id_2',
+                    $this->table.'.attendance_time_id_3',
+                    $this->table.'.attendance_time_id_4',
+                    $this->table.'.attendance_time_id_5',
+                    $this->table.'.attendance_editor_department_code_1',
+                    $this->table.'.attendance_editor_department_code_2',
+                    $this->table.'.attendance_editor_department_code_3',
+                    $this->table.'.attendance_editor_department_code_4',
+                    $this->table.'.attendance_editor_department_code_5',
+                    $this->table.'.attendance_editor_department_name_1',
+                    $this->table.'.attendance_editor_department_name_2',
+                    $this->table.'.attendance_editor_department_name_3',
+                    $this->table.'.attendance_editor_department_name_4',
+                    $this->table.'.attendance_editor_department_name_5',
+                    $this->table.'.attendance_editor_user_code_1',
+                    $this->table.'.attendance_editor_user_code_2',
+                    $this->table.'.attendance_editor_user_code_3',
+                    $this->table.'.attendance_editor_user_code_4',
+                    $this->table.'.attendance_editor_user_code_5',
+                    $this->table.'.attendance_editor_user_name_1',
+                    $this->table.'.attendance_editor_user_name_2',
+                    $this->table.'.attendance_editor_user_name_3',
+                    $this->table.'.attendance_editor_user_name_4',
+                    $this->table.'.attendance_editor_user_name_5',
                     $this->table.'.leaving_time_1',
                     $this->table.'.leaving_time_2',
                     $this->table.'.leaving_time_3',
                     $this->table.'.leaving_time_4',
                     $this->table.'.leaving_time_5',
+                    $this->table.'.leaving_time_id_1',
+                    $this->table.'.leaving_time_id_2',
+                    $this->table.'.leaving_time_id_3',
+                    $this->table.'.leaving_time_id_4',
+                    $this->table.'.leaving_time_id_5',
+                    $this->table.'.leaving_editor_department_code_1',
+                    $this->table.'.leaving_editor_department_code_2',
+                    $this->table.'.leaving_editor_department_code_3',
+                    $this->table.'.leaving_editor_department_code_4',
+                    $this->table.'.leaving_editor_department_code_5',
+                    $this->table.'.leaving_editor_department_name_1',
+                    $this->table.'.leaving_editor_department_name_2',
+                    $this->table.'.leaving_editor_department_name_3',
+                    $this->table.'.leaving_editor_department_name_4',
+                    $this->table.'.leaving_editor_department_name_5',
+                    $this->table.'.leaving_editor_user_code_1',
+                    $this->table.'.leaving_editor_user_code_2',
+                    $this->table.'.leaving_editor_user_code_3',
+                    $this->table.'.leaving_editor_user_code_4',
+                    $this->table.'.leaving_editor_user_code_5',
+                    $this->table.'.leaving_editor_user_name_1',
+                    $this->table.'.leaving_editor_user_name_2',
+                    $this->table.'.leaving_editor_user_name_3',
+                    $this->table.'.leaving_editor_user_name_4',
+                    $this->table.'.leaving_editor_user_name_5',
                     $this->table.'.missing_middle_time_1',
                     $this->table.'.missing_middle_time_2',
                     $this->table.'.missing_middle_time_3',
                     $this->table.'.missing_middle_time_4',
                     $this->table.'.missing_middle_time_5',
+                    $this->table.'.missing_middle_time_id_1',
+                    $this->table.'.missing_middle_time_id_2',
+                    $this->table.'.missing_middle_time_id_3',
+                    $this->table.'.missing_middle_time_id_4',
+                    $this->table.'.missing_middle_time_id_5',
+                    $this->table.'.missing_editor_department_code_1',
+                    $this->table.'.missing_editor_department_code_2',
+                    $this->table.'.missing_editor_department_code_3',
+                    $this->table.'.missing_editor_department_code_4',
+                    $this->table.'.missing_editor_department_code_5',
+                    $this->table.'.missing_editor_department_name_1',
+                    $this->table.'.missing_editor_department_name_2',
+                    $this->table.'.missing_editor_department_name_3',
+                    $this->table.'.missing_editor_department_name_4',
+                    $this->table.'.missing_editor_department_name_5',
+                    $this->table.'.missing_editor_user_code_1',
+                    $this->table.'.missing_editor_user_code_2',
+                    $this->table.'.missing_editor_user_code_3',
+                    $this->table.'.missing_editor_user_code_4',
+                    $this->table.'.missing_editor_user_code_5',
+                    $this->table.'.missing_editor_user_name_1',
+                    $this->table.'.missing_editor_user_name_2',
+                    $this->table.'.missing_editor_user_name_3',
+                    $this->table.'.missing_editor_user_name_4',
+                    $this->table.'.missing_editor_user_name_5',
                     $this->table.'.missing_middle_return_time_1',
                     $this->table.'.missing_middle_return_time_2',
                     $this->table.'.missing_middle_return_time_3',
                     $this->table.'.missing_middle_return_time_4',
                     $this->table.'.missing_middle_return_time_5',
+                    $this->table.'.missing_middle_return_time_id_1',
+                    $this->table.'.missing_middle_return_time_id_2',
+                    $this->table.'.missing_middle_return_time_id_3',
+                    $this->table.'.missing_middle_return_time_id_4',
+                    $this->table.'.missing_middle_return_time_id_5',
+                    $this->table.'.missing_return_editor_department_code_1',
+                    $this->table.'.missing_return_editor_department_code_2',
+                    $this->table.'.missing_return_editor_department_code_3',
+                    $this->table.'.missing_return_editor_department_code_4',
+                    $this->table.'.missing_return_editor_department_code_5',
+                    $this->table.'.missing_return_editor_department_name_1',
+                    $this->table.'.missing_return_editor_department_name_2',
+                    $this->table.'.missing_return_editor_department_name_3',
+                    $this->table.'.missing_return_editor_department_name_4',
+                    $this->table.'.missing_return_editor_department_name_5',
+                    $this->table.'.missing_return_editor_user_code_1',
+                    $this->table.'.missing_return_editor_user_code_2',
+                    $this->table.'.missing_return_editor_user_code_3',
+                    $this->table.'.missing_return_editor_user_code_4',
+                    $this->table.'.missing_return_editor_user_code_5',
+                    $this->table.'.missing_return_editor_user_name_1',
+                    $this->table.'.missing_return_editor_user_name_2',
+                    $this->table.'.missing_return_editor_user_name_3',
+                    $this->table.'.missing_return_editor_user_name_4',
+                    $this->table.'.missing_return_editor_user_name_5',
                     $this->table.'.public_going_out_time_1',
                     $this->table.'.public_going_out_time_2',
                     $this->table.'.public_going_out_time_3',
                     $this->table.'.public_going_out_time_4',
                     $this->table.'.public_going_out_time_5',
+                    $this->table.'.public_going_out_time_id_1',
+                    $this->table.'.public_going_out_time_id_2',
+                    $this->table.'.public_going_out_time_id_3',
+                    $this->table.'.public_going_out_time_id_4',
+                    $this->table.'.public_going_out_time_id_5',
+                    $this->table.'.public_editor_department_code_1',
+                    $this->table.'.public_editor_department_code_2',
+                    $this->table.'.public_editor_department_code_3',
+                    $this->table.'.public_editor_department_code_4',
+                    $this->table.'.public_editor_department_code_5',
+                    $this->table.'.public_editor_department_name_1',
+                    $this->table.'.public_editor_department_name_2',
+                    $this->table.'.public_editor_department_name_3',
+                    $this->table.'.public_editor_department_name_4',
+                    $this->table.'.public_editor_department_name_5',
+                    $this->table.'.public_editor_user_code_1',
+                    $this->table.'.public_editor_user_code_2',
+                    $this->table.'.public_editor_user_code_3',
+                    $this->table.'.public_editor_user_code_4',
+                    $this->table.'.public_editor_user_code_5',
+                    $this->table.'.public_editor_user_name_1',
+                    $this->table.'.public_editor_user_name_2',
+                    $this->table.'.public_editor_user_name_3',
+                    $this->table.'.public_editor_user_name_4',
+                    $this->table.'.public_editor_user_name_5',
                     $this->table.'.public_going_out_return_time_1',
                     $this->table.'.public_going_out_return_time_2',
                     $this->table.'.public_going_out_return_time_3',
                     $this->table.'.public_going_out_return_time_4',
                     $this->table.'.public_going_out_return_time_5',
+                    $this->table.'.public_going_out_return_time_id_1',
+                    $this->table.'.public_going_out_return_time_id_2',
+                    $this->table.'.public_going_out_return_time_id_3',
+                    $this->table.'.public_going_out_return_time_id_4',
+                    $this->table.'.public_going_out_return_time_id_5',
+                    $this->table.'.public_return_editor_department_code_1',
+                    $this->table.'.public_return_editor_department_code_2',
+                    $this->table.'.public_return_editor_department_code_3',
+                    $this->table.'.public_return_editor_department_code_4',
+                    $this->table.'.public_return_editor_department_code_5',
+                    $this->table.'.public_return_editor_department_name_1',
+                    $this->table.'.public_return_editor_department_name_2',
+                    $this->table.'.public_return_editor_department_name_3',
+                    $this->table.'.public_return_editor_department_name_4',
+                    $this->table.'.public_return_editor_department_name_5',
+                    $this->table.'.public_return_editor_user_code_1',
+                    $this->table.'.public_return_editor_user_code_2',
+                    $this->table.'.public_return_editor_user_code_3',
+                    $this->table.'.public_return_editor_user_code_4',
+                    $this->table.'.public_return_editor_user_code_5',
+                    $this->table.'.public_return_editor_user_name_1',
+                    $this->table.'.public_return_editor_user_name_2',
+                    $this->table.'.public_return_editor_user_name_3',
+                    $this->table.'.public_return_editor_user_name_4',
+                    $this->table.'.public_return_editor_user_name_5',
                     $this->table.'.total_working_times',
                     $this->table.'.regular_working_times',
                     $this->table.'.out_of_regular_working_times',
@@ -1176,31 +1711,181 @@ class TempWorkingTimeDate extends Model
                 ->addselect('t2.attendance_time_positions_3')
                 ->addselect('t2.attendance_time_positions_4')
                 ->addselect('t2.attendance_time_positions_5')
+                ->addselect('t2.attendance_time_id_1')
+                ->addselect('t2.attendance_time_id_2')
+                ->addselect('t2.attendance_time_id_3')
+                ->addselect('t2.attendance_time_id_4')
+                ->addselect('t2.attendance_time_id_5')
+                ->addselect('t2.attendance_editor_department_code_1')
+                ->addselect('t2.attendance_editor_department_code_2')
+                ->addselect('t2.attendance_editor_department_code_3')
+                ->addselect('t2.attendance_editor_department_code_4')
+                ->addselect('t2.attendance_editor_department_code_5')
+                ->addselect('t2.attendance_editor_department_name_1')
+                ->addselect('t2.attendance_editor_department_name_2')
+                ->addselect('t2.attendance_editor_department_name_3')
+                ->addselect('t2.attendance_editor_department_name_4')
+                ->addselect('t2.attendance_editor_department_name_5')
+                ->addselect('t2.attendance_editor_user_code_1')
+                ->addselect('t2.attendance_editor_user_code_2')
+                ->addselect('t2.attendance_editor_user_code_3')
+                ->addselect('t2.attendance_editor_user_code_4')
+                ->addselect('t2.attendance_editor_user_code_5')
+                ->addselect('t2.attendance_editor_user_name_1')
+                ->addselect('t2.attendance_editor_user_name_2')
+                ->addselect('t2.attendance_editor_user_name_3')
+                ->addselect('t2.attendance_editor_user_name_4')
+                ->addselect('t2.attendance_editor_user_name_5')
                 ->addselect('t2.leaving_time_positions_1')
                 ->addselect('t2.leaving_time_positions_2')
                 ->addselect('t2.leaving_time_positions_3')
                 ->addselect('t2.leaving_time_positions_4')
                 ->addselect('t2.leaving_time_positions_5')
+                ->addselect('t2.leaving_time_id_1')
+                ->addselect('t2.leaving_time_id_2')
+                ->addselect('t2.leaving_time_id_3')
+                ->addselect('t2.leaving_time_id_4')
+                ->addselect('t2.leaving_time_id_5')
+                ->addselect('t2.leaving_editor_department_code_1')
+                ->addselect('t2.leaving_editor_department_code_2')
+                ->addselect('t2.leaving_editor_department_code_3')
+                ->addselect('t2.leaving_editor_department_code_4')
+                ->addselect('t2.leaving_editor_department_code_5')
+                ->addselect('t2.leaving_editor_department_name_1')
+                ->addselect('t2.leaving_editor_department_name_2')
+                ->addselect('t2.leaving_editor_department_name_3')
+                ->addselect('t2.leaving_editor_department_name_4')
+                ->addselect('t2.leaving_editor_department_name_5')
+                ->addselect('t2.leaving_editor_user_code_1')
+                ->addselect('t2.leaving_editor_user_code_2')
+                ->addselect('t2.leaving_editor_user_code_3')
+                ->addselect('t2.leaving_editor_user_code_4')
+                ->addselect('t2.leaving_editor_user_code_5')
+                ->addselect('t2.leaving_editor_user_name_1')
+                ->addselect('t2.leaving_editor_user_name_2')
+                ->addselect('t2.leaving_editor_user_name_3')
+                ->addselect('t2.leaving_editor_user_name_4')
+                ->addselect('t2.leaving_editor_user_name_5')
                 ->addselect('t2.missing_middle_time_positions_1')
                 ->addselect('t2.missing_middle_time_positions_2')
                 ->addselect('t2.missing_middle_time_positions_3')
                 ->addselect('t2.missing_middle_time_positions_4')
                 ->addselect('t2.missing_middle_time_positions_5')
+                ->addselect('t2.missing_middle_time_id_1')
+                ->addselect('t2.missing_middle_time_id_2')
+                ->addselect('t2.missing_middle_time_id_3')
+                ->addselect('t2.missing_middle_time_id_4')
+                ->addselect('t2.missing_middle_time_id_5')
+                ->addselect('t2.missing_editor_department_code_1')
+                ->addselect('t2.missing_editor_department_code_2')
+                ->addselect('t2.missing_editor_department_code_3')
+                ->addselect('t2.missing_editor_department_code_4')
+                ->addselect('t2.missing_editor_department_code_5')
+                ->addselect('t2.missing_editor_department_name_1')
+                ->addselect('t2.missing_editor_department_name_2')
+                ->addselect('t2.missing_editor_department_name_3')
+                ->addselect('t2.missing_editor_department_name_4')
+                ->addselect('t2.missing_editor_department_name_5')
+                ->addselect('t2.missing_editor_user_code_1')
+                ->addselect('t2.missing_editor_user_code_2')
+                ->addselect('t2.missing_editor_user_code_3')
+                ->addselect('t2.missing_editor_user_code_4')
+                ->addselect('t2.missing_editor_user_code_5')
+                ->addselect('t2.missing_editor_user_name_1')
+                ->addselect('t2.missing_editor_user_name_2')
+                ->addselect('t2.missing_editor_user_name_3')
+                ->addselect('t2.missing_editor_user_name_4')
+                ->addselect('t2.missing_editor_user_name_5')
                 ->addselect('t2.missing_middle_return_time_positions_1')
                 ->addselect('t2.missing_middle_return_time_positions_2')
                 ->addselect('t2.missing_middle_return_time_positions_3')
                 ->addselect('t2.missing_middle_return_time_positions_4')
                 ->addselect('t2.missing_middle_return_time_positions_5')
+                ->addselect('t2.missing_middle_return_time_id_1')
+                ->addselect('t2.missing_middle_return_time_id_2')
+                ->addselect('t2.missing_middle_return_time_id_3')
+                ->addselect('t2.missing_middle_return_time_id_4')
+                ->addselect('t2.missing_middle_return_time_id_5')
+                ->addselect('t2.missing_return_editor_department_code_1')
+                ->addselect('t2.missing_return_editor_department_code_2')
+                ->addselect('t2.missing_return_editor_department_code_3')
+                ->addselect('t2.missing_return_editor_department_code_4')
+                ->addselect('t2.missing_return_editor_department_code_5')
+                ->addselect('t2.missing_return_editor_department_name_1')
+                ->addselect('t2.missing_return_editor_department_name_2')
+                ->addselect('t2.missing_return_editor_department_name_3')
+                ->addselect('t2.missing_return_editor_department_name_4')
+                ->addselect('t2.missing_return_editor_department_name_5')
+                ->addselect('t2.missing_return_editor_user_code_1')
+                ->addselect('t2.missing_return_editor_user_code_2')
+                ->addselect('t2.missing_return_editor_user_code_3')
+                ->addselect('t2.missing_return_editor_user_code_4')
+                ->addselect('t2.missing_return_editor_user_code_5')
+                ->addselect('t2.missing_return_editor_user_name_1')
+                ->addselect('t2.missing_return_editor_user_name_2')
+                ->addselect('t2.missing_return_editor_user_name_3')
+                ->addselect('t2.missing_return_editor_user_name_4')
+                ->addselect('t2.missing_return_editor_user_name_5')
                 ->addselect('t2.public_going_out_time_positions_1')
                 ->addselect('t2.public_going_out_time_positions_2')
                 ->addselect('t2.public_going_out_time_positions_3')
                 ->addselect('t2.public_going_out_time_positions_4')
                 ->addselect('t2.public_going_out_time_positions_5')
+                ->addselect('t2.public_going_out_time_id_1')
+                ->addselect('t2.public_going_out_time_id_2')
+                ->addselect('t2.public_going_out_time_id_3')
+                ->addselect('t2.public_going_out_time_id_4')
+                ->addselect('t2.public_going_out_time_id_5')
+                ->addselect('t2.public_editor_department_code_1')
+                ->addselect('t2.public_editor_department_code_2')
+                ->addselect('t2.public_editor_department_code_3')
+                ->addselect('t2.public_editor_department_code_4')
+                ->addselect('t2.public_editor_department_code_5')
+                ->addselect('t2.public_editor_department_name_1')
+                ->addselect('t2.public_editor_department_name_2')
+                ->addselect('t2.public_editor_department_name_3')
+                ->addselect('t2.public_editor_department_name_4')
+                ->addselect('t2.public_editor_department_name_5')
+                ->addselect('t2.public_editor_user_code_1')
+                ->addselect('t2.public_editor_user_code_2')
+                ->addselect('t2.public_editor_user_code_3')
+                ->addselect('t2.public_editor_user_code_4')
+                ->addselect('t2.public_editor_user_code_5')
+                ->addselect('t2.public_editor_user_name_1')
+                ->addselect('t2.public_editor_user_name_2')
+                ->addselect('t2.public_editor_user_name_3')
+                ->addselect('t2.public_editor_user_name_4')
+                ->addselect('t2.public_editor_user_name_5')
                 ->addselect('t2.public_going_out_return_time_positions_1')
                 ->addselect('t2.public_going_out_return_time_positions_2')
                 ->addselect('t2.public_going_out_return_time_positions_3')
                 ->addselect('t2.public_going_out_return_time_positions_4')
                 ->addselect('t2.public_going_out_return_time_positions_5')
+                ->addselect('t2.public_going_out_return_time_id_1')
+                ->addselect('t2.public_going_out_return_time_id_2')
+                ->addselect('t2.public_going_out_return_time_id_3')
+                ->addselect('t2.public_going_out_return_time_id_4')
+                ->addselect('t2.public_going_out_return_time_id_5')
+                ->addselect('t2.public_return_editor_department_code_1')
+                ->addselect('t2.public_return_editor_department_code_2')
+                ->addselect('t2.public_return_editor_department_code_3')
+                ->addselect('t2.public_return_editor_department_code_4')
+                ->addselect('t2.public_return_editor_department_code_5')
+                ->addselect('t2.public_return_editor_department_name_1')
+                ->addselect('t2.public_return_editor_department_name_2')
+                ->addselect('t2.public_return_editor_department_name_3')
+                ->addselect('t2.public_return_editor_department_name_4')
+                ->addselect('t2.public_return_editor_department_name_5')
+                ->addselect('t2.public_return_editor_user_code_1')
+                ->addselect('t2.public_return_editor_user_code_2')
+                ->addselect('t2.public_return_editor_user_code_3')
+                ->addselect('t2.public_return_editor_user_code_4')
+                ->addselect('t2.public_return_editor_user_code_5')
+                ->addselect('t2.public_return_editor_user_name_1')
+                ->addselect('t2.public_return_editor_user_name_2')
+                ->addselect('t2.public_return_editor_user_name_3')
+                ->addselect('t2.public_return_editor_user_name_4')
+                ->addselect('t2.public_return_editor_user_name_5')
                 ->addselect('t2.total_working_times')
                 ->addselect('t2.regular_working_times')
                 ->addselect('t2.out_of_regular_working_times')
@@ -1241,8 +1926,7 @@ class TempWorkingTimeDate extends Model
                 ->addselect('t2.pattern')
                 ->addselect('t2.check_result')
                 ->addselect('t2.check_max_times')
-                ->addselect('t2.check_interval')
-                ->addselect('t2.fixedtime');
+                ->addselect('t2.check_interval');
             $mainquery->selectRaw(Auth::user()->id.' as created_user');
             $mainquery->selectRaw('null as updated_user');
             $mainquery->leftJoinSub($subquery1, 't2', function ($join) { 
@@ -1326,31 +2010,181 @@ class TempWorkingTimeDate extends Model
                 'attendance_time_3' => $this->array_attendance_time[2],
                 'attendance_time_4' => $this->array_attendance_time[3],
                 'attendance_time_5' => $this->array_attendance_time[4],
+                'attendance_time_id_1' => $this->array_attendance_time_id[0],
+                'attendance_time_id_2' => $this->array_attendance_time_id[1],
+                'attendance_time_id_3' => $this->array_attendance_time_id[2],
+                'attendance_time_id_4' => $this->array_attendance_time_id[3],
+                'attendance_time_id_5' => $this->array_attendance_time_id[4],
+                'attendance_editor_department_code_1' => $this->array_attendance_editor_department_code[0],
+                'attendance_editor_department_code_2' => $this->array_attendance_editor_department_code[1],
+                'attendance_editor_department_code_3' => $this->array_attendance_editor_department_code[2],
+                'attendance_editor_department_code_4' => $this->array_attendance_editor_department_code[3],
+                'attendance_editor_department_code_5' => $this->array_attendance_editor_department_code[4],
+                'attendance_editor_department_name_1' => $this->array_attendance_editor_department_name[0],
+                'attendance_editor_department_name_2' => $this->array_attendance_editor_department_name[1],
+                'attendance_editor_department_name_3' => $this->array_attendance_editor_department_name[2],
+                'attendance_editor_department_name_4' => $this->array_attendance_editor_department_name[3],
+                'attendance_editor_department_name_5' => $this->array_attendance_editor_department_name[4],
+                'attendance_editor_user_code_1' => $this->array_attendance_editor_user_code[0],
+                'attendance_editor_user_code_2' => $this->array_attendance_editor_user_code[1],
+                'attendance_editor_user_code_3' => $this->array_attendance_editor_user_code[2],
+                'attendance_editor_user_code_4' => $this->array_attendance_editor_user_code[3],
+                'attendance_editor_user_code_5' => $this->array_attendance_editor_user_code[4],
+                'attendance_editor_user_name_1' => $this->array_attendance_editor_user_name[0],
+                'attendance_editor_user_name_2' => $this->array_attendance_editor_user_name[1],
+                'attendance_editor_user_name_3' => $this->array_attendance_editor_user_name[2],
+                'attendance_editor_user_name_4' => $this->array_attendance_editor_user_name[3],
+                'attendance_editor_user_name_5' => $this->array_attendance_editor_user_name[4],
                 'leaving_time_1' => $this->array_leaving_time[0],
                 'leaving_time_2' => $this->array_leaving_time[1],
                 'leaving_time_3' => $this->array_leaving_time[2],
                 'leaving_time_4' => $this->array_leaving_time[3],
                 'leaving_time_5' => $this->array_leaving_time[4],
+                'leaving_time_id_1' => $this->array_leaving_time_id[0],
+                'leaving_time_id_2' => $this->array_leaving_time_id[1],
+                'leaving_time_id_3' => $this->array_leaving_time_id[2],
+                'leaving_time_id_4' => $this->array_leaving_time_id[3],
+                'leaving_time_id_5' => $this->array_leaving_time_id[4],
+                'leaving_editor_department_code_1' => $this->array_leaving_editor_department_code[0],
+                'leaving_editor_department_code_2' => $this->array_leaving_editor_department_code[1],
+                'leaving_editor_department_code_3' => $this->array_leaving_editor_department_code[2],
+                'leaving_editor_department_code_4' => $this->array_leaving_editor_department_code[3],
+                'leaving_editor_department_code_5' => $this->array_leaving_editor_department_code[4],
+                'leaving_editor_department_name_1' => $this->array_leaving_editor_department_name[0],
+                'leaving_editor_department_name_2' => $this->array_leaving_editor_department_name[1],
+                'leaving_editor_department_name_3' => $this->array_leaving_editor_department_name[2],
+                'leaving_editor_department_name_4' => $this->array_leaving_editor_department_name[3],
+                'leaving_editor_department_name_5' => $this->array_leaving_editor_department_name[4],
+                'leaving_editor_user_code_1' => $this->array_leaving_editor_user_code[0],
+                'leaving_editor_user_code_2' => $this->array_leaving_editor_user_code[1],
+                'leaving_editor_user_code_3' => $this->array_leaving_editor_user_code[2],
+                'leaving_editor_user_code_4' => $this->array_leaving_editor_user_code[3],
+                'leaving_editor_user_code_5' => $this->array_leaving_editor_user_code[4],
+                'leaving_editor_user_name_1' => $this->array_leaving_editor_user_name[0],
+                'leaving_editor_user_name_2' => $this->array_leaving_editor_user_name[1],
+                'leaving_editor_user_name_3' => $this->array_leaving_editor_user_name[2],
+                'leaving_editor_user_name_4' => $this->array_leaving_editor_user_name[3],
+                'leaving_editor_user_name_5' => $this->array_leaving_editor_user_name[4],
                 'missing_middle_time_1' => $this->array_missing_middle_time[0],
                 'missing_middle_time_2' => $this->array_missing_middle_time[1],
                 'missing_middle_time_3' => $this->array_missing_middle_time[2],
                 'missing_middle_time_4' => $this->array_missing_middle_time[3],
                 'missing_middle_time_5' => $this->array_missing_middle_time[4],
+                'missing_middle_time_id_1' => $this->array_missing_middle_time_id[0],
+                'missing_middle_time_id_2' => $this->array_missing_middle_time_id[1],
+                'missing_middle_time_id_3' => $this->array_missing_middle_time_id[2],
+                'missing_middle_time_id_4' => $this->array_missing_middle_time_id[3],
+                'missing_middle_time_id_5' => $this->array_missing_middle_time_id[4],
+                'missing_editor_department_code_1' => $this->array_missing_editor_department_code[0],
+                'missing_editor_department_code_2' => $this->array_missing_editor_department_code[1],
+                'missing_editor_department_code_3' => $this->array_missing_editor_department_code[2],
+                'missing_editor_department_code_4' => $this->array_missing_editor_department_code[3],
+                'missing_editor_department_code_5' => $this->array_missing_editor_department_code[4],
+                'missing_editor_department_name_1' => $this->array_missing_editor_department_name[0],
+                'missing_editor_department_name_2' => $this->array_missing_editor_department_name[1],
+                'missing_editor_department_name_3' => $this->array_missing_editor_department_name[2],
+                'missing_editor_department_name_4' => $this->array_missing_editor_department_name[3],
+                'missing_editor_department_name_5' => $this->array_missing_editor_department_name[4],
+                'missing_editor_user_code_1' => $this->array_missing_editor_user_code[0],
+                'missing_editor_user_code_2' => $this->array_missing_editor_user_code[1],
+                'missing_editor_user_code_3' => $this->array_missing_editor_user_code[2],
+                'missing_editor_user_code_4' => $this->array_missing_editor_user_code[3],
+                'missing_editor_user_code_5' => $this->array_missing_editor_user_code[4],
+                'missing_editor_user_name_1' => $this->array_missing_editor_user_name[0],
+                'missing_editor_user_name_2' => $this->array_missing_editor_user_name[1],
+                'missing_editor_user_name_3' => $this->array_missing_editor_user_name[2],
+                'missing_editor_user_name_4' => $this->array_missing_editor_user_name[3],
+                'missing_editor_user_name_5' => $this->array_missing_editor_user_name[4],
                 'missing_middle_return_time_1' => $this->array_missing_middle_return_time[0],
                 'missing_middle_return_time_2' => $this->array_missing_middle_return_time[1],
                 'missing_middle_return_time_3' => $this->array_missing_middle_return_time[2],
                 'missing_middle_return_time_4' => $this->array_missing_middle_return_time[3],
                 'missing_middle_return_time_5' => $this->array_missing_middle_return_time[4],
+                'missing_middle_return_time_id_1' => $this->array_missing_middle_return_time_id[0],
+                'missing_middle_return_time_id_2' => $this->array_missing_middle_return_time_id[1],
+                'missing_middle_return_time_id_3' => $this->array_missing_middle_return_time_id[2],
+                'missing_middle_return_time_id_4' => $this->array_missing_middle_return_time_id[3],
+                'missing_middle_return_time_id_5' => $this->array_missing_middle_return_time_id[4],
+                'missing_return_editor_department_code_1' => $this->array_missing_return_editor_department_code[0],
+                'missing_return_editor_department_code_2' => $this->array_missing_return_editor_department_code[1],
+                'missing_return_editor_department_code_3' => $this->array_missing_return_editor_department_code[2],
+                'missing_return_editor_department_code_4' => $this->array_missing_return_editor_department_code[3],
+                'missing_return_editor_department_code_5' => $this->array_missing_return_editor_department_code[4],
+                'missing_return_editor_department_name_1' => $this->array_missing_return_editor_department_name[0],
+                'missing_return_editor_department_name_2' => $this->array_missing_return_editor_department_name[1],
+                'missing_return_editor_department_name_3' => $this->array_missing_return_editor_department_name[2],
+                'missing_return_editor_department_name_4' => $this->array_missing_return_editor_department_name[3],
+                'missing_return_editor_department_name_5' => $this->array_missing_return_editor_department_name[4],
+                'missing_return_editor_user_code_1' => $this->array_missing_return_editor_user_code[0],
+                'missing_return_editor_user_code_2' => $this->array_missing_return_editor_user_code[1],
+                'missing_return_editor_user_code_3' => $this->array_missing_return_editor_user_code[2],
+                'missing_return_editor_user_code_4' => $this->array_missing_return_editor_user_code[3],
+                'missing_return_editor_user_code_5' => $this->array_missing_return_editor_user_code[4],
+                'missing_return_editor_user_name_1' => $this->array_missing_return_editor_user_name[0],
+                'missing_return_editor_user_name_2' => $this->array_missing_return_editor_user_name[1],
+                'missing_return_editor_user_name_3' => $this->array_missing_return_editor_user_name[2],
+                'missing_return_editor_user_name_4' => $this->array_missing_return_editor_user_name[3],
+                'missing_return_editor_user_name_5' => $this->array_missing_return_editor_user_name[4],
                 'public_going_out_time_1' => $this->array_public_going_out_time[0],
                 'public_going_out_time_2' => $this->array_public_going_out_time[1],
                 'public_going_out_time_3' => $this->array_public_going_out_time[2],
                 'public_going_out_time_4' => $this->array_public_going_out_time[3],
                 'public_going_out_time_5' => $this->array_public_going_out_time[4],
+                'public_going_out_time_id_1' => $this->array_public_going_out_time_id[0],
+                'public_going_out_time_id_2' => $this->array_public_going_out_time_id[1],
+                'public_going_out_time_id_3' => $this->array_public_going_out_time_id[2],
+                'public_going_out_time_id_4' => $this->array_public_going_out_time_id[3],
+                'public_going_out_time_id_5' => $this->array_public_going_out_time_id[4],
+                'public_editor_department_code_1' => $this->array_public_editor_department_code[0],
+                'public_editor_department_code_2' => $this->array_public_editor_department_code[1],
+                'public_editor_department_code_3' => $this->array_public_editor_department_code[2],
+                'public_editor_department_code_4' => $this->array_public_editor_department_code[3],
+                'public_editor_department_code_5' => $this->array_public_editor_department_code[4],
+                'public_editor_department_name_1' => $this->array_public_editor_department_name[0],
+                'public_editor_department_name_2' => $this->array_public_editor_department_name[1],
+                'public_editor_department_name_3' => $this->array_public_editor_department_name[2],
+                'public_editor_department_name_4' => $this->array_public_editor_department_name[3],
+                'public_editor_department_name_5' => $this->array_public_editor_department_name[4],
+                'public_editor_user_code_1' => $this->array_public_editor_user_code[0],
+                'public_editor_user_code_2' => $this->array_public_editor_user_code[1],
+                'public_editor_user_code_3' => $this->array_public_editor_user_code[2],
+                'public_editor_user_code_4' => $this->array_public_editor_user_code[3],
+                'public_editor_user_code_5' => $this->array_public_editor_user_code[4],
+                'public_editor_user_name_1' => $this->array_public_editor_user_name[0],
+                'public_editor_user_name_2' => $this->array_public_editor_user_name[1],
+                'public_editor_user_name_3' => $this->array_public_editor_user_name[2],
+                'public_editor_user_name_4' => $this->array_public_editor_user_name[3],
+                'public_editor_user_name_5' => $this->array_public_editor_user_name[4],
                 'public_going_out_return_time_1' => $this->array_public_going_out_return_time[0],
                 'public_going_out_return_time_2' => $this->array_public_going_out_return_time[1],
                 'public_going_out_return_time_3' => $this->array_public_going_out_return_time[2],
                 'public_going_out_return_time_4' => $this->array_public_going_out_return_time[3],
                 'public_going_out_return_time_5' => $this->array_public_going_out_return_time[4],
+                'public_going_out_return_time_id_1' => $this->array_public_going_out_return_time_id[0],
+                'public_going_out_return_time_id_2' => $this->array_public_going_out_return_time_id[1],
+                'public_going_out_return_time_id_3' => $this->array_public_going_out_return_time_id[2],
+                'public_going_out_return_time_id_4' => $this->array_public_going_out_return_time_id[3],
+                'public_going_out_return_time_id_5' => $this->array_public_going_out_return_time_id[4],
+                'public_return_editor_department_code_1' => $this->array_public_return_editor_department_code[0],
+                'public_return_editor_department_code_2' => $this->array_public_return_editor_department_code[1],
+                'public_return_editor_department_code_3' => $this->array_public_return_editor_department_code[2],
+                'public_return_editor_department_code_4' => $this->array_public_return_editor_department_code[3],
+                'public_return_editor_department_code_5' => $this->array_public_return_editor_department_code[4],
+                'public_return_editor_department_name_1' => $this->array_public_return_editor_department_name[0],
+                'public_return_editor_department_name_2' => $this->array_public_return_editor_department_name[1],
+                'public_return_editor_department_name_3' => $this->array_public_return_editor_department_name[2],
+                'public_return_editor_department_name_4' => $this->array_public_return_editor_department_name[3],
+                'public_return_editor_department_name_5' => $this->array_public_return_editor_department_name[4],
+                'public_return_editor_user_code_1' => $this->array_public_return_editor_user_code[0],
+                'public_return_editor_user_code_2' => $this->array_public_return_editor_user_code[1],
+                'public_return_editor_user_code_3' => $this->array_public_return_editor_user_code[2],
+                'public_return_editor_user_code_4' => $this->array_public_return_editor_user_code[3],
+                'public_return_editor_user_code_5' => $this->array_public_return_editor_user_code[4],
+                'public_return_editor_user_name_1' => $this->array_public_return_editor_user_name[0],
+                'public_return_editor_user_name_2' => $this->array_public_return_editor_user_name[1],
+                'public_return_editor_user_name_3' => $this->array_public_return_editor_user_name[2],
+                'public_return_editor_user_name_4' => $this->array_public_return_editor_user_name[3],
+                'public_return_editor_user_name_5' => $this->array_public_return_editor_user_name[4],
                 'total_working_times' => $this->total_working_times,
                 'regular_working_times' => $this->regular_working_times,
                 'out_of_regular_working_times' => $this->out_of_regular_working_times,

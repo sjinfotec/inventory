@@ -32,22 +32,21 @@ export const dialogable = {
         // メッセージ表示
         htmlMessageSwal: function(
             title,
-            html,
+            arrayMessage,
             icon,
             showConfirmButton,
-            showCancelButton,
-            dangerMode
+            showCancelButton
         ) {
+            this.messagedata = this.arrayTostring(arrayMessage);
             let self = this;
             return new Promise(function(resolve, reject) {
                 self.$swal({
                     title: title,
-                    text: html,
+                    html: self.messagedata,
                     icon: icon,
                     showCancelButton: showCancelButton,
                     showConfirmButton: showConfirmButton,
                     allowOutsideClick: false, //枠外をクリックしても画面を閉じない
-                    html: true
                 }).then(result => {
                     resolve(result.value);
                 });
@@ -114,7 +113,7 @@ export const dialogable = {
         arrayTostring(arrayMessage) {
             var stringdata = arrayMessage[0];
             for (var i = 1; i < arrayMessage.length; i++) {
-                stringdata += "\n" + arrayMessage[i];
+                stringdata += "<br>" + arrayMessage[i];
             }
             return stringdata;
         }

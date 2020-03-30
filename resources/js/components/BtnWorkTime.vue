@@ -39,12 +39,11 @@
         @mouseover="edttooltips('update')"
       >
         <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt=""> -->
-        指定年月締め一括集計</button>
+        指定年月締め一括集計（指定範囲により数分程度時間要する場合があります）</button>
     </div>
     <div v-if="btnMode === 'init'" class="btn-group d-flex" v-on:click="initclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
-        <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-restore-b.svg" alt="">初期設定をする</button> -->
-        この条件でカレンダー設定する</button>
+        この条件でカレンダーを一括設定する</button>
     </div>
     <div v-if="btnMode === 'copyinit'" class="btn-group d-flex" v-on:click="copyinitclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">

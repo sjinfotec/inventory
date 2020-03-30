@@ -295,7 +295,7 @@ export default {
       if (flag) {
         var messages = [];
         messages.push("パスワード変更します。よろしいですか？");
-        this.messageswal("確認", messages, "info", true, true, true)
+        this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
               this.Fixpass("変更");
@@ -387,7 +387,7 @@ export default {
         this.before_count = this.count;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("氏名", "取得");
         }
@@ -398,11 +398,10 @@ export default {
       var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("パスワードを" + eventtext + "しました");
-        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+        this.$toasted.show("パスワードを" + eventtext + "しました");
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch("パスワード", eventtext);
         }
@@ -412,7 +411,7 @@ export default {
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     inputClear() {
       this.enterPass = "";

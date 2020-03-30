@@ -8,8 +8,8 @@
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:header-text1="'年月を指定してカレンダーを設定する'"
-            v-bind:header-text2="'前月を当月に複写設定も可能です。'"
+            v-bind:header-text1="'年（または月）を指定して出勤カレンダーを設定する'"
+            v-bind:header-text2="'全従業員共通または部署ごと個人ごとに設定可能です。'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <div class="card-body pt-2">
@@ -26,12 +26,25 @@
                       id="basic-addon1"
                     >指定年<span class="color-red">[必須]</span></span>
                   </div>
-                  <input-datepicker
+                  <div class="form-control p-0">
+                    <input
+                      type="number"
+                      name="fromyear"
+                      title="指定年"
+                      max="2050"
+                      v-bind:min="year"
+                      step="1"
+                      class="form-control"
+                      v-model="valueyear"
+                      v-on:onblur="fromyearChanges"
+                    />
+                  </div>
+                  <!-- <input-datepicker
                     v-bind:default-date="valueyear"
                     v-bind:date-format="'yyyy年'"
                     v-on:change-event="fromyearChanges"
                     v-on:clear-event="fromyearCleared"
-                  ></input-datepicker>
+                  ></input-datepicker> -->
                 </div>
               </div>
               <!-- /.col -->
@@ -44,12 +57,19 @@
                       id="basic-addon1"
                     >指定月<font color="blue">[表示時必須]</font></span>
                   </div>
-                  <input-datepicker
-                    v-bind:default-date="valuemonth"
-                    v-bind:date-format="'MM月'"
-                    v-on:change-event="frommonthChanges"
-                    v-on:clear-event="frommonthCleared"
-                  ></input-datepicker>
+                  <div class="form-control p-0">
+                    <input
+                      type="number"
+                      name="frommonth"
+                      title="指定月"
+                      max="12"
+                      min="1"
+                      step="1"
+                      class="form-control"
+                      v-model="valuemonth"
+                      v-on:onblur="frommonthChanges"
+                    />
+                  </div>
                 </div>
               </div>
               <!-- /.col -->
@@ -143,6 +163,28 @@
               <!-- /.col -->
             </div>
             <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between" v-if="messagevalidatesInit.length">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <ul class="error-red color-red">
+                  <li v-for="(messagevalidate,index) in messagevalidatesInit" v-bind:key="index">{{ messagevalidate }}</li>
+                </ul>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <!-- <div class="row justify-content-between" v-if="messagevalidatesCopyinit.length"> -->
+              <!-- col -->
+              <!-- <div class="col-md-12 pb-2">
+                <ul class="error-red color-red">
+                  <li v-for="(messagevalidate,index) in messagevalidatesCopyinit" v-bind:key="index">{{ messagevalidate }}</li>
+                </ul>
+              </div> -->
+              <!-- /.col -->
+            <!-- </div> -->
+            <!-- /.row -->
             <!-- ----------- メッセージ部 END ---------------- -->
             <!-- ----------- 選択ボタン類 START ---------------- -->
             <!-- .row -->
@@ -186,32 +228,6 @@
             <!-- /.row -->
             <!-- ----------- 選択ボタン類 END ---------------- -->
           </div>
-          <!-- ----------- メッセージ部 START ---------------- -->
-          <!-- .row -->
-          <div class="row justify-content-between" v-if="messagevalidatesInit.length">
-            <!-- col -->
-            <div class="col-md-12 pb-2">
-              <ul class="error-red color-red">
-                <li v-for="(messagevalidate,index) in messagevalidatesInit" v-bind:key="index">{{ messagevalidate }}</li>
-              </ul>
-            </div>
-            <!-- /.col -->
-          </div>
-          <!-- /.row -->
-          <!-- ----------- メッセージ部 END ---------------- -->
-          <!-- ----------- メッセージ部 START ---------------- -->
-          <!-- .row -->
-          <div class="row justify-content-between" v-if="messagevalidatesCopyinit.length">
-            <!-- col -->
-            <div class="col-md-12 pb-2">
-              <ul class="error-red color-red">
-                <li v-for="(messagevalidate,index) in messagevalidatesCopyinit" v-bind:key="index">{{ messagevalidate }}</li>
-              </ul>
-            </div>
-            <!-- /.col -->
-          </div>
-          <!-- /.row -->
-          <!-- ----------- メッセージ部 END ---------------- -->
           <!-- panel contents -->
         </div>
       </div>
@@ -225,10 +241,23 @@
           <!-- panel header -->
           <daily-working-information-panel-header
             v-bind:header-text1="'◆カレンダー表示'"
-            v-bind:header-text2="'設定済みのカレンダーを編集できます。'"
+            v-bind:header-text2="stringtext"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <!-- main contentns row -->
+          <!-- ----------- 一括編集部 START ---------------- -->
+          <!-- panel contents -->
+          <!-- .row -->
+          <div class="col-md-3 pb-2 w-15 text-center align-middle">
+            <col-note
+              v-bind:item-name="'個別編集'"
+              v-bind:item-control="'INFO'"
+              v-bind:item-note="''"
+              data-toggle="tooltip"
+              data-placement="top"
+            ></col-note>
+          </div>
+          <!-- /.row -->
           <!-- ----------- 項目部 START ---------------- -->
           <table-calendarmonth
             v-bind:detail-dates="detail_dates"
@@ -237,6 +266,108 @@
             v-on:detaileditclick-event="detailEdtClick"
           ></table-calendarmonth>
           <!-- ----------- 項目部 END ---------------- -->
+          <!-- .row -->
+          <div class="col-md-3 pb-2 w-15 text-center align-middle">
+            <col-note
+              v-bind:item-name="'一括編集'"
+              v-bind:item-control="'INFO'"
+              v-bind:item-note="''"
+              data-toggle="tooltip"
+              data-placement="top"
+            ></col-note>
+          </div>
+          <!-- /.row -->
+          <div class="card-body pt-2">
+            <!-- ----------- メッセージ部 START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between" v-if="messagevalidatesBatch.length">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <ul class="error-red color-red">
+                  <li v-for="(messagevalidate,index) in messagevalidatesBatch" v-bind:key="index">{{ messagevalidate }}</li>
+                </ul>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- ----------- メッセージ部 END ---------------- -->
+            <!-- .row -->
+            <div class="row">
+              <div class="col-12">
+                <div class="table-responsive">
+                  <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                    <thead>
+                      <tr>
+                        <td class="text-center align-middle w-10 mw-rem-3">開始日<span class="color-red">[必須]</span></td>
+                        <td class="text-center align-middle w-10 mw-rem-3">終了日</td>
+                        <td class="text-center align-middle w-30">営業日区分<span class="color-red">[必須]</span></td>
+                        <td class="text-center align-middle w-30">休暇区分</td>
+                        <td class="text-center align-middle w-20">操作</td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="text-left align-middle">
+                          <input
+                            type="number"
+                            name="fromday"
+                            title="開始日"
+                            v-bind:max="date_endof"
+                            min="1"
+                            step="1"
+                            class="form-control"
+                            v-model="valuefromday"
+                          />
+                        </td>
+                        <td class="text-left align-middle">
+                          <input
+                            type="number"
+                            name="today"
+                            title="終了日"
+                            v-bind:max="date_endof"
+                            min="1"
+                            step="1"
+                            class="form-control"
+                            v-model="valuetoday"
+                          />
+                        </td>
+                        <td class="text-center align-middle">
+                          <select class="form-control" v-model="businessbatch" @change="businessbatchChanges(businessbatch)">
+                            <option value></option>
+                            <option
+                              v-for="blist in BusinessDayList"
+                              :value="blist.code"
+                              v-bind:key="blist.code"
+                            >{{ blist.code_name }}</option>
+                          </select>
+                        </td>
+                        <td class="text-center align-middle">
+                          <select class="form-control" v-model="holidaybatch" @change="holiDaybatchChanges(holidaybatch)">
+                            <option value></option>
+                            <option
+                              v-for="hlist in HoliDayList"
+                              :value="hlist.code"
+                              v-bind:key="hlist.code"
+                            >{{ hlist.code_name }}</option>
+                          </select>
+                        </td>
+                        <td class="text-center align-middle">
+                          <div class="btn-group">
+                            <button
+                              type="button"
+                              class="btn btn-success"
+                              @click="fixbatchclick()"
+                            >この内容で一括更新する</button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <!-- /.row -->
+          </div>
           <!-- /main contentns row -->
         </div>
       </div>
@@ -301,9 +432,9 @@
                     <table class="table table-striped border-bottom font-size-sm text-nowrap">
                       <thead>
                         <tr>
-                          <td class="text-left align-middle w-10 mw-rem-5">日付</td>
-                          <td class="text-left align-middle w-35 mw-rem-10">営業日区分<span class="color-red">[必須]</span></td>
-                          <td class="text-left align-middle w-35 mw-rem-10">休暇区分</td>
+                          <td class="text-center align-middle w-10 mw-rem-5">日付</td>
+                          <td class="text-center align-middle w-35 mw-rem-10">営業日区分<span class="color-red">[必須]</span></td>
+                          <td class="text-center align-middle w-35 mw-rem-10">休暇区分</td>
                         </tr>
                       </thead>
                       <tbody>
@@ -367,7 +498,7 @@
           <!-- panel header -->
           <daily-working-information-panel-header
             v-bind:header-text1="'◆カレンダー設定'"
-            v-bind:header-text2="'上記条件および設定内容でカレンダーを設定します。'"
+            v-bind:header-text2="stringtext"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <!-- ----------- メッセージ部 START ---------------- -->
@@ -393,7 +524,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
-                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
                       for="inputGroupSelect01"
                     >設定区分<span class="color-red">[必須]</span></label>
                   </div>
@@ -565,6 +696,7 @@ export default {
       valuemonth: "",
       year: "",
       month: "",
+      datejaFormat: "",
       issearchbutton: false,
       isinitbutton: false,
       isfixbutton: false,
@@ -575,6 +707,7 @@ export default {
       messagevalidatesEdt: [],
       messagevalidatesInitstore: [],
       messagevalidatesCopyinit: [],
+      messagevalidatesBatch: [],
       showC034list: true,
       selectedC034Value: "",
       valueC034killcheck: false,
@@ -617,7 +750,13 @@ export default {
         initptn_holiday : ["","","","","","",""]
       },
       detailsEdt: [],
-      detailsEdtlength: 0
+      detailsEdtlength: 0,
+      valuefromday : "",
+      valuetoday : "",
+      businessbatch : "",
+      holidaybatch : "",
+      input_date : moment().format("YYYYMMDD"),
+      date_endof : moment().endOf('month').format("DD")
     };
   },
   // マウント時
@@ -625,10 +764,11 @@ export default {
     this.valueym = this.defaultYm;
     this.year = moment(this.valueym).format("YYYY");
     this.month = moment(this.valueym).format("MM");
-    this.valueyear = this.defaultYm;
-    this.valuemonth = this.defaultYm;
+    this.valueyear = this.year;
+    this.valuemonth = this.month;
     this.getGeneralList("C007");
     this.getGeneralList("C008");
+    this.setPanelHeader();
   },
   created() {
     this.form.initptn = this.formptns.find(formptn => formptn.checked).value
@@ -638,15 +778,20 @@ export default {
     // バリデーション（表示）
     checkFormEdt: function() {
       this.messagevalidatesDsp = [];
-      var chkArray = [];
       var flag = true;
       // 指定年
+      var chkArray = [];
       var required = true;
       var equalength = 0;
       var maxlength = 0;
       var itemname = '指定年';
       chkArray = 
         this.checkHeader(this.valueyear, required, equalength, maxlength, itemname);
+      if (chkArray.length == 0) {
+        if (this.valueyear < 2000 || this.valueyear > 2050) {
+          chkArray.push("正しい年を入力してください。");
+        }
+      }
       if (chkArray.length > 0) {
         if (this.messagevalidatesDsp.length == 0) {
           this.messagevalidatesDsp = chkArray;
@@ -655,12 +800,18 @@ export default {
         }
       }
       // 指定月
+      chkArray = [];
       required = true;
       equalength = 0;
       maxlength = 0;
       itemname = '指定月';
       chkArray = 
         this.checkHeader(this.valuemonth, required, equalength, maxlength, itemname);
+      if (chkArray.length == 0) {
+        if (this.valuemonth < 1 || this.valuemonth > 12) {
+          chkArray.push("1月から12月を入力してください。");
+        }
+      }
       if (chkArray.length > 0) {
         if (this.messagevalidatesDsp.length == 0) {
           this.messagevalidatesDsp = chkArray;
@@ -668,6 +819,7 @@ export default {
           this.messagevalidatesDsp = this.messagevalidatesDsp.concat(chkArray);
         }
       }
+
 
       if (this.messagevalidatesDsp.length > 0) {
         flag = false;
@@ -677,9 +829,9 @@ export default {
     // バリデーション（更新）
     checkFormFix: function() {
       this.messagevalidatesEdt = [];
-      var chkArray = [];
       var flag = true;
       // 営業日区分
+      var chkArray = [];
       var required = true;
       var equalength = 0;
       var maxlength = 0;
@@ -704,15 +856,38 @@ export default {
     // バリデーション（初期設定）
     checkFormInit: function() {
       this.messagevalidatesInit = [];
-      var chkArray = [];
       var flag = true;
       // 指定年
+      var chkArray = [];
       var required = true;
       var equalength = 0;
       var maxlength = 0;
       var itemname = '指定年';
       chkArray = 
         this.checkHeader(this.valueyear, required, equalength, maxlength, itemname);
+      if (chkArray.length == 0) {
+        if (this.valueyear < 2000 || this.valueyear > 2050) {
+          chkArray.push("正しい年を入力してください。");
+        }
+      }
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesInit.length == 0) {
+          this.messagevalidatesInit = chkArray;
+        } else {
+          this.messagevalidatesInit = this.messagevalidatesInit.concat(chkArray);
+        }
+      }
+      // 指定月
+      chkArray = [];
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '指定月';
+      if (this.valuemonth != "" && this.valuemonth != null ) {
+        if (this.valuemonth < 1 || this.valuemonth > 12) {
+          chkArray.push("1月から12月を入力してください。");
+        }
+      }
       if (chkArray.length > 0) {
         if (this.messagevalidatesInit.length == 0) {
           this.messagevalidatesInit = chkArray;
@@ -729,37 +904,25 @@ export default {
     // バリデーション（初期設定登録）
     checkFormInitstore: function() {
       this.messagevalidatesInitstore = [];
-      var chkArray = [];
       var flag = true;
       var required = true;
       var equalength = 0;
       var maxlength = 0;
       var itemname = '';
       // // 設定区分選択
+      var chkArray = [];
       if (this.showC024list) {
         required = true;
         equalength = 0;
         maxlength = 0;
         itemname = '設定区分選択';
-        if (this.valuemonth == null || this.valuemonth == "") {
-          chkArray = 
-            this.checkHeader(this.selectedC024Value, required, equalength, maxlength, itemname);
-          if (chkArray.length > 0) {
-            if (this.messagevalidatesInitstore.length == 0) {
-              this.messagevalidatesInitstore = chkArray;
-            } else {
-              this.messagevalidatesInitstore = this.messagevalidatesInitstore.concat(chkArray);
-            }
-          }
-        } else {
-          chkArray = 
-            this.checkHeader(this.selectedC034Value, required, equalength, maxlength, itemname);
-          if (chkArray.length > 0) {
-            if (this.messagevalidatesInitstore.length == 0) {
-              this.messagevalidatesInitstore = chkArray;
-            } else {
-              this.messagevalidatesInitstore = this.messagevalidatesInitstore.concat(chkArray);
-            }
+        chkArray = 
+          this.checkHeader(this.selectedC024Value, required, equalength, maxlength, itemname);
+        if (chkArray.length > 0) {
+          if (this.messagevalidatesInitstore.length == 0) {
+            this.messagevalidatesInitstore = chkArray;
+          } else {
+            this.messagevalidatesInitstore = this.messagevalidatesInitstore.concat(chkArray);
           }
         }
       }
@@ -788,15 +951,20 @@ export default {
     // バリデーション（複写設定）
     checkFormCopyinit: function() {
       this.messagevalidatesCopyinit = [];
-      var chkArray = [];
       var flag = true;
       // 指定年
+      var chkArray = [];
       var required = true;
       var equalength = 0;
       var maxlength = 0;
       var itemname = '指定年';
       chkArray = 
         this.checkHeader(this.valueyear, required, equalength, maxlength, itemname);
+      if (chkArray.length == 0) {
+        if (this.valueyear < 2000 || this.valueyear > 2050) {
+          chkArray.push("正しい年を入力してください。");
+        }
+      }
       if (chkArray.length > 0) {
         if (this.messagevalidatesCopyinit.length == 0) {
           this.messagevalidatesCopyinit = chkArray;
@@ -805,6 +973,7 @@ export default {
         }
       }
       // 指定月
+      chkArray = [];
       required = true;
       equalength = 0;
       maxlength = 0;
@@ -820,6 +989,85 @@ export default {
       }
 
       if (this.messagevalidatesCopyinit.length > 0) {
+        flag = false;
+      }
+      return flag;
+    },
+    // バリデーション（一括更新）
+    checkFormBatch: function() {
+      this.messagevalidatesBatch = [];
+      var flag = true;
+      // 開始日
+      var chkArray = [];
+      var required = true;
+      var equalength = 0;
+      var maxlength = 0;
+      var itemname = '開始日';
+      chkArray = 
+        this.checkHeader(this.valuefromday, required, equalength, maxlength, itemname);
+      if (chkArray.length == 0) {
+        if (this.valuefromday < 1 || this.valuefromday > this.date_endof) {
+          chkArray.push("開始日に正しい日付を入力してください。");
+        }
+      }
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesBatch.length == 0) {
+          this.messagevalidatesBatch = chkArray;
+        } else {
+          this.messagevalidatesBatch = this.messagevalidatesBatch.concat(chkArray);
+        }
+      }
+      // 終了日
+      chkArray = [];
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '終了日';
+      if (this.valuetoday != "" && this.valuetoday != null) {
+        if (this.valuetoday < 1 || this.valuetoday > this.date_endof) {
+          chkArray.push("終了日に正しい日付を入力してください。");
+        }
+        if (chkArray.length > 0) {
+          if (this.messagevalidatesBatch.length == 0) {
+            this.messagevalidatesBatch = chkArray;
+          } else {
+            this.messagevalidatesBatch = this.messagevalidatesBatch.concat(chkArray);
+          }
+        }
+      }
+
+      if (this.messagevalidatesBatch.length == 0) {
+        if (this.valuetoday != "" && this.valuetoday != null) {
+          if (this.valuefromday > this.valuetoday) {
+            chkArray.push("開始日　＞　終了日となっています。");
+          }
+          if (chkArray.length > 0) {
+            if (this.messagevalidatesBatch.length == 0) {
+              this.messagevalidatesBatch = chkArray;
+            } else {
+              this.messagevalidatesBatch = this.messagevalidatesBatch.concat(chkArray);
+            }
+          }
+        }
+      }
+
+      // 営業日区分
+      chkArray = [];
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '営業日区分';
+      chkArray = 
+        this.checkHeader(this.businessbatch, required, equalength, maxlength, itemname, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesBatch.length == 0) {
+          this.messagevalidatesBatch = chkArray;
+        } else {
+          this.messagevalidatesBatch = this.messagevalidatesBatch.concat(chkArray);
+        }
+      }
+
+      if (this.messagevalidatesBatch.length > 0) {
         flag = false;
       }
       return flag;
@@ -926,6 +1174,20 @@ export default {
       }
     },
     // 出勤区分がクリアされた場合の処理
+    businessbatchChanges: function(value) {
+      if (value < 2) {
+        this.holidaybatch = null;
+      }
+    },
+    // 休暇区分がクリアされた場合の処理
+    holiDaybatchChanges: function(value) {
+      if (value < 1) {
+        this.businessbatch = 1;
+      } else {
+        this.businessbatch = 3;
+      }
+    },
+    // 出勤区分がクリアされた場合の処理
     formbusinessDayChanges: function(value, index) {
       if (value < 2) {
         this.initptn_holiday[index] = null;
@@ -943,11 +1205,7 @@ export default {
     searchclick() {
       // 入力項目クリア
       this.inputClear();
-      this.messagevalidatesInit = [];
-      this.messagevalidatesDsp = [];
-      this.messagevalidatesEdt = [];
-      this.messagevalidatesInitstore = [];
-      this.messagevalidatesCopyinit = [];
+      this.messageClear();
       if (this.checkFormEdt()) {
         this.selectMode = 'DSP';
         this.isinitbutton = false;
@@ -956,7 +1214,6 @@ export default {
     },
     // 明細編集ボタンクリックされた場合の処理
     detailEdtClick: function(e, arrayitem) {
-      console.log('arrayitem[rowIndex] = ' + arrayitem['rowIndex']);
       var index = arrayitem['rowIndex'];
       this.selectMode = 'EDT';
       this.isinitbutton = false;
@@ -973,17 +1230,20 @@ export default {
     initclick() {
       // 入力項目クリア
       this.inputClear();
-      this.messagevalidatesInit = [];
-      this.messagevalidatesDsp = [];
-      this.messagevalidatesEdt = [];
-      this.messagevalidatesInitstore = [];
-      this.messagevalidatesCopyinit = [];
+      this.messageClear();
       var flag = this.checkFormInit();
       if (flag) {
         this.selectMode = 'INT';
-        this.isinitbutton = true;
-        // パネルに表示
-        this.setPanelHeader();
+        if (this.valuemonth == "" || this.valuemonth == null) {
+          this.frommonthCleared();
+        } else {
+          if (this.valuemonth > 0) {
+            this.frommonthChanges(this.valuemonth);
+          } else {
+            this.frommonthCleared();
+          }
+        }
+        this.selectMode = 'INT';
       // 項目数が多い場合以下コメントアウト
       // } else {
       //   this.countswal("エラー", this.messagevalidatesInit, "error", true, false, true)
@@ -995,16 +1255,12 @@ export default {
     },
     //更新ボタンクリック処理
     fixclick() {
-      this.messagevalidatesInit = [];
-      this.messagevalidatesDsp = [];
-      this.messagevalidatesEdt = [];
-      this.messagevalidatesInitstore = [];
-      this.messagevalidatesCopyinit = [];
+      this.messageClear();
       var flag = this.checkFormFix();
       if (flag) {
         var messages = [];
         messages.push("この内容で更新しますか？");
-        this.messageswal("確認", messages, "info", true, true, true)
+        this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
               this.FixDetail("更新");
@@ -1021,17 +1277,14 @@ export default {
     },
     //初期設定登録ボタンクリック処理
     initstoreclick() {
-      this.messagevalidatesInit = [];
-      this.messagevalidatesDsp = [];
-      this.messagevalidatesEdt = [];
-      this.messagevalidatesInitstore = [];
-      this.messagevalidatesCopyinit = [];
+      this.messageClear();
       var flag = this.checkFormInitstore();
       if (flag) {
         var messages = [];
-        messages.push("指定年（月）に登録しているデータを上書きしますが、初期設定登録してもよろしいですか？");
+        messages.push("指定年（月）に登録しているデータを上書きしますが、");
+        messages.push("初期設定登録してもよろしいですか？");
         messages.push("※指定期間が長いと処理には数分かかる場合があります。");
-        this.messageswal("確認", messages, "info", true, true, true)
+        this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
               this.initStore("初期設定登録", this.form.initptn);
@@ -1050,11 +1303,7 @@ export default {
     copyinitclick() {
       // 入力項目クリア
       this.inputClear();
-      this.messagevalidatesInit = [];
-      this.messagevalidatesDsp = [];
-      this.messagevalidatesEdt = [];
-      this.messagevalidatesInitstore = [];
-      this.messagevalidatesCopyinit = [];
+      this.messageClear();
       var flag = this.checkFormCopyinit();
       if (flag) {
         this.selectMode = 'INT';
@@ -1068,6 +1317,28 @@ export default {
       //       if (result) {
       //       }
       //   });
+      }
+    },
+    // 一括更新ボタンクリック処理
+    fixbatchclick() {
+      this.messageClear();
+      var flag = this.checkFormBatch();
+      if (flag) {
+        var messages = [];
+        messages.push("この内容で一括更新しますか？");
+        this.htmlMessageSwal("確認", messages, "info", true, true)
+          .then(result  => {
+            if (result) {
+              this.FixDetailbatch("一括更新");
+            }
+        });
+      // 項目数が多い場合以下コメントアウト
+      } else {
+        this.countswal("エラー", this.messagevalidatesBatch, "error", true, false, true)
+          .then(result  => {
+            if (result) {
+            }
+        });
       }
     },
 
@@ -1089,23 +1360,44 @@ export default {
     // カレンダー取得処理
     getItem() {
       var parammonth = null;
+      this.input_date = null;
       if (this.valuemonth != "") {
         parammonth = moment(this.valuemonth).format("MM");
+        this.input_date = moment(this.valueyear + this.valuemonth.padStart(2, "0") + '15').format("YYYYMMDD");
+      } else {
+        // 本来ありえない
+        parammonth = moment().format("MM");
+        this.input_date = tmoment(this.valueyear + '0115').format("YYYYMMDD");
       }
-      var arrayParams = {
-        dateyear : moment(this.valueyear).format("YYYY"),
-        datemonth : parammonth,
-        employmentstatus : this.selectedEmploymentValue,
-        departmentcode : this.selectedDepartmentValue,
-        usercode : this.selectedUserValue
-      };
-      this.postRequest("/setting_calendar/get", arrayParams)
-        .then(response  => {
-          this.getThen(response);
-        })
-        .catch(reason => {
-          this.serverCatch("カレンダー", "取得");
-        });
+      this.date_endof = moment(this.input_date).endOf('month').format("DD");
+
+      // 処理中メッセージ表示
+      this.$swal({
+        title: "処　理　中...",
+        html: "",
+        allowOutsideClick: false, //枠外をクリックしても画面を閉じない
+        showConfirmButton: false,
+        showCancelButton: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+          var arrayParams = {
+            dateyear : moment(this.valueyear + '0115').format("YYYY"),
+            datemonth : parammonth,
+            employmentstatus : this.selectedEmploymentValue,
+            departmentcode : this.selectedDepartmentValue,
+            usercode : this.selectedUserValue
+          };
+          this.postRequest("/setting_calendar/get", arrayParams)
+            .then(response  => {
+              this.$swal.close();
+              this.getThen(response);
+            })
+            .catch(reason => {
+              this.$swal.close();
+              this.serverCatch("カレンダー", "取得");
+            });
+        }
+      });
     },
     // カレンダー登録処理
     initStore(eventname, ptn) {
@@ -1126,7 +1418,7 @@ export default {
           this.$swal.showLoading();
           var arrayParams = {
             ptn : ptn,
-            dateyear : moment(this.valueyear).format("YYYY"),
+            dateyear : moment(this.valueyear + '0115').format("YYYY"),
             datemonth : parammonth,
             displaykbn : paramselectedC024Value,
             employmentstatus : this.selectedEmploymentValue,
@@ -1164,7 +1456,7 @@ export default {
         onBeforeOpen: () => {
           this.$swal.showLoading();
           var arrayParams = {
-            dateyear : moment(this.valueyear).format("YYYY"),
+            dateyear : moment(this.valueyear + '0115').format("YYYY"),
             datemonth : parammonth,
             employmentstatus : this.selectedEmploymentValue,
             departmentcode : this.selectedDepartmentValue,
@@ -1192,6 +1484,35 @@ export default {
         .catch(reason => {
           this.serverCatch("カレンダー", eventname);
         });
+    },
+    // カレンダー一括更新処理
+    FixDetailbatch(eventname) {
+      var paramfromdate = null;
+      var paramtodate = null;
+      if (this.valuemonth != "") {
+        paramfromdate = moment(this.valueyear + this.valuemonth.padStart(2, "0") + this.valuefromday.padStart(2, "0")).format("YYYYMMDD");
+        if (this.valuetoday != "") {
+          paramtodate = moment(this.valueyear + this.valuemonth.padStart(2, "0") + this.valuetoday.padStart(2, "0")).format("YYYYMMDD");
+        } else {
+          paramtodate = paramfromdate;
+        }
+        var arrayParams = {
+            employmentstatus : this.selectedEmploymentValue,
+            departmentcode : this.selectedDepartmentValue,
+            usercode : this.selectedUserValue,
+            fromdate : paramfromdate,
+            todate : paramtodate,
+            businessdays: this.businessbatch,
+            holidays : this.holidaybatch
+        };
+        this.postRequest("/setting_calendar/fixbatch", arrayParams)
+          .then(response  => {
+            this.putThenBatch(response, eventname);
+          })
+          .catch(reason => {
+            this.serverCatch("カレンダー", eventname);
+          });
+      }
     },
     // コード選択リスト取得処理
     getGeneralList(value) {
@@ -1226,7 +1547,7 @@ export default {
         this.detail_dates = res.detail_dates;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false)
         } else {
           this.serverCatch("カレンダー", "取得");
         }
@@ -1238,11 +1559,9 @@ export default {
       var res = response.data;
       if (res.result) {
         this.$toasted.show("カレンダーを" + eventtext + "しました");
-        // messages.push("カレンダーを" + eventtext + "しました");
-        // this.messageswal(eventtext + "完了", messages, "success", true, false, true);
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false)
         } else {
           this.serverCatch("カレンダー",eventtext);
         }
@@ -1254,21 +1573,36 @@ export default {
       var res = response.data;
       if (res.result) {
         this.$toasted.show("カレンダーを" + eventtext + "しました");
-        // messages.push("カレンダーを" + eventtext + "しました");
-        // this.messageswal(eventtext + "完了", messages, "success", true, false, true);
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false)
         } else {
           this.serverCatch("カレンダー", eventtext);
         }
       }
     },
+    // 一括更新系正常処理
+    putThenBatch(response, eventtext) {
+      var messages = [];
+      var res = response.data;
+      if (res.result) {
+        this.$toasted.show("カレンダーを" + eventtext + "しました");
+      } else {
+        if (res.messagedata.length > 0) {
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false)
+        } else {
+          this.serverCatch("カレンダー", eventtext);
+        }
+      }
+      this.selectMode = 'DSP';
+      this.isinitbutton = false;
+      this.getItem();
+    },
     // 異常処理
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false)
     },
     // 取得正常処理（明細出勤区分）
     getThenbusinesskbn(response) {
@@ -1277,7 +1611,7 @@ export default {
         this.BusinessDayList = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false)
         } else {
           this.serverCatch("出勤区分", "取得");
         }
@@ -1290,7 +1624,7 @@ export default {
         this.HoliDayList = res.details;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false)
         } else {
           this.serverCatch("休暇区分", "取得");
         }
@@ -1299,49 +1633,39 @@ export default {
     inputClear() {
       this.details = [];
     },
+    // メッセージクリア
+    messageClear() {
+      this.messagevalidatesInit = [];
+      this.messagevalidatesDsp = [];
+      this.messagevalidatesEdt = [];
+      this.messagevalidatesInitstore = [];
+      this.messagevalidatesCopyinit = [];
+      this.messagevalidatesBatch = [];
+    },
     // 集計パネルヘッダ文字列編集処理
     setPanelHeader: function() {
       moment.locale("ja");
       var datejaFormat = "";
-      if (this.valueyear == null || this.valueyear == "") {
-        this.stringtext = "";
-      } else {
+      this.stringtext = "";
+      if (this.valueyear != null && this.valueyear != "") {
         if (this.valuemonth != null && this.valuemonth != "") {
-          datejaFormat +=  moment(this.valuemonth).format("MM月");
-          if (this.selectedC034Value == null || this.selectedC034Value == "") {
-            this.stringtext = "";
+          datejaFormat +=  moment(this.valueyear + this.valuemonth + '15').format("YYYY年MM月");
+          if (this.selectMode == 'INT') {
+            this.stringtext =
+              datejaFormat + "のカレンダーを1日から設定";
           } else {
-            datejaFormat = moment(this.valueyear).format("YYYY年");
-            if (this.valuemonth != null && this.valuemonth != "") {
-              datejaFormat +=  moment(this.valuemonth).format("MM月");
-            }
-            if (this.selectedC034Value == "2") {
-              this.stringtext =
-                datejaFormat + "のカレンダーを1日から設定";
-            } else {
-              if (this.selectedC034Value == "1") {
-                this.stringtext =
-                  datejaFormat + "のカレンダーを前月締日+1日から設定";
-              } else {
-                this.stringtext = "";
-              }
-            }
+            this.stringtext =
+              datejaFormat + "のカレンダーを1日から表示";
           }
         } else {
-          if (this.selectedC024Value == null || this.selectedC024Value == "") {
-            this.stringtext = "";
-          } else {
-            datejaFormat = moment(this.valueyear).format("YYYY年");
-            if (this.selectedC024Value == "2") {
+          datejaFormat +=  moment(this.valueyear + '0115').format("YYYY年");
+          if (this.selectedC024Value != null && this.selectedC024Value != "") {
+            if (this.selectedC024Value == "1") {
               this.stringtext =
-                datejaFormat + "のカレンダーを1月1日から設定";
+                datejaFormat + "のカレンダーを期首月１日から設定";
             } else {
-              if (this.selectedC024Value == "1") {
-                this.stringtext =
-                  datejaFormat + "のカレンダーを期首月1日から設定";
-              } else {
-                this.stringtext = "";
-              }
+              this.stringtext =
+                datejaFormat + "のカレンダーを１月１日から設定";
             }
           }
         }
@@ -1368,7 +1692,12 @@ export default {
 };
 </script>
 <style scoped>
+
 .table th, .table td {
     padding: 0rem !important;
+}
+
+.mw-rem-3 {
+  min-width: 3rem;
 }
 </style>
