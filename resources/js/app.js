@@ -48,6 +48,10 @@ Vue.prototype.$axios = axios;
 
 // const files = require.context('./', true, /\.vue$/i);
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default));
+Vue.component(
+    "home-component",
+    require("./components/HomeComponent.vue").default
+);
 
 // 日次集計
 Vue.component(
