@@ -434,6 +434,68 @@ class WorkingTimeTable extends Model
     }
 
     /**
+     * 詳細取得（時間の丸め用）
+     *
+     * @return void
+     */
+    public function getWorkingTimeTableRound(){
+        try {
+            $sqlString = "";
+            $sqlString .= "select ";
+            $sqlString .= "  t1.id ";
+            $sqlString .= "  , t1.no ";
+            $sqlString .= "  , t1.name ";
+            $sqlString .= "  , t1.working_time_kubun ";
+            $sqlString .= "  , DATE_FORMAT(t1.from_time, '%H%i%s') as from_time ";
+            $sqlString .= "  , DATE_FORMAT(t1.to_time, '%H%i%s') as to_time ";
+            $sqlString .= "from ";
+            $sqlString .= $this->table." as t1 ";
+            $sqlString .= "  inner join ( ";
+            $sqlString .= "    select ";
+            $sqlString .= "      no as no ";
+            $sqlString .= "      , MAX(apply_term_from) as max_apply_term_from ";
+            $sqlString .= "    from ";
+            $sqlString .= $this->table;
+            $sqlString .= "    where ";
+            $sqlString .= "      apply_term_from <= ? ";
+            $sqlString .= "      and is_deleted = ? ";
+            $sqlString .= "    group by ";
+            $sqlString .= "      no ";
+            $sqlString .= "   ) as t2 ";
+            $sqlString .= " on t2.no = t1.no ";
+            $sqlString .= " and t2.max_apply_term_from = t1.apply_term_from ";
+            $sqlString .= "where ";
+            $sqlString .= "  t1.no < ? ";
+            $sqlString .= "  and t1.working_time_kubun in (?,?) ";
+            $sqlString .= "  and t1.is_deleted = ? ";
+            $sqlString .= "order by ";
+            $sqlString .= "  t1.no asc ";
+            $sqlString .= "  , t1.working_time_kubun asc ";
+            $sqlString .= "  , t1.from_time asc ";
+            // バインド
+            $array_setBindingsStr = array();
+            $array_setBindingsStr[] = $this->param_date_from;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 9999;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 2;
+            $array_setBindingsStr[] = 0;
+            $results = DB::select($sqlString, $array_setBindingsStr);
+
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    
+        return $results;
+    }
+
+    /**
      * 論理削除
      *
      * @return void

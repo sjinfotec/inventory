@@ -79,8 +79,10 @@ use App\ApprovalRouteNo;
  *          時刻日付変換to                          : convTimeToDateTo
  *          インターバル時間を取得して分に変換する    : getIntevalMinute
  *      8.設定
- *          タイムテーブルの分解            : analyzeTimeTable
- *          reqestクエリーセット            : setRequestQeury
+ *          タイムテーブルの分解                        : analyzeTimeTable
+ *          タイムテーブル労働開始終了時間テーブル設定    : setWorkingStartEndTimeTable
+ *          タイムテーブル編集設定                      : edtTimeTable
+ *          reqestクエリーセット                        : setRequestQeury
  * 
  *
  */
@@ -1697,99 +1699,76 @@ class ApiCommonController extends Controller
      *
      * @return 分で返却
      */
-    public function roundTimeByTimeStart($round_date, $round_time, $time_unit, $time_rounding){
+    public function roundTimeByTimeStart($params){
 
-        $result_round_time = $round_time;
-        $dt = new Carbon($result_round_time);
-        $target_h = $dt->format("H");
-        $target_i = $dt->format("i");
-        $target_s = $dt->format("s");
-        $w_time_h = (int)$target_h;
-        $w_time_i = (int)$target_i;
-        $result_w_time_h = $target_h;
-        $result_w_time_i = $target_i;
+        $current_date = $params['current_date'];
+        $start_time = $params['start_time'];
+        $time_unit = $params['time_unit'];
+        $time_rounding = $params['time_rounding'];
+        $working_timetable_no = $params['working_timetable_no'];
+        $array_get_timetable_result = $params['array_get_timetable_result'];
+        Log::debug('roundTimeByTimeStart = $params[start_time]'.$params['start_time']);
+        // 1分単位の場合はそのまま
         if ($time_unit == Config::get('const.C009.round1')) {
-            $result_round_time = $round_time;
-        } elseif ($time_unit == Config::get('const.C009.round5')) {
-            if ($w_time_i >= 56) {
-                $result_w_time_i = "00";
-                $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
-            } elseif ($w_time_i >= 51) {
-                $result_w_time_i = "55";
-            } elseif ($w_time_i >= 46) {
-                $result_w_time_i = "50";
-            } elseif ($w_time_i >= 41) {
-                $result_w_time_i = "45";
-            } elseif ($w_time_i >= 36) {
-                $result_w_time_i = "40";
-            } elseif ($w_time_i >= 31) {
-                $result_w_time_i = "35";
-            } elseif ($w_time_i >= 26) {
-                $result_w_time_i = "30";
-            } elseif ($w_time_i >= 21) {
-                $result_w_time_i = "25";
-            } elseif ($w_time_i >= 16) {
-                $result_w_time_i = "20";
-            } elseif ($w_time_i >= 11) {
-                $result_w_time_i = "15";
-            } elseif ($w_time_i >= 6) {
-                $result_w_time_i = "10";
-            } elseif ($w_time_i >= 1) {
-                $result_w_time_i = "05";
-            } else {
-                $result_w_time_i = "00";
-            }
-            $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-            $result_round_time = $dt->format("Y-m-d H:i:s");
-        } elseif ($time_unit == Config::get('const.C009.round10')) {
-            if ($w_time_i >= 51) {
-                $result_w_time_i = "00";
-                $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
-            } elseif ($w_time_i >= 41) {
-                $result_w_time_i = "50";
-            } elseif ($w_time_i >= 31) {
-                $result_w_time_i = "40";
-            } elseif ($w_time_i >= 21) {
-                $result_w_time_i = "30";
-            } elseif ($w_time_i >= 11) {
-                $result_w_time_i = "20";
-            } elseif ($w_time_i >= 1) {
-                $result_w_time_i = "10";
-            } else {
-                $result_w_time_i = "00";
-            }
-            $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-            $result_round_time = $dt->format("Y-m-d H:i:s");
-        } elseif ($time_unit == Config::get('const.C009.round15')) {
-            if ($w_time_i >= 46) {
-                $result_w_time_i = "00";
-                $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
-            } elseif ($w_time_i >= 31) {
-                $result_w_time_i = "45";
-            } elseif ($w_time_i >= 16) {
-                $result_w_time_i = "30";
-            } elseif ($w_time_i >= 1) {
-                $result_w_time_i = "15";
-            } else {
-                $result_w_time_i = "00";
-            }
-            $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-            $result_round_time = $dt->format("Y-m-d H:i:s");
-        } elseif ($time_unit == Config::get('const.C009.round30')) {
-            if ($w_time_i >= 31) {
-                $result_w_time_i = "00";
-                $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
-            } elseif ($w_time_i >= 1) {
-                $result_w_time_i = "30";
-            } else {
-                $result_w_time_i = "00";
-            }
-            $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-            $result_round_time = $dt->format("Y-m-d H:i:s");
-        } elseif ($time_unit == Config::get('const.C009.round60')) {
-            $result_round_time = $round_time;
+            return $start_time;
         }
-
+        // start_time時刻が丸めタイムテーブルのどこに該当するか決める
+        // start_time時刻<丸めタイムテーブルの労働開始時間
+        $dt = new Carbon($start_time);
+        $target_his = $dt->format("His");
+        $source_start_time = null;
+        $source_to_time = null;
+        $last_start_time = null;
+        foreach($array_get_timetable_result as $item) {
+            if ($item['no'] == $working_timetable_no) {
+                foreach($item['timetable'] as $edt_item) {
+                    $last_start_time = $edt_item['from_time'];
+                    if ($target_his < $edt_item['from_time']) {
+                        $source_start_time = $edt_item['from_time'];
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        // データない場合はそのまま
+        if ($last_start_time == null) {
+            return $start_time;
+        }
+        if ($source_start_time == null || $source_start_time == "") {
+            $source_start_time = $last_start_time;
+        }
+        // 
+        $carbon_ymd = $dt->format("Y-m-d");
+        $source_dt = new Carbon($carbon_ymd." ".$source_start_time);
+        $calc_times = $this->diffTimeSerial($start_time, $source_dt);
+        // 分単位
+        $calc_times_unit = 1;
+        if ($time_unit == Config::get('const.C009.round5')) {
+            $calc_times_unit = 5 * 60;
+        } elseif ($time_unit == Config::get('const.C009.round10')) {
+            $calc_times_unit = 10 * 60;
+        } elseif ($time_unit == Config::get('const.C009.round15')) {
+            $calc_times_unit = 15 * 60;
+        } elseif ($time_unit == Config::get('const.C009.round30')) {
+            $calc_times_unit = 30 * 60;
+        } elseif ($time_unit == Config::get('const.C009.round60')) {
+            $calc_times_unit = 60 * 60;
+        }
+        // start_time丸め
+        $calc_times_round = floor($calc_times / $calc_times_unit) * $calc_times_unit;
+        // 出勤時刻が労働時間開始前
+        if ($target_his <= $source_start_time) {
+            // source_dtの$calc_times_round前
+            $result_round_time = date('Y-m-d H:i:00',strtotime((0-$calc_times_round).' second',strtotime($source_dt)));
+        } else {
+            // source_dtの$calc_times_round後
+            if ($calc_times_round < 0) {
+                $calc_times_round = 0-$calc_times_round;
+            }
+            $result_round_time = date('Y-m-d H:i:00',strtotime(('+'.$calc_times_round).' second',strtotime($source_dt)));
+        }
+        Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
         return $result_round_time;
     }
 
@@ -1798,259 +1777,82 @@ class ApiCommonController extends Controller
      *
      * @return 分で返却
      */
-    public function roundTimeByTimeEnd($round_date, $round_time, $time_unit, $time_rounding){
+    public function roundTimeByTimeEnd($params){
 
-        $result_round_time = $round_time;
-        Log::DEBUG('roundTimeByTime $result_round_time = '.$result_round_time);
-        $dt = new Carbon($result_round_time);
-        $target_h = $dt->format("H");
-        $target_i = $dt->format("i");
-        $target_s = $dt->format("s");
-        $w_time_h = (int)$target_h;
-        $w_time_i = (int)$target_i;
-        $result_w_time_h = $target_h;
-        $result_w_time_i = $target_i;
-        Log::DEBUG('roundTimeByTime $target_h = '.$target_h);
-        Log::DEBUG('roundTimeByTime $target_i = '.$target_i);
-        Log::DEBUG('roundTimeByTime $target_s = '.$target_s);
-        if ($time_rounding == Config::get('const.C010.round_half_up')) {
-            // 四捨五入
-            if ($time_unit == Config::get('const.C009.round1')) {
-                $result_round_time = $round_time;
-            } elseif ($time_unit == Config::get('const.C009.round5')) {
-                if ($w_time_i <= 2) {
-                    $result_w_time_i = "00";
-                } elseif ($w_time_i <= 7) {
-                    $result_w_time_i = "05";
-                } elseif ($w_time_i <= 12) {
-                    $result_w_time_i = "10";
-                } elseif ($w_time_i <= 17) {
-                    $result_w_time_i = "15";
-                } elseif ($w_time_i <= 22) {
-                    $result_w_time_i = "20";
-                } elseif ($w_time_i <= 27) {
-                    $result_w_time_i = "25";
-                } elseif ($w_time_i <= 32) {
-                    $result_w_time_i = "30";
-                } elseif ($w_time_i <= 37) {
-                    $result_w_time_i = "35";
-                } elseif ($w_time_i <= 42) {
-                    $result_w_time_i = "40";
-                } elseif ($w_time_i <= 47) {
-                    $result_w_time_i = "45";
-                } elseif ($w_time_i <= 52) {
-                    $result_w_time_i = "50";
-                } elseif ($w_time_i <= 57) {
-                    $result_w_time_i = "55";
-                } else {
-                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
-                    $result_w_time_i = "00";
-                }
-                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-                $result_round_time = $dt->format("Y-m-d H:i:s");
-            } elseif ($time_unit == Config::get('const.C009.round10')) {
-                if ($w_time_i <= 4) {
-                    $result_w_time_i = "00";
-                } elseif ($w_time_i <= 14) {
-                    $result_w_time_i = "10";
-                } elseif ($w_time_i <= 24) {
-                    $result_w_time_i = "20";
-                } elseif ($w_time_i <= 34) {
-                    $result_w_time_i = "30";
-                } elseif ($w_time_i <= 44) {
-                    $result_w_time_i = "40";
-                } elseif ($w_time_i <= 54) {
-                    $result_w_time_i = "50";
-                } else {
-                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
-                    $result_w_time_i = "00";
-                }
-                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-                $result_round_time = $dt->format("Y-m-d H:i:s");
-            } elseif ($time_unit == Config::get('const.C009.round15')) {
-                if ($w_time_i <= 6) {
-                    $result_w_time_i = "00";
-                } elseif ($w_time_i <= 21) {
-                    $result_w_time_i = "15";
-                } elseif ($w_time_i <= 36) {
-                    $result_w_time_i = "30";
-                } elseif ($w_time_i <= 51) {
-                    $result_w_time_i = "45";
-                } else {
-                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
-                    $result_w_time_i = "00";
-                }
-                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-                $result_round_time = $dt->format("Y-m-d H:i:s");
-            } elseif ($time_unit == Config::get('const.C009.round30')) {
-                if ($w_time_i <= 12) {
-                    $result_w_time_i = "00";
-                } elseif ($w_time_i <= 42) {
-                    $result_w_time_i = "30";
-                } else {
-                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
-                    $result_w_time_i = "00";
-                }
-                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-                $result_round_time = $dt->format("Y-m-d H:i:s");
-            } elseif ($time_unit == Config::get('const.C009.round60')) {
-                $result_round_time = $round_time;
-            }
-        } elseif ($time_rounding == Config::get('const.C010.round_down')) {
-            // 切り捨て
-            if ($time_unit == Config::get('const.C009.round1')) {
-                $result_round_time = $round_time;
-            } elseif ($time_unit == Config::get('const.C009.round5')) {
-                if ($w_time_i <= 4) {
-                    $result_w_time_i = "00";
-                } elseif ($w_time_i <= 9) {
-                    $result_w_time_i = "05";
-                } elseif ($w_time_i <= 14) {
-                    $result_w_time_i = "10";
-                } elseif ($w_time_i <= 19) {
-                    $result_w_time_i = "15";
-                } elseif ($w_time_i <= 24) {
-                    $result_w_time_i = "20";
-                } elseif ($w_time_i <= 29) {
-                    $result_w_time_i = "25";
-                } elseif ($w_time_i <= 34) {
-                    $result_w_time_i = "30";
-                } elseif ($w_time_i <= 39) {
-                    $result_w_time_i = "35";
-                } elseif ($w_time_i <= 44) {
-                    $result_w_time_i = "40";
-                } elseif ($w_time_i <= 49) {
-                    $result_w_time_i = "45";
-                } elseif ($w_time_i <= 54) {
-                    $result_w_time_i = "50";
-                } else {
-                    $result_w_time_i = "55";
-                }
-                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-                $result_round_time = $dt->format("Y-m-d H:i:s");
-            } elseif ($time_unit == Config::get('const.C009.round10')) {
-                if ($w_time_i <= 9) {
-                    $result_w_time_i = "00";
-                } elseif ($w_time_i <= 19) {
-                    $result_w_time_i = "10";
-                } elseif ($w_time_i <= 29) {
-                    $result_w_time_i = "20";
-                } elseif ($w_time_i <= 39) {
-                    $result_w_time_i = "30";
-                } elseif ($w_time_i <= 49) {
-                    $result_w_time_i = "40";
-                } else {
-                    $result_w_time_i = "50";
-                }
-                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-                $result_round_time = $dt->format("Y-m-d H:i:s");
-            } elseif ($time_unit == Config::get('const.C009.round15')) {
-                if ($w_time_i <= 14) {
-                    $result_w_time_i = "00";
-                } elseif ($w_time_i <= 29) {
-                    $result_w_time_i = "15";
-                } elseif ($w_time_i <= 44) {
-                    $result_w_time_i = "30";
-                } else {
-                    $result_w_time_i = "45";
-                }
-                Log::DEBUG('roundTimeByTime $substr($round_time,11) = '.substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-                Log::DEBUG('roundTimeByTime $dt = '.$dt);
-                $result_round_time = $dt->format("Y-m-d H:i:s");
-            } elseif ($time_unit == Config::get('const.C009.round30')) {
-                if ($w_time_i <= 29) {
-                    $result_w_time_i = "00";
-                } else {
-                    $result_w_time_i = "30";
-                }
-                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-                $result_round_time = $dt->format("Y-m-d H:i:s");
-            } elseif ($time_unit == Config::get('const.C009.round60')) {
-                $result_round_time = $round_time;
-            }
-        } elseif ($time_rounding == Config::get('const.C010.round_up')) {
-            // 切り上げ
-            if ($time_unit == Config::get('const.C009.round1')) {
-                $result_round_time = $round_time;
-            } elseif ($time_unit == Config::get('const.C009.round5')) {
-                if ($w_time_i <= 5) {
-                    $result_w_time_i = "05";
-                } elseif ($w_time_i <= 10) {
-                    $result_w_time_i = "10";
-                } elseif ($w_time_i <= 15) {
-                    $result_w_time_i = "15";
-                } elseif ($w_time_i <= 20) {
-                    $result_w_time_i = "20";
-                } elseif ($w_time_i <= 25) {
-                    $result_w_time_i = "25";
-                } elseif ($w_time_i <= 30) {
-                    $result_w_time_i = "30";
-                } elseif ($w_time_i <= 35) {
-                    $result_w_time_i = "35";
-                } elseif ($w_time_i <= 40) {
-                    $result_w_time_i = "40";
-                } elseif ($w_time_i <= 45) {
-                    $result_w_time_i = "45";
-                } elseif ($w_time_i <= 50) {
-                    $result_w_time_i = "50";
-                } elseif ($w_time_i <= 55) {
-                    $result_w_time_i = "55";
-                } else {
-                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
-                    $result_w_time_i = "00";
-                }
-                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-                $result_round_time = $dt->format("Y-m-d H:i:s");
-            } elseif ($time_unit == Config::get('const.C009.round10')) {
-                if ($w_time_i <= 10) {
-                    $result_w_time_i = "10";
-                } elseif ($w_time_i <= 20) {
-                    $result_w_time_i = "20";
-                } elseif ($w_time_i <= 30) {
-                    $result_w_time_i = "30";
-                } elseif ($w_time_i <= 40) {
-                    $result_w_time_i = "40";
-                } elseif ($w_time_i <= 50) {
-                    $result_w_time_i = "50";
-                } else {
-                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
-                    $result_w_time_i = "00";
-                }
-                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-                $result_round_time = $dt->format("Y-m-d H:i:s");
-            } elseif ($time_unit == Config::get('const.C009.round15')) {
-                if ($w_time_i <= 15) {
-                    $result_w_time_i = "15";
-                } elseif ($w_time_i <= 30) {
-                    $result_w_time_i = "30";
-                } elseif ($w_time_i <= 45) {
-                    $result_w_time_i = "45";
-                } else {
-                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
-                    $result_w_time_i = "00";
-                }
-                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-                $result_round_time = $dt->format("Y-m-d H:i:s");
-            } elseif ($time_unit == Config::get('const.C009.round30')) {
-                if ($w_time_i <= 30) {
-                    $result_w_time_i = "30";
-                } else {
-                    $result_w_time_h = str_pad($w_time_h + 1, 2, 0, STR_PAD_LEFT);
-                    $result_w_time_i = "00";
-                }
-                $dt = new Carbon(substr($round_time,0,11).$result_w_time_h.":".$result_w_time_i.":00");
-                $result_round_time = $dt->format("Y-m-d H:i:s");
-            } elseif ($time_unit == Config::get('const.C009.round60')) {
-                $result_round_time = $round_time;
-            }
-        } elseif ($time_unit == Config::get('const.C010.non')) {
-            $result_round_time = $round_time;
-        } else {
-            $result_round_time = $round_time;
+        $current_date = $params['current_date'];
+        $end_time = $params['end_time'];
+        $time_unit = $params['time_unit'];
+        $time_rounding = $params['time_rounding'];
+        $working_timetable_no = $params['working_timetable_no'];
+        $array_get_timetable_result = $params['array_get_timetable_result'];
+        Log::debug('roundTimeByTimeEnd = $params[end_time]'.$params['end_time']);
+        // 1分単位の場合はそのまま
+        if ($time_unit == Config::get('const.C009.round1')) {
+            return $end_time;
         }
-        Log::DEBUG('roundTimeByTime $result_round_time = '.$result_round_time);
-
+        // end_time時刻が丸めタイムテーブルのどこに該当するか決める
+        // end_time時刻<丸めタイムテーブルの労働開始時間
+        $dt = new Carbon($end_time);
+        $target_his = $dt->format("His");
+        $source_end_time = null;
+        $source_to_time = null;
+        $last_end_time = null;
+        foreach($array_get_timetable_result as $item) {
+            if ($item['no'] == $working_timetable_no) {
+                foreach($item['timetable'] as $edt_item) {
+                    $last_end_time = $edt_item['to_time'];
+                    if ($target_his < $edt_item['to_time']) {
+                        $source_end_time = $edt_item['to_time'];
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        // データない場合はそのまま
+        if ($last_end_time == null) {
+            return $end_time;
+        }
+        if ($source_end_time == null || $source_end_time == "") {
+            $source_end_time = $last_end_time;
+        }
+        // 
+        $carbon_ymd = $dt->format("Y-m-d");
+        $source_dt = new Carbon($carbon_ymd." ".$source_end_time);
+        $calc_times = $this->diffTimeSerial($end_time, $source_dt);
+        // 分単位
+        $calc_times_unit = 1;
+        if ($time_unit == Config::get('const.C009.round5')) {
+            $calc_times_unit = 5 * 60;
+        } elseif ($time_unit == Config::get('const.C009.round10')) {
+            $calc_times_unit = 10 * 60;
+        } elseif ($time_unit == Config::get('const.C009.round15')) {
+            $calc_times_unit = 15 * 60;
+        } elseif ($time_unit == Config::get('const.C009.round30')) {
+            $calc_times_unit = 30 * 60;
+        } elseif ($time_unit == Config::get('const.C009.round60')) {
+            $calc_times_unit = 60 * 60;
+        }
+        // end_time丸め
+        $calc_times_round_double = $calc_times / $calc_times_unit;
+        $calc_times_round_floor = floor($calc_times_round_double);
+        if ($calc_times_round_double == $calc_times_round_floor) {
+            $calc_times_round = floor($calc_times / $calc_times_unit) * $calc_times_unit;
+        } else {
+            $calc_times_round = $calc_times_unit + (floor($calc_times / $calc_times_unit) * $calc_times_unit);
+        }
+        // 退勤時刻が労働時間終了前
+        if ($target_his <= $source_end_time) {
+            // source_dtの$calc_times_round前
+            $result_round_time = date('Y-m-d H:i:00',strtotime((0-$calc_times_round).' second',strtotime($source_dt)));
+        } else {
+            // source_dtの$calc_times_round後
+            if ($calc_times_round < 0) {
+                $calc_times_round = 0-$calc_times_round;
+            }
+            $result_round_time = date('Y-m-d H:i:00',strtotime(('+'.$calc_times_round).' second',strtotime($source_dt)));
+        }
+        Log::debug('roundTimeByTimeEnd $result_round_time = '.$result_round_time);
         return $result_round_time;
     }
 
@@ -2536,7 +2338,6 @@ class ApiCommonController extends Controller
      */
     public function convTimeToDateFrom($from_time, $current_date, $target_from_time, $target_to_time){
 
-        Log::DEBUG('         ------------- convTimeToDateFrom in ');
         $current_date_ymd = date_format(new Carbon($current_date),'Ymd');
         $target_from_ymd = date_format(new Carbon($target_from_time),'Ymd');
         $target_from_his = date_format(new Carbon($target_from_time),'His');
@@ -2561,7 +2362,6 @@ class ApiCommonController extends Controller
             //$cnv_from_date = new Carbon($target_from_ymd.' '.$target_from_his);
             $cnv_from_date = new Carbon($target_from_ymd.' '.$from_time);
         }
-        Log::DEBUG('         ------------- convTimeToDateFrom end '.$cnv_from_date);
 
         return $cnv_from_date;
     }
@@ -2571,8 +2371,6 @@ class ApiCommonController extends Controller
      * @return 日付時刻
      */
     public function convTimeToDateTo($from_time, $to_time, $current_date, $target_from_time, $target_to_time){
-
-        Log::DEBUG('         ------------- convTimeToDateTo in ');
 
         $current_date_ymd = date_format(new Carbon($current_date),'Ymd');
         $target_from_ymd = date_format(new Carbon($target_from_time),'Ymd');    // 打刻時刻
@@ -2608,7 +2406,6 @@ class ApiCommonController extends Controller
                 }
             }
         }
-        Log::DEBUG('         ------------- convTimeToDateTo end '.$cnv_to_date);
 
         return $cnv_to_date;
     }
@@ -2648,8 +2445,6 @@ class ApiCommonController extends Controller
      * @return 
      */
     public function analyzeTimeTable($timetables, $working_time_kubun, $working_timetable_no){
-        Log::DEBUG('        タイムテーブルの分解 analyzeTimeTable in $working_time_kubun = '.$working_time_kubun);
-        Log::DEBUG('        タイムテーブルの分解 analyzeTimeTable in $working_timetable_no = '.$working_timetable_no);
         $array_times = array();
         if ($working_time_kubun != Config::get('const.C004.out_of_regular_working_time')) {
             $filtered = $timetables->where('no', $working_timetable_no)->where('working_time_kubun', $working_time_kubun);
@@ -2767,10 +2562,6 @@ class ApiCommonController extends Controller
             }
             $array_times = $temp_times;
         }
-        foreach($array_times as $item) {
-            Log::DEBUG('             タイムテーブルの分解 result --- analyzeTimeTable in $array_time from_time = '.$item['from_time']);
-            Log::DEBUG('             タイムテーブルの分解 result --- analyzeTimeTable in $array_time to_time = '.$item['to_time']);
-        }
         return $array_times;
     }
     
@@ -2781,29 +2572,123 @@ class ApiCommonController extends Controller
      * @return 時間差
      */
     public function setWorkingStartEndTimeTable($target_date){
-        // タイムテーブル取得（所定時間と休憩時間）
-        // 設定項目よりインターバル時間を取得
-        $setting_model = new Setting();
-        $dt = new Carbon($target_datetime);
-        $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
-        $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
-        $settings = $setting_model->getSettingDatas();
-        $interval = 0;
-        foreach($settings as $setting) {
-            if (isset($setting->interval)) {
-                $interval = $setting->interval;
-                break;
+        try {
+            // タイムテーブル取得（所定時間と休憩時間）
+            $timetable_model = new WorkingTimeTable();
+            $dt = new Carbon($target_date);
+            $timetable_model->setParamdatefromAttribute(date_format($dt, 'Ymd'));
+            // タイムテーブル取得(丸め）
+            $results = $timetable_model->getWorkingTimeTableRound();
+            $current_no = null;
+            $current_item = null;
+            $array_no = array();
+            $array_timetable = array();
+            $array_edt_timetable = array();
+            $breaktime_cnt = 0;
+            // タイムテーブル労働開始終了時間テーブル設定
+            foreach($results as $item) {
+                if($current_no == null) {$current_no = $item->no;}
+                if($current_item == null) {$current_item = $item;}
+                if($current_no == $item->no) {
+                    if ($item->working_time_kubun == Config::get('const.C004.regular_working_breaks_time')) {
+                        $breaktime_cnt++;
+                    }
+                    $array_timetable[] = array(
+                        'working_time_kubun' => $item->working_time_kubun,
+                        'from_time' => $item->from_time,
+                        'to_time' => $item->to_time
+                    );
+                } else {
+                    // テーブル編集設定
+                    $array_timetable = $this->edtTimeTable($array_timetable, $breaktime_cnt);
+                    $array_no[] = array(
+                        'no' => $current_item->no,
+                        'name' => $current_item->name,
+                        'timetable' => $array_timetable
+                    );
+                    $current_no = $item->no;
+                    $current_item = $item;
+                    $array_timetable = array();
+                    $array_timetable[] = array(
+                        'working_time_kubun' => $item->working_time_kubun,
+                        'from_time' => $item->from_time,
+                        'to_time' => $item->to_time
+                    );
+                }
+            }
+            // 残り
+            if (count($array_timetable) > 0) {
+                // テーブル編集設定
+                $array_timetable = $this->edtTimeTable($array_timetable, $breaktime_cnt);
+                $array_no[] = array(
+                    'no' => $current_item->no,
+                    'name' => $current_item->name,
+                    'timetable' => $array_timetable
+                );
+            }
+            return $array_no;
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error').'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+    
+
+    /**
+     * タイムテーブル編集設定
+     *      
+     * @return void
+     */
+    private function edtTimeTable($array_timetable, $breaktime_cnt)
+    {
+        $array_edt_timetable = array();
+        $array_from_time = array();
+        $array_to_time = array();
+        $edt_item_cnt = 0;
+        $jdg_tie_kubun = 0;
+        $first_from_time = null;
+        if ($breaktime_cnt > 0) {
+            // 休憩時間があれば休憩時間でのテーブル編集設定
+            $jdg_tie_kubun = Config::get('const.C004.regular_working_breaks_time');
+        } else {
+            // 休憩時間がなければ所定時間でのテーブル編集設定
+            $jdg_tie_kubun = Config::get('const.C004.regular_working_time');
+        }
+        foreach($array_timetable as $edt_item) {
+            if ($edt_item['working_time_kubun'] == $jdg_tie_kubun) {
+                if ($edt_item['from_time'] != "" && $edt_item['from_time'] != null) {
+                    if ($jdg_tie_kubun == Config::get('const.C004.regular_working_breaks_time')) {
+                        $array_from_time[] = $edt_item['to_time'];
+                        $edt_item_cnt++;
+                        if ($first_from_time == null) {
+                            $first_from_time = $edt_item['from_time'];
+                        } else {
+                            $array_to_time[] = $edt_item['from_time'];
+                        }
+                    } else {
+                        $array_from_time[] = $edt_item['from_time'];
+                        $array_to_time[] = $edt_item['to_time'];
+                    }
+                }
             }
         }
-        // 設定されていない場合はチェック不要
-        if ($interval == 0) {return true;}
-        // $target_datetime - $before_datetime <= $interval であること
-        $diffInterval = $this->diffTimeSerial($before_datetime, $target_datetime);
-        // $intervalも$diffIntervalもシリアル値
-        if ($diffInterval < $interval * 60 * 60) {
-            return Config::get('const.C018.interval_stamp');
+        if ($jdg_tie_kubun == Config::get('const.C004.regular_working_breaks_time')) {
+            if ($first_from_time != null) {
+                $array_to_time[] = $first_from_time;
+            }
         }
-        return Config::get('const.RESULT_CODE.normal');
+        for ($i=0;$i<count($array_from_time);$i++) {
+            $array_edt_timetable[] = array(
+                'working_time_kubun' => $edt_item['working_time_kubun'],
+                'from_time' => $array_from_time[$i],
+                'to_time' => $array_to_time[$i]
+            );
+        }
+
+        return $array_edt_timetable;
     }
     
 

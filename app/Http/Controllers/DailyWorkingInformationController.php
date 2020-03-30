@@ -430,7 +430,7 @@ class DailyWorkingInformationController extends Controller
                         $timetables = $timetable_model->getWorkingTimeTableJoin();
                         if (count($timetables) > 0) {
                             // 日次集計
-                            $add_result = $this->calcTempWorkingTimeDate($timetables);
+                            $add_result = $this->calcTempWorkingTimeDate($timetables, $datefrom);
                         } else {
                             $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_setting_timetable'));
                             Log::error(Config::get('const.LOG_MSG.not_setting_timetable'));
@@ -4461,7 +4461,7 @@ class DailyWorkingInformationController extends Controller
      *
      * @return 集計結果
      */
-    private function calcTempWorkingTimeDate($timetables){
+    private function calcTempWorkingTimeDate($timetables, $target_date){
 
         Log::DEBUG('---------------------- calcTempWorkingTimeDate in ------------------------ ');
         $this->not_employment_working = 0;
@@ -4573,6 +4573,8 @@ class DailyWorkingInformationController extends Controller
         $before_holiday_set = false;
 
         $apicommon = new ApiCommonController();
+        // 時間丸め用にタイムテーブル労働開始終了時間テーブル設定をしておく
+        $array_get_timetable_result = $apicommon->setWorkingStartEndTimeTable($target_date);
         // ユーザー単位処理
         $temp_calc_model = new TempCalcWorkingTime();
         $worktimes = $temp_calc_model->getTempCalcWorkingtime();
@@ -4834,14 +4836,32 @@ class DailyWorkingInformationController extends Controller
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
                             if (($array_working_time_kubun[$i] <> Config::get('const.C004.regular_working_breaks_time')) &&
                                 ($array_working_time_kubun[$i] <> Config::get('const.C004.working_breaks_time')))  {
+                                // roundTimeByTimeStart implement
+                                $array_roundTimeByTimeStart = array (
+                                    'current_date' => $current_date,
+                                    'start_time' => $attendance_time,
+                                    'time_unit' => $result->time_unit,
+                                    'time_rounding' => $result->time_rounding,
+                                    'working_timetable_no' => $working_timetable_no,
+                                    'array_get_timetable_result' => $array_get_timetable_result
+                                );
+                                // roundTimeByTimeEnd implement
+                                $array_roundTimeByTimeEnd = array (
+                                    'current_date' => $current_date,
+                                    'end_time' => $leaving_time,
+                                    'time_unit' => $result->time_unit,
+                                    'time_rounding' => $result->time_rounding,
+                                    'working_timetable_no' => $working_timetable_no,
+                                    'array_get_timetable_result' => $array_get_timetable_result
+                                );
                                 $array_calc_time[$i] += 
                                     $this->calcTimes(Config::get('const.INC_NO.attendace_leaving'),
                                         $timetables,
                                         $working_timetable_no,
                                         $array_working_time_kubun[$i],
                                         $current_date,
-                                        $apicommon->roundTimeByTimeStart($current_date, $attendance_time, $result->time_unit, $result->time_rounding),
-                                        $apicommon->roundTimeByTimeEnd($current_date, $leaving_time, $result->time_unit, $result->time_rounding),
+                                        $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart),
+                                        $apicommon->roundTimeByTimeEnd($array_roundTimeByTimeEnd),
                                         $array_calc_time,
                                         $array_missing_middle_time
                                     );
@@ -4854,8 +4874,9 @@ class DailyWorkingInformationController extends Controller
                                         $working_timetable_no,
                                         $array_working_time_kubun[$i],
                                         $current_date,
-                                        $apicommon->roundTimeByTimeStart($current_date, $attendance_time, $result->time_unit, $result->time_rounding),
-                                        $apicommon->roundTimeByTimeEnd($current_date, $leaving_time, $result->time_unit, $result->time_rounding));
+                                        $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart),
+                                        $apicommon->roundTimeByTimeEnd($array_roundTimeByTimeEnd)
+                                    );
                             }
                         }
                         // 出勤退勤時刻を初期化して次の計算準備
