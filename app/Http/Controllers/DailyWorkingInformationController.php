@@ -7330,7 +7330,8 @@ class DailyWorkingInformationController extends Controller
             // $calc_time = round(($w_time / 60 / 60) + 0.005,2);
             // timestampを99.99hにする
             $calc_time = $apicommon->cnvToDecFromStamp($w_time);
-       }
+            // $calc_time = $apicommon->cnvToDecFromStamp($w_time);
+        }
         // 平日は時間外労働時間＝残業時間
         // ---- 取り消し--休日は所定労働時間+時間外労働時間>8の場合、所定労働時間+時間外労働時間-8=残業時間
         // 休日は残業時間は単価は1.25で休日の労働時間同じなので休日の労働時間に加算
