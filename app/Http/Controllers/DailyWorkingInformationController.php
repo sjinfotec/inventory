@@ -6649,8 +6649,8 @@ class DailyWorkingInformationController extends Controller
             // 時間登録の終了時間
             $to_time = $result_time['to_time'];
             Log::DEBUG(' ◆◆◆◆◆　労働時間計算　 ◆◆◆◆◆◆');
-            Log::DEBUG('            from_time = '.$from_time);
-            Log::DEBUG('            to_time = '.$to_time);
+            Log::DEBUG('            タイムテーブル from_time = '.$from_time);
+            Log::DEBUG('            タイムテーブル to_time = '.$to_time);
             if (isset($from_time) && isset($to_time)) {
                 // from_time日付付与
                 $working_time_from_time = $apicommon->convTimeToDateFrom($from_time, $current_date, $target_from_time, $target_to_time);         
@@ -6659,7 +6659,6 @@ class DailyWorkingInformationController extends Controller
                 $working_time_to_time = $apicommon->convTimeToDateTo($from_time, $to_time, $current_date, $target_from_time, $target_to_time);         
                 $working_time_calc_to = $working_time_to_time;
                 // ------------------ DEBUG strat ----------------------------------------
-                Log::DEBUG(' 　　　　　　working_time_kubun = '.$working_time_kubun);
                 Log::DEBUG('            working_time_from_time = '.$working_time_from_time);
                 Log::DEBUG('　　　　　　 出勤時刻または外出  target_from_time = '.$target_from_time);
                 Log::DEBUG('            退勤時刻または戻り  target_to_time = '.$target_to_time);
@@ -7314,7 +7313,9 @@ class DailyWorkingInformationController extends Controller
             $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
             //$regular_calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
             $total_time_regular_calc_time = $w_time;
-            $regular_calc_time = round(($w_time / 60 / 60) + 0.005,2);
+            // $regular_calc_time = round(($w_time / 60 / 60) + 0.005,2);
+            // timestampを99.99hにする
+            $regular_calc_time = $apicommon->cnvToDecFromStamp($w_time);
         }
         // 時間外労働時間
         $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
@@ -7326,8 +7327,10 @@ class DailyWorkingInformationController extends Controller
             // $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
             // $calc_time = round($w_time / 60 / 60,2);
             $total_time_over_time = $w_time;
-            $calc_time = round(($w_time / 60 / 60) + 0.005,2);
-        }
+            // $calc_time = round(($w_time / 60 / 60) + 0.005,2);
+            // timestampを99.99hにする
+            $calc_time = $apicommon->cnvToDecFromStamp($w_time);
+       }
         // 平日は時間外労働時間＝残業時間
         // ---- 取り消し--休日は所定労働時間+時間外労働時間>8の場合、所定労働時間+時間外労働時間-8=残業時間
         // 休日は残業時間は単価は1.25で休日の労働時間同じなので休日の労働時間に加算
@@ -7372,15 +7375,21 @@ class DailyWorkingInformationController extends Controller
             // $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
             // $calc_time = round($w_time / 60 / 60,2);
             $total_time = $total_time + $w_time;
-            $calc_time = round(($w_time / 60 / 60) + 0.005,2);
-        }
+            // $calc_time = round(($w_time / 60 / 60) + 0.005,2);
+            // timestampを99.99hにする
+            $calc_time = $apicommon->cnvToDecFromStamp($w_time);
+         }
         $temp_working_model->setLatenightovertimehoursAttribute($calc_time);
         // $total_time = $total_time + $calc_time;
         // 深夜労働時間
         // $w_time = round($this->calc_late_night_working_hours / 60 / 60,2);
-        $w_time = round(($this->calc_late_night_working_hours / 60 / 60) + 0.005,2);
+        // $w_time = round(($this->calc_late_night_working_hours / 60 / 60) + 0.005,2);
+        // timestampを99.99hにする
+        $w_time = $apicommon->cnvToDecFromStamp($this->calc_late_night_working_hours);
         $temp_working_model->setLatenightworkinghoursAttribute($w_time);
-        $total_time = round(($total_time / 60 / 60) + 0.005,2);
+        // $total_time = round(($total_time / 60 / 60) + 0.005,2);
+        // timestampを99.99hにする
+        $total_time = $apicommon->cnvToDecFromStamp($total_time);
         // $total_time = $total_time + $w_time;
         // 残業時間
         $temp_working_model->setOvertimehoursAttribute($overtime_hours);
@@ -7481,12 +7490,20 @@ class DailyWorkingInformationController extends Controller
             if ($regular_calc_time > 0) {
                 $w_calc_time = $w_time - $w_break_time - $total_time_regular_calc_time;
                 if ($w_calc_time < 0) { $w_calc_time = 0; }
-                if ($w_calc_time > 0) { $w_calc_time = round(($w_calc_time / 60 / 60) + 0.005,2); }
+                if ($w_calc_time > 0) {
+                    // $w_calc_time = round(($w_calc_time / 60 / 60) + 0.005,2);
+                    // timestampを99.99hにする
+                    $w_calc_time = $apicommon->cnvToDecFromStamp($w_calc_time);
+                }
                 $temp_working_model->setNotemploymentworkinghoursAttribute($w_calc_time);
             } else {
                 // 欠勤の場合は規則所定労働時間を不就労に設定
                 if ($target_result->holiday_kubun == Config::get('const.C013.absence_work')) {
-                    $w_calc_time = round(($w_time / 60 / 60) + 0.005,2) - round(($w_break_time / 60 / 60) + 0.005,2);
+                    // $w_calc_time = round(($w_time / 60 / 60) + 0.005,2) - round(($w_break_time / 60 / 60) + 0.005,2);
+                    // timestampを99.99hにする
+                    $w_time = $apicommon->cnvToDecFromStamp($w_time);
+                    $w_break_time = $apicommon->cnvToDecFromStamp($w_break_time);
+                    $w_calc_time = $w_time - $w_break_time;
                     if ($w_calc_time < 0) { $w_calc_time = 0; }
                     $temp_working_model->setNotemploymentworkinghoursAttribute($w_calc_time);
                 } else {
@@ -7509,9 +7526,13 @@ class DailyWorkingInformationController extends Controller
         }
         // $calc_time = round($apicommon->roundTime($calc_time + $calc_missing_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
         // $calc_time = round(($calc_time + $calc_missing_time) / 60 / 60,2);
-        $calc_time = round((($calc_time + $calc_missing_time) / 60 / 60) + 0.005,2);
+        // $calc_time = round((($calc_time + $calc_missing_time) / 60 / 60) + 0.005,2);
+        // timestampを99.99hにする
+        $calc_time = $apicommon->cnvToDecFromStamp(($calc_time + $calc_missing_time));
         // $calc_missing_time = round($calc_missing_time / 60 / 60,2);
-        $calc_missing_time = round(($calc_missing_time / 60 / 60) + 0.005,2);
+        // $calc_missing_time = round(($calc_missing_time / 60 / 60) + 0.005,2);
+        // timestampを99.99hにする
+        $calc_missing_time = $apicommon->cnvToDecFromStamp($calc_missing_time);
         // $calc_missing_time = round($apicommon->roundTime($calc_missing_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
         $temp_working_model->setMissingmiddlehoursAttribute($calc_missing_time);
         // 公用外出時間
@@ -7524,7 +7545,9 @@ class DailyWorkingInformationController extends Controller
 
         // $calc_time = round($apicommon->roundTime($calc_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
         // $calc_time = round($calc_time / 60 / 60,2);
-        $calc_time = round(($calc_time / 60 / 60) + 0.005,2);
+        // $calc_time = round(($calc_time / 60 / 60) + 0.005,2);
+        // timestampを99.99hにする
+        $calc_time = $apicommon->cnvToDecFromStamp($calc_time);
         $temp_working_model->setPublicgoingouthoursAttribute($calc_time);
         $temp_working_model->setWorkingtimetablenoAttribute($target_result->working_timetable_no);
         $temp_working_model->setWorkingstatusAttribute($working_status);

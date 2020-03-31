@@ -2435,6 +2435,25 @@ class ApiCommonController extends Controller
         $mm = ($interval - floor($interval)) * 60;
         return str_pad($hh, 2 , '0', STR_PAD_LEFT).":".str_pad($mm, 2 , '0', STR_PAD_LEFT).":00";
     }
+    
+    /**
+     * timestampを時間単位の10進数に変換する
+     * 
+     *  設定する時刻はDATEで
+     *
+     * @return 99.99
+     */
+    public function cnvToDecFromStamp($target_time){
+        $w_time_division = $target_time / 3600;
+        $w_time_int = floor($w_time_division);
+        $w_time_decimal_part = $w_time_division - $w_time_int;
+        $convert_time = $w_time_int;
+        if ($w_time_decimal_part > 0) {
+            $convert_time += round($w_time_decimal_part + 0.005,2);
+        }
+        return $convert_time;
+    }
+
     // -------------  7.変換 end -------------------------------------------------------------- //
 
     // -------------  8.設定 start ------------------------------------------------------------ //
