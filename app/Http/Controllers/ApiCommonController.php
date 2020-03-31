@@ -2444,14 +2444,29 @@ class ApiCommonController extends Controller
      * @return 99.99
      */
     public function cnvToDecFromStamp($target_time){
-        $w_time_division = $target_time / 3600;
+        $time_division = $target_time / 3600;
+        $time_int = floor($time_division);
+        $convert_time = $time_int;
+        // 小数第３位が0でない場合は四捨五入
+        $w_time_division = $target_time / 36;
         $w_time_int = floor($w_time_division);
         $w_time_decimal_part = $w_time_division - $w_time_int;
-        $convert_time = $w_time_int;
         if ($w_time_decimal_part > 0) {
-            $convert_time += round($w_time_decimal_part + 0.005,2);
+            $convert_time += round(($time_division - $time_int), 2);
         }
         return $convert_time;
+    }
+    
+    /**
+     * timestampをHisに変換する
+     * 
+     *  設定する時刻はDATEで
+     *
+     * @return 99.99
+     */
+    public function cnvToHisFromStamp($target_stamp){
+        $dt_basic = new Carbon('2019-01-01 00:00:00');
+        return date('H:i:00',strtotime(('+'.$target_stamp).' second',strtotime($dt_basic)));
     }
 
     // -------------  7.変換 end -------------------------------------------------------------- //
