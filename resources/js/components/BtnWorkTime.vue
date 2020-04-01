@@ -141,6 +141,16 @@
       <button type="button" class="btn btn-danger btn-lg font-size-rg w-100" :disabled="isPush">
         削除する</button>
     </div>
+    <div v-if="btnMode === 'usersupload'" class="btn-group d-flex" v-on:click="usersuploadclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+      <img class="icon-size-sm mr-2 pb-1" src="/images/file-upload-icon-vector-01.svg" alt="">
+        CSVから作成する</button>
+    </div>
+    <div v-if="btnMode === 'csvusers'" class="btn-group d-flex" v-on:click="usersdownloadclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+      <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
+      ユーザー情報ダウンロード</button>
+    </div>
   </button>
   </div>
 </template>
@@ -265,6 +275,12 @@ export default {
     },
     deleteclickBtn : function() {
       this.$emit('deleteclick-event',event);
+    },
+    usersuploadclickBtn : function() {
+      this.$emit('usersupload-event',event);
+    },
+    usersdownloadclickBtn : function() {
+      this.$emit('usersdownload-event',event);
     },
     // tooltips
     edttooltips: function(value1) {

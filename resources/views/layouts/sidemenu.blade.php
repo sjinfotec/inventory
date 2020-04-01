@@ -29,16 +29,25 @@
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/daily_alert') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">日次警告通知</a></li>
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/monthly_alert') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">月次警告通知</a></li>
                             </ul>
-                            <h3 class="side-head p-3 font-size-rg">
-                                <span>勤怠ログ</span>
-                                <a class="float-right mb-1 font-size-sm line-height-xs btn btn-secondary btn-sm" data-toggle="collapse" href="#collapseEdit" role="button" aria-expanded="true" aria-controls="collapseEdit"><img class="icon-size-xs" src="{{ asset('images/round-expand-less-w.svg') }}" alt=""></a>
-                            </h3>
-                            <ul class="collapse show list-unstyled" id="collapseEdit">
-                                @if(Config::get('const.DISTRIBUTION.DISTRIBUTION') == Config::get('const.DISTRIBUTION_VALUE.43z') )
+                            @if(Config::get('const.DISTRIBUTION.DISTRIBUTION') == Config::get('const.DISTRIBUTION_VALUE.SSJJOO') )
+                                <h3 class="side-head p-3 font-size-rg">
+                                    <span>勤怠ログ</span>
+                                    <a class="float-right mb-1 font-size-sm line-height-xs btn btn-secondary btn-sm" data-toggle="collapse" href="#collapseEdit" role="button" aria-expanded="true" aria-controls="collapseEdit"><img class="icon-size-xs" src="{{ asset('images/round-expand-less-w.svg') }}" alt=""></a>
+                                </h3>
+                                <ul class="collapse show list-unstyled" id="collapseEdit">
                                     <li><a class="px-3 py-1 text-white d-block" href="{{ url('/store_attendancelog') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">勤怠ログ登録</a></li>
                                     <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_attendancelog') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">勤怠ログ編集</a></li>
-                                @endif
-                            </ul>
+                                </ul>
+                            @elseif(Config::get('const.DISTRIBUTION.DISTRIBUTION') == Config::get('const.DISTRIBUTION_VALUE.43z') )
+                                <h3 class="side-head p-3 font-size-rg">
+                                    <span>勤怠ログ</span>
+                                    <a class="float-right mb-1 font-size-sm line-height-xs btn btn-secondary btn-sm" data-toggle="collapse" href="#collapseEdit" role="button" aria-expanded="true" aria-controls="collapseEdit"><img class="icon-size-xs" src="{{ asset('images/round-expand-less-w.svg') }}" alt=""></a>
+                                </h3>
+                                <ul class="collapse show list-unstyled" id="collapseEdit">
+                                    <li><a class="px-3 py-1 text-white d-block" href="{{ url('/store_attendancelog') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">勤怠ログ登録</a></li>
+                                    <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_attendancelog') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">勤怠ログ編集</a></li>
+                                </ul>
+                            @endif
                             <h3 class="side-head p-3 font-size-rg">
                                 <span>編集</span>
                                 <a class="float-right mb-1 font-size-sm line-height-xs btn btn-secondary btn-sm" data-toggle="collapse" href="#collapseEdit" role="button" aria-expanded="true" aria-controls="collapseEdit"><img class="icon-size-xs" src="{{ asset('images/round-expand-less-w.svg') }}" alt=""></a>
@@ -50,11 +59,26 @@
                                     <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_work_times') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-access-time-w.svg') }}" alt="">勤怠編集</a></li>
                                 @endcan
                             </ul>
+                            @if(Config::get('const.EDITION.EDITION') == Config::get('const.EDITION_VALUE.CROUD') )
                             <h3 class="side-head p-3 font-size-rg">
                                 <span>申請機能</span>
                                 <a class="float-right mb-1 font-size-sm line-height-xs btn btn-secondary btn-sm" data-toggle="collapse" href="#collapseAggregate" role="button" aria-expanded="true" aria-controls="collapseAggregate"><img class="icon-size-xs" src="{{ asset('images/round-expand-less-w.svg') }}" alt=""></a>
                             </h3>
-                            @if(Config::get('const.EDITION.EDITION') >= Config::get('const.EDITION_VALUE.CROUD') )
+                            <ul class="collapse show list-unstyled" id="collapseAggregate">
+                                <li><a class="px-3 py-1 text-white d-block" href="{{ url('/demand') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">各種申請作成</a></li>
+                                @can('admin-midle')
+                                    <li><a class="px-3 py-1 text-white d-block" href="{{ url('/approval') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">各種申請承認</a></li>
+                                    @can('admin-higher')
+                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/approvalroot') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">承認者ルート設定</a></li>
+                                    @endcan
+                                @endcan
+                            </ul>
+                            @endif
+                            @if(Config::get('const.EDITION.EDITION') == Config::get('const.EDITION_VALUE.SSJJOO') )
+                            <h3 class="side-head p-3 font-size-rg">
+                                <span>申請機能</span>
+                                <a class="float-right mb-1 font-size-sm line-height-xs btn btn-secondary btn-sm" data-toggle="collapse" href="#collapseAggregate" role="button" aria-expanded="true" aria-controls="collapseAggregate"><img class="icon-size-xs" src="{{ asset('images/round-expand-less-w.svg') }}" alt=""></a>
+                            </h3>
                             <ul class="collapse show list-unstyled" id="collapseAggregate">
                                 <li><a class="px-3 py-1 text-white d-block" href="{{ url('/demand') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">各種申請作成</a></li>
                                 @can('admin-midle')
