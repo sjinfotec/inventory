@@ -106,12 +106,89 @@
             </div>
             <!-- /.row -->
             <!-- ----------- 選択ボタン類 START ---------------- -->
+            <!-- ----------- ボタン部 START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <btn-work-time
+                  v-on:usersupload-event="usersuploadclick"
+                  v-bind:btn-mode="'usersupload'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <btn-csv-download
+                  v-bind:btn-mode="'csvusers'"
+                  v-bind:csv-data="calcresults"
+                  v-bind:is-csvbutton="iscsvbutton"
+                  v-bind:csv-date="datejaFormat"
+                >
+                </btn-csv-download>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- ----------- ボタン部 END ---------------- -->
           </div>
           <!-- panel contents -->
         </div>
       </div>
       <!-- /.panel -->
       <!-- ========================== 検索部 END ========================== -->
+    </div>
+    <div class="row justify-content-between">
+      <!-- ========================== アップロード部 START ========================== -->
+      <!-- .panel -->
+      <div class="col-md pt-3  print-none" v-if="selectMode=='UPUSERS'">
+        <div class="card shadow-pl">
+          <!-- panel header -->
+          <daily-working-information-panel-header
+            v-bind:header-text1="'以下のアップロードアイコンでユーザーを登録します。'"
+            v-bind:header-text2="''"
+          ></daily-working-information-panel-header>
+          <!-- /.panel header -->
+          <div class="card-body pt-2">
+            <!-- ----------- ファイル選択 START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-3 pb-2">
+                <button type="button" class="btn btn-lg font-size-rg" @click="upclick">
+                  <img class="icon-size-user mr-2 pb-1" src="/images/upload-icon-1.svg" alt="">ユーザー登録</button>
+                <input type="file" id="f1" style="display: none;" ref="uplog" @change="onFileChange" accept=".csv" />
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- ----------- ファイル選択 END ---------------- -->
+          </div>
+          <div class="card-body pt-2">
+            <!-- ----------- メッセージ部 START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between" v-if="messageUp.length">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <ul class="error-red color-red">
+                  <li v-for="(messageup,index) in messageUp" v-bind:key="index">{{ messageup }}</li>
+                </ul>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- ----------- メッセージ部 END ---------------- -->
+          </div>
+        </div>
+      </div>
+      <!-- /.panel -->
+      <!-- ========================== アップロード部 END ========================== -->
+      <!-- /.panel -->
       <!-- ========================== 新規部 START ========================== -->
       <!-- .panel -->
       <div class="col-md-12 pt-3" v-if="selectMode=='NEW'">
@@ -1264,14 +1341,20 @@
   <!-- /main contentns row -->
 </template>
 <script>
-import toasted from "vue-toasted";
 import moment from "moment";
+import encoding from 'encoding-japanese';
 import { dialogable } from "../mixins/dialogable.js";
 import { checkable } from "../mixins/checkable.js";
 import { requestable } from "../mixins/requestable.js";
 export default {
   name: "EditUser",
   mixins: [dialogable, checkable, requestable],
+  props: {
+    authusers: {
+        type: Array,
+        default: []
+    }
+  },
   data() {
     return {
       selectedDepartmentValue: "",
@@ -1287,9 +1370,11 @@ export default {
       selectMode: "",
       messagevalidatesNew: [],
       messagevalidatesEdt: [],
+      messageUp: [],
       selectedUserName: "",
       showrelease: true,
       details: [],
+      usersups: [],
       form: {
         id: "",
         apply_term_from: "",
@@ -1319,11 +1404,15 @@ export default {
       mobile_address: "",
       dialogVisible: false,
       latest_user_code: "",
-      messageshowsearch: false
+      messageshowsearch: false,
+      login_user_code: "",
+      login_user_role: ""
     };
   },
   // マウント時
   mounted() {
+    this.login_user_code = this.authusers['code'];
+    this.login_user_role = this.authusers['role'];
     this.details = [];
     this.getDepartmentList("");
     this.getGeneralList("C001");
@@ -1886,6 +1975,7 @@ export default {
       this.selectMode = "";
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messageUp = [];
       this.selectedUserValue = value;
       if (value == "" || value == null) {
         this.selectMode = "NEW";
@@ -1927,10 +2017,43 @@ export default {
     addroleChange: function(value, arrayitem) {
       this.form.role = value;
     },
+    // CSVボタンクリック処理
+    usersuploadclick: function() {
+      this.selectMode = "UPUSERS";
+    },
+    // アップロードボタンがクリックされた場合の処理
+    upclick: function(e) {
+      this.messagevalidatesNew = [];
+      this.messagevalidatesEdt = [];
+      this.messageUp = [];
+      var messages = [];
+      messages.push("登録しているユーザー情報をクリアしてから登録します。");
+      messages.push("既存データは消去されますが、よろしいですか？");
+      this.htmlMessageSwal("確認", messages, "info", true, true).then(
+        result => {
+          if (result) {
+            var obj = document.getElementById("f1");
+            obj.value = "";
+            this.$refs.uplog.click() // 同じファイルだとイベントが走らない
+          }
+        }
+      );
+    },
+    // ファイル選択が変更された場合の処理
+    onFileChange: function(e) {
+      var isResult = this.handleFileSelect(e);
+      if (!isResult) {
+        var messages = [];
+        messages.push("アップロードするファイルの内容が誤っています。");
+        messages.push("確認してください。");
+        this.htmlMessageSwal("エラー", messages, "error", true, false);
+      }
+    },
     // 新規作成ボタンクリック処理
     storeclick() {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messageUp = [];
       var flag = this.checkFormStore();
       if (flag) {
         var messages = [];
@@ -1961,6 +2084,7 @@ export default {
     fixclick(index) {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messageUp = [];
       var flag = this.checkFormFix(index);
       if (flag) {
         var messages = [];
@@ -2001,6 +2125,7 @@ export default {
     addClick(index) {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messageUp = [];
       var flag = this.checkFormFix(index);
       if (flag) {
         var messages = [];
@@ -2041,6 +2166,7 @@ export default {
     delClick(index) {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messageUp = [];
       var messages = [];
       messages.push("この内容を削除しますか？");
       this.htmlMessageSwal("確認", messages, "info", true, true).then(
@@ -2055,6 +2181,7 @@ export default {
     appendRowClick: function() {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messageUp = [];
       if (this.before_count < this.count) {
         var messages = [];
         messages.push(
@@ -2102,6 +2229,7 @@ export default {
     rowDelClick: function(index) {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messageUp = [];
       if (this.checkRowData(index)) {
         var messages = [];
         messages.push("履歴追加取り消ししてよろしいですか？");
@@ -2122,6 +2250,7 @@ export default {
     releaseclick(index) {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messageUp = [];
       var messages = [];
       messages.push("カード情報の紐づけを解除しますか？");
       this.htmlMessageSwal("確認", messages, "info", true, true).then(
@@ -2331,6 +2460,93 @@ export default {
           this.messageshowsearch = false;
         });
     },
+    // アップロード登録処理
+    usersUpload() {
+      // 処理中メッセージ表示
+      this.$swal({
+        title: "処　理　中...",
+        html: "",
+        allowOutsideClick: false, //枠外をクリックしても画面を閉じない
+        showConfirmButton: false,
+        showCancelButton: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+          var arrayParams = { usersups : this.usersups };
+          this.postRequest("/edit_user/up", arrayParams)
+            .then(response  => {
+              this.$swal.close();
+              this.putThenUp(response, "アップロード登録");
+            })
+            .catch(reason => {
+              this.$swal.close();
+              this.serverCatch("ユーザ","アップロード登録");
+            });
+        }
+      });
+    },
+
+    // ----------------- privateメソッド ----------------------------------
+    // イベントログファイル操作
+    handleFileSelect: function(e) {
+      var file_data = e.target.files[0];
+      // 読み込み
+      var reader = new FileReader();
+      // 読み込んだファイルの中身を取得する
+      reader.readAsBinaryString( file_data );
+      let $this = this;
+      //ファイルの中身を取得後に処理を行う
+      reader.addEventListener( 'load', function() {
+        var result = reader.result;
+        const sjisArray = [];
+        for (let i = 0; i < result.length; i += 1) {
+          sjisArray.push(result.charCodeAt(i));
+        }
+      // 変換処理の実施
+        const uniArray = encoding.convert(sjisArray, 'unicode', 'sjis');
+        var result_enc = encoding.codeToString(uniArray);
+        var array_linetext = result_enc.split('\r\n');
+        var user_code = "";
+        var user_department_name = "";
+        var user_employment_name = "";
+        var user_name = "";
+        var user_kana = "";
+        var user_official_position = "";
+        var user_kill_from_date = "";
+        var user_working_timetable_name = "";
+        var user_email = "";
+        var user_mobile_email = "";
+        var user_management = "";
+        var user_role = "";
+        var linetext = "";
+        var array_object = [];
+        // 1行目はヘッダ
+        for(var i=1; i < array_linetext.length; i++) {
+          linetext = array_linetext[i].split(",");
+          // TODO:linetext.length=1はSKIPとするが(EOF)EOF以外のデータの場合でもSKIPとなる
+          if (linetext.length == 12) {
+            array_object.push({
+              user_code: linetext[0].trim(),
+              user_department_name: linetext[1].trim(),
+              user_employment_name: linetext[2].trim(),
+              user_name: linetext[3].trim(),
+              user_kana: linetext[4].trim(),
+              user_official_position: linetext[5].trim(),
+              user_kill_from_date: linetext[6].trim(),
+              user_working_timetable_name: linetext[7].trim(),
+              user_email: linetext[8].trim(),
+              user_mobile_email: linetext[9].trim(),
+              user_management: linetext[10].trim(),
+              user_role: linetext[11].trim()
+            })
+          } else if (linetext.length != 1) {
+            return false;
+          }
+        }
+        $this.usersups = array_object;
+        $this.usersUpload();
+        return true;
+      });
+    },
     // -------------------- 共通 ----------------------------
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
@@ -2447,8 +2663,8 @@ export default {
       var res = response.data;
       if (res.result) {
         messages.push("ユーザーを" + eventtext + "しました。");
-        messages.push("カレンダー設定にてユーザーのカレンダーを設定してください");
-        this.htmlMessageSwal(eventtext + "完了", messages, "error", true, false);
+        messages.push("個人のカレンダー設定する場合はカレンダー設定処理をしてください。");
+        this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
         this.refreshUserList();
       } else {
         if (res.messagedata.length > 0) {
@@ -2487,6 +2703,20 @@ export default {
           this.htmlMessageSwal( "警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch("ユーザ", eventtext);
+        }
+      }
+    },
+    // 更新系正常処理（アップロード）
+    putThenUp(response, eventtext) {
+      var messages = [];
+      var res = response.data;
+      if (res.result) {
+        this.$toasted.show("ユーザーを" + eventtext + "しました");
+      } else {
+        if (res.messagedata.length > 0) {
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
+        } else {
+          this.serverCatch("ユーザー", eventtext);
         }
       }
     },

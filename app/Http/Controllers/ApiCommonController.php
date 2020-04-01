@@ -2448,11 +2448,15 @@ class ApiCommonController extends Controller
         $time_int = floor($time_division);
         $convert_time = $time_int;
         // 小数第３位が0でない場合は四捨五入
-        $w_time_division = $target_time / 36;
-        $w_time_int = floor($w_time_division);
-        $w_time_decimal_part = $w_time_division - $w_time_int;
+        $w_time_decimal_part = $time_division - $time_int;
         if ($w_time_decimal_part > 0) {
-            $convert_time += round(($time_division - $time_int), 2);
+            $w_time_decimal_part_3 = $w_time_decimal_part * 100;
+            $w_time_decimal_part_31 = $w_time_decimal_part_3 - floor($w_time_decimal_part_3);
+            if ($w_time_decimal_part_31 > 0) {
+                $convert_time += round($w_time_decimal_part, 2);
+            } else {
+                $convert_time += $w_time_decimal_part;
+            }
         }
         return $convert_time;
     }

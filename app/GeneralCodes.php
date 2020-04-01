@@ -187,9 +187,9 @@ class GeneralCodes extends Model
         try {
             $this->codes = $this->getGeneralcode();
         }catch(\PDOException $pe){
-            $this->codes = new Collection()
+            $this->codes = new Collection();
         }catch(\Exception $e){
-            $this->codes = new Collection()
+            $this->codes = new Collection();
         }
 
     }

@@ -216,8 +216,10 @@ class Department extends Model
                 ->JoinSub($subquery, 't2', function ($join) { 
                     $join->on('t2.code', '=', 't1.code');
                 });
+            if(!empty($this->param_code)){
+                $mainquery->where('t1.code', $this->param_code);
+            }
             $details = $mainquery
-                ->where('t1.code', $this->param_code)
                 ->where('t1.is_deleted', 0)
                 ->orderBy('t1.apply_term_from', 'desc')
                 ->get();

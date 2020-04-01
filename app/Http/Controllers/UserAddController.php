@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Config;
 use App\Http\Requests\StoreUserPost;
 use Illuminate\Support\Facades\Auth;
 use App\UserModel;
+use App\Department;
+use App\WorkingTimeTable;
+use App\GeneralCodes;
 use App\Calendar;
 use Carbon\Carbon;
 
@@ -428,6 +431,165 @@ class UserAddController extends Controller
         }catch(\Exception $e){
             DB::rollBack();
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * アップロード登録
+     *
+     * @param Request $request
+     * @return response
+     */
+    public function up(Request $request){
+        $this->array_messagedata = array();
+        $details = array();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['usersups'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "usersups", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $usersups = $params['usersups'];
+            // csvから登録
+            $this->insertCsv($usersups);
+            $result = true;
+            // 取得パラメータ設定
+            return response()->json(
+                ['result' => $result,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /*
+     * CSVユーザー登録
+     *
+     */
+    public function insertCsv($usersups){
+        DB::beginTransaction();
+        try {
+            $login_user_code = Auth::user()->code;
+            $systemdate = Carbon::now();
+            $temp_systemdate = $systemdate->copy()->format('Ymd');
+            // 部署情報
+            $department_model = new Department();
+            $department_model->setParamapplytermfromAttribute($temp_systemdate);
+            $departments = $department_model->getDetails();
+            // 雇用形態情報
+            $generalcode_model = new GeneralCodes();
+            $generalcode_model->setParamidentificationidAttribute(Config::get('const.C001.value'));
+            $generalcodes = $generalcode_model->getGeneralcode();
+            // タイムテーブル情報
+            $taimetable_model = new WorkingTimeTable();
+            $taimetable_model->setParamapplytermfromAttribute($temp_systemdate);
+            $taimetables = $taimetable_model->getTimeTables();
+            // users情報
+            $user_model = new UserModel();
+            // 全部物理削除
+            $user_model->setParamcodeAttribute(null);
+            $user_model->delUserData();
+            foreach ($usersups as $item) {
+                $user_model->setApplytermfromAttribute(Config::get('const.INIT_DATE.initdate'));
+                if ($item['user_code'] != null && $item['user_code'] != "") {
+                    $user_model->setCodeAttribute($item['user_code']);
+                    // 部署名から部署コード設定
+                    $department_code = 1;
+                    if ($item['user_department_name'] != null && $item['user_department_name'] != "") {
+                        $filtered = $departments->where('name', "=", $item['user_department_name']);
+                        foreach ($filtered as $d_item) {
+                            $department_code = $d_item->code;
+                            break;
+                        }
+                    }
+                    $user_model->setDepartmentcodeAttribute($department_code);
+                    // 雇用形態名から雇用形態コード設定
+                    $employment_status = 1;
+                    if ($item['user_employment_name'] != null && $item['user_employment_name'] == "") {
+                        $filtered = $generalcodes->where('code_name', "=", $item['user_employment_name']);
+                        foreach ($filtered as $g_item) {
+                            $employment_status = $g_item->code;
+                            break;
+                        }
+                    }
+                    $user_model->setEmploymentstatusAttribute($employment_status);
+                    $user_model->setNameAttribute($item['user_name']);
+                    $user_model->setKanaAttribute($item['user_kana']);
+                    $user_model->setOfficialpositionAttribute($item['user_official_position']);
+                    if ($item['user_kill_from_date'] != null && $item['user_kill_from_date'] == "") {
+                        $user_model->setKillfromdateAttribute($item['user_kill_from_date']);
+                    } else {
+                        $user_model->setKillfromdateAttribute(Config::get('const.INIT_DATE.maxdate'));
+                    }
+                    $user_model->setPasswordAttribute($item['user_code']);
+                    // タイムテーブル名からタイムテーブルNO設定
+                    $user_working_timetable_no = 1;
+                    if ($item['user_working_timetable_name'] != null && $item['user_working_timetable_name'] == "") {
+                        $filtered = $generalcodes->where('name', "=", $item['user_working_timetable_name']);
+                        foreach ($filtered as $g_item) {
+                            $user_working_timetable_no = $g_item->no;
+                            break;
+                        }
+                    }
+                    $user_model->setWorkingtimetablenoAttribute($user_working_timetable_no);
+                    // メールアドレス設定
+                    $user_email = "sample@sample.com";
+                    if ($item['user_email'] != null && $item['user_email'] == "") {
+                        $user_email = $item['user_email'];
+                    }
+                    $user_model->setEmailAttribute($user_email);
+                    $user_model->setMobileEmailAttribute($item['user_mobile_email']);
+                    $user_model->setCreatedatAttribute($systemdate);
+                    $user_model->setCreateduserAttribute($login_user_code);
+                    // 勤怠管理設定
+                    $user_management = 1;
+                    if ($item['user_management'] != null && $item['user_management'] == "") {
+                        $user_email = $item['user_management'];
+                    }
+                    $user_model->setManagementAttribute($user_management);
+                    // 権限設定
+                    $user_role = 1;
+                    if ($item['user_role'] != null && $item['user_role'] == "") {
+                        $user_email = $item['user_role'];
+                    }
+                    $user_model->setRoleAttribute($user_role);
+                    $pass_word = bcrypt($item['user_code']);
+                    $user_model->setPasswordAttribute($pass_word);
+                    $user_model->insertNewUser();
+    
+                }
+            }
+            DB::commit();
+        }catch(\PDOException $pe){
+            DB::rollBack();
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.data_insert_erorr'));
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            DB::rollBack();
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
             Log::error($e->getMessage());
             throw $e;
         }

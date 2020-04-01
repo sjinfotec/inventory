@@ -161,6 +161,7 @@ class WorkingTimeTable extends Model
     private $param_employment_status;           // 雇用形態
     private $param_department_code;             // 部署
     private $param_user_code;                   // ユーザー
+    private $param_apply_term_from;             // 適用期間開始
 
     private $massegedata;                       // メッセージ
 
@@ -232,6 +233,17 @@ class WorkingTimeTable extends Model
         $this->param_user_code = $value;
     }
 
+    // 適用期間開始
+    public function getParamapplytermfromAttribute()
+    {
+        return $this->param_apply_term_from;
+    }
+
+    public function setParamapplytermfromAttribute($value)
+    {
+        $this->param_apply_term_from = $value;
+    }
+
     // メッセージ
     public function getMassegedataAttribute()
     {
@@ -284,7 +296,11 @@ class WorkingTimeTable extends Model
             // no nameでgroup by した際　noが同じでnameが異なるものが別れて表示してしまう対策
             $subquery = DB::table($this->table)
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
-                ->selectRaw('no as no')
+                ->selectRaw('no as no');
+            if (!empty($this->param_apply_term_from)) {
+                $subquery->where('apply_term_from', '<=', $this->param_apply_term_from);
+            }
+            $subquery
                 ->where('is_deleted', '=', 0)
                 ->groupBy('no');
 

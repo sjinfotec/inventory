@@ -503,8 +503,12 @@ class UserModel extends Model
      */
     public function delUserData(){
         try {
-            DB::table($this->table)
-                ->where('code', $this->code)
+            $mainQuery = DB::table($this->table);
+            if (!empty($this->param_code)) {
+                $mainQuery
+                    ->where('code', $this->param_code);
+            }
+            $mainQuery
                 ->where('is_deleted', 0)
                 ->delete();
         }catch(\PDOException $pe){

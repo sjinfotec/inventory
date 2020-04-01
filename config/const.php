@@ -609,15 +609,16 @@ return [
     ],
 
     'DISTRIBUTION' => [
-        'DISTRIBUTION' => 1
+        'DISTRIBUTION' => 0
     ],
 
     'DISTRIBUTION_VALUE' => [
-        '43z' => 1
+        '43z' => 1,
+        'SSJJOO' => 2
     ],
 
     'EDITION' => [
-        'EDITION' => 3
+        'EDITION' => 5
     ],
 
     'EDITION_VALUE' => [

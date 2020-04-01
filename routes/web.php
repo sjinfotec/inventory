@@ -142,6 +142,7 @@ Route::post('/edit_user/del', 'UserAddController@del')->middleware('auth');
 Route::post('/edit_user/edit', 'UserAddController@edit')->middleware('auth');
 Route::post('/edit_user/fix', 'UserAddController@fixUser')->middleware('auth');
 Route::post('/edit_user/release_card_info', 'UserAddController@releaseCardInfo')->middleware('auth');
+Route::post('/edit_user/up', 'UserAddController@up')->middleware('auth');
 // ------------------ 操作 --------------------------------
 // ユーザーパスワード変更
 Route::get('/user_pass', 'UserPassController@index')->middleware('auth');
