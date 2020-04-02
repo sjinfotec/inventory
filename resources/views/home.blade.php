@@ -37,18 +37,18 @@
 					<div class="row justify-content-between">
 						<home-component
 							v-bind:authusers="{{ $authusers }}"
-							v-bind:generaluser="{{ Config::get('const.C025.general_user') }}"
-							v-bind:generalapproveruser="{{ Config::get('const.C025.general_approver__user') }}"
-							v-bind:adminuser="{{ Config::get('const.C025.admin_user') }}"
-							v-bind:distribution="{{ Config::get('const.DISTRIBUTION.DISTRIBUTION') }}"
-							v-bind:distribution43z="{{ Config::get('const.DISTRIBUTION_VALUE.43z') }}"
-							v-bind:distributionssjjoo="{{ Config::get('const.DISTRIBUTION_VALUE.SSJJOO') }}"
-							v-bind:edition="{{ Config::get('const.EDITION.EDITION') }}"
-							v-bind:editiondemo="{{ Config::get('const.EDITION_VALUE.DEMO') }}"
-							v-bind:editiontrial="{{ Config::get('const.EDITION_VALUE.TRIAL') }}"
-							v-bind:editioncroud="{{ Config::get('const.EDITION_VALUE.CROUD') }}"
-							v-bind:editionssjjoo="{{ Config::get('const.EDITION_VALUE.SSJJOO') }}"
-							v-bind:editionclient="{{ Config::get('const.EDITION_VALUE.CLIENT') }}"
+							v-bind:generaluser="{{ $generaluser }}"
+							v-bind:generalapproveruser="{{ $generalapproveruser }}"
+							v-bind:adminuser="{{ $adminuser }}"
+							v-bind:distribution="{{ $distribution }}"
+							v-bind:distribution43z="{{ $distribution43z }}"
+							v-bind:distributionssjjoo="{{ $distributionssjjoo }}"
+							v-bind:edition="{{ $edition }}"
+							v-bind:editiondemo="{{ $editiondemo }}"
+							v-bind:editiontrial="{{ $editiontrial }}"
+							v-bind:editioncroud="{{ $editioncroud }}"
+							v-bind:editionssjjoo="{{ $editionssjjoo }}"
+							v-bind:editionclient="{{ $editionclient }}"
 						>
 						</home-component>
 					</div>
