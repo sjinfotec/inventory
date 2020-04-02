@@ -1463,7 +1463,8 @@ class WorkTime extends Model
                         from
                             work_times as t1 
                         where
-                            t1.is_deleted = ?
+                            t1.record_time between ? and ? 
+                            and t1.is_deleted = ?
                         ) as t5 
                     on t5.user_code = t4.user_code 
                         and t5.department_code = t4.department_code 
@@ -1477,7 +1478,8 @@ class WorkTime extends Model
                         from
                             work_times as t1 
                         where
-                            t1.is_deleted = ?
+                            t1.record_time between ? and ? 
+                            and t1.is_deleted = ?
                     ) as t6 
                     on t6.user_code = t4.user_code 
                         and t6.department_code = t4.department_code 
@@ -1499,6 +1501,7 @@ class WorkTime extends Model
                     inner join users as t8 
                     on t8.code = t7.code 
                         and t8.apply_term_from = t7.max_apply_term_from 
+                        and t8.kill_from_date > ?
                         and t8.is_deleted = ?
                     left join ( 
                         select
@@ -1550,12 +1553,12 @@ class WorkTime extends Model
                       , t10.code_name as employment_status_name
                       , t1.department_code as department_code
                       , t9.name as department_name
-                      , t1.date as current_record_date
+                      , t2.calendars_date as current_record_date
                       , null as current_record_time
                       , null as current_mode
                       , null as current_mode_name
                       , 0 as hit_alert
-                      , t2.record_date as before_record_date
+                      , t3.record_date as before_record_date
                       , null as before_record_time
                       , null as before_mode
                       , null as before_mode_name
@@ -1570,7 +1573,7 @@ class WorkTime extends Model
                             , t1.management as user_management
                             , t1.employment_status as employment_status
                             , t1.department_code as department_code
-                            , DATE_FORMAT(calendars.date, '%Y%m%d') as date 
+                            , t1.kill_from_date as kill_from_date
                         from
                             users as t1 
                             inner join ( 
@@ -1588,8 +1591,24 @@ class WorkTime extends Model
                             ) as t3 
                             on t3.code = t1.code 
                             and t3.max_apply_term_from = t1.apply_term_from 
-                            cross join calendars
+                        where
+                            t1.kill_from_date > ?
                     ) AS t1 
+                    inner join ( 
+                        select
+                            t1.department_code as department_code
+                            , t1.user_code as user_code
+                            , DATE_FORMAT(t1.date, '%Y%m%d') as calendars_date 
+                        from
+                            calendars as t1
+                        where
+                            t1.date between ? and ?
+                            and  t1.business_kubun = ?
+                            and  holiday_kubun = ?
+                            and  is_deleted = ?
+                   ) as t2 
+                    on t2.department_code = t1.department_code
+                        and t2.user_code = t1.user_code 
                     left join ( 
                         select
                             t1.user_code as user_code
@@ -1597,10 +1616,12 @@ class WorkTime extends Model
                             , DATE_FORMAT(t1.record_time, '%Y%m%d') as record_date 
                         from
                             work_times as t1
-                    ) as t2 
-                    on t2.user_code = t1.user_code 
-                        and t2.department_code = t1.department_code 
-                        and t2.record_date = t1.date 
+                        where
+                            t1.record_time between ? and ?
+                    ) as t3 
+                    on t3.user_code = t1.user_code 
+                        and t3.department_code = t1.department_code 
+                        and t3.record_date = t2.calendars_date 
                     left join ( 
                         select
                             t1.code as code
@@ -1631,11 +1652,11 @@ class WorkTime extends Model
                         and t10.identification_id = ?
                         and t10.is_deleted = ?
                     where
-                        t1.date between ? and ? 
-                        and t2.record_date is null
+                        t2.calendars_date between ? and ? 
+                        and t3.record_date is null
                 )
             ) as t1 
-            left join calendars as t2 
+            inner join calendars as t2 
             on t2.department_code = t1.department_code 
                 and t2.user_code = t1.user_code 
                 and t2.date = t1.current_record_date ";
@@ -1673,15 +1694,23 @@ class WorkTime extends Model
             $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $this->param_date_from;
+            $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $this->param_end_date;
-            $array_setBindingsStr[] = 10;
-            $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $this->param_end_date;
+            $array_setBindingsStr[] = $this->param_date_from;
+            $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = $this->param_end_date;
+            $array_setBindingsStr[] = Config::get('const.C017.admin_user');;
+            $array_setBindingsStr[] = 0;
+            // 月末
+            $dt = new Carbon($this->param_end_date);
+            $lastOfMonth = date_format($dt->endOfMonth(), 'Ymd');
+            $array_setBindingsStr[] = $lastOfMonth;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $this->param_end_date;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $lastOfMonth;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = Config::get('const.C001.value');
             $array_setBindingsStr[] = 0;
@@ -1693,21 +1722,29 @@ class WorkTime extends Model
             $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = $this->param_end_date;
-            $array_setBindingsStr[] = Config::get('const.C017.admin_user');
+            $array_setBindingsStr[] = Config::get('const.C017.admin_user');;
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $lastOfMonth;
+            $array_setBindingsStr[] = $this->param_start_date;
+            $array_setBindingsStr[] = $this->param_end_date;
+            $array_setBindingsStr[] = Config::get('const.C007.basic');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $this->param_date_from;
+            $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = $this->param_end_date;
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $this->param_end_date;
+            $array_setBindingsStr[] = $lastOfMonth;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = Config::get('const.C001.value');
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = $this->param_start_date;
             $array_setBindingsStr[] = $this->param_end_date;
-            if(!empty($this->param_department_code)) {
-                $array_setBindingsStr[] = $this->param_department_code;
-            }
             if(!empty($this->param_employment_status)) {
                 $array_setBindingsStr[] = $this->param_employment_status;
+            }
+            if(!empty($this->param_department_code)) {
+                $array_setBindingsStr[] = $this->param_department_code;
             }
             if(!empty($this->param_user_code)) {
                 $array_setBindingsStr[] = $this->param_user_code;

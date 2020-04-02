@@ -121,15 +121,30 @@
         <div class="card-header bg-color">
           <!-- <img class="icon-size-sm svg_img orange600" src="/images/info-32.png" alt />打刻エラー -->
           <i class="fa fa-exclamation-triangle my-red fa-lg fa-fw" aria-hidden="true"></i>
-          <span class="font-weight-bold">対応が必要となる項目</span>
+          <span class="font-weight-bold">【通知事項】</span>
         </div>
         <div class="card-body">
-          <h5 class="card-title">【打刻エラー】</h5>
-          <p class="card-text">情報処理課 武田大蔵 さん 退勤エラー</p>
-          <p class="card-text">営業部 田口覚 さん 退勤状態から公用外出を開始</p>
+          <!-- ----------- waitメッセージ部 START ---------------- -->
+          <!-- .row -->
+          <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting>
+          <!-- /.row -->
+          <!-- ----------- waitメッセージ部 END ---------------- -->
+          <div class="row justify-content-between  print-none" v-if="infomationmessage.length">
+            <!-- col -->
+            <div class="col-md-12 pb-2">
+              <ul class="error-red color-red">
+                <div v-if="login_user_role === login_adminuser_role">
+                  <a class href="/edit_work_times"
+                   v-for="(messagevalidate,index) in infomationmessage" v-bind:key="index">{{ messagevalidate }}
+                  </a>
+                </div>
+              </ul>
+            </div>
+            <!-- /.col -->
+          </div>
         </div>
       </div>
-      <div class="card flex-fill margin-left-small">
+      <!-- <div class="card flex-fill margin-left-small">
         <div class="card-header bg-color">
           <i class="fa fa-bullhorn fa-lg my-orange fa-fw" aria-hidden="true"></i>
           <span class="font-weight-bolder">お知らせ</span>
@@ -142,9 +157,9 @@
             <button class="btn btn-primary" @click="makeInformation()">作成</button>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
-    <el-dialog custom-class v-bind:title="'三条印刷からのお知らせ'" :visible.sync="dialogVisible" width="80%">
+    <!-- <el-dialog custom-class v-bind:title="'三条印刷からのお知らせ'" :visible.sync="dialogVisible" width="80%">
       <div class="card">
         <div class="card-header">
           <i class="fa fa-edit my-orange fa-lg fa-fw" aria-hidden="true"></i>お知らせ入力
@@ -184,15 +199,15 @@
           <div class="card-footer text-align-right padding-dis">
             <el-button type="danger" @click="dialogVisible = false">閉じる</el-button>
             <!-- 下記ボタンは三条印刷ユーザーのみ表示 -->
-            <el-button type="primary" @click="postInformation()">作成する</el-button>
+            <!-- <el-button type="primary" @click="postInformation()">作成する</el-button>
           </div>
         </div>
-      </div>
-    </el-dialog>
+      </div> -->
+    <!-- </el-dialog> -->
   </div>
 </template>
 <script>
-import toasted from "vue-toasted";
+import moment from "moment";
 import { dialogable } from "../mixins/dialogable.js";
 import { checkable } from "../mixins/checkable.js";
 import { requestable } from "../mixins/requestable.js";
@@ -273,26 +288,13 @@ export default {
       editioncroud_value : 0,
       editionssjjoo_value : 0,
       editionclient_value : 0,
-      dialogVisible: false
+      dialogVisible: false,
+      messageshowsearch: false,
+      infomationmessage : []
     };
   },
   // マウント時
   mounted() {
-    console.log('mounted');
-    console.log('this.authusers[code]' + this.authusers['code']);
-    console.log('this.authusers[role]' + this.authusers['role']);
-    console.log('this.generaluser' + this.generaluser);
-    console.log('this.generalapproveruser' + this.generalapproveruser);
-    console.log('this.adminuser' + this.adminuser);
-    console.log('this.distribution' + this.distribution);
-    console.log('this.distribution43z' + this.distribution43z);
-    console.log('this.distributionssjjoo' + this.distributionssjjoo);
-    console.log('this.distribution' + this.distribution);
-    console.log('this.editiondemo' + this.editiondemo);
-    console.log('this.editiontrial' + this.editiontrial);
-    console.log('this.editioncroud' + this.editioncroud);
-    console.log('this.editionssjjoo' + this.editionssjjoo);
-    console.log('this.editionclient' + this.editionclient);
     this.login_user_code = this.authusers['code'];
     this.login_user_role = this.authusers['role'];
     this.login_generaluser_role = this.generaluser;
@@ -307,10 +309,32 @@ export default {
     this.editioncroud_value = this.editioncroud;
     this.editionssjjoo_value = this.editionssjjoo;
     this.editionclient_value = this.editionclient;
+    this.getDayAlert();
     this.getPostInformations();
   },
   methods: {
-    // -------------------- 共通 ----------------------------
+    // ------------------------ サーバー処理 ----------------------------
+    // 日次警告取得処理
+    getDayAlert() {
+      // 処理中メッセージ表示
+      this.infomationmessage = [];
+      this.messageshowsearch = true;
+      var arrayParams = {
+        alert_form_date : moment(new Date()).format("YYYYMMDD"),
+        employmentstatus : null,
+        departmentcode : null,
+        usercode : null
+      };
+      this.postRequest("/daily_alert/show", arrayParams)
+        .then(response  => {
+          this.getThen(response);
+        })
+        .catch(reason => {
+          this.$swal.close();
+          this.serverCatch("日次警告", "取得");
+        });
+      this.messageshowsearch = false;
+    },
     // お知らせ取得
     getPostInformations() {
       this.$axios
@@ -356,6 +380,30 @@ export default {
           console.log(err);
           this.dialogVisible = false;
         });
+    },
+    // -------------------- 共通 ----------------------------
+    // 取得正常処理（アラート）
+    getThen(response) {
+      var res = response.data;
+      if (res.result) {
+        this.details = res.details;
+        if (this.details.length > 0) {
+          this.infomationmessage.push('直近1週間に打刻警告が' + this.details.length + '件あります');
+        }
+        this.dateName = res.datename;
+      } else {
+        if (res.messagedata.length > 0) {
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
+        } else {
+          this.serverCatch("日次警告", "取得");
+        }
+      }
+    },
+    // 異常処理
+    serverCatch(kbn, eventtext) {
+      var messages = [];
+      messages.push(kbn + "情報" + eventtext + "に失敗しました");
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     makeInformation() {
       this.dialogVisible = true;
