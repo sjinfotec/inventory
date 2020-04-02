@@ -609,7 +609,7 @@ return [
     ],
 
     'DISTRIBUTION' => [
-        'DISTRIBUTION' => 0
+        'DISTRIBUTION' => 2
     ],
 
     'DISTRIBUTION_VALUE' => [
@@ -618,7 +618,7 @@ return [
     ],
 
     'EDITION' => [
-        'EDITION' => 5
+        'EDITION' => 4
     ],
 
     'EDITION_VALUE' => [
