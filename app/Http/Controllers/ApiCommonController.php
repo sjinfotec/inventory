@@ -2431,8 +2431,10 @@ class ApiCommonController extends Controller
                 break;
             }
         }
+        Log::debug('getIntevalMinute $interval  = '.$interval );
         $hh = floor($interval);
         $mm = ($interval - floor($interval)) * 60;
+        Log::debug('getIntevalMinute $hh mm  = '.str_pad($hh, 2 , '0', STR_PAD_LEFT).":".str_pad($mm, 2 , '0', STR_PAD_LEFT).":00" );
         return str_pad($hh, 2 , '0', STR_PAD_LEFT).":".str_pad($mm, 2 , '0', STR_PAD_LEFT).":00";
     }
     
