@@ -314,7 +314,7 @@ class ApiCommonController extends Controller
         $makeSql .= "   on t1.no = t2.no ";
         $makeSql .= "   and t1.apply_term_from = t2.max_apply_term_from ";
         $makeSql .= " where ? = ? ";
-        $makeSql .= "   and t1.no not in ? ";
+        $makeSql .= "   and t1.no < ? ";
         $makeSql .= "   and t1.is_deleted = ? ";
 
         return $makeSql;
@@ -2674,7 +2674,6 @@ class ApiCommonController extends Controller
         }
     }
     
-
     /**
      * タイムテーブル編集設定
      *      
@@ -2729,7 +2728,6 @@ class ApiCommonController extends Controller
         return $array_edt_timetable;
     }
     
-
     /**
      * reqestクエリーセット
      *      

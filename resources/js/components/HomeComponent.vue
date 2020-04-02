@@ -5,114 +5,114 @@
       <!-- 日次集計 -->
       <div class="p-4">
         <a class href="/daily">
-          <img width="120" height="120" class src="/images/icon02.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon02.svg" alt />
         </a>
       </div>
       <!-- 月次集計 -->
       <div class="p-4">
         <a class href="/monthly">
-          <img width="120" height="120" class src="/images/icon01.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon01.svg" alt />
         </a>
       </div>
       <!-- 日次警告 -->
       <div class="p-4">
         <a class href="/daily_alert">
-          <img width="120" height="120" class src="/images/icon04.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon04.svg" alt />
         </a>
       </div>
       <!-- 月次警告 -->
       <div class="p-4">
         <a class href="/monthly_alert">
-          <img width="120" height="120" class src="/images/icon03.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon03.svg" alt />
         </a>
       </div>
       <!-- 勤怠履歴編集 -->
       <div class="p-4" v-if="distributionmode === distribution43z_value">
         <a class href="/edit_attendancelog">
-          <img width="120" height="120" class src="/images/icon10.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon10.svg" alt />
         </a>
       </div>
       <div class="p-4" v-if="distributionmode === distributionssjjoo_value">
         <a class href="/edit_attendancelog">
-          <img width="120" height="120" class src="/images/icon10.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon10.svg" alt />
         </a>
       </div>
       <!-- シフト編集 -->
       <div class="p-4" v-if="login_user_role === login_adminuser_role">
         <a class href="/setting_shift_time">
-          <img width="120" height="120" class src="/images/icon08.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon08.svg" alt />
         </a>
       </div>
       <!-- 勤怠編集 -->
       <div class="p-4" v-if="login_user_role === login_adminuser_role">
         <a class href="/edit_work_times">
-          <img width="120" height="120" class src="/images/icon09.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon09.svg" alt />
         </a>
       </div>
       <!-- 各種申請作成 -->
       <div class="p-4" v-if="editionmode !== editiondemo_value && editionmode !== editiontrial_value && editionmode !== editionclient_value">
         <a class href="/demand">
-          <img width="120" height="120" class src="/images/icon05.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon05.svg" alt />
         </a>
       </div>
       <!-- 各種申請承認 -->
       <div class="p-4" v-if="editionmode !== editiondemo_value && editionmode !== editiontrial_value && editionmode !== editionclient_value">
         <a class href="/approval">
-          <img width="120" height="120" class src="/images/icon06.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon06.svg" alt />
         </a>
       </div>
       <!-- 承認者ルート設定 -->
       <div class="p-4" v-if="editionmode !== editiondemo_value && editionmode !== editiontrial_value && editionmode !== editionclient_value">
         <a class href="/confirm">
-          <img width="120" height="120" class src="/images/icon07.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon07.svg" alt />
         </a>
       </div>
       <!-- 会社設定 -->
       <div class="p-4" v-if="login_user_role === login_adminuser_role">
         <a class href="/create_company_information">
-          <img width="120" height="120" class src="/images/icon13.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon13.svg" alt />
         </a>
       </div>
       <!-- 組織設定 -->
       <div class="p-4" v-if="login_user_role === login_adminuser_role">
         <a class href="/create_department">
-          <img width="120" height="120" class src="/images/icon14.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon14.svg" alt />
         </a>
       </div>
       <!-- 労働時間基本設定 -->
       <div class="p-4" v-if="login_user_role === login_adminuser_role">
         <a class href="/setting_calc">
-          <img width="120" height="120" class src="/images/icon15.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon15.svg" alt />
         </a>
       </div>
       <!-- 勤務帯時間設定 -->
       <div class="p-4" v-if="login_user_role === login_adminuser_role">
         <a class href="/create_time_table">
-          <img width="120" height="120" class src="/images/icon16.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon16.svg" alt />
         </a>
       </div>
       <!-- カレンダー設定 -->
       <div class="p-4" v-if="login_user_role === login_adminuser_role">
         <a class href="/setting_calendar">
-          <img width="120" height="120" class src="/images/icon17.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon17.svg" alt />
         </a>
       </div>
       <!-- ユーザー情報設定 -->
       <div class="p-4" v-if="login_user_role === login_adminuser_role">
         <a class href="/edit_user">
-          <img width="120" height="120" class src="/images/icon18.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon18.svg" alt />
         </a>
       </div>
       <!-- パスワード変更 -->
       <div class="p-4">
         <a class href="/user_pass">
-          <img width="120" height="120" class src="/images/icon11.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon11.svg" alt />
         </a>
       </div>
       <!-- ダウンロード -->
       <div class="p-4">
         <a class href="/file_download">
-          <img width="120" height="120" class src="/images/icon12.svg" @click="test()" alt />
+          <img width="120" height="120" class src="/images/icon12.svg" alt />
         </a>
       </div>
     </div>

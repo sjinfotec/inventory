@@ -1006,7 +1006,7 @@ export default {
       chkArray = 
         this.checkHeader(this.valuefromday, required, equalength, maxlength, itemname);
       if (chkArray.length == 0) {
-        if (this.valuefromday < 1 || this.valuefromday > this.date_endof) {
+        if (this.valuefromday < 1 || this.valuefromday > parseInt(this.date_endof)) {
           chkArray.push("開始日に正しい日付を入力してください。");
         }
       }
@@ -1024,7 +1024,7 @@ export default {
       maxlength = 0;
       itemname = '終了日';
       if (this.valuetoday != "" && this.valuetoday != null) {
-        if (this.valuetoday < 1 || this.valuetoday > this.date_endof) {
+        if (this.valuetoday < 1 || this.valuetoday > parseInt(this.date_endof)) {
           chkArray.push("終了日に正しい日付を入力してください。");
         }
         if (chkArray.length > 0) {

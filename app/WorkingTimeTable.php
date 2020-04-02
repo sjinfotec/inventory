@@ -762,7 +762,7 @@ class WorkingTimeTable extends Model
             if (!empty($this->param_user_code)) {
                 $sqlString .= "   and t1.code = ? ";
             }
-            $sqlString .= "   and t1.is_deleted = ? ";
+            $sqlString .= "   and t1.is_deleted_ = ? ";
         
             // バインド
             $array_setBindingsStr = array();
