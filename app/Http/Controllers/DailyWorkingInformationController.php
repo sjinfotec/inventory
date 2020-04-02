@@ -7390,7 +7390,9 @@ class DailyWorkingInformationController extends Controller
         $temp_working_model->setLatenightworkinghoursAttribute($w_time);
         // $total_time = round(($total_time / 60 / 60) + 0.005,2);
         // timestampを99.99hにする
+        Log::debug('$total_time cnvToDecFromStamp before= '.$total_time);
         $total_time = $apicommon->cnvToDecFromStamp($total_time);
+        Log::debug('$total_time cnvToDecFromStamp after = '.$total_time);
         // $total_time = $total_time + $w_time;
         // 残業時間
         $temp_working_model->setOvertimehoursAttribute($overtime_hours);

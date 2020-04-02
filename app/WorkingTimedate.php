@@ -649,6 +649,10 @@ class WorkingTimedate extends Model
 
     public function setTotalworkingtimesAttribute($value)
     {
+        if ($value > 9999.99) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
+            $value = 9999.99;
+        }
         $this->total_working_times = $value;
     }
 
@@ -661,6 +665,10 @@ class WorkingTimedate extends Model
 
     public function setRegularworkingtimesAttribute($value)
     {
+        if ($value > 9999.99) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
+            $value = 9999.99;
+        }
         $this->regular_working_times = $value;
     }
 
@@ -673,6 +681,10 @@ class WorkingTimedate extends Model
 
     public function setOutofregularworkingtimesAttribute($value)
     {
+        if ($value > 9999.99) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
+            $value = 9999.99;
+        }
         $this->out_of_regular_working_times = $value;
     }
 
@@ -685,6 +697,10 @@ class WorkingTimedate extends Model
 
     public function setOvertimehoursAttribute($value)
     {
+        if ($value > 9999.99) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
+            $value = 9999.99;
+        }
         $this->overtime_hours = $value;
     }
 
@@ -697,6 +713,10 @@ class WorkingTimedate extends Model
 
     public function setLatenightovertimehoursAttribute($value)
     {
+        if ($value > 9999.99) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
+            $value = 9999.99;
+        }
         $this->late_night_overtime_hours = $value;
     }
 
@@ -709,6 +729,10 @@ class WorkingTimedate extends Model
 
     public function setLatenightworkinghoursAttribute($value)
     {
+        if ($value > 9999.99) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
+            $value = 9999.99;
+        }
         $this->late_night_working_hours = $value;
     }
 
@@ -721,6 +745,10 @@ class WorkingTimedate extends Model
 
     public function setLegalworkingtimesAttribute($value)
     {
+        if ($value > 9999.99) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
+            $value = 9999.99;
+        }
         $this->legal_working_times = $value;
     }
 
@@ -733,6 +761,10 @@ class WorkingTimedate extends Model
 
     public function setOutoflegalworkingtimesAttribute($value)
     {
+        if ($value > 9999.99) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
+            $value = 9999.99;
+        }
         $this->out_of_legal_working_times = $value;
     }
 
@@ -745,6 +777,10 @@ class WorkingTimedate extends Model
 
     public function setNotemploymentworkinghoursAttribute($value)
     {
+        if ($value > 9999.99) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
+            $value = 9999.99;
+        }
         $this->not_employment_working_hours = $value;
     }
 
@@ -757,6 +793,10 @@ class WorkingTimedate extends Model
 
     public function setOffhoursworkinghoursAttribute($value)
     {
+        if ($value > 9999.99) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
+            $value = 9999.99;
+        }
         $this->off_hours_working_hours = $value;
     }
 
@@ -768,6 +808,10 @@ class WorkingTimedate extends Model
 
     public function setMissingmiddlehoursAttribute($value)
     {
+        if ($value > 9999.99) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
+            $value = 9999.99;
+        }
         $this->missing_middle_hours = $value;
     }
 
@@ -779,6 +823,10 @@ class WorkingTimedate extends Model
 
     public function setPublicgoingouthoursAttribute($value)
     {
+        if ($value > 9999.99) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
+            $value = 9999.99;
+        }
         $this->public_going_out_hours = $value;
     }
 
@@ -790,6 +838,10 @@ class WorkingTimedate extends Model
 
     public function setOutoflegalworkingholidayhoursAttribute($value)
     {
+        if ($value > 9999.99) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
+            $value = 9999.99;
+        }
         $this->out_of_legal_working_holiday_hours = $value;
     }
 
@@ -801,6 +853,10 @@ class WorkingTimedate extends Model
 
     public function setLegalworkingholidayhoursAttribute($value)
     {
+        if ($value > 9999.99) {
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
+            $value = 9999.99;
+        }
         $this->legal_working_holiday_hours = $value;
     }
 
