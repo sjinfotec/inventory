@@ -7317,6 +7317,7 @@ class DailyWorkingInformationController extends Controller
             // timestampを99.99hにする
             $regular_calc_time = $apicommon->cnvToDecFromStamp($w_time);
         }
+
         // 時間外労働時間
         $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
         $w_time = 0;
@@ -8355,6 +8356,7 @@ class DailyWorkingInformationController extends Controller
                     'fixedtime' => $working_time["fixedtime"],
                     'holiday_kubun' => $working_time["holiday_kubun"],
                     'holiday_name' => $working_time["holiday_name"],
+                    'holiday_description' => $working_time["holiday_description"],
                     'calendars_business_kubun' => $working_time["calendars_business_kubun"],
                     'working_time_name' => $working_time["working_time_name"],
                     'predeter_time_name' => $working_time["predeter_time_name"],
@@ -8469,6 +8471,7 @@ class DailyWorkingInformationController extends Controller
                     'fixedtime' => '',
                     'holiday_kubun' => '',
                     'holiday_name' => '',
+                    'holiday_description' => '',
                     'calendars_business_kubun' => '',
                     'working_time_name' => '',
                     'predeter_time_name' => '',

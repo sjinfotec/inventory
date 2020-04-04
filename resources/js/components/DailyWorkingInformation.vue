@@ -226,7 +226,7 @@
           <div class="card-body pt-2">
             <!-- panel contents -->
             <!-- .row -->
-            <daily-working-info-table
+            <daily-working-info-sum-table
               v-bind:detail-or-total="'total'"
               v-bind:calc-lists="sumresults"
               v-bind:predeter-time-name="predetertimename"
@@ -234,7 +234,7 @@
               v-bind:predeter-time-secondname="predetertimesecondname"
               v-bind:predeter-night-time-secondname="predeternighttimesecondname"
               v-bind:btn-mode="btnmodeswitch"
-            ></daily-working-info-table>
+            ></daily-working-info-sum-table>
             <!-- /.row -->
             <!-- /panel contents -->
           </div>

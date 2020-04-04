@@ -2295,7 +2295,8 @@ class WorkingTimedate extends Model
                 ->addselect($this->table.'.is_deleted')
                 ->addselect($this->table_user_holiday_kubuns.'.holiday_kubun');
             $mainquery
-                ->selectRaw('t2.code_name as holiday_name');
+                ->selectRaw('t2.code_name as holiday_name')
+                ->selectRaw('t2.description as holiday_description');
             $mainquery
                 ->addselect($this->table_calendars.'.business_kubun as calendars_business_kubun');
                 
@@ -2470,15 +2471,19 @@ class WorkingTimedate extends Model
             $case_where .= "ELSE CONCAT(CONCAT(TRUNCATE({0}, 0),':'),LPAD(TRUNCATE((mod({0} * 100, 100) * 60) / 100, 0) , 2, '0')) ";
             $case_where .= ' END as {1} ';
 
-            $case_working_status = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
-            $case_working_status .= "WHEN {1} THEN 1 ";
-            $case_working_status .= "WHEN {2} THEN 1 ";
-            $case_working_status .= "WHEN {3} THEN 1 ";
-            $case_working_status .= "WHEN {4} THEN 1 ";
-            $case_working_status .= "WHEN {5} THEN 1 ";
-            $case_working_status .= "WHEN {6} THEN 1 ";
-            $case_working_status .= "WHEN {7} THEN 1 ";
-            $case_working_status .= "ELSE 0 ";
+            $case_working_status = "CASE ifnull({0}, '') ";
+            $case_working_status .= "  WHEN '1日集計対象休暇' THEN 0 ";
+            $case_working_status .= "  ELSE ";
+            $case_working_status .= "    CASE ifnull({1},0) WHEN 0 THEN 0 ";
+            $case_working_status .= "     WHEN {2} THEN 1 ";
+            $case_working_status .= "     WHEN {3} THEN 1 ";
+            $case_working_status .= "     WHEN {4} THEN 1 ";
+            $case_working_status .= "     WHEN {5} THEN 1 ";
+            $case_working_status .= "     WHEN {6} THEN 1 ";
+            $case_working_status .= "     WHEN {7} THEN 1 ";
+            $case_working_status .= "     WHEN {8} THEN 1 ";
+            $case_working_status .= "     ELSE 0 ";
+            $case_working_status .= '   END ';
             $case_working_status .= ' END ';
 
             $case_go_out = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
@@ -2514,14 +2519,15 @@ class WorkingTimedate extends Model
             $case_absence_kubun .= "ELSE 0 ";
             $case_absence_kubun .= 'END ';
 
-            $str_replace_working_status0 =str_replace('{0}', $this->table.'.working_status', $case_working_status);
-            $str_replace_working_status1 =str_replace('{1}', Config::get('const.C012.attendance'), $str_replace_working_status0);
-            $str_replace_working_status2 =str_replace('{2}', Config::get('const.C012.leaving'), $str_replace_working_status1);
-            $str_replace_working_status3 =str_replace('{3}', Config::get('const.C012.missing_middle'), $str_replace_working_status2);
-            $str_replace_working_status4 =str_replace('{4}', Config::get('const.C012.missing_middle_return'), $str_replace_working_status3);
-            $str_replace_working_status5 =str_replace('{5}', Config::get('const.C012.public_going_out'), $str_replace_working_status4);
-            $str_replace_working_status6 =str_replace('{6}', Config::get('const.C012.public_going_out_return'), $str_replace_working_status5);
-            $str_replace_working_status7 =str_replace('{7}', Config::get('const.C012.continue_work'), $str_replace_working_status6);
+            $str_replace_working_status0 =str_replace('{0}', 't2.description', $case_working_status);
+            $str_replace_working_status1 =str_replace('{1}', $this->table.'.working_status', $str_replace_working_status0);
+            $str_replace_working_status2 =str_replace('{2}', Config::get('const.C012.attendance'), $str_replace_working_status1);
+            $str_replace_working_status3 =str_replace('{3}', Config::get('const.C012.leaving'), $str_replace_working_status2);
+            $str_replace_working_status4 =str_replace('{4}', Config::get('const.C012.missing_middle'), $str_replace_working_status3);
+            $str_replace_working_status5 =str_replace('{5}', Config::get('const.C012.missing_middle_return'), $str_replace_working_status4);
+            $str_replace_working_status6 =str_replace('{6}', Config::get('const.C012.public_going_out'), $str_replace_working_status5);
+            $str_replace_working_status7 =str_replace('{7}', Config::get('const.C012.public_going_out_return'), $str_replace_working_status6);
+            $str_replace_working_status8 =str_replace('{8}', Config::get('const.C012.continue_work'), $str_replace_working_status7);
 
             $str_replace_go_out0 =str_replace('{0}', $this->table.'.working_status', $case_go_out);
             $str_replace_go_out1 =str_replace('{1}', Config::get('const.C012.missing_middle'), $str_replace_go_out0);
@@ -2569,7 +2575,7 @@ class WorkingTimedate extends Model
                 ->selectRaw('sum(ifnull('.$this->table.'.missing_middle_hours, 0)) as missing_middle_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.out_of_legal_working_holiday_hours, 0)) as out_of_legal_working_holiday_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.legal_working_holiday_hours, 0)) as legal_working_holiday_hours')
-                ->selectRaw('sum('.$str_replace_working_status7.') as total_working_status')
+                ->selectRaw('sum('.$str_replace_working_status8.') as total_working_status')
                 ->selectRaw('sum('.$str_replace_go_out2.') as total_go_out')
                 ->selectRaw('sum('.$str_replace_paid_holidays1.') as total_paid_holidays')
                 ->selectRaw('sum('.$str_replace_holiday_kubun13.') as total_holiday_kubun')
@@ -2580,6 +2586,11 @@ class WorkingTimedate extends Model
                 $subquery->addselect($this->table.'.working_date');
             }
 
+            $subquery->leftJoin($this->table_generalcodes.' as t2', function ($join) { 
+                $join->on('t2.code', '=', $this->table.'.holiday_kubun')
+                ->where('t2.identification_id', '=', Config::get('const.C013.value'))
+                ->where('t2.is_deleted', '=', 0);
+            });
             $array_groupby = [];
             $subquery = $this->setWhereSql($subquery);
             
@@ -2700,6 +2711,10 @@ class WorkingTimedate extends Model
                 
             $array_setBindingsStr = array();
             $cnt = 0;
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>Config::get('const.C013.value'));
+            $cnt += 1;
+            $array_setBindingsStr[] = array($cnt=>0);
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $cnt += 1;
                 $array_setBindingsStr[] = array($cnt=>$this->param_date_from);

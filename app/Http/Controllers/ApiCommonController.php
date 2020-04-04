@@ -18,6 +18,7 @@ use App\Confirm;
 use App\Company;
 use App\UserHolidayKubun;
 use App\ApprovalRouteNo;
+use App\WorkTimeLog;
 
 
 
@@ -56,7 +57,8 @@ use App\ApprovalRouteNo;
  *          指定月締日取得（画面から）                  : getClosingDay              : Setting   
  *          指定月締日取得                              : getCommonClosingDay       : Setting  
  *          曜日取得                                    : getWeekDay
- *          日付のフォーマット YYYY年MM月DD日（WEEK）    : getYMDWeek                 : Calendar       
+ *          日付のフォーマット YYYY年MM月DD日（WEEK）    : getYMDWeek                 : Calendar   
+ *          勤務状況取得                               : getWorgingStatusInfo       : work_timelogs
  *      5.算出情報取得
  *          翌日を求める                                            : getNextDay
  *          指定時間（スタンプ）後を求める                          : getAfterDayTime
@@ -1568,8 +1570,56 @@ class ApiCommonController extends Controller
         }
         return $date_name;
     }
-    // -------------  4.その他情報取得  end ------------------------------------------------------ //
 
+    /**
+     * 勤務状況取得
+     *
+     * @param [type] $dt
+     * @param [type] $format
+     * @return array
+     */
+    public function getWorgingStatusInfo(Request $request){
+        $result = true;
+        $details = array();
+        try {
+            $worktimelog_model = new WorkTimeLog();
+                // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['target_date'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "target_date", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $target_date = $params['target_date'];
+            $details = $worktimelog_model->getWorkinTimeLog(date_format(new Carbon($target_date), 'Ymd'));
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+    // -------------  4.その他情報取得  end ------------------------------------------------------ //
+    
     // -------------  5.算出情報取得  start ------------------------------------------------------ //
 
     /**

@@ -26,7 +26,17 @@ class EditWorkTimesController extends Controller
      */
     public function index()
     {
-        return view('edit_work_times');
+        $authusers = Auth::user();
+        $generaluser = Config::get('const.C025.general_user');
+        $generalapproveruser = Config::get('const.C025.general_approver__user');
+        $adminuser = Config::get('const.C025.admin_user');
+        return view('edit_work_times',
+            compact(
+                'authusers',
+                'generaluser',
+                'generalapproveruser',
+                'adminuser'
+            ));
     }
 
     /** 詳細取得
@@ -251,14 +261,22 @@ class EditWorkTimesController extends Controller
             foreach($details as $item) {
                 //部署選択されていない場合は部署コードないためApiCommonControllerで取得
                 if ($department_code == null) {
-                    if ($item['department_code'] == "" || $item['department_code'] == null) {
+                    if (isset($item['department_code'])) {
+                        if ($item['department_code'] == "" || $item['department_code'] == null) {
+                            $dep_results = $apicommon_model->getUserDepartment($item['user_code'], $target_date);
+                            foreach($dep_results as $dep_result) {
+                                $department_code = $dep_result->department_code;
+                                break;
+                            }
+                        } else {
+                            $department_code = $item['department_code'];
+                        }
+                    } else {
                         $dep_results = $apicommon_model->getUserDepartment($item['user_code'], $target_date);
                         foreach($dep_results as $dep_result) {
                             $department_code = $dep_result->department_code;
                             break;
                         }
-                    } else {
-                        $department_code = $item['department_code'];
                     }
                 }
                 $record_time = null;

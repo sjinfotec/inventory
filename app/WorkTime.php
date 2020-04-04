@@ -1056,7 +1056,7 @@ class WorkTime extends Model
                     't4.name as department_name',
                     't5.code_name'
                 )
-                ->selectRaw("DATE_FORMAT(t1.record_time,'%Y/%m/%d') as record_date")
+                ->selectRaw("DATE_FORMAT(t1.record_time,'%Y年%m月%d日') as record_date")
                 ->selectRaw('X(t1.positions) as x_positions')
                 ->selectRaw('Y(t1.positions) as y_positions')
                 ->where('t1.user_code', $this->user_code)
