@@ -13,14 +13,14 @@
                 <tr>
                   <td class="text-center align-middle mw-rem-20">部署</td>
                   <td class="text-center align-middle mw-rem-20">氏名</td>
-                  <td class="text-center align-middle mw-rem-02">勤務状況</td>
+                  <td class="text-center align-middle mw-rem-25">勤務状況</td>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(item,rowIndex1) in details" v-bind:key="item['user_code']">
                   <td class="text-left align-middle mw-rem-20">{{ item['department_name'] }}</td>
                   <td class="text-left align-middle mw-rem-20">{{ item['user_name'] }}</td>
-                  <td class="text-left align-middle mw-rem-20">{{ item['mode_name'] }}</td>
+                  <td class="text-center align-middle mw-rem-25">{{ item['mode_name'] }}</td>
                 </tr>
               </tbody>
             </table>
@@ -122,7 +122,7 @@ thead, tbody {
 tbody {
   overflow-x: hidden !important;
   overflow-y: scroll !important;
-  height: 360px !important;
+  height: 300px !important;
 }
 
 .table th, .table td {
@@ -132,8 +132,8 @@ tbody {
     border-color: #95c5ed #dee2e6 !important;
 }
 
-.mw-rem-2-6 {
-  min-width: 2.6rem;
+.mw-rem-25 {
+  min-width: 25rem;
 }
 
 </style>
