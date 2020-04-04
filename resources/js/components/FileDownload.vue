@@ -72,6 +72,28 @@
             <div class="row justify-content-between">
               <!-- panel header -->
               <daily-working-information-panel-header
+                v-bind:header-text1="'◆ツールファイルダウンロード'"
+                v-bind:header-text2="'とくに指定ない限り最新版をダウンロードしてください'"
+                v-bind:class-text="'card-header col-12 bg-transparent pb-2 border-0'"
+              ></daily-working-information-panel-header>
+              <!-- /.panel header -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=4">・ユーザー一括登録テンプレートファイル（最新版） -- ファイル名：users_template_org.xlsx</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- panel header -->
+              <daily-working-information-panel-header
                 v-bind:header-text1="'◆説明書ダウンロード'"
                 v-bind:header-text2="'とくに指定ない限り最新版をダウンロードしてください'"
                 v-bind:class-text="'card-header col-12 bg-transparent pb-2 border-0'"

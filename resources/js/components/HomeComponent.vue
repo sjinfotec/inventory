@@ -139,14 +139,14 @@
                 </a>
               </div>
               <div v-else>
-                <span style="color: #808080;">周知事項はありません</span>
+                <span style="color: #808080;">通知事項はありません</span>
               </div>
             </div>
             <!-- /.col -->
           </div>
           <div class="row justify-content-between  print-none" v-else>
             <!-- col -->
-            <span style="color: #808080;">周知事項はありません</span>
+            <span style="color: #808080;">通知事項はありません</span>
             <!-- /.col -->
           </div>
         </div>

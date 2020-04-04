@@ -537,7 +537,7 @@ return [
         'file1' => 'croud_install.zip',
         'file2' => 'pceventlog.zip',
         'file3' => 'TeamViewer_Setup.exe',
-        'file4' => '',
+        'file4' => 'users_template_org.xlsx',
         'file5' => '',
         'file6' => '',
         'file7' => '',
@@ -648,7 +648,7 @@ return [
     ],
 
     'DISTRIBUTION' => [
-        'DISTRIBUTION' => 0
+        'DISTRIBUTION' => 2
     ],
 
     'DISTRIBUTION_VALUE' => [
@@ -657,7 +657,7 @@ return [
     ],
 
     'EDITION' => [
-        'EDITION' => 5
+        'EDITION' => 4
     ],
 
     'EDITION_VALUE' => [
