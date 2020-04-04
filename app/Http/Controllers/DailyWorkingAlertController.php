@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\WorkTime;
 use App\Http\Controllers\ApiCommonController;
@@ -23,7 +24,17 @@ class DailyWorkingAlertController extends Controller
      */
     public function index()
     {
-        return view('daily_working_alert');
+        $authusers = Auth::user();
+        $generaluser = Config::get('const.C025.general_user');
+        $generalapproveruser = Config::get('const.C025.general_approver__user');
+        $adminuser = Config::get('const.C025.admin_user');
+        return view('daily_working_alert',
+            compact(
+                'authusers',
+                'generaluser',
+                'generalapproveruser',
+                'adminuser'
+            ));
     }
 
     /**

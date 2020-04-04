@@ -8,19 +8,19 @@
             <table class="table table-striped border-bottom font-size-sm text-nowrap">
               <thead>
                 <tr v-if="detailOrTotal === 'detail' && btnMode ==='basicswitch'" bgcolor="#e3f0fb">
-                  <td class="text-center align-middle w-15 mw-rem-5">部署</td>
-                  <td class="text-center align-middle w-15 mw-rem-10">雇用形態</td>
-                  <td class="text-center align-middle w-15 mw-rem-10">氏名</td>
-                  <td class="text-left align-middle w-15 mw-rem-4">出勤</td>
-                  <td class="text-left align-middle w-15 mw-rem-4">退勤</td>
-                  <td class="text-left align-middle w-15 mw-rem-4">公外</td>
-                  <td class="text-left align-middle w-15 mw-rem-4">公外戻</td>
-                  <td class="text-left align-middle w-15 mw-rem-4">私外</td>
-                  <td class="text-left align-middle w-15 mw-rem-4">私外戻</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">勤務状態</td>
-                  <td class="text-center align-middle w-15 mw-rem-10">勤務帯</td>
+                  <td class="text-center align-middle mw-rem-5">部署</td>
+                  <td class="text-center align-middle mw-rem-10">雇用形態</td>
+                  <td class="text-center align-middle mw-rem-10">氏名</td>
+                  <td class="text-left align-middle mw-rem-4">出勤</td>
+                  <td class="text-left align-middle mw-rem-4">退勤</td>
+                  <td class="text-left align-middle mw-rem-4">公外</td>
+                  <td class="text-left align-middle mw-rem-4">公外戻</td>
+                  <td class="text-left align-middle mw-rem-4">私外</td>
+                  <td class="text-left align-middle mw-rem-4">私外戻</td>
+                  <td class="text-center align-middle mw-rem-5">勤務状態</td>
+                  <td class="text-center align-middle mw-rem-10">勤務帯</td>
                   <td
-                    class="text-center align-middle w-15 mw-rem-5 color-royalblue"
+                    class="text-center align-middle mw-rem-5 color-royalblue"
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
@@ -31,119 +31,119 @@
                     <span class="text">実働時間</span>
                     <span class="fukidashi">{{ edtString }}</span>
                   </td>-->
-                  <td class="text-center align-middle w-15 mw-rem-3">所定</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">{{ predeterTimeSecondName }}</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">{{ predeterNightTimeSecondName }}</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">深夜労働</td>
+                  <td class="text-center align-middle mw-rem-3">所定</td>
+                  <td class="text-center align-middle mw-rem-5">{{ predeterTimeSecondName }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ predeterNightTimeSecondName }}</td>
+                  <td class="text-center align-middle mw-rem-3">深夜労働</td>
                   <td
-                    class="text-center align-middle w-15 mw-rem-5 color-royalblue"
+                    class="text-center align-middle mw-rem-5 color-royalblue"
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
                     @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                   >不就労時間</td>
-                  <td class="text-center align-middle w-35 mw-rem-15">備考</td>
+                  <td class="text-center align-middle mw-rem-15">備考</td>
                 </tr>
                 <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'" bgcolor="#e3f0fb">
-                  <td class="text-center align-middle w-15 mw-rem-5">部署</td>
-                  <td class="text-center align-middle w-15 mw-rem-10">雇用形態</td>
-                  <td class="text-center align-middle w-15 mw-rem-10">氏名</td>
-                  <td class="text-left align-middle w-15 mw-rem-4">出勤</td>
-                  <td class="text-center align-middle w-15 mw-rem-10">編集氏名</td>
-                  <td class="text-left align-middle w-15 mw-rem-4">退勤</td>
-                  <td class="text-center align-middle w-15 mw-rem-10">編集氏名</td>
-                  <td class="text-left align-middle w-15 mw-rem-4">公外</td>
-                  <td class="text-center align-middle w-15 mw-rem-10">編集氏名</td>
-                  <td class="text-left align-middle w-15 mw-rem-4">公外戻</td>
-                  <td class="text-center align-middle w-15 mw-rem-10">編集氏名</td>
-                  <td class="text-left align-middle w-15 mw-rem-4">私外</td>
-                  <td class="text-center align-middle w-15 mw-rem-10">編集氏名</td>
-                  <td class="text-left align-middle w-15 mw-rem-4">私外戻</td>
-                  <td class="text-center align-middle w-15 mw-rem-10">編集氏名</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">勤務状態</td>
-                  <td class="text-center align-middle w-15 mw-rem-10">勤務帯</td>
+                  <td class="text-center align-middle mw-rem-5">部署</td>
+                  <td class="text-center align-middle mw-rem-10">雇用形態</td>
+                  <td class="text-center align-middle mw-rem-10">氏名</td>
+                  <td class="text-left align-middle mw-rem-4">出勤</td>
+                  <td class="text-center align-middle mw-rem-10">編集氏名</td>
+                  <td class="text-left align-middle mw-rem-4">退勤</td>
+                  <td class="text-center align-middle mw-rem-10">編集氏名</td>
+                  <td class="text-left align-middle mw-rem-4">公外</td>
+                  <td class="text-center align-middle mw-rem-10">編集氏名</td>
+                  <td class="text-left align-middle mw-rem-4">公外戻</td>
+                  <td class="text-center align-middle mw-rem-10">編集氏名</td>
+                  <td class="text-left align-middle mw-rem-4">私外</td>
+                  <td class="text-center align-middle mw-rem-10">編集氏名</td>
+                  <td class="text-left align-middle mw-rem-4">私外戻</td>
+                  <td class="text-center align-middle mw-rem-10">編集氏名</td>
+                  <td class="text-center align-middle mw-rem-5">勤務状態</td>
+                  <td class="text-center align-middle mw-rem-10">勤務帯</td>
                   <td
-                    class="text-center align-middle w-15 color-royalblue"
+                    class="text-center align-middle mw-rem-5 color-royalblue"
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
                     @mouseover="edttooltips('実働時間 = 所定 + ',predeterTimeSecondName,' + ' + predeterNightTimeSecondName,'')"
                   >実働時間</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">所定</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">所定外</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">{{ predeterTimeSecondName }}</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">{{ predeterNightTimeSecondName }}</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">深夜労働</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">法定</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">法定外</td>
+                  <td class="text-center align-middle mw-rem-3">所定</td>
+                  <td class="text-center align-middle mw-rem-3">所定外</td>
+                  <td class="text-center align-middle mw-rem-5">{{ predeterTimeSecondName }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ predeterNightTimeSecondName }}</td>
+                  <td class="text-center align-middle mw-rem-3">深夜労働</td>
+                  <td class="text-center align-middle mw-rem-3">法定</td>
+                  <td class="text-center align-middle mw-rem-3">法定外</td>
                   <td
-                    class="text-center align-middle w-15 mw-rem-5 color-royalblue"
+                    class="text-center align-middle mw-rem-5 color-royalblue"
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
                     @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                   >不就労時間</td>
-                  <td class="text-center align-middle w-35 mw-rem-15">備考</td>
+                  <td class="text-center align-middle mw-rem-15">備考</td>
                 </tr>
                 <tr v-if="detailOrTotal === 'total' && btnMode ==='basicswitch'" bgcolor="#e3fbef">
                   <td
-                    class="text-center align-middle w-15 mw-rem-5 color-royalblue"
+                    class="text-center align-middle mw-rem-5 color-royalblue"
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
                     @click="edttooltips('実働時間 = 所定労働時間 + ',predeterTimeName,' + ' + predeterNightTimeName,'')"
                     @mouseover="edttooltips('実働時間 = 所定労働時間 + ',predeterTimeName,' + ' + predeterNightTimeName,'')"
                   >実働時間</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">所定労働時間</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">{{ predeterTimeSecondName }}</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">{{ predeterNightTimeSecondName }}</td>
-                  <td class="text-center align-middle w-15 mw-rem-3">深夜労働時間</td>
+                  <td class="text-center align-middle mw-rem-3">所定労働時間</td>
+                  <td class="text-center align-middle mw-rem-5">{{ predeterTimeSecondName }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ predeterNightTimeSecondName }}</td>
+                  <td class="text-center align-middle mw-rem-3">深夜労働時間</td>
                   <td
-                    class="text-center align-middle w-15 mw-rem-5"
+                    class="text-center align-middle mw-rem-5"
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
                     @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                   >不就労時間</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">出勤者数</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">外出者数</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">有給休暇者数</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">特別休暇者数</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">早退者数</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">遅刻者数</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">欠勤者数</td>
-                  <td class="text-center align-middle w-35 mw-rem-15">備考</td>
+                  <td class="text-center align-middle mw-rem-5">出勤者数</td>
+                  <td class="text-center align-middle mw-rem-5">外出者数</td>
+                  <td class="text-center align-middle mw-rem-5">有給休暇者数</td>
+                  <td class="text-center align-middle mw-rem-5">特別休暇者数</td>
+                  <td class="text-center align-middle mw-rem-5">早退者数</td>
+                  <td class="text-center align-middle mw-rem-5">遅刻者数</td>
+                  <td class="text-center align-middle mw-rem-5">欠勤者数</td>
+                  <td class="text-center align-middle mw-rem-15">備考</td>
                 </tr>
                 <tr v-if="detailOrTotal === 'total' && btnMode ==='detailswitch'" bgcolor="#e3fbef">
                   <td
-                    class="text-center align-middle w-15 color-royalblue"
+                    class="text-center align-middle mw-rem-5 color-royalblue"
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
                     @mouseover="edttooltips('実働時間 = 所定時間 + ',predeterTimeName,' + ' + predeterNightTimeName,'')"
                   >実働時間</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">所定時間</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">所定外時間</td>
-                  <td class="text-center align-middle w-15 mw-rem-10">{{ predeterTimeName }}</td>
-                  <td class="text-center align-middle w-15 mw-rem-10">{{ predeterNightTimeName }}</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">深夜労働時間</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">法定時間</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">法定外時間</td>
+                  <td class="text-center align-middle mw-rem-5">所定時間</td>
+                  <td class="text-center align-middle mw-rem-5">所定外時間</td>
+                  <td class="text-center align-middle mw-rem-10">{{ predeterTimeName }}</td>
+                  <td class="text-center align-middle mw-rem-10">{{ predeterNightTimeName }}</td>
+                  <td class="text-center align-middle mw-rem-5">深夜労働時間</td>
+                  <td class="text-center align-middle mw-rem-5">法定時間</td>
+                  <td class="text-center align-middle mw-rem-5">法定外時間</td>
                   <td
-                    class="text-center align-middle w-15"
+                    class="text-center align-middle"
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
                     @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                   >不就労時間</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">出勤者数</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">外出者数</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">有給休暇者数</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">特別休暇者数</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">早退者数</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">遅刻者数</td>
-                  <td class="text-center align-middle w-15 mw-rem-5">欠勤者数</td>
-                  <td class="text-center align-middle w-35 mw-rem-15">備考</td>
+                  <td class="text-center align-middle mw-rem-5">出勤者数</td>
+                  <td class="text-center align-middle mw-rem-5">外出者数</td>
+                  <td class="text-center align-middle mw-rem-5">有給休暇者数</td>
+                  <td class="text-center align-middle mw-rem-5">特別休暇者数</td>
+                  <td class="text-center align-middle mw-rem-5">早退者数</td>
+                  <td class="text-center align-middle mw-rem-5">遅刻者数</td>
+                  <td class="text-center align-middle mw-rem-5">欠勤者数</td>
+                  <td class="text-center align-middle mw-rem-15">備考</td>
                 </tr>
               </thead>
               <tbody>
@@ -151,9 +151,9 @@
                   v-if="detailOrTotal === 'detail' && btnMode ==='basicswitch'"
                   v-for="(calcList,index) in calcLists"
                 >
-                  <td class="text-left align-middle">{{ calcList.department_name }}</td>
-                  <td class="text-left align-middle">{{ calcList.employment_status_name }}</td>
-                  <td class="text-left align-middle">{{ calcList.user_name }}</td>
+                  <td class="text-left align-middle mw-rem-5">{{ calcList.department_name }}</td>
+                  <td class="text-left align-middle mw-rem-10">{{ calcList.employment_status_name }}</td>
+                  <td class="text-left align-middle mw-rem-10">{{ calcList.user_name }}</td>
                   <!-- 出勤 -->
                   <daily-working-info-time-table
                     v-bind:calc-list="{
@@ -163,6 +163,7 @@
                       editor_department_name: calcList.attendance_editor_department_name,
                       editor_user_name: calcList.attendance_editor_user_name,
                       working_time: calcList.attendance_time,
+                      holiday_description: calcList.holiday_description
                     }"
                     v-on:click-event="showMap(
                         calcList.attendance_time,
@@ -183,6 +184,7 @@
                       editor_department_name: calcList.leaving_editor_department_name,
                       editor_user_name: calcList.attendance_editor_user_name,
                       working_time: calcList.leaving_time,
+                      holiday_description: calcList.holiday_description
                     }"
                     v-on:click-event="showMap(
                         calcList.leaving_time,
@@ -203,6 +205,7 @@
                       editor_department_name: calcList.public_editor_department_name,
                       editor_user_name: calcList.public_editor_user_name,
                       working_time: calcList.public_going_out_time,
+                      holiday_description: calcList.holiday_description
                     }"
                     v-on:click-event="showMap(
                         calcList.public_going_out_time,
@@ -223,6 +226,7 @@
                       editor_department_name: calcList.public_return_editor_department_name,
                       editor_user_name: calcList.public_return_editor_user_name,
                       working_time: calcList.public_going_out_return_time,
+                      holiday_description: calcList.holiday_description
                     }"
                     v-on:click-event="showMap(
                         calcList.public_going_out_return_time,
@@ -243,6 +247,7 @@
                       editor_department_name: calcList.missing_editor_department_name,
                       editor_user_name: calcList.missing_editor_user_name,
                       working_time: calcList.missing_middle_time,
+                      holiday_description: calcList.holiday_description
                     }"
                     v-on:click-event="showMap(
                         calcList.missing_middle_time,
@@ -263,6 +268,7 @@
                       editor_department_name: calcList.missing_return_editor_department_name,
                       editor_user_name: calcList.missing_return_editor_user_name,
                       working_time: calcList.missing_middle_return_time,
+                      holiday_description: calcList.holiday_description
                     }"
                     v-on:click-event="showMap(
                         calcList.missing_middle_return_time,
@@ -273,38 +279,47 @@
                         mode_private_out_end)"
                   >
                   </daily-working-info-time-table>
-                  <!-- /私用外出戻り　終了 -->
-                  <td class="text-center align-middle">{{ calcList.working_status_name }}</td>
-                  <td class="text-center align-middle">{{ calcList.working_timetable_name }}</td>
+                  <!-- /私用外出戻り　終了 -->    
+                  <!-- 勤務状態 -->    
                   <td
-                    class="text-center align-middle"
+                    class="text-center align-middle mw-rem-5"
+                    v-if="calcList.holiday_description === '1日集計対象休暇'"
+                  ></td>
+                  <td
+                    class="text-center align-middle mw-rem-5"
+                    v-else
+                  >{{ calcList.working_status_name }}</td>
+                  <!-- /勤務状態 -->    
+                  <td class="text-center align-middle mw-rem-10">{{ calcList.working_timetable_name }}</td>
+                  <td
+                    class="text-center align-middle mw-rem-5"
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
                     @mouseover="edttooltips('実働時間 = 所定 + ',predeterTimeSecondName,' + ' + predeterNightTimeSecondName,'')"
                   >{{ calcList.total_working_times }}</td>
-                  <td class="text-center align-middle">{{ calcList.regular_working_times }}</td>
-                  <td class="text-center align-middle">{{ calcList.off_hours_working_hours }}</td>
-                  <td class="text-center align-middle">{{ calcList.late_night_overtime_hours }}</td>
-                  <td class="text-center align-middle">{{ calcList.late_night_working_hours }}</td>
+                  <td class="text-center align-middle mw-rem-3">{{ calcList.regular_working_times }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ calcList.off_hours_working_hours }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ calcList.late_night_overtime_hours }}</td>
+                  <td class="text-center align-middle mw-rem-3">{{ calcList.late_night_working_hours }}</td>
                   <td
-                    class="text-center align-middle"
+                    class="text-center align-middle mw-rem-5"
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
                     @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                   >{{ calcList.not_employment_working_hours }}</td>
                   <td
-                    class="text-left align-middle"
+                    class="text-left align-middle mw-rem-15"
                   >{{ calcList.remark_holiday_name }} {{ calcList.remark_check_result }} {{ calcList.remark_check_max_times }} {{ calcList.remark_check_interval }}</td>
                 </tr>
                 <tr
                   v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'"
                   v-for="(calcList,index) in calcLists"
                 >
-                  <td class="text-left align-middle">{{ calcList.department_name }}</td>
-                  <td class="text-left align-middle">{{ calcList.employment_status_name }}</td>
-                  <td class="text-left align-middle">{{ calcList.user_name }}</td>
+                  <td class="text-left align-middle mw-rem-5">{{ calcList.department_name }}</td>
+                  <td class="text-left align-middle mw-rem-10">{{ calcList.employment_status_name }}</td>
+                  <td class="text-left align-middle mw-rem-10">{{ calcList.user_name }}</td>
                   <!-- 出勤 -->
                   <daily-working-info-time-table
                     v-bind:calc-list="{
@@ -314,6 +329,7 @@
                       editor_department_name: calcList.attendance_editor_department_name,
                       editor_user_name: calcList.attendance_editor_user_name,
                       working_time: calcList.attendance_time,
+                      holiday_description: calcList.holiday_description
                     }"
                     v-on:click-event="showMap(
                         calcList.attendance_time,
@@ -325,13 +341,13 @@
                   >
                   </daily-working-info-time-table>
                   <td
-                    class="text-left text-align-left"
+                    class="text-left text-align-left mw-rem-10"
                     v-if="calcList.attendance_editor_department_name"
                   >
                     {{ calcList.attendance_editor_department_name }}：{{ calcList.attendance_editor_user_name }}
                   </td>
                   <td
-                    class="text-left text-align-left"
+                    class="text-left text-align-left mw-rem-10"
                     v-else
                   >
                   </td>
@@ -345,6 +361,7 @@
                       editor_department_name: calcList.leaving_editor_department_name,
                       editor_user_name: calcList.attendance_editor_user_name,
                       working_time: calcList.leaving_time,
+                      holiday_description: calcList.holiday_description
                     }"
                     v-on:click-event="showMap(
                         calcList.leaving_time,
@@ -356,13 +373,13 @@
                   >
                   </daily-working-info-time-table>
                   <td
-                    class="text-left text-align-left"
+                    class="text-left text-align-left mw-rem-10"
                     v-if="calcList.leaving_editor_department_name"
                   >
                     {{ calcList.leaving_editor_department_name }}：{{ calcList.attendance_editor_user_name }}
                   </td>
                   <td
-                    class="text-left text-align-left"
+                    class="text-left text-align-left mw-rem-10"
                     v-else
                   >
                   </td>
@@ -376,6 +393,7 @@
                       editor_department_name: calcList.public_editor_department_name,
                       editor_user_name: calcList.public_editor_user_name,
                       working_time: calcList.public_going_out_time,
+                      holiday_description: calcList.holiday_description
                     }"
                     v-on:click-event="showMap(
                         calcList.public_going_out_time,
@@ -387,13 +405,13 @@
                   >
                   </daily-working-info-time-table>
                   <td
-                    class="text-left text-align-left"
+                    class="text-left text-align-left mw-rem-10"
                     v-if="calcList.public_editor_department_name"
                   >
                     {{ calcList.public_editor_department_name }}：{{ calcList.public_editor_user_name }}
                   </td>
                   <td
-                    class="text-left text-align-left"
+                    class="text-left text-align-left mw-rem-10"
                     v-else
                   >
                   </td>
@@ -407,6 +425,7 @@
                       editor_department_name: calcList.public_return_editor_department_name,
                       editor_user_name: calcList.public_return_editor_user_name,
                       working_time: calcList.public_going_out_return_time,
+                      holiday_description: calcList.holiday_description
                     }"
                     v-on:click-event="showMap(
                         calcList.public_going_out_return_time,
@@ -418,13 +437,13 @@
                   >
                   </daily-working-info-time-table>
                   <td
-                    class="text-left text-align-left"
+                    class="text-left text-align-left mw-rem-10"
                     v-if="calcList.public_return_editor_department_name"
                   >
                     {{ calcList.public_return_editor_department_name }}：{{ calcList.public_return_editor_user_name }}
                   </td>
                   <td
-                    class="text-left text-align-left"
+                    class="text-left text-align-left mw-rem-10"
                     v-else
                   >
                   </td>
@@ -438,6 +457,7 @@
                       editor_department_name: calcList.missing_editor_department_name,
                       editor_user_name: calcList.missing_editor_user_name,
                       working_time: calcList.missing_middle_time,
+                      holiday_description: calcList.holiday_description
                     }"
                     v-on:click-event="showMap(
                         calcList.missing_middle_time,
@@ -449,13 +469,13 @@
                   >
                   </daily-working-info-time-table>
                   <td
-                    class="text-left text-align-left"
+                    class="text-left text-align-left mw-rem-10"
                     v-if="calcList.missing_editor_department_name"
                   >
                     {{ calcList.missing_editor_department_name }}：{{ calcList.missing_editor_user_name }}
                   </td>
                   <td
-                    class="text-left text-align-left"
+                    class="text-left text-align-left mw-rem-10"
                     v-else
                   >
                   </td>
@@ -469,6 +489,7 @@
                       editor_department_name: calcList.missing_return_editor_department_name,
                       editor_user_name: calcList.missing_return_editor_user_name,
                       working_time: calcList.missing_middle_return_time,
+                      holiday_description: calcList.holiday_description
                     }"
                     v-on:click-event="showMap(
                         calcList.missing_middle_return_time,
@@ -480,42 +501,51 @@
                   >
                   </daily-working-info-time-table>
                   <td
-                    class="text-left text-align-left"
+                    class="text-left text-align-left mw-rem-10"
                     v-if="calcList.missing_return_editor_department_name"
                   >
                     {{ calcList.missing_return_editor_department_name }}：{{ calcList.missing_return_editor_user_name }}
                   </td>
                   <td
-                    class="text-left text-align-left"
+                    class="text-left text-align-left mw-rem-10"
                     v-else
                   >
                   </td>
                   <!-- /私用外出戻り　終了 -->
-                  <td class="text-center align-middle">{{ calcList.working_status_name }}</td>
-                  <td class="text-center align-middle">{{ calcList.working_timetable_name }}</td>
+                  <!-- 勤務状態 -->    
                   <td
-                    class="text-center align-middle"
+                    class="text-center align-middle mw-rem-5"
+                    v-if="calcList.holiday_description === '1日集計対象休暇'"
+                  ></td>
+                  <td
+                    class="text-center align-middle mw-rem-5"
+                    v-else
+                  >{{ calcList.working_status_name }}</td>
+                  <!-- /勤務状態 -->    
+                  <td class="text-center align-middle mw-rem-10">{{ calcList.working_timetable_name }}</td>
+                  <td
+                    class="text-center align-middle mw-rem-5"
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
                     @mouseover="edttooltips('実働時間 = 所定 + ',predeterTimeSecondName,' + ' + predeterNightTimeSecondName,'')"
                   >{{ calcList.total_working_times }}</td>
-                  <td class="text-center align-middle">{{ calcList.regular_working_times }}</td>
-                  <td class="text-center align-middle">{{ calcList.out_of_regular_working_times }}</td>
-                  <td class="text-center align-middle">{{ calcList.off_hours_working_hours }}</td>
-                  <td class="text-center align-middle">{{ calcList.late_night_overtime_hours }}</td>
-                  <td class="text-center align-middle">{{ calcList.late_night_working_hours }}</td>
-                  <td class="text-center align-middle">{{ calcList.legal_working_times }}</td>
-                  <td class="text-center align-middle">{{ calcList.out_of_legal_working_times }}</td>
+                  <td class="text-center align-middle mw-rem-3">{{ calcList.regular_working_times }}</td>
+                  <td class="text-center align-middle mw-rem-3">{{ calcList.out_of_regular_working_times }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ calcList.off_hours_working_hours }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ calcList.late_night_overtime_hours }}</td>
+                  <td class="text-center align-middle mw-rem-3">{{ calcList.late_night_working_hours }}</td>
+                  <td class="text-center align-middle mw-rem-3">{{ calcList.legal_working_times }}</td>
+                  <td class="text-center align-middle mw-rem-3">{{ calcList.out_of_legal_working_times }}</td>
                   <td
-                    class="text-center align-middle"
+                    class="text-center align-middle mw-rem-5"
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
                     @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                   >{{ calcList.not_employment_working_hours }}</td>
                   <td
-                    class="text-left align-middle"
+                    class="text-left align-middle mw-rem-15"
                   >{{ calcList.remark_holiday_name }} {{ calcList.remark_check_result }} {{ calcList.remark_check_max_times }} {{ calcList.remark_check_interval }}</td>
                 </tr>
                 <tr
@@ -831,9 +861,14 @@ export default {
   color: chartreuse;
 }
 
-table {
-   border-collapse: collapse !important;
-   border: 1px solid #95c5ed !important;
+thead, tbody {
+  display: block !important;
+}
+
+tbody {
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
+  height: 300px !important;
 }
 
 .table th, .table td {
@@ -841,6 +876,11 @@ table {
     border-style: solid dashed !important;
     border-width: 1px !important;
     border-color: #95c5ed #dee2e6 !important;
+}
+
+table {
+   border-collapse: collapse !important;
+   border: 1px solid #95c5ed !important;
 }
 
 .mw-rem-3 {

@@ -17,6 +17,7 @@ class TempCalcWorkingTime extends Model
 {
     protected $table = 'temp_calc_workingtimes';
     protected $table_working_timetables = 'working_timetables';
+    protected $table_generalcodes = 'generalcodes';
     protected $guarded = array('id');
 
     //--------------- 項目属性 -----------------------------------
@@ -882,6 +883,7 @@ class TempCalcWorkingTime extends Model
                 't1.business_name as business_name',
                 't1.holiday_kubun as holiday_kubun',
                 't1.holiday_name as holiday_name',
+                't2.description as holiday_description',
                 't1.closing as closing',
                 't1.uplimit_time as uplimit_time',
                 't1.statutory_uplimit_time as statutory_uplimit_time',
@@ -905,6 +907,13 @@ class TempCalcWorkingTime extends Model
             $mainquery
                 ->selectRaw('X(t1.positions) as x_positions')
                 ->selectRaw('Y(t1.positions) as y_positions');
+            $mainquery
+                ->leftJoin($this->table_generalcodes.' as t2', function ($join) { 
+                    $join->on('t2.code', '=', 't1.holiday_kubun')
+                    ->where('t2.identification_id', '=', Config::get('const.C013.value'))
+                    ->where('t1.is_deleted', '=', 0)
+                    ->where('t2.is_deleted', '=', 0);
+                });
 
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $date = date_create($this->param_date_from);

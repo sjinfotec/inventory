@@ -70,6 +70,10 @@ Vue.component(
     "daily-working-info-time-table",
     require("./components/DailyWorkingInfoTimeTable.vue").default
 );
+Vue.component(
+    "daily-working-info-sum-table",
+    require("./components/DailyWorkingInfoSumTable.vue").default
+);
 // 日次警告
 Vue.component(
     "daily-working-alert",
@@ -172,10 +176,17 @@ Vue.component(
     require("./components/InitCalendar.vue").default
 );
 
+// 勤怠編集
 Vue.component(
     "edit-work-times",
     require("./components/EditWorkTimes.vue").default
 );
+// 勤怠編集テーブル
+Vue.component(
+    "edit-work-times-table",
+    require("./components/EditWorkTimesTable.vue").default
+);
+
 
 Vue.component(
     "create-company-information",
@@ -364,6 +375,13 @@ Vue.component(
 Vue.component(
     "edit_attendance-log",
     require("./components/EditAttendanceLog.vue").default
+);
+
+
+// 勤務状況テーブル
+Vue.component(
+    "table-working-status",
+    require("./components/TableWorkingStatus.vue").default
 );
 
 /**

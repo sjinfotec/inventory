@@ -762,7 +762,7 @@ class WorkingTimeTable extends Model
             if (!empty($this->param_user_code)) {
                 $sqlString .= "   and t1.code = ? ";
             }
-            $sqlString .= "   and t1.is_deleted_ = ? ";
+            $sqlString .= "   and t1.is_deleted = ? ";
         
             // バインド
             $array_setBindingsStr = array();
@@ -820,11 +820,13 @@ class WorkingTimeTable extends Model
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 9999;
             $array_setBindingsStr[] = 0;
             //
             $array_setBindingsStr[] =  Config::get('const.C004.regular_working_time');
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+
             if (!empty($this->param_date_to)) {
                 $array_setBindingsStr[] = $this->param_date_to;
             }

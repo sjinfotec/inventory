@@ -38,6 +38,11 @@
 	<!-- /main contentns row -->
 	@endif
 	@can('admin-higher')
-		<edit-work-times></edit-work-times>
+		<edit-work-times
+			v-bind:authusers="{{ $authusers }}"
+			v-bind:generaluser="{{ $generaluser }}"
+			v-bind:generalapproveruser="{{ $generalapproveruser }}"
+			v-bind:adminuser="{{ $adminuser }}"
+		></edit-work-times>
 	@endcan
 @endsection

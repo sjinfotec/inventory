@@ -176,4 +176,7 @@ Route::post('/insert_post_informations', 'ApiCommonController@insertPostInformat
 Route::post('/del_post_informations', 'ApiCommonController@delPostInformations')->middleware('auth');
 // ユーザー所定時刻取得
 Route::post('/get_working_hours', 'ApiCommonController@getWorkingHours')->middleware('auth');
+// 勤務状況取得
+Route::post('/get_working_status/get', 'ApiCommonController@getWorgingStatusInfo')->middleware('auth');
+
 

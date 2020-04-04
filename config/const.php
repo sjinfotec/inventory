@@ -118,7 +118,46 @@ return [
         'leave_early_work' => 17,
         'deemed_business_trip' => 18,
         'deemed_direct_go' => 19,
-        'deemed_direct_return' => 20
+        'deemed_direct_return' => 20,
+        'public_damage' => 21
+    ],
+
+    'C013_DESC_VALUE' => [
+        'value' => 'C013',
+        'non_set' => "",
+        'target_calc_time' => "1日集計対象休暇",
+        'half_am_' => "午前半休",
+        'half_pm' => "午後半休",
+        'non_calc_time' => "1日休暇",
+        'late_work' => "遅刻",
+        'early_work' => "早退",
+        'deemed' => "みなし"
+    ],
+
+    'C013_DESC' => [
+        'value' => 'C013',
+        'non_set' => "",
+        'paid_holiday' => "1日集計対象休暇",
+        'morning_off' => "午前半休",
+        'afternoon_off' => "午後半休",
+        'substitute_holiday' => "1日休暇",
+        'compensation_holiday' => "1日休暇",
+        'summer_leave' => "1日休暇",
+        'year_end_and_new_year_leave' => "1日休暇",
+        'organization_anniversary' => "1日休暇",
+        'prenatal_postnatal' => "1日休暇",
+        'physiology_days_leave' => "1日休暇",
+        'childcare_care_leave' => "1日休暇",
+        'nursing_care_leave' => "1日休暇",
+        'congratulatory_or_consolatory_leave' => "1日休暇",
+        'refresh_leave' => "1日休暇",
+        'absence_work' => "1日休暇",
+        'late_work' => "遅刻",
+        'leave_early_work' => "早退",
+        'deemed_business_trip' => "みなし",
+        'deemed_direct_go' => "みなし",
+        'deemed_direct_return' => "みなし",
+        'public_damage' => "1日集計対象休暇"
     ],
 
     'C014' => [

@@ -37,5 +37,11 @@
 					</div>
 					<!-- /main contentns row -->
 					@endif
-					<daily-working-alert></daily-working-alert>
+					<daily-working-alert
+						v-bind:authusers="{{ $authusers }}"
+						v-bind:generaluser="{{ $generaluser }}"
+						v-bind:generalapproveruser="{{ $generalapproveruser }}"
+						v-bind:adminuser="{{ $adminuser }}"
+					>
+					</daily-working-alert>
 @endsection

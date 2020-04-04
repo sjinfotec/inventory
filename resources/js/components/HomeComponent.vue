@@ -120,7 +120,8 @@
       <div class="card flex-fill">
         <div class="card-header bg-color">
           <!-- <img class="icon-size-sm svg_img orange600" src="/images/info-32.png" alt />打刻エラー -->
-          <i class="fa fa-exclamation-triangle my-red fa-lg fa-fw" aria-hidden="true"></i>
+          <!-- <i class="fa fa-exclamation-triangle my-red fa-lg fa-fw" aria-hidden="true"></i> -->
+          <img class="con-size-lg svg_img" src="/images/round-info-b.svg" alt />
           <span class="font-weight-bold">【通知事項】</span>
         </div>
         <div class="card-body">
@@ -131,19 +132,41 @@
           <!-- ----------- waitメッセージ部 END ---------------- -->
           <div class="row justify-content-between  print-none" v-if="infomationmessage.length">
             <!-- col -->
-            <div class="col-md-12 pb-2">
-              <ul class="error-red color-red">
-                <div v-if="login_user_role === login_adminuser_role">
-                  <a class href="/edit_work_times"
-                   v-for="(messagevalidate,index) in infomationmessage" v-bind:key="index">{{ messagevalidate }}
-                  </a>
-                </div>
-              </ul>
+            <div class="col-md-12">
+              <div v-if="login_user_role === login_adminuser_role">
+                <a class href="/daily_alert"
+                  v-for="(messagevalidate,index) in infomationmessage" v-bind:key="index">{{ messagevalidate }}
+                </a>
+              </div>
+              <div v-else>
+                <span style="color: #808080;">周知事項はありません</span>
+              </div>
             </div>
+            <!-- /.col -->
+          </div>
+          <div class="row justify-content-between  print-none" v-else>
+            <!-- col -->
+            <span style="color: #808080;">周知事項はありません</span>
             <!-- /.col -->
           </div>
         </div>
       </div>
+    </div>
+    <div class="d-flex flex-row justify-content">
+      <!-- ========================== 勤務状況部 START ========================== -->
+      <!-- .panel -->
+      <div class="col-md-12 pt-3">
+        <table-working-status
+          v-if="showeditworktimestable"
+          ref="refeditworktimestable"
+          v-bind:target-date="''"
+        >
+        </table-working-status>
+      </div>
+      <!-- /.panel -->
+      <!-- ========================== 勤務状況部 END =========================== -->
+    </div>
+      
       <!-- <div class="card flex-fill margin-left-small">
         <div class="card-header bg-color">
           <i class="fa fa-bullhorn fa-lg my-orange fa-fw" aria-hidden="true"></i>
@@ -290,7 +313,8 @@ export default {
       editionclient_value : 0,
       dialogVisible: false,
       messageshowsearch: false,
-      infomationmessage : []
+      infomationmessage : [],
+      showeditworktimestable: true
     };
   },
   // マウント時

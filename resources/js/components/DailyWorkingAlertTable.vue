@@ -10,6 +10,7 @@
                 <td class="text-center align-middle mw-rem-8">雇用形態</td>
                 <td class="text-center align-middle mw-rem-8">部署</td>
                 <td class="text-center align-middle mw-rem-12">氏名</td>
+                <td class="text-center align-middle mw-rem-5" v-if="isEdit">操作</td>
                 <td class="text-center align-middle mw-rem-8">打刻時刻</td>
                 <td class="text-center align-middle mw-rem-8">打刻モード</td>
                 <td class="text-center align-middle mw-rem-8">直前打刻時刻</td>
@@ -29,7 +30,8 @@
               </tr>
             </thead>
               <!-- class="card-body mb-3 py-0 pt-4 border-top" -->
-            <tbody>
+                  <!-- <input type="image" class="fa fa-edit" alt="編集" v-on:click="detailEdtClick(index)"> -->
+            <tbody :style="tableheight">
               <tr
                 v-for="(alertList,index) in alertLists"
               >
@@ -37,6 +39,11 @@
                 <td class="text-left align-middle mw-rem-8">{{ alertList.employment_status_name }}</td>
                 <td class="text-left align-middle mw-rem-8">{{ alertList.department_name }}</td>
                 <td class="text-left align-middle mw-rem-12">{{ alertList.user_name }}</td>
+                <td class="text-center align-middle mw-rem-5" v-if="isEdit">
+                  <i class="fa fa-edit" style="color: red;ccursor: hand; cursor:pointer;" v-on:click="detailEdtClick(index)">
+                    <span style="color: #0000FF;cursor: hand; cursor:pointer;">編集</span>
+                  </i>
+                </td>
                 <td class="text-left align-middle mw-rem-8">{{ alertList.current_record_time }}</td>
                 <td class="text-left align-middle mw-rem-8">{{ alertList.current_mode_name }}</td>
                 <td class="text-left align-middle mw-rem-8">{{ alertList.before_record_time }}</td>
@@ -91,6 +98,29 @@ export default {
   props: {
     alertLists: {
       type: Array
+    },
+    tablebodyHeight: {
+      type: String,
+      default: "height: 400px !important;"
+    },
+    isEdit: {
+      type: Boolean,
+      default: false
+    }
+  },
+  data: function() {
+    return {
+      tableheight: this.tablebodyHeight
+    };
+  },
+  methods: {
+    // ------------------------ イベント処理 ------------------------------------
+    
+    // 明細編集ボタンクリックされた場合の処理
+    detailEdtClick: function(index) {
+      this.tableheight = "height: 100px !important;";
+      var arrayData = {'rowIndex' : index};
+      this.$emit('detaileditclick-event',event, arrayData);
     }
   }
 };
@@ -104,7 +134,6 @@ thead, tbody {
 tbody {
   overflow-x: hidden !important;
   overflow-y: scroll !important;
-  height: 400px !important;
 }
 
 .table th, .table td {
