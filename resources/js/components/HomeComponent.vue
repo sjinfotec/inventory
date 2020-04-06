@@ -267,6 +267,10 @@ export default {
         type: Number,
         default: 0
     },
+    distributionmarutaka: {
+        type: Number,
+        default: 0
+    },
     edition: {
         type: Number,
         default: 0
@@ -305,6 +309,7 @@ export default {
       distributionmode : 0,
       distribution43z_value : 0,
       distributionssjjoo_value : 0,
+      distributionmarutaka_value : 0,
       editionmode : 0,
       editiondemo_value : 0,
       editiontrial_value : 0,
@@ -327,6 +332,7 @@ export default {
     this.distributionmode = this.distribution;
     this.distribution43z_value = this.distribution43z;
     this.distributionssjjoo_value = this.distributionssjjoo;
+    this.distributionmarutaka_value = this.distributionmarutaka;
     this.editionmode = this.edition;
     this.editiondemo_value = this.editiondemo;
     this.editiontrial_value = this.editiontrial;

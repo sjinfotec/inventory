@@ -12,6 +12,7 @@ use Carbon\Carbon;
 class WorkTimeLog extends Model
 {
     protected $table = 'work_time_logs';
+    protected $table_work_times = 'work_times';
     protected $table_users = 'users';
     protected $table_departments = 'departments';
     protected $table_generalcodes = 'generalcodes';
@@ -196,6 +197,7 @@ class WorkTimeLog extends Model
      * @return void
      */
     public function getWorkinTimeLog($target_date){
+        // $this->tableを$this->table_work_timesに変更 20200406
         try {
             $sqlString = "";
             $sqlString .= "select";
@@ -205,13 +207,13 @@ class WorkTimeLog extends Model
             $sqlString .= "  , t4.name as department_name ";
             $sqlString .= "  , t1.mode as mode ";
             $sqlString .= "  , t5.code_name as mode_name ";
-            $sqlString .= "from ".$this->table.' as t1 ';
+            $sqlString .= "from ".$this->table_work_times.' as t1 ';
             $sqlString .= "  inner join ( ";
             $sqlString .= "    select ";
             $sqlString .= "      user_code ";
             $sqlString .= "      , department_code ";
             $sqlString .= "      , max(record_time) as record_time ";
-            $sqlString .= "    from ".$this->table.' ';
+            $sqlString .= "    from ".$this->table_work_times.' ';
             $sqlString .= "    where ";
             $sqlString .= "      ? = ? ";
             $sqlString .= "      and record_time between ? and ? ";
@@ -286,8 +288,8 @@ class WorkTimeLog extends Model
             $sqlString .= "    and t5.code = t1.mode ";
             $sqlString .= "    and t5.is_deleted = ? ";
             $sqlString .= "order by ";
-            $sqlString .= "  t1.mode ";
-            $sqlString .= "  , t3.department_code ";
+            $sqlString .= "  t3.department_code ";
+            $sqlString .= "  , t1.mode ";
             $sqlString .= "  , t3.code ";
             // バインド
             // record_time 範囲
@@ -311,7 +313,7 @@ class WorkTimeLog extends Model
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = $target_date;
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = Config::get('const.C012.value');
+            $array_setBindingsStr[] = Config::get('const.C005.value');
             $array_setBindingsStr[] = 0;
             $result = DB::select($sqlString, $array_setBindingsStr);
         }catch(\PDOException $pe){

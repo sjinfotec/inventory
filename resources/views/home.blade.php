@@ -43,6 +43,7 @@
 							v-bind:distribution="{{ $distribution }}"
 							v-bind:distribution43z="{{ $distribution43z }}"
 							v-bind:distributionssjjoo="{{ $distributionssjjoo }}"
+							v-bind:distributionmarutaka="{{ $distributionmarutaka }}"
 							v-bind:edition="{{ $edition }}"
 							v-bind:editiondemo="{{ $editiondemo }}"
 							v-bind:editiontrial="{{ $editiontrial }}"

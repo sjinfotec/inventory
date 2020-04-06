@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 
@@ -22,7 +23,38 @@ class FileDownloadController extends Controller
         if (isset($request->filekbn)) {
             return $this->getfileDownload($request);
         } else {
-            return view('file_download');
+            $authusers = Auth::user();
+            $loginusercode = $authusers->code;
+            $generaluser = Config::get('const.C025.general_user');
+            $generalapproveruser = Config::get('const.C025.general_approver__user');
+            $adminuser = Config::get('const.C025.admin_user');
+            $distribution = Config::get('const.DISTRIBUTION.DISTRIBUTION');
+            $distribution43z = Config::get('const.DISTRIBUTION_VALUE.43z');
+            $distributionssjjoo = Config::get('const.DISTRIBUTION_VALUE.SSJJOO');
+            $distributionmarutaka = Config::get('const.DISTRIBUTION_VALUE.MARUTAKA');
+            $edition = Config::get('const.EDITION.EDITION');
+            $editiondemo = Config::get('const.EDITION_VALUE.DEMO');
+            $editiontrial = Config::get('const.EDITION_VALUE.TRIAL');
+            $editioncroud = Config::get('const.EDITION_VALUE.CROUD');
+            $editionssjjoo = Config::get('const.EDITION_VALUE.SSJJOO');
+            $editionclient = Config::get('const.EDITION_VALUE.CLIENT');
+            return view('file_download',
+                compact(
+                    'authusers',
+                    'generaluser',
+                    'generalapproveruser',
+                    'adminuser',
+                    'distribution',
+                    'distribution43z',
+                    'distributionssjjoo',
+                    'distributionmarutaka',
+                    'edition',
+                    'editiondemo',
+                    'editiontrial',
+                    'editioncroud',
+                    'editionssjjoo',
+                    'editionclient'
+                ));
         }
     }
 
@@ -82,7 +114,6 @@ class FileDownloadController extends Controller
             // パラメータチェック
             $filekbn = $request->filekbn;
             if ($filekbn > 0) {
-                // 操作マニュアル（導入編）
                 $filePath = Config::get('const.FILE_DOWNLOAD_PATH.STORAGE').$array_file[$filekbn-1];
                 $fileName = $array_file[$filekbn-1];
                 $mimeType = Storage::mimeType($filePath);

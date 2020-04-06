@@ -38,6 +38,21 @@
 		</div>
 		<!-- /main contentns row -->
 		@endif
-		<file-download></file-download>
+		<file-download
+			v-bind:authusers="{{ $authusers }}"
+			v-bind:generaluser="{{ $generaluser }}"
+			v-bind:generalapproveruser="{{ $generalapproveruser }}"
+			v-bind:adminuser="{{ $adminuser }}"
+			v-bind:distribution="{{ $distribution }}"
+			v-bind:distribution43z="{{ $distribution43z }}"
+			v-bind:distributionssjjoo="{{ $distributionssjjoo }}"
+			v-bind:distributionmarutaka="{{ $distributionmarutaka }}"
+			v-bind:edition="{{ $edition }}"
+			v-bind:editiondemo="{{ $editiondemo }}"
+			v-bind:editiontrial="{{ $editiontrial }}"
+			v-bind:editioncroud="{{ $editioncroud }}"
+			v-bind:editionssjjoo="{{ $editionssjjoo }}"
+			v-bind:editionclient="{{ $editionclient }}"
+		></file-download>
 		<!-- /main contentns row -->
 @endsection
