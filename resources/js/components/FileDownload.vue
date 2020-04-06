@@ -108,117 +108,7 @@
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
-                  <a href="/file_download?filekbn=11">・管理者画面接続説明書（PDF 最新版） -- ファイル名：csd1000l_admin.pdf</a>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between" v-if="this.login_user_role === this.login_adminuser_role">
-              <!-- .col -->
-              <div class="col-md-12 pb-2">
-                <div class="input-group">
-                  <a href="/file_download?filekbn=12">・管理者画面接続説明書（EXCEL 最新版） -- ファイル名：csd1000l_admin.xlsx</a>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-12 pb-2">
-                <div class="input-group">
-                  <a href="/file_download?filekbn=22">・操作マニュアル（導入編）（EXCEL 最新版） -- ファイル名：Installmanual.xlsx</a>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-12 pb-2">
-                <div class="input-group">
-                  <a href="/file_download?filekbn=21">・操作マニュアル（導入編）（PDF 最新版） -- ファイル名：Installmanual.pdf</a>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-12 pb-2">
-                <div class="input-group">
-                  <a href="/file_download?filekbn=22">・操作マニュアル（導入編）（EXCEL 最新版） -- ファイル名：Installmanual.xlsx</a>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-12 pb-2">
-                <div class="input-group">
-                  <a href="/file_download?filekbn=23">・操作マニュアル（打刻編）（PDF 最新版） -- ファイル名：Operationmanual(card_reader).pdf</a>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-12 pb-2">
-                <div class="input-group">
-                  <a href="/file_download?filekbn=24">・操作マニュアル（打刻編）（EXCEL 最新版） -- ファイル名：Operationmanual(card_reader).xlsx</a>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-12 pb-2">
-                <div class="input-group">
-                  <a href="/file_download?filekbn=25">・操作マニュアル（設定編）（PDF 最新版） -- ファイル名：Operationmanual(setting).pdf</a>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-12 pb-2">
-                <div class="input-group">
-                  <a href="/file_download?filekbn=26">・操作マニュアル（設定編）（EXCEL 最新版） -- ファイル名：Operationmanual(setting).xlsx</a>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-12 pb-2">
-                <div class="input-group">
-                  <a href="/file_download?filekbn=27">・操作マニュアル（弥生給与ソフト連携）（PDF 最新版） -- ファイル名：Operationmanual(yayoi).pdf</a>
-                </div>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-12 pb-2">
-                <div class="input-group">
-                  <a href="/file_download?filekbn=28">・操作マニュアル（弥生給与ソフト連携）（EXCEL 最新版） -- ファイル名：Operationmanual(yayoi).xlsx</a>
+                  <a href="/file_download?filekbn=11">・管理者画面接続説明書（EXCEL 最新版） -- ファイル名：csd1000l_admin.xlsx</a>
                 </div>
               </div>
               <!-- /.col -->
@@ -226,12 +116,12 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="this.distributionmode !== this.distributionmarutaka_value">
+              v-if="this.login_user_role === this.login_adminuser_role && this.distributionmode === this.distributionmarutaka_value">
             >
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
-                  <a href="/file_download?filekbn=29">・操作マニュアル（イベントログ取得インストール）（PDF 最新版） -- ファイル名：pceventlogmanual.pdf</a>
+                  <a href="/file_download?filekbn=12">・管理者画面接続説明書（PDF 最新版） -- ファイル名：csd1000l_admin.pdf</a>
                 </div>
               </div>
               <!-- /.col -->
@@ -239,12 +129,25 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="this.distributionmode !== this.distributionmarutaka_value">
+              v-if="this.editionmode === this.editionclient_value || this.editionmode === this.editionssjjoo_value"
             >
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
-                  <a href="/file_download?filekbn=30">・操作マニュアル（イベントログ取得インストール）（EXCEL 最新版） -- ファイル名：pceventlogmanual.xlsx</a>
+                  <a href="/file_download?filekbn=13">・クライアント版サーバー構築手順書（WORD 最新版） -- ファイル名：Operationmanual(clientServer).docx</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between"
+              v-if="this.editionmode === this.editionclient_value || this.editionmode === this.editionssjjoo_value"
+            >
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=14">・クライアント版サーバー構築手順書（PDF 最新版） -- ファイル名：Operationmanual(clientServer).pdf</a>
                 </div>
               </div>
               <!-- /.col -->
@@ -255,7 +158,7 @@
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
-                  <a href="/file_download?filekbn=31">・操作マニュアル（遠隔リモートインストール）（PDF 最新版） -- ファイル名：Operationmanual(TeamViewer).pdf</a>
+                  <a href="/file_download?filekbn=21">・操作マニュアル（導入編）（EXCEL 最新版） -- ファイル名：Installmanual.xlsx</a>
                 </div>
               </div>
               <!-- /.col -->
@@ -266,7 +169,121 @@
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
-                  <a href="/file_download?filekbn=32">・操作マニュアル（遠隔リモートインストール）（EXCEL 最新版） -- ファイル名：Operationmanual(TeamViewer).xlsx</a>
+                  <a href="/file_download?filekbn=22">・操作マニュアル（導入編）（PDF 最新版） -- ファイル名：Installmanual.pdf</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=23">・操作マニュアル（打刻編）（EXCEL 最新版） -- ファイル名：Operationmanual(card_reader).xlsx</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=24">・操作マニュアル（打刻編）（PDF 最新版） -- ファイル名：Operationmanual(card_reader).pdf</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=25">・操作マニュアル（設定編）（EXCEL 最新版） -- ファイル名：Operationmanual(setting).xlsx</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=26">・操作マニュアル（設定編）（PDF 最新版） -- ファイル名：Operationmanual(setting).pdf</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=27">・操作マニュアル（弥生給与ソフト連携）（EXCEL 最新版） -- ファイル名：Operationmanual(yayoi).xlsx</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=28">・操作マニュアル（弥生給与ソフト連携）（PDF 最新版） -- ファイル名：Operationmanual(yayoi).pdf</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between"
+              v-if="this.distributionmode !== this.distributionmarutaka_value"
+            >
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=29">・操作マニュアル（イベントログ取得インストール）（EXCEL 最新版） -- ファイル名：pceventlogmanual.xlsx</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between"
+              v-if="this.distributionmode !== this.distributionmarutaka_value"
+            >
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=30">・操作マニュアル（イベントログ取得インストール）（PDF 最新版） -- ファイル名：pceventlogmanual.pdf</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=31">・操作マニュアル（遠隔リモートインストール）（EXCEL 最新版） -- ファイル名：Operationmanual(TeamViewer).xlsx</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=32">・操作マニュアル（遠隔リモートインストール）（PDF 最新版） -- ファイル名：Operationmanual(TeamViewer).pdf</a>
                 </div>
               </div>
               <!-- /.col -->
