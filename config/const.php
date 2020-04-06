@@ -544,8 +544,8 @@ return [
         'file8' => '',
         'file9' => '',
         'file10' => '',
-        'file11' => '',
-        'file12' => '',
+        'file11' => 'csd1000l_admin.pdf',
+        'file12' => 'csd1000l_admin.xlsx',
         'file13' => '',
         'file14' => '',
         'file15' => '',
@@ -653,7 +653,8 @@ return [
 
     'DISTRIBUTION_VALUE' => [
         '43z' => 1,
-        'SSJJOO' => 2
+        'SSJJOO' => 2,
+        'MARUTAKA' => 3
     ],
 
     'EDITION' => [

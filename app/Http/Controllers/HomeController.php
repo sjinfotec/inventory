@@ -33,6 +33,7 @@ class HomeController extends Controller
         $distribution = Config::get('const.DISTRIBUTION.DISTRIBUTION');
         $distribution43z = Config::get('const.DISTRIBUTION_VALUE.43z');
         $distributionssjjoo = Config::get('const.DISTRIBUTION_VALUE.SSJJOO');
+        $distributionmarutaka = Config::get('const.DISTRIBUTION_VALUE.MARUTAKA');
         $edition = Config::get('const.EDITION.EDITION');
         $editiondemo = Config::get('const.EDITION_VALUE.DEMO');
         $editiontrial = Config::get('const.EDITION_VALUE.TRIAL');
@@ -48,6 +49,7 @@ class HomeController extends Controller
                 'distribution',
                 'distribution43z',
                 'distributionssjjoo',
+                'distributionmarutaka',
                 'edition',
                 'editiondemo',
                 'editiontrial',
