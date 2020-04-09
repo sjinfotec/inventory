@@ -129,8 +129,7 @@
                   v-bind:csv-data="calcresults"
                   v-bind:is-csvbutton="iscsvbutton"
                   v-bind:csv-date="datejaFormat"
-                >
-                </btn-csv-download>
+                ></btn-csv-download>
               </div>
               <!-- /.col -->
             </div>
@@ -146,7 +145,7 @@
     <div class="row justify-content-between">
       <!-- ========================== アップロード部 START ========================== -->
       <!-- .panel -->
-      <div class="col-md pt-3  print-none" v-if="selectMode=='UPUSERS'">
+      <div class="col-md pt-3 print-none" v-if="selectMode=='UPUSERS'">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -161,8 +160,16 @@
               <!-- col -->
               <div class="col-md-3 pb-2">
                 <button type="button" class="btn btn-lg font-size-rg" @click="upclick">
-                  <img class="icon-size-user mr-2 pb-1" src="/images/upload-icon-1.svg" alt="">ユーザー登録</button>
-                <input type="file" id="f1" style="display: none;" ref="uplog" @change="onFileChange" accept=".csv" />
+                  <img class="icon-size-user mr-2 pb-1" src="/images/upload-icon-1.svg" alt />ユーザー登録
+                </button>
+                <input
+                  type="file"
+                  id="f1"
+                  style="display: none;"
+                  ref="uplog"
+                  @change="onFileChange"
+                  accept=".csv"
+                />
               </div>
               <!-- /.col -->
             </div>
@@ -1342,7 +1349,7 @@
 </template>
 <script>
 import moment from "moment";
-import encoding from 'encoding-japanese';
+import encoding from "encoding-japanese";
 import { dialogable } from "../mixins/dialogable.js";
 import { checkable } from "../mixins/checkable.js";
 import { requestable } from "../mixins/requestable.js";
@@ -1351,8 +1358,8 @@ export default {
   mixins: [dialogable, checkable, requestable],
   props: {
     authusers: {
-        type: Array,
-        default: []
+      type: Array,
+      default: []
     }
   },
   data() {
@@ -1411,8 +1418,8 @@ export default {
   },
   // マウント時
   mounted() {
-    this.login_user_code = this.authusers['code'];
-    this.login_user_role = this.authusers['role'];
+    this.login_user_code = this.authusers["code"];
+    this.login_user_role = this.authusers["role"];
     this.details = [];
     this.getDepartmentList("");
     this.getGeneralList("C001");
@@ -2034,7 +2041,7 @@ export default {
           if (result) {
             var obj = document.getElementById("f1");
             obj.value = "";
-            this.$refs.uplog.click() // 同じファイルだとイベントが走らない
+            this.$refs.uplog.click(); // 同じファイルだとイベントが走らない
           }
         }
       );
@@ -2442,13 +2449,11 @@ export default {
           console.log(res);
           if (res.data.result) {
             //メール送信完了画面に遷移する
-            this.htmlMessageSwal(
-              "送信完了",
-              "※メールが届かない場合は、お手数ですが「onedawnm.onedawn.net」へ手動で接続して下さい。",
-              "success",
-              true,
-              false
+            var messages = [];
+            messages.push(
+              "※メールが届かない場合は、お手数ですがご使用いただくモバイル端末のブラウザにて「https://onedawnm.onedawn.net」へ手動で接続して下さい。"
             );
+            this.htmlMessageSwal("送信完了", messages, "success", true, false);
           } else {
             self.errors = res.data.errors;
           }
@@ -2471,15 +2476,15 @@ export default {
         showCancelButton: true,
         onBeforeOpen: () => {
           this.$swal.showLoading();
-          var arrayParams = { usersups : this.usersups };
+          var arrayParams = { usersups: this.usersups };
           this.postRequest("/edit_user/up", arrayParams)
-            .then(response  => {
+            .then(response => {
               this.$swal.close();
               this.putThenUp(response, "アップロード登録");
             })
             .catch(reason => {
               this.$swal.close();
-              this.serverCatch("ユーザ","アップロード登録");
+              this.serverCatch("ユーザ", "アップロード登録");
             });
         }
       });
@@ -2492,19 +2497,19 @@ export default {
       // 読み込み
       var reader = new FileReader();
       // 読み込んだファイルの中身を取得する
-      reader.readAsBinaryString( file_data );
+      reader.readAsBinaryString(file_data);
       let $this = this;
       //ファイルの中身を取得後に処理を行う
-      reader.addEventListener( 'load', function() {
+      reader.addEventListener("load", function() {
         var result = reader.result;
         const sjisArray = [];
         for (let i = 0; i < result.length; i += 1) {
           sjisArray.push(result.charCodeAt(i));
         }
-      // 変換処理の実施
-        const uniArray = encoding.convert(sjisArray, 'unicode', 'sjis');
+        // 変換処理の実施
+        const uniArray = encoding.convert(sjisArray, "unicode", "sjis");
         var result_enc = encoding.codeToString(uniArray);
-        var array_linetext = result_enc.split('\r\n');
+        var array_linetext = result_enc.split("\r\n");
         var user_code = "";
         var user_department_name = "";
         var user_employment_name = "";
@@ -2520,7 +2525,7 @@ export default {
         var linetext = "";
         var array_object = [];
         // 1行目はヘッダ
-        for(var i=1; i < array_linetext.length; i++) {
+        for (var i = 1; i < array_linetext.length; i++) {
           linetext = array_linetext[i].split(",");
           // TODO:linetext.length=1はSKIPとするが(EOF)EOF以外のデータの場合でもSKIPとなる
           if (linetext.length == 12) {
@@ -2537,7 +2542,7 @@ export default {
               user_mobile_email: linetext[9].trim(),
               user_management: linetext[10].trim(),
               user_role: linetext[11].trim()
-            })
+            });
           } else if (linetext.length != 1) {
             return false;
           }
@@ -2663,7 +2668,9 @@ export default {
       var res = response.data;
       if (res.result) {
         messages.push("ユーザーを" + eventtext + "しました。");
-        messages.push("個人のカレンダー設定する場合はカレンダー設定処理をしてください。");
+        messages.push(
+          "個人のカレンダー設定する場合はカレンダー設定処理をしてください。"
+        );
         this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
         this.refreshUserList();
       } else {
@@ -2700,7 +2707,7 @@ export default {
         this.$toasted.show("ユーザーとカードの紐づけを解除しました");
       } else {
         if (res.messagedata.length > 0) {
-          this.htmlMessageSwal( "警告", res.messagedata, "warning", true, false);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch("ユーザ", eventtext);
         }
