@@ -29,6 +29,7 @@ class WorkTime extends Model
     private $department_code;               // 部署コード
     private $record_time;                   // 打刻時間
     private $mode;                          // 打刻モード
+    private $user_holiday_kubuns_id;        // ユーザー休暇区分ID
     private $check_result;                  // 打刻チェック結果
     private $check_max_time;                // 打刻回数最大チェック結果
     private $check_interval;                // インターバルチェック結果
@@ -96,6 +97,17 @@ class WorkTime extends Model
     public function setModeAttribute($value)
     {
         $this->mode = $value;
+    }
+
+    // ユーザー休暇区分ID
+    public function getUserholidaykubunsidAttribute()
+    {
+        return $this->user_holiday_kubuns_id;
+    }
+
+    public function setUserholidaykubunsidAttribute($value)
+    {
+        $this->user_holiday_kubuns_id = $value;
     }
 
 
@@ -403,6 +415,7 @@ class WorkTime extends Model
                         'department_code' => $this->department_code,
                         'record_time' => $this->record_time,
                         'mode' => $this->mode,
+                        'user_holiday_kubuns_id' => $this->user_holiday_kubuns_id,
                         'check_result' => $this->check_result,
                         'check_max_time' => $this->check_max_time,
                         'check_interval' => $this->check_interval,
@@ -421,6 +434,7 @@ class WorkTime extends Model
                         'department_code' => $this->department_code,
                         'record_time' => $this->record_time,
                         'mode' => $this->mode,
+                        'user_holiday_kubuns_id' => $this->user_holiday_kubuns_id,
                         'check_result' => $this->check_result,
                         'check_max_time' => $this->check_max_time,
                         'check_interval' => $this->check_interval,
@@ -547,6 +561,7 @@ class WorkTime extends Model
                     $this->table.'.department_code as department_code',
                     $this->table.'.record_time as record_datetime',
                     $this->table.'.mode as mode',
+                    $this->table.'.user_holiday_kubuns_id',
                     $this->table.'.check_result as check_result',
                     $this->table.'.check_max_time as check_max_time',
                     $this->table.'.check_interval as check_interval',
@@ -608,6 +623,7 @@ class WorkTime extends Model
                     't1.employment_status as employment_status',
                     't8.code_name as employment_status_name',
                     't2.mode as mode',
+                    't2.user_holiday_kubuns_id',
                     't2.check_result as check_result',
                     't2.check_max_time as check_max_time',
                     't2.check_interval as check_interval',
@@ -634,6 +650,7 @@ class WorkTime extends Model
                     't14.holiday_kubun as user_holiday_kubun',
                     't14.working_date as user_working_date',
                     't15.code_name as user_holiday_name',
+                    't15.description as user_holiday_description',
                     't2.is_editor as is_editor',
                     't2.editor_department_code as editor_department_code',
                     't2.editor_user_code as editor_user_code',
@@ -843,6 +860,7 @@ class WorkTime extends Model
             $mainquery  = DB::table($this->table)
                 ->select(
                     $this->table.'.mode as mode',
+                    $this->table.'.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     $this->table.'.record_time as record_datetime')
                 ->JoinSub($subquery_max, 't3', function ($join) { 
                     $join->on('t3.user_code', '=', $this->table.'.user_code');
@@ -935,6 +953,7 @@ class WorkTime extends Model
             $mainquery  = DB::table($this->table)
                 ->select(
                     $this->table.'.mode as mode',
+                    $this->table.'.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     $this->table.'.record_time as record_datetime')
                 ->JoinSub($subquery_max, 't3', function ($join) { 
                     $join->on('t3.user_code', '=', $this->table.'.user_code');
@@ -988,6 +1007,7 @@ class WorkTime extends Model
             $mainquery = DB::table($this->table.' AS t1')
                 ->select(
                     't1.mode as mode',
+                    't1.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     't1.record_time as record_datetime'
                     )
                 ->JoinSub($sunquery1, 't2', function ($join) { 
@@ -1046,19 +1066,29 @@ class WorkTime extends Model
                     $join->on('t5.code', '=','t1.mode')
                     ->where('t5.identification_id', '=', Config::get('const.C005.value'));
                 })
+                ->leftJoin($this->table_user_holiday_kubuns.' as t6', function ($join) { 
+                    $join->on('t6.id', '=','t1.user_holiday_kubuns_id')
+                    ->where('t6.is_deleted', '=', 0);
+                })
                 ->select(
                     't1.id',
                     't1.user_code',
                     't1.department_code',
                     't1.record_time',
                     't1.mode',
+                    't1.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     't2.name as user_name',
                     't4.name as department_name',
-                    't5.code_name'
+                    't5.code_name',
+                    't6.holiday_kubun as user_holiday_kbn'
                 )
+                ->selectRaw("DATE_FORMAT(t1.record_time,'%Y%m%d') as record_ymd")
                 ->selectRaw("DATE_FORMAT(t1.record_time,'%Y年%m月%d日') as record_date")
+                ->selectRaw("DATE_FORMAT(t1.record_time,'%Y/%m/%d') as date")
+                ->selectRaw("DATE_FORMAT(t1.record_time,'%H:%i') as time")
                 ->selectRaw('X(t1.positions) as x_positions')
                 ->selectRaw('Y(t1.positions) as y_positions')
+                ->selectRaw("case ifnull(t6.holiday_kubun,0) when 0 then 0 else 1 end as kbn_flag")
                 ->where('t1.user_code', $this->user_code)
                 ->whereBetween('t1.record_time', [$this->param_start_date,$this->param_end_date])
                 ->where('t1.is_deleted', 0)
@@ -1154,7 +1184,8 @@ class WorkTime extends Model
                 ->addselect($this->table.'.user_code as user_code')
                 ->addselect($this->table.'.department_code as department_code')
                 ->addselect($this->table.'.record_time as record_time')
-                ->addselect($this->table.'.mode as mode');
+                ->addselect($this->table.'.mode as mode')
+                ->addselect($this->table.'.user_holiday_kubuns_id as user_holiday_kubuns_id');
             $subquery1
                 ->selectRaw('case check_result when null then 0 else check_result end as check_result')
                 ->selectRaw('case check_max_time when null then 0 else check_max_time end as check_max_time')
@@ -1186,6 +1217,7 @@ class WorkTime extends Model
                     't2.record_time as record_time',
                     't2.mode as mode',
                     't6.code_name as mode_name',
+                    't2.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     't2.check_result as check_result',
                     't2.check_max_time as check_max_time',
                     't2.check_interval as unused_check_interval',

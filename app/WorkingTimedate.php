@@ -2494,6 +2494,8 @@ class WorkingTimedate extends Model
 
             $case_paid_holidays = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
             $case_paid_holidays .= "WHEN {1} THEN 1 ";
+            $case_paid_holidays .= "WHEN {2} THEN 1 ";
+            $case_paid_holidays .= "WHEN {3} THEN 1 ";
             $case_paid_holidays .= "ELSE 0 ";
             $case_paid_holidays .= 'END ';
 
@@ -2509,8 +2511,6 @@ class WorkingTimedate extends Model
             $case_holiday_kubun .= "WHEN {9} THEN 1 ";
             $case_holiday_kubun .= "WHEN {10} THEN 1 ";
             $case_holiday_kubun .= "WHEN {11} THEN 1 ";
-            $case_holiday_kubun .= "WHEN {12} THEN 1 ";
-            $case_holiday_kubun .= "WHEN {13} THEN 1 ";
             $case_holiday_kubun .= "ELSE 0 ";
             $case_holiday_kubun .= 'END ';
 
@@ -2518,7 +2518,7 @@ class WorkingTimedate extends Model
             $case_absence_kubun .= "WHEN {1} THEN 1 ";
             $case_absence_kubun .= "ELSE 0 ";
             $case_absence_kubun .= 'END ';
-
+    
             $str_replace_working_status0 =str_replace('{0}', 't2.description', $case_working_status);
             $str_replace_working_status1 =str_replace('{1}', $this->table.'.working_status', $str_replace_working_status0);
             $str_replace_working_status2 =str_replace('{2}', Config::get('const.C012.attendance'), $str_replace_working_status1);
@@ -2535,21 +2535,21 @@ class WorkingTimedate extends Model
 
             $str_replace_paid_holidays0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_paid_holidays);
             $str_replace_paid_holidays1 =str_replace('{1}', Config::get('const.C013.paid_holiday'), $str_replace_paid_holidays0);
+            $str_replace_paid_holidays2 =str_replace('{2}', Config::get('const.C013.morning_off'), $str_replace_paid_holidays1);
+            $str_replace_paid_holidays3 =str_replace('{3}', Config::get('const.C013.afternoon_off'), $str_replace_paid_holidays2);
 
             $str_replace_holiday_kubun0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_holiday_kubun);
-            $str_replace_holiday_kubun1 =str_replace('{1}', Config::get('const.C013.morning_off'), $str_replace_holiday_kubun0);
-            $str_replace_holiday_kubun2 =str_replace('{2}', Config::get('const.C013.afternoon_off'), $str_replace_holiday_kubun1);
-            $str_replace_holiday_kubun3 =str_replace('{3}', Config::get('const.C013.substitute_holiday'), $str_replace_holiday_kubun2);
-            $str_replace_holiday_kubun4 =str_replace('{4}', Config::get('const.C013.compensation_holiday'), $str_replace_holiday_kubun3);
-            $str_replace_holiday_kubun5 =str_replace('{5}', Config::get('const.C013.summer_leave'), $str_replace_holiday_kubun4);
-            $str_replace_holiday_kubun6 =str_replace('{6}', Config::get('const.C013.year_end_and_new_year_leave'), $str_replace_holiday_kubun5);
-            $str_replace_holiday_kubun7 =str_replace('{7}', Config::get('const.C013.organization_anniversary'), $str_replace_holiday_kubun6);
-            $str_replace_holiday_kubun8 =str_replace('{8}', Config::get('const.C013.prenatal_postnatal'), $str_replace_holiday_kubun7);
-            $str_replace_holiday_kubun9 =str_replace('{9}', Config::get('const.C013.physiology_days_leave'), $str_replace_holiday_kubun8);
-            $str_replace_holiday_kubun10 =str_replace('{10}', Config::get('const.C013.childcare_care_leave'), $str_replace_holiday_kubun9);
-            $str_replace_holiday_kubun11 =str_replace('{11}', Config::get('const.C013.nursing_care_leave'), $str_replace_holiday_kubun10);
-            $str_replace_holiday_kubun12 =str_replace('{12}', Config::get('const.C013.congratulatory_or_consolatory_leave'), $str_replace_holiday_kubun11);
-            $str_replace_holiday_kubun13 =str_replace('{13}', Config::get('const.C013.refresh_leave'), $str_replace_holiday_kubun12);
+            $str_replace_holiday_kubun1 =str_replace('{1}', Config::get('const.C013.substitute_holiday'), $str_replace_holiday_kubun0);
+            $str_replace_holiday_kubun2 =str_replace('{2}', Config::get('const.C013.compensation_holiday'), $str_replace_holiday_kubun1);
+            $str_replace_holiday_kubun3 =str_replace('{3}', Config::get('const.C013.summer_leave'), $str_replace_holiday_kubun2);
+            $str_replace_holiday_kubun4 =str_replace('{4}', Config::get('const.C013.year_end_and_new_year_leave'), $str_replace_holiday_kubun3);
+            $str_replace_holiday_kubun5 =str_replace('{5}', Config::get('const.C013.organization_anniversary'), $str_replace_holiday_kubun4);
+            $str_replace_holiday_kubun6 =str_replace('{6}', Config::get('const.C013.prenatal_postnatal'), $str_replace_holiday_kubun5);
+            $str_replace_holiday_kubun7 =str_replace('{7}', Config::get('const.C013.physiology_days_leave'), $str_replace_holiday_kubun6);
+            $str_replace_holiday_kubun8 =str_replace('{8}', Config::get('const.C013.childcare_care_leave'), $str_replace_holiday_kubun7);
+            $str_replace_holiday_kubun9 =str_replace('{9}', Config::get('const.C013.nursing_care_leave'), $str_replace_holiday_kubun8);
+            $str_replace_holiday_kubun10 =str_replace('{10}', Config::get('const.C013.congratulatory_or_consolatory_leave'), $str_replace_holiday_kubun9);
+            $str_replace_holiday_kubun11 =str_replace('{11}', Config::get('const.C013.refresh_leave'), $str_replace_holiday_kubun10);
 
             $str_replace_leave_early_kubun0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_absence_kubun);
             $str_replace_leave_early_kubun1 =str_replace('{1}', Config::get('const.C013.leave_early_work'), $str_replace_leave_early_kubun0);
@@ -2577,8 +2577,8 @@ class WorkingTimedate extends Model
                 ->selectRaw('sum(ifnull('.$this->table.'.legal_working_holiday_hours, 0)) as legal_working_holiday_hours')
                 ->selectRaw('sum('.$str_replace_working_status8.') as total_working_status')
                 ->selectRaw('sum('.$str_replace_go_out2.') as total_go_out')
-                ->selectRaw('sum('.$str_replace_paid_holidays1.') as total_paid_holidays')
-                ->selectRaw('sum('.$str_replace_holiday_kubun13.') as total_holiday_kubun')
+                ->selectRaw('sum('.$str_replace_paid_holidays3.') as total_paid_holidays')
+                ->selectRaw('sum('.$str_replace_holiday_kubun11.') as total_holiday_kubun')
                 ->selectRaw('sum('.$str_replace_leave_early_kubun1.') as total_leave_early')
                 ->selectRaw('sum('.$str_replace_late_kubun1.') as total_late')
                 ->selectRaw('sum('.$str_replace_absence_kubun1.') as total_absence');

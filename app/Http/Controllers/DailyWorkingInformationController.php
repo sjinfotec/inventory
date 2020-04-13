@@ -83,7 +83,6 @@ class DailyWorkingInformationController extends Controller
      */
     public function show(Request $request){
 
-        Log::debug('------------- 日次集計表示 show in----------------');
         $this->array_messagedata = array();
         $array_working_time_dates = array();
         $working_time_sum = new collection();
@@ -157,7 +156,6 @@ class DailyWorkingInformationController extends Controller
             }
             $array_working_time_dates = $array_result_showCalc['array_working_time_dates'];
             $working_time_sum = $array_result_showCalc['working_time_sum'];
-            Log::debug('------------- 日次集計表示 show end----------------');
 
             return response()->json(
                 ['calcresults' => $array_working_time_dates,
@@ -180,7 +178,6 @@ class DailyWorkingInformationController extends Controller
      */
     public function showCalc($params){
 
-        Log::debug('------------- 日次集計開始 showCalc in----------------');
         $business_kubun = "";
         $datefrom = $params['datefrom'];
         $dateto = $params['dateto'];
@@ -226,7 +223,6 @@ class DailyWorkingInformationController extends Controller
                 );
                 $array_result_calcMain = $this->calcMain($array_impl_calcMain);
             }
-            Log::debug('------------- 日次集計開始 showCalc end ---------------');
         }catch(\PDOException $pe){
             throw $pe;
         }catch(\Exception $e){
@@ -396,8 +392,8 @@ class DailyWorkingInformationController extends Controller
         $calc_result = true;
         $add_result = true;
 
-        // 打刻時刻を取得
         $temp_working_model = new TempWorkingTimeDate();
+        $timetable_model = new WorkingTimeTable();
         $apicommon = new ApiCommonController();
         // シフト打刻を取得するために$datetoの翌日をParamDatetoを再設定
         $nextdt = $apicommon->getNextDay($dateto, 'Y/m/d');
@@ -422,7 +418,6 @@ class DailyWorkingInformationController extends Controller
                     $calc_result = $this->calcWorkingTimeDate($array_impl_calcWorkingTimeDate);
                     if ($calc_result) {
                         // タイムテーブルを取得
-                        $timetable_model = new WorkingTimeTable();
                         $timetable_model->setParamdatefromAttribute($datefrom);
                         $timetable_model->setParamdatetoAttribute($dateto);
                         $timetable_model->setParamemploymentstatusAttribute($employmentstatus);
@@ -562,23 +557,26 @@ class DailyWorkingInformationController extends Controller
         foreach ($worktimes as $result) {
             // 打刻データありの場合
             Log::DEBUG('------ 日次労働時間取得 code = '.$result->user_code.' '.$result->user_name. ' 開始   計算ターゲット日付'.$target_date_ymd.' ------------------------ ');
-            Log::DEBUG('        部署  $result->department_name   = '.$result->department_name);
-            Log::DEBUG('        打刻時刻 $result->record_datetime = '.$result->record_datetime);
-            Log::DEBUG('        打刻日  $result->record_date = '.$result->record_date);
-            Log::DEBUG('        モード  $result->mode = '.$result->mode);
-            Log::DEBUG('        出勤区分 $result->business_kubun = '.$result->business_kubun);
-            Log::DEBUG('                $result->business_name  = '.$result->business_name);
-            Log::DEBUG('        ユーザー休暇区分 $result->user_holiday_kubun = '.$result->user_holiday_kubun);
-            Log::DEBUG('                        $result->user_holiday_name  = '.$result->user_holiday_name);
-            Log::DEBUG('        タイムテーブル　開始時刻　$result->working_timetable_from_time = '.$result->working_timetable_from_time);
-            Log::DEBUG('        タイムテーブル　終了時刻　result->working_timetable_to_time    = '.$result->working_timetable_to_time);
+            Log::DEBUG('         部署  $result->department_name   = '.$result->department_name);
+            Log::DEBUG('         打刻時刻 $result->record_datetime = '.$result->record_datetime);
+            Log::DEBUG('         打刻日  $result->record_date = '.$result->record_date);
+            Log::DEBUG('         モード  $result->mode = '.$result->mode);
+            Log::DEBUG('         出勤区分 $result->business_kubun = '.$result->business_kubun);
+            Log::DEBUG('                 $result->business_name  = '.$result->business_name);
+            Log::DEBUG('         ユーザー休暇区分 $result->user_holiday_kubun = '.$result->user_holiday_kubun);
+            Log::DEBUG('                         $result->user_holiday_name  = '.$result->user_holiday_name);
+            Log::DEBUG('                         $result->user_holiday_description  = '.$result->user_holiday_description);
+            Log::DEBUG('         タイムテーブル  no = '.$result->working_timetable_no);
+            Log::DEBUG('         タイムテーブル  name = '.$result->working_timetable_name);
+            Log::DEBUG('         タイムテーブル　開始時刻　$result->working_timetable_from_time = '.$result->working_timetable_from_time);
+            Log::DEBUG('         タイムテーブル　終了時刻　result->working_timetable_to_time    = '.$result->working_timetable_to_time);
             if ($result->record_datetime != null && $result->mode != null) {
                 // 設定値確認
                 $chk_setting = $this->chkSettingData($result);
                 // 設定が正常である場合
                 if ($chk_setting == 0)  {
                     // 翌日退勤した場合を考慮し、同日処理を行うようにするため、$current_dateは$target_date_ymdとする
-                    // よって日付ブレーク処理は無意味となる
+                    // よって日付ブレーク処理は無意味となるけど
                     $current_date = $target_date_ymd;
                     $current_department_code = $result->department_code;
                     $current_user_code = $result->user_code;
@@ -590,10 +588,48 @@ class DailyWorkingInformationController extends Controller
                     }
                     // 指定日付<=であれば集計対象、>であれば打刻なしとして登録
                     if ($result->mode == Config::get('const.C012.attendance')) {
-                        if ($result->record_date > $target_date_ymd) {
-                            $target_flg = false;
+                        $dt = new Carbon($target_date_ymd);
+                        $w_minus1_ymd = date_format($dt->copy()->subDay(), 'Y-m-d');
+                        $w_today_ymd = date_format($dt->copy(), 'Y-m-d');
+                        $w_plus1_ymd = date_format($dt->copy()->addDay(), 'Y-m-d');
+                        $w_plus2_ymd = date_format($dt->copy()->addDay(2), 'Y-m-d');
+                        // 所定時間内であれば対象
+                        Log::DEBUG('         $w_minus1_ymd = '.$w_minus1_ymd);
+                        Log::DEBUG('         $w_today_ymd = '.$w_today_ymd);
+                        Log::DEBUG('         $w_plus1_ymd = '.$w_plus1_ymd);
+                        Log::DEBUG('         $w_plus2_ymd = '.$w_plus2_ymd);
+                        //  タイムテーブル　開始時刻
+                        $w_minus1_from_datetime = $w_minus1_ymd.' '.$result->working_timetable_from_time;
+                        $w_today_from_datetime = $w_today_ymd.' '.$result->working_timetable_from_time;
+                        $w_plus1_from_datetime = $w_plus1_ymd.' '.$result->working_timetable_from_time;
+                        $w_minus1_to_datetime = null;
+                        $w_today_to_datetime = null;
+                        $w_plus1_to_datetime = null;
+                        if ($result->working_timetable_from_time <= $result->working_timetable_to_time) {
+                            $w_minus1_to_datetime = $w_minus1_ymd.' '.$result->working_timetable_to_time;
+                            $w_today_to_datetime = $w_today_ymd.' '.$result->working_timetable_to_time;
+                            $w_plus1_to_datetime = $w_plus1_ymd.' '.$result->working_timetable_to_time;
                         } else {
+                            $w_minus1_to_datetime = $w_today_ymd.' '.$result->working_timetable_to_time;
+                            $w_today_to_datetime = $w_plus1_ymd.' '.$result->working_timetable_to_time;
+                            $w_plus1_to_datetime = $w_plus2_ymd.' '.$result->working_timetable_to_time;
+                        }
+                        Log::DEBUG('         w_minus1_from_datetime = '.$w_minus1_from_datetime);
+                        Log::DEBUG('         w_minus1_to_datetime = '.$w_minus1_to_datetime);
+                        Log::DEBUG('         w_today_from_datetime = '.$w_today_from_datetime);
+                        Log::DEBUG('         w_today_to_datetime = '.$w_today_to_datetime);
+                        Log::DEBUG('         w_plus1_from_datetime = '.$w_plus1_from_datetime);
+                        Log::DEBUG('         w_plus1_to_datetime = '.$w_plus1_to_datetime);
+                        if ($result->record_datetime >= $w_today_from_datetime &&
+                            $result->record_datetime <= $w_today_to_datetime) {
                             $target_flg = true;
+                        } else {
+                            if ($result->record_datetime >= $w_minus1_to_datetime &&
+                                $result->record_datetime < $w_today_from_datetime) {
+                                $target_flg = true;
+                            } else {
+                                $target_flg = false;
+                            }
                         }
                         $attendance_target_flg = $target_flg;
                     } else {
@@ -4573,8 +4609,14 @@ class DailyWorkingInformationController extends Controller
         $before_holiday_set = false;
 
         $apicommon = new ApiCommonController();
-        // 時間丸め用にタイムテーブル労働開始終了時間テーブル設定をしておく
+        // TODO: 引数の$timetablesと1.と2.を纏められないか
+        // 1.時間丸め用にタイムテーブル労働開始終了時間テーブル設定する
         $array_get_timetable_result = $apicommon->setWorkingStartEndTimeTable($target_date);
+        // 2.集計必要な休暇用のタイムテーブルを取得
+        $timetable_model = new WorkingTimeTable();
+        $timetable_model->setParamdatefromAttribute($target_date);
+        $timetable_model->setParamdatetoAttribute($target_date);
+        $array_break_worktimetable_result = $timetable_model->getAllTimeTables();
         // ユーザー単位処理
         $temp_calc_model = new TempCalcWorkingTime();
         $worktimes = $temp_calc_model->getTempCalcWorkingtime();
@@ -4601,6 +4643,7 @@ class DailyWorkingInformationController extends Controller
             Log::DEBUG('        　　　 = '.$result->business_name);
             Log::DEBUG('        休暇 = '.$result->holiday_kubun);
             Log::DEBUG('        　　　= '.$result->holiday_name);
+            Log::DEBUG('        　　　= '.$result->holiday_description);
             Log::DEBUG('        当日分計算　=  '.$result->current_calc);
             Log::DEBUG('        勤務状態 =  '.$result->working_status);
             $current_date = $result->working_date;
@@ -4912,6 +4955,7 @@ class DailyWorkingInformationController extends Controller
                                 'target_result' => $current_result,
                                 'note' => $note,
                                 'working_status' => $working_status,
+                                'timetables' => $timetables,
                                 'array_calc_time' => $array_calc_time,
                                 'array_missing_middle_time' => $array_missing_middle_time,
                                 'array_public_going_out_time' => $array_public_going_out_time,
@@ -4956,7 +5000,8 @@ class DailyWorkingInformationController extends Controller
                                 'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
                                 'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
                                 'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
-                                'array_add_public_return_time_positions' => $array_add_public_return_time_positions
+                                'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                                'array_break_worktimetable_result' => $array_break_worktimetable_result
                             );
 
                             $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
@@ -5161,6 +5206,7 @@ class DailyWorkingInformationController extends Controller
                             'target_result' => $before_result,
                             'note' => $note,
                             'working_status' => $working_status,
+                            'timetables' => $timetables,
                             'array_calc_time' => $array_calc_time,
                             'array_missing_middle_time' => $array_missing_middle_time,
                             'array_public_going_out_time' => $array_public_going_out_time,
@@ -5205,7 +5251,8 @@ class DailyWorkingInformationController extends Controller
                             'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
                             'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
                             'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
-                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions
+                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                            'array_break_worktimetable_result' => $array_break_worktimetable_result
                         );
                         $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                     }
@@ -5373,6 +5420,7 @@ class DailyWorkingInformationController extends Controller
                             'target_result' => $before_result,
                             'note' => $note,
                             'working_status' => $working_status,
+                            'timetables' => $timetables,
                             'array_calc_time' => $array_calc_time,
                             'array_missing_middle_time' => $array_missing_middle_time,
                             'array_public_going_out_time' => $array_public_going_out_time,
@@ -5417,7 +5465,8 @@ class DailyWorkingInformationController extends Controller
                             'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
                             'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
                             'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
-                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions
+                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                            'array_break_worktimetable_result' => $array_break_worktimetable_result
                         );
                         $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                     }
@@ -5568,6 +5617,7 @@ class DailyWorkingInformationController extends Controller
                             'target_result' => $current_result,
                             'note' => $note,
                             'working_status' => $working_status,
+                            'timetables' => $timetables,
                             'array_calc_time' => $array_calc_time,
                             'array_missing_middle_time' => $array_missing_middle_time,
                             'array_public_going_out_time' => $array_public_going_out_time,
@@ -5612,7 +5662,8 @@ class DailyWorkingInformationController extends Controller
                             'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
                             'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
                             'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
-                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions
+                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                            'array_break_worktimetable_result' => $array_break_worktimetable_result
                         );
                         $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                         // 次データ計算事前処理
@@ -5770,6 +5821,7 @@ class DailyWorkingInformationController extends Controller
                             'target_result' => $before_result,
                             'note' => $note,
                             'working_status' => $working_status,
+                            'timetables' => $timetables,
                             'array_calc_time' => $array_calc_time,
                             'array_missing_middle_time' => $array_missing_middle_time,
                             'array_public_going_out_time' => $array_public_going_out_time,
@@ -5814,7 +5866,8 @@ class DailyWorkingInformationController extends Controller
                             'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
                             'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
                             'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
-                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions
+                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                            'array_break_worktimetable_result' => $array_break_worktimetable_result
                         );
                         $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                     }
@@ -5967,6 +6020,7 @@ class DailyWorkingInformationController extends Controller
                             'target_result' => $current_result,
                             'note' => $note,
                             'working_status' => $working_status,
+                            'timetables' => $timetables,
                             'array_calc_time' => $array_calc_time,
                             'array_missing_middle_time' => $array_missing_middle_time,
                             'array_public_going_out_time' => $array_public_going_out_time,
@@ -6011,7 +6065,8 @@ class DailyWorkingInformationController extends Controller
                             'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
                             'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
                             'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
-                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions
+                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                            'array_break_worktimetable_result' => $array_break_worktimetable_result
                         );
                         $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                         // 次データ計算事前処理
@@ -6169,6 +6224,7 @@ class DailyWorkingInformationController extends Controller
                             'target_result' => $before_result,
                             'note' => $note,
                             'working_status' => $working_status,
+                            'timetables' => $timetables,
                             'array_calc_time' => $array_calc_time,
                             'array_missing_middle_time' => $array_missing_middle_time,
                             'array_public_going_out_time' => $array_public_going_out_time,
@@ -6213,7 +6269,8 @@ class DailyWorkingInformationController extends Controller
                             'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
                             'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
                             'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
-                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions
+                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                            'array_break_worktimetable_result' => $array_break_worktimetable_result
                         );
                         $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                     }
@@ -6367,6 +6424,7 @@ class DailyWorkingInformationController extends Controller
                             'target_result' => $current_result,
                             'note' => $note,
                             'working_status' => $working_status,
+                            'timetables' => $timetables,
                             'array_calc_time' => $array_calc_time,
                             'array_missing_middle_time' => $array_missing_middle_time,
                             'array_public_going_out_time' => $array_public_going_out_time,
@@ -6411,7 +6469,8 @@ class DailyWorkingInformationController extends Controller
                             'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
                             'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
                             'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
-                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions
+                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                            'array_break_worktimetable_result' => $array_break_worktimetable_result
                         );
                         $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                         // 次データ計算事前処理
@@ -6556,6 +6615,7 @@ class DailyWorkingInformationController extends Controller
                         'target_result' => $current_result,
                         'note' => $note,
                         'working_status' => $working_status,
+                        'timetables' => $timetables,
                         'array_calc_time' => $array_calc_time,
                         'array_missing_middle_time' => $array_missing_middle_time,
                         'array_public_going_out_time' => $array_public_going_out_time,
@@ -6600,7 +6660,8 @@ class DailyWorkingInformationController extends Controller
                         'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
                         'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
                         'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
-                        'array_add_public_return_time_positions' => $array_add_public_return_time_positions
+                        'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                        'array_break_worktimetable_result' => $array_break_worktimetable_result
                     );
                     $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                 }catch(\PDOException $pe){
@@ -6758,7 +6819,6 @@ class DailyWorkingInformationController extends Controller
                                 $after_target_from_time,
                                 $after_legal_working_hours_day,
                                 'Y-m-d H:i:s');
-                            Log::DEBUG('　　　　　　 計算後時刻  = '.$after_daytime);
                             $braek_time = $apicommon->calcBetweenBreakTime(
                                 $after_target_from_time,
                                 $after_daytime,
@@ -7041,6 +7101,7 @@ class DailyWorkingInformationController extends Controller
         $target_result = $params['target_result'];
         $note = $params['note'];
         $working_status = $params['working_status'];
+        $timetables = $params['timetables'];
         $array_calc_time = $params['array_calc_time'];
         $array_missing_middle_time = $params['array_missing_middle_time'];
         $array_public_going_out_time = $params['array_public_going_out_time'];
@@ -7086,9 +7147,14 @@ class DailyWorkingInformationController extends Controller
         $array_add_public_return_editor_user_code = $params['array_add_public_return_editor_user_code'];
         $array_add_public_return_editor_user_name = $params['array_add_public_return_editor_user_name'];
         $array_add_public_return_time_positions = $params['array_add_public_return_time_positions'];
-        $temp_working_model = new TempWorkingTimeDate();
-        $apicommon = new ApiCommonController();
+        $array_break_worktimetable_result = $params['array_break_worktimetable_result'];
 
+        // 休暇計算用出勤時刻
+        $break_attendance_time = null;
+        // 休暇計算用退勤時刻
+        $breakleaving_time = null;
+        $apicommon = new ApiCommonController();
+        $temp_working_model = new TempWorkingTimeDate();
         $temp_working_model->setWorkingdateAttribute(date_format(new Carbon($target_date), 'Ymd'));
         $temp_working_model->setEmploymentstatusAttribute($target_result->employment_status);
         $temp_working_model->setDepartmentcodeAttribute($target_department_code);
@@ -7101,7 +7167,6 @@ class DailyWorkingInformationController extends Controller
         $temp_working_model->setWorkingtimetablenameAttribute($target_result->working_timetable_name);
         // 出勤打刻５回までチェック
         $attendence_note_set = false;
-        $array_add_attendance_time_cnt = count($array_add_attendance_time);
         if (!$this->chkWorkingTime($array_add_attendance_time, (int)(Config::get('const.ARRAY_MAX_INDEX.attendace_time')) )) {
             $note .= Config::get('const.MEMO_DATA.MEMO_DATA_016').' '; 
             $attendence_note_set = true;
@@ -7110,6 +7175,7 @@ class DailyWorkingInformationController extends Controller
         $array_decide_times = $this->decideWorkingTimeFrom($array_add_attendance_time, count($array_add_attendance_time));
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
+                if ($break_attendance_time == null) {$break_attendance_time = $array_decide_times[$i]; }
                 $temp_working_model->setAttendancetimeAttribute($i, $array_decide_times[$i]);
                 $temp_working_model->setAttendancetimeidAttribute($i, $array_add_attendance_time_id[$i]);
                 $temp_working_model->setAttendanceeditordepartmentcodeAttribute($i, $array_add_attendance_editor_department_code[$i]);
@@ -7145,6 +7211,7 @@ class DailyWorkingInformationController extends Controller
             count($array_add_attendance_time));
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
+                if ($breakleaving_time == null) {$breakleaving_time = $array_decide_times[$i]; }
                 $temp_working_model->setLeavingtimeAttribute($i, $array_decide_times[$i]);
                 $temp_working_model->setLeavingtimeidAttribute($i, $array_add_leaving_time_id[$i]);
                 $temp_working_model->setLeavingeditordepartmentcodeAttribute($i, $array_add_leaving_editor_department_code[$i]);
@@ -7298,6 +7365,62 @@ class DailyWorkingInformationController extends Controller
                 $temp_working_model->setPublicgoingoutreturntimepositionsAttribute($i, null);
             }
         }
+        // 休暇内容が以下であれば別途計算
+        //  1日集計対象休暇　　午前半休　　午後半休
+        // タイムテーブルから所定時間を取得
+        $result_getHolydayTempStartEndTime = array();
+        $break_workingtime = 0;
+        $braek_time = 0;
+        if ($target_result->holiday_description != "" && $target_result->holiday_description != null) {
+            // getHolydayTempStartEndTime implement
+            $array_impl_getHolydayTempStartEndTime = array (
+                'array_break_worktimetable_result' => $array_break_worktimetable_result,
+                'target_date' => $target_date,
+                'working_timetable_no' => $target_result->working_timetable_no,
+                'user_holiday_description' => $target_result->holiday_description
+            );
+            // タイムテーブルから所定時間を取得
+            $result_getHolydayTempStartEndTime = $this->getHolydayTempStartEndTime($array_impl_getHolydayTempStartEndTime);
+            $break_start_time = null;
+            $break_end_time = null;
+            if ($target_result->holiday_description == Config::get('const.C013_DESC_VALUE.target_calc_time')) {
+                $break_start_time = $result_getHolydayTempStartEndTime['start_record_datetime'];
+                $break_end_time = $result_getHolydayTempStartEndTime['end_record_datetime'];
+            } elseif ($target_result->holiday_description == Config::get('const.C013_DESC_VALUE.half_am')) {
+                Log::debug('休暇労働時間 $result_getHolydayTempStartEndTime[start_record_datetime] = '.$result_getHolydayTempStartEndTime['start_record_datetime']);
+                $break_start_time = $result_getHolydayTempStartEndTime['start_record_datetime'];
+                $break_end_time = $breakleaving_time;
+            } elseif ($target_result->holiday_description == Config::get('const.C013_DESC_VALUE.half_pm')) {
+                $break_start_time = $break_attendance_time;
+                $break_end_time = $result_getHolydayTempStartEndTime['end_record_datetime'];
+            }
+            Log::debug('休暇労働時間 $break_start_time = '.$break_start_time);
+            Log::debug('休暇労働時間 $break_end_time = '.$break_end_time);
+            // 労働時間の計算
+            if (($break_start_time != "" && $break_start_time != null)
+                && ($break_end_time != "" && $break_end_time != null)) {
+                if ($break_start_time > $break_end_time) {
+                    $dt = new Carbon($break_end_time);
+                    $break_end_time = date_format($dt->copy()->addDay(), 'Y-m-d H:i:s');
+                    Log::debug('休暇労働時間 next   $break_end_time = '.$break_end_time);
+                }
+                $break_workingtime = $apicommon->diffTimeSerial($break_start_time, $break_end_time);
+                Log::debug('休暇労働時間 $break_workingtime = '.$break_workingtime);
+                // 休憩時間があれば減算
+                $braek_time = $apicommon->calcBetweenBreakTime(
+                    $break_start_time,
+                    $break_end_time,
+                    $target_date,
+                    $timetables,
+                    $target_result->working_timetable_no,
+                    null,
+                    null);
+            }
+            Log::debug('休暇労働時間 $break_workingtime = '.$break_workingtime);
+            Log::debug('休暇労働時間 $braek_time = '.$braek_time);
+            $break_workingtime = $break_workingtime - $braek_time;
+        }
+        Log::debug('休暇労働時間 break_workingtime = '.$break_workingtime);
         // 合計勤務時間
         $total_time = 0;
         $total_time_regular_calc_time = 0;
@@ -7310,13 +7433,26 @@ class DailyWorkingInformationController extends Controller
         $regular_calc_time = 0;
         // $array_calc_time[$index]=0はまだ退勤していないということ
         if ($array_calc_time[$index] > 0) {
-            $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
-            //$regular_calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-            $total_time_regular_calc_time = $w_time;
-            // $regular_calc_time = round(($w_time / 60 / 60) + 0.005,2);
-            // timestampを99.99hにする
-            $regular_calc_time = $apicommon->cnvToDecFromStamp($w_time);
+            // 休暇集計
+            if ($break_workingtime > 0) {
+                $total_time_regular_calc_time = $break_workingtime;
+                $regular_calc_time = $apicommon->cnvToDecFromStamp($break_workingtime);
+            } else {
+                $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
+                //$regular_calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
+                $total_time_regular_calc_time = $w_time;
+                // $regular_calc_time = round(($w_time / 60 / 60) + 0.005,2);
+                // timestampを99.99hにする
+                $regular_calc_time = $apicommon->cnvToDecFromStamp($w_time);
+            }
+        } else {
+            // 休暇集計
+            if ($break_workingtime > 0) {
+                $total_time_regular_calc_time = $break_workingtime;
+                $regular_calc_time = $apicommon->cnvToDecFromStamp($break_workingtime);
+            }
         }
+        Log::debug(' regular_calc_time = '.$regular_calc_time);
 
         // 時間外労働時間
         $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
@@ -7430,9 +7566,10 @@ class DailyWorkingInformationController extends Controller
         // 平日は設定している所定労働時間を求める
         // 休日は所定労働時間=8時間であるが、（所定という概念ではない）
         if ($target_result->business_kubun == Config::get('const.C007.basic')) {
-            $timetables = $timetable_model->getWorkingTimeTableJoin();
+            // 引数のtimetablesとは条件がちがうので取得しなおし
+            $w_timetables = $timetable_model->getWorkingTimeTableJoin();
             $calc_time = 0;
-            if (count($timetables) > 0) {
+            if (count($w_timetables) > 0) {
                 $w_time = 0;
                 $w_break_time = 0;
                 $w_from_time1 = "";
@@ -7440,7 +7577,7 @@ class DailyWorkingInformationController extends Controller
                 $w_to_time1 = "";
                 $w_to_time2 = "";
                 $target_dt = new Carbon($target_date);
-                foreach($timetables as $item) {
+                foreach($w_timetables as $item) {
                     if ($item->working_time_kubun == Config::get('const.C004.regular_working_time')) {
                         if (isset($item->from_time) && isset($item->to_time)) {
                             if ($item->from_time < $item->to_time) {
@@ -7454,6 +7591,8 @@ class DailyWorkingInformationController extends Controller
                             } else {
                                 $from_time = date_format($target_dt, 'Y-m-d').' '.$item->from_time;
                                 $to_time = date_format($target_dt, 'Y-m-d').' '.$item->to_time;
+                                Log::ERROR('不就労2 $from_time '.$from_time);
+                                Log::ERROR('不就労2 $to_time '.$to_time);
                                 $nextdt =$apicommon->getNextDay(new Carbon($to_time), 'Y/m/d');
                                 $to_time = date_format(new Carbon($nextdt), 'Y-m-d').' 00:00:00';
                                 $w_time += $apicommon->diffTimeSerial($from_time, $to_time);
@@ -7605,6 +7744,63 @@ class DailyWorkingInformationController extends Controller
 
     }
  
+    /**
+     * 休暇集計打刻仮時刻設定
+     * 
+     *      有給休暇などの休暇字の集計のため、仮の打刻時刻を設定する
+     *      出勤・退勤はタイムテーブルの所定時刻の時刻を返却
+     *      出勤・退勤以外はパラメータの打刻時刻をそのまま返却
+     *
+     * @return 
+     */
+    private function getHolydayTempStartEndTime($params)
+    {
+        Log::DEBUG('---------------------- getHolydayTempStartEndTime in ------------------------ ');
+        $param_array_break_worktimetable_result = $params['array_break_worktimetable_result'];
+        $param_target_date = $params['target_date'];
+        $param_working_timetable_no = $params['working_timetable_no'];
+        $param_user_holiday_description = $params['user_holiday_description'];
+        $result_start_record_datetime = null;
+        $result_end_record_datetime = null;
+
+        $collect_array_break_worktimetable_result = collect($param_array_break_worktimetable_result);
+        // 1日集計対象休暇
+        if ($param_user_holiday_description == Config::get('const.C013_DESC_VALUE.target_calc_time')) {
+            $dt = date_format(new Carbon($param_target_date), 'Y-m-d');
+            $filtered = $collect_array_break_worktimetable_result
+                ->where('no', '=', $param_working_timetable_no)
+                ->where('working_time_kubun', Config::get('const.C004.regular_working_time'));
+            foreach ($filtered as $item) {
+                $result_start_record_datetime = $dt.' '.$item->from_time;
+                $result_end_record_datetime = $dt.' '.$item->to_time;
+                break;
+            }
+        }elseif ($param_user_holiday_description == Config::get('const.C013_DESC_VALUE.half_am')) {
+            $dt = date_format(new Carbon($param_target_date), 'Y-m-d');
+            $filtered = $collect_array_break_worktimetable_result
+                ->where('no', '=', $param_working_timetable_no)
+                ->where('working_time_kubun', '=', Config::get('const.C004.regular_working_time'));
+            foreach ($filtered as $item) {
+                $result_start_record_datetime = $dt.' '.$item->from_time;
+                break;
+            }
+        }elseif ($param_user_holiday_description == Config::get('const.C013_DESC_VALUE.half_pm')) {
+            $dt = date_format(new Carbon($param_target_date), 'Y-m-d');
+            $filtered = $collect_array_break_worktimetable_result
+                ->where('no', '=', $param_working_timetable_no)
+                ->where('working_time_kubun', '=', Config::get('const.C004.regular_working_time'));
+            foreach ($filtered as $item) {
+                $result_end_record_datetime = $dt.' '.$item->to_time;
+                break;
+            }
+        }
+        Log::DEBUG('---------------------- setNoteLateEtc end ------------------------ ');
+
+        return array(
+            'start_record_datetime' => $result_start_record_datetime,
+            'end_record_datetime' =>$result_end_record_datetime);
+    }
+
     /**
      * 打刻時刻状況の判定
      * 
@@ -8066,9 +8262,29 @@ class DailyWorkingInformationController extends Controller
      * 労働時間数配列初期化
      * 
      */
-    private function setArrayTimeSet0(
-        $array_working_time_kubun
-        )
+    private function setArrayTimeSet0($array_working_time_kubun)
+    {
+        $array_calc_time = array(); 
+        $array_missing_middle_time = array(); 
+        $array_public_going_out_time = array(); 
+        for ($i=0;$i<count($array_working_time_kubun);$i++) {
+            $array_calc_time[$i] = 0; 
+            $array_missing_middle_time[$i] = 0; 
+            $array_public_going_out_time[$i] = 0; 
+        }
+
+        return array(
+            'array_calc_time' => $array_calc_time,
+            'array_missing_middle_time' => $array_missing_middle_time,
+            'array_public_going_out_time' => $array_public_going_out_time
+        );
+    }
+
+    /**
+     * 休暇集計の場合仮出勤
+     * 
+     */
+    private function setUserHolidayStartEndTime($array_working_time_kubun)
     {
         $array_calc_time = array(); 
         $array_missing_middle_time = array(); 

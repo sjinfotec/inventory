@@ -126,7 +126,7 @@ return [
         'value' => 'C013',
         'non_set' => "",
         'target_calc_time' => "1日集計対象休暇",
-        'half_am_' => "午前半休",
+        'half_am' => "午前半休",
         'half_pm' => "午後半休",
         'non_calc_time' => "1日休暇",
         'late_work' => "遅刻",
@@ -333,7 +333,15 @@ return [
     'C999' => [
         'value' => 'C999',
         'main' => 1,
-        'sub' => 2
+        'sub' => 2,
+        'timetable_no' => 3
+    ],
+ 
+    'C999_NAME' => [
+        'value' => 'C999',
+        'main' => 9999,
+        'sub' => 'systemuser',
+        'timetable_no' => 9999
     ],
 
     'WEEK_KANJI' => [
@@ -517,6 +525,11 @@ return [
         'items_12' => '特別条項の上限規制：年720時間（休日労働含めない）'
     ],
  
+    'LUNCH_BREAK' => [
+        'STARTAFTERTIME' => 2,
+        'HOURS' => 0.5
+    ],
+ 
     'ALERT_INFO_RESULT' => [
         'OK' => 'OK',
         'WA' => 'WA',
@@ -667,6 +680,10 @@ return [
         'CROUD' => 3,
         'SSJJOO' => 4,
         'CLIENT' => 5
+    ],
+
+    'ACCOUNTID' => [
+        'account_id' => 'CSD1000L'
     ]
 
 ];

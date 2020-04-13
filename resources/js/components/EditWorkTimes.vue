@@ -213,7 +213,6 @@ export default {
       ja: ja,
       default: "2019/10/24",
       validate: false,
-      showeditworktimestable: true,
       heads: [],
       login_user_code: "",
       login_user_role: "",
@@ -352,6 +351,7 @@ export default {
           current_record_date : moment(this.valuedate).format("YYYYMMDD")
         }
       }
+      this.refeditworktimestable();
     },
     // -------------------- サーバー処理 ----------------------------
 
@@ -389,6 +389,11 @@ export default {
       // 最新リストの表示
       this.showuserlist = false;
       this.$nextTick(() => (this.showuserlist = true));
+    },
+    refeditworktimestable() {
+      // 最新リストの表示
+      this.showeditworktimestable = false;
+      this.$nextTick(() => (this.showeditworktimestable = true));
     }
   }
 };
