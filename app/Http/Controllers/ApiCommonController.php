@@ -2989,7 +2989,7 @@ class ApiCommonController extends Controller
         // $details = new Collection();
         try {
             $details =
-                DB::table($table_post_informations)
+                DB::table($this->table_post_informations)
                     ->select('id','content','created_at')
                     ->where('is_deleted', 0)
                     ->orderby('created_at','desc')
@@ -3001,11 +3001,11 @@ class ApiCommonController extends Controller
             // }
             return $details;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $table_post_informations, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $table_post_informations, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -3024,19 +3024,19 @@ class ApiCommonController extends Controller
         // 新規登録
         DB::beginTransaction();
         try{
-            DB::table($table_post_informations)->insert(
+            DB::table($this->table_post_informations)->insert(
                 ['user_code' => $usercode, 'content' => $content ,'created_at' => $systemdate]
             );
             DB::commit();
             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
         }catch(\PDOException $pe){
             DB::rollBack();
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $table_post_informations, Config::get('const.LOG_MSG.insert_error')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.insert_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
             DB::rollBack();
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $table_post_informations, Config::get('const.LOG_MSG.insert_error')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.insert_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -3054,17 +3054,17 @@ class ApiCommonController extends Controller
         // 新規登録
         DB::beginTransaction();
         try{
-            DB::table($table_post_informations)->where('id', $id)->update(['is_deleted' => 1,'updated_at' => $systemdate]);
+            DB::table($this->table_post_informations)->where('id', $id)->update(['is_deleted' => 1,'updated_at' => $systemdate]);
             DB::commit();
             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $table_post_informations, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
 
         }catch(\Exception $e){
             DB::rollBack();
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $table_post_informations, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
