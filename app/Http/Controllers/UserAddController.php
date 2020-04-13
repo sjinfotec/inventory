@@ -506,14 +506,14 @@ class UserAddController extends Controller
             $taimetable_model = new WorkingTimeTable();
             $taimetable_model->setParamapplytermfromAttribute($temp_systemdate);
             $taimetables = $taimetable_model->getTimeTables();
-            // users情報
-            $user_model = new UserModel();
             // 全部物理削除
-            $user_model->setParamcodeAttribute(null);
+            $user_model = new UserModel();
+            $user_model->setParamsystemcodeAttribute(Config::get('const.ACCOUNTID.account_id'));
+            //$user_model->setParamsystemcodeAttribute('CSD1000L');
             $user_model->delUserData();
             foreach ($usersups as $item) {
                 $user_model->setApplytermfromAttribute(Config::get('const.INIT_DATE.initdate'));
-                if ($item['user_code'] != null && $item['user_code'] != "") {
+                if ($item['user_code'] != null && $item['user_code'] != "" && $item['user_code'] != "CSD1000L") {
                     $user_model->setCodeAttribute($item['user_code']);
                     // 部署名から部署コード設定
                     $department_code = 1;
@@ -527,7 +527,7 @@ class UserAddController extends Controller
                     $user_model->setDepartmentcodeAttribute($department_code);
                     // 雇用形態名から雇用形態コード設定
                     $employment_status = 1;
-                    if ($item['user_employment_name'] != null && $item['user_employment_name'] == "") {
+                    if ($item['user_employment_name'] != null && $item['user_employment_name'] != "") {
                         $filtered = $generalcodes->where('code_name', "=", $item['user_employment_name']);
                         foreach ($filtered as $g_item) {
                             $employment_status = $g_item->code;
@@ -538,7 +538,7 @@ class UserAddController extends Controller
                     $user_model->setNameAttribute($item['user_name']);
                     $user_model->setKanaAttribute($item['user_kana']);
                     $user_model->setOfficialpositionAttribute($item['user_official_position']);
-                    if ($item['user_kill_from_date'] != null && $item['user_kill_from_date'] == "") {
+                    if ($item['user_kill_from_date'] != null && $item['user_kill_from_date'] != "") {
                         $user_model->setKillfromdateAttribute($item['user_kill_from_date']);
                     } else {
                         $user_model->setKillfromdateAttribute(Config::get('const.INIT_DATE.maxdate'));
@@ -546,8 +546,8 @@ class UserAddController extends Controller
                     $user_model->setPasswordAttribute($item['user_code']);
                     // タイムテーブル名からタイムテーブルNO設定
                     $user_working_timetable_no = 1;
-                    if ($item['user_working_timetable_name'] != null && $item['user_working_timetable_name'] == "") {
-                        $filtered = $generalcodes->where('name', "=", $item['user_working_timetable_name']);
+                    if ($item['user_working_timetable_name'] != null && $item['user_working_timetable_name'] != "") {
+                        $filtered = $taimetables->where('name', "=", $item['user_working_timetable_name']);
                         foreach ($filtered as $g_item) {
                             $user_working_timetable_no = $g_item->no;
                             break;
@@ -556,7 +556,7 @@ class UserAddController extends Controller
                     $user_model->setWorkingtimetablenoAttribute($user_working_timetable_no);
                     // メールアドレス設定
                     $user_email = "sample@sample.com";
-                    if ($item['user_email'] != null && $item['user_email'] == "") {
+                    if ($item['user_email'] != null && $item['user_email'] != "") {
                         $user_email = $item['user_email'];
                     }
                     $user_model->setEmailAttribute($user_email);
@@ -565,14 +565,14 @@ class UserAddController extends Controller
                     $user_model->setCreateduserAttribute($login_user_code);
                     // 勤怠管理設定
                     $user_management = 1;
-                    if ($item['user_management'] != null && $item['user_management'] == "") {
-                        $user_email = $item['user_management'];
+                    if ($item['user_management'] != null && $item['user_management'] != "") {
+                        $user_management = $item['user_management'];
                     }
                     $user_model->setManagementAttribute($user_management);
                     // 権限設定
                     $user_role = 1;
-                    if ($item['user_role'] != null && $item['user_role'] == "") {
-                        $user_email = $item['user_role'];
+                    if ($item['user_role'] != null && $item['user_role'] != "") {
+                        $user_role = $item['user_role'];
                     }
                     $user_model->setRoleAttribute($user_role);
                     $pass_word = bcrypt($item['user_code']);

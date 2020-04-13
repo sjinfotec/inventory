@@ -1413,7 +1413,8 @@ export default {
       latest_user_code: "",
       messageshowsearch: false,
       login_user_code: "",
-      login_user_role: ""
+      login_user_role: "",
+      input_mobile_address: ""
     };
   },
   // マウント時

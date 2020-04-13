@@ -30,8 +30,9 @@ class UserModel extends Model
     private $employment_status;                  
     private $kill_from_date;
     private $working_timetable_no;
+    private $remember_token;                // トークン
     private $management;                    // 勤怠管理対象
-    private $roe;                           // 権限
+    private $role;                          // 権限
     private $is_deleted;                    // 削除フラグ
     private $updated_user;                  // 修正ユーザー
     private $created_user;                  // 作成ユーザー
@@ -171,6 +172,17 @@ class UserModel extends Model
         }
         $this->working_timetable_no = $value;
     }
+ 
+    // トークン
+    public function getRemembertokenAttribute()
+    {
+        return $this->remember_token;
+    }
+
+    public function setRemembertokenAttribute($value)
+    {
+        $this->remember_token = $value;
+    }
 
     // 作成日時
     public function getCreatedatAttribute()
@@ -251,9 +263,11 @@ class UserModel extends Model
 
     // ---------------- param --------------------------------
     private $param_code;                            // ユーザーCODE
+    private $param_system_code;                     // システム管理者
     private $param_apply_term_from;                 // 適用期間開始
     private $param_killvalue;                       // 退職開始日を条件に含む(true)
      
+    // ユーザーCODE
     public function getParamcodeAttribute()
     {
         return $this->param_code;
@@ -262,6 +276,17 @@ class UserModel extends Model
     public function setParamcodeAttribute($value)
     {
         $this->param_code = $value;
+    }
+     
+    // システム管理者
+    public function getParamsystemcodeAttribute()
+    {
+        return $this->param_system_code;
+    }
+
+    public function setParamsystemcodeAttribute($value)
+    {
+        $this->param_system_code = $value;
     }
 
     // 適用期間開始
@@ -294,26 +319,50 @@ class UserModel extends Model
      */
     public function insertNewUser(){
         try {
-            DB::table($this->table)->insert(
-                [
-                    'apply_term_from' => $this->apply_term_from,
-                    'code' => $this->code,
-                    'employment_status' => $this->employment_status,
-                    'department_code' => $this->department_code,
-                    'name' => $this->name,
-                    'kana' => $this->kana,
-                    'official_position' => $this->official_position,
-                    'kill_from_date' => $this->kill_from_date,
-                    'working_timetable_no' => $this->working_timetable_no,
-                    'email' => $this->email,
-                    'mobile_email' => $this->mobile_email,
-                    'password' => $this->password,
-                    'created_user'=>$this->created_user,
-                    'created_at'=>$this->created_at,
-                    'management' => $this->management,
-                    'role' => $this->role
-                ]
-            );
+            if ($this->remember_token == null || $this->remember_token == "") {
+                DB::table($this->table)->insert(
+                    [
+                        'apply_term_from' => $this->apply_term_from,
+                        'code' => $this->code,
+                        'employment_status' => $this->employment_status,
+                        'department_code' => $this->department_code,
+                        'name' => $this->name,
+                        'kana' => $this->kana,
+                        'official_position' => $this->official_position,
+                        'kill_from_date' => $this->kill_from_date,
+                        'working_timetable_no' => $this->working_timetable_no,
+                        'email' => $this->email,
+                        'mobile_email' => $this->mobile_email,
+                        'password' => $this->password,
+                        'created_user'=>$this->created_user,
+                        'created_at'=>$this->created_at,
+                        'management' => $this->management,
+                        'role' => $this->role
+                    ]
+                );
+            } else {
+                DB::table($this->table)->insert(
+                    [
+                        'apply_term_from' => $this->apply_term_from,
+                        'code' => $this->code,
+                        'employment_status' => $this->employment_status,
+                        'department_code' => $this->department_code,
+                        'name' => $this->name,
+                        'kana' => $this->kana,
+                        'official_position' => $this->official_position,
+                        'kill_from_date' => $this->kill_from_date,
+                        'working_timetable_no' => $this->working_timetable_no,
+                        'email' => $this->email,
+                        'mobile_email' => $this->mobile_email,
+                        'password' => $this->password,
+                        'remember_token' => $this->remember_token,
+                        'created_user'=>$this->created_user,
+                        'created_at'=>$this->created_at,
+                        'management' => $this->management,
+                        'role' => $this->role
+                    ]
+                );
+            }
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
             Log::error($pe->getMessage());
@@ -364,7 +413,7 @@ class UserModel extends Model
     }
 
     /**
-     * ユーザー詳細取得
+     * ユーザー詳細取得（カード情報付き）
      *
      * @return void
      */
@@ -417,6 +466,7 @@ class UserModel extends Model
                     't1.email',
                     't1.mobile_email',
                     't1.password',
+                    't1.remember_token',
                     't1.management',
                     't1.role'
                     )
@@ -433,6 +483,88 @@ class UserModel extends Model
                 });
             $results = $mainquery
                 ->where('t1.code', $this->code)
+                ->where('t1.is_deleted', 0)
+                ->orderBy('t1.apply_term_from', 'desc')
+                ->get();
+
+            return $results;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * ユーザー詳細取得
+     *
+     * @return void
+     */
+    public function getFullUserDetails(){
+        // 適用期間日付の取得
+        $dt = new Carbon();
+        $target_date = $dt->format('Ymd');
+        try {
+            if(empty($this->param_apply_term_from)){
+                $this->param_apply_term_from = $target_date;
+            }
+            // usersの最大適用開始日付subquery
+            $subquery1 = DB::table($this->table)
+                ->select('code as code')
+                ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('apply_term_from', '<=',$this->param_apply_term_from)
+                ->where('role', '<', Config::get('const.C017.admin_user'));
+
+            if(!empty($this->param_killvalue)){
+                if (!$this->param_killvalue) {
+                    $subquery1->where('kill_from_date', '>',$this->param_apply_term_from);
+                }
+            } else {
+                $subquery1->where('kill_from_date', '>',$this->param_apply_term_from);
+            }
+            $subquery1
+                ->where('is_deleted', '=', 0)
+                ->groupBy('code');
+            $case_sql1 = "CASE t1.kill_from_date = ".Config::get('const.INIT_DATE.maxdate');
+            $case_sql1 = $case_sql1." WHEN TRUE THEN NULL ELSE DATE_FORMAT(t1.kill_from_date, '%Y-%m-%d') END as kill_from_date";
+            $case_sql2 = "CASE IFNULL(t2.max_apply_term_from,".Config::get('const.INIT_DATE.initdate').") = t1.apply_term_from ";
+            $case_sql2 = $case_sql2." WHEN TRUE THEN 1";
+            $case_sql2 = $case_sql2." ELSE CASE IFNULL(t2.max_apply_term_from,".Config::get('const.INIT_DATE.initdate').") < t1.apply_term_from ";
+            $case_sql2 = $case_sql2."      WHEN TRUE THEN 2 ELSE 0 END ";
+            $case_sql2 = $case_sql2." END  as result";
+            $mainquery = DB::table($this->table.' AS t1')
+                ->select(
+                    't1.id',
+                    't1.code',
+                    't1.department_code',
+                    't1.employment_status',
+                    't1.name',
+                    't1.kana',
+                    't1.official_position',
+                    't1.working_timetable_no',
+                    't1.email',
+                    't1.mobile_email',
+                    't1.password',
+                    't1.remember_token',
+                    't1.management',
+                    't1.role'
+                    )
+                ->selectRaw("DATE_FORMAT(t1.apply_term_from, '%Y-%m-%d') as apply_term_from")
+                ->selectRaw($case_sql1)
+                ->selectRaw($case_sql2);
+            $mainquery
+                ->leftJoinSub($subquery1, 't2', function ($join) { 
+                    $join->on('t2.code', '=', 't1.code');
+                });
+            if (!empty($this->code)) {
+                $mainquery
+                    ->where('t1.code', $this->code);
+            }
+            $results = $mainquery
                 ->where('t1.is_deleted', 0)
                 ->orderBy('t1.apply_term_from', 'desc')
                 ->get();
@@ -507,6 +639,10 @@ class UserModel extends Model
             if (!empty($this->param_code)) {
                 $mainQuery
                     ->where('code', $this->param_code);
+            }
+            if (!empty($this->param_system_code)) {
+                $mainQuery
+                    ->whereNotIn('code', [$this->param_system_code]);
             }
             $mainQuery
                 ->where('is_deleted', 0)

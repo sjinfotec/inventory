@@ -281,6 +281,55 @@ class WorkingTimeTable extends Model
     }
 
     /**
+     * full項目取得
+     *
+     * @return void
+     */
+    public function getAllTimeTables(){
+        try {
+            //
+            $date_from = null;
+            if ($this->param_date_from == "" || $this->param_date_from == null) {
+                $date_from = new Carbon();
+            } else {
+                $date_from = new Carbon($this->param_date_from);
+            }
+            $target_date = $date_from->format('Ymd');
+   
+            $apicommon = new ApiCommonController();
+            // working_timetablesの最大適用開始日付subquery
+            $subquery2 = $apicommon->makeWorkingTimeTableApplyTermSql($target_date);
+            // t2:working_timetables
+            $sqlString = "";
+            $sqlString .= $subquery2;
+        
+            // バインド
+            $array_setBindingsStr = array();
+            // subquery2
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $target_date;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = Config::get('const.C999_NAME.timetable_no');
+            $array_setBindingsStr[] = 0;
+            $result = DB::select($sqlString, $array_setBindingsStr);
+        
+            return $result;
+    
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
      * セレクト用データ取得
      *
      * @return void
@@ -288,12 +337,12 @@ class WorkingTimeTable extends Model
     public function getTimeTables(){
         try {
             $code_name = DB::table($this->table_generalcodes)
-            ->where($this->table_generalcodes.'.identification_id', 'C999')
+            ->where($this->table_generalcodes.'.identification_id', Config::get('const.C999.value'))
             ->where($this->table_generalcodes.'.is_deleted', '0')
-            ->where($this->table_generalcodes.'.code', '1')
+            ->where($this->table_generalcodes.'.code', Config::get('const.C999.timetable_no'))
             ->value('code_name');
 
-            // no nameでgroup by した際　noが同じでnameが異なるものが別れて表示してしまう対策
+            // no, nameでgroup by した際　履歴が複数ある場合のnoが同じでnameが異なるものが別れて表示してしまう対策
             $subquery = DB::table($this->table)
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->selectRaw('no as no');
@@ -657,6 +706,8 @@ class WorkingTimeTable extends Model
 
     /**
      * 該当日付のタイムテーブル取得
+     *  日付/部署/ユーザー  必須
+     * 
      * @return void
      */
     public function getWorkingTimeTable(){
@@ -685,6 +736,9 @@ class WorkingTimeTable extends Model
             $subquery34 .= " from ";
             $subquery34 .= "   ".$this->table_shift_informations." as t1 ";
 
+            // t33:working_timetables
+            // t34:shift_informations
+            // t35:shift_informationsに紐づくworking_timetables
             $sqlString = "";
             $sqlString .= " select ";
             $sqlString .= "   t1.code as user_code ";
@@ -695,6 +749,10 @@ class WorkingTimeTable extends Model
             $sqlString .= "     when 0 then t33.no ";
             $sqlString .= "     else t35.no ";
             $sqlString .= "    end as working_timetable_no ";
+            $sqlString .= "   ,case ifnull(t34.working_timetable_no, 0) ";
+            $sqlString .= "     when 0 then t33.working_time_kubun ";
+            $sqlString .= "     else t35.working_time_kubun ";
+            $sqlString .= "     end as working_time_kubun ";
             $sqlString .= "   ,case ifnull(t34.working_timetable_no,0) ";
             $sqlString .= "     when 0 then t33.name ";
             $sqlString .= "     else t35.name ";
@@ -738,7 +796,6 @@ class WorkingTimeTable extends Model
             $sqlString .= "   ".$subquery33. " ";
             $sqlString .= "   ) as t33 ";
             $sqlString .= "   on t33.no = t1.working_timetable_no ";
-            $sqlString .= "   and t33.working_time_kubun = ? ";
             $sqlString .= "   left join ( ";
             $sqlString .= "   ".$subquery34. " ";
             $sqlString .= "   ) as t34 ";
@@ -750,18 +807,11 @@ class WorkingTimeTable extends Model
             $sqlString .= "   ".$subquery33. " ";
             $sqlString .= "   ) as t35 ";
             $sqlString .= "   on t35.no = t34.working_timetable_no ";
-            $sqlString .= "   and t35.working_time_kubun = ? ";
             $sqlString .= " where ";
             $sqlString .= "   ? = ? ";
-            if (!empty($this->param_date_to)) {
-                $sqlString .= "   and t1.kill_from_date >= ? ";
-            }
-            if (!empty($this->param_department_code)) {
-                $sqlString .= "   and t1.department_code = ? ";
-            }
-            if (!empty($this->param_user_code)) {
-                $sqlString .= "   and t1.code = ? ";
-            }
+            $sqlString .= "   and t1.kill_from_date >= ? ";
+            $sqlString .= "   and t1.department_code = ? ";
+            $sqlString .= "   and t1.code = ? ";
             $sqlString .= "   and t1.is_deleted = ? ";
         
             // バインド
@@ -776,37 +826,27 @@ class WorkingTimeTable extends Model
             // subquery31
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
-            if (!empty($this->param_date_to)) {
-                $array_setBindingsStr[] = $this->param_date_to;
-            }
+            $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = Config::get('const.C025.admin_user');
             $array_setBindingsStr[] = 0;
             // subquery32
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
-            if (!empty($this->param_date_to)) {
-                $array_setBindingsStr[] = $this->param_date_to;
-            }
+            $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
-            if (!empty($this->param_date_to)) {
-                $array_setBindingsStr[] = $this->param_date_to;
-            }
+            $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = 0;
             // subquery33
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
-            if (!empty($this->param_date_to)) {
-                $array_setBindingsStr[] = $this->param_date_to;
-            }
+            $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 9999;
             $array_setBindingsStr[] = 0;
-            //
-            $array_setBindingsStr[] = Config::get('const.C004.regular_working_time');
             // subquery34
             //
             $array_setBindingsStr[] = $this->param_date_from;
@@ -814,28 +854,18 @@ class WorkingTimeTable extends Model
             // subquery33
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
-            if (!empty($this->param_date_to)) {
-                $array_setBindingsStr[] = $this->param_date_to;
-            }
+            $array_setBindingsStr[] = $this->param_date_to;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 9999;
             $array_setBindingsStr[] = 0;
-            //
-            $array_setBindingsStr[] =  Config::get('const.C004.regular_working_time');
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
 
-            if (!empty($this->param_date_to)) {
-                $array_setBindingsStr[] = $this->param_date_to;
-            }
-            if (!empty($this->param_department_code)) {
-                $array_setBindingsStr[] = $this->param_department_code;
-            }
-            if (!empty($this->param_user_code)) {
-                $array_setBindingsStr[] = $this->param_user_code;
-            }
+            $array_setBindingsStr[] = $this->param_date_to;
+            $array_setBindingsStr[] = $this->param_department_code;
+            $array_setBindingsStr[] = $this->param_user_code;
             $array_setBindingsStr[] = 0;
             $result = DB::select($sqlString, $array_setBindingsStr);
         
