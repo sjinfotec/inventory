@@ -23,7 +23,7 @@
                 <tr v-for="(item,onrowIndex) in ondetails" v-bind:key="item['user_code']">
                   <td class="text-left align-middle mw-rem-10">{{ item['department_name'] }}</td>
                   <td class="text-left align-middle mw-rem-10">{{ item['user_name'] }}</td>
-                  <td class="text-left align-middle mw-rem-8">{{ item['record_time_name'] }}</td>
+                  <td class="text-center align-middle mw-rem-8">{{ item['record_time_name'] }}</td>
                   <td class="text-center align-middle mw-rem-5">{{ item['mode_name'] }}</td>
                   <td
                     class="text-center align-middle mw-rem-10"
@@ -32,7 +32,7 @@
                   <td
                     class="text-center align-middle mw-rem-10"
                     v-else
-                  >{{ item['mode_name'] }}</td>
+                  >{{ item['mode_sub_name'] }}</td>
               </tr>
               </tbody>
             </table>
@@ -56,7 +56,7 @@
                 <tr v-for="(item,offrowIndex) in offdetails" v-bind:key="item['user_code']">
                   <td class="text-left align-middle mw-rem-10">{{ item['department_name'] }}</td>
                   <td class="text-left align-middle mw-rem-10">{{ item['user_name'] }}</td>
-                  <td class="text-left align-middle mw-rem-8">{{ item['record_time_name'] }}</td>
+                  <td class="text-center align-middle mw-rem-8">{{ item['record_time_name'] }}</td>
                   <td class="text-center align-middle mw-rem-5">{{ item['mode_name'] }}</td>
                   <td
                     class="text-center align-middle mw-rem-10"
@@ -65,7 +65,7 @@
                   <td
                     class="text-center align-middle mw-rem-10"
                     v-else
-                  >{{ item['mode_name'] }}</td>
+                  >未出勤</td>
               </tr>
               </tbody>
             </table>
