@@ -330,6 +330,16 @@ return [
         'first' => 2
     ],
  
+    'C035' => [
+        'value' => 'C035',
+        'attendance_time' => 1,
+        'leaving_time' => 2,
+        'missing_middle_time' => 11,
+        'missing_middle_return_time' => 12,
+        'public_going_out_time' => 21,
+        'public_going_out_return_time' => 22
+    ],
+ 
     'C999' => [
         'value' => 'C999',
         'main' => 1,

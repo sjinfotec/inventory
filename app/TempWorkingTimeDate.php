@@ -83,8 +83,10 @@ class TempWorkingTimeDate extends Model
     private $off_hours_working_hours;       // 時間外労働時間
     private $missing_middle_hours;          // 私用外出時間
     private $public_going_out_hours;        // 公用外出時間
-    private $out_of_legal_working_holiday_hours;    // 法定外休日労働時間
-    private $legal_working_holiday_hours;   // 法定休日労働時間
+    private $out_of_legal_working_holiday_hours;                    // 法定外休日労働時間
+    private $out_of_legal_working_holiday_night_overtime_hours;     // 法定外休日深夜残業時間
+    private $legal_working_holiday_hours;                   // 法定休日労働時間
+    private $legal_working_holiday_night_overtime_hours;    // 法定休日深夜残業時間
     private $working_status;                // 勤務状態
     private $working_status_name;           // 勤務状態名称
     private $note;                          // メモ
@@ -745,7 +747,6 @@ class TempWorkingTimeDate extends Model
     public function setRegularworkingtimesAttribute($value)
     {
         if ($value > 9999.99) {
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
             $value = 9999.99;
         }
         $this->regular_working_times = $value;
@@ -761,7 +762,6 @@ class TempWorkingTimeDate extends Model
     public function setOutofregularworkingtimesAttribute($value)
     {
         if ($value > 9999.99) {
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
             $value = 9999.99;
         }
         $this->out_of_regular_working_times = $value;
@@ -918,10 +918,23 @@ class TempWorkingTimeDate extends Model
     public function setOutoflegalworkingholidayhoursAttribute($value)
     {
         if ($value > 9999.99) {
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
             $value = 9999.99;
         }
         $this->out_of_legal_working_holiday_hours = $value;
+    }
+
+    // 法定外休日深夜残業時間
+    public function getOutoflegalworkingholidaynightovertimehoursAttribute()
+    {
+        return $this->out_of_legal_working_holiday_night_overtime_hours;
+    }
+
+    public function setOutoflegalworkingholidaynightovertimehoursAttribute($value)
+    {
+        if ($value > 9999.99) {
+            $value = 9999.99;
+        }
+        $this->out_of_legal_working_holiday_night_overtime_hours = $value;
     }
 
     // 法定休日労働時間
@@ -933,12 +946,25 @@ class TempWorkingTimeDate extends Model
     public function setLegalworkingholidayhoursAttribute($value)
     {
         if ($value > 9999.99) {
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.$value);
             $value = 9999.99;
         }
         $this->legal_working_holiday_hours = $value;
     }
 
+    // 法定休日深夜残業時間
+    public function getLegalworkingholidaynightovertimehoursAttribute()
+    {
+        return $this->legal_working_holiday_night_overtime_hours;
+    }
+
+    public function setLegalworkingholidaynightovertimehoursAttribute($value)
+    {
+        if ($value > 9999.99) {
+            $value = 9999.99;
+        }
+        $this->legal_working_holiday_night_overtime_hours = $value;
+    }
+    
 
     // 勤務状態
     public function getWorkingstatusAttribute()
@@ -1602,7 +1628,9 @@ class TempWorkingTimeDate extends Model
                     $this->table.'.public_going_out_hours',
                     $this->table.'.missing_middle_hours',
                     $this->table.'.out_of_legal_working_holiday_hours',
+                    $this->table.'.out_of_legal_working_holiday_night_overtime_hours',
                     $this->table.'.legal_working_holiday_hours',
+                    $this->table.'.legal_working_holiday_night_overtime_hours',
                     $this->table.'.working_status',
                     $this->table.'.working_status_name',
                     $this->table.'.note',
@@ -1955,7 +1983,9 @@ class TempWorkingTimeDate extends Model
                 ->addselect('t2.public_going_out_hours')
                 ->addselect('t2.missing_middle_hours')
                 ->addselect('t2.out_of_legal_working_holiday_hours')
+                ->addselect('t2.out_of_legal_working_holiday_night_overtime_hours')
                 ->addselect('t2.legal_working_holiday_hours')
+                ->addselect('t2.legal_working_holiday_night_overtime_hours')
                 ->addselect('t2.working_status')
                 ->addselect('t5.code_name as working_status_name')
                 ->addselect('t2.note')
@@ -2254,7 +2284,9 @@ class TempWorkingTimeDate extends Model
                 'public_going_out_hours' => $this->public_going_out_hours,
                 'missing_middle_hours' => $this->missing_middle_hours,
                 'out_of_legal_working_holiday_hours' => $this->out_of_legal_working_holiday_hours,
+                'out_of_legal_working_holiday_night_overtime_hours' => $this->out_of_legal_working_holiday_night_overtime_hours,
                 'legal_working_holiday_hours' => $this->legal_working_holiday_hours,
+                'legal_working_holiday_night_overtime_hours' => $this->legal_working_holiday_night_overtime_hours,
                 'working_status' => $this->working_status,
                 'working_status_name' => $this->working_status_name,
                 'note' => $this->note,

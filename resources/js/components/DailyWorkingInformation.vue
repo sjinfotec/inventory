@@ -206,8 +206,8 @@
                 v-bind:date-name="dateName"
                 v-bind:predeter-time-name="predetertimename"
                 v-bind:predeter-night-time-name="predeternighttimename"
-                v-bind:predeter-time-secondname="predetertimesecondname"
-                v-bind:predeter-night-time-secondname="predeternighttimesecondname"
+                v-bind:predeter-time-second-name="predetertimesecondname"
+                v-bind:predeter-night-time-second-name="predeternighttimesecondname"
                 v-bind:btn-mode="btnmodeswitch"
               ></daily-working-info-table>
               <!-- ----------- 日次集計テーブル END ---------------- -->
@@ -610,9 +610,11 @@ export default {
         this.predetertimesecondname = this.calcresults[key][
           "predeter_time_secondname"
         ];
+        console.log('getThen this.predetertimesecondname = ' + this.predetertimesecondname);
         this.predeternighttimesecondname = this.calcresults[key][
           "predeter_night_time_secondname"
         ];
+        console.log('getThen this.predeternighttimesecondname = ' + this.predeternighttimesecondname);
         break;
       }
       this.$forceUpdate();

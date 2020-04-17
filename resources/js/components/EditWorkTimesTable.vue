@@ -468,6 +468,9 @@ export default {
     // 休暇区分が変更された場合の処理
     changeHolidayKbn: function(index) {
       this.value_user_holiday_kbn = this.details[index].user_holiday_kbn;
+      for (var i=0;i<this.details.length;i++) {
+        this.details[i].kbn_flag = 0;
+      }
       if (this.value_user_holiday_kbn != "" && this.value_user_holiday_kbn != null) {
         this.details[index].kbn_flag = 1;
         // 編集前の休暇区分と比較
@@ -494,8 +497,6 @@ export default {
             this.before_user_holiday_kbn = this.value_user_holiday_kbn;
           }
         }        
-      } else {
-        this.details[index].kbn_flag = 0;
       }
     },
     //前日ボタンクリック処理
@@ -809,24 +810,24 @@ export default {
           } else if (item.description == HALFDAY_AM_NAME) {
             // 出勤自動設定
             this.details.push(this.edtDetailesBreakAttendance(edtdetail));
-            if (this.before_count > 0) {
-              // 旧detailsから出勤以外を設定
-              old_details.forEach(detail => {
-                if (detail.mode != "" && detail.mode != null && detail.mode != ATTENDANCE) {
-                  this.details.push(this.edtDetailesfromOld(detail));
-                }
-              });
-            }
+            // if (this.before_count > 0) {
+            //   // 旧detailsから出勤以外を設定
+            //   old_details.forEach(detail => {
+            //     if (detail.mode != "" && detail.mode != null && detail.mode != ATTENDANCE) {
+            //       this.details.push(this.edtDetailesfromOld(detail));
+            //     }
+            //   });
+            // }
           // 午後半休
           } else if (item.code_name == HALFDAY_PM_NAME) {
-            if (this.before_count > 0) {
-              // 旧detailsから出勤以外を設定
-              old_details.forEach(detail => {
-                if (detail.mode != "" && detail.mode != null && detail.mode != LEAVING) {
-                  this.details.push(this.edtDetailesfromOld(detail));
-                }
-              });
-            }
+            // if (this.before_count > 0) {
+            //   // 旧detailsから出勤以外を設定
+            //   old_details.forEach(detail => {
+            //     if (detail.mode != "" && detail.mode != null && detail.mode != LEAVING) {
+            //       this.details.push(this.edtDetailesfromOld(detail));
+            //     }
+            //   });
+            // }
             // 退勤自動設定
             this.details.push(this.edtDetailesBreakLeaving(edtdetail));
           // みなし
@@ -838,23 +839,23 @@ export default {
           } else if (item.code_name == DEEMED_DIRECT_GO) {
             // 出勤自動設定
             this.details.push(this.edtDetailesAttendance(edtdetail));
-            if (this.before_count > 0) {
-              // 旧detailsから出勤以外を設定
-              old_details.forEach(detail => {
-                if (detail.mode != "" && detail.mode != null && detail.mode != ATTENDANCE) {
-                  this.details.push(this.edtDetailesfromOld(detail));
-                }
-              });
-            }
+            // if (this.before_count > 0) {
+            //   // 旧detailsから出勤以外を設定
+            //   old_details.forEach(detail => {
+            //     if (detail.mode != "" && detail.mode != null && detail.mode != ATTENDANCE) {
+            //       this.details.push(this.edtDetailesfromOld(detail));
+            //     }
+            //   });
+            // }
           } else if (item.code_name == DEEMED_DIRECT_RETURN) {
-            if (this.before_count > 0) {
-              // 旧detailsから退勤以外を設定
-              old_details.forEach(detail => {
-                if (detail.mode != "" && detail.mode != null && detail.mode != LEAVING) {
-                  this.details.push(this.edtDetailesfromOld(detail));
-                }
-              });
-            }
+            // if (this.before_count > 0) {
+            //   // 旧detailsから退勤以外を設定
+            //   old_details.forEach(detail => {
+            //     if (detail.mode != "" && detail.mode != null && detail.mode != LEAVING) {
+            //       this.details.push(this.edtDetailesfromOld(detail));
+            //     }
+            //   });
+            // }
             // 退勤自動設定
             this.details.push(this.edtDetailesLeaving(edtdetail));
           // 1日集計対象休暇

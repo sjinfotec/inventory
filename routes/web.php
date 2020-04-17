@@ -85,6 +85,7 @@ Route::post('/create_shift_time/get', 'CreateShiftTimeController@get')->middlewa
 Route::post('/create_shift_time/del', 'CreateShiftTimeController@del')->middleware('auth');
 Route::get('/setting_shift_time', 'SttingShiftTimeController@index')->middleware('auth');
 Route::post('/get_user_list', 'ApiCommonController@getUserList')->middleware('auth');
+Route::post('/get_user_list/csv', 'ApiCommonController@getUserListCsv')->middleware('auth');
 Route::post('/get_user_shift', 'ApiCommonController@getShiftInformation')->middleware('auth');
 Route::post('/setting_shift_time/del', 'SttingShiftTimeController@del')->middleware('auth');
 Route::post('/setting_shift_time/store', 'SttingShiftTimeController@store')->middleware('auth');

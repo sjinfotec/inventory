@@ -263,6 +263,8 @@ class UserModel extends Model
 
     // ---------------- param --------------------------------
     private $param_code;                            // ユーザーCODE
+    private $param_department_code;                 // 部署CODE
+    private $param_employment_status;               // 雇用形態
     private $param_system_code;                     // システム管理者
     private $param_apply_term_from;                 // 適用期間開始
     private $param_killvalue;                       // 退職開始日を条件に含む(true)
@@ -276,6 +278,28 @@ class UserModel extends Model
     public function setParamcodeAttribute($value)
     {
         $this->param_code = $value;
+    }
+     
+    // 部署CODE
+    public function getParamdepartmentcodeAttribute()
+    {
+        return $this->param_department_code;
+    }
+
+    public function setParamdepartmentcodeAttribute($value)
+    {
+        $this->param_department_code = $value;
+    }
+     
+    // 雇用形態
+    public function getParamemploymentstatusAttribute()
+    {
+        return $this->param_employment_status;
+    }
+
+    public function setParamemploymentstatusAttribute($value)
+    {
+        $this->param_employment_status = $value;
     }
      
     // システム管理者
@@ -570,6 +594,154 @@ class UserModel extends Model
                 ->get();
 
             return $results;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * ユーザーCSV作成詳細取得
+     *
+     * @return void
+     */
+    public function getUserDetailsCsv(){
+        try {
+            $sqlString = "";
+            $sqlString .= " select ";
+            $sqlString .= "   t1.code as user_code ";
+            $sqlString .= "   ,t1.department_code ";
+            $sqlString .= "   ,t1.employment_status ";
+            $sqlString .= "   ,t1.name as user_name ";
+            $sqlString .= "   ,t1.kana ";
+            $sqlString .= "   ,t1.apply_term_from ";
+            $sqlString .= "   ,t1.official_position ";
+            $sqlString .= "   ,t1.kill_from_date ";
+            $sqlString .= "   ,t1.working_timetable_no ";
+            $sqlString .= "   ,t1.email ";
+            $sqlString .= "   ,t1.mobile_email ";
+            $sqlString .= "   ,t1.management ";
+            $sqlString .= "   ,t1.role ";
+            $sqlString .= "   ,t2.name as department_name ";
+            $sqlString .= "   ,t4.code_name as employment_name ";
+            $sqlString .= "   ,t5.name as working_timetable_name ";
+            $sqlString .= " from users t1 ";
+            $sqlString .= "   inner join departments t2 ";
+            $sqlString .= "   on ";
+            $sqlString .= "     t2.code = t1.department_code ";
+            $sqlString .= "   inner join (  ";
+            $sqlString .= "     select ";
+            $sqlString .= "       t1.user_code as user_code ";
+            $sqlString .= "       , t1.department_code ";
+            $sqlString .= "       , max(t1.department_apply_term_from) as max_department_apply_term_from ";
+            $sqlString .= "     from ( ";
+            $sqlString .= "       select ";
+            $sqlString .= "         t1.code as user_code ";
+            $sqlString .= "         , t1.department_code ";
+            $sqlString .= "         , t1.apply_term_from as user_apply_term_from ";
+            $sqlString .= "         , t2.apply_term_from as department_apply_term_from ";
+            $sqlString .= "       from ";
+            $sqlString .= "         users t1 ";
+            $sqlString .= "         inner join (  ";
+            $sqlString .= "           select ";
+            $sqlString .= "             code as code ";
+            $sqlString .= "             , apply_term_from ";
+            $sqlString .= "           from ";
+            $sqlString .= "             departments ";
+            $sqlString .= "           where ";
+            $sqlString .= "             is_deleted = ? ";
+            $sqlString .= "         ) as t2 ";
+            $sqlString .= "         on ";
+            $sqlString .= "           t2.code = t1.department_code ";
+            $sqlString .= "       where ";
+            $sqlString .= "         t2.apply_term_from <= t1.apply_term_from ";
+            $sqlString .= "         and t1.is_deleted = ? ";
+            $sqlString .= "       ) t1 ";
+            $sqlString .= "     group by ";
+            $sqlString .= "       t1.user_code ";
+            $sqlString .= "       , t1.department_code ";
+            $sqlString .= "   ) as t3  ";
+            $sqlString .= "   on ";
+            $sqlString .= "     t3.user_code = t1.code ";
+            $sqlString .= "     and t3.department_code = t1.department_code ";
+            $sqlString .= "     and t3.max_department_apply_term_from = t2.apply_term_from ";
+            $sqlString .= "   left join generalcodes t4 ";
+            $sqlString .= "   on ";
+            $sqlString .= "     t4.identification_id = ? ";
+            $sqlString .= "     and t4.code = t1.employment_status ";
+            $sqlString .= "   inner join ( ";
+            $sqlString .= "     select ";
+            $sqlString .= "       no ";
+            $sqlString .= "       ,name ";
+            $sqlString .= "       ,working_time_kubun ";
+            $sqlString .= "       ,apply_term_from ";
+            $sqlString .= "     from ";
+            $sqlString .= "       working_timetables ";
+            $sqlString .= "     where ";
+            $sqlString .= "       working_time_kubun = ? ";
+            $sqlString .= "       and is_deleted = ? ";
+            $sqlString .= "   ) t5 ";
+            $sqlString .= "   on ";
+            $sqlString .= "     t5.no = t1.working_timetable_no ";
+            $sqlString .= "   inner join (  ";
+            $sqlString .= "     select ";
+            $sqlString .= "       t1.user_code as user_code ";
+            $sqlString .= "       , t1.working_timetable_no ";
+            $sqlString .= "       , max(t1.working_timetable_apply_term_from) as max_working_timetable_apply_term_from ";
+            $sqlString .= "     from ( ";
+            $sqlString .= "       select ";
+            $sqlString .= "         t1.code as user_code ";
+            $sqlString .= "         , t1.working_timetable_no ";
+            $sqlString .= "         , t2.apply_term_from as working_timetable_apply_term_from ";
+            $sqlString .= "       from ";
+            $sqlString .= "         users t1 ";
+            $sqlString .= "       inner join (  ";
+            $sqlString .= "         select ";
+            $sqlString .= "           no as no ";
+            $sqlString .= "           , apply_term_from ";
+            $sqlString .= "         from ";
+            $sqlString .= "           working_timetables ";
+            $sqlString .= "         where ";
+            $sqlString .= "           is_deleted = ? ";
+            $sqlString .= "       ) as t2 ";
+            $sqlString .= "       on ";
+            $sqlString .= "         t2.no = t1.working_timetable_no ";
+            $sqlString .= "     where ";
+            $sqlString .= "       t2.apply_term_from <= t1.apply_term_from ";
+            $sqlString .= "       and t1.is_deleted = ? ";
+            $sqlString .= "   ) t1 ";
+            $sqlString .= "   group by ";
+            $sqlString .= "     t1.user_code ";
+            $sqlString .= "     , t1.working_timetable_no ";
+            $sqlString .= " ) as t6  ";
+            $sqlString .= " on ";
+            $sqlString .= "   t6.user_code = t1.code ";
+            $sqlString .= "   and t6.working_timetable_no = t1.working_timetable_no ";
+            $sqlString .= "   and t6.max_working_timetable_apply_term_from = t5.apply_term_from ";
+            $sqlString .= " where ";
+            $sqlString .= "   1 = 1 ";
+            $sqlString .= "   and t1.is_deleted = ? ";
+            $sqlString .= "   and t2.is_deleted = ? ";
+            $sqlString .= "   and t4.is_deleted = ? ";
+            // バインド
+            $array_setBindingsStr = array();
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = Config::get('const.C001.value');
+            $array_setBindingsStr[] = Config::get('const.C004.regular_working_time');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+            $results = DB::select($sqlString, $array_setBindingsStr);
+            return $results;
+
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());

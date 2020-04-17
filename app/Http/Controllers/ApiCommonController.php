@@ -19,6 +19,7 @@ use App\Company;
 use App\UserHolidayKubun;
 use App\ApprovalRouteNo;
 use App\WorkTimeLog;
+use App\UserModel;
 
 
 
@@ -31,6 +32,7 @@ use App\WorkTimeLog;
 *          タイムテーブル適用期間開始サブクエリー作成  : getTimetableApplyTermSubquery, makeWorkingTimeTableApplyTermSql    : working_timetables
  *      2.リスト作成
  *          ユーザーリスト取得          : getUserList               : users
+ *          ユーザーリストCSV作成取得   : getUserListCsv            : users
  *          部署リスト取得              : getDepartmentList         : departments
  *          タイムテーブルリスト取得     : getTimeTableList         : working_timetables
  *          承認リスト取得              : getApprovalroutenoList    : approvals 
@@ -523,6 +525,74 @@ class ApiCommonController extends Controller
                 }
             }
 
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+    /**
+     * ユーザーリストCSV作成取得
+     *
+     * @param  Request
+     * @return list users
+     */
+    public function getUserListCsv(Request $request){
+
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            $targetdate = '';
+            if (isset($params['targetdate'])) {
+                $targetdate =  $params['targetdate'];
+            }
+            // 適用期間日付の取得
+            $dt = null;
+            if ($targetdate != '') {
+                $dt = new Carbon($targetdate);
+            } else {
+                $dt = new Carbon();
+            }
+            $target_date = $dt->format("Ymd");
+            $departmentcode = null;
+            if (isset($params['departmentcode'])) {
+                $departmentcode =  $params['departmentcode'];
+            }
+            $employmentcode = null;
+            if (isset($params['employmentcode'])) {
+                $employmentcode =  $params['employmentcode'];
+            }
+            $usercode = null;
+            if (isset($params['usercode'])) {
+                $employmentcode =  $params['usercode'];
+            }
+            $killvalue = false;
+            if (isset($params['killvalue'])) {
+                $killvalue =  $params['killvalue'];
+            }
+            /// users->getFullUserDetails呼び出し
+            $users_model = new UserModel();
+            $details = $users_model->getUserDetailsCsv();
             return response()->json(
                 ['result' => true, 'details' => $details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -1730,8 +1800,18 @@ class ApiCommonController extends Controller
             }
             $target_date = $params['target_date'];
             $details = $worktimelog_model->getWorkinTimeLog(date_format(new Carbon($target_date), 'Ymd'));
+            $result_details = Collect($details);
+            $ondetails = $result_details->whereIn('mode', [
+                Config::get('const.C005.attendance_time'),
+                Config::get('const.C005.missing_middle_return_time'),
+                Config::get('const.C005.public_going_out_return_time')]);
+            $offdetails = $result_details->whereIn('mode', [
+                Config::get('const.C005.leaving_time'),
+                Config::get('const.C005.missing_middle_time'),
+                Config::get('const.C005.public_going_out_time'),
+                null]);
             return response()->json(
-                ['result' => true, 'details' => $details,
+                ['result' => true, 'ondetails' => $ondetails, 'offdetails' => $details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){

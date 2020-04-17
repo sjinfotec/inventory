@@ -48,7 +48,7 @@ export default {
   },
   data() {
     return {
-      items: [{}]
+      details: []
     };
   },
   // マウント時
@@ -273,7 +273,7 @@ export default {
       link.click();
     },
     downloadCSVUsers() {
-      this.getUserList();
+      this.getUserListCsv();
       var csv = "";
       var line = "";
       var workingdate = "";
@@ -282,6 +282,7 @@ export default {
       var pcstart_time = "";
       var pcend_time = "";
       var difference_reason = "";
+      this.csvData = this.details;
       // 1ユーザーごと
       this.csvData.forEach(user => {
         //  '\ufeff' + 
@@ -292,17 +293,27 @@ export default {
         csv += line;
         // 項目名
         line =
-          "日付" +
+          "社員コード（半角英数字10桁）" +
           "," +
-          "出勤時刻" +
+          "部署名" +
           "," +
-          "退勤時刻" +
+          "雇用形態名" +
           "," +
-          "PC起動時刻" +
+          "社員カナ名（半角30文字以内、全角15文字以内）" +
           "," +
-          "PC終了時刻" +
+          "役職（全角50文字以内）" +
           "," +
-          "差異の理由" +
+          "退職日" +
+          "," +
+          "タイムテーブル名" +
+          "," +
+          "メールアドレス" +
+          "," +
+          "モバイルメールアドレス" +
+          "," +
+          "勤怠管理（半角数字）" +
+          "," +
+          "権限（半角数字）" +
           "\r\n";
         csv += line;
         user.date.forEach(record => {
@@ -360,20 +371,44 @@ export default {
       link.download = moment().format('YYYYMMDDhhmmss') + "_" + this.csvDate + "次勤怠ログ" + ".csv";
       link.click();
     },
-    // 氏名取得処理
-    getUserList() {
-      var arrayParams = {
-        code: this.selectedUserValue,
-        killvalue: this.isUsermanagement
-      };
-      this.postRequest("/edit_user/get", arrayParams)
+    // -------------------- サーバー処理 ----------------------------
+    // 氏名選択リスト取得処理
+    getUserListCsv() {
+      this.postRequest("/get_user_list/csv", {
+        targetdate: null,
+        departmentcode: null,
+        employmentcode: null,
+        usercode: null,
+        killvalue: null,
+      })
         .then(response => {
           this.getThen(response);
         })
         .catch(reason => {
-          this.serverCatch("ユーザ", "取得");
+          this.serverCatch("氏名", "取得");
         });
     },
+    // -------------------- 共通 ----------------------------
+    // 取得正常処理（ユーザー）
+    getThen(response) {
+      this.details = [];
+      var res = response.data;
+      if (res.result) {
+        this.details = res.details;
+      } else {
+        if (res.messagedata.length > 0) {
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
+        } else {
+          this.serverCatch("氏名", "取得");
+        }
+      }
+    },
+    // 異常処理
+    serverCatch(kbn, eventtext) {
+      var messages = [];
+      messages.push(kbn + "情報" + eventtext + "に失敗しました");
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
+    }
   }
 };
 </script>
