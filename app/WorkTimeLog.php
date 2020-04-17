@@ -231,6 +231,7 @@ class WorkTimeLog extends Model
             $sqlString .= "    where ";
             $sqlString .= "      ? = ? ";
             $sqlString .= "      and apply_term_from <= ? ";
+            $sqlString .= "      and kill_from_date >  ? ";
             $sqlString .= "      and role <= ? ";
             $sqlString .= "      and is_deleted = ? ";
             $sqlString .= "    group by ";
@@ -326,6 +327,7 @@ class WorkTimeLog extends Model
             $array_setBindingsStr = array();
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $target_date;
             $array_setBindingsStr[] = $target_date;
             $array_setBindingsStr[] = Config::get('const.C017.admin_user');;
             $array_setBindingsStr[] = 0;
