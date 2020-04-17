@@ -2,11 +2,11 @@
   <div>
     <!-- ----------- テーブル部 START ---------------- -->
     <!-- main contentns row -->
-    <div class="card-body pt-2" v-if="ondetails.length > 0 || offdetails.length > 0">
+    <div class="card-body pt-2" v-if="ondetails_length > 0 || offdetails_length > 0">
       <!-- .row -->
       <div class="row">
-        <div class="col-6" v-if="ondetails.length">
-          <p>在席者数：{{ ondetails.length}}人</p>
+        <div class="col-6" v-if="ondetails_length">
+          <p>在席者数：{{ ondetails_length}}人</p>
           <div class="table-responsive">
             <table class="table table-striped border-bottom font-size-sm text-nowrap">
             <!-- <table class="table"> -->
@@ -36,8 +36,8 @@
             </table>
           </div>
         </div>
-        <div class="col-6" v-if="offdetails.length">
-          <p>離席者数：{{ offdetails.length}}人</p>
+        <div class="col-6" v-if="offdetails_length">
+          <p>離席者数：{{ offdetails_length}}人</p>
           <div class="table-responsive">
             <table class="table table-striped border-bottom font-size-sm text-nowrap">
             <!-- <table class="table"> -->
@@ -103,6 +103,8 @@ export default {
     return {
       ondetails: [],
       offdetails: [],
+      ondetails_length: 0,
+      offdetails_length: 0,
       defaultYmd: new Date()
     };
   },
@@ -139,6 +141,8 @@ export default {
       if (res.result) {
         this.ondetails = res.ondetails;
         this.offdetails = res.offdetails;
+        this.ondetails_length = Object.keys(this.ondetails).length;
+        this.offdetails_length = Object.keys(this.offdetails).length;
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
