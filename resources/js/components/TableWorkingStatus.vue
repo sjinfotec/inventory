@@ -2,7 +2,7 @@
   <div>
     <!-- ----------- テーブル部 START ---------------- -->
     <!-- main contentns row -->
-    <div class="card-body pt-2" v-if="ondetails.length || offdetails.length">
+    <div class="card-body pt-2" v-if="ondetails.length > 0 || offdetails.length > 0">
       <!-- .row -->
       <div class="row">
         <div class="col-6" v-if="ondetails.length">
@@ -133,7 +133,8 @@ export default {
     // ------------------------ 共通処理 ------------------------------------
     // 取得正常処理（ユーザー）
     getThen(response) {
-      this.details = [];
+      this.ondetails = [];
+      this.offdetails = [];
       var res = response.data;
       if (res.result) {
         this.ondetails = res.ondetails;
