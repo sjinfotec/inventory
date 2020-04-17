@@ -13,16 +13,18 @@
               <thead>
                 <tr>
                   <td class="text-center align-middle mw-rem-10">部署</td>
-                  <td class="text-center align-middle mw-rem-13">氏名</td>
-                  <td class="text-center align-middle mw-rem-10">打刻時刻</td>
+                  <td class="text-center align-middle mw-rem-10">氏名</td>
+                  <td class="text-center align-middle mw-rem-8">打刻時刻</td>
+                  <td class="text-center align-middle mw-rem-5">モード</td>
                   <td class="text-center align-middle mw-rem-10">勤務状況</td>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(item,onrowIndex) in ondetails" v-bind:key="item['user_code']">
                   <td class="text-left align-middle mw-rem-10">{{ item['department_name'] }}</td>
-                  <td class="text-left align-middle mw-rem-13">{{ item['user_name'] }}</td>
-                  <td class="text-center align-middle mw-rem-10">{{ item['record_time_name'] }}</td>
+                  <td class="text-left align-middle mw-rem-10">{{ item['user_name'] }}</td>
+                  <td class="text-left align-middle mw-rem-8">{{ item['record_time_name'] }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ item['mode_name'] }}</td>
                   <td
                     class="text-center align-middle mw-rem-10"
                     v-if="item['holiday_kubun_name']"
@@ -44,16 +46,18 @@
               <thead>
                 <tr>
                   <td class="text-center align-middle mw-rem-10">部署</td>
-                  <td class="text-center align-middle mw-rem-13">氏名</td>
-                  <td class="text-center align-middle mw-rem-10">打刻時刻</td>
+                  <td class="text-center align-middle mw-rem-10">氏名</td>
+                  <td class="text-center align-middle mw-rem-8">打刻時刻</td>
+                  <td class="text-center align-middle mw-rem-5">モード</td>
                   <td class="text-center align-middle mw-rem-10">勤務状況</td>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(item,offrowIndex) in offdetails" v-bind:key="item['user_code']">
                   <td class="text-left align-middle mw-rem-10">{{ item['department_name'] }}</td>
-                  <td class="text-left align-middle mw-rem-13">{{ item['user_name'] }}</td>
-                  <td class="text-center align-middle mw-rem-10">{{ item['record_time_name'] }}</td>
+                  <td class="text-left align-middle mw-rem-10">{{ item['user_name'] }}</td>
+                  <td class="text-left align-middle mw-rem-8">{{ item['record_time_name'] }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ item['mode_name'] }}</td>
                   <td
                     class="text-center align-middle mw-rem-10"
                     v-if="item['holiday_kubun_name']"
@@ -180,8 +184,8 @@ tbody {
     border-color: #95c5ed #dee2e6 !important;
 }
 
-.mw-rem-13 {
-  min-width: 13rem;
+.mw-rem-8 {
+  min-width: 8rem;
 }
 
 </style>
