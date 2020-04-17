@@ -1805,13 +1805,15 @@ class ApiCommonController extends Controller
                 Config::get('const.C005.attendance_time'),
                 Config::get('const.C005.missing_middle_return_time'),
                 Config::get('const.C005.public_going_out_return_time')]);
+            Log::debug('$ondetails = '.count($ondetails));
             $offdetails = $result_details->whereIn('mode', [
                 Config::get('const.C005.leaving_time'),
                 Config::get('const.C005.missing_middle_time'),
                 Config::get('const.C005.public_going_out_time'),
                 null]);
+            Log::debug('$offdetails = '.count($offdetails));
             return response()->json(
-                ['result' => true, 'ondetails' => $ondetails, 'offdetails' => $details,
+                ['result' => true, 'ondetails' => $ondetails, 'offdetails' => $offdetails,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
