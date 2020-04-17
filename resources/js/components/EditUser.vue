@@ -1414,7 +1414,8 @@ export default {
       messageshowsearch: false,
       login_user_code: "",
       login_user_role: "",
-      input_mobile_address: ""
+      input_mobile_address: "",
+      iscsvbutton: false
     };
   },
   // マウント時
@@ -2208,6 +2209,7 @@ export default {
         var add_official_position = this.details[0].official_position;
         var add_working_timetable_no = this.details[0].working_timetable_no;
         var add_email = this.details[0].email;
+        var add_mobile_email = this.details[0].mobile_email;
         var add_management = this.details[0].management;
         var add_role = this.details[0].role;
         var add_password = this.details[0].password;
@@ -2221,6 +2223,7 @@ export default {
           official_position: add_official_position,
           working_timetable_no: add_working_timetable_no,
           email: add_email,
+          mobile_email: add_mobile_email,
           password: add_password,
           management: add_management,
           role: add_role,

@@ -2,26 +2,67 @@
   <div>
     <!-- ----------- テーブル部 START ---------------- -->
     <!-- main contentns row -->
-    <div class="card-body pt-2" v-if="details.length">
+    <div class="card-body pt-2" v-if="ondetails.length || offdetails.length">
       <!-- .row -->
       <div class="row">
-        <div class="col-12">
+        <div class="col-6" v-if="ondetails.length">
+          <p>在席者数：{{ ondetails.length}}人</p>
           <div class="table-responsive">
             <table class="table table-striped border-bottom font-size-sm text-nowrap">
             <!-- <table class="table"> -->
               <thead>
                 <tr>
-                  <td class="text-center align-middle mw-rem-20">部署</td>
-                  <td class="text-center align-middle mw-rem-20">氏名</td>
-                  <td class="text-center align-middle mw-rem-25">勤務状況</td>
+                  <td class="text-center align-middle mw-rem-10">部署</td>
+                  <td class="text-center align-middle mw-rem-13">氏名</td>
+                  <td class="text-center align-middle mw-rem-10">打刻時刻</td>
+                  <td class="text-center align-middle mw-rem-10">勤務状況</td>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(item,rowIndex1) in details" v-bind:key="item['user_code']">
-                  <td class="text-left align-middle mw-rem-20">{{ item['department_name'] }}</td>
-                  <td class="text-left align-middle mw-rem-20">{{ item['user_name'] }}</td>
-                  <td class="text-center align-middle mw-rem-25">{{ item['mode_name'] }}</td>
+                <tr v-for="(item,onrowIndex) in ondetails" v-bind:key="item['user_code']">
+                  <td class="text-left align-middle mw-rem-10">{{ item['department_name'] }}</td>
+                  <td class="text-left align-middle mw-rem-13">{{ item['user_name'] }}</td>
+                  <td class="text-center align-middle mw-rem-10">{{ item['record_time_name'] }}</td>
+                  <td
+                    class="text-center align-middle mw-rem-10"
+                    v-if="item['holiday_kubun_name']"
+                  >{{ item['holiday_kubun_name'] }}</td>
+                  <td
+                    class="text-center align-middle mw-rem-10"
+                    v-else
+                  >{{ item['mode_name'] }}</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="col-6" v-if="offdetails.length">
+          <p>離席者数：{{ offdetails.length}}人</p>
+          <div class="table-responsive">
+            <table class="table table-striped border-bottom font-size-sm text-nowrap">
+            <!-- <table class="table"> -->
+              <thead>
+                <tr>
+                  <td class="text-center align-middle mw-rem-10">部署</td>
+                  <td class="text-center align-middle mw-rem-13">氏名</td>
+                  <td class="text-center align-middle mw-rem-10">打刻時刻</td>
+                  <td class="text-center align-middle mw-rem-10">勤務状況</td>
                 </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(item,offrowIndex) in offdetails" v-bind:key="item['user_code']">
+                  <td class="text-left align-middle mw-rem-10">{{ item['department_name'] }}</td>
+                  <td class="text-left align-middle mw-rem-13">{{ item['user_name'] }}</td>
+                  <td class="text-center align-middle mw-rem-10">{{ item['record_time_name'] }}</td>
+                  <td
+                    class="text-center align-middle mw-rem-10"
+                    v-if="item['holiday_kubun_name']"
+                  >{{ item['holiday_kubun_name'] }}</td>
+                  <td
+                    class="text-center align-middle mw-rem-10"
+                    v-else
+                  >{{ item['mode_name'] }}</td>
+              </tr>
               </tbody>
             </table>
           </div>
@@ -60,7 +101,8 @@ export default {
   },
   data() {
     return {
-      details: [],
+      ondetails: [],
+      offdetails: [],
       defaultYmd: new Date()
     };
   },
@@ -94,7 +136,8 @@ export default {
       this.details = [];
       var res = response.data;
       if (res.result) {
-        this.details = res.details;
+        this.ondetails = res.ondetails;
+        this.offdetails = res.offdetails;
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
@@ -132,8 +175,8 @@ tbody {
     border-color: #95c5ed #dee2e6 !important;
 }
 
-.mw-rem-25 {
-  min-width: 25rem;
+.mw-rem-13 {
+  min-width: 13rem;
 }
 
 </style>

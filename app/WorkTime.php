@@ -683,10 +683,11 @@ class WorkTime extends Model
                     $join->on('t5.code', '=', 't1.department_code')
                     ->where('t1.is_deleted', '=', 0);
                 })
-                ->leftJoin($this->table_calendars.' as t3', function ($join) { 
+                ->leftJoin($this->table_calendars.' as t3', function ($join) use($targetdateto) { 
                     $join->on('t3.department_code', '=', 't1.department_code');
-                    $join->on('t3.user_code', '=', 't1.code');
-                    $join->on('t3.date', '=', 't2.record_date')
+                    $join->on('t3.user_code', '=', 't1.code')
+                    // $join->on('t3.date', '=', 't2.record_date')
+                    ->where('t3.date', '=', $targetdateto)
                     ->where('t3.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_settings.' as t4', function ($join) { 
@@ -755,6 +756,10 @@ class WorkTime extends Model
                 ->leftJoinSub($subquery3, 't18', function ($join) { 
                     $join->on('t18.code', '=', 't17.code');
                     $join->on('t18.max_apply_term_from', '=', 't17.apply_term_from');
+                })
+                ->JoinSub($subquery3, 't19', function ($join) { 
+                    $join->on('t19.code', '=', 't1.code');
+                    $join->on('t19.max_apply_term_from', '=', 't1.apply_term_from');
                 });
 
             if(!empty($this->param_employment_status)){
