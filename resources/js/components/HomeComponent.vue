@@ -122,51 +122,58 @@
           <!-- <img class="icon-size-sm svg_img orange600" src="/images/info-32.png" alt />打刻エラー -->
           <!-- <i class="fa fa-exclamation-triangle my-red fa-lg fa-fw" aria-hidden="true"></i> -->
           <img class="con-size-lg svg_img" src="/images/round-info-b.svg" alt />
-          <span class="font-weight-bold">【通知事項】</span>
+          <span class="font-weight-bolder">【通知事項】</span>
         </div>
         <div class="card-body">
-          <!-- ----------- waitメッセージ部 START ---------------- -->
-          <!-- .row -->
-          <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting>
-          <!-- /.row -->
-          <!-- ----------- waitメッセージ部 END ---------------- -->
-          <div class="row justify-content-between  print-none" v-if="infomationmessage.length">
-            <!-- col -->
-            <div class="col-md-12">
-              <div v-if="login_user_role === login_adminuser_role">
-                <a class href="/daily_alert/home"
-                  v-for="(messagevalidate,index) in infomationmessage" v-bind:key="index">{{ messagevalidate }}
-                </a>
-              </div>
-              <div v-else>
-                <span style="color: #808080;">通知事項はありません</span>
-              </div>
+          <div class="col-6">
+            <!-- ----------- waitメッセージ部 START ---------------- -->
+            <!-- .row -->
+            <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting>
+            <!-- /.row -->
+            <!-- ----------- waitメッセージ部 END ---------------- -->
+            <div class="row justify-content-between  print-none" v-if="infomationmessage.length">
+              <!-- col -->
+              <!-- <div class="col-md-12"> -->
+                <div v-if="login_user_role === login_adminuser_role">
+                  <a class href="/daily_alert/home"
+                    v-for="(messagevalidate,index) in infomationmessage" v-bind:key="index">{{ messagevalidate }}
+                  </a>
+                </div>
+                <div v-else>
+                  <span style="color: #808080;">通知事項はありません</span>
+                </div>
+              <!-- </div> -->
+              <!-- /.col -->
             </div>
-            <!-- /.col -->
-          </div>
-          <div class="row justify-content-between  print-none" v-else>
-            <!-- col -->
-            <span style="color: #808080;">通知事項はありません</span>
-            <!-- /.col -->
+            <div class="row justify-content-between  print-none" v-else>
+              <!-- col -->
+              <span style="color: #808080;">通知事項はありません</span>
+              <!-- /.col -->
+            </div>
           </div>
         </div>
       </div>
-      <div class="card flex-fill margin-left-small">
+      <div class="card flex-fill">
         <div class="card-header bg-color">
           <i class="fa fa-bullhorn fa-lg my-orange fa-fw" aria-hidden="true"></i>
           <span class="font-weight-bolder">お知らせ</span>
         </div>
         <div class="card-body">
-          <div v-if="informations" v-for="(item,index) in informations">
-            <span v-html="item.content"></span>
+          <div class="col-6">
+            <div v-if="informations" v-for="(item,index) in informations">
+              <span v-html="item.content"></span>
+            </div>
           </div>
         </div>
       </div>
     </div>
+    <!-- ========================== 勤務状況部 START ========================== -->
     <div class="d-flex flex-row justify-content">
-      <!-- ========================== 勤務状況部 START ========================== -->
-      <!-- .panel -->
-      <div class="col-md-12 pt-3">
+      <div class="card flex-fill margin-top-small">
+        <div class="card-header bg-color">
+          <i class="fa fa-bullhorn fa-lg my-orange fa-fw" aria-hidden="true"></i>
+          <span class="font-weight-bolder">出勤状況確認</span>
+        </div>
         <table-working-status
           v-if="showeditworktimestable"
           ref="refeditworktimestable"
@@ -175,8 +182,8 @@
         </table-working-status>
       </div>
       <!-- /.panel -->
-      <!-- ========================== 勤務状況部 END =========================== -->
     </div>
+    <!-- ========================== 勤務状況部 END =========================== -->
       
       <!-- <div class="card flex-fill margin-left-small">
         <div class="card-header bg-color">
