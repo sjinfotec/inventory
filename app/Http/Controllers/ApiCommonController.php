@@ -1798,6 +1798,7 @@ class ApiCommonController extends Controller
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
+            // $params['target_date'] = "2020-04-08 08:00:00";
             $target_date = $params['target_date'];
             $details = $worktimelog_model->getWorkinTimeLog(date_format(new Carbon($target_date), 'Ymd'));
             $result_details = Collect($details);

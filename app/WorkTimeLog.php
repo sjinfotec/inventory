@@ -254,6 +254,7 @@ class WorkTimeLog extends Model
             $sqlString .= "      , t1.mode ";
             $sqlString .= "      , t1.user_holiday_kubuns_id ";
             $sqlString .= "      , t1.positions ";
+            $sqlString .= "      , t1.is_deleted ";
             $sqlString .= "    from ";
             $sqlString .= "      ".$this->table_work_times." as t1 ";
             $sqlString .= "      inner join ( ";
@@ -266,6 +267,7 @@ class WorkTimeLog extends Model
             $sqlString .= "        where ";
             $sqlString .= "          ? = ? ";
             $sqlString .= "          and record_time between ? and ? ";
+            $sqlString .= "          and is_deleted = ? ";
             $sqlString .= "        group by  ";
             $sqlString .= "          user_code ";
             $sqlString .= "          , department_code ";
@@ -312,6 +314,7 @@ class WorkTimeLog extends Model
             $sqlString .= "    t5.code = t1.department_code ";
             $sqlString .= "where ";
             $sqlString .= "  t1.is_deleted = ? ";
+            $sqlString .= "  and t3.is_deleted = ? ";
             $sqlString .= "order by ";
             $sqlString .= "  t1.department_code ";
             $sqlString .= "  , t1.code ";
@@ -337,6 +340,7 @@ class WorkTimeLog extends Model
             $to_datetime = date_format(new Carbon($target_date), 'Y/m/d')." 23:59:59";
             $array_setBindingsStr[] = $from_datetime;
             $array_setBindingsStr[] = $to_datetime;
+            $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = $target_date;
@@ -344,6 +348,7 @@ class WorkTimeLog extends Model
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = $target_date;
+            $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 0;
             $result = DB::select($sqlString, $array_setBindingsStr);

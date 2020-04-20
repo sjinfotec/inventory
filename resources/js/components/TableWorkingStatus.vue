@@ -6,7 +6,7 @@
       <!-- .row -->
       <div class="row">
         <div class="col-6" v-if="ondetails_length">
-          <p>在席者数：{{ ondetails_length}}人</p>
+          <p>在席者数：{{ ondetails_length}}名</p>
           <div class="table-responsive">
             <table class="table table-striped border-bottom font-size-sm text-nowrap">
             <!-- <table class="table"> -->
@@ -39,7 +39,7 @@
           </div>
         </div>
         <div class="col-6" v-if="offdetails_length">
-          <p>離席者数：{{ offdetails_length}}人</p>
+          <p>離席者数：{{ offdetails_length}}名</p>
           <div class="table-responsive">
             <table class="table table-striped border-bottom font-size-sm text-nowrap">
             <!-- <table class="table"> -->
@@ -65,7 +65,7 @@
                   <td
                     class="text-center align-middle mw-rem-10"
                     v-else
-                  >未出勤</td>
+                  >{{ item['mode_sub_name'] }}</td>
               </tr>
               </tbody>
             </table>
