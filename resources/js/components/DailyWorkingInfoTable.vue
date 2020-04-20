@@ -23,7 +23,7 @@
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="edtString"
-                  @mouseover="edttooltips('実働時間 = 所定 + 残業時間（法定休,法定外休） + ', '深夜残業（法休深夜,法外休深夜）','')"
+                  @mouseover="edttooltips('実働時間 = 所定 + 残業時間（法定休日,法定外休日） + ', '深夜残業','')"
                 >実働時間</td>
                 <!--  <td class="text-center align-middle css-fukidashi"
                   @mouseover="edttooltips('実働時間 = 所定 + ',predeterTimeName,predeterNightTimeName,'')">
@@ -35,10 +35,10 @@
                 <td class="text-center align-middle mw-rem-5">{{ predeterNightTimeSecondName }}</td> -->
                 <td class="text-center align-middle mw-rem-5">残業時間</td>
                 <td class="text-center align-middle mw-rem-5">深夜残業</td>
-                <td class="text-center align-middle mw-rem-5">法定休</td>
-                <td class="text-center align-middle mw-rem-5">法休深夜</td>
-                <td class="text-center align-middle mw-rem-5">法定外休</td>
-                <td class="text-center align-middle mw-rem-5">法外休深夜</td>
+                <td class="text-center align-middle mw-rem-5">法定休日</td>
+                <!-- <td class="text-center align-middle mw-rem-5">法休深夜</td> -->
+                <td class="text-center align-middle mw-rem-5">法定外休日</td>
+                <!-- <td class="text-center align-middle mw-rem-5">法外休深夜</td> -->
                 <td class="text-center align-middle mw-rem-3">深夜労働</td>
                 <td
                   class="text-center align-middle mw-rem-5 color-royalblue"
@@ -72,7 +72,7 @@
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="edtString"
-                  @mouseover="edttooltips('実働時間 = 所定 + 残業時間（法定休,法定外休） + ', '深夜残業（法休深夜,法外休深夜）','')"
+                  @mouseover="edttooltips('実働時間 = 所定 + 残業時間（法定休日,法定外休日） + ', '深夜残業','')"
                 >実働時間</td>
                 <td class="text-center align-middle mw-rem-3">所定</td>
                 <td class="text-center align-middle mw-rem-3">所定外</td>
@@ -80,10 +80,10 @@
                 <td class="text-center align-middle mw-rem-5">{{ predeterNightTimeSecondName }}</td> -->
                 <td class="text-center align-middle mw-rem-5">残業時間</td>
                 <td class="text-center align-middle mw-rem-5">深夜残業</td>
-                <td class="text-center align-middle mw-rem-5">法定休</td>
-                <td class="text-center align-middle mw-rem-5">法休深夜</td>
-                <td class="text-center align-middle mw-rem-5">法定外休</td>
-                <td class="text-center align-middle mw-rem-5">法外休深夜</td>
+                <td class="text-center align-middle mw-rem-5">法定休日</td>
+                <!-- <td class="text-center align-middle mw-rem-5">法休深夜</td> -->
+                <td class="text-center align-middle mw-rem-5">法定外休日</td>
+                <!-- <td class="text-center align-middle mw-rem-5">法外休深夜</td> -->
                 <td class="text-center align-middle mw-rem-3">深夜労働</td>
                 <td class="text-center align-middle mw-rem-3">法定</td>
                 <td class="text-center align-middle mw-rem-3">法定外</td>
@@ -250,7 +250,7 @@
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="edtString"
-                  @mouseover="edttooltips('実働時間 = 所定 + 残業時間（法定休,法定外休） + ', '深夜残業（法休深夜,法外休深夜）','')"
+                  @mouseover="edttooltips('実働時間 = 所定 + 残業時間（法定休日,法定外休日） + ', '深夜残業','')"
                 >{{ calcList.total_working_times }}</td>
                 <!-- /実働時間 -->
                 <!-- 所定労働時間 -->
@@ -291,7 +291,7 @@
                 >00:00</td>
                 <!-- /法定休日労働時間 -->
                 <!-- 法定休日深夜残業時間 -->
-                <td
+                <!-- <td
                   class="text-center align-middle mw-rem-5"
                   v-if="calcList.business_kubun === '2'"
                 >{{ calcList.legal_working_holiday_night_overtime_hours }}</td>
@@ -302,7 +302,7 @@
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-else
-                >00:00</td>
+                >00:00</td> -->
                 <!-- /法定休日深夜残業時間 -->
                 <!-- 法定外（所定休日）休日労働時間 -->
                 <td
@@ -317,9 +317,9 @@
                   class="text-center align-middle mw-rem-5"
                   v-else
                 >00:00</td>
-                <!-- /法定外（所定休日）休日労働時間 -->
+                <!-- /法定外（所定休日）休日労働時間
                 <!-- 法定外（所定休日）休日深夜残業時間 -->
-                <td
+                <!-- <td
                   class="text-center align-middle mw-rem-5"
                   v-if="calcList.business_kubun === '3'"
                 >{{ calcList.out_of_legal_working_holiday_night_overtime_hours }}</td>
@@ -330,7 +330,7 @@
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-else
-                >00:00</td>
+                >00:00</td> -->
                 <!-- /法定外（所定休日）休日深夜残業時間 -->
                 <!-- 深夜労働時間 -->
                 <td class="text-center align-middle mw-rem-3">{{ calcList.late_night_working_hours }}</td>
@@ -568,7 +568,7 @@
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="edtString"
-                  @mouseover="edttooltips('実働時間 = 所定 + 残業時間（法定休,法定外休） + ', '深夜残業（法休深夜,法外休深夜）','')"
+                  @mouseover="edttooltips('実働時間 = 所定 + 残業時間（法定休日,法定外休日） + ', '深夜残業','')"
                 >{{ calcList.total_working_times }}</td>
                 <!-- /実働時間 -->
                 <!-- 所定労働時間 -->
@@ -612,7 +612,7 @@
                 >00:00</td>
                 <!-- /法定休日労働時間 -->
                 <!-- 法定休日深夜残業時間 -->
-                <td
+                <!-- <td
                   class="text-center align-middle mw-rem-5"
                   v-if="calcList.business_kubun === '2'"
                 >{{ calcList.legal_working_holiday_night_overtime_hours }}</td>
@@ -623,7 +623,7 @@
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-else
-                >00:00</td>
+                >00:00</td> -->
                 <!-- /法定休日深夜残業時間 -->
                 <!-- 法定外（所定休日）休日労働時間 -->
                 <td
@@ -640,7 +640,7 @@
                 >00:00</td>
                 <!-- /法定外（所定休日）休日労働時間 -->
                 <!-- 法定外（所定休日）休日深夜残業時間 -->
-                <td
+                <!-- <td
                   class="text-center align-middle mw-rem-5"
                   v-if="calcList.business_kubun === '3'"
                 >{{ calcList.out_of_legal_working_holiday_night_overtime_hours }}</td>
@@ -651,7 +651,7 @@
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-else
-                >00:00</td>
+                >00:00</td> -->
                 <!-- /法定外（所定休日）休日深夜残業時間 -->
                 <!-- 深夜労働時間 -->
                 <td class="text-center align-middle mw-rem-3">{{ calcList.late_night_working_hours }}</td>

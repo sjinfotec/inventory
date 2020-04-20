@@ -7512,8 +7512,7 @@ class DailyWorkingInformationController extends Controller
                 $temp_working_model->setPublicgoingoutreturntimepositionsAttribute($i, null);
             }
         }
-        // 所定労働時間の計算（出勤日）
-        $holiday_calc_time_stamp = 0;
+        // 所定労働時間の計算
         // calcRegulartime implement
         $array_impl_calcRegulartime = array (
             'target_date' => $target_date,
@@ -7527,14 +7526,23 @@ class DailyWorkingInformationController extends Controller
         );
         $regular_calc_time_stamp = $this->calcRegulartime($array_impl_calcRegulartime);
         $regular_calc_time = $apicommon->cnvToDecFromStamp($regular_calc_time_stamp);
+        $holiday_calc_time_stamp = 0;
+        $holiday_calc_time = 0;
         if ($target_result->business_kubun == Config::get('const.C007.basic')) {
-            $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);               // 所定労働時間
+            $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);               // 所定労働時間（出勤日）
         } else if ($target_result->business_kubun == Config::get('const.C007.legal_out_holoday')) {
             $holiday_calc_time_stamp = $regular_calc_time_stamp;
+            $regular_calc_time_stamp = 0;
+            $regular_calc_time = 0;
+            $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);               // 所定労働時間（法定外休日）
         } else {
             $holiday_calc_time_stamp = $regular_calc_time_stamp;
+            $regular_calc_time_stamp = 0;
+            $regular_calc_time = 0;
+            $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);               // 所定労働時間（法定休日）
         }
-        // 残業時間（出勤日）
+        Log::DEBUG('  $holiday_calc_time_stamp = '.$holiday_calc_time_stamp);
+        // 残業時間
         // calcOvertime implement
         $array_impl_calcOvertime = array (
             'target_result' => $target_result,
@@ -7543,16 +7551,19 @@ class DailyWorkingInformationController extends Controller
         );
         $overtime_hours_stamp = $this->calcOvertime($array_impl_calcOvertime);
         $overtime_hours = $apicommon->cnvToDecFromStamp($overtime_hours_stamp);
+        Log::DEBUG('  $overtime_hours_stamp = '.$overtime_hours_stamp);
         if ($target_result->business_kubun == Config::get('const.C007.basic')) {
-            $temp_working_model->setOvertimehoursAttribute($overtime_hours);                        // 普通残業時間
+            $temp_working_model->setOvertimehoursAttribute($overtime_hours);                        // 普通残業時間（出勤日）
         } else if ($target_result->business_kubun == Config::get('const.C007.legal_out_holoday')) {
-            $holiday_calc_time_stamp += $overtime_hours;
-            $overtime_hours = $apicommon->cnvToDecFromStamp($holiday_calc_time_stamp);
-            $temp_working_model->setOutoflegalworkingholidayhoursAttribute($overtime_hours);        // 法定外休日労働時間
+            $holiday_calc_time_stamp += $overtime_hours_stamp;
+            $overtime_hours_stamp = 0;
+            $overtime_hours = 0;
+            $temp_working_model->setOvertimehoursAttribute($overtime_hours);                        // 普通残業時間（法定外休日）
         } else {
-            $holiday_calc_time_stamp += $overtime_hours;
-            $overtime_hours = $apicommon->cnvToDecFromStamp($holiday_calc_time_stamp);
-            $temp_working_model->setLegalworkingholidayhoursAttribute($overtime_hours);             // 法定休日労働時間
+            $holiday_calc_time_stamp += $overtime_hours_stamp;
+            $overtime_hours_stamp = 0;
+            $overtime_hours = 0;
+            $temp_working_model->setOvertimehoursAttribute($overtime_hours);                        // 普通残業時間（法定休日）
         }
         // 時間外労働時間
         $off_hours_working_hours = $overtime_hours;
@@ -7565,41 +7576,86 @@ class DailyWorkingInformationController extends Controller
         );
         $lastnight_overtime_hours_stamp = $this->calcLatenightovertime($array_impl_calcLatenightovertime);
         $lastnight_overtime_hours = $apicommon->cnvToDecFromStamp($lastnight_overtime_hours_stamp);
+        Log::DEBUG('  $lastnight_overtime_hours_stamp = '.$lastnight_overtime_hours_stamp);
         if ($target_result->business_kubun == Config::get('const.C007.basic')) {
             $temp_working_model->setLatenightovertimehoursAttribute($lastnight_overtime_hours);                         // 深夜残業時間
+            $temp_working_model->setOutoflegalworkingholidayhoursAttribute($holiday_calc_time);                         // 法定外休日労働時間
+            $temp_working_model->setLegalworkingholidayhoursAttribute($holiday_calc_time);                              // 法定休日労働時間
+            // 合計勤務時間
+            $total_time_stamp = $regular_calc_time_stamp + $overtime_hours_stamp + $lastnight_overtime_hours_stamp;
+            $total_time = $apicommon->cnvToDecFromStamp($total_time_stamp);
+            $temp_working_model->setTotalworkingtimesAttribute($total_time);
         } else if ($target_result->business_kubun == Config::get('const.C007.legal_out_holoday')) {
+            $holiday_calc_time_stamp += $lastnight_overtime_hours_stamp;
+            Log::DEBUG('  $holiday_calc_time_stamp = '.$holiday_calc_time_stamp);
+            $holiday_calc_time = $apicommon->cnvToDecFromStamp($holiday_calc_time_stamp);
+            $lastnight_overtime_hours = 0;
+            $temp_working_model->setLatenightovertimehoursAttribute($lastnight_overtime_hours);                         // 深夜残業時間
+            $temp_working_model->setOutoflegalworkingholidayhoursAttribute($holiday_calc_time);                         // 法定外休日労働時間
+            $temp_working_model->setLegalworkingholidayhoursAttribute($lastnight_overtime_hours);                       // 法定休日労働時間
+            $lastnight_overtime_hours_stamp = 0;
+            $lastnight_overtime_hours = 0;
+            // 深夜手当はあるが深夜残業はない
+            $temp_working_model->setLatenightovertimehoursAttribute($lastnight_overtime_hours);                         // 深夜残業時間
             $temp_working_model->setOutoflegalworkingholidaynightovertimehoursAttribute($lastnight_overtime_hours);     // 法定外休日深夜残業時間
-        } else {
             $temp_working_model->setLegalworkingholidaynightovertimehoursAttribute($lastnight_overtime_hours);          // 法定休日深夜残業時間
+            // 合計勤務時間
+            $total_time_stamp = $holiday_calc_time_stamp;
+            $total_time = $apicommon->cnvToDecFromStamp($total_time_stamp);
+            $temp_working_model->setTotalworkingtimesAttribute($total_time);
+        } else {
+            $holiday_calc_time_stamp += $lastnight_overtime_hours_stamp;
+            Log::DEBUG('  $holiday_calc_time_stamp = '.$holiday_calc_time_stamp);
+            $holiday_calc_time = $apicommon->cnvToDecFromStamp($holiday_calc_time_stamp);
+            $lastnight_overtime_hours = 0;
+            $temp_working_model->setLatenightovertimehoursAttribute($lastnight_overtime_hours);                         // 深夜残業時間
+            $temp_working_model->setOutoflegalworkingholidayhoursAttribute($lastnight_overtime_hours);                  // 法定外休日労働時間
+            $temp_working_model->setLegalworkingholidayhoursAttribute($holiday_calc_time);                              // 法定休日労働時間
+            $lastnight_overtime_hours_stamp = 0;
+            $lastnight_overtime_hours = 0;
+            // 深夜手当はあるが深夜残業はない
+            $temp_working_model->setLatenightovertimehoursAttribute($lastnight_overtime_hours);                         // 深夜残業時間
+            $temp_working_model->setOutoflegalworkingholidaynightovertimehoursAttribute($lastnight_overtime_hours);     // 法定外休日深夜残業時間
+            $temp_working_model->setLegalworkingholidaynightovertimehoursAttribute($lastnight_overtime_hours);          // 法定休日深夜残業時間
+            // 合計勤務時間
+            $total_time_stamp = $holiday_calc_time_stamp;
+            $total_time = $apicommon->cnvToDecFromStamp($total_time_stamp);
+            $temp_working_model->setTotalworkingtimesAttribute($total_time);
         }
         // 深夜労働時間
         $w_time = $apicommon->cnvToDecFromStamp($this->calc_late_night_working_hours);
         $temp_working_model->setLatenightworkinghoursAttribute($w_time);
-        // 合計勤務時間
-        $total_time_stamp = $regular_calc_time_stamp + $overtime_hours_stamp + $lastnight_overtime_hours_stamp;
-        $total_time = $apicommon->cnvToDecFromStamp($total_time_stamp);
-        $temp_working_model->setTotalworkingtimesAttribute($total_time);
+
         // 所定外労働時間
         $outside_calc_time = 0;
-        $default_time = (int)(Config::get('const.C002.legal_working_hours_day'));
-        if ($regular_calc_time < $default_time && $total_time > $default_time) {    // 所定労働時間 < 8 and 合計勤務時間 > 8 の場合
-            $outside_calc_time = $default_time - $regular_calc_time;
-        } elseif ($regular_calc_time < $total_time) { 
-            $outside_calc_time = $total_time- $regular_calc_time;
-        } 
-        $temp_working_model->setOutofregularworkingtimesAttribute($outside_calc_time);
-        // 法定労働時間 法定外労働時間
-        if ($total_time > $default_time) {      // 合計勤務時間 > 8 の場合
-            // 法定労働時間
-            $temp_working_model->setLegalworkingtimesAttribute($default_time);
-            // 法定外労働時間
-            $temp_working_model->setOutoflegalworkingtimesAttribute($total_time - $default_time);
+        if ($target_result->business_kubun == Config::get('const.C007.basic')) {
+            $default_time = (int)(Config::get('const.C002.legal_working_hours_day'));
+            if ($regular_calc_time < $default_time && $total_time > $default_time) {    // 所定労働時間 < 8 and 合計勤務時間 > 8 の場合
+                $outside_calc_time = $default_time - $regular_calc_time;
+            } elseif ($regular_calc_time < $total_time) { 
+                $outside_calc_time = $total_time- $regular_calc_time;
+            } 
+            Log::DEBUG('  $outside_calc_time = '.$outside_calc_time);
+            // 法定労働時間 法定外労働時間
+            if ($total_time > $default_time) {      // 合計勤務時間 > 8 の場合
+                // 法定労働時間
+                $temp_working_model->setLegalworkingtimesAttribute($default_time);
+                // 法定外労働時間
+                $temp_working_model->setOutoflegalworkingtimesAttribute($total_time - $default_time);
+            } else {
+                // 法定労働時間
+                $temp_working_model->setLegalworkingtimesAttribute($total_time);
+                // 法定外労働時間
+                $temp_working_model->setOutoflegalworkingtimesAttribute(0);
+            }
         } else {
             // 法定労働時間
-            $temp_working_model->setLegalworkingtimesAttribute($total_time);
+            $temp_working_model->setLegalworkingtimesAttribute(0);
             // 法定外労働時間
             $temp_working_model->setOutoflegalworkingtimesAttribute(0);
         }
+        $temp_working_model->setOutofregularworkingtimesAttribute($outside_calc_time);          // 所定外労働時間
+
         // 不就労時間
         // calcNotemploymentworkinghours implement
         $array_impl_calcNotemploymentworkinghours = array (
@@ -8838,7 +8894,9 @@ class DailyWorkingInformationController extends Controller
                     'public_going_out_hours' => $working_time["public_going_out_hours"],
                     'missing_middle_hours' => $working_time["missing_middle_hours"],
                     'out_of_legal_working_holiday_hours' => $working_time["out_of_legal_working_holiday_hours"],
+                    'out_of_legal_working_holiday_night_overtime_hours' => $working_time["out_of_legal_working_holiday_night_overtime_hours"],
                     'legal_working_holiday_hours' => $working_time["legal_working_holiday_hours"],
+                    'legal_working_holiday_night_overtime_hours' => $working_time["legal_working_holiday_night_overtime_hours"],
                     'working_status' => $working_time["working_status"],
                     'working_status_name' => $working_time["working_status_name"],
                     'remark_holiday_name' => $working_time["remark_holiday_name"],
@@ -8953,7 +9011,9 @@ class DailyWorkingInformationController extends Controller
                     'public_going_out_hours' => '',
                     'missing_middle_hours' => '',
                     'out_of_legal_working_holiday_hours' => '',
+                    'out_of_legal_working_holiday_night_overtime_hours' => '',
                     'legal_working_holiday_hours' => '',
+                    'legal_working_holiday_night_overtime_hours' => '',
                     'working_status' => '',
                     'working_status_name' => '',
                     'remark_holiday_name' => '',

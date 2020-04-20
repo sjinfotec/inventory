@@ -151,6 +151,17 @@
           </div>
         </div>
       </div>
+      <div class="card flex-fill margin-left-small">
+        <div class="card-header bg-color">
+          <i class="fa fa-bullhorn fa-lg my-orange fa-fw" aria-hidden="true"></i>
+          <span class="font-weight-bolder">お知らせ</span>
+        </div>
+        <div class="card-body">
+          <div v-if="informations" v-for="(item,index) in informations">
+            <span v-html="item.content"></span>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="d-flex flex-row justify-content">
       <!-- ========================== 勤務状況部 START ========================== -->
@@ -181,7 +192,7 @@
           </div>
         </div>
       </div> -->
-    </div>
+    <!-- </div> -->
     <!-- <el-dialog custom-class v-bind:title="'三条印刷からのお知らせ'" :visible.sync="dialogVisible" width="80%">
       <div class="card">
         <div class="card-header">
@@ -371,7 +382,6 @@ export default {
         .get("/get_post_informations")
         .then(response => {
           this.informations = response.data;
-          console.log("お知らせ取得");
         })
         .catch(reason => {
           console.log(reason);
