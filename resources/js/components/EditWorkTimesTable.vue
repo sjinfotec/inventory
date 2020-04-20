@@ -179,6 +179,15 @@
           <!-- /.col -->
         </div>
         <!-- /.row -->
+        <!-- .row -->
+        <div class="row justify-content-between">
+          <!-- col -->
+          <div class="col-md-12 pb-2">
+            <btn-work-time v-bind:btn-mode="'cancel'" v-on:cancelclick-event="cancelclick"></btn-work-time>
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
         <!-- /.panel contents -->
       </div>
       <!-- ----------- 選択ボタン類 END ---------------- -->
@@ -593,6 +602,9 @@ export default {
         this.details.splice(index, 1);
         this.count = this.details.length
       }
+    },
+    cancelclick : function() {
+      this.$emit('cancelclick-event',event);
     },
     // -------------------- サーバー処理 ----------------------------
     // 勤怠取得処理

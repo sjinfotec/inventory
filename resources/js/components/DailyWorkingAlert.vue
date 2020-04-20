@@ -159,6 +159,7 @@
           v-bind:generalapproveruser="generalapproveruser"
           v-bind:adminuser="adminuser"
           v-bind:heads="detailsEdt"
+          v-on:cancelclick-event="cancelClick"
         >
         </edit-work-times-table>
       </div>
@@ -376,14 +377,15 @@ export default {
       this.detailsEdt = this.details[index];
       this.refreshEdtWorkingTimesTable();
     },
+    // キャンセルボタンクリックされた場合の処理
+    cancelClick: function(e, arrayitem) {
+      this.selectMode = '';
+      this.refreshDailyWorkingAlertTable();
+    },
     // ------------------------ サーバー処理 ----------------------------
     // 日次警告取得処理
     getItem() {
       // 処理中メッセージ表示
-      console.log('getItem this.valuefromdate = ' + this.valuefromdate);
-      console.log('getItem this.selectedEmploymentValue = ' + this.selectedEmploymentValue);
-      console.log('getItem this.selectedDepartmentValue = ' + this.selectedDepartmentValue);
-      console.log('getItem this.selectedUserValue = ' + this.selectedUserValue);
       this.$swal({
         title: "処　理　中...",
         html: "",

@@ -13,15 +13,15 @@
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
-                    @mouseover="edttooltips('実働時間 = 所定労働時間 + 残業時間（法定休日労働時間,法定外休日労働時間） + ', '深夜残業（法定休日深夜時間,法定外休日深夜時間）','')"
+                    @mouseover="edttooltips('実働時間 = 所定労働時間 + 残業時間（法定休日労働時間,法定外休日労働時間） + ', '深夜残業','')"
                   >実働時間</td>
                   <td class="text-center align-middle mw-rem-8">所定労働時間</td>
                   <td class="text-center align-middle mw-rem-8">残業時間</td>
                   <td class="text-center align-middle mw-rem-8">深夜残業時間</td>
                   <td class="text-center align-middle mw-rem-8">法定休日労働時間</td>
-                  <td class="text-center align-middle mw-rem-8">法定休日深夜時間</td>
+                  <!-- <td class="text-center align-middle mw-rem-8">法定休日深夜時間</td> -->
                   <td class="text-center align-middle mw-rem-8">法定外休日労働時間</td>
-                  <td class="text-center align-middle mw-rem-8">法定外休日深夜時間</td>
+                  <!-- <td class="text-center align-middle mw-rem-8">法定外休日深夜時間</td> -->
                   <td class="text-center align-middle mw-rem-8">深夜労働時間</td>
                   <td
                     class="text-center align-middle mw-rem-5"
@@ -45,15 +45,15 @@
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
-                    @mouseover="edttooltips('実働時間 = 所定労働時間 + 残業時間（法定休日労働時間,法定外休日労働時間） + ', '深夜残業（法定休日深夜時間,法定外休日深夜時間）','')"
+                    @mouseover="edttooltips('実働時間 = 所定労働時間 + 残業時間（法定休日労働時間,法定外休日労働時間） + ', '深夜残業','')"
                   >実働時間</td>
                   <td class="text-center align-middle mw-rem-8">所定労働時間</td>
                   <td class="text-center align-middle mw-rem-8">残業時間</td>
                   <td class="text-center align-middle mw-rem-8">深夜残業時間</td>
                   <td class="text-center align-middle mw-rem-8">法定休日労働時間</td>
-                  <td class="text-center align-middle mw-rem-8">法定休日深夜時間</td>
+                  <!-- <td class="text-center align-middle mw-rem-8">法定休日深夜時間</td> -->
                   <td class="text-center align-middle mw-rem-8">法定外休日労働時間</td>
-                  <td class="text-center align-middle mw-rem-8">法定外休日深夜時間</td>
+                  <!-- <td class="text-center align-middle mw-rem-8">法定外休日深夜時間</td> -->
                   <td class="text-center align-middle mw-rem-8">深夜労働時間</td>
                   <td class="text-center align-middle mw-rem-8">法定時間</td>
                   <td class="text-center align-middle mw-rem-8">法定外時間</td>
@@ -84,15 +84,15 @@
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
-                    @mouseover="edttooltips('実働時間 = 所定労働時間 + 残業時間（法定休日労働時間,法定外休日労働時間） + ', '深夜残業（法定休日深夜時間,法定外休日深夜時間）','')"
+                    @mouseover="edttooltips('実働時間 = 所定労働時間 + 残業時間（法定休日労働時間,法定外休日労働時間） + ', '深夜残業','')"
                   >{{ calcList.total_working_times }}</td>
                   <td class="text-center align-middle mw-rem-8">{{ calcList.regular_working_times }}</td>
                   <td class="text-center align-middle mw-rem-8">{{ calcList.off_hours_working_hours }}</td>
                   <td class="text-center align-middle mw-rem-8">{{ calcList.late_night_overtime_hours }}</td>
                   <td class="text-center align-middle mw-rem-8">{{ calcList.legal_working_holiday_hours }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.legal_working_holiday_night_overtime_hours }}</td>
+                  <!-- <td class="text-center align-middle mw-rem-8">{{ calcList.legal_working_holiday_night_overtime_hours }}</td> -->
                   <td class="text-center align-middle mw-rem-8">{{ calcList.out_of_legal_working_holiday_hours }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.out_of_legal_working_holiday_night_overtime_hours }}</td>
+                  <!-- <td class="text-center align-middle mw-rem-8">{{ calcList.out_of_legal_working_holiday_night_overtime_hours }}</td> -->
                   <td class="text-center align-middle mw-rem-8">{{ calcList.late_night_working_hours }}</td>
                   <td
                     class="text-center align-middle mw-rem-5"
@@ -119,15 +119,15 @@
                     data-toggle="tooltip"
                     data-placement="top"
                     v-bind:title="edtString"
-                    @mouseover="edttooltips('実働時間 = 所定労働時間 + 残業時間（法定休日労働時間,法定外休日労働時間） + ', '深夜残業（法定休日深夜時間,法定外休日深夜時間）','')"
+                    @mouseover="edttooltips('実働時間 = 所定労働時間 + 残業時間（法定休日労働時間,法定外休日労働時間） + ', '深夜残業','')"
                   >{{ calcList.total_working_times }}</td>
                   <td class="text-center align-middle mw-rem-8">{{ calcList.regular_working_times }}</td>
                   <td class="text-center align-middle mw-rem-8">{{ calcList.off_hours_working_hours }}</td>
                   <td class="text-center align-middle mw-rem-8">{{ calcList.late_night_overtime_hours }}</td>
                   <td class="text-center align-middle mw-rem-8">{{ calcList.legal_working_holiday_hours }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.legal_working_holiday_night_overtime_hours }}</td>
+                  <!-- <td class="text-center align-middle mw-rem-8">{{ calcList.legal_working_holiday_night_overtime_hours }}</td> -->
                   <td class="text-center align-middle mw-rem-8">{{ calcList.out_of_legal_working_holiday_hours }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.out_of_legal_working_holiday_night_overtime_hours }}</td>
+                  <!-- <td class="text-center align-middle mw-rem-8">{{ calcList.out_of_legal_working_holiday_night_overtime_hours }}</td> -->
                   <td class="text-center align-middle mw-rem-8">{{ calcList.late_night_working_hours }}</td>
                   <td class="text-center align-middle mw-rem-8">{{ calcList.legal_working_times }}</td>
                   <td class="text-center align-middle mw-rem-8">{{ calcList.out_of_legal_working_times }}</td>
