@@ -20,6 +20,7 @@ Auth::routes();
 //     return view('app');
 // })->where('any', '.*');
 
+// ------------------ ホーム --------------------------------
 Route::get('/', 'HomeController@index')->middleware('auth');
 Route::get('/home', 'HomeController@index')->name('home');
 // ------------------ 集計 --------------------------------
@@ -37,6 +38,8 @@ Route::post('/attendancelog/show', 'AttendanceLogController@show')->middleware('
 // ------------------ 警告 --------------------------------
 // 日次警告通知
 Route::get('/daily_alert', 'DailyWorkingAlertController@index')->middleware('auth');
+Route::get('/daily_alert/home', 'DailyWorkingAlertController@homeindex')->middleware('auth');
+Route::get('/daily_alert/alerthome', 'DailyWorkingAlertController@alerthome')->middleware('auth')->name('daily_alert.alerthome');
 Route::post('/daily_alert/show', 'DailyWorkingAlertController@show')->middleware('auth');
 // 月次警告通知
 Route::get('/monthly_alert', 'MonthlyWorkingAlertController@index')->middleware('auth');

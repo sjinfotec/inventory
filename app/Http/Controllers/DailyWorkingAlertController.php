@@ -28,12 +28,47 @@ class DailyWorkingAlertController extends Controller
         $generaluser = Config::get('const.C025.general_user');
         $generalapproveruser = Config::get('const.C025.general_approver__user');
         $adminuser = Config::get('const.C025.admin_user');
+        $indexorhome = 1;
         return view('daily_working_alert',
             compact(
                 'authusers',
                 'generaluser',
                 'generalapproveruser',
-                'adminuser'
+                'adminuser',
+                'indexorhome'
+            ));
+    }
+    
+    /**
+     * ホームページからの初期処理
+     *
+     * @return void
+     */
+    public function homeindex()
+    {
+        // 日次警告アラートリダイレクト
+        return redirect()->route('daily_alert.alerthome');
+    }
+
+    /**
+     * 初期処理
+     *
+     * @return void
+     */
+    public function alerthome()
+    {
+        $authusers = Auth::user();
+        $generaluser = Config::get('const.C025.general_user');
+        $generalapproveruser = Config::get('const.C025.general_approver__user');
+        $adminuser = Config::get('const.C025.admin_user');
+        $indexorhome = 2;
+        return view('daily_working_alert',
+            compact(
+                'authusers',
+                'generaluser',
+                'generalapproveruser',
+                'adminuser',
+                'indexorhome'
             ));
     }
 

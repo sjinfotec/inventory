@@ -134,7 +134,7 @@
             <!-- col -->
             <div class="col-md-12">
               <div v-if="login_user_role === login_adminuser_role">
-                <a class href="/daily_alert"
+                <a class href="/daily_alert/home"
                   v-for="(messagevalidate,index) in infomationmessage" v-bind:key="index">{{ messagevalidate }}
                 </a>
               </div>

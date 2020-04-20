@@ -195,6 +195,10 @@ export default {
         type: Number,
         default: 0
     },
+    indexorhome: {
+        type: Number,
+        default: 0
+    },
   },
   data: function() {
     return {
@@ -224,6 +228,7 @@ export default {
       login_generaluser_role: "",
       login_generalapproveruser_role: "",
       login_adminuser_role: "",
+      index_or_home: "",
       showeditworktimestable: true,
       showdailyworkingalerttable: true
     };
@@ -238,6 +243,8 @@ export default {
     if (this.login_user_role == this.login_adminuser_role) {
       this.isEdit = true;
     }
+    this.login_adminuser_role = this.adminuser;
+    this.index_or_home = this.indexorhome;
     this.valuefromdate = this.defaultDate;
     moment.locale("ja");
     this.applytermdate = ""
@@ -246,6 +253,13 @@ export default {
     }
     this.$refs.selectdepartmentlist.getList(this.applytermdate);
     this.getUserSelected();
+    // 1:index 2:homeindex
+    if (this.index_or_home == 2) {
+      this.selectMode = '';
+      this.itemClear();
+      this.getItem();
+      this.refreshDailyWorkingAlertTable();
+    }
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -366,6 +380,10 @@ export default {
     // 日次警告取得処理
     getItem() {
       // 処理中メッセージ表示
+      console.log('getItem this.valuefromdate = ' + this.valuefromdate);
+      console.log('getItem this.selectedEmploymentValue = ' + this.selectedEmploymentValue);
+      console.log('getItem this.selectedDepartmentValue = ' + this.selectedDepartmentValue);
+      console.log('getItem this.selectedUserValue = ' + this.selectedUserValue);
       this.$swal({
         title: "処　理　中...",
         html: "",
