@@ -348,6 +348,7 @@ class MonthlyWorkingInformationController extends Controller
                 $workingtimedate_model->delWorkingTimeDate();
             };
             while (true) {
+                Log::debug(' ●● 最新更新集計 対象日付 ●● $calc_date = '.$calc_date);
                 $dt1 = new Carbon($calc_date);
                 if ($dt1 > $dt2) { break; }
                 // 打刻時刻を取得
@@ -377,7 +378,7 @@ class MonthlyWorkingInformationController extends Controller
                     'business_kubun' => $business_kubun
                 );
                 $calc_result = $daily_controller->addDailyCalc($array_impl_addDailyCalc);
-                $calc_date = $dt1->addDay(1);
+                $calc_date = date_format($dt1->addDay(1), 'Ymd');
             }
             DB::commit();
         }catch(\PDOException $pe){

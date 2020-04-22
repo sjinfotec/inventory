@@ -146,7 +146,7 @@
       <img class="icon-size-sm mr-2 pb-1" src="/images/file-upload-icon-vector-01.svg" alt="">
         CSVから作成する</button>
     </div>
-    <div v-if="btnMode === 'csvusers'" class="btn-group d-flex" v-on:click="usersdownloadclickBtn()">
+    <div v-if="btnMode === 'usersdownload'" class="btn-group d-flex" v-on:click="usersdownloadclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
       <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
       ユーザー情報ダウンロード</button>

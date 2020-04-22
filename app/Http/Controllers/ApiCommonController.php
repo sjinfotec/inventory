@@ -593,8 +593,9 @@ class ApiCommonController extends Controller
             /// users->getFullUserDetails呼び出し
             $users_model = new UserModel();
             $details = $users_model->getUserDetailsCsv();
+            $result_details = Collect($details);
             return response()->json(
-                ['result' => true, 'details' => $details,
+                ['result' => true, 'details' => $result_details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){

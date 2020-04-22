@@ -512,7 +512,6 @@ class UserAddController extends Controller
             //$user_model->setParamsystemcodeAttribute('CSD1000L');
             $user_model->delUserData();
             foreach ($usersups as $item) {
-                $user_model->setApplytermfromAttribute(Config::get('const.INIT_DATE.initdate'));
                 if ($item['user_code'] != null && $item['user_code'] != "" && $item['user_code'] != "CSD1000L") {
                     $user_model->setCodeAttribute($item['user_code']);
                     // 部署名から部署コード設定
@@ -538,6 +537,15 @@ class UserAddController extends Controller
                     $user_model->setNameAttribute($item['user_name']);
                     $user_model->setKanaAttribute($item['user_kana']);
                     $user_model->setOfficialpositionAttribute($item['user_official_position']);
+                    if (isset($item['user_apply_term_from'])) {
+                        if ($item['user_apply_term_from'] != null && $item['user_apply_term_from'] != "") {
+                            $user_model->setApplytermfromAttribute($item['user_apply_term_from']);
+                        } else {
+                            $user_model->setApplytermfromAttribute(Config::get('const.INIT_DATE.initdate'));
+                        }
+                    } else {
+                        $user_model->setApplytermfromAttribute(Config::get('const.INIT_DATE.initdate'));
+                    }
                     if ($item['user_kill_from_date'] != null && $item['user_kill_from_date'] != "") {
                         $user_model->setKillfromdateAttribute($item['user_kill_from_date']);
                     } else {
