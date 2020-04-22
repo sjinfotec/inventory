@@ -7528,6 +7528,8 @@ class DailyWorkingInformationController extends Controller
         $regular_calc_time = $apicommon->cnvToDecFromStamp($regular_calc_time_stamp);
         $holiday_calc_time_stamp = 0;
         $holiday_calc_time = 0;
+        Log::DEBUG('  target_result->business_kubun = '.$target_result->business_kubun);
+        Log::DEBUG('  regular_calc_time = '.$regular_calc_time);
         if ($target_result->business_kubun == Config::get('const.C007.basic')) {
             $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);               // 所定労働時間（出勤日）
         } else if ($target_result->business_kubun == Config::get('const.C007.legal_out_holoday')) {
@@ -7724,7 +7726,9 @@ class DailyWorkingInformationController extends Controller
             $temp_working_model->setParamDepartmentcodeAttribute($target_department_code);
             $temp_working_model->setParamUsercodeAttribute($target_user_code);
             // insert
+            Log::debug('insertTempWorkingTimeDate start');
             $temp_working_model->insertTempWorkingTimeDate();
+            Log::debug('insertTempWorkingTimeDate end');
         }catch(\PDOException $pe){
             Log::ERROR('insertTempWorkingTimeDate PDOException '.$pe->getMessage());
             throw $pe;

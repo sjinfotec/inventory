@@ -15,7 +15,7 @@
       v-bind:btn-mode="btnMode"
       v-bind:is-push="isCsvbutton">
     </btn-work-time>
-    <btn-work-time v-if="btnMode === 'csvusers'"
+    <btn-work-time v-if="btnMode === 'usersdownload'"
       v-on:usersdownload-event="downloadCSVUsers"
       v-bind:btn-mode="btnMode"
       v-bind:is-push="isCsvbutton">
@@ -25,9 +25,13 @@
 <script>
 import moment from "moment";
 import encoding from 'encoding-japanese';
+import {dialogable} from '../mixins/dialogable.js';
+import {checkable} from '../mixins/checkable.js';
+import {requestable} from '../mixins/requestable.js';
 
 export default {
   name: "btnCsvDownload",
+  mixins: [ dialogable, checkable, requestable ],
   props: {
     btnMode: {
       type: String,
@@ -272,104 +276,9 @@ export default {
       link.download = moment().format('YYYYMMDDhhmmss') + "_" + this.csvDate + "次勤怠ログ" + ".csv";
       link.click();
     },
+    // ユーザー情報ダウンロード
     downloadCSVUsers() {
       this.getUserListCsv();
-      var csv = "";
-      var line = "";
-      var workingdate = "";
-      var attendance_time = "";
-      var leaving_time = "";
-      var pcstart_time = "";
-      var pcend_time = "";
-      var difference_reason = "";
-      this.csvData = this.details;
-      // 1ユーザーごと
-      this.csvData.forEach(user => {
-        //  '\ufeff' + 
-        // タイトル
-        line =
-          this.csvDate +
-          "\r\n";
-        csv += line;
-        // 項目名
-        line =
-          "社員コード（半角英数字10桁）" +
-          "," +
-          "部署名" +
-          "," +
-          "雇用形態名" +
-          "," +
-          "社員カナ名（半角30文字以内、全角15文字以内）" +
-          "," +
-          "役職（全角50文字以内）" +
-          "," +
-          "退職日" +
-          "," +
-          "タイムテーブル名" +
-          "," +
-          "メールアドレス" +
-          "," +
-          "モバイルメールアドレス" +
-          "," +
-          "勤怠管理（半角数字）" +
-          "," +
-          "権限（半角数字）" +
-          "\r\n";
-        csv += line;
-        user.date.forEach(record => {
-          workingdate = "";
-          attendance_time = "";
-          leaving_time = "";
-          pcstart_time = "";
-          pcend_time = "";
-          difference_reason = "";
-          if (record["working_date_name"] != "" && record["working_date_name"] != null) {
-            workingdate = record["working_date_name"];
-          }
-          if (record["attendance_time"] != "" && record["attendance_time"] != null) {
-            attendance_time = record["attendance_time"];
-          }
-          if (record["leaving_time"] != "" && record["leaving_time"] != null) {
-            leaving_time = record["leaving_time"];
-          }
-          if (record["pcstart_time"] != "" && record["pcstart_time"] != null) {
-            pcstart_time = record["pcstart_time"];
-          }
-          if (record["pcend_time"] != "" && record["pcend_time"] != null) {
-            pcend_time = record["pcend_time"];
-          }
-          if (record["difference_reason"] != "" && record["difference_reason"] != null) {
-            difference_reason = record["difference_reason"];
-          }
-          line =
-            workingdate +
-            "," +
-            attendance_time +
-            "," +
-            leaving_time +
-            "," +
-            pcstart_time +
-            "," +
-            pcend_time +
-            "," +  
-            difference_reason +
-            "\r\n";
-          csv += line;
-        });
-      });
-      // csvを文字コードの数値の配列に変換
-      const unicodeList = [];
-      for (let i = 0; i < csv.length; i += 1) {
-        unicodeList.push(csv.charCodeAt(i));
-      }
-      // 変換処理の実施
-      const shiftJisCodeList = encoding.convert(unicodeList, 'sjis', 'unicode');
-      const uInt8List = new Uint8Array(shiftJisCodeList);
-      let blob = new Blob([uInt8List], { type: "text/csv" });
-      let link = document.createElement("a");
-      link.href = window.URL.createObjectURL(blob);
-      link.download = moment().format('YYYYMMDDhhmmss') + "_" + this.csvDate + "次勤怠ログ" + ".csv";
-      link.click();
     },
     // -------------------- サーバー処理 ----------------------------
     // 氏名選択リスト取得処理
@@ -395,6 +304,7 @@ export default {
       var res = response.data;
       if (res.result) {
         this.details = res.details;
+        this.edtCSVUsers();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
@@ -408,6 +318,111 @@ export default {
       var messages = [];
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
       this.htmlMessageSwal("エラー", messages, "error", true, false);
+    },
+    // ユーザー情報CSV編集
+    edtCSVUsers() {
+      var csv = "";
+      var line = "";
+      var user_code= "";
+      var department_name= "";
+      var employment_name= "";
+      var user_name= "";
+      var user_kana = "";
+      var official_position= "";
+      var apply_term_from= "";
+      var kill_from_date= "";
+      var working_timetable_name= "";
+      var email= "";
+      var mobile_email= "";
+      var management= "";
+      var role= "";
+      if (this.details.length > 0) {
+        // 項目名
+        line =
+          "社員コード（半角英数字10桁）" +
+          "," +
+          "部署名" +
+          "," +
+          "雇用形態名" +
+          "," +
+          "社員名（全角50文字以内）" +
+          "," +
+          "社員カナ名（半角30文字以内、全角15文字以内）" +
+          "," +
+          "役職（全角50文字以内）" +
+          "," +
+          "適用開始日" +
+          "," +
+          "退職日" +
+          "," +
+          "タイムテーブル名" +
+          "," +
+          "メールアドレス" +
+          "," +
+          "モバイルメールアドレス" +
+          "," +
+          "勤怠管理（半角数字）" +
+          "," +
+          "権限（半角数字）" +
+          "\r\n";
+        csv += line;
+        this.details.forEach(record => {
+          user_code = record["user_code"];
+          department_name = record["department_name"];
+          employment_name = record["employment_name"];
+          user_name = record["user_name"];
+          user_kana = record["user_kana"];
+          official_position = record["official_position"];
+          apply_term_from = record["apply_term_from"];
+          kill_from_date = record["kill_from_date"];
+          working_timetable_name = record["working_timetable_name"];
+          email = record["email"];
+          mobile_email = record["mobile_email"];
+          management = record["management"];
+          role = record["role"];
+          line =
+            user_code +
+            "," +
+            department_name +
+            "," +
+            employment_name +
+            "," +
+            user_name +
+            "," +
+            user_kana +
+            "," +
+            official_position +
+            "," +  
+            apply_term_from +
+            "," +  
+            kill_from_date +
+            "," +  
+            working_timetable_name +
+            "," +  
+            email +
+            "," +  
+            mobile_email +
+            "," +  
+            management +
+            "," +  
+            role +
+            "\r\n";
+          csv += line;
+        });
+        // csvを文字コードの数値の配列に変換
+        const unicodeList = [];
+        for (let i = 0; i < csv.length; i += 1) {
+          unicodeList.push(csv.charCodeAt(i));
+        }
+        // 変換処理の実施
+        const shiftJisCodeList = encoding.convert(unicodeList, 'sjis', 'unicode');
+        const uInt8List = new Uint8Array(shiftJisCodeList);
+        let blob = new Blob([uInt8List], { type: "text/csv" });
+        let link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = moment().format('YYYYMMDDhhmmss') + "_ユーザー情報" + ".csv";
+        link.click();
+      }
     }
   }
 };

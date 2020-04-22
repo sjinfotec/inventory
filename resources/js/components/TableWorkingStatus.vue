@@ -12,7 +12,7 @@
             <!-- <table class="table"> -->
               <thead>
                 <tr>
-                  <td class="text-center align-middle mw-rem-8">部署</td>
+                  <td class="text-center align-middle mw-rem-10">部署</td>
                   <td class="text-center align-middle mw-rem-10">氏名</td>
                   <td class="text-center align-middle mw-rem-8">打刻時刻</td>
                   <td class="text-center align-middle mw-rem-5">モード</td>
@@ -21,7 +21,7 @@
               </thead>
               <tbody>
                 <tr v-for="(item,onrowIndex) in ondetails" v-bind:key="item['user_code']">
-                  <td class="text-left align-middle mw-rem-8">{{ item['department_name'] }}</td>
+                  <td class="text-left align-middle mw-rem-10">{{ item['department_name'] }}</td>
                   <td class="text-left align-middle mw-rem-10">{{ item['user_name'] }}</td>
                   <td class="text-center align-middle mw-rem-8">{{ item['record_time_name'] }}</td>
                   <td class="text-center align-middle mw-rem-5">{{ item['mode_name'] }}</td>
@@ -45,7 +45,7 @@
             <!-- <table class="table"> -->
               <thead>
                 <tr>
-                  <td class="text-center align-middle mw-rem-8">部署</td>
+                  <td class="text-center align-middle mw-rem-10">部署</td>
                   <td class="text-center align-middle mw-rem-10">氏名</td>
                   <td class="text-center align-middle mw-rem-8">打刻時刻</td>
                   <td class="text-center align-middle mw-rem-5">モード</td>
@@ -54,7 +54,7 @@
               </thead>
               <tbody>
                 <tr v-for="(item,offrowIndex) in offdetails" v-bind:key="item['user_code']">
-                  <td class="text-left align-middle mw-rem-8">{{ item['department_name'] }}</td>
+                  <td class="text-left align-middle mw-rem-10">{{ item['department_name'] }}</td>
                   <td class="text-left align-middle mw-rem-10">{{ item['user_name'] }}</td>
                   <td class="text-center align-middle mw-rem-8">{{ item['record_time_name'] }}</td>
                   <td class="text-center align-middle mw-rem-5">{{ item['mode_name'] }}</td>
@@ -173,7 +173,7 @@ thead, tbody {
 
 tbody {
   overflow-x: hidden !important;
-  /* overflow-y: scroll !important; */
+  overflow-y: scroll !important;
   height: 300px !important;
 }
 
