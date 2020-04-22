@@ -273,9 +273,7 @@ class MonthlyWorkingInformationController extends Controller
                     'usercode' => $usercode
                 );
                 // 月次最新集計
-                Log::debug('  set_time_limit ');
                 $te = set_time_limit(180);
-                Log::debug('  $te = '.$te);
                 $this->showupdate($array_impl_showCalc);
             } else {
                 $this->array_messagedata =  $array_messagedata->concat($workingtimedate_model->getMassegedataAttribute());
