@@ -4939,14 +4939,32 @@ class DailyWorkingInformationController extends Controller
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
                             if (($array_working_time_kubun[$i] <> Config::get('const.C004.regular_working_breaks_time')) &&
                                 ($array_working_time_kubun[$i] <> Config::get('const.C004.working_breaks_time')))  {
+                                // roundTimeByTimeStart implement
+                                $array_roundTimeByTimeStart = array (
+                                    'current_date' => $current_date,
+                                    'start_time' => $missing_middle_time,
+                                    'time_unit' => $result->time_unit,
+                                    'time_rounding' => $result->time_rounding,
+                                    'working_timetable_no' => $working_timetable_no,
+                                    'array_get_timetable_result' => $array_get_timetable_result
+                                );
+                                // roundTimeByTimeEnd implement
+                                $array_roundTimeByTimeEnd = array (
+                                    'current_date' => $current_date,
+                                    'end_time' => $missing_middle_return_time,
+                                    'time_unit' => $result->time_unit,
+                                    'time_rounding' => $result->time_rounding,
+                                    'working_timetable_no' => $working_timetable_no,
+                                    'array_get_timetable_result' => $array_get_timetable_result
+                                );
                                 $array_missing_middle_time[$i] += 
                                     $this->calcTimes(Config::get('const.INC_NO.missing_return'),
                                         $timetables,
                                         $working_timetable_no,
                                         $array_working_time_kubun[$i],
                                         $current_date,
-                                        $missing_middle_time,
-                                        $missing_middle_return_time,
+                                        $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart),
+                                        $apicommon->roundTimeByTimeEnd($array_roundTimeByTimeEnd),
                                         $array_calc_time,
                                         $array_missing_middle_time
                                     );
@@ -7657,6 +7675,20 @@ class DailyWorkingInformationController extends Controller
             $temp_working_model->setOutoflegalworkingtimesAttribute(0);
         }
         $temp_working_model->setOutofregularworkingtimesAttribute($outside_calc_time);          // 所定外労働時間
+        // 私用外出時間
+        $w_time = 0;
+        for ($i=0;$i<count($array_missing_middle_time);$i++) {
+            $w_time += $array_missing_middle_time[$i];
+        }
+        $missing_middle_time = $apicommon->cnvToDecFromStamp($w_time);
+        $temp_working_model->setMissingmiddlehoursAttribute($missing_middle_time);
+        // 公用外出時間
+        $w_time = 0;
+        for ($i=0;$i<count($array_public_going_out_time);$i++) {
+            $w_time += $array_public_going_out_time[$i];
+        }
+        $public_going_out_time = $apicommon->cnvToDecFromStamp($w_time);
+        $temp_working_model->setPublicgoingouthoursAttribute($public_going_out_time);
 
         // 不就労時間
         // calcNotemploymentworkinghours implement
@@ -7672,21 +7704,7 @@ class DailyWorkingInformationController extends Controller
         );
         $w_time = $this->calcNotemploymentworkinghours($array_impl_calcNotemploymentworkinghours);
         $not_employment_working_hours = $apicommon->cnvToDecFromStamp($w_time);
-        $temp_working_model->setNotemploymentworkinghoursAttribute($not_employment_working_hours);
-        // 私用外出時間
-        $w_time = 0;
-        for ($i=0;$i<count($array_missing_middle_time);$i++) {
-            $w_time += $array_missing_middle_time[$i];
-        }
-        $missing_middle_time = $apicommon->cnvToDecFromStamp($w_time);
-        $temp_working_model->setMissingmiddlehoursAttribute($missing_middle_time);
-        // 公用外出時間
-        $w_time = 0;
-        for ($i=0;$i<count($array_public_going_out_time);$i++) {
-            $w_time += $array_public_going_out_time[$i];
-        }
-        $public_going_out_time = $apicommon->cnvToDecFromStamp($w_time);
-        $temp_working_model->setPublicgoingouthoursAttribute($public_going_out_time);
+        $temp_working_model->setNotemploymentworkinghoursAttribute($not_employment_working_hours + $missing_middle_time);
 
         $temp_working_model->setWorkingtimetablenoAttribute($target_result->working_timetable_no);
         $temp_working_model->setWorkingstatusAttribute($working_status);
