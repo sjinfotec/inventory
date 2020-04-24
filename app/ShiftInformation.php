@@ -204,116 +204,130 @@ class ShiftInformation extends Model
     public function getUserShift(){
         try {
             $sqlString = "";
-            $sqlString .= "
-            select
-                t1.department_code as department_code
-                , t1.employment_status as employment_status
-                , t1.user_code as user_code
-                , t1.date as date
-                , t1.date_name as date_name
-                , t1.working_timetable_no as working_timetable_no
-                , t2.name as working_timetable_name
-            from (
-                select
-                    t1.department_code as department_code
-                    , t1.employment_status as employment_status
-                    , t1.code as user_code
-                    , t2.date as date
-                    , concat(DATE_FORMAT(t2.date, '%Y年%m月%d日('),  substring('月火水木金土日', convert(t2.weekday_kubun + 1, char), 1), ')') as date_name
-                    , case ifnull(t3.working_timetable_no, 0)
-                      when 0 then t1.working_timetable_no
-                      else t3.working_timetable_no
-                      end as working_timetable_no 
-                from
-                    users as t1
-                    left join (
-                        select
-                        department_code
-                        , user_code
-                        , date
-                        , weekday_kubun
-                        from calendars
-                        where
-                            date between ? AND ?
-                            and is_deleted = ?
-                    ) t2
-                    on t2.department_code = t1.department_code
-                        and t2.user_code = t1.code
-                    left join (
-                        select
-                            department_code           
-                            , user_code
-                            , target_date
-                            , working_timetable_no as working_timetable_no
-                        from
-                            shift_informations
-                        where
-                            is_deleted = ?
-                    ) as t3
-                    on t3.department_code = t1.department_code
-                        and t3.user_code = t1.code
-                        and t3.target_date = t2.date
-                where
-                    t1.is_deleted = ?
-                ) t1
-                inner join (
-                    select
-                        t2.department_code as department_code
-                        , t2.user_code as user_code
-                        , t2.date as date
-                        , t1.no as no
-                        , t1.name as name
-                    from
-                        working_timetables t1
-                        inner join (
-                            select
-                                t1.department_code as department_code
-                                , t1.user_code as user_code
-                                , t1.date as date
-                                , t2.no as no
-                                , MAX(t2.apply_term_from) as max_apply_term_from 
-                            from
-                                calendars as t1
-                                left join ( 
-                                    select
-                                        no as no
-                                        , apply_term_from as apply_term_from 
-                                    from
-                                        working_timetables 
-                                    where
-                                        is_deleted = ? 
-                                    group by
-                                        no
-                                        , apply_term_from
-                                ) as t2 
-                                on t2.apply_term_from <= t1.date 
-                            where
-                                t2.no <> ? 
-                                and t1.date between ? and ?
-                                and t1.is_deleted = ? 
-                            group by
-                                t1.department_code
-                                , t1.user_code
-                                , t1.date
-                                , t2.no
-                                ) t2 
-                        on t2.no = t1.no 
-                        and t2.max_apply_term_from = t1.apply_term_from 
-                    where
-                        t1.is_deleted = 0 
-                    group by
-                        t2.department_code
-                        , t2.user_code
-                        , t2.date
-                        , t1.no
-                        , t1.name
-                    ) t2 
-                on t1.department_code = t2.department_code 
-                    and t1.user_code = t2.user_code 
-                    and t1.date = t2.date 
-                    and t1.working_timetable_no = t2.no ";
-
-            $sqlString .= "where 1 = 1 ";
+            $sqlString .= "select ";
+            $sqlString .= "    t1.department_code as department_code ";
+            $sqlString .= "    , t1.employment_status as employment_status ";
+            $sqlString .= "    , t1.user_code as user_code ";
+            $sqlString .= "    , t1.date as date ";
+            $sqlString .= "    , t1.date_name as date_name ";
+            $sqlString .= "    , t1.working_timetable_no as working_timetable_no ";
+            $sqlString .= "    , t2.name as working_timetable_name ";
+            $sqlString .= "from ( ";
+            $sqlString .= "    select ";
+            $sqlString .= "        t1.department_code as department_code ";
+            $sqlString .= "        , t1.employment_status as employment_status ";
+            $sqlString .= "        , t1.code as user_code ";
+            $sqlString .= "        , t2.date as date ";
+            $sqlString .= "        , concat(DATE_FORMAT(t2.date, '%Y年%m月%d日('),  substring('月火水木金土日', convert(t2.weekday_kubun + 1, char), 1), ')') as date_name ";
+            $sqlString .= "        , case ifnull(t3.working_timetable_no, 0) ";
+            $sqlString .= "          when 0 then t1.working_timetable_no ";
+            $sqlString .= "          else t3.working_timetable_no ";
+            $sqlString .= "          end as working_timetable_no  ";
+            $sqlString .= "    from ";
+            $sqlString .= "        ".$this->table_users." as t1 ";
+            $sqlString .= "        left join ( ";
+            $sqlString .= "            select ";
+            $sqlString .= "            department_code ";
+            $sqlString .= "            , user_code ";
+            $sqlString .= "            , date ";
+            $sqlString .= "            , weekday_kubun ";
+            $sqlString .= "            from ";
+            $sqlString .= "            ".$this->table_calendars." ";
+            $sqlString .= "            where ";
+            $sqlString .= "                date between ? AND ? ";
+            $sqlString .= "                and is_deleted = ? ";
+            $sqlString .= "        ) t2 ";
+            $sqlString .= "        on t2.department_code = t1.department_code ";
+            $sqlString .= "            and t2.user_code = t1.code ";
+            $sqlString .= "        left join ( ";
+            $sqlString .= "            select ";
+            $sqlString .= "                department_code     ";       
+            $sqlString .= "                , user_code ";
+            $sqlString .= "                , target_date ";
+            $sqlString .= "                , working_timetable_no as working_timetable_no ";
+            $sqlString .= "            from ";
+            $sqlString .= "                 ".$this->table." ";
+            $sqlString .= "            where ";
+            $sqlString .= "                is_deleted = ? ";
+            $sqlString .= "        ) as t3 ";
+            $sqlString .= "        on t3.department_code = t1.department_code ";
+            $sqlString .= "            and t3.user_code = t1.code ";
+            $sqlString .= "            and t3.target_date = t2.date ";
+            $sqlString .= "        inner join ( ";
+            $sqlString .= "            select ";
+            $sqlString .= "                code as code     ";       
+            $sqlString .= "                , MAX(apply_term_from) as max_apply_term_from ";
+            $sqlString .= "            from ";
+            $sqlString .= "                ".$this->table_users." ";
+            $sqlString .= "            where ";
+            $sqlString .= "                apply_term_from <= ? ";
+            $sqlString .= "                and role < ? ";
+            $sqlString .= "                and is_deleted = ? ";
+            $sqlString .= "            group by ";
+            $sqlString .= "                code ";
+            $sqlString .= "        ) as t4 ";
+            $sqlString .= "        on t4.code = t1.code ";
+            $sqlString .= "           and  t4.max_apply_term_from = t1.apply_term_from ";
+            $sqlString .= "    where ";
+            $sqlString .= "        t1.is_deleted = ? ";
+            $sqlString .= "    ) t1 ";
+            $sqlString .= "    inner join ( ";
+            $sqlString .= "        select ";
+            $sqlString .= "            t2.department_code as department_code ";
+            $sqlString .= "            , t2.user_code as user_code ";
+            $sqlString .= "            , t2.date as date ";
+            $sqlString .= "            , t1.no as no ";
+            $sqlString .= "            , t1.name as name ";
+            $sqlString .= "        from ";
+            $sqlString .= "            ".$this->table_working_timetables." t1 ";
+            $sqlString .= "            inner join ( ";
+            $sqlString .= "                select ";
+            $sqlString .= "                    t1.department_code as department_code ";
+            $sqlString .= "                    , t1.user_code as user_code ";
+            $sqlString .= "                    , t1.date as date ";
+            $sqlString .= "                    , t2.no as no ";
+            $sqlString .= "                    , MAX(t2.apply_term_from) as max_apply_term_from  ";
+            $sqlString .= "                from ";
+            $sqlString .= "                    ".$this->table_calendars." as t1 ";
+            $sqlString .= "                    left join (  ";
+            $sqlString .= "                        select ";
+            $sqlString .= "                            apply_term_from as apply_term_from  ";
+            $sqlString .= "                            , no as no ";
+            $sqlString .= "                        from ";
+            $sqlString .= "                            ".$this->table_working_timetables." ";
+            $sqlString .= "                        where ";
+            $sqlString .= "                            no not in (?)  ";
+            $sqlString .= "                            and is_deleted = ?  ";
+            $sqlString .= "                        group by ";
+            $sqlString .= "                            apply_term_from ";
+            $sqlString .= "                            , no ";
+            $sqlString .= "                    ) as t2  ";
+            $sqlString .= "                    on t2.apply_term_from <= t1.date  ";
+            $sqlString .= "                where ";
+            $sqlString .= "                    t1.date between ? and ? ";
+            $sqlString .= "                    and t1.is_deleted = ?  ";
+            $sqlString .= "                group by ";
+            $sqlString .= "                    t1.department_code ";
+            $sqlString .= "                    , t1.user_code ";
+            $sqlString .= "                    , t1.date ";
+            $sqlString .= "                    , t2.no ";
+            $sqlString .= "                    ) t2  ";
+            $sqlString .= "            on t2.no = t1.no  ";
+            $sqlString .= "            and t2.max_apply_term_from = t1.apply_term_from  ";
+            $sqlString .= "        where ";
+            $sqlString .= "            t1.is_deleted = 0  ";
+            $sqlString .= "        group by ";
+            $sqlString .= "            t2.department_code ";
+            $sqlString .= "            , t2.user_code ";
+            $sqlString .= "            , t2.date ";
+            $sqlString .= "            , t1.no ";
+            $sqlString .= "            , t1.name ";
+            $sqlString .= "        ) t2  ";
+            $sqlString .= "    on t1.department_code = t2.department_code  ";
+            $sqlString .= "        and t1.user_code = t2.user_code  ";
+            $sqlString .= "        and t1.date = t2.date  ";
+            $sqlString .= "        and t1.working_timetable_no = t2.no ";
+            $sqlString .= "where ? = ? ";
             if(!empty($this->param_department_code)) {
                 $sqlString .= "and t1.department_code = ? ";
             }
@@ -332,12 +346,17 @@ class ShiftInformation extends Model
             $array_setBindingsStr[] = $this->param_todate;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $this->param_fromdate;
+            $array_setBindingsStr[] = (int)Config::get('const.C017.admin_user');
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 9999;
+            $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = $this->param_fromdate;
             $array_setBindingsStr[] = $this->param_todate;
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
             if(!empty($this->param_department_code)) {
                 $array_setBindingsStr[] = $this->param_department_code;
             }
