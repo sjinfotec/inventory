@@ -140,15 +140,6 @@
                 <!-- <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting> -->
               </div>
               <!-- /.col -->
-              <!-- col -->
-              <div v-if="isswitchvisible" class="col-md-12 pb-2">
-                <btn-work-time
-                  v-on:switchclick-event="switchclick"
-                  v-bind:btn-mode="btnmodeswitch"
-                  v-bind:is-push="isswitchbutton"
-                ></btn-work-time>
-              </div>
-              <!-- /.col -->
             </div>
             <!-- /.row -->
             <!-- /.panel contents -->
@@ -174,7 +165,7 @@
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- col -->
-              <div class="col-md-3 pb-2">
+              <div class="col-md-4 pb-2">
                 <btn-work-time
                   v-on:gosubateclick-event="gosubateclick"
                   v-bind:btn-mode="'gosubdate'"
@@ -184,7 +175,16 @@
               </div>
               <!-- /.col -->
               <!-- col -->
-              <div class="col-md-3 pb-2">
+              <div v-if="isswitchvisible" class="col-md-4 pb-2">
+                <btn-work-time
+                  v-on:switchclick-event="switchclick"
+                  v-bind:btn-mode="btnmodeswitch"
+                  v-bind:is-push="isswitchbutton"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+              <!-- col -->
+              <div class="col-md-4 pb-2">
                 <btn-work-time
                   v-on:goaddateclick-event="goaddateclick"
                   v-bind:btn-mode="'goadddate'"

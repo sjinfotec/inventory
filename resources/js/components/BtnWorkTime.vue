@@ -6,12 +6,12 @@
         この条件で表示する</button>
     </div>
     <div v-if="btnMode === 'basicswitch'" class="btn-group d-flex" v-on:click="switchclickBtn()">
-      <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
         <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-outlined-flag-b.svg" alt="">詳細を表示する</button> -->
         詳細を表示する</button>
     </div>
     <div v-if="btnMode === 'detailswitch'" class="btn-group d-flex" v-on:click="switchclickBtn()">
-      <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
         <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-outlined-flag-b.svg" alt="">詳細を非表示にする</button> -->
         詳細を非表示にする</button>
     </div>
@@ -22,11 +22,11 @@
     </div>
     <div v-if="btnMode === 'gosubdate' && isDisplay === true" class="btn-group d-flex" v-on:click="gosubdateclickBtn()">
       <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
-        前日</button>
+        &lt;&lt; 前日</button>
     </div>
     <div v-if="btnMode === 'goadddate' && isDisplay === true" class="btn-group d-flex" v-on:click="goadddateclickBtn()">
       <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
-        翌日</button>
+        翌日 &gt;&gt;</button>
     </div>
 
     <div v-if="btnMode === 'update'" class="btn-group d-flex" v-on:click="updateclickBtn()">

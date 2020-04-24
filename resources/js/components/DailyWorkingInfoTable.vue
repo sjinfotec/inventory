@@ -23,7 +23,7 @@
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="edtString"
-                  @mouseover="edttooltips('実働時間 = 所定 + 残業時間（法定休日,法定外休日） + ', '深夜残業','')"
+                  @mouseover="edttooltips('実働時間 = 所定＋残業時間＋深夜残業', 'または','法定休日・法定外休日')"
                 >実働時間</td>
                 <!--  <td class="text-center align-middle css-fukidashi"
                   @mouseover="edttooltips('実働時間 = 所定 + ',predeterTimeName,predeterNightTimeName,'')">
@@ -45,7 +45,7 @@
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="edtString"
-                  @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
+                  @mouseover="edttooltips('所定時間内での','遅刻・早退・欠勤・私用外出などで労働時間に含めない（不就労）時間','給与控除対象','')"
                 >不就労時間</td>
                 <td class="text-center align-middle mw-rem-15">備考</td>
               </tr>
@@ -72,7 +72,7 @@
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="edtString"
-                  @mouseover="edttooltips('実働時間 = 所定 + 残業時間（法定休日,法定外休日） + ', '深夜残業','')"
+                  @mouseover="edttooltips('実働時間 = 所定＋残業時間＋深夜残業', 'または','法定休日・法定外休日')"
                 >実働時間</td>
                 <td class="text-center align-middle mw-rem-3">所定</td>
                 <td class="text-center align-middle mw-rem-3">所定外</td>
@@ -92,7 +92,7 @@
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="edtString"
-                  @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
+                  @mouseover="edttooltips('所定時間内での','遅刻・早退・欠勤・私用外出などで労働時間に含めない（不就労）時間','給与控除対象','')"
                 >不就労時間</td>
                 <td class="text-center align-middle mw-rem-15">備考</td>
               </tr>
@@ -250,7 +250,7 @@
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="edtString"
-                  @mouseover="edttooltips('実働時間 = 所定 + 残業時間（法定休日,法定外休日） + ', '深夜残業','')"
+                  @mouseover="edttooltips('実働時間 = 所定＋残業時間＋深夜残業', 'または','法定休日・法定外休日')"
                 >{{ calcList.total_working_times }}</td>
                 <!-- /実働時間 -->
                 <!-- 所定労働時間 -->
@@ -341,7 +341,7 @@
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="edtString"
-                  @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
+                  @mouseover="edttooltips('所定時間内での','遅刻・早退・欠勤・私用外出などで労働時間に含めない（不就労）時間','給与控除対象','')"
                 >{{ calcList.not_employment_working_hours }}</td>
                 <!-- /未就労労働時間 -->
                 <!-- 備考 -->
@@ -568,7 +568,7 @@
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="edtString"
-                  @mouseover="edttooltips('実働時間 = 所定 + 残業時間（法定休日,法定外休日） + ', '深夜残業','')"
+                  @mouseover="edttooltips('実働時間 = 所定＋残業時間＋深夜残業', 'または','法定休日・法定外休日')"
                 >{{ calcList.total_working_times }}</td>
                 <!-- /実働時間 -->
                 <!-- 所定労働時間 -->
@@ -668,7 +668,7 @@
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="edtString"
-                  @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
+                  @mouseover="edttooltips('所定時間内での','遅刻・早退・欠勤・私用外出などで労働時間に含めない（不就労）時間','給与控除対象','')"
                 >{{ calcList.not_employment_working_hours }}</td>
                 <!-- /未就労労働時間 -->
                 <!-- 備考 -->
