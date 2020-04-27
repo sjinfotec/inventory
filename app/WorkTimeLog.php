@@ -209,7 +209,8 @@ class WorkTimeLog extends Model
             $sqlString .= "  , t3.mode as mode ";
             $sqlString .= "  , DATE_FORMAT(t3.record_time, '%m/%d %H:%i')as record_time_name ";
             $sqlString .= "  , t3.record_time as record_time ";
-            $sqlString .= "  , t3.positions as positions ";
+            $sqlString .= "  , t3.x_positions as x_positions ";
+            $sqlString .= "  , t3.y_positions as y_positions ";
             $sqlString .= "  , t4.holiday_kubun as holiday_kubun ";
             $sqlString .= "  , case ifnull(t3.mode,'') ";
             $sqlString .= "    when '' then '' ";
@@ -253,7 +254,8 @@ class WorkTimeLog extends Model
             $sqlString .= "      , t1.record_time ";
             $sqlString .= "      , t1.mode ";
             $sqlString .= "      , t1.user_holiday_kubuns_id ";
-            $sqlString .= "      , t1.positions ";
+            $sqlString .= "      , X(t1.positions) as x_positions ";
+            $sqlString .= "      , Y(t1.positions) as y_positions ";
             $sqlString .= "      , t1.is_deleted ";
             $sqlString .= "    from ";
             $sqlString .= "      ".$this->table_work_times." as t1 ";
