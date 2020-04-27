@@ -692,8 +692,9 @@ return [
         'CLIENT' => 5
     ],
 
+    // ONEDAWNA:共通 SD03TA00:清水勧業 CSD1000L:丸高水産
     'ACCOUNTID' => [
-        'account_id' => 'CSD1000L'
+        'account_id' => 'ONEDAWNA'
     ]
 
 ];

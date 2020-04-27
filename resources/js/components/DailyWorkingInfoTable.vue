@@ -108,7 +108,7 @@
                 <!-- 出勤 -->
                 <daily-working-info-time-table
                   v-bind:calc-list="{
-                    x_positions: calcList.x_attendance_time_position,
+                    x_positions: calcList.x_attendance_time_positions,
                     y_positions: calcList.y_attendance_time_positions,
                     editor_department_code: calcList.attendance_editor_department_code,
                     editor_department_name: calcList.attendance_editor_department_name,
@@ -360,7 +360,7 @@
                 <!-- 出勤 -->
                 <daily-working-info-time-table
                   v-bind:calc-list="{
-                    x_positions: calcList.x_attendance_time_position,
+                    x_positions: calcList.x_attendance_time_positions,
                     y_positions: calcList.y_attendance_time_positions,
                     editor_department_code: calcList.attendance_editor_department_code,
                     editor_department_name: calcList.attendance_editor_department_name,

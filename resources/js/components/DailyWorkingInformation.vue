@@ -175,7 +175,7 @@
               </div>
               <!-- /.col -->
               <!-- col -->
-              <div v-if="isswitchvisible" class="col-md-4 pb-2">
+              <div class="col-md-4 pb-2">
                 <btn-work-time
                   v-on:switchclick-event="switchclick"
                   v-bind:btn-mode="btnmodeswitch"
