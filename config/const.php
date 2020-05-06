@@ -340,6 +340,24 @@ return [
         'public_going_out_return_time' => 22
     ],
  
+    'C036' => [
+        'value' => 'C036',
+        'date' => 1,
+        'hour' => 2
+    ],
+ 
+    'C037' => [
+        'value' => 'C037',
+        'csvcalc' => 1,
+        'csvsalary' => 2,
+        'csvlog' => 3,
+        'usersdownload' => 4
+    ],
+ 
+    'C037_DESC_VALUE' => [
+        'array' => array('C037', 'csvcalc', 'csvsalary', 'csvlog', 'usersdownload')
+    ],
+ 
     'C999' => [
         'value' => 'C999',
         'main' => 1,
@@ -681,7 +699,7 @@ return [
     ],
 
     'EDITION' => [
-        'EDITION' => 4
+        'EDITION' => 3
     ],
 
     'EDITION_VALUE' => [
@@ -692,9 +710,43 @@ return [
         'CLIENT' => 5
     ],
 
-    // ONEDAWNA:共通 SD03TA00:清水勧業 CSD1000L:丸高水産
+    // SSJJOO00:三条 SD03TA00:清水勧業 CSD1000L:丸高水産
     'ACCOUNTID' => [
-        'account_id' => 'ONEDAWNA'
+        'account_id' => 'SSJJOO00'
+    ],
+
+    // メニュー項目数
+    'MENUITEMCOUNT' => [
+        'count' => 26
+    ],
+
+    'MENUITEM' => [
+        'calc_block' => 1,
+        'daily' => 2,
+        'monthly' => 3,
+        'alert_block' => 4,
+        'daily_alert' => 5,
+        'monthly_alert' => 6,
+        'attendancelog_block' => 7,
+        'store_attendancelog' => 8,
+        'edit_attendancelog' => 9,
+        'edit_block' => 10,
+        'create_shift_time' => 11,
+        'edit_work_times' => 12,
+        'demand_block' => 13,
+        'demand' => 14,
+        'approval' => 15,
+        'confirm' => 16,
+        'setting_block' => 17,
+        'create_company_information' => 18,
+        'create_department' => 19,
+        'setting_calc' => 20,
+        'create_time_table' => 21,
+        'setting_calendar' => 22,
+        'edit_user' => 23,
+        'operation_block' => 24,
+        'user_pass' => 25,
+        'file_download' => 26
     ]
 
 ];

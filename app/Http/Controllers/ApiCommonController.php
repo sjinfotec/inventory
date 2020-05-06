@@ -20,6 +20,7 @@ use App\UserHolidayKubun;
 use App\ApprovalRouteNo;
 use App\WorkTimeLog;
 use App\UserModel;
+use App\CsvItemSelection;
 
 
 
@@ -61,6 +62,7 @@ use App\UserModel;
  *          曜日取得                                    : getWeekDay
  *          日付のフォーマット YYYY年MM月DD日（WEEK）    : getYMDWeek                 : Calendar   
  *          勤務状況取得                               : getWorgingStatusInfo       : work_timelogs
+*           CSV対象項目取得                             : getCsvItem                : csv_item_selections
  *      5.算出情報取得
  *          翌日を求める                                            : getNextDay
  *          指定時間（スタンプ）後を求める                          : getAfterDayTime
@@ -1807,13 +1809,11 @@ class ApiCommonController extends Controller
                 Config::get('const.C005.attendance_time'),
                 Config::get('const.C005.missing_middle_return_time'),
                 Config::get('const.C005.public_going_out_return_time')]);
-            Log::debug('$ondetails = '.count($ondetails));
             $offdetails = $result_details->whereIn('mode', [
                 Config::get('const.C005.leaving_time'),
                 Config::get('const.C005.missing_middle_time'),
                 Config::get('const.C005.public_going_out_time'),
                 null]);
-            Log::debug('$offdetails = '.count($offdetails));
             return response()->json(
                 ['result' => true, 'ondetails' => $ondetails, 'offdetails' => $offdetails,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -1828,7 +1828,64 @@ class ApiCommonController extends Controller
             throw $e;
         }
     }
-    
+
+
+    /**
+     * CSV対象項目取得
+     *
+     * @param [type] $dt
+     * @param [type] $format
+     * @return array
+     */
+    public function getCsvItem(Request $request){
+        $result = true;
+        $details = array();
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['selection_code'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "selection_code", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $selection_code = $params['selection_code'];
+            $is_select = null;
+            if (isset($params['is_select'])) {
+                $is_select = $params['is_select'];
+            }
+            $csvitem_model = new CsvItemSelection();
+            $csvitem_model->setParamaccountidAttribute(
+                array(Config::get('const.ACCOUNTID.account_id')));
+            $csvitem_model->setParamselectioncodeAttribute($selection_code);
+            $csvitem_model->setParamisselectAttribute($is_select);
+            $details = $csvitem_model->getCsvItem();
+            return response()->json(
+                ['result' => true, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
     // -------------  4.その他情報取得  end ------------------------------------------------------ //
     
     // -------------  5.算出情報取得  start ------------------------------------------------------ //

@@ -259,13 +259,13 @@ export default {
       this.$emit('goaddateclick-event',event);
     },
     csvcalcclickBtn : function() {
-      this.$emit('csvcalc-event',event);
+      this.$emit('csv-event',event);
     },
     csvsalaryclickBtn : function() {
-      this.$emit('csvsalary-event',event);
+      this.$emit('csv-event',event);
     },
     csvlogclickBtn : function() {
-      this.$emit('csvlog-event',event);
+      this.$emit('csv-event',event);
     },
     filedownloadclickBtn : function() {
       this.$emit('filedownload-event',event);
@@ -280,7 +280,7 @@ export default {
       this.$emit('usersupload-event',event);
     },
     usersdownloadclickBtn : function() {
-      this.$emit('usersdownload-event',event);
+      this.$emit('csv-event',event);
     },
     // tooltips
     edttooltips: function(value1) {

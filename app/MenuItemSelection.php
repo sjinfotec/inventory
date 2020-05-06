@@ -8,20 +8,17 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 
-class CsvItemSelection extends Model
+class MenuItemSelection extends Model
 {
-    protected $table = 'csv_item_selections';
-    protected $table_users = 'users';
+    protected $table = 'menu_item_selections';
     protected $guarded = array('id');
 
     private $id;                        // ID
     private $account_id;                // アカウントID
     private $selection_code;            // 選択種類
     private $item_code;                 // 項目コード
-    private $item_seq;                  // 出力順
     private $item_name;                 // 項目名
     private $item_kanji_name;           // 項目漢字名
-    private $item_out_name;             // 出力項目名
     private $is_select;                 // 選択有無
     private $created_user;              // 作成ユーザー
     private $updated_user;              // 修正ユーザー
@@ -77,18 +74,6 @@ class CsvItemSelection extends Model
     }
 
 
-    // 出力順
-    public function getItemseqAttribute()
-    {
-        return $this->item_seq;
-    }
-
-    public function setItemseqAttribute($value)
-    {
-        $this->item_seq = $value;
-    }
-
-
     // 項目名
     public function getItemnameAttribute()
     {
@@ -110,18 +95,6 @@ class CsvItemSelection extends Model
     public function setItemkanjinameAttribute($value)
     {
         $this->item_kanji_name = $value;
-    }
-
-
-    // 出力項目名
-    public function getItemoutnameAttribute()
-    {
-        return $this->item_out_name;
-    }
-
-    public function setItemoutnameAttribute($value)
-    {
-        $this->item_out_name = $value;
     }
 
 
@@ -196,9 +169,9 @@ class CsvItemSelection extends Model
         $this->is_deleted = $value;
     }
 
+
     private $param_account_id;          // アカウントID
     private $param_selection_code;      // 選択種類
-    private $param_is_select;           // 項目選択有無
 
 
     // アカウントID
@@ -222,34 +195,21 @@ class CsvItemSelection extends Model
     {
         $this->param_selection_code = $value;
     }
-
-    // 項目選択有無
-    public function getParamisselectAttribute()
-    {
-        return $this->param_is_select;
-    }
-
-    public function setParamisselectAttribute($value)
-    {
-        $this->param_is_select = $value;
-    }
     
     /**
      * 情報取得
      *
      * @return void
      */
-    public function getCsvItem(){
+    public function getMenuItem(){
         try {
             $query = DB::table($this->table)
             ->select(
                     'account_id',
                     'selection_code',
                     'item_code',
-                    'item_seq',
                     'item_name',
                     'item_kanji_name',
-                    'item_out_name',
                     'is_select'
             );
             if ($this->param_account_id != null && $this->param_account_id != "") {
@@ -258,13 +218,10 @@ class CsvItemSelection extends Model
             if ($this->param_selection_code != null && $this->param_selection_code != "") {
                 $query->where('selection_code', $this->param_selection_code);
             }
-            if ($this->param_is_select != null && $this->param_is_select != "") {
-                $query->where('is_select', $this->param_is_select);
-            }
             $data  = $query->where('is_deleted',0)
                     ->orderBy('account_id', 'asc')
                     ->orderBy('selection_code', 'asc')
-                    ->orderBy('item_seq', 'asc')
+                    ->orderBy('item_code', 'asc')
                     ->get();
             return $data;
         }catch(\PDOException $pe){
@@ -276,6 +233,8 @@ class CsvItemSelection extends Model
             Log::error($e->getMessage());
             throw $e;
         }
+
     }
+
 
 }

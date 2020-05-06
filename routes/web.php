@@ -182,5 +182,7 @@ Route::post('/del_post_informations', 'ApiCommonController@delPostInformations')
 Route::post('/get_working_hours', 'ApiCommonController@getWorkingHours')->middleware('auth');
 // 勤務状況取得
 Route::post('/get_working_status/get', 'ApiCommonController@getWorgingStatusInfo')->middleware('auth');
+// CSV項目取得
+Route::post('/get_csv_item', 'ApiCommonController@getCsvItem')->middleware('auth');
 
 
