@@ -135,6 +135,7 @@ class GeneralCodes extends Model
     //--------------- パラメータ項目属性 -----------------------------------
 
     private $param_identification_id;           // 識別
+    private $param_array_identification_id;     // 識別（array）
     private $param_code;                        // コード
 
 
@@ -147,6 +148,17 @@ class GeneralCodes extends Model
     public function setParamidentificationidAttribute($value)
     {
         $this->param_identification_id = $value;
+    }
+
+    // 識別（array）
+    public function getParamarrayidentificationidAttribute()
+    {
+        return $this->param_array_identification_id;
+    }
+
+    public function setParamarrayidentificationidAttribute($value)
+    {
+        $this->param_array_identification_id = $value;
     }
 
     // コード
@@ -213,6 +225,10 @@ class GeneralCodes extends Model
                 );
             if (isset($this->param_identification_id)) {
                 $data->where($this->table.'.identification_id',$this->param_identification_id);
+            } else {
+                if (isset($this->param_array_identification_id)) {
+                    $data->whereIn($this->table.'.identification_id',$this->param_array_identification_id);
+                }
             }
             if (isset($this->param_code)) {
                 $data->where($this->table.'.code',$this->param_code);

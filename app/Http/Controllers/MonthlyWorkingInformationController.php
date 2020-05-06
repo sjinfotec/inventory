@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -14,6 +15,7 @@ use App\Setting;
 use App\Company;
 use App\Http\Controllers\DailyWorkingInformationController;
 use App\Http\Controllers\ApiCommonController;
+use App\GeneralCodes;
 
 class MonthlyWorkingInformationController extends Controller
 {
@@ -30,7 +32,15 @@ class MonthlyWorkingInformationController extends Controller
      */
     public function index()
     {
-        return view('monthly_working_information');
+        $authusers = Auth::user();
+        // $general_model = new GeneralCodes();
+        // $general_model->setParamarrayidentificationidAttribute(
+        //     array(Config::get('const.C037.value')));
+        // $general_data = $general_model->getGeneralcode();
+        return view('monthly_working_information',
+            compact(
+                'authusers'
+            ));
     }
 
 
