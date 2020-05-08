@@ -42,6 +42,7 @@
                     v-bind:usercon-index="userconindex"
                     v-bind:ssjjoo-id="ssjjoo_id"
                     v-bind:edituser-id="edit_user_id"
+                    v-bind:table-class="'text-center align-middle mw-rem-8'"
                     v-on:click-event="showMap(
                       item['record_time_name'],
                       item['user_name'],
