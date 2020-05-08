@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -73,7 +74,11 @@ class DailyWorkingInformationController extends Controller
      */
     public function index()
     {
-        return view('daily_working_information');
+        $authusers = Auth::user();
+        return view('daily_working_information',
+            compact(
+                'authusers'
+            ));
     }
 
     /**
@@ -344,6 +349,10 @@ class DailyWorkingInformationController extends Controller
                     $array_working_time_attendances = array_merge($array_working_time_attendances, $this->setCollect_Working_time($value, $time_cnt, true));
                     for ($i=$time_cnt+1; $i<6; $i++) {
                         $array_working_time_attendances = array_merge($array_working_time_attendances, $this->setCollect_Working_time($value, $i, false));
+                    }
+                    $time_cnt = 5;
+                    for ($i=$time_cnt+1; $i<8; $i++) {
+                        $array_working_time_attendances = array_merge($array_working_time_attendances, $this->setCollect_Working_time_public($value, $i, false));
                     }
                     // 集計結果配列設定
                     $array_w = array();
@@ -8759,6 +8768,126 @@ class DailyWorkingInformationController extends Controller
                 'missing_return_editor_user_name' => $array_setting_time['missing_return_editor_user_name_'.$time_cnt],
                 'x_missing_middle_return_time_positions' => $array_setting_time['x_missing_middle_return_time_positions_'.$time_cnt],
                 'y_missing_middle_return_time_positions' => $array_setting_time['y_missing_middle_return_time_positions_'.$time_cnt],
+                'public_going_out_time' => $array_setting_time['public_going_out_time_'.$time_cnt],
+                'public_going_out_time_id' => $array_setting_time['public_going_out_time_id_'.$time_cnt],
+                'public_editor_department_code' => $array_setting_time['public_editor_department_code_'.$time_cnt],
+                'public_editor_department_name' => $array_setting_time['public_editor_department_name_'.$time_cnt],
+                'public_editor_user_code' => $array_setting_time['public_editor_user_code_'.$time_cnt],
+                'public_editor_user_name' => $array_setting_time['public_editor_user_name_'.$time_cnt],
+                'x_public_going_out_time_positions' => $array_setting_time['x_public_going_out_time_positions_'.$time_cnt],
+                'y_public_going_out_time_positions' => $array_setting_time['y_public_going_out_time_positions_'.$time_cnt],
+                'public_going_out_return_time' => $array_setting_time['public_going_out_return_time_'.$time_cnt],
+                'public_going_out_return_time_id' => $array_setting_time['public_going_out_return_time_id_'.$time_cnt],
+                'public_return_editor_department_code' => $array_setting_time['public_return_editor_department_code_'.$time_cnt],
+                'public_return_editor_department_name' => $array_setting_time['public_return_editor_department_name_'.$time_cnt],
+                'public_return_editor_user_code' => $array_setting_time['public_return_editor_user_code_'.$time_cnt],
+                'public_return_editor_user_name' => $array_setting_time['public_return_editor_user_name_'.$time_cnt],
+                'x_public_going_out_return_time_positions' => $array_setting_time['x_public_going_out_return_time_positions_'.$time_cnt],
+                'y_public_going_out_return_time_positions' => $array_setting_time['y_public_going_out_return_time_positions_'.$time_cnt]
+            );
+        } else {
+            if ($issetspace) {
+                $array_working_time_attendances[] = array(
+                    'attendance_time' => '',
+                    'attendance_time_id' => '',
+                    'attendance_editor_department_code' => '',
+                    'attendance_editor_department_name' => '',
+                    'attendance_editor_user_code' => '',
+                    'attendance_editor_user_name' => '',
+                    'x_attendance_time_positions' => '',
+                    'y_attendance_time_positions' => '',
+                    'leaving_time' => '',
+                    'leaving_time_id' => '',
+                    'leaving_editor_department_code' => '',
+                    'leaving_editor_department_name' => '',
+                    'leaving_editor_user_code' => '',
+                    'leaving_editor_user_name' => '',
+                    'x_leaving_time_positions' => '',
+                    'y_leaving_time_positions' => '',
+                    'missing_middle_time' => '',
+                    'missing_middle_time_id' => '',
+                    'missing_editor_department_code' => '',
+                    'missing_editor_department_name' => '',
+                    'missing_editor_user_code' => '',
+                    'missing_editor_user_name' => '',
+                    'x_missing_middle_time_positions' => '',
+                    'y_missing_middle_time_positions' => '',
+                    'missing_middle_return_time' => '',
+                    'missing_middle_return_time_id' => '',
+                    'missing_return_editor_department_code' => '',
+                    'missing_return_editor_department_name' => '',
+                    'missing_return_editor_user_code' => '',
+                    'missing_return_editor_user_name' => '',
+                    'x_missing_middle_return_time_positions' => '',
+                    'y_missing_middle_return_time_positions' => '',
+                    'public_going_out_time' => '',
+                    'public_going_out_time_id' => '',
+                    'public_editor_department_code' => '',
+                    'public_editor_department_name' => '',
+                    'public_editor_user_code' => '',
+                    'public_editor_user_name' => '',
+                    'x_public_going_out_time_positions' => '',
+                    'y_public_going_out_time_positions' => '',
+                    'public_going_out_return_time' => '',
+                    'public_going_out_return_time_id' => '',
+                    'public_return_editor_department_code' => '',
+                    'public_return_editor_department_name' => '',
+                    'public_return_editor_user_code' => '',
+                    'public_return_editor_user_name' => '',
+                    'x_public_going_out_return_time_positions' => '',
+                    'y_public_going_out_return_time_positions' => ''
+                );
+            }
+        }
+        return $array_working_time_attendances;
+    }
+
+    /**
+     * 勤怠集計結果コレクション設定
+     * 
+     *
+     * @return 
+     */
+    private function setCollect_Working_time_public($array_setting_time, $time_cnt, $issetspace)
+    {
+
+        // 勤怠集計結果コレクション設定
+        $array_working_time_attendances = array();
+        if (isset($array_setting_time['public_going_out_time_'.$time_cnt]) ||
+            isset($array_setting_time['public_going_out_return_time_'.$time_cnt]) ) {
+            $array_working_time_attendances[] = array(
+                'attendance_time' => '',
+                'attendance_time_id' => '',
+                'attendance_editor_department_code' => '',
+                'attendance_editor_department_name' => '',
+                'attendance_editor_user_code' => '',
+                'attendance_editor_user_name' => '',
+                'x_attendance_time_positions' => '',
+                'y_attendance_time_positions' => '',
+                'leaving_time' => '',
+                'leaving_time_id' => '',
+                'leaving_editor_department_code' => '',
+                'leaving_editor_department_name' => '',
+                'leaving_editor_user_code' => '',
+                'leaving_editor_user_name' => '',
+                'x_leaving_time_positions' => '',
+                'y_leaving_time_positions' => '',
+                'missing_middle_time' => '',
+                'missing_middle_time_id' => '',
+                'missing_editor_department_code' => '',
+                'missing_editor_department_name' => '',
+                'missing_editor_user_code' => '',
+                'missing_editor_user_name' => '',
+                'x_missing_middle_time_positions' => '',
+                'y_missing_middle_time_positions' => '',
+                'missing_middle_return_time' => '',
+                'missing_middle_return_time_id' => '',
+                'missing_return_editor_department_code' => '',
+                'missing_return_editor_department_name' => '',
+                'missing_return_editor_user_code' => '',
+                'missing_return_editor_user_name' => '',
+                'x_missing_middle_return_time_positions' => '',
+                'y_missing_middle_return_time_positions' => '',
                 'public_going_out_time' => $array_setting_time['public_going_out_time_'.$time_cnt],
                 'public_going_out_time_id' => $array_setting_time['public_going_out_time_id_'.$time_cnt],
                 'public_editor_department_code' => $array_setting_time['public_editor_department_code_'.$time_cnt],

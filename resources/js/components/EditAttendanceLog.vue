@@ -382,12 +382,19 @@ import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
+// CONST
+const CONST_C025 = 'C025';
+
 
 export default {
   name: "monthlyworkingtime",
   mixins: [ dialogable, checkable, requestable ],
   props: {
     authusers: {
+        type: Array,
+        default: []
+    },
+    const_generaldatas: {
         type: Array,
         default: []
     }
@@ -420,12 +427,20 @@ export default {
       applytermdate: "",
       issearchbutton: false,
       defaultDate: new Date(),
+      const_C025_data: []
     };
   },
   // マウント時
   mounted() {
-    this.login_user_code = this.authusers['code'];
-    this.login_user_role = this.authusers['role'];
+    // メソッドで使用するのでcomputedでなくてOK
+    var i = 0;
+    let $this = this;
+    this.const_generaldatas.forEach( function( item ) {
+      if (item.identification_id == CONST_C025) {
+        $this.const_C025_data.push($this.const_generaldatas[i]);
+      }
+      i++;
+    });
     this.selectMode = "";
     this.selectFromdateValue = this.defaultDate;
     this.selectTodateValue = this.defaultDate;
@@ -488,6 +503,54 @@ export default {
           var chkArray = [];
           chkArray.push("開始日付が終了日付より未来日となっています");
           this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
+        }
+      }
+
+      // 所属部署
+      if (this.authusers['role'] < this.const_C025_data[2]['code']) {
+        required = true;
+        equalength = 0;
+        maxlength = 0;
+        itemname = "所属部署";
+        chkArray = this.checkHeader(
+          this.selectedDepartmentValue,
+          required,
+          equalength,
+          maxlength,
+          itemname
+        );
+        if (chkArray.length > 0) {
+          if (this.messagevalidatesSearch.length == 0) {
+            this.messagevalidatesSearch.push(
+              "一般ユーザーは所属部署は必ず入力してください。"
+            );
+          } else {
+            this.messagevalidatesSearch = this.messagevalidatesSearch.concat(
+              chkArray
+            );
+          }
+          this.validate = false;
+        }
+        required = true;
+        equalength = 0;
+        maxlength = 0;
+        itemname = "氏名";
+        chkArray = this.checkHeader(
+          this.selectedUserValue,
+          required,
+          equalength,
+          maxlength,
+          itemname
+        );
+        if (chkArray.length > 0) {
+          if (this.messagevalidatesSearch.length == 0) {
+            this.messagevalidatesSearch.push(
+              "一般ユーザーは氏名は必ず入力してください。"
+            );
+          } else {
+            this.messagevalidatesSearch = this.messagevalidatesSearch.concat(chkArray);
+          }
+          this.validate = false;
         }
       }
 

@@ -198,10 +198,6 @@ export default {
       default: "AIzaSyDmNKensj6Y3qEY9t0v1kbQqUxdOrhq3X8"
     }
   },
-  // マウント時
-  mounted() {
-    console.log("dailyworkinginfotable  マウント");
-  },
   data: function() {
     return {
       edtString: "",

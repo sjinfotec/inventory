@@ -69,20 +69,20 @@ class WorkingTimedate extends Model
     private $array_missing_return_editor_user_code = [null,null,null,null,null];            // 私用外出戻り編集ユーザーコード
     private $array_missing_return_editor_department_name = [null,null,null,null,null];      // 私用外出戻り編集部署名
     private $array_missing_return_editor_user_name = [null,null,null,null,null];            // 私用外出戻り編集ユーザー名
-    private $array_public_going_out_time = [null,null,null,null,null];                      // 公用外出時刻
-    private $array_public_going_out_time_positions = [null,null,null,null,null];            // 公用外出位置情報
-    private $array_public_going_out_time_id = [null,null,null,null,null];                   // 公用外出打刻時刻テーブルID
-    private $array_public_editor_department_code = [null,null,null,null,null];              // 公用外出編集部署コード
-    private $array_public_editor_user_code = [null,null,null,null,null];                    // 公用外出編集ユーザーコード
-    private $array_public_editor_department_name = [null,null,null,null,null];              // 公用外出編集部署名
-    private $array_public_editor_user_name = [null,null,null,null,null];                    // 公用外出編集ユーザー名
-    private $array_public_going_out_return_time = [null,null,null,null,null];               // 公用外出戻り時刻
-    private $array_public_going_out_return_time_positions = [null,null,null,null,null];     // 公用外出戻り位置情報
-    private $array_public_going_out_return_time_id = [null,null,null,null,null];            // 公用外出戻り打刻時刻テーブルID
-    private $array_public_return_editor_department_code = [null,null,null,null,null];       // 公用外出戻り編集部署コード
-    private $array_public_return_editor_user_code = [null,null,null,null,null];             // 公用外出戻り編集ユーザーコード
-    private $array_public_return_editor_department_name = [null,null,null,null,null];       // 公用外出戻り編集部署名
-    private $array_public_return_editor_user_name = [null,null,null,null,null];             // 公用外出戻り編集ユーザー名
+    private $array_public_going_out_time = [null,null,null,null,null,null,null];                      // 公用外出時刻
+    private $array_public_going_out_time_positions = [null,null,null,null,null,null,null];            // 公用外出位置情報
+    private $array_public_going_out_time_id = [null,null,null,null,null,null,null];                   // 公用外出打刻時刻テーブルID
+    private $array_public_editor_department_code = [null,null,null,null,null,null,null];              // 公用外出編集部署コード
+    private $array_public_editor_user_code = [null,null,null,null,null,null,null];                    // 公用外出編集ユーザーコード
+    private $array_public_editor_department_name = [null,null,null,null,null,null,null];              // 公用外出編集部署名
+    private $array_public_editor_user_name = [null,null,null,null,null,null,null];                    // 公用外出編集ユーザー名
+    private $array_public_going_out_return_time = [null,null,null,null,null,null,null];               // 公用外出戻り時刻
+    private $array_public_going_out_return_time_positions = [null,null,null,null,null,null,null];     // 公用外出戻り位置情報
+    private $array_public_going_out_return_time_id = [null,null,null,null,null,null,null];            // 公用外出戻り打刻時刻テーブルID
+    private $array_public_return_editor_department_code = [null,null,null,null,null,null,null];       // 公用外出戻り編集部署コード
+    private $array_public_return_editor_user_code = [null,null,null,null,null,null,null];             // 公用外出戻り編集ユーザーコード
+    private $array_public_return_editor_department_name = [null,null,null,null,null,null,null];       // 公用外出戻り編集部署名
+    private $array_public_return_editor_user_name = [null,null,null,null,null,null,null];             // 公用外出戻り編集ユーザー名
     private $total_working_times;           // 合計勤務時間
     private $regular_working_times;         // 所定労働時間
     private $out_of_regular_working_times;  // 所定外労働時間
@@ -1770,61 +1770,85 @@ class WorkingTimedate extends Model
                     $this->table.'.public_going_out_time_3',
                     $this->table.'.public_going_out_time_4',
                     $this->table.'.public_going_out_time_5',
+                    $this->table.'.public_going_out_time_6',
+                    $this->table.'.public_going_out_time_7',
                     $this->table.'.public_going_out_time_id_1',
                     $this->table.'.public_going_out_time_id_2',
                     $this->table.'.public_going_out_time_id_3',
                     $this->table.'.public_going_out_time_id_4',
                     $this->table.'.public_going_out_time_id_5',
+                    $this->table.'.public_going_out_time_id_6',
+                    $this->table.'.public_going_out_time_id_7',
                     $this->table.'.public_editor_department_code_1',
                     $this->table.'.public_editor_department_code_2',
                     $this->table.'.public_editor_department_code_3',
                     $this->table.'.public_editor_department_code_4',
                     $this->table.'.public_editor_department_code_5',
+                    $this->table.'.public_editor_department_code_6',
+                    $this->table.'.public_editor_department_code_7',
                     $this->table.'.public_editor_department_name_1',
                     $this->table.'.public_editor_department_name_2',
                     $this->table.'.public_editor_department_name_3',
                     $this->table.'.public_editor_department_name_4',
                     $this->table.'.public_editor_department_name_5',
+                    $this->table.'.public_editor_department_name_6',
+                    $this->table.'.public_editor_department_name_7',
                     $this->table.'.public_editor_user_code_1',
                     $this->table.'.public_editor_user_code_2',
                     $this->table.'.public_editor_user_code_3',
                     $this->table.'.public_editor_user_code_4',
                     $this->table.'.public_editor_user_code_5',
+                    $this->table.'.public_editor_user_code_6',
+                    $this->table.'.public_editor_user_code_7',
                     $this->table.'.public_editor_user_name_1',
                     $this->table.'.public_editor_user_name_2',
                     $this->table.'.public_editor_user_name_3',
                     $this->table.'.public_editor_user_name_4',
                     $this->table.'.public_editor_user_name_5',
+                    $this->table.'.public_editor_user_name_6',
+                    $this->table.'.public_editor_user_name_7',
                     $this->table.'.public_going_out_return_time_1',
                     $this->table.'.public_going_out_return_time_2',
                     $this->table.'.public_going_out_return_time_3',
                     $this->table.'.public_going_out_return_time_4',
                     $this->table.'.public_going_out_return_time_5',
+                    $this->table.'.public_going_out_return_time_6',
+                    $this->table.'.public_going_out_return_time_7',
                     $this->table.'.public_going_out_return_time_id_1',
                     $this->table.'.public_going_out_return_time_id_2',
                     $this->table.'.public_going_out_return_time_id_3',
                     $this->table.'.public_going_out_return_time_id_4',
                     $this->table.'.public_going_out_return_time_id_5',
+                    $this->table.'.public_going_out_return_time_id_6',
+                    $this->table.'.public_going_out_return_time_id_7',
                     $this->table.'.public_return_editor_department_code_1',
                     $this->table.'.public_return_editor_department_code_2',
                     $this->table.'.public_return_editor_department_code_3',
                     $this->table.'.public_return_editor_department_code_4',
                     $this->table.'.public_return_editor_department_code_5',
+                    $this->table.'.public_return_editor_department_code_6',
+                    $this->table.'.public_return_editor_department_code_7',
                     $this->table.'.public_return_editor_department_name_1',
                     $this->table.'.public_return_editor_department_name_2',
                     $this->table.'.public_return_editor_department_name_3',
                     $this->table.'.public_return_editor_department_name_4',
                     $this->table.'.public_return_editor_department_name_5',
+                    $this->table.'.public_return_editor_department_name_6',
+                    $this->table.'.public_return_editor_department_name_7',
                     $this->table.'.public_return_editor_user_code_1',
                     $this->table.'.public_return_editor_user_code_2',
                     $this->table.'.public_return_editor_user_code_3',
                     $this->table.'.public_return_editor_user_code_4',
                     $this->table.'.public_return_editor_user_code_5',
+                    $this->table.'.public_return_editor_user_code_6',
+                    $this->table.'.public_return_editor_user_code_7',
                     $this->table.'.public_return_editor_user_name_1',
                     $this->table.'.public_return_editor_user_name_2',
                     $this->table.'.public_return_editor_user_name_3',
                     $this->table.'.public_return_editor_user_name_4',
                     $this->table.'.public_return_editor_user_name_5',
+                    $this->table.'.public_return_editor_user_name_6',
+                    $this->table.'.public_return_editor_user_name_7',
                     $this->table.'.total_working_times',
                     $this->table.'.regular_working_times',
                     $this->table.'.out_of_regular_working_times',
@@ -1923,6 +1947,10 @@ class WorkingTimedate extends Model
                 ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_4) as y_public_going_out_time_positions_4')
                 ->selectRaw('X('.$this->table.'.public_going_out_time_positions_5) as x_public_going_out_time_positions_5')
                 ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_5) as y_public_going_out_time_positions_5')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_6) as x_public_going_out_time_positions_6')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_6) as y_public_going_out_time_positions_6')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_7) as x_public_going_out_time_positions_7')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_7) as y_public_going_out_time_positions_7')
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_1) as x_public_going_out_return_time_positions_1')
                 ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_1) as y_public_going_out_return_time_positions_1')
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_2) as x_public_going_out_return_time_positions_2')
@@ -1932,7 +1960,11 @@ class WorkingTimedate extends Model
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_4) as x_public_going_out_return_time_positions_4')
                 ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_4) as y_public_going_out_return_time_positions_4')
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_5) as x_public_going_out_return_time_positions_5')
-                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_5) as y_public_going_out_return_time_positions_5');
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_5) as y_public_going_out_return_time_positions_5')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_6) as x_public_going_out_return_time_positions_6')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_6) as y_public_going_out_return_time_positions_6')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_7) as x_public_going_out_return_time_positions_7')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_7) as y_public_going_out_return_time_positions_7');
 
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $date = date_create($this->param_date_from);
@@ -2037,11 +2069,15 @@ class WorkingTimedate extends Model
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_3,'."'%H:%i'".')  as public_going_out_time_3')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_4,'."'%H:%i'".')  as public_going_out_time_4')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_5,'."'%H:%i'".')  as public_going_out_time_5')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_6,'."'%H:%i'".')  as public_going_out_time_6')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_7,'."'%H:%i'".')  as public_going_out_time_7')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_1,'."'%H:%i'".')  as public_going_out_return_time_1')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_2,'."'%H:%i'".')  as public_going_out_return_time_2')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_3,'."'%H:%i'".')  as public_going_out_return_time_3')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_4,'."'%H:%i'".')  as public_going_out_return_time_4')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_5,'."'%H:%i'".')  as public_going_out_return_time_5')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_6,'."'%H:%i'".')  as public_going_out_return_time_6')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_7,'."'%H:%i'".')  as public_going_out_return_time_7')
                 ->selectRaw(str_replace('{1}', 'total_working_times', str_replace('{0}', $this->table.'.total_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'regular_working_times', str_replace('{0}', $this->table.'.regular_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'out_of_regular_working_times', str_replace('{0}', $this->table.'.out_of_regular_working_times', $case_where)))
@@ -2108,6 +2144,10 @@ class WorkingTimedate extends Model
                 ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_4) as y_public_going_out_time_positions_4')
                 ->selectRaw('X('.$this->table.'.public_going_out_time_positions_5) as x_public_going_out_time_positions_5')
                 ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_5) as y_public_going_out_time_positions_5')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_6) as x_public_going_out_time_positions_6')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_6) as y_public_going_out_time_positions_6')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_7) as x_public_going_out_time_positions_7')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_7) as y_public_going_out_time_positions_7')
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_1) as x_public_going_out_return_time_positions_1')
                 ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_1) as y_public_going_out_return_time_positions_1')
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_2) as x_public_going_out_return_time_positions_2')
@@ -2117,7 +2157,11 @@ class WorkingTimedate extends Model
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_4) as x_public_going_out_return_time_positions_4')
                 ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_4) as y_public_going_out_return_time_positions_4')
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_5) as x_public_going_out_return_time_positions_5')
-                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_5) as y_public_going_out_return_time_positions_5');
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_5) as y_public_going_out_return_time_positions_5')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_6) as x_public_going_out_return_time_positions_6')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_6) as y_public_going_out_return_time_positions_6')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_7) as x_public_going_out_return_time_positions_7')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_7) as y_public_going_out_return_time_positions_7');
 
             $mainquery
                 ->addselect($this->table.'.working_status');
@@ -2264,51 +2308,71 @@ class WorkingTimedate extends Model
                 ->addselect($this->table.'.public_going_out_time_id_3')
                 ->addselect($this->table.'.public_going_out_time_id_4')
                 ->addselect($this->table.'.public_going_out_time_id_5')
+                ->addselect($this->table.'.public_going_out_time_id_6')
+                ->addselect($this->table.'.public_going_out_time_id_7')
                 ->addselect($this->table.'.public_editor_department_code_1')
                 ->addselect($this->table.'.public_editor_department_code_2')
                 ->addselect($this->table.'.public_editor_department_code_3')
                 ->addselect($this->table.'.public_editor_department_code_4')
                 ->addselect($this->table.'.public_editor_department_code_5')
+                ->addselect($this->table.'.public_editor_department_code_6')
+                ->addselect($this->table.'.public_editor_department_code_7')
                 ->addselect($this->table.'.public_editor_department_name_1')
                 ->addselect($this->table.'.public_editor_department_name_2')
                 ->addselect($this->table.'.public_editor_department_name_3')
                 ->addselect($this->table.'.public_editor_department_name_4')
                 ->addselect($this->table.'.public_editor_department_name_5')
+                ->addselect($this->table.'.public_editor_department_name_6')
+                ->addselect($this->table.'.public_editor_department_name_7')
                 ->addselect($this->table.'.public_editor_user_code_1')
                 ->addselect($this->table.'.public_editor_user_code_2')
                 ->addselect($this->table.'.public_editor_user_code_3')
                 ->addselect($this->table.'.public_editor_user_code_4')
                 ->addselect($this->table.'.public_editor_user_code_5')
+                ->addselect($this->table.'.public_editor_user_code_6')
+                ->addselect($this->table.'.public_editor_user_code_7')
                 ->addselect($this->table.'.public_editor_user_name_1')
                 ->addselect($this->table.'.public_editor_user_name_2')
                 ->addselect($this->table.'.public_editor_user_name_3')
                 ->addselect($this->table.'.public_editor_user_name_4')
                 ->addselect($this->table.'.public_editor_user_name_5')
+                ->addselect($this->table.'.public_editor_user_name_6')
+                ->addselect($this->table.'.public_editor_user_name_7')
                 ->addselect($this->table.'.public_going_out_return_time_id_1')
                 ->addselect($this->table.'.public_going_out_return_time_id_2')
                 ->addselect($this->table.'.public_going_out_return_time_id_3')
                 ->addselect($this->table.'.public_going_out_return_time_id_4')
                 ->addselect($this->table.'.public_going_out_return_time_id_5')
+                ->addselect($this->table.'.public_going_out_return_time_id_6')
+                ->addselect($this->table.'.public_going_out_return_time_id_7')
                 ->addselect($this->table.'.public_return_editor_department_code_1')
                 ->addselect($this->table.'.public_return_editor_department_code_2')
                 ->addselect($this->table.'.public_return_editor_department_code_3')
                 ->addselect($this->table.'.public_return_editor_department_code_4')
                 ->addselect($this->table.'.public_return_editor_department_code_5')
+                ->addselect($this->table.'.public_return_editor_department_code_6')
+                ->addselect($this->table.'.public_return_editor_department_code_7')
                 ->addselect($this->table.'.public_return_editor_department_name_1')
                 ->addselect($this->table.'.public_return_editor_department_name_2')
                 ->addselect($this->table.'.public_return_editor_department_name_3')
                 ->addselect($this->table.'.public_return_editor_department_name_4')
                 ->addselect($this->table.'.public_return_editor_department_name_5')
+                ->addselect($this->table.'.public_return_editor_department_name_6')
+                ->addselect($this->table.'.public_return_editor_department_name_7')
                 ->addselect($this->table.'.public_return_editor_user_code_1')
                 ->addselect($this->table.'.public_return_editor_user_code_2')
                 ->addselect($this->table.'.public_return_editor_user_code_3')
                 ->addselect($this->table.'.public_return_editor_user_code_4')
                 ->addselect($this->table.'.public_return_editor_user_code_5')
+                ->addselect($this->table.'.public_return_editor_user_code_6')
+                ->addselect($this->table.'.public_return_editor_user_code_7')
                 ->addselect($this->table.'.public_return_editor_user_name_1')
                 ->addselect($this->table.'.public_return_editor_user_name_2')
                 ->addselect($this->table.'.public_return_editor_user_name_3')
                 ->addselect($this->table.'.public_return_editor_user_name_4')
                 ->addselect($this->table.'.public_return_editor_user_name_5')
+                ->addselect($this->table.'.public_return_editor_user_name_6')
+                ->addselect($this->table.'.public_return_editor_user_name_7')
                 ->addselect($this->table.'.closing')
                 ->addselect($this->table.'.uplimit_time')
                 ->addselect($this->table.'.statutory_uplimit_time')
@@ -2887,13 +2951,13 @@ class WorkingTimedate extends Model
                         $temp_collect['missing_middle_return_time_positions_'.$i] = DB::raw("(GeomFromText('POINT(".$item_data.")'))");
                     }
                 }
-                for ($i=1;$i<=5;$i++) {
+                for ($i=1;$i<=7;$i++) {
                     if (isset($temp_collect['public_going_out_time_positions_'.$i]) && $temp_collect['public_going_out_time_positions_'.$i] != "") {
                         $item_data = $temp_collect['public_going_out_time_positions_'.$i];
                         $temp_collect['public_going_out_time_positions_'.$i] = DB::raw("(GeomFromText('POINT(".$item_data.")'))");
                     }
                 }
-                for ($i=1;$i<=5;$i++) {
+                for ($i=1;$i<=7;$i++) {
                     if (isset($temp_collect['public_going_out_return_time_positions_'.$i]) && $temp_collect['public_going_out_return_time_positions_'.$i] != "") {
                         $item_data = $temp_collect['public_going_out_return_time_positions_'.$i];
                         $temp_collect['public_going_out_return_time_positions_'.$i] = DB::raw("(GeomFromText('POINT(".$item_data.")'))");

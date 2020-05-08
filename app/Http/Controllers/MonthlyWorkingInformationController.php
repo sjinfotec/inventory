@@ -33,10 +33,6 @@ class MonthlyWorkingInformationController extends Controller
     public function index()
     {
         $authusers = Auth::user();
-        // $general_model = new GeneralCodes();
-        // $general_model->setParamarrayidentificationidAttribute(
-        //     array(Config::get('const.C037.value')));
-        // $general_data = $general_model->getGeneralcode();
         return view('monthly_working_information',
             compact(
                 'authusers'

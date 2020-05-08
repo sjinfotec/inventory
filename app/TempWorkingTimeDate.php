@@ -57,20 +57,20 @@ class TempWorkingTimeDate extends Model
     private $array_missing_return_editor_user_code = [null,null,null,null,null];            // 私用外出戻り編集ユーザーコード
     private $array_missing_return_editor_department_name = [null,null,null,null,null];      // 私用外出戻り編集部署名
     private $array_missing_return_editor_user_name = [null,null,null,null,null];            // 私用外出戻り編集ユーザー名
-    private $array_public_going_out_time = [null,null,null,null,null];                      // 公用外出時刻
-    private $array_public_going_out_time_positions = [null,null,null,null,null];            // 公用外出位置情報
-    private $array_public_going_out_time_id = [null,null,null,null,null];                   // 公用外出打刻時刻テーブルID
-    private $array_public_editor_department_code = [null,null,null,null,null];              // 公用外出編集部署コード
-    private $array_public_editor_user_code = [null,null,null,null,null];                    // 公用外出編集ユーザーコード
-    private $array_public_editor_department_name = [null,null,null,null,null];              // 公用外出編集部署名
-    private $array_public_editor_user_name = [null,null,null,null,null];                    // 公用外出編集ユーザー名
-    private $array_public_going_out_return_time = [null,null,null,null,null];               // 公用外出戻り時刻
-    private $array_public_going_out_return_time_positions = [null,null,null,null,null];     // 公用外出戻り位置情報
-    private $array_public_going_out_return_time_id = [null,null,null,null,null];            // 公用外出戻り打刻時刻テーブルID
-    private $array_public_return_editor_department_code = [null,null,null,null,null];       // 公用外出戻り編集部署コード
-    private $array_public_return_editor_user_code = [null,null,null,null,null];             // 公用外出戻り編集ユーザーコード
-    private $array_public_return_editor_department_name = [null,null,null,null,null];       // 公用外出戻り編集部署名
-    private $array_public_return_editor_user_name = [null,null,null,null,null];             // 公用外出戻り編集ユーザー名
+    private $array_public_going_out_time = [null,null,null,null,null,null,null];                      // 公用外出時刻
+    private $array_public_going_out_time_positions = [null,null,null,null,null,null,null];            // 公用外出位置情報
+    private $array_public_going_out_time_id = [null,null,null,null,null,null,null];                   // 公用外出打刻時刻テーブルID
+    private $array_public_editor_department_code = [null,null,null,null,null,null,null];              // 公用外出編集部署コード
+    private $array_public_editor_user_code = [null,null,null,null,null,null,null];                    // 公用外出編集ユーザーコード
+    private $array_public_editor_department_name = [null,null,null,null,null,null,null];              // 公用外出編集部署名
+    private $array_public_editor_user_name = [null,null,null,null,null,null,null];                    // 公用外出編集ユーザー名
+    private $array_public_going_out_return_time = [null,null,null,null,null,null,null];               // 公用外出戻り時刻
+    private $array_public_going_out_return_time_positions = [null,null,null,null,null,null,null];     // 公用外出戻り位置情報
+    private $array_public_going_out_return_time_id = [null,null,null,null,null,null,null];            // 公用外出戻り打刻時刻テーブルID
+    private $array_public_return_editor_department_code = [null,null,null,null,null,null,null];       // 公用外出戻り編集部署コード
+    private $array_public_return_editor_user_code = [null,null,null,null,null,null,null];             // 公用外出戻り編集ユーザーコード
+    private $array_public_return_editor_department_name = [null,null,null,null,null,null,null];       // 公用外出戻り編集部署名
+    private $array_public_return_editor_user_name = [null,null,null,null,null,null,null];             // 公用外出戻り編集ユーザー名
     private $total_working_times;           // 合計勤務時間
     private $regular_working_times;         // 所定労働時間
     private $out_of_regular_working_times;  // 所定外労働時間
@@ -1560,61 +1560,85 @@ class TempWorkingTimeDate extends Model
                     $this->table.'.public_going_out_time_3',
                     $this->table.'.public_going_out_time_4',
                     $this->table.'.public_going_out_time_5',
+                    $this->table.'.public_going_out_time_6',
+                    $this->table.'.public_going_out_time_7',
                     $this->table.'.public_going_out_time_id_1',
                     $this->table.'.public_going_out_time_id_2',
                     $this->table.'.public_going_out_time_id_3',
                     $this->table.'.public_going_out_time_id_4',
                     $this->table.'.public_going_out_time_id_5',
+                    $this->table.'.public_going_out_time_id_6',
+                    $this->table.'.public_going_out_time_id_7',
                     $this->table.'.public_editor_department_code_1',
                     $this->table.'.public_editor_department_code_2',
                     $this->table.'.public_editor_department_code_3',
                     $this->table.'.public_editor_department_code_4',
                     $this->table.'.public_editor_department_code_5',
+                    $this->table.'.public_editor_department_code_6',
+                    $this->table.'.public_editor_department_code_7',
                     $this->table.'.public_editor_department_name_1',
                     $this->table.'.public_editor_department_name_2',
                     $this->table.'.public_editor_department_name_3',
                     $this->table.'.public_editor_department_name_4',
                     $this->table.'.public_editor_department_name_5',
+                    $this->table.'.public_editor_department_name_6',
+                    $this->table.'.public_editor_department_name_7',
                     $this->table.'.public_editor_user_code_1',
                     $this->table.'.public_editor_user_code_2',
                     $this->table.'.public_editor_user_code_3',
                     $this->table.'.public_editor_user_code_4',
                     $this->table.'.public_editor_user_code_5',
+                    $this->table.'.public_editor_user_code_6',
+                    $this->table.'.public_editor_user_code_7',
                     $this->table.'.public_editor_user_name_1',
                     $this->table.'.public_editor_user_name_2',
                     $this->table.'.public_editor_user_name_3',
                     $this->table.'.public_editor_user_name_4',
                     $this->table.'.public_editor_user_name_5',
+                    $this->table.'.public_editor_user_name_6',
+                    $this->table.'.public_editor_user_name_7',
                     $this->table.'.public_going_out_return_time_1',
                     $this->table.'.public_going_out_return_time_2',
                     $this->table.'.public_going_out_return_time_3',
                     $this->table.'.public_going_out_return_time_4',
                     $this->table.'.public_going_out_return_time_5',
+                    $this->table.'.public_going_out_return_time_6',
+                    $this->table.'.public_going_out_return_time_7',
                     $this->table.'.public_going_out_return_time_id_1',
                     $this->table.'.public_going_out_return_time_id_2',
                     $this->table.'.public_going_out_return_time_id_3',
                     $this->table.'.public_going_out_return_time_id_4',
                     $this->table.'.public_going_out_return_time_id_5',
+                    $this->table.'.public_going_out_return_time_id_6',
+                    $this->table.'.public_going_out_return_time_id_7',
                     $this->table.'.public_return_editor_department_code_1',
                     $this->table.'.public_return_editor_department_code_2',
                     $this->table.'.public_return_editor_department_code_3',
                     $this->table.'.public_return_editor_department_code_4',
                     $this->table.'.public_return_editor_department_code_5',
+                    $this->table.'.public_return_editor_department_code_6',
+                    $this->table.'.public_return_editor_department_code_7',
                     $this->table.'.public_return_editor_department_name_1',
                     $this->table.'.public_return_editor_department_name_2',
                     $this->table.'.public_return_editor_department_name_3',
                     $this->table.'.public_return_editor_department_name_4',
                     $this->table.'.public_return_editor_department_name_5',
+                    $this->table.'.public_return_editor_department_name_6',
+                    $this->table.'.public_return_editor_department_name_7',
                     $this->table.'.public_return_editor_user_code_1',
                     $this->table.'.public_return_editor_user_code_2',
                     $this->table.'.public_return_editor_user_code_3',
                     $this->table.'.public_return_editor_user_code_4',
                     $this->table.'.public_return_editor_user_code_5',
+                    $this->table.'.public_return_editor_user_code_6',
+                    $this->table.'.public_return_editor_user_code_7',
                     $this->table.'.public_return_editor_user_name_1',
                     $this->table.'.public_return_editor_user_name_2',
                     $this->table.'.public_return_editor_user_name_3',
                     $this->table.'.public_return_editor_user_name_4',
                     $this->table.'.public_return_editor_user_name_5',
+                    $this->table.'.public_return_editor_user_name_6',
+                    $this->table.'.public_return_editor_user_name_7',
                     $this->table.'.total_working_times',
                     $this->table.'.regular_working_times',
                     $this->table.'.out_of_regular_working_times',
@@ -1707,7 +1731,7 @@ class TempWorkingTimeDate extends Model
                 $subquery1
                     ->selectRaw($case_options);
             }
-            for ($i=1;$i<=5;$i++) {
+            for ($i=1;$i<=7;$i++) {
                 $case_options =
                     "  CASE IFNULL(".$this->table.'.public_going_out_time_positions_'.$i.',null)';
                 $case_options .=
@@ -1719,7 +1743,7 @@ class TempWorkingTimeDate extends Model
                 $subquery1
                     ->selectRaw($case_options);
             }
-            for ($i=1;$i<=5;$i++) {
+            for ($i=1;$i<=7;$i++) {
                 $case_options =
                     "  CASE IFNULL(".$this->table.'.public_going_out_return_time_positions_'.$i.',null)';
                 $case_options .=
@@ -1784,11 +1808,15 @@ class TempWorkingTimeDate extends Model
                 ->selectRaw('(case when t2.public_going_out_time_3 is not null then t2.public_going_out_time_3 else null end) as public_going_out_time_3')
                 ->selectRaw('(case when t2.public_going_out_time_4 is not null then t2.public_going_out_time_4 else null end) as public_going_out_time_4')
                 ->selectRaw('(case when t2.public_going_out_time_5 is not null then t2.public_going_out_time_5 else null end) as public_going_out_time_5')
+                ->selectRaw('(case when t2.public_going_out_time_6 is not null then t2.public_going_out_time_5 else null end) as public_going_out_time_6')
+                ->selectRaw('(case when t2.public_going_out_time_7 is not null then t2.public_going_out_time_5 else null end) as public_going_out_time_7')
                 ->selectRaw('(case when t2.public_going_out_return_time_1 is not null then t2.public_going_out_return_time_1 else null end) as public_going_out_return_time_1')
                 ->selectRaw('(case when t2.public_going_out_return_time_2 is not null then t2.public_going_out_return_time_2 else null end) as public_going_out_return_time_2')
                 ->selectRaw('(case when t2.public_going_out_return_time_3 is not null then t2.public_going_out_return_time_3 else null end) as public_going_out_return_time_3')
                 ->selectRaw('(case when t2.public_going_out_return_time_4 is not null then t2.public_going_out_return_time_4 else null end) as public_going_out_return_time_4')
-                ->selectRaw('(case when t2.public_going_out_return_time_5 is not null then t2.public_going_out_return_time_5 else null end) as public_going_out_return_time_5');
+                ->selectRaw('(case when t2.public_going_out_return_time_5 is not null then t2.public_going_out_return_time_5 else null end) as public_going_out_return_time_5')
+                ->selectRaw('(case when t2.public_going_out_return_time_6 is not null then t2.public_going_out_return_time_5 else null end) as public_going_out_return_time_6')
+                ->selectRaw('(case when t2.public_going_out_return_time_7 is not null then t2.public_going_out_return_time_5 else null end) as public_going_out_return_time_7');
             $mainquery
                 ->addselect('t2.attendance_time_positions_1')
                 ->addselect('t2.attendance_time_positions_2')
@@ -1915,61 +1943,85 @@ class TempWorkingTimeDate extends Model
                 ->addselect('t2.public_going_out_time_positions_3')
                 ->addselect('t2.public_going_out_time_positions_4')
                 ->addselect('t2.public_going_out_time_positions_5')
+                ->addselect('t2.public_going_out_time_positions_6')
+                ->addselect('t2.public_going_out_time_positions_7')
                 ->addselect('t2.public_going_out_time_id_1')
                 ->addselect('t2.public_going_out_time_id_2')
                 ->addselect('t2.public_going_out_time_id_3')
                 ->addselect('t2.public_going_out_time_id_4')
                 ->addselect('t2.public_going_out_time_id_5')
+                ->addselect('t2.public_going_out_time_id_6')
+                ->addselect('t2.public_going_out_time_id_7')
                 ->addselect('t2.public_editor_department_code_1')
                 ->addselect('t2.public_editor_department_code_2')
                 ->addselect('t2.public_editor_department_code_3')
                 ->addselect('t2.public_editor_department_code_4')
                 ->addselect('t2.public_editor_department_code_5')
+                ->addselect('t2.public_editor_department_code_6')
+                ->addselect('t2.public_editor_department_code_7')
                 ->addselect('t2.public_editor_department_name_1')
                 ->addselect('t2.public_editor_department_name_2')
                 ->addselect('t2.public_editor_department_name_3')
                 ->addselect('t2.public_editor_department_name_4')
                 ->addselect('t2.public_editor_department_name_5')
+                ->addselect('t2.public_editor_department_name_6')
+                ->addselect('t2.public_editor_department_name_7')
                 ->addselect('t2.public_editor_user_code_1')
                 ->addselect('t2.public_editor_user_code_2')
                 ->addselect('t2.public_editor_user_code_3')
                 ->addselect('t2.public_editor_user_code_4')
                 ->addselect('t2.public_editor_user_code_5')
+                ->addselect('t2.public_editor_user_code_6')
+                ->addselect('t2.public_editor_user_code_7')
                 ->addselect('t2.public_editor_user_name_1')
                 ->addselect('t2.public_editor_user_name_2')
                 ->addselect('t2.public_editor_user_name_3')
                 ->addselect('t2.public_editor_user_name_4')
                 ->addselect('t2.public_editor_user_name_5')
+                ->addselect('t2.public_editor_user_name_6')
+                ->addselect('t2.public_editor_user_name_7')
                 ->addselect('t2.public_going_out_return_time_positions_1')
                 ->addselect('t2.public_going_out_return_time_positions_2')
                 ->addselect('t2.public_going_out_return_time_positions_3')
                 ->addselect('t2.public_going_out_return_time_positions_4')
                 ->addselect('t2.public_going_out_return_time_positions_5')
+                ->addselect('t2.public_going_out_return_time_positions_6')
+                ->addselect('t2.public_going_out_return_time_positions_7')
                 ->addselect('t2.public_going_out_return_time_id_1')
                 ->addselect('t2.public_going_out_return_time_id_2')
                 ->addselect('t2.public_going_out_return_time_id_3')
                 ->addselect('t2.public_going_out_return_time_id_4')
                 ->addselect('t2.public_going_out_return_time_id_5')
+                ->addselect('t2.public_going_out_return_time_id_6')
+                ->addselect('t2.public_going_out_return_time_id_7')
                 ->addselect('t2.public_return_editor_department_code_1')
                 ->addselect('t2.public_return_editor_department_code_2')
                 ->addselect('t2.public_return_editor_department_code_3')
                 ->addselect('t2.public_return_editor_department_code_4')
                 ->addselect('t2.public_return_editor_department_code_5')
+                ->addselect('t2.public_return_editor_department_code_6')
+                ->addselect('t2.public_return_editor_department_code_7')
                 ->addselect('t2.public_return_editor_department_name_1')
                 ->addselect('t2.public_return_editor_department_name_2')
                 ->addselect('t2.public_return_editor_department_name_3')
                 ->addselect('t2.public_return_editor_department_name_4')
                 ->addselect('t2.public_return_editor_department_name_5')
+                ->addselect('t2.public_return_editor_department_name_6')
+                ->addselect('t2.public_return_editor_department_name_7')
                 ->addselect('t2.public_return_editor_user_code_1')
                 ->addselect('t2.public_return_editor_user_code_2')
                 ->addselect('t2.public_return_editor_user_code_3')
                 ->addselect('t2.public_return_editor_user_code_4')
                 ->addselect('t2.public_return_editor_user_code_5')
+                ->addselect('t2.public_return_editor_user_code_6')
+                ->addselect('t2.public_return_editor_user_code_7')
                 ->addselect('t2.public_return_editor_user_name_1')
                 ->addselect('t2.public_return_editor_user_name_2')
                 ->addselect('t2.public_return_editor_user_name_3')
                 ->addselect('t2.public_return_editor_user_name_4')
                 ->addselect('t2.public_return_editor_user_name_5')
+                ->addselect('t2.public_return_editor_user_name_6')
+                ->addselect('t2.public_return_editor_user_name_7')
                 ->addselect('t2.total_working_times')
                 ->addselect('t2.regular_working_times')
                 ->addselect('t2.out_of_regular_working_times')
@@ -2216,61 +2268,85 @@ class TempWorkingTimeDate extends Model
                 'public_going_out_time_3' => $this->array_public_going_out_time[2],
                 'public_going_out_time_4' => $this->array_public_going_out_time[3],
                 'public_going_out_time_5' => $this->array_public_going_out_time[4],
+                'public_going_out_time_6' => $this->array_public_going_out_time[5],
+                'public_going_out_time_7' => $this->array_public_going_out_time[6],
                 'public_going_out_time_id_1' => $this->array_public_going_out_time_id[0],
                 'public_going_out_time_id_2' => $this->array_public_going_out_time_id[1],
                 'public_going_out_time_id_3' => $this->array_public_going_out_time_id[2],
                 'public_going_out_time_id_4' => $this->array_public_going_out_time_id[3],
                 'public_going_out_time_id_5' => $this->array_public_going_out_time_id[4],
+                'public_going_out_time_id_6' => $this->array_public_going_out_time_id[5],
+                'public_going_out_time_id_7' => $this->array_public_going_out_time_id[6],
                 'public_editor_department_code_1' => $this->array_public_editor_department_code[0],
                 'public_editor_department_code_2' => $this->array_public_editor_department_code[1],
                 'public_editor_department_code_3' => $this->array_public_editor_department_code[2],
                 'public_editor_department_code_4' => $this->array_public_editor_department_code[3],
                 'public_editor_department_code_5' => $this->array_public_editor_department_code[4],
+                'public_editor_department_code_6' => $this->array_public_editor_department_code[5],
+                'public_editor_department_code_7' => $this->array_public_editor_department_code[6],
                 'public_editor_department_name_1' => $this->array_public_editor_department_name[0],
                 'public_editor_department_name_2' => $this->array_public_editor_department_name[1],
                 'public_editor_department_name_3' => $this->array_public_editor_department_name[2],
                 'public_editor_department_name_4' => $this->array_public_editor_department_name[3],
                 'public_editor_department_name_5' => $this->array_public_editor_department_name[4],
+                'public_editor_department_name_6' => $this->array_public_editor_department_name[5],
+                'public_editor_department_name_7' => $this->array_public_editor_department_name[6],
                 'public_editor_user_code_1' => $this->array_public_editor_user_code[0],
                 'public_editor_user_code_2' => $this->array_public_editor_user_code[1],
                 'public_editor_user_code_3' => $this->array_public_editor_user_code[2],
                 'public_editor_user_code_4' => $this->array_public_editor_user_code[3],
                 'public_editor_user_code_5' => $this->array_public_editor_user_code[4],
+                'public_editor_user_code_6' => $this->array_public_editor_user_code[5],
+                'public_editor_user_code_5' => $this->array_public_editor_user_code[6],
                 'public_editor_user_name_1' => $this->array_public_editor_user_name[0],
                 'public_editor_user_name_2' => $this->array_public_editor_user_name[1],
                 'public_editor_user_name_3' => $this->array_public_editor_user_name[2],
                 'public_editor_user_name_4' => $this->array_public_editor_user_name[3],
                 'public_editor_user_name_5' => $this->array_public_editor_user_name[4],
+                'public_editor_user_name_6' => $this->array_public_editor_user_name[5],
+                'public_editor_user_name_7' => $this->array_public_editor_user_name[6],
                 'public_going_out_return_time_1' => $this->array_public_going_out_return_time[0],
                 'public_going_out_return_time_2' => $this->array_public_going_out_return_time[1],
                 'public_going_out_return_time_3' => $this->array_public_going_out_return_time[2],
                 'public_going_out_return_time_4' => $this->array_public_going_out_return_time[3],
                 'public_going_out_return_time_5' => $this->array_public_going_out_return_time[4],
+                'public_going_out_return_time_6' => $this->array_public_going_out_return_time[5],
+                'public_going_out_return_time_7' => $this->array_public_going_out_return_time[6],
                 'public_going_out_return_time_id_1' => $this->array_public_going_out_return_time_id[0],
                 'public_going_out_return_time_id_2' => $this->array_public_going_out_return_time_id[1],
                 'public_going_out_return_time_id_3' => $this->array_public_going_out_return_time_id[2],
                 'public_going_out_return_time_id_4' => $this->array_public_going_out_return_time_id[3],
                 'public_going_out_return_time_id_5' => $this->array_public_going_out_return_time_id[4],
+                'public_going_out_return_time_id_6' => $this->array_public_going_out_return_time_id[5],
+                'public_going_out_return_time_id_7' => $this->array_public_going_out_return_time_id[6],
                 'public_return_editor_department_code_1' => $this->array_public_return_editor_department_code[0],
                 'public_return_editor_department_code_2' => $this->array_public_return_editor_department_code[1],
                 'public_return_editor_department_code_3' => $this->array_public_return_editor_department_code[2],
                 'public_return_editor_department_code_4' => $this->array_public_return_editor_department_code[3],
                 'public_return_editor_department_code_5' => $this->array_public_return_editor_department_code[4],
+                'public_return_editor_department_code_6' => $this->array_public_return_editor_department_code[5],
+                'public_return_editor_department_code_7' => $this->array_public_return_editor_department_code[6],
                 'public_return_editor_department_name_1' => $this->array_public_return_editor_department_name[0],
                 'public_return_editor_department_name_2' => $this->array_public_return_editor_department_name[1],
                 'public_return_editor_department_name_3' => $this->array_public_return_editor_department_name[2],
                 'public_return_editor_department_name_4' => $this->array_public_return_editor_department_name[3],
                 'public_return_editor_department_name_5' => $this->array_public_return_editor_department_name[4],
+                'public_return_editor_department_name_6' => $this->array_public_return_editor_department_name[5],
+                'public_return_editor_department_name_7' => $this->array_public_return_editor_department_name[6],
                 'public_return_editor_user_code_1' => $this->array_public_return_editor_user_code[0],
                 'public_return_editor_user_code_2' => $this->array_public_return_editor_user_code[1],
                 'public_return_editor_user_code_3' => $this->array_public_return_editor_user_code[2],
                 'public_return_editor_user_code_4' => $this->array_public_return_editor_user_code[3],
                 'public_return_editor_user_code_5' => $this->array_public_return_editor_user_code[4],
+                'public_return_editor_user_code_6' => $this->array_public_return_editor_user_code[5],
+                'public_return_editor_user_code_7' => $this->array_public_return_editor_user_code[6],
                 'public_return_editor_user_name_1' => $this->array_public_return_editor_user_name[0],
                 'public_return_editor_user_name_2' => $this->array_public_return_editor_user_name[1],
                 'public_return_editor_user_name_3' => $this->array_public_return_editor_user_name[2],
                 'public_return_editor_user_name_4' => $this->array_public_return_editor_user_name[3],
                 'public_return_editor_user_name_5' => $this->array_public_return_editor_user_name[4],
+                'public_return_editor_user_name_6' => $this->array_public_return_editor_user_name[5],
+                'public_return_editor_user_name_7' => $this->array_public_return_editor_user_name[6],
                 'total_working_times' => $this->total_working_times,
                 'regular_working_times' => $this->regular_working_times,
                 'out_of_regular_working_times' => $this->out_of_regular_working_times,

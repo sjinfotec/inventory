@@ -38,6 +38,7 @@
 		</div>
 		<!-- /main contentns row -->
 		@endif
-		<attendance-log></attendance-log>
+		<attendance-log>
+		</attendance-log>
 		<!-- /main contentns row -->
 @endsection

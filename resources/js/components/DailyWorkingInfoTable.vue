@@ -116,6 +116,14 @@
                     working_time: calcList.attendance_time,
                     holiday_description: calcList.holiday_description
                   }"
+                  v-bind:login-user="loginUser"
+                  v-bind:login-role="loginRole"
+                  v-bind:account-data="accountData"
+                  v-bind:menu-data="menuData"
+                  v-bind:user-index="userindex"
+                  v-bind:usercon-index="userconindex"
+                  v-bind:ssjjoo-id="ssjjoo_id"
+                  v-bind:edituser-id="edit_user_id"
                   v-on:click-event="showMap(
                       calcList.attendance_time,
                       calcList.user_name,
@@ -137,6 +145,14 @@
                     working_time: calcList.leaving_time,
                     holiday_description: calcList.holiday_description
                   }"
+                  v-bind:login-user="loginUser"
+                  v-bind:login-role="loginRole"
+                  v-bind:account-data="accountData"
+                  v-bind:menu-data="menuData"
+                  v-bind:user-index="userindex"
+                  v-bind:usercon-index="userconindex"
+                  v-bind:ssjjoo-id="ssjjoo_id"
+                  v-bind:edituser-id="edit_user_id"
                   v-on:click-event="showMap(
                       calcList.leaving_time,
                       calcList.user_name,
@@ -158,6 +174,14 @@
                     working_time: calcList.public_going_out_time,
                     holiday_description: calcList.holiday_description
                   }"
+                  v-bind:login-user="loginUser"
+                  v-bind:login-role="loginRole"
+                  v-bind:account-data="accountData"
+                  v-bind:menu-data="menuData"
+                  v-bind:user-index="userindex"
+                  v-bind:usercon-index="userconindex"
+                  v-bind:ssjjoo-id="ssjjoo_id"
+                  v-bind:edituser-id="edit_user_id"
                   v-on:click-event="showMap(
                       calcList.public_going_out_time,
                       calcList.user_name,
@@ -179,6 +203,14 @@
                     working_time: calcList.public_going_out_return_time,
                     holiday_description: calcList.holiday_description
                   }"
+                  v-bind:login-user="loginUser"
+                  v-bind:login-role="loginRole"
+                  v-bind:account-data="accountData"
+                  v-bind:menu-data="menuData"
+                  v-bind:user-index="userindex"
+                  v-bind:usercon-index="userconindex"
+                  v-bind:ssjjoo-id="ssjjoo_id"
+                  v-bind:edituser-id="edit_user_id"
                   v-on:click-event="showMap(
                       calcList.public_going_out_return_time,
                       calcList.user_name,
@@ -200,6 +232,14 @@
                     working_time: calcList.missing_middle_time,
                     holiday_description: calcList.holiday_description
                   }"
+                  v-bind:login-user="loginUser"
+                  v-bind:login-role="loginRole"
+                  v-bind:account-data="accountData"
+                  v-bind:menu-data="menuData"
+                  v-bind:user-index="userindex"
+                  v-bind:usercon-index="userconindex"
+                  v-bind:ssjjoo-id="ssjjoo_id"
+                  v-bind:edituser-id="edit_user_id"
                   v-on:click-event="showMap(
                       calcList.missing_middle_time,
                       calcList.user_name,
@@ -221,6 +261,14 @@
                     working_time: calcList.missing_middle_return_time,
                     holiday_description: calcList.holiday_description
                   }"
+                  v-bind:login-user="loginUser"
+                  v-bind:login-role="loginRole"
+                  v-bind:account-data="accountData"
+                  v-bind:menu-data="menuData"
+                  v-bind:user-index="userindex"
+                  v-bind:usercon-index="userconindex"
+                  v-bind:ssjjoo-id="ssjjoo_id"
+                  v-bind:edituser-id="edit_user_id"
                   v-on:click-event="showMap(
                       calcList.missing_middle_return_time,
                       calcList.user_name,
@@ -368,6 +416,14 @@
                     working_time: calcList.attendance_time,
                     holiday_description: calcList.holiday_description
                   }"
+                  v-bind:login-user="loginUser"
+                  v-bind:login-role="loginRole"
+                  v-bind:account-data="accountData"
+                  v-bind:menu-data="menuData"
+                  v-bind:user-index="userindex"
+                  v-bind:usercon-index="userconindex"
+                  v-bind:ssjjoo-id="ssjjoo_id"
+                  v-bind:edituser-id="edit_user_id"
                   v-on:click-event="showMap(
                       calcList.attendance_time,
                       calcList.user_name,
@@ -379,7 +435,13 @@
                 </daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-if="calcList.attendance_editor_department_name"
+                  v-if="menuData[userindex]['is_select'] === 1 && calcList.attendance_editor_department_name"
+                >
+                  {{ calcList.attendance_editor_department_name }}：{{ calcList.attendance_editor_user_name }}
+                </td>
+                <td
+                  class="text-left text-align-left mw-rem-10"
+                  v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.attendance_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
                 >
                   {{ calcList.attendance_editor_department_name }}：{{ calcList.attendance_editor_user_name }}
                 </td>
@@ -400,6 +462,14 @@
                     working_time: calcList.leaving_time,
                     holiday_description: calcList.holiday_description
                   }"
+                  v-bind:login-user="loginUser"
+                  v-bind:login-role="loginRole"
+                  v-bind:account-data="accountData"
+                  v-bind:menu-data="menuData"
+                  v-bind:user-index="userindex"
+                  v-bind:usercon-index="userconindex"
+                  v-bind:ssjjoo-id="ssjjoo_id"
+                  v-bind:edituser-id="edit_user_id"
                   v-on:click-event="showMap(
                       calcList.leaving_time,
                       calcList.user_name,
@@ -411,9 +481,15 @@
                 </daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-if="calcList.leaving_editor_department_name"
+                  v-if="menuData[userindex]['is_select'] === 1 && calcList.leaving_editor_department_name"
                 >
-                  {{ calcList.leaving_editor_department_name }}：{{ calcList.attendance_editor_user_name }}
+                  {{ calcList.leaving_editor_department_name }}：{{ calcList.leaving_editor_user_name }}
+                </td>
+                <td
+                  class="text-left text-align-left mw-rem-10"
+                  v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.leaving_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
+                >
+                  {{ calcList.leaving_editor_department_name }}：{{ calcList.leaving_editor_user_name }}
                 </td>
                 <td
                   class="text-left text-align-left mw-rem-10"
@@ -432,6 +508,14 @@
                     working_time: calcList.public_going_out_time,
                     holiday_description: calcList.holiday_description
                   }"
+                  v-bind:login-user="loginUser"
+                  v-bind:login-role="loginRole"
+                  v-bind:account-data="accountData"
+                  v-bind:menu-data="menuData"
+                  v-bind:user-index="userindex"
+                  v-bind:usercon-index="userconindex"
+                  v-bind:ssjjoo-id="ssjjoo_id"
+                  v-bind:edituser-id="edit_user_id"
                   v-on:click-event="showMap(
                       calcList.public_going_out_time,
                       calcList.user_name,
@@ -443,7 +527,13 @@
                 </daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-if="calcList.public_editor_department_name"
+                  v-if="menuData[userindex]['is_select'] === 1 && calcList.public_editor_department_name"
+                >
+                  {{ calcList.public_editor_department_name }}：{{ calcList.public_editor_user_name }}
+                </td>
+                <td
+                  class="text-left text-align-left mw-rem-10"
+                  v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.public_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
                 >
                   {{ calcList.public_editor_department_name }}：{{ calcList.public_editor_user_name }}
                 </td>
@@ -464,6 +554,14 @@
                     working_time: calcList.public_going_out_return_time,
                     holiday_description: calcList.holiday_description
                   }"
+                  v-bind:login-user="loginUser"
+                  v-bind:login-role="loginRole"
+                  v-bind:account-data="accountData"
+                  v-bind:menu-data="menuData"
+                  v-bind:user-index="userindex"
+                  v-bind:usercon-index="userconindex"
+                  v-bind:ssjjoo-id="ssjjoo_id"
+                  v-bind:edituser-id="edit_user_id"
                   v-on:click-event="showMap(
                       calcList.public_going_out_return_time,
                       calcList.user_name,
@@ -475,7 +573,13 @@
                 </daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-if="calcList.public_return_editor_department_name"
+                  v-if="menuData[userindex]['is_select'] === 1 && calcList.public_return_editor_department_name"
+                >
+                  {{ calcList.public_return_editor_department_name }}：{{ calcList.public_return_editor_user_name }}
+                </td>
+                <td
+                  class="text-left text-align-left mw-rem-10"
+                  v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.public_return_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
                 >
                   {{ calcList.public_return_editor_department_name }}：{{ calcList.public_return_editor_user_name }}
                 </td>
@@ -496,6 +600,14 @@
                     working_time: calcList.missing_middle_time,
                     holiday_description: calcList.holiday_description
                   }"
+                  v-bind:login-user="loginUser"
+                  v-bind:login-role="loginRole"
+                  v-bind:account-data="accountData"
+                  v-bind:menu-data="menuData"
+                  v-bind:user-index="userindex"
+                  v-bind:usercon-index="userconindex"
+                  v-bind:ssjjoo-id="ssjjoo_id"
+                  v-bind:edituser-id="edit_user_id"
                   v-on:click-event="showMap(
                       calcList.missing_middle_time,
                       calcList.user_name,
@@ -507,7 +619,13 @@
                 </daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-if="calcList.missing_editor_department_name"
+                  v-if="menuData[userindex]['is_select'] === 1 && calcList.missing_editor_department_name"
+                >
+                  {{ calcList.missing_editor_department_name }}：{{ calcList.missing_editor_user_name }}
+                </td>
+                <td
+                  class="text-left text-align-left mw-rem-10"
+                  v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.missing_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
                 >
                   {{ calcList.missing_editor_department_name }}：{{ calcList.missing_editor_user_name }}
                 </td>
@@ -528,6 +646,14 @@
                     working_time: calcList.missing_middle_return_time,
                     holiday_description: calcList.holiday_description
                   }"
+                  v-bind:login-user="loginUser"
+                  v-bind:login-role="loginRole"
+                  v-bind:account-data="accountData"
+                  v-bind:menu-data="menuData"
+                  v-bind:user-index="userindex"
+                  v-bind:usercon-index="userconindex"
+                  v-bind:ssjjoo-id="ssjjoo_id"
+                  v-bind:edituser-id="edit_user_id"
                   v-on:click-event="showMap(
                       calcList.missing_middle_return_time,
                       calcList.user_name,
@@ -539,7 +665,13 @@
                 </daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-if="calcList.missing_return_editor_department_name"
+                  v-if="menuData[userindex]['is_select'] === 1 && calcList.missing_return_editor_department_name"
+                >
+                  {{ calcList.missing_return_editor_department_name }}：{{ calcList.missing_return_editor_user_name }}
+                </td>
+                <td
+                  class="text-left text-align-left mw-rem-10"
+                  v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.missing_return_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
                 >
                   {{ calcList.missing_return_editor_department_name }}：{{ calcList.missing_return_editor_user_name }}
                 </td>
@@ -683,48 +815,22 @@
       </div>
     </div>
     <!-- /.row -->
-    <el-dialog
-      custom-class="custom-bg-dark"
-      v-bind:title="dateName + ' 打刻時の位置情報'"
-      :visible.sync="dialogVisible"
-      width="60%"
-      center="true"
+    <!-- ----------- 地図表示部 START ---------------- -->
+    <show-map-dialog
+      v-bind:dateName="dateName"
+      v-bind:dialogVisible="dialogVisible"
+      v-bind:longitude="longitude"
+      v-bind:latitude="latitude"
+      v-bind:record_time="record_time"
+      v-bind:user_name="user_name"
+      v-bind:mode_name="mode_name"
     >
-      <!-- <div class="col-xs-12 padding-dis-left"> -->
-      <!-- <div>{{ user_name }} さん {{mode_name}} : {{ record_time }}</div> -->
-      <div class="card bg-dark text-white">
-        <!-- <div class="card-header">打刻時の位置情報</div> -->
-        <div class="card-body">
-          <h5 class="card-title">{{ user_name }} さん</h5>
-          <h5 class="card-subtitle mb-2 color-chartreuse">{{ record_time }} {{mode_name}}</h5>
-          <div style="width: 100%; overflow: hidden; width:100%;">
-            <iframe
-              v-bind:src="'https://www.google.com/maps/embed/v1/place?q='+longitude+','+latitude+'&key='+apiKey"
-              width="100%"
-              height="600"
-              frameborder="0"
-              style="border:0; margin-top: -150px;"
-            ></iframe>
-            <div class="card-footer text-align-right padding-dis">
-              <span class="float-left">※機種の設定により位置情報が多少ずれる事があります。</span>
-              <el-button type="danger" @click="dialogVisible = false">閉じる</el-button>
-            </div>
-          </div>
-          <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
-        </div>
-      </div>
-
-      <!-- <div class="dialog-footer text-align-right"> -->
-      <!-- <span slot="footer" class="dialog-footer"> -->
-      <!-- <el-button type="danger" @click="dialogVisible = false">閉じる</el-button> -->
-      <!-- <el-button type="success" @click="dialogVisible = false">承認</el-button> -->
-      <!-- </span> -->
-      <!-- </div> -->
-      <!-- </div> -->
-    </el-dialog>
+    </show-map-dialog>
   </div>
 </template>
 <script>
+
+// CONST
 // 打刻モード
 const ATTENDANCE = 1;
 const LEAVING = 2;
@@ -732,6 +838,10 @@ const OFFICIAL_OUT_START = 11;
 const OFFICIAL_OUT_END = 12;
 const PRIVATE_OUT_START = 21;
 const PRIVATE_OUT_END = 22;
+const C_USER_INDEX = 26;              // 編集者表示
+const C_USER_CON_INDEX = 27;          // 条件付き編集者表示
+const C_SSJJOO_ID = 'SSJJOO00';       // 三条ID
+const C_EDIT_USER = '23';             // 三条編集者ID
 
 export default {
   name: "dailyworkinginfotable",
@@ -767,42 +877,34 @@ export default {
       type: String,
       default: "深夜残業"
     },
+    loginUser: {
+      type: String,
+      default: ""
+    },
+    loginRole: {
+      type: String,
+      default: ""
+    },
+    accountData: {
+      type: String,
+      default: ""
+    },
+    menuData: {
+      type: Array,
+      default: []
+    },
     // TODO: 本来は .envに記載して取得したい
     apiKey: {
       type: String,
       default: "AIzaSyDmNKensj6Y3qEY9t0v1kbQqUxdOrhq3X8"
     }
   },
-  // マウント時
-  mounted() {
-    console.log("dailyworkinginfotable  マウント");
-  },
-  created() {
+  computed: {
     // scriptjs(
     //       "https://maps.googleapis.com/maps/api/js?key=AIzaSyDmNKensj6Y3qEY9t0v1kbQqUxdOrhq3X8&callback=initMap",
     //       "loadGoogleMap"
     //     );
     // scriptjs.ready("loadGoogleMap", this.loadMap);
-  },
-  data: function() {
-    return {
-      edtString: "",
-      edtString1: "",
-      tipStyle: {
-        // 後述のスタイル用オブジェクト
-        position: "absolute",
-        top: "0px",
-        left: "0px"
-      },
-      dialogVisible: false,
-      longitude: "",
-      latitude: "",
-      record_time: "",
-      user_name: "",
-      mode_name: ""
-    };
-  },
-  computed: {
     mode_attendance: function() {
       return ATTENDANCE;
     },
@@ -820,21 +922,52 @@ export default {
     },
     mode_private_out_end: function() {
       return PRIVATE_OUT_END;
+    },
+    userindex: function() {
+      return C_USER_INDEX;
+    },
+    userconindex: function() {
+      return C_USER_CON_INDEX;
+    },
+    ssjjoo_id: function() {
+      return C_SSJJOO_ID;
+    },
+    edit_user_id: function() {
+      return C_EDIT_USER;
     }
+  },
+  data: function() {
+    return {
+      edtString: "",
+      edtString1: "",
+      tipStyle: {
+        // 後述のスタイル用オブジェクト
+        position: "absolute",
+        top: "0px",
+        left: "0px"
+      },
+      dialogVisible: false,
+      longitude: "",
+      latitude: "",
+      record_time: "",
+      user_name: "",
+      mode_name: "",
+      menu_data: []
+    };
   },
   methods: {
     // tooltips
     edttooltips: function(value1, value2, value3, value4) {
-      if (value1.length > 0) {
+      if (value1 != null && value1 != "") {
         this.edtString = value1;
       }
-      if (value2.length > 0) {
+      if (value2 != null && value2 != "") {
         this.edtString = this.edtString + "\n" + value2;
       }
-      if (value3.length > 0) {
+      if (value3 != null && value3 != "") {
         this.edtString = this.edtString + "\n" + value3;
       }
-      if (value4.length > 0) {
+      if (value4 != null && value4 != "") {
         this.edtString = this.edtString + "\n" + value4;
       }
     },

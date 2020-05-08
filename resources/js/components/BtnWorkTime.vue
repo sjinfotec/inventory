@@ -176,10 +176,6 @@ export default {
           type: Boolean
       }
   },
-  // マウント時
-  mounted() {
-    console.log("WorkTimeSearchButton Component mounted.");
-  },
   data: function() {
     return {
       edtString: ""
