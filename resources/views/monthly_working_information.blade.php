@@ -39,7 +39,7 @@
 		@endif
 		<monthly-working-information
 			v-bind:authusers="{{ $authusers }}"
-			v-bind:c037datas="{{ $const_general_data_C037 }}"
+			v-bind:const_generaldatas="{{ $const_general_datas }}"
 		>
 		</monthly-working-information>
 	</div>

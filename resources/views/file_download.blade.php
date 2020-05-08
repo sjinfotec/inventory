@@ -40,19 +40,9 @@
 		@endif
 		<file-download
 			v-bind:authusers="{{ $authusers }}"
-			v-bind:generaluser="{{ $generaluser }}"
-			v-bind:generalapproveruser="{{ $generalapproveruser }}"
-			v-bind:adminuser="{{ $adminuser }}"
-			v-bind:distribution="{{ $distribution }}"
-			v-bind:distribution43z="{{ $distribution43z }}"
-			v-bind:distributionssjjoo="{{ $distributionssjjoo }}"
-			v-bind:distributionmarutaka="{{ $distributionmarutaka }}"
-			v-bind:edition="{{ $edition }}"
-			v-bind:editiondemo="{{ $editiondemo }}"
-			v-bind:editiontrial="{{ $editiontrial }}"
-			v-bind:editioncroud="{{ $editioncroud }}"
-			v-bind:editionssjjoo="{{ $editionssjjoo }}"
-			v-bind:editionclient="{{ $editionclient }}"
+			v-bind:accountdatas="{{ $account_datas }}"
+			v-bind:menudatas="{{ $menu_selections }}"
+			v-bind:const_generaldatas="{{ $const_general_datas }}"
 		></file-download>
 		<!-- /main contentns row -->
 @endsection

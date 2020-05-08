@@ -1,12 +1,10 @@
 <template>
   <div>
-    <div v-for="(item,index) in generalData">
-      <btn-work-time v-if="btnMode === item['code']"
-        v-on:csv-event="csvmain"
-        v-bind:btn-mode="item['description']"
-        v-bind:is-push="isCsvbutton">
-      </btn-work-time>
-    </div>
+    <btn-work-time
+      v-on:csv-event="csvmain"
+      v-bind:btn-mode="generalDescription"
+      v-bind:is-push="isCsvbutton">
+    </btn-work-time>
   </div>
 </template>
 <script>
@@ -24,13 +22,17 @@ export default {
       type: String,
       default: ""
     },
+    csvData: {
+      type: Array,
+      required: true
+    },
     generalData: {
       type: Array,
       default: []
     },
-    csvData: {
-      type: Array,
-      required: true
+    generalDescription: {
+      type: String,
+      default: ""
     },
     csvDate: {
       type: String,
@@ -43,16 +45,9 @@ export default {
   },
   data() {
     return {
-      c037_code: [],
       details: [],
       titles:[]
     };
-  },
-  // マウント時
-  mounted() {
-    for (var i=0;i<this.generalData.length;i++) {
-      this.c037_code.push(this.generalData[i]['code']);
-    }
   },
   methods: {
     // -------------------- イベント処理 ----------------------------
@@ -63,8 +58,7 @@ export default {
     // CSV対象項目取得処理
     getCsvItem() {
       this.postRequest("get_csv_item", {
-        selection_code: this.btnMode,
-        is_select: 1
+        selection_code: this.btnMode
       })
         .then(response => {
           this.getThenCsvItem(response);
@@ -141,9 +135,12 @@ export default {
       var csv = "";
       var line = "";
       // タイトル
-      line =
-        this.csvDate + "分" + "\r\n";
-      csv += line;
+      var out_f = this.isTitle();
+      if (out_f) {
+        line =
+          this.csvDate + "分" + "\r\n";
+        csv += line;
+      }
       // 項目名
       line = this.makeTitleLine();
       csv += line;
@@ -181,9 +178,12 @@ export default {
       var csv = "";
       var line = "";
       // タイトル
-      line =
-        this.csvDate + "\r\n";
-      csv += line;
+      var out_f = this.isTitle();
+      if (out_f) {
+        line =
+          this.csvDate + "\r\n";
+        csv += line;
+      }
       // 項目名
       line = this.makeTitleLine();
       csv += line;
@@ -308,11 +308,15 @@ export default {
       var linetext = "";
       var cnt = 0;
       this.details.forEach(item => {
-        if (cnt > 0) {
-          linetext += ",";
+        if (item['is_select'] == 1) {
+          if (item['item_code'] != 99) {
+            if (cnt > 0) {
+              linetext += ",";
+            }
+            linetext += item['item_out_name'];
+            cnt++;
+          }
         }
-        linetext += item['item_out_name'];
-        cnt++;
       });
       linetext += "\r\n";
       return linetext;
@@ -324,12 +328,16 @@ export default {
       var cnt = 0;
       var item_name = "";
       this.details.forEach(item => {
-        if (cnt > 0) {
-          linetext += ",";
+        if (item['is_select'] == 1) {
+          if (item['item_code'] != 99) {
+            if (cnt > 0) {
+              linetext += ",";
+            }
+            item_name = item['item_name'];
+            linetext += user[item_name];
+            cnt++;
+          }
         }
-        item_name = item['item_name'];
-        linetext += user[item_name];
-        cnt++;
       });
       linetext += "\r\n";
       return linetext;
@@ -346,36 +354,40 @@ export default {
       var linetext = "";
       var cnt = 0;
       this1.details.forEach(item => {
-        if (cnt > 0) {
-          linetext += ",";
-        }
-        item_name = item['item_name'];
-        item_data = "";
-        if (item_name == "attendance") {
-          if (record[item_name] == null) {
-            attendance = "";
-          } else {
-            attendance = record[item_name];
+        if (item['is_select'] == 1) {
+          if (item['item_code'] != 99) {
+            if (cnt > 0) {
+              linetext += ",";
+            }
+            item_name = item['item_name'];
+            item_data = "";
+            if (item_name == "attendance") {
+              if (record[item_name] == null) {
+                attendance = "";
+              } else {
+                attendance = record[item_name];
+              }
+              item_data = attendance;
+            } else if (item_name == "leaving") {
+              if (record[item_name] == null) {
+                leaving = "";
+              } else {
+                leaving = record[item_name];
+              }
+              item_data = leaving;
+            } else if (item_name == "remark_holiday_name") {
+              remark_holiday_name = record[item_name]
+              item_data = remark_holiday_name;
+            } else if (item_name == "workingdate") {
+              item_data =
+                record[item_name].substr(0,4) + "/" + record[item_name].substr(4,2) + "/" +  record[item_name].substr(6,2);
+            } else {
+              item_data = record[item_name];
+            }
+            linetext += item_data;
+            cnt++;
           }
-          item_data = attendance;
-        } else if (item_name == "leaving") {
-          if (record[item_name] == null) {
-            leaving = "";
-          } else {
-            leaving = record[item_name];
-          }
-          item_data = leaving;
-        } else if (item_name == "remark_holiday_name") {
-          remark_holiday_name = record[item_name]
-          item_data = remark_holiday_name;
-        } else if (item_name == "workingdate") {
-          item_data =
-            record[item_name].substr(0,4) + "/" + record[item_name].substr(4,2) + "/" +  record[item_name].substr(6,2);
-        } else {
-          item_data = record[item_name];
         }
-        linetext += item_data;
-        cnt++;
       });
       if ((attendance != "") || (leaving != "") || (remark_holiday_name != "" && remark_holiday_name != null)) {
         linetext += "\r\n";
@@ -392,16 +404,20 @@ export default {
       var item_name = "";
       var item_data = "";
       this.details.forEach(item => {
-        if (cnt > 0) {
-          linetext += ",";
+        if (item['is_select'] == 1) {
+          if (item['item_code'] != 99) {
+            if (cnt > 0) {
+              linetext += ",";
+            }
+            item_name = item['item_name'];
+            item_data = "";
+            if (user[item_name] != "" && user[item_name] != null) {
+              item_data = user[item_name];
+            }
+            linetext += item_data;
+            cnt++;
+          }
         }
-        item_name = item['item_name'];
-        item_data = "";
-        if (user[item_name] != "" && user[item_name] != null) {
-          item_data = user[item_name];
-        }
-        linetext += item_data;
-        cnt++;
       });
       linetext += "\r\n";
       return linetext;
@@ -422,6 +438,19 @@ export default {
       link.href = window.URL.createObjectURL(blob);
       link.download = filename;
       link.click();
+    },
+    // タイトルセット有無
+    isTitle() {
+      var out_f = false;
+      this.details.forEach(item => {
+        if (item['item_code'] == 99) {
+          if (item['is_select'] == 1) {
+            out_f = true;
+          }
+        }
+      });
+
+      return out_f;
     }
   }
 };

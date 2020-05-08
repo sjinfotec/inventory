@@ -31,22 +31,22 @@ class CommonServiceProvider extends ServiceProvider
     public function boot()
     {
 
-        $menu_model = new MenuItemSelection();
-        $menu_model->setParamaccountidAttribute(
-            array(Config::get('const.ACCOUNTID.account_id')));
-        $menu_model->setParamselectioncodeAttribute(
-            array(Config::get('const.EDITION.EDITION')));
-        $menu_data = $menu_model->getMenuItem();
+        //account
+        $account_data = collect([
+            'account_id' => Config::get('const.ACCOUNTID.account_id')
+        ]);
+        View::share('account_datas', $account_data);
 
-        Log::debug('$menu_data = '.count($menu_data));
+        //menu selection
+        $menu_model = new MenuItemSelection();
+        $menu_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+        $menu_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+        $menu_data = $menu_model->getMenuItem();
         View::share('menu_selections', $menu_data);
 
         //const
         $general_model = new GeneralCodes();
-        $general_model->setParamarrayidentificationidAttribute(
-            array(Config::get('const.C037.value')));
-        $general_data_C037 = $general_model->getGeneralcode();
-        Log::debug('$general_data_C037 = '.count($general_data_C037));
-        View::share('const_general_data_C037', $general_data_C037);
+        $general_datas = $general_model->getGeneralcode();
+        View::share('const_general_datas', $general_datas);
     }
 }

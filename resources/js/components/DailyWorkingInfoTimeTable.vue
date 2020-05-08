@@ -6,7 +6,16 @@
   </td>
   <td
     class="text-left text-align-left mw-rem-4"
-    v-else-if="calcList.x_positions && calcList.editor_department_code"
+    v-else-if="menuData[userIndex]['is_select'] === 0 && menuData[userconIndex]['is_select'] === 0"
+    data-toggle="tooltip"
+    data-placement="top"
+    v-bind:title="edtString"
+  >
+    {{ calcList.working_time }}
+  </td>
+  <td
+    class="text-left text-align-left mw-rem-4"
+    v-else-if="menuData[userIndex]['is_select'] === 1 && calcList.x_positions && calcList.editor_department_code"
     style="color:#ff0000"
     data-toggle="tooltip"
     data-placement="top"
@@ -23,7 +32,18 @@
   </td>
   <td
     class="text-left text-align-left mw-rem-4"
-    v-else-if="calcList.x_positions"
+    v-else-if="menuData[userIndex]['is_select'] === 1 && !calcList.x_positions && calcList.editor_department_code"
+    style="color:#ff0000"
+    data-toggle="tooltip"
+    data-placement="top"
+    v-bind:title="edtString"
+    @mouseover="edttooltips(calcList.editor_department_name + '：' + calcList.editor_user_name,'')"
+  >
+    {{ calcList.working_time }}
+  </td>
+  <td
+    class="text-left text-align-left mw-rem-4"
+    v-else-if="menuData[userIndex]['is_select'] === 1 && calcList.x_positions && !calcList.editor_department_code"
   >
     {{ calcList.working_time }}
     <img
@@ -35,38 +55,124 @@
   </td>
   <td
     class="text-left text-align-left mw-rem-4"
-    v-else-if="calcList.editor_department_code"
+    v-else-if="menuData[userIndex]['is_select'] === 1 && !calcList.x_positions && !calcList.editor_department_code"
+  >
+    {{ calcList.working_time }}
+  </td>
+  <td
+    class="text-left text-align-left mw-rem-4"
+    v-else-if="menuData[userconIndex]['is_select'] === 1 && calcList.x_positions && calcList.editor_department_code && accountData === ssjjooId && loginUser === edituserId"
     style="color:#ff0000"
     data-toggle="tooltip"
     data-placement="top"
     v-bind:title="edtString"
     @mouseover="edttooltips(calcList.editor_department_name + '：' + calcList.editor_user_name,'')"
+  >
+    {{ calcList.working_time }}
+    <img
+      class="icon-size-sm svg_img orange600"
+      src="/images/red_map_pin.svg"
+      v-on:click="selClick()"
+      alt
+    />
+  </td>
+  <td
+    class="text-left text-align-left mw-rem-4"
+    v-else-if="menuData[userconIndex]['is_select'] === 1 && !calcList.x_positions && calcList.editor_department_code && accountData === ssjjooId && loginUser === edituserId"
+    style="color:#ff0000"
+    data-toggle="tooltip"
+    data-placement="top"
+    v-bind:title="edtString"
+    @mouseover="edttooltips(calcList.editor_department_name + '：' + calcList.editor_user_name,'')"
+  >
+    {{ calcList.working_time }}
+  </td>
+  <td
+    class="text-left text-align-left mw-rem-4"
+    v-else-if="menuData[userconIndex]['is_select'] === 1 && calcList.x_positions && !calcList.editor_department_code && accountData === ssjjooId && loginUser === edituserId"
+  >
+    {{ calcList.working_time }}
+    <img
+      class="icon-size-sm svg_img orange600"
+      src="/images/red_map_pin.svg"
+      v-on:click="selClick()"
+      alt
+    />
+  </td>
+  <td
+    class="text-left text-align-left mw-rem-4"
+    v-else-if="menuData[userconIndex]['is_select'] === 1 && !calcList.x_positions && !calcList.editor_department_code && accountData === ssjjooId && loginUser === edituserId"
   >
     {{ calcList.working_time }}
   </td>
   <td
     class="text-left text-align-left mw-rem-4"
     v-else
-  >{{ calcList.working_time }}
+  >
+    {{ calcList.working_time }}
   </td>
 </template>
 <script>
+
+// CONST
+const C_USER_INDEX = 26;
+const C_USER_CON_INDEX = 27;
+const C_SSJJOO_ID = 'SSJJOO00';
 
 export default {
   name: "dailyworkinginfotimetable",
   props: {
     calcList: {
       type: Object
+    },
+    loginUser: {
+      type: String,
+      default: ""
+    },
+    loginRole: {
+      type: String,
+      default: ""
+    },
+    accountData: {
+      type: String,
+      default: ""
+    },
+    menuData: {
+      type: Array,
+      default: []
+    },
+    userIndex: {
+      type: Number,
+      default: 0
+    },
+    userconIndex: {
+      type: Number,
+      default: 0
+    },
+    ssjjooId: {
+      type: String,
+      default: ""
+    },
+    edituserId: {
+      type: String,
+      default: ""
     }
   },
   data: function() {
     return {
-      edtString: "",
+      edtString: ""
     };
   },
-  // マウント時
-  mounted() {
-    console.log("dailyworkinginfotimetable  マウント");
+  computed: {
+    userindex: function() {
+      return C_USER_INDEX;
+    },
+    userconindex: function() {
+      return C_USER_CON_INDEX;
+    },
+    ssjjoo_id: function() {
+      return C_SSJJOO_ID;
+    }
   },
   methods: {
     // tooltips

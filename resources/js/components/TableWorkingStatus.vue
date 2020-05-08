@@ -23,7 +23,25 @@
                 <tr v-for="(item,onrowIndex) in ondetails" v-bind:key="item['user_code']">
                   <td class="text-left align-middle mw-rem-10">{{ item['department_name'] }}</td>
                   <td class="text-left align-middle mw-rem-10">{{ item['user_name'] }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ item['record_time_name'] }}</td>
+                  <!-- <td class="text-center align-middle mw-rem-8">{{ item['record_time_name'] }}</td> -->
+                  <daily-working-info-time-table
+                    v-bind:calc-list="{
+                      x_positions: item['x_positions'],
+                      y_positions: item['y_positions'],
+                      editor_department_code: null,
+                      editor_department_name: null,
+                      editor_user_name: null,
+                      working_time: item['record_time_name'],
+                      holiday_description: null
+                    }"
+                    v-on:click-event="showMap(
+                        item['record_time_name'],
+                        item['user_name'],
+                        item['x_positions'],
+                        item['y_positions'],
+                        item['mode_name'])"
+                  >
+                  </daily-working-info-time-table>
                   <td class="text-center align-middle mw-rem-5">{{ item['mode_name'] }}</td>
                   <td
                     class="text-center align-middle mw-rem-10"
@@ -86,6 +104,18 @@
       <!-- /.row -->
     </div>
     <!-- ----------- テーブル部 END ---------------- -->
+    <!-- ----------- 地図表示部 START ---------------- -->
+    <show-map-dialog
+      v-bind:dateName="''"
+      v-bind:dialogVisible="dialogVisible"
+      v-bind:longitude="longitude"
+      v-bind:latitude="latitude"
+      v-bind:record_time="record_time"
+      v-bind:user_name="user_name"
+      v-bind:mode_name="mode_name"
+    >
+    </show-map-dialog>
+    <!-- ----------- 地図表示部 END ---------------- -->
   </div>
 </template>
 <script>
@@ -109,7 +139,13 @@ export default {
       offdetails: [],
       ondetails_length: 0,
       offdetails_length: 0,
-      defaultYmd: new Date()
+      defaultYmd: new Date(),
+      dialogVisible: false,
+      longitude: "",
+      latitude: "",
+      record_time: "",
+      user_name: "",
+      mode_name: ""
     };
   },
   // マウント時
@@ -160,7 +196,16 @@ export default {
       var messages = [];
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
       this.htmlMessageSwal("エラー", messages, "error", true, false);
-    }
+    },
+    // マップ表示
+    showMap: function(time, name, x, y, mode) {
+      this.latitude = x;
+      this.longitude = y;
+      this.user_name = name;
+      this.record_time = time;
+      this.mode_name = mode;
+      this.dialogVisible = true;
+    },
   }
 };
 

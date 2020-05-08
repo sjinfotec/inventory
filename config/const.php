@@ -357,6 +357,38 @@ return [
     'C037_DESC_VALUE' => [
         'array' => array('C037', 'csvcalc', 'csvsalary', 'csvlog', 'usersdownload')
     ],
+
+    'C038' => [
+        'value' => 'C038',
+        'calc_block' => 1,
+        'daily' => 2,
+        'monthly' => 3,
+        'alert_block' => 4,
+        'daily_alert' => 5,
+        'monthly_alert' => 6,
+        'attendancelog_block' => 7,
+        'store_attendancelog' => 8,
+        'edit_attendancelog' => 9,
+        'edit_block' => 10,
+        'create_shift_time' => 11,
+        'edit_work_times' => 12,
+        'demand_block' => 13,
+        'demand' => 14,
+        'approval' => 15,
+        'confirm' => 16,
+        'setting_block' => 17,
+        'create_company_information' => 18,
+        'create_department' => 19,
+        'setting_calc' => 20,
+        'create_time_table' => 21,
+        'setting_calendar' => 22,
+        'edit_user' => 23,
+        'operation_block' => 24,
+        'user_pass' => 25,
+        'file_download' => 26,
+        'edit_worktime_user' => 27,
+        'edit_worktime_user_conditional' => 28
+    ],
  
     'C999' => [
         'value' => 'C999',
@@ -417,8 +449,8 @@ return [
         'leaving_time' => 5,
         'missing_middle_time' => 5,
         'missing_middle_return_time' => 5,
-        'public_going_out_time' => 5,
-        'public_going_out_return_time' => 5
+        'public_going_out_time' => 7,
+        'public_going_out_return_time' => 7
     ],
 
     'SHOW_OR_UPDATE' => [
@@ -688,10 +720,12 @@ return [
         'DEBUG' => 'DEBUG'
     ],
 
+    // 未使用
     'DISTRIBUTION' => [
-        'DISTRIBUTION' => 2
+        'DISTRIBUTION' => 1
     ],
 
+    // 未使用
     'DISTRIBUTION_VALUE' => [
         '43z' => 1,
         'SSJJOO' => 2,
@@ -715,11 +749,12 @@ return [
         'account_id' => 'SSJJOO00'
     ],
 
-    // メニュー項目数
+    // メニュー項目数   未使用
     'MENUITEMCOUNT' => [
         'count' => 26
     ],
 
+    // 未使用
     'MENUITEM' => [
         'calc_block' => 1,
         'daily' => 2,
@@ -746,7 +781,9 @@ return [
         'edit_user' => 23,
         'operation_block' => 24,
         'user_pass' => 25,
-        'file_download' => 26
+        'file_download' => 26,
+        'edit_worktime_user' => 101,
+        'edit_worktime_user_conditional' => 102
     ]
 
 ];

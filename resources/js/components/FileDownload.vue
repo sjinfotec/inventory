@@ -37,7 +37,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="this.distributionmode !== this.distributionmarutaka_value">
+              v-if="menudatas[get_c038[6]['sort_seq'] - 1]['is_select']">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -48,7 +48,8 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between"
+              v-if="menudatas[get_c038[28]['sort_seq'] - 1]['is_select']">
               <!-- panel header -->
               <daily-working-information-panel-header
                 v-bind:header-text1="'◆遠隔リモートインストールファイルダウンロード'"
@@ -59,7 +60,8 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between"
+              v-if="menudatas[get_c038[28]['sort_seq'] - 1]['is_select']">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -70,7 +72,8 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between"
+              v-if="authusers['role'] === get_c025[2]['code']">
               <!-- panel header -->
               <daily-working-information-panel-header
                 v-bind:header-text1="'◆ツールファイルダウンロード'"
@@ -81,7 +84,8 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between"
+              v-if="authusers['role'] === get_c025[2]['code']">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -104,7 +108,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="this.login_user_role === this.login_adminuser_role && this.distributionmode === this.distributionmarutaka_value">
+              v-if="menudatas[get_c038[29]['sort_seq'] - 1]['is_select'] && authusers['role'] === get_c025[2]['code']">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -116,8 +120,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="this.login_user_role === this.login_adminuser_role && this.distributionmode === this.distributionmarutaka_value">
-            >
+              v-if="menudatas[get_c038[29]['sort_seq'] - 1]['is_select'] && authusers['role'] === get_c025[2]['code']">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -129,8 +132,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="this.editionmode === this.editionclient_value || this.editionmode === this.editionssjjoo_value"
-            >
+              v-if="menudatas[get_c038[30]['sort_seq'] - 1]['is_select']">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -142,8 +144,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="this.editionmode === this.editionclient_value || this.editionmode === this.editionssjjoo_value"
-            >
+              v-if="menudatas[get_c038[30]['sort_seq'] - 1]['is_select']">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -243,8 +244,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="this.distributionmode !== this.distributionmarutaka_value"
-            >
+              v-if="menudatas[get_c038[6]['sort_seq'] - 1]['is_select']">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -256,8 +256,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="this.distributionmode !== this.distributionmarutaka_value"
-            >
+              v-if="menudatas[get_c038[6]['sort_seq'] - 1]['is_select']">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -268,7 +267,8 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between"
+              v-if="menudatas[get_c038[28]['sort_seq'] - 1]['is_select']">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -279,7 +279,8 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between"
+              v-if="menudatas[get_c038[28]['sort_seq'] - 1]['is_select']">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -299,6 +300,10 @@
 </template>
 <script>
 
+// CONST
+const CONST_C025 = 'C025';
+const CONST_C038 = 'C038';
+
 export default {
   name: "FileDownload",
   props: {
@@ -306,95 +311,51 @@ export default {
         type: Array,
         default: []
     },
-    generaluser: {
-        type: Number,
-        default: 0
+    accountdatas: {
+        type: Array,
+        default: []
     },
-    generalapproveruser: {
-        type: Number,
-        default: 0
+    menudatas: {
+        type: Array,
+        default: []
     },
-    adminuser: {
-        type: Number,
-        default: 0
+    const_generaldatas: {
+        type: Array,
+        default: []
+    }
+  },
+  computed: {
+    get_c025: function() {
+      var i = 0;
+      let $this = this;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C025) {
+          $this.const_C025_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });
+      return this.const_C025_data;
     },
-    distribution: {
-        type: Number,
-        default: 0
-    },
-    distribution43z: {
-        type: Number,
-        default: 0
-    },
-    distributionssjjoo: {
-        type: Number,
-        default: 0
-    },
-    distributionmarutaka: {
-        type: Number,
-        default: 0
-    },
-    edition: {
-        type: Number,
-        default: 0
-    },
-    editiondemo: {
-        type: Number,
-        default: 0
-    },
-    editiontrial: {
-        type: Number,
-        default: 0
-    },
-    editioncroud: {
-        type: Number,
-        default: 0
-    },
-    editionssjjoo: {
-        type: Number,
-        default: 0
-    },
-    editionclient: {
-        type: Number,
-        default: 0
+    get_c038: function() {
+      var i = 0;
+      let $this = this;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C038) {
+          $this.const_C038_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });
+      return this.const_C038_data;
     }
   },
   data() {
     return {
-      login_user_code: 0,
-      login_user_role: 0,
-      login_generaluser_role: 0,
-      login_generalapproveruser_role: 0,
-      login_adminuser_role: 0,
-      distributionmode : 0,
-      distribution43z_value : 0,
-      distributionssjjoo_value : 0,
-      distributionmarutaka_value : 0,
-      editionmode : 0,
-      editiondemo_value : 0,
-      editiontrial_value : 0,
-      editioncroud_value : 0,
-      editionssjjoo_value : 0,
-      editionclient_value : 0
+      const_C025_data: [],
+      const_C038_data: []
     };
   },
   // マウント時
   mounted() {
-    this.login_user_code = this.authusers['code'];
-    this.login_user_role = this.authusers['role'];
-    this.login_generaluser_role = this.generaluser;
-    this.login_generalapproveruser_role = this.generalapproveruser;
-    this.login_adminuser_role = this.adminuser;
-    this.distributionmode = this.distribution;
-    this.distribution43z_value = this.distribution43z;
-    this.distributionssjjoo_value = this.distributionssjjoo;
-    this.distributionmarutaka_value = this.distributionmarutaka;
-    this.editionmode = this.edition;
-    this.editiondemo_value = this.editiondemo;
-    this.editiontrial_value = this.editiontrial;
-    this.editioncroud_value = this.editioncroud;
-    this.editionssjjoo_value = this.editionssjjoo;
-    this.editionclient_value = this.editionclient;
   },
   methods: {
     // -------------------- サーバー処理 ----------------------------

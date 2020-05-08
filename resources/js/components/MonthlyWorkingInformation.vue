@@ -206,22 +206,23 @@
           <div class="card-body mb-3 py-0 pt-4 border-top print-none">
             <!-- panel contents -->
             <!-- ----------- ボタン部 START ---------------- -->
-              <!-- .row -->
-              <div class="row" v-for="(item,index) in const_C037_data">
-                <div class="col-md-12 pb-2">
-                  <!-- col -->
-                  <btn-csv-download
-                    v-bind:btn-mode="item['code']"
-                    v-bind:csv-data="calcresults"
-                    v-bind:general-data="const_C037_data"
-                    v-bind:is-csvbutton="iscsvbutton"
-                    v-bind:csv-date="datejaFormat"
-                  >
-                  </btn-csv-download>
-                  <!-- /.col -->
-                </div>
-              <!-- /.row -->
+            <!-- .row -->
+            <div class="row" v-for="(item,index) in get_c037">
+              <div class="col-md-12 pb-2">
+                <!-- col -->
+                <btn-csv-download
+                  v-bind:btn-mode="item['code']"
+                  v-bind:csv-data="calcresults"
+                  v-bind:general-data="get_c037"
+                  v-bind:general-description="item['description']"
+                  v-bind:is-csvbutton="iscsvbutton"
+                  v-bind:csv-date="datejaFormat"
+                >
+                </btn-csv-download>
+                <!-- /.col -->
+              </div>
             </div>
+            <!-- /.row -->
             <!-- ----------- ボタン部 END ---------------- -->
             <!-- /.panel contents -->
           </div>
@@ -370,11 +371,6 @@
         </div>
       </div>
       <!-- /.panel -->
-    </div>
-    <!-- ========================== 表示部 END ========================== -->
-    <!-- /main contentns row -->
-    <!-- main contentns row -->
-    <div class="row justify-content-between print-none" v-if="serchorshow === 'show'">
       <!-- .panel -->
       <div class="col-md pt-3">
         <div class="card shadow-pl">
@@ -397,35 +393,36 @@
           </div>
           <!-- /collapse -->
           <!-- panel body -->
+          <!-- ----------- ボタン部 START ---------------- -->
           <div
             class="card-body mb-3 py-0 pt-4 border-top print-none"
-            v-if="const_C037_data.length > 0"
           >
             <!-- panel contents -->
-            <!-- ----------- ボタン部 START ---------------- -->
-              <!-- .row -->
-              <div class="row" v-for="(item,index) in const_C037_data">
-                <div class="col-md-12 pb-2">
-                  <!-- col -->
-                  <btn-csv-download
-                    v-bind:btn-mode="item['code']"
-                    v-bind:csv-data="calcresults"
-                    v-bind:general-data="const_C037_data"
-                    v-bind:is-csvbutton="iscsvbutton"
-                    v-bind:csv-date="datejaFormat"
-                  >
-                  </btn-csv-download>
-                  <!-- /.col -->
-                </div>
+            <!-- .row -->
+            <div class="row" v-for="(item,index) in get_c037">
+              <div class="col-md-12 pb-2">
+                <!-- col -->
+                <btn-csv-download
+                  v-bind:btn-mode="item['code']"
+                  v-bind:csv-data="calcresults"
+                  v-bind:general-data="get_c037"
+                  v-bind:general-description="item['description']"
+                  v-bind:is-csvbutton="iscsvbutton"
+                  v-bind:csv-date="datejaFormat"
+                >
+                </btn-csv-download>
+                <!-- /.col -->
               </div>
-              <!-- /.row -->
-            <!-- ----------- ボタン部 END ---------------- -->
+            </div>
+            <!-- /.row -->
           </div>
+          <!-- ----------- ボタン部 END ---------------- -->
         </div>
         <!-- /panel -->
       </div>
       <!-- /main contentns row -->
     </div>
+    <!-- ========================== 表示部 END ========================== -->
   </div>
 </template>
 <script>
@@ -433,6 +430,9 @@ import moment from "moment";
 import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
+
+// CONST
+const CONST_C037 = 'C037';
 
 export default {
   name: "monthlyworkingtime",
@@ -442,9 +442,24 @@ export default {
         type: Array,
         default: []
     },
-    c037datas: {
+    const_generaldatas: {
         type: Array,
         default: []
+    }
+  },
+  computed: {
+    get_c037: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C037) {
+          if (item.code <= 2) {
+            $this.const_C037_data.push($this.const_generaldatas[i]);
+          }
+        }
+        i++;
+      });    
+      return this.const_C037_data;
     }
   },
   data: function() {
@@ -490,9 +505,6 @@ export default {
   mounted() {
     this.login_user_code = this.authusers['code'];
     this.login_user_role = this.authusers['role'];
-    for(var i=0;i<=1;i++) {
-      this.const_C037_data.push(this.c037datas[i]);
-    }
     // 今月初末を取得
     const defaultfromDate = moment().startOf('month');
     const defaulttoDate = moment().endOf('month');

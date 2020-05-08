@@ -377,11 +377,16 @@ Vue.component(
     require("./components/EditAttendanceLog.vue").default
 );
 
-
 // 勤務状況テーブル
 Vue.component(
     "table-working-status",
     require("./components/TableWorkingStatus.vue").default
+);
+
+// 地図Map
+Vue.component(
+    "show-map-dialog",
+    require("./components/ShowMapDialog.vue").default
 );
 
 /**
