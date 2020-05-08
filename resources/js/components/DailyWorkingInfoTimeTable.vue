@@ -1,11 +1,11 @@
 <template>
   <td
-    class="text-left text-align-left mw-rem-4"
+    class="tableClass"
     v-if="calcList.holiday_description === '1日集計対象休暇'"
   >
   </td>
   <td
-    class="text-left text-align-left mw-rem-4"
+    class="tableClass"
     v-else-if="menuData[userIndex]['is_select'] === 0 && menuData[userconIndex]['is_select'] === 0"
     data-toggle="tooltip"
     data-placement="top"
@@ -14,7 +14,7 @@
     {{ calcList.working_time }}
   </td>
   <td
-    class="text-left text-align-left mw-rem-4"
+    class="tableClass"
     v-else-if="menuData[userIndex]['is_select'] === 1 && calcList.x_positions && calcList.editor_department_code"
     style="color:#ff0000"
     data-toggle="tooltip"
@@ -31,7 +31,7 @@
     />
   </td>
   <td
-    class="text-left text-align-left mw-rem-4"
+    class="tableClass"
     v-else-if="menuData[userIndex]['is_select'] === 1 && !calcList.x_positions && calcList.editor_department_code"
     style="color:#ff0000"
     data-toggle="tooltip"
@@ -42,7 +42,7 @@
     {{ calcList.working_time }}
   </td>
   <td
-    class="text-left text-align-left mw-rem-4"
+    class="tableClass"
     v-else-if="menuData[userIndex]['is_select'] === 1 && calcList.x_positions && !calcList.editor_department_code"
   >
     {{ calcList.working_time }}
@@ -54,13 +54,13 @@
     />
   </td>
   <td
-    class="text-left text-align-left mw-rem-4"
+    class="tableClass"
     v-else-if="menuData[userIndex]['is_select'] === 1 && !calcList.x_positions && !calcList.editor_department_code"
   >
     {{ calcList.working_time }}
   </td>
   <td
-    class="text-left text-align-left mw-rem-4"
+    class="tableClass"
     v-else-if="menuData[userconIndex]['is_select'] === 1 && calcList.x_positions && calcList.editor_department_code && accountData === ssjjooId && loginUser === edituserId"
     style="color:#ff0000"
     data-toggle="tooltip"
@@ -77,7 +77,7 @@
     />
   </td>
   <td
-    class="text-left text-align-left mw-rem-4"
+    class="tableClass"
     v-else-if="menuData[userconIndex]['is_select'] === 1 && !calcList.x_positions && calcList.editor_department_code && accountData === ssjjooId && loginUser === edituserId"
     style="color:#ff0000"
     data-toggle="tooltip"
@@ -88,7 +88,7 @@
     {{ calcList.working_time }}
   </td>
   <td
-    class="text-left text-align-left mw-rem-4"
+    class="tableClass"
     v-else-if="menuData[userconIndex]['is_select'] === 1 && calcList.x_positions && !calcList.editor_department_code && accountData === ssjjooId && loginUser === edituserId"
   >
     {{ calcList.working_time }}
@@ -100,13 +100,13 @@
     />
   </td>
   <td
-    class="text-left text-align-left mw-rem-4"
+    class="tableClass"
     v-else-if="menuData[userconIndex]['is_select'] === 1 && !calcList.x_positions && !calcList.editor_department_code && accountData === ssjjooId && loginUser === edituserId"
   >
     {{ calcList.working_time }}
   </td>
   <td
-    class="text-left text-align-left mw-rem-4"
+    class="tableClass"
     v-else
   >
     {{ calcList.working_time }}
@@ -156,6 +156,10 @@ export default {
     edituserId: {
       type: String,
       default: ""
+    },
+    tableClass: {
+      type: String,
+      default: "text-left text-align-left mw-rem-4"
     }
   },
   data: function() {
