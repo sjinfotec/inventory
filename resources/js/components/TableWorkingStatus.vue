@@ -34,12 +34,20 @@
                       working_time: item['record_time_name'],
                       holiday_description: null
                     }"
+                    v-bind:login-user="loginUser"
+                    v-bind:login-role="loginRole"
+                    v-bind:account-data="accountData"
+                    v-bind:menu-data="menuData"
+                    v-bind:user-index="userindex"
+                    v-bind:usercon-index="userconindex"
+                    v-bind:ssjjoo-id="ssjjoo_id"
+                    v-bind:edituser-id="edit_user_id"
                     v-on:click-event="showMap(
-                        item['record_time_name'],
-                        item['user_name'],
-                        item['x_positions'],
-                        item['y_positions'],
-                        item['mode_name'])"
+                      item['record_time_name'],
+                      item['user_name'],
+                      item['x_positions'],
+                      item['y_positions'],
+                      item['mode_name'])"
                   >
                   </daily-working-info-time-table>
                   <td class="text-center align-middle mw-rem-5">{{ item['mode_name'] }}</td>
@@ -124,6 +132,12 @@ import { dialogable } from "../mixins/dialogable.js";
 import { checkable } from "../mixins/checkable.js";
 import { requestable } from "../mixins/requestable.js";
 
+// const
+const C_USER_INDEX = 26;              // 編集者表示
+const C_USER_CON_INDEX = 27;          // 条件付き編集者表示
+const C_SSJJOO_ID = 'SSJJOO00';       // 三条ID
+const C_EDIT_USER = '23';             // 三条編集者ID
+
 export default {
   name: "TableWorkingStatus",
   mixins: [dialogable, checkable, requestable],
@@ -131,6 +145,36 @@ export default {
     targetDate: {
       type: String,
       default: ""
+    },
+    loginUser: {
+      type: String,
+      default: ""
+    },
+    loginRole: {
+      type: String,
+      default: ""
+    },
+    accountData: {
+      type: String,
+      default: ""
+    },
+    menuData: {
+      type: Array,
+      default: []
+    },
+  },
+  computed: {
+    userindex: function() {
+      return C_USER_INDEX;
+    },
+    userconindex: function() {
+      return C_USER_CON_INDEX;
+    },
+    ssjjoo_id: function() {
+      return C_SSJJOO_ID;
+    },
+    edit_user_id: function() {
+      return C_EDIT_USER;
     }
   },
   data() {
