@@ -38,7 +38,9 @@
 	<!-- /main contentns row -->
 	@endif
 	@can('admin-higher')
-		<setting-calendar></setting-calendar>
+		<setting-calendar
+			v-bind:const_generaldatas="{{ $const_general_datas }}"
+		></setting-calendar>
 	@endcan
 	<!-- /main contentns row -->
 @endsection
