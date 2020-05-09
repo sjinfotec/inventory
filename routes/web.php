@@ -82,14 +82,11 @@ Route::post('/edit_work_times/fixtime', 'EditWorkTimesController@fixtime')->midd
 Route::post('/edit_work_times/del', 'EditWorkTimesController@del')->middleware('auth');
 Route::post('/edit_work_times/add', 'EditWorkTimesController@add')->middleware('auth');
 // シフト
-Route::get('/create_shift_time', 'CreateShiftTimeController@index')->middleware('auth');
-Route::post('/create_shift_time/store', 'CreateShiftTimeController@store')->middleware('auth');
-Route::post('/create_shift_time/get', 'CreateShiftTimeController@get')->middleware('auth');
-Route::post('/create_shift_time/del', 'CreateShiftTimeController@del')->middleware('auth');
+// Route::get('/create_shift_time', 'CreateShiftTimeController@index')->middleware('auth');        // 未使用
+// Route::post('/create_shift_time/store', 'CreateShiftTimeController@store')->middleware('auth'); // 未使用
+// Route::post('/create_shift_time/get', 'CreateShiftTimeController@get')->middleware('auth');     // 未使用
+// Route::post('/create_shift_time/del', 'CreateShiftTimeController@del')->middleware('auth');     // 未使用
 Route::get('/setting_shift_time', 'SttingShiftTimeController@index')->middleware('auth');
-Route::post('/get_user_list', 'ApiCommonController@getUserList')->middleware('auth');
-Route::post('/get_user_list/csv', 'ApiCommonController@getUserListCsv')->middleware('auth');
-Route::post('/get_user_shift', 'ApiCommonController@getShiftInformation')->middleware('auth');
 Route::post('/setting_shift_time/del', 'SttingShiftTimeController@del')->middleware('auth');
 Route::post('/setting_shift_time/store', 'SttingShiftTimeController@store')->middleware('auth');
 Route::post('/setting_shift_time/range_del', 'SttingShiftTimeController@rangeDel')->middleware('auth');
@@ -168,6 +165,9 @@ Route::post('/get_demand_list', 'ApiCommonController@getDemandList')->middleware
 Route::post('/get_confirm_list', 'ApiCommonController@getConfirmlList')->middleware('auth');
 Route::post('/get_company_info_apply', 'ApiCommonController@getCompanyInfoApply')->middleware('auth');
 Route::post('/approval_root_list', 'ApiCommonController@getApprovalroutenoList')->middleware('auth');
+Route::post('/get_user_list', 'ApiCommonController@getUserList')->middleware('auth');
+Route::post('/get_user_list/csv', 'ApiCommonController@getUserListCsv')->middleware('auth');
+Route::post('/get_user_shift', 'ApiCommonController@getShiftInformation')->middleware('auth');
 // 締日取得
 Route::post('/get_closing_day', 'ApiCommonController@getClosingDay')->middleware('auth');
 // ユーザー権限取得

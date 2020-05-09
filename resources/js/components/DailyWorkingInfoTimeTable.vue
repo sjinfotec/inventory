@@ -107,6 +107,18 @@
   </td>
   <td
     :class="classText"
+    v-else-if="menuData[userconIndex]['is_select'] === 1 && calcList.x_positions"
+  >
+    {{ calcList.working_time }}
+    <img
+      class="icon-size-sm svg_img orange600"
+      src="/images/red_map_pin.svg"
+      v-on:click="selClick()"
+      alt
+    />
+  </td>
+  <td
+    :class="classText"
     v-else
   >
     {{ calcList.working_time }}
