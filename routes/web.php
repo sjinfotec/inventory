@@ -126,6 +126,7 @@ Route::get('/setting_calendar', 'EditCalendarController@index')->middleware('aut
 Route::post('/setting_calendar/get', 'EditCalendarController@getDetail')->middleware('auth');
 Route::post('/setting_calendar/fix', 'EditCalendarController@fix')->middleware('auth');
 Route::post('/setting_calendar/fixbatch', 'EditCalendarController@fixbatch')->middleware('auth');
+Route::post('/setting_calendar/fixbatchw', 'EditCalendarController@fixbatchW')->middleware('auth');
 Route::post('/setting_calendar/init', 'EditCalendarController@init')->middleware('auth');
 Route::post('/setting_calendar/copyinit', 'EditCalendarController@copyinit')->middleware('auth');
 // ユーザー情報設定

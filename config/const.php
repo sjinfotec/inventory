@@ -387,7 +387,10 @@ return [
         'user_pass' => 25,
         'file_download' => 26,
         'edit_worktime_user' => 27,
-        'edit_worktime_user_conditional' => 28
+        'edit_worktime_user_conditional' => 28,
+        'TeamViewer' => 29,
+        'account_admin' => 30,
+        'clientServer' => 31
     ],
  
     'C999' => [

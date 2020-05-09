@@ -303,7 +303,7 @@ class EditCalendarController extends Controller
     }
     
     /**
-     * 一括更新
+     * 一括更新（日付）
      *
      * @param [type] $converts
      * @return void
@@ -372,13 +372,160 @@ class EditCalendarController extends Controller
             }
             $fromdate = $params['fromdate'];
             $businessdays = $params['businessdays'];
+            // 指定月の指定曜日の日付を配列に設定する
+            $array_fix_date = array();
+            $array_fix_date[] = array(
+                'fromdate' => $fromdate,
+                'todate' => $todate
+            );
             // fixDataBatch implement
             $array_impl_fixDataBatch = array (
                 'department_code' => $departmentcode,
                 'employment_status' => $employmentstatus,
                 'user_code' => $usercode,
-                'fromdate' => $fromdate,
-                'todate' => $todate,
+                'fixdates' => $array_fix_date,
+                'businessdays' => $businessdays,
+                'holidays' => $holidays
+            );
+            $this->fixDataBatch($array_impl_fixDataBatch);
+            return response()->json(
+                ['result' => $result,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+    
+    /**
+     * 一括更新（曜日）
+     *
+     * @param [type] $converts
+     * @return void
+     */
+    public function fixbatchW(Request $request){
+        $this->array_messagedata = array();
+        $details = array();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['fromyear'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "fromyear", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (!isset($params['frommonth'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "frommonth", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (!isset($params['weekdays'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "weekdays", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (!isset($params['businessdays'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "businessdays", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $fromyear = $params['fromyear'];
+            $frommonth = $params['frommonth'];
+            $weekdays = $params['weekdays'];
+            $businessdays = $params['businessdays'];
+            $employmentstatus = null;
+            if (isset($params['employmentstatus'])) {
+                if ($params['employmentstatus'] != "") {
+                    $employmentstatus = $params['employmentstatus'];
+                }
+            }
+            $departmentcode = null;
+            if (isset($params['departmentcode'])) {
+                if ($params['departmentcode'] != "") {
+                    $departmentcode = $params['departmentcode'];
+                }
+            }
+            $usercode = null;
+            if (isset($params['usercode'])) {
+                if ($params['usercode'] != "") {
+                    $usercode = $params['usercode'];
+                }
+            }
+            $holidays = null;
+            if (isset($params['holidays'])) {
+                if ($params['holidays'] != "") {
+                    $holidays = $params['holidays'];
+                }
+            }
+            // 指定年月の１日の曜日を取得
+            $dt = new Carbon($fromyear.$frommonth.'01');
+            $first_week = $dt->dayOfWeek;       // 0 (日曜)から 6 (土曜) を取得する
+            Log::debug('fixbatchW $first_week = '.$first_week);
+            // １日の曜日とパラメータの曜日の差分を求める
+            // $weekdaysは0 (月曜)から 6 (日曜) 
+            if ($weekdays == 6) {
+                $edt_weekdays = 0;
+            } else {
+                $edt_weekdays = $weekdays + 1;
+            }
+            $diff = $edt_weekdays - $first_week;
+            // 差分より指定曜日の初めの日付を求める
+            $day = 1;
+            if($diff < 0) { 
+                $day += $diff + 7;              // 1日の曜日より前の曜日の場合 
+            } else { 
+                $day += $diff;                  // 1日の曜日より後の曜日の場合 
+            }
+            // 指定月の指定曜日の日付を配列に設定する
+            $array_fix_date = array();
+            $dt = new Carbon($fromyear.$frommonth.str_pad($day, 2, 0, STR_PAD_LEFT));
+            Log::debug('fixbatchW $dt = '.$dt);
+            $dt1 = $dt;
+            while(true) {
+                $set_date = date_format($dt, 'Ymd');
+                Log::debug('fixbatchW $set_date = '.$set_date);
+                $chk_month = date_format($dt, 'm');
+                if ($chk_month != $frommonth) {
+                    break;
+                }
+                $array_fix_date[] = array(
+                    'fromdate' => $set_date,
+                    'todate' => $set_date
+                );
+                $dt = $dt1->addWeek(1); 
+            }
+            // fixDataBatch implement
+            $array_impl_fixDataBatch = array (
+                'department_code' => $departmentcode,
+                'employment_status' => $employmentstatus,
+                'user_code' => $usercode,
+                'fixdates' => $array_fix_date,
                 'businessdays' => $businessdays,
                 'holidays' => $holidays
             );
@@ -414,11 +561,15 @@ class EditCalendarController extends Controller
             $calendar_model->setParamemploymentstatusAttribute($params['employment_status']);
             $calendar_model->setParamusercodeAttribute($params['user_code']);
             $calendar_model->setUpdatedatAttribute($systemdate);
-            $calendar_model->setParamfromdateAttribute($params['fromdate']);
-            $calendar_model->setParamtodateAttribute($params['todate']);
             $calendar_model->setBusinesskubunAttribute($params['businessdays']);
             $calendar_model->setHolidaykubunAttribute($params['holidays']);
-            $calendar_model->updateCalendar();
+            foreach ($params['fixdates'] as $item) {
+                Log::debug('fixDataBatch $item[fromdate] = '.$item['fromdate']);
+                Log::debug('fixDataBatch $item[todate] = '.$item['todate']);
+                $calendar_model->setParamfromdateAttribute($item['fromdate']);
+                $calendar_model->setParamtodateAttribute($item['todate']);
+                $calendar_model->updateCalendar();
+            }
             DB::commit();
 
         }catch(\PDOException $pe){

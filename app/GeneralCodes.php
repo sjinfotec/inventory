@@ -93,6 +93,32 @@ class GeneralCodes extends Model
         $this->code_name = $value;
     }
 
+    private $secound_code_name;             // 項目名略称
+
+    // 項目名
+    public function getSecoundcodenameAttribute()
+    {
+        return $this->secound_code_name;
+    }
+
+    public function setSecoundcodenameAttribute($value)
+    {
+        $this->secound_code_name = $value;
+    }
+
+    private $use_free_item;                 // 用途フリー項目
+
+    // 項目名
+    public function getUsefreeitemAttribute()
+    {
+        return $this->use_free_item;
+    }
+
+    public function setUsefreeitemAttribute($value)
+    {
+        $this->use_free_item = $value;
+    }
+
     private $created_user;                  // 作成ユーザー
 
     // 作成ユーザー
@@ -221,6 +247,8 @@ class GeneralCodes extends Model
                     $this->table.'.identification_name as identification_name',
                     $this->table.'.description as description',
                     $this->table.'.code_name as code_name',
+                    $this->table.'.secound_code_name as secound_code_name',
+                    $this->table.'.use_free_item as use_free_item',
                     $this->table.'.is_deleted as is_deleted'
                 );
             if (isset($this->param_identification_id)) {
