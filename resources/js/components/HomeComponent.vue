@@ -193,7 +193,7 @@
           v-bind:target-date="''"
           v-bind:login-user="authusers['code']"
           v-bind:login-role="authusers['role']"
-          v-bind:account-data="accountdatas"
+          v-bind:account-data="accountdatas['account_id']"
           v-bind:menu-data="menudatas"
         >
         </table-working-status>

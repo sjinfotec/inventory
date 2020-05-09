@@ -211,7 +211,7 @@
                 v-bind:btn-mode="btnmodeswitch"
                 v-bind:login-user="authusers['code']"
                 v-bind:login-role="authusers['role']"
-                v-bind:account-data="accountdatas"
+                v-bind:account-data="accountdatas['account_id']"
                 v-bind:menu-data="menudatas"
               ></daily-working-info-table>
               <!-- ----------- 日次集計テーブル END ---------------- -->
