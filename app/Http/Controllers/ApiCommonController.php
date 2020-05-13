@@ -2884,4 +2884,36 @@ class ApiCommonController extends Controller
         }
     }
 
+     /**
+     * 有給単位リスト取得
+     *
+     * @return list
+     */
+    public function getPaidTypeList(Request $request){
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            $details =
+                DB::table($this->table_generalcodes)
+                    ->where('identification_id', Config::get('const.C036.value'))
+                    ->where('is_deleted', 0)
+                    ->orderby('sort_seq','asc')
+                    ->get();
+
+            return response()->json(
+                ['result' => $result, 'details' => $details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
 }

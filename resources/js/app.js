@@ -27,7 +27,6 @@ var options = {
     type: "info"
 };
 
-
 Vue.use(toasted, options);
 Vue.use(VCalendar);
 Vue.use(VModal);
@@ -187,7 +186,6 @@ Vue.component(
     require("./components/EditWorkTimesTable.vue").default
 );
 
-
 Vue.component(
     "create-company-information",
     require("./components/CreateCompanyInformation.vue").default
@@ -260,7 +258,10 @@ Vue.component(
 );
 // 申請
 //  承認ルート作成
-Vue.component("create-approvalroot", require("./components/CreateApprovalRouteNo.vue").default);
+Vue.component(
+    "create-approvalroot",
+    require("./components/CreateApprovalRouteNo.vue").default
+);
 Vue.component("setting-root", require("./components/SettingRoot.vue").default); // 削除予定
 
 Vue.component("make-demand", require("./components/MakeDemand.vue").default);
@@ -377,11 +378,16 @@ Vue.component(
     require("./components/EditAttendanceLog.vue").default
 );
 
-
 // 勤務状況テーブル
 Vue.component(
     "table-working-status",
     require("./components/TableWorkingStatus.vue").default
+);
+
+// 有給設定
+Vue.component(
+    "setting-paid-holiday",
+    require("./components/SettingPaidHoliday.vue").default
 );
 
 /**
