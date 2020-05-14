@@ -36,7 +36,6 @@
                       step="1"
                       class="form-control"
                       v-model="valueyear"
-                      v-on:onblur="fromyearChanges"
                     />
                   </div>
                   <!-- <input-datepicker
@@ -67,7 +66,6 @@
                       step="1"
                       class="form-control"
                       v-model="valuemonth"
-                      v-on:onblur="frommonthChanges"
                     />
                   </div>
                 </div>
@@ -284,6 +282,34 @@
               data-toggle="tooltip"
               data-placement="top"
             ></col-note>
+          </div>
+          <!-- /.row -->
+          <!-- .row -->
+          <div class="col-md-12 text-left align-middle">
+            <div class="form-check">
+              <div
+                  v-for="batchptn in get_C040"
+                  :key="batchptn.key"
+              >
+                <label>
+                  <input
+                    type="radio"
+                    v-model="batch.initptn"
+                    :value="batchptn.value"
+                      @change="batchinitptnChanges(batch.initptn)"
+                  />
+                  {{ batchptn.label }}
+                </label>
+              </div>
+            </div>
+          </div>
+          <!-- /.row -->
+          <div class="col-md-12 text-left align-middle">
+            <div class="form-check">
+              <span style="color: #009900;">
+                ※営業日区分に「法定（法定外）休日」を指定した場合は指定期間内すべてを入力内容で更新します。
+              </span>
+            </div>
           </div>
           <!-- /.row -->
           <div class="card-body pt-2">
@@ -642,7 +668,7 @@
                     <div class="form-group">
                       <div class="form-check">
                         <div
-                            v-for="formptn in formptns"
+                            v-for="formptn in get_C039"
                             :key="formptn.key"
                         >
                           <label>
@@ -650,6 +676,7 @@
                               type="radio"
                               v-model="form.initptn"
                               :value="formptn.value"
+                               @change="forminitptnChanges(form.initptn)"
                             />
                             {{ formptn.label }}
                           </label>
@@ -664,12 +691,13 @@
                             <div class="col-12">
                               <div class="table-responsive">
                                 <div class="col-12 p-0">
-                                  <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                                  <table
+                                    class="table table-striped border-bottom font-size-sm text-nowrap">
                                     <thead>
                                       <tr>
                                         <td class="text-center align-middle w-10">曜日</td>
-                                        <td class="text-center align-middle w-20 mw-rem-10">営業日区分<span class="color-red">[必須]</span></td>
-                                        <td class="text-center align-middle w-20 mw-rem-10">休暇区分</td>
+                                        <td class="text-center align-middle w-30 mw-rem-10">営業日区分<span class="color-red">[必須]</span></td>
+                                        <!-- <td class="text-center align-middle w-20 mw-rem-10">休暇区分</td> -->
                                       </tr>
                                     </thead>
                                     <tbody>
@@ -677,7 +705,11 @@
                                         <td class="text-center align-middle">{{ formweekdays[index] }}</td>
                                         <td class="text-center align-middle">
                                           <div class="input-group">
-                                            <select class="form-control" v-model="form.initptn_business[index]" @change="formbusinessDayChanges(index)">
+                                            <select
+                                              v-bind:disabled="isTabledisabled"
+                                              class="form-control"
+                                              v-model="form.initptn_business[index]"
+                                              @change="formbusinessDayChanges(index)">
                                               <option value></option>
                                               <option
                                                 v-for="blist in get_C007"
@@ -687,9 +719,13 @@
                                             </select>
                                           </div>
                                         </td>
-                                        <td class="text-center align-middle">
+                                        <!-- <td class="text-center align-middle">
                                           <div class="input-group">
-                                            <select class="form-control" v-model="form.initptn_holiday[index]" @change="formholiDayChanges(index)">
+                                            <select
+                                              v-bind:disabled="isTabledisabled"
+                                              class="form-control" 
+                                              v-model="form.initptn_holiday[index]" 
+                                              @change="formholiDayChanges(index)">
                                               <option value></option>
                                               <option
                                                 v-for="hlist in get_C013"
@@ -698,7 +734,7 @@
                                               >{{ hlist.code_name }}</option>
                                             </select>
                                           </div>
-                                        </td>
+                                        </td> -->
                                       </tr>
                                     </tbody>
                                   </table>
@@ -752,8 +788,13 @@ import {requestable} from '../mixins/requestable.js';
 
 // CONST
 const CONST_C007 = 'C007';
-const CONST_C008 = 'C008';
+const CONST_C007_ATTENDANCE = 0;    // 出勤日のindex
+// const CONST_C008 = 'C008';
 const CONST_C013 = 'C013';
+const CONST_OUT_LEGAL = 0;      // 出勤日か法定外休日かの判定文字位置（0始まり）
+const CONST_1DAY_HOLIDAY = 1;   // 1日休日かの判定文字位置（0始まり）
+const CONST_C039 = 'C039';
+const CONST_C040 = 'C040';
 
 export default {
   name: "SettingCalendar",
@@ -792,11 +833,53 @@ export default {
       var i = 0;
       this.const_generaldatas.forEach( function( item ) {
         if (item.identification_id == CONST_C013) {
-          $this.const_C013_data.push($this.const_generaldatas[i]);
+          if (item.use_free_item.substr(CONST_1DAY_HOLIDAY, 1) == "1") {
+            $this.const_C013_data.push($this.const_generaldatas[i]);
+          }
         }
         i++;
       });    
       return this.const_C013_data;
+    },
+    get_C039: function() {
+      let $this = this;
+      var i = 0;
+      var array_set = [{}];
+      var check_value = true;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C039) {
+          array_set = {
+            key: $this.const_generaldatas[i]['code'],
+            value: $this.const_generaldatas[i]['code'],
+            label: $this.const_generaldatas[i]['code_name'],
+            checked: check_value
+          };
+          $this.const_C039_data.push(array_set);
+          check_value = false;
+        }
+        i++;
+      });    
+      return this.const_C039_data;
+    },
+    get_C040: function() {
+      let $this = this;
+      var i = 0;
+      var array_set = [{}];
+      var check_value = true;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C040) {
+          array_set = {
+            key: $this.const_generaldatas[i]['code'],
+            value: $this.const_generaldatas[i]['code'],
+            label: $this.const_generaldatas[i]['code_name'],
+            checked: check_value
+          };
+          $this.const_C040_data.push(array_set);
+          check_value = false;
+        }
+        i++;
+      });    
+      return this.const_C040_data;
     }
   },
   data() {
@@ -804,6 +887,8 @@ export default {
       const_C007_data: [],
       const_C008_data: [],
       const_C013_data: [],
+      const_C039_data: [],
+      const_C040_data: [],
       selectedEmploymentValue: "",
       selectedDepartmentValue : "",
       valueDepartmentkillcheck : false,
@@ -818,6 +903,11 @@ export default {
       valueym: "",
       valueyear: "",
       valuemonth: "",
+      search_selectedEmploymentValue: "",
+      search_selectedDepartmentValue: "",
+      search_selectedUserValue: "",
+      search_valueyear: "",
+      search_valuemonth: "",
       year: "",
       month: "",
       datejaFormat: "",
@@ -844,20 +934,7 @@ export default {
       detail_dates: [],
       business: [{}],
       holiday: [{}],
-      formptns: [
-        {
-          key: 1,
-          value: 1,
-          label: '平日【出勤日】土曜日祝日【法定外休日】日曜日【法定休日】の内容で自動設定',
-          checked: true,
-        },
-        {
-          key: 2,
-          value: 2,
-          label: '曜日ごとに自動設定（下記内容を指定します。）',
-          checked: false,
-        }
-      ],
+      use_free_item: [{}],
       formweekdays: [
         '月曜日',
         '火曜日',
@@ -870,7 +947,8 @@ export default {
       form: {
         initptn : 1,
         initptn_business : ["","","","","","",""],
-        initptn_holiday : ["","","","","","",""]
+        initptn_holiday : ["","","","","","",""],
+        initptn_use_free_item : ["","","","","","",""]
       },
       detailsEdt: [],
       detailsEdtlength: 0,
@@ -878,11 +956,17 @@ export default {
       valuetoday : "",
       businessbatch : "",
       holidaybatch : "",
+      use_free_itembatch : "",
       weekbatch : "",
       businessbatch_w : "",
       holidaybatch_w : "",
+      use_free_itembatch_w : "",
       input_date : moment().format("YYYYMMDD"),
-      date_endof : moment().endOf('month').format("DD")
+      date_endof : moment().endOf('month').format("DD"),
+      isTabledisabled : true,
+      batch: {
+        initptn : 1
+      }
     };
   },
   // マウント時
@@ -892,10 +976,13 @@ export default {
     this.month = moment(this.valueym).format("MM");
     this.valueyear = this.year;
     this.valuemonth = this.month;
+    this.search_valueyear = this.year;
+    this.search_valuemonth = this.month;
     this.setPanelHeader();
   },
   created() {
-    this.form.initptn = this.formptns.find(formptn => formptn.checked).value
+    this.form.initptn = this.const_C039_data.find(formptn => formptn.checked).value
+    this.batch.initptn = this.const_C040_data.find(batchptn => batchptn.checked).value
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -1248,7 +1335,7 @@ export default {
       this.applytermdate = this.valuefromdate;
       this.getDo = 1;
       this.getUserSelected();
-      this.selectMode = '';
+      // this.selectMode = '';
       this.isinitbutton = false;
     },
     // 部署選択が変更された場合の処理
@@ -1259,7 +1346,7 @@ export default {
       this.selectedUserValue = "";
       this.getDo = 1;
       this.getUserSelected();
-      this.selectMode = '';
+      // this.selectMode = '';
       this.isinitbutton = false;
     },
     // ユーザー選択が変更された場合の処理
@@ -1267,28 +1354,31 @@ export default {
       this.selectedUserValue = value;
       this.user_name = arrayitem['name'];
       this.selectedName = this.user_name + "　" + this.date_name + "分勤怠編集" ;
-      this.selectMode = '';
+      // this.selectMode = '';
       this.isinitbutton = false;
     },
     // 指定年が変更された場合の処理
     fromyearChanges: function(value) {
       this.valueyear = value;
+      this.search_valueyear = value;
       // パネルに表示
       this.setPanelHeader();
-      this.selectMode = '';
+      // this.selectMode = '';
       this.isinitbutton = false;
     },
     // 指定年がクリアされた場合の処理
     fromyearCleared: function() {
       this.valueyear = "";
+      this.search_valueyear = "";
       // パネルに表示
       this.setPanelHeader();
-      this.selectMode = '';
+      // this.selectMode = '';
       this.isinitbutton = false;
     },
     // 指定月が変更された場合の処理
     frommonthChanges: function(value) {
       this.valuemonth = value;
+      this.search_valuemonth = value;
       this.showC024list = false;
       this.showC034list = true;
       this.selectedC024Value = "";
@@ -1296,12 +1386,13 @@ export default {
       // this.refreshC024C034list(this.showC024list ,this.showC034list);
       // パネルに表示
       this.setPanelHeader();
-      this.selectMode = '';
+      // this.selectMode = '';
       this.isinitbutton = false;
     },
     // 指定月がクリアされた場合の処理
     frommonthCleared: function() {
       this.valuemonth = "";
+      this.search_valuemonth = "";
       this.selectedC024Value = "";
       this.selectedC034Value = "";
       this.showC024list = true;
@@ -1309,7 +1400,7 @@ export default {
       // this.refreshC024C034list(this.showC024list ,this.showC034list);
       // パネルに表示
       this.setPanelHeader();
-      this.selectMode = '';
+      // this.selectMode = '';
       this.isinitbutton = false;
     },
     // 設定区分が変更された場合の処理
@@ -1326,46 +1417,70 @@ export default {
     },
     // 出勤区分が変更された場合の処理
     businessDayChanges: function(value, index) {
-      if (value < 2) {
-        this.holiday[index] = null;
-      }
+      // if (value < 2) {
+      //   this.holiday[index] = null;
+      //   this.use_free_item[index] = null;
+      // }
+      this.holiday[index] = null;
+      this.use_free_item[index] = null;
     },
     // 休暇区分が変更された場合の処理
     holiDayChanges: function(value, index) {
+      this.use_free_item[index] = this.setUsefreeitemAuto(value);
       this.business[index] = this.setBussinessAuto(value);
     },
     // 出勤区分が変更された場合の処理
     businessbatchChanges: function(value) {
-      if (value < 2) {
-        this.holidaybatch = null;
-      }
+      // if (value < 2) {
+      //   this.holidaybatch = null;
+      //   this.use_free_itembatch = null;
+      // }
+      this.holidaybatch = null;
+      this.use_free_itembatch = null;
     },
     // 休暇区分が変更された場合の処理
     holiDaybatchChanges: function(value) {
+      this.use_free_itembatch = this.setUsefreeitemAuto(value);
       this.businessbatch = this.setBussinessAuto(value);
     },
     // 曜日が変更された場合の処理
     weekdaysChanges: function(value) {
-      console.log('weekdaysChanges value = ' + value);
     },
     // 出勤区分が変更された場合の処理
     businessbatchWChanges: function(value) {
-      if (value < 2) {
-        this.holidaybatch_w = null;
-      }
+      // if (value < 2) {
+      //   this.holidaybatch_w = null;
+      //   this.use_free_itembatch_w = null;
+      // }
+      this.holidaybatch_w = null;
+      this.use_free_itembatch_w = null;
     },
     // 休暇区分が変更された場合の処理
     holiDaybatchWChanges: function(value) {
+      this.use_free_itembatch_w = this.setUsefreeitemAuto(value);
       this.businessbatch_w = this.setBussinessAuto(value);
     },
     // 出勤区分が変更された場合の処理
     formbusinessDayChanges: function(index) {
-      if (this.form.initptn_business[index] < 2) {
-        this.form.initptn_holiday[index] = null;
+      // if (this.form.initptn_business[index] < 2) {
+      //   this.form.initptn_holiday[index] = null;
+      //   this.form.initptn_use_free_item[index] = null;
+      // }
+      this.form.initptn_holiday[index] = null;
+      this.form.initptn_use_free_item[index] = null;
+    },
+    //選択が変更された場合の処理
+    forminitptnChanges: function(value) {
+      if (value == 1) {
+        this.isTabledisabled = true;
+      }else if (value == 2) {
+        this.isTabledisabled = false;
       }
     },
+
     // 休暇区分が変更された場合の処理
     formholiDayChanges: function(index) {
+      this.form.initptn_use_free_item[index] = this.setUsefreeitemAuto(this.form.initptn_holiday[index]);
       this.form.initptn_business[index] = this.setBussinessAuto(this.form.initptn_holiday[index]);
     },
     // 表示ボタンクリック処理
@@ -1374,6 +1489,11 @@ export default {
       this.inputClear();
       this.messageClear();
       if (this.checkFormEdt()) {
+        this.search_selectedEmploymentValue = this.selectedEmploymentValue;
+        this.search_selectedDepartmentValue = this.selectedDepartmentValue;
+        this.search_selectedUserValue = this.selectedUserValue;
+        this.fromyearChanges(this.valueyear);
+        this.frommonthChanges(this.valuemonth);
         this.selectMode = 'DSP';
         this.isinitbutton = false;
         this.getItem();
@@ -1391,6 +1511,7 @@ export default {
       for (var i=0; i<detailsEdtdatedata.length; i++) {
         this.business[i] = detailsEdtdatedata[i]['business_kubun'];
         this.holiday[i] = detailsEdtdatedata[i]['holiday_kubun'];
+        this.use_free_item[i] = detailsEdtdatedata[i]['use_free_item'];
       }
     },
     // 初期設定ボタンクリック処理
@@ -1401,6 +1522,10 @@ export default {
       var flag = this.checkFormInit();
       if (flag) {
         this.selectMode = 'INT';
+        this.search_selectedEmploymentValue = this.selectedEmploymentValue;
+        this.search_selectedDepartmentValue = this.selectedDepartmentValue;
+        this.search_selectedUserValue = this.selectedUserValue;
+        this.fromyearChanges(this.valueyear);
         if (this.valuemonth == "" || this.valuemonth == null) {
           this.frommonthCleared();
         } else {
@@ -1426,7 +1551,16 @@ export default {
       var flag = this.checkFormFix();
       if (flag) {
         var messages = [];
-        messages.push("この内容で更新しますか？");
+        var item_name = this.jdgSearchItemInput();
+        if (item_name != null) {
+          messages.push(item_name + "が変更されていますが、");
+          messages.push("変更前の条件で更新します。");
+          messages.push("また、すでに入力した日にデータがある場合は");
+        } else {
+          messages.push("すでに入力した日にデータがある場合は");
+        }
+        messages.push("入力内容で上書きします。");
+        messages.push("更新してよろしいですか？");
         this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
@@ -1448,8 +1582,16 @@ export default {
       var flag = this.checkFormInitstore();
       if (flag) {
         var messages = [];
-        messages.push("指定年（月）に登録しているデータを上書きしますが、");
-        messages.push("初期設定登録してもよろしいですか？");
+        var item_name = this.jdgSearchItemInput();
+        if (item_name != null) {
+          messages.push(item_name + "が変更されていますが、");
+          messages.push("変更前の条件で更新します。");
+          messages.push("また、すでに設定しているデータがある場合は");
+        } else {
+          messages.push("すでに設定しているデータがある場合は");
+        }
+        messages.push("入力内容で上書きします。");
+        messages.push("設定してよろしいですか？");
         messages.push("※指定期間が長いと処理には数分かかる場合があります。");
         this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
@@ -1492,7 +1634,12 @@ export default {
       var flag = this.checkFormBatch();
       if (flag) {
         var messages = [];
-        messages.push("この内容で一括更新しますか？");
+        var item_name = this.jdgSearchItemInput();
+        if (item_name != null) {
+          messages.push(item_name + "が変更されていますが");
+          messages.push("変更前の条件で更新します。");
+        }
+        messages.push("更新してよろしいですか？");
         this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
@@ -1514,7 +1661,12 @@ export default {
       var flag = this.checkFormBatchW();
       if (flag) {
         var messages = [];
-        messages.push("この内容で一括更新しますか？");
+        var item_name = this.jdgSearchItemInput();
+        if (item_name != null) {
+          messages.push(item_name + "が変更されていますが");
+          messages.push("変更前の条件で更新します。");
+        }
+        messages.push("更新してよろしいですか？");
         this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
@@ -1550,13 +1702,13 @@ export default {
     getItem() {
       var parammonth = null;
       this.input_date = null;
-      if (this.valuemonth != "") {
-        parammonth = moment(this.valuemonth).format("MM");
-        this.input_date = moment(this.valueyear + this.valuemonth.padStart(2, "0") + '15').format("YYYYMMDD");
+      if (this.search_valuemonth != "") {
+        parammonth = moment(this.search_valuemonth).format("MM");
+        this.input_date = moment(this.search_valueyear + this.search_valuemonth.padStart(2, "0") + '15').format("YYYYMMDD");
       } else {
         // 本来ありえない
         parammonth = moment().format("MM");
-        this.input_date = tmoment(this.valueyear + '0115').format("YYYYMMDD");
+        this.input_date = tmoment(this.search_valueyear + '0115').format("YYYYMMDD");
       }
       this.date_endof = moment(this.input_date).endOf('month').format("DD");
 
@@ -1570,11 +1722,11 @@ export default {
         onBeforeOpen: () => {
           this.$swal.showLoading();
           var arrayParams = {
-            dateyear : moment(this.valueyear + '0115').format("YYYY"),
+            dateyear : moment(this.search_valueyear + '0115').format("YYYY"),
             datemonth : parammonth,
-            employmentstatus : this.selectedEmploymentValue,
-            departmentcode : this.selectedDepartmentValue,
-            usercode : this.selectedUserValue
+            employmentstatus : this.search_selectedEmploymentValue,
+            departmentcode : this.search_selectedDepartmentValue,
+            usercode : this.search_selectedUserValue
           };
           this.postRequest("/setting_calendar/get", arrayParams)
             .then(response  => {
@@ -1592,8 +1744,8 @@ export default {
     initStore(eventname, ptn) {
       var messages = [];
       var parammonth = null;
-      if (this.valuemonth != "") {
-        parammonth = moment(this.valuemonth).format("MM");
+      if (this.search_valuemonth != "") {
+        parammonth = moment(this.search_valuemonth).format("MM");
       }
       var paramselectedC024Value = this.selectedC024Value;
       // 処理中メッセージ表示
@@ -1607,12 +1759,12 @@ export default {
           this.$swal.showLoading();
           var arrayParams = {
             ptn : ptn,
-            dateyear : moment(this.valueyear + '0115').format("YYYY"),
+            dateyear : moment(this.search_valueyear + '0115').format("YYYY"),
             datemonth : parammonth,
             displaykbn : paramselectedC024Value,
-            employmentstatus : this.selectedEmploymentValue,
-            departmentcode : this.selectedDepartmentValue,
-            usercode : this.selectedUserValue,
+            employmentstatus : this.search_selectedEmploymentValue,
+            departmentcode : this.search_selectedDepartmentValue,
+            usercode : this.search_selectedUserValue,
             formdata : this.form
           };
           this.postRequest("/setting_calendar/init", arrayParams)
@@ -1631,8 +1783,8 @@ export default {
     copyInit(eventname) {
       var messages = [];
       var parammonth = null;
-      if (this.valuemonth != "") {
-        parammonth = moment(this.valuemonth).format("MM");
+      if (this.search_valuemonth != "") {
+        parammonth = moment(this.search_valuemonth).format("MM");
       }
       var paramselectedC024Value = this.selectedC024Value;
       // 処理中メッセージ表示
@@ -1645,11 +1797,11 @@ export default {
         onBeforeOpen: () => {
           this.$swal.showLoading();
           var arrayParams = {
-            dateyear : moment(this.valueyear + '0115').format("YYYY"),
+            dateyear : moment(this.search_valueyear + '0115').format("YYYY"),
             datemonth : parammonth,
-            employmentstatus : this.selectedEmploymentValue,
-            departmentcode : this.selectedDepartmentValue,
-            usercode : this.selectedUserValue,
+            employmentstatus : this.search_selectedEmploymentValue,
+            departmentcode : this.search_selectedDepartmentValue,
+            usercode : this.search_selectedUserValue,
           };
           this.postRequest("/setting_calendar/copyinit", arrayParams)
             .then(response  => {
@@ -1665,7 +1817,12 @@ export default {
     },
     // カレンダー更新処理（明細）
     FixDetail(eventname) {
-      var arrayParams = { details : this.detailsEdt, businessdays : this.business, holidays : this.holiday };
+      var arrayParams = {
+        details : this.detailsEdt,
+        businessdays : this.business,
+        holidays : this.holiday,
+        use_free_items : this.use_free_item
+      };
       this.postRequest("/setting_calendar/fix", arrayParams)
         .then(response  => {
           this.putThenDetail(response, eventname);
@@ -1678,21 +1835,28 @@ export default {
     FixDetailbatch(eventname) {
       var paramfromdate = null;
       var paramtodate = null;
-      if (this.valuemonth != "") {
-        paramfromdate = moment(this.valueyear + this.valuemonth.padStart(2, "0") + this.valuefromday.padStart(2, "0")).format("YYYYMMDD");
+      if (this.search_valuemonth != "") {
+        paramfromdate = moment(this.search_valueyear + this.search_valuemonth.padStart(2, "0") + this.valuefromday.padStart(2, "0")).format("YYYYMMDD");
         if (this.valuetoday != "") {
-          paramtodate = moment(this.valueyear + this.valuemonth.padStart(2, "0") + this.valuetoday.padStart(2, "0")).format("YYYYMMDD");
+          paramtodate = moment(this.search_valueyear + this.search_valuemonth.padStart(2, "0") + this.valuetoday.padStart(2, "0")).format("YYYYMMDD");
         } else {
           paramtodate = paramfromdate;
         }
+        // 出勤日以外の場合は指定期間内すべて上書き更新にする
+        var batch_initptn = this.batch.initptn;
+        if (this.businessbatch != this.const_C007_data[CONST_C007_ATTENDANCE]['code']) {
+          batch_initptn = 0;
+        }
         var arrayParams = {
-            employmentstatus : this.selectedEmploymentValue,
-            departmentcode : this.selectedDepartmentValue,
-            usercode : this.selectedUserValue,
+            employmentstatus : this.search_selectedEmploymentValue,
+            departmentcode : this.search_selectedDepartmentValue,
+            usercode : this.search_selectedUserValue,
             fromdate : paramfromdate,
             todate : paramtodate,
             businessdays: this.businessbatch,
-            holidays : this.holidaybatch
+            holidays : this.holidaybatch,
+            use_free_items : this.use_free_itembatch,
+            initptn : batch_initptn
         };
         this.postRequest("/setting_calendar/fixbatch", arrayParams)
           .then(response  => {
@@ -1705,15 +1869,23 @@ export default {
     },
     // カレンダー一括更新処理（曜日）
     FixDetailbatchW(eventname) {
+      // 出勤日以外の場合は指定期間内すべて上書き更新にする
+      var batch_initptn = this.batch.initptn;
+        console.log('this.batch.initptn = ' + this.batch.initptn);
+      if (this.businessbatch != this.const_C007_data[CONST_C007_ATTENDANCE]['code']) {
+        batch_initptn = 0;
+      }
       var arrayParams = {
-          employmentstatus : this.selectedEmploymentValue,
-          departmentcode : this.selectedDepartmentValue,
-          usercode : this.selectedUserValue,
-          fromyear : this.valueyear,
-          frommonth : this.valuemonth,
+          employmentstatus : this.search_selectedEmploymentValue,
+          departmentcode : this.search_selectedDepartmentValue,
+          usercode : this.search_selectedUserValue,
+          fromyear : this.search_valueyear,
+          frommonth : this.search_valuemonth,
           weekdays : this.weekbatch,
           businessdays: this.businessbatch_w,
-          holidays : this.holidaybatch_w
+          holidays : this.holidaybatch_w,
+          use_free_items : this.use_free_itembatch_w,
+          initptn : batch_initptn
       };
       this.postRequest("/setting_calendar/fixbatchw", arrayParams)
         .then(response  => {
@@ -1730,7 +1902,7 @@ export default {
       let $this = this;
       Object.keys(this.const_C013_data).forEach(function (value, key) {
         if (code == $this.const_C013_data[key]['code']) {
-          if ($this.const_C013_data[key]['use_free_item'] == 1) {
+          if ($this.const_C013_data[key]['use_free_item'].substr(CONST_OUT_LEGAL, '1') == 1) {
             valuebusiness = 3;
           } else {
             valuebusiness = 1;
@@ -1739,15 +1911,37 @@ export default {
       });
       return valuebusiness;
     },
+    // 休暇区分による用途フリー項目の自動設定
+    setUsefreeitemAuto: function(code) {
+      var valueusefreeitem = "";
+      let $this = this;
+      Object.keys(this.const_C013_data).forEach(function (value, key) {
+        if (code == $this.const_C013_data[key]['code']) {
+          valueusefreeitem = $this.const_C013_data[key]['use_free_item'];
+        }
+      });
+      return valueusefreeitem;
+    },
     // 取得正常処理
     getThen(response) {
       this.details = [];
       this.business = [{}];
       this.holiday = [{}];
+      this.use_free_item = [{}];
       var res = response.data;
       if (res.result) {
         this.details = res.details;
         this.detail_dates = res.detail_dates;
+        if (res.messagedata.length > 0) {
+          if (this.details.length == 0) {
+            var getmessagedata = res.messagedata;
+            getmessagedata.push("カレンダー一括設定で初期設定してから");
+            getmessagedata.push("再度実行してください");
+            this.htmlMessageSwal("情報", getmessagedata, "info", true, false)
+          } else {
+            this.htmlMessageSwal("情報", res.messagedata, "info", true, false)
+          }
+        }
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("エラー", res.messagedata, "error", true, false)
@@ -1819,15 +2013,34 @@ export default {
       this.messagevalidatesCopyinit = [];
       this.messagevalidatesBatch = [];
     },
+    // 検索項目入力変更判定
+    jdgSearchItemInput: function() {
+      if (this.search_selectedEmploymentValue != this.selectedEmploymentValue) {
+        return "雇用形態";
+      }
+      if (this.search_selectedDepartmentValue != this.selectedDepartmentValue) {
+        return "所属部署";
+      }
+      if (this.search_selectedUserValue != this.selectedUserValue) {
+        return "氏名";
+      }
+      if (this.search_valueyear != this.valueyear) {
+        return "指定年";
+      }
+      if (("00" + this.search_valuemonth).slice(-2) != ("00" + this.valuemonth).slice(-2)) {
+        return "指定月";
+      }
+      return null;
+    },
     // 集計パネルヘッダ文字列編集処理
     setPanelHeader: function() {
       moment.locale("ja");
       var datejaFormat = "";
       this.stringtext = "";
       this.stringtext2 = "";
-      if (this.valueyear != null && this.valueyear != "") {
-        if (this.valuemonth != null && this.valuemonth != "") {
-          datejaFormat +=  moment(this.valueyear + this.valuemonth + '15').format("YYYY年MM月");
+      if (this.search_valueyear != null && this.search_valueyear != "") {
+        if (this.search_valuemonth != null && this.search_valuemonth != "") {
+          datejaFormat +=  moment(this.search_valueyear + ("00" + this.search_valuemonth).slice(-2) + '15').format("YYYY年MM月");
           if (this.selectMode == 'INT') {
             this.stringtext =
               datejaFormat + "のカレンダーを1日から設定";
@@ -1838,7 +2051,7 @@ export default {
               datejaFormat + "のカレンダーを一括編集";
           }
         } else {
-          datejaFormat +=  moment(this.valueyear + '0115').format("YYYY年");
+          datejaFormat +=  moment(this.search_valueyear + '0115').format("YYYY年");
           if (this.selectedC024Value != null && this.selectedC024Value != "") {
             if (this.selectedC024Value == "1") {
               this.stringtext =
