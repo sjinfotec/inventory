@@ -393,6 +393,18 @@ return [
         'clientServer' => 31
     ],
  
+    'C039' => [
+        'value' => 'C039',
+        'basic' => 1,
+        'week' => 2
+    ],
+ 
+    'C040' => [
+        'value' => 'C040',
+        'holiday_noupdate' => 1,
+        'holiday_update' => 2
+    ],
+ 
     'C999' => [
         'value' => 'C999',
         'main' => 1,
@@ -703,6 +715,7 @@ return [
         'data_exists_erorr' => 'データexistsエラー table = [{0}]',
         'data_maxget_erorr' => 'データmaxgetエラー table = [{0}]',
         'data_count_erorr' => 'データcountエラー table = [{0}]',
+        'data_access_erorr' => 'データaccessエラー table = [{0}]',
         'unknown_error' => '不明なエラー',
         'mismatch_data' => 'データ不整合',
         'not_set_time_rounding ' => '時間の端数処理が設定されていない',
@@ -757,6 +770,12 @@ return [
         'count' => 26
     ],
 
+    // 用途フリー項目
+    'USEFREEITEM' => [
+        'out_legal' => 0,           // 出勤日か法定外休日かの判定文字位置（0始まり）
+        'day_holiday' => 1          // 1日休日かの判定文字位置（0始まり）
+    ],
+    
     // 未使用
     'MENUITEM' => [
         'calc_block' => 1,

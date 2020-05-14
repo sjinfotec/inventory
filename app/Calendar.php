@@ -169,6 +169,7 @@ class Calendar extends Model
     private $paramdepartmentcode;
     private $paramemploymentstatus;
     private $paramusercode;
+    private $paramweekdaykubun;
     private $parambusinesskubun;
     private $paramholidaykubun;
     
@@ -228,6 +229,17 @@ class Calendar extends Model
     }
 
     // 曜日区分
+    public function getParamweekdaykubunAttribute()
+    {
+        return $this->paramweekdaykubun;
+    }
+
+    public function setParamweekdaykubunAttribute($value)
+    {
+        $this->paramweekdaykubun = $value;
+    }
+
+    // 営業日区分
     public function getParambusinesskubunAttribute()
     {
         return $this->parambusinesskubun;
@@ -238,6 +250,7 @@ class Calendar extends Model
         $this->parambusinesskubun = $value;
     }
      
+    // 休暇区分
     public function getParamholidaykubunAttribute()
     {
         return $this->paramholidaykubun;
@@ -447,6 +460,7 @@ class Calendar extends Model
                     )
                 ->selectRaw("ifnull(t4.name, '') as public_holidays_name")
                 ->selectRaw("ifnull(t6.secound_code_name, '') as business_kubun_name")
+                ->selectRaw("ifnull(t7.use_free_item, '') as use_free_item")
                 ->selectRaw("ifnull(t7.secound_code_name, '') as holiday_kubun_name");
             // join
             // 適用期間日付の取得
@@ -493,11 +507,11 @@ class Calendar extends Model
                     ->where('t6.identification_id', '=', Config::get('const.C007.value'))
                     ->where('t6.is_deleted', '=', 0);
             });
-            // 休暇区分
+            // 休暇区分 C008→C013
             $mainquery
                 ->leftJoin($this->table_generalcodes.' as t7', function ($join) { 
                     $join->on('t7.code', '=',  $this->table.'.holiday_kubun')
-                    ->where('t7.identification_id', '=', Config::get('const.C008.value'))
+                    ->where('t7.identification_id', '=', Config::get('const.C013.value'))
                     ->where('t7.is_deleted', '=', 0);
             });
     
