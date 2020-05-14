@@ -69,20 +69,20 @@ class WorkingTimedate extends Model
     private $array_missing_return_editor_user_code = [null,null,null,null,null];            // 私用外出戻り編集ユーザーコード
     private $array_missing_return_editor_department_name = [null,null,null,null,null];      // 私用外出戻り編集部署名
     private $array_missing_return_editor_user_name = [null,null,null,null,null];            // 私用外出戻り編集ユーザー名
-    private $array_public_going_out_time = [null,null,null,null,null];                      // 公用外出時刻
-    private $array_public_going_out_time_positions = [null,null,null,null,null];            // 公用外出位置情報
-    private $array_public_going_out_time_id = [null,null,null,null,null];                   // 公用外出打刻時刻テーブルID
-    private $array_public_editor_department_code = [null,null,null,null,null];              // 公用外出編集部署コード
-    private $array_public_editor_user_code = [null,null,null,null,null];                    // 公用外出編集ユーザーコード
-    private $array_public_editor_department_name = [null,null,null,null,null];              // 公用外出編集部署名
-    private $array_public_editor_user_name = [null,null,null,null,null];                    // 公用外出編集ユーザー名
-    private $array_public_going_out_return_time = [null,null,null,null,null];               // 公用外出戻り時刻
-    private $array_public_going_out_return_time_positions = [null,null,null,null,null];     // 公用外出戻り位置情報
-    private $array_public_going_out_return_time_id = [null,null,null,null,null];            // 公用外出戻り打刻時刻テーブルID
-    private $array_public_return_editor_department_code = [null,null,null,null,null];       // 公用外出戻り編集部署コード
-    private $array_public_return_editor_user_code = [null,null,null,null,null];             // 公用外出戻り編集ユーザーコード
-    private $array_public_return_editor_department_name = [null,null,null,null,null];       // 公用外出戻り編集部署名
-    private $array_public_return_editor_user_name = [null,null,null,null,null];             // 公用外出戻り編集ユーザー名
+    private $array_public_going_out_time = [null,null,null,null,null,null,null];                      // 公用外出時刻
+    private $array_public_going_out_time_positions = [null,null,null,null,null,null,null];            // 公用外出位置情報
+    private $array_public_going_out_time_id = [null,null,null,null,null,null,null];                   // 公用外出打刻時刻テーブルID
+    private $array_public_editor_department_code = [null,null,null,null,null,null,null];              // 公用外出編集部署コード
+    private $array_public_editor_user_code = [null,null,null,null,null,null,null];                    // 公用外出編集ユーザーコード
+    private $array_public_editor_department_name = [null,null,null,null,null,null,null];              // 公用外出編集部署名
+    private $array_public_editor_user_name = [null,null,null,null,null,null,null];                    // 公用外出編集ユーザー名
+    private $array_public_going_out_return_time = [null,null,null,null,null,null,null];               // 公用外出戻り時刻
+    private $array_public_going_out_return_time_positions = [null,null,null,null,null,null,null];     // 公用外出戻り位置情報
+    private $array_public_going_out_return_time_id = [null,null,null,null,null,null,null];            // 公用外出戻り打刻時刻テーブルID
+    private $array_public_return_editor_department_code = [null,null,null,null,null,null,null];       // 公用外出戻り編集部署コード
+    private $array_public_return_editor_user_code = [null,null,null,null,null,null,null];             // 公用外出戻り編集ユーザーコード
+    private $array_public_return_editor_department_name = [null,null,null,null,null,null,null];       // 公用外出戻り編集部署名
+    private $array_public_return_editor_user_name = [null,null,null,null,null,null,null];             // 公用外出戻り編集ユーザー名
     private $total_working_times;           // 合計勤務時間
     private $regular_working_times;         // 所定労働時間
     private $out_of_regular_working_times;  // 所定外労働時間
@@ -95,8 +95,10 @@ class WorkingTimedate extends Model
     private $off_hours_working_hours;       // 時間外労働時間
     private $missing_middle_hours;          // 私用外出時間
     private $public_going_out_hours;        // 公用外出時間
-    private $out_of_legal_working_holiday_hours;    // 法定外休日労働時間
-    private $legal_working_holiday_hours;           // 法定休日労働時間
+    private $out_of_legal_working_holiday_hours;                    // 法定外休日労働時間
+    private $out_of_legal_working_holiday_night_overtime_hours;     // 法定外休日深夜残業時間
+    private $legal_working_holiday_hours;                   // 法定休日労働時間
+    private $legal_working_holiday_night_overtime_hours;    // 法定休日深夜残業時間
     private $working_status;                // 勤務状態
     private $working_status_name;           // 勤務状態名称
     private $note;                          // メモ
@@ -845,6 +847,20 @@ class WorkingTimedate extends Model
         $this->out_of_legal_working_holiday_hours = $value;
     }
 
+    // 法定外休日深夜残業時間
+    public function getOutoflegalworkingholidaynightovertimehoursAttribute()
+    {
+        return $this->out_of_legal_working_holiday_night_overtime_hours;
+    }
+
+    public function setOutoflegalworkingholidaynightovertimehoursAttribute($value)
+    {
+        if ($value > 9999.99) {
+            $value = 9999.99;
+        }
+        $this->out_of_legal_working_holiday_night_overtime_hours = $value;
+    }
+
     // 法定休日労働時間
     public function getLegalworkingholidayhoursAttribute()
     {
@@ -858,6 +874,20 @@ class WorkingTimedate extends Model
             $value = 9999.99;
         }
         $this->legal_working_holiday_hours = $value;
+    }
+
+    // 法定休日深夜残業時間
+    public function getLegalworkingholidaynightovertimehoursAttribute()
+    {
+        return $this->legal_working_holiday_night_overtime_hours;
+    }
+
+    public function setLegalworkingholidaynightovertimehoursAttribute($value)
+    {
+        if ($value > 9999.99) {
+            $value = 9999.99;
+        }
+        $this->legal_working_holiday_night_overtime_hours = $value;
     }
 
 
@@ -1740,61 +1770,85 @@ class WorkingTimedate extends Model
                     $this->table.'.public_going_out_time_3',
                     $this->table.'.public_going_out_time_4',
                     $this->table.'.public_going_out_time_5',
+                    $this->table.'.public_going_out_time_6',
+                    $this->table.'.public_going_out_time_7',
                     $this->table.'.public_going_out_time_id_1',
                     $this->table.'.public_going_out_time_id_2',
                     $this->table.'.public_going_out_time_id_3',
                     $this->table.'.public_going_out_time_id_4',
                     $this->table.'.public_going_out_time_id_5',
+                    $this->table.'.public_going_out_time_id_6',
+                    $this->table.'.public_going_out_time_id_7',
                     $this->table.'.public_editor_department_code_1',
                     $this->table.'.public_editor_department_code_2',
                     $this->table.'.public_editor_department_code_3',
                     $this->table.'.public_editor_department_code_4',
                     $this->table.'.public_editor_department_code_5',
+                    $this->table.'.public_editor_department_code_6',
+                    $this->table.'.public_editor_department_code_7',
                     $this->table.'.public_editor_department_name_1',
                     $this->table.'.public_editor_department_name_2',
                     $this->table.'.public_editor_department_name_3',
                     $this->table.'.public_editor_department_name_4',
                     $this->table.'.public_editor_department_name_5',
+                    $this->table.'.public_editor_department_name_6',
+                    $this->table.'.public_editor_department_name_7',
                     $this->table.'.public_editor_user_code_1',
                     $this->table.'.public_editor_user_code_2',
                     $this->table.'.public_editor_user_code_3',
                     $this->table.'.public_editor_user_code_4',
                     $this->table.'.public_editor_user_code_5',
+                    $this->table.'.public_editor_user_code_6',
+                    $this->table.'.public_editor_user_code_7',
                     $this->table.'.public_editor_user_name_1',
                     $this->table.'.public_editor_user_name_2',
                     $this->table.'.public_editor_user_name_3',
                     $this->table.'.public_editor_user_name_4',
                     $this->table.'.public_editor_user_name_5',
+                    $this->table.'.public_editor_user_name_6',
+                    $this->table.'.public_editor_user_name_7',
                     $this->table.'.public_going_out_return_time_1',
                     $this->table.'.public_going_out_return_time_2',
                     $this->table.'.public_going_out_return_time_3',
                     $this->table.'.public_going_out_return_time_4',
                     $this->table.'.public_going_out_return_time_5',
+                    $this->table.'.public_going_out_return_time_6',
+                    $this->table.'.public_going_out_return_time_7',
                     $this->table.'.public_going_out_return_time_id_1',
                     $this->table.'.public_going_out_return_time_id_2',
                     $this->table.'.public_going_out_return_time_id_3',
                     $this->table.'.public_going_out_return_time_id_4',
                     $this->table.'.public_going_out_return_time_id_5',
+                    $this->table.'.public_going_out_return_time_id_6',
+                    $this->table.'.public_going_out_return_time_id_7',
                     $this->table.'.public_return_editor_department_code_1',
                     $this->table.'.public_return_editor_department_code_2',
                     $this->table.'.public_return_editor_department_code_3',
                     $this->table.'.public_return_editor_department_code_4',
                     $this->table.'.public_return_editor_department_code_5',
+                    $this->table.'.public_return_editor_department_code_6',
+                    $this->table.'.public_return_editor_department_code_7',
                     $this->table.'.public_return_editor_department_name_1',
                     $this->table.'.public_return_editor_department_name_2',
                     $this->table.'.public_return_editor_department_name_3',
                     $this->table.'.public_return_editor_department_name_4',
                     $this->table.'.public_return_editor_department_name_5',
+                    $this->table.'.public_return_editor_department_name_6',
+                    $this->table.'.public_return_editor_department_name_7',
                     $this->table.'.public_return_editor_user_code_1',
                     $this->table.'.public_return_editor_user_code_2',
                     $this->table.'.public_return_editor_user_code_3',
                     $this->table.'.public_return_editor_user_code_4',
                     $this->table.'.public_return_editor_user_code_5',
+                    $this->table.'.public_return_editor_user_code_6',
+                    $this->table.'.public_return_editor_user_code_7',
                     $this->table.'.public_return_editor_user_name_1',
                     $this->table.'.public_return_editor_user_name_2',
                     $this->table.'.public_return_editor_user_name_3',
                     $this->table.'.public_return_editor_user_name_4',
                     $this->table.'.public_return_editor_user_name_5',
+                    $this->table.'.public_return_editor_user_name_6',
+                    $this->table.'.public_return_editor_user_name_7',
                     $this->table.'.total_working_times',
                     $this->table.'.regular_working_times',
                     $this->table.'.out_of_regular_working_times',
@@ -1808,7 +1862,9 @@ class WorkingTimedate extends Model
                     $this->table.'.public_going_out_hours',
                     $this->table.'.missing_middle_hours',
                     $this->table.'.out_of_legal_working_holiday_hours',
+                    $this->table.'.out_of_legal_working_holiday_night_overtime_hours',
                     $this->table.'.legal_working_holiday_hours',
+                    $this->table.'.legal_working_holiday_night_overtime_hours',
                     $this->table.'.working_status',
                     $this->table.'.working_status_name',
                     $this->table.'.note',
@@ -1891,6 +1947,10 @@ class WorkingTimedate extends Model
                 ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_4) as y_public_going_out_time_positions_4')
                 ->selectRaw('X('.$this->table.'.public_going_out_time_positions_5) as x_public_going_out_time_positions_5')
                 ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_5) as y_public_going_out_time_positions_5')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_6) as x_public_going_out_time_positions_6')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_6) as y_public_going_out_time_positions_6')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_7) as x_public_going_out_time_positions_7')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_7) as y_public_going_out_time_positions_7')
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_1) as x_public_going_out_return_time_positions_1')
                 ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_1) as y_public_going_out_return_time_positions_1')
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_2) as x_public_going_out_return_time_positions_2')
@@ -1900,7 +1960,11 @@ class WorkingTimedate extends Model
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_4) as x_public_going_out_return_time_positions_4')
                 ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_4) as y_public_going_out_return_time_positions_4')
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_5) as x_public_going_out_return_time_positions_5')
-                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_5) as y_public_going_out_return_time_positions_5');
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_5) as y_public_going_out_return_time_positions_5')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_6) as x_public_going_out_return_time_positions_6')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_6) as y_public_going_out_return_time_positions_6')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_7) as x_public_going_out_return_time_positions_7')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_7) as y_public_going_out_return_time_positions_7');
 
             if(!empty($this->param_date_from) && !empty($this->param_date_to)){
                 $date = date_create($this->param_date_from);
@@ -2005,11 +2069,15 @@ class WorkingTimedate extends Model
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_3,'."'%H:%i'".')  as public_going_out_time_3')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_4,'."'%H:%i'".')  as public_going_out_time_4')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_5,'."'%H:%i'".')  as public_going_out_time_5')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_6,'."'%H:%i'".')  as public_going_out_time_6')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_time_7,'."'%H:%i'".')  as public_going_out_time_7')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_1,'."'%H:%i'".')  as public_going_out_return_time_1')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_2,'."'%H:%i'".')  as public_going_out_return_time_2')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_3,'."'%H:%i'".')  as public_going_out_return_time_3')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_4,'."'%H:%i'".')  as public_going_out_return_time_4')
                 ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_5,'."'%H:%i'".')  as public_going_out_return_time_5')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_6,'."'%H:%i'".')  as public_going_out_return_time_6')
+                ->selectRaw('DATE_FORMAT('.$this->table.'.public_going_out_return_time_7,'."'%H:%i'".')  as public_going_out_return_time_7')
                 ->selectRaw(str_replace('{1}', 'total_working_times', str_replace('{0}', $this->table.'.total_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'regular_working_times', str_replace('{0}', $this->table.'.regular_working_times', $case_where)))
                 ->selectRaw(str_replace('{1}', 'out_of_regular_working_times', str_replace('{0}', $this->table.'.out_of_regular_working_times', $case_where)))
@@ -2023,7 +2091,9 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'public_going_out_hours', str_replace('{0}', $this->table.'.public_going_out_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'missing_middle_hours', str_replace('{0}', $this->table.'.missing_middle_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'out_of_legal_working_holiday_hours', str_replace('{0}', $this->table.'.out_of_legal_working_holiday_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'out_of_legal_working_holiday_night_overtime_hours', str_replace('{0}', $this->table.'.out_of_legal_working_holiday_night_overtime_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'legal_working_holiday_hours', str_replace('{0}', $this->table.'.legal_working_holiday_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'legal_working_holiday_night_overtime_hours', str_replace('{0}', $this->table.'.legal_working_holiday_night_overtime_hours', $case_where)))
                 ->selectRaw('X('.$this->table.'.attendance_time_positions_1) as x_attendance_time_positions_1')
                 ->selectRaw('Y('.$this->table.'.attendance_time_positions_1) as y_attendance_time_positions_1')
                 ->selectRaw('X('.$this->table.'.attendance_time_positions_2) as x_attendance_time_positions_2')
@@ -2074,6 +2144,10 @@ class WorkingTimedate extends Model
                 ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_4) as y_public_going_out_time_positions_4')
                 ->selectRaw('X('.$this->table.'.public_going_out_time_positions_5) as x_public_going_out_time_positions_5')
                 ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_5) as y_public_going_out_time_positions_5')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_6) as x_public_going_out_time_positions_6')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_6) as y_public_going_out_time_positions_6')
+                ->selectRaw('X('.$this->table.'.public_going_out_time_positions_7) as x_public_going_out_time_positions_7')
+                ->selectRaw('Y('.$this->table.'.public_going_out_time_positions_7) as y_public_going_out_time_positions_7')
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_1) as x_public_going_out_return_time_positions_1')
                 ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_1) as y_public_going_out_return_time_positions_1')
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_2) as x_public_going_out_return_time_positions_2')
@@ -2083,7 +2157,11 @@ class WorkingTimedate extends Model
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_4) as x_public_going_out_return_time_positions_4')
                 ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_4) as y_public_going_out_return_time_positions_4')
                 ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_5) as x_public_going_out_return_time_positions_5')
-                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_5) as y_public_going_out_return_time_positions_5');
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_5) as y_public_going_out_return_time_positions_5')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_6) as x_public_going_out_return_time_positions_6')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_6) as y_public_going_out_return_time_positions_6')
+                ->selectRaw('X('.$this->table.'.public_going_out_return_time_positions_7) as x_public_going_out_return_time_positions_7')
+                ->selectRaw('Y('.$this->table.'.public_going_out_return_time_positions_7) as y_public_going_out_return_time_positions_7');
 
             $mainquery
                 ->addselect($this->table.'.working_status');
@@ -2230,51 +2308,71 @@ class WorkingTimedate extends Model
                 ->addselect($this->table.'.public_going_out_time_id_3')
                 ->addselect($this->table.'.public_going_out_time_id_4')
                 ->addselect($this->table.'.public_going_out_time_id_5')
+                ->addselect($this->table.'.public_going_out_time_id_6')
+                ->addselect($this->table.'.public_going_out_time_id_7')
                 ->addselect($this->table.'.public_editor_department_code_1')
                 ->addselect($this->table.'.public_editor_department_code_2')
                 ->addselect($this->table.'.public_editor_department_code_3')
                 ->addselect($this->table.'.public_editor_department_code_4')
                 ->addselect($this->table.'.public_editor_department_code_5')
+                ->addselect($this->table.'.public_editor_department_code_6')
+                ->addselect($this->table.'.public_editor_department_code_7')
                 ->addselect($this->table.'.public_editor_department_name_1')
                 ->addselect($this->table.'.public_editor_department_name_2')
                 ->addselect($this->table.'.public_editor_department_name_3')
                 ->addselect($this->table.'.public_editor_department_name_4')
                 ->addselect($this->table.'.public_editor_department_name_5')
+                ->addselect($this->table.'.public_editor_department_name_6')
+                ->addselect($this->table.'.public_editor_department_name_7')
                 ->addselect($this->table.'.public_editor_user_code_1')
                 ->addselect($this->table.'.public_editor_user_code_2')
                 ->addselect($this->table.'.public_editor_user_code_3')
                 ->addselect($this->table.'.public_editor_user_code_4')
                 ->addselect($this->table.'.public_editor_user_code_5')
+                ->addselect($this->table.'.public_editor_user_code_6')
+                ->addselect($this->table.'.public_editor_user_code_7')
                 ->addselect($this->table.'.public_editor_user_name_1')
                 ->addselect($this->table.'.public_editor_user_name_2')
                 ->addselect($this->table.'.public_editor_user_name_3')
                 ->addselect($this->table.'.public_editor_user_name_4')
                 ->addselect($this->table.'.public_editor_user_name_5')
+                ->addselect($this->table.'.public_editor_user_name_6')
+                ->addselect($this->table.'.public_editor_user_name_7')
                 ->addselect($this->table.'.public_going_out_return_time_id_1')
                 ->addselect($this->table.'.public_going_out_return_time_id_2')
                 ->addselect($this->table.'.public_going_out_return_time_id_3')
                 ->addselect($this->table.'.public_going_out_return_time_id_4')
                 ->addselect($this->table.'.public_going_out_return_time_id_5')
+                ->addselect($this->table.'.public_going_out_return_time_id_6')
+                ->addselect($this->table.'.public_going_out_return_time_id_7')
                 ->addselect($this->table.'.public_return_editor_department_code_1')
                 ->addselect($this->table.'.public_return_editor_department_code_2')
                 ->addselect($this->table.'.public_return_editor_department_code_3')
                 ->addselect($this->table.'.public_return_editor_department_code_4')
                 ->addselect($this->table.'.public_return_editor_department_code_5')
+                ->addselect($this->table.'.public_return_editor_department_code_6')
+                ->addselect($this->table.'.public_return_editor_department_code_7')
                 ->addselect($this->table.'.public_return_editor_department_name_1')
                 ->addselect($this->table.'.public_return_editor_department_name_2')
                 ->addselect($this->table.'.public_return_editor_department_name_3')
                 ->addselect($this->table.'.public_return_editor_department_name_4')
                 ->addselect($this->table.'.public_return_editor_department_name_5')
+                ->addselect($this->table.'.public_return_editor_department_name_6')
+                ->addselect($this->table.'.public_return_editor_department_name_7')
                 ->addselect($this->table.'.public_return_editor_user_code_1')
                 ->addselect($this->table.'.public_return_editor_user_code_2')
                 ->addselect($this->table.'.public_return_editor_user_code_3')
                 ->addselect($this->table.'.public_return_editor_user_code_4')
                 ->addselect($this->table.'.public_return_editor_user_code_5')
+                ->addselect($this->table.'.public_return_editor_user_code_6')
+                ->addselect($this->table.'.public_return_editor_user_code_7')
                 ->addselect($this->table.'.public_return_editor_user_name_1')
                 ->addselect($this->table.'.public_return_editor_user_name_2')
                 ->addselect($this->table.'.public_return_editor_user_name_3')
                 ->addselect($this->table.'.public_return_editor_user_name_4')
                 ->addselect($this->table.'.public_return_editor_user_name_5')
+                ->addselect($this->table.'.public_return_editor_user_name_6')
+                ->addselect($this->table.'.public_return_editor_user_name_7')
                 ->addselect($this->table.'.closing')
                 ->addselect($this->table.'.uplimit_time')
                 ->addselect($this->table.'.statutory_uplimit_time')
@@ -2401,6 +2499,11 @@ class WorkingTimedate extends Model
                     $join->on('t21.code', '=', $this->table_users.'.department_code')
                     ->where($this->table_users.'.is_deleted', '=', 0);
                 });
+            $mainquery
+                ->JoinSub($subquery1, 't22', function ($join) { 
+                    $join->on('t22.code', '=', $this->table_users.'.code');
+                    $join->on('t22.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
+                });
 
             if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
                 if ($business_kubun != Config::get('const.C007.basic')) {
@@ -2494,6 +2597,8 @@ class WorkingTimedate extends Model
 
             $case_paid_holidays = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
             $case_paid_holidays .= "WHEN {1} THEN 1 ";
+            $case_paid_holidays .= "WHEN {2} THEN 1 ";
+            $case_paid_holidays .= "WHEN {3} THEN 1 ";
             $case_paid_holidays .= "ELSE 0 ";
             $case_paid_holidays .= 'END ';
 
@@ -2509,8 +2614,6 @@ class WorkingTimedate extends Model
             $case_holiday_kubun .= "WHEN {9} THEN 1 ";
             $case_holiday_kubun .= "WHEN {10} THEN 1 ";
             $case_holiday_kubun .= "WHEN {11} THEN 1 ";
-            $case_holiday_kubun .= "WHEN {12} THEN 1 ";
-            $case_holiday_kubun .= "WHEN {13} THEN 1 ";
             $case_holiday_kubun .= "ELSE 0 ";
             $case_holiday_kubun .= 'END ';
 
@@ -2518,7 +2621,7 @@ class WorkingTimedate extends Model
             $case_absence_kubun .= "WHEN {1} THEN 1 ";
             $case_absence_kubun .= "ELSE 0 ";
             $case_absence_kubun .= 'END ';
-
+    
             $str_replace_working_status0 =str_replace('{0}', 't2.description', $case_working_status);
             $str_replace_working_status1 =str_replace('{1}', $this->table.'.working_status', $str_replace_working_status0);
             $str_replace_working_status2 =str_replace('{2}', Config::get('const.C012.attendance'), $str_replace_working_status1);
@@ -2535,21 +2638,21 @@ class WorkingTimedate extends Model
 
             $str_replace_paid_holidays0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_paid_holidays);
             $str_replace_paid_holidays1 =str_replace('{1}', Config::get('const.C013.paid_holiday'), $str_replace_paid_holidays0);
+            $str_replace_paid_holidays2 =str_replace('{2}', Config::get('const.C013.morning_off'), $str_replace_paid_holidays1);
+            $str_replace_paid_holidays3 =str_replace('{3}', Config::get('const.C013.afternoon_off'), $str_replace_paid_holidays2);
 
             $str_replace_holiday_kubun0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_holiday_kubun);
-            $str_replace_holiday_kubun1 =str_replace('{1}', Config::get('const.C013.morning_off'), $str_replace_holiday_kubun0);
-            $str_replace_holiday_kubun2 =str_replace('{2}', Config::get('const.C013.afternoon_off'), $str_replace_holiday_kubun1);
-            $str_replace_holiday_kubun3 =str_replace('{3}', Config::get('const.C013.substitute_holiday'), $str_replace_holiday_kubun2);
-            $str_replace_holiday_kubun4 =str_replace('{4}', Config::get('const.C013.compensation_holiday'), $str_replace_holiday_kubun3);
-            $str_replace_holiday_kubun5 =str_replace('{5}', Config::get('const.C013.summer_leave'), $str_replace_holiday_kubun4);
-            $str_replace_holiday_kubun6 =str_replace('{6}', Config::get('const.C013.year_end_and_new_year_leave'), $str_replace_holiday_kubun5);
-            $str_replace_holiday_kubun7 =str_replace('{7}', Config::get('const.C013.organization_anniversary'), $str_replace_holiday_kubun6);
-            $str_replace_holiday_kubun8 =str_replace('{8}', Config::get('const.C013.prenatal_postnatal'), $str_replace_holiday_kubun7);
-            $str_replace_holiday_kubun9 =str_replace('{9}', Config::get('const.C013.physiology_days_leave'), $str_replace_holiday_kubun8);
-            $str_replace_holiday_kubun10 =str_replace('{10}', Config::get('const.C013.childcare_care_leave'), $str_replace_holiday_kubun9);
-            $str_replace_holiday_kubun11 =str_replace('{11}', Config::get('const.C013.nursing_care_leave'), $str_replace_holiday_kubun10);
-            $str_replace_holiday_kubun12 =str_replace('{12}', Config::get('const.C013.congratulatory_or_consolatory_leave'), $str_replace_holiday_kubun11);
-            $str_replace_holiday_kubun13 =str_replace('{13}', Config::get('const.C013.refresh_leave'), $str_replace_holiday_kubun12);
+            $str_replace_holiday_kubun1 =str_replace('{1}', Config::get('const.C013.substitute_holiday'), $str_replace_holiday_kubun0);
+            $str_replace_holiday_kubun2 =str_replace('{2}', Config::get('const.C013.compensation_holiday'), $str_replace_holiday_kubun1);
+            $str_replace_holiday_kubun3 =str_replace('{3}', Config::get('const.C013.summer_leave'), $str_replace_holiday_kubun2);
+            $str_replace_holiday_kubun4 =str_replace('{4}', Config::get('const.C013.year_end_and_new_year_leave'), $str_replace_holiday_kubun3);
+            $str_replace_holiday_kubun5 =str_replace('{5}', Config::get('const.C013.organization_anniversary'), $str_replace_holiday_kubun4);
+            $str_replace_holiday_kubun6 =str_replace('{6}', Config::get('const.C013.prenatal_postnatal'), $str_replace_holiday_kubun5);
+            $str_replace_holiday_kubun7 =str_replace('{7}', Config::get('const.C013.physiology_days_leave'), $str_replace_holiday_kubun6);
+            $str_replace_holiday_kubun8 =str_replace('{8}', Config::get('const.C013.childcare_care_leave'), $str_replace_holiday_kubun7);
+            $str_replace_holiday_kubun9 =str_replace('{9}', Config::get('const.C013.nursing_care_leave'), $str_replace_holiday_kubun8);
+            $str_replace_holiday_kubun10 =str_replace('{10}', Config::get('const.C013.congratulatory_or_consolatory_leave'), $str_replace_holiday_kubun9);
+            $str_replace_holiday_kubun11 =str_replace('{11}', Config::get('const.C013.refresh_leave'), $str_replace_holiday_kubun10);
 
             $str_replace_leave_early_kubun0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_absence_kubun);
             $str_replace_leave_early_kubun1 =str_replace('{1}', Config::get('const.C013.leave_early_work'), $str_replace_leave_early_kubun0);
@@ -2574,11 +2677,13 @@ class WorkingTimedate extends Model
                 ->selectRaw('sum(ifnull('.$this->table.'.public_going_out_hours, 0)) as public_going_out_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.missing_middle_hours, 0)) as missing_middle_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.out_of_legal_working_holiday_hours, 0)) as out_of_legal_working_holiday_hours')
+                ->selectRaw('sum(ifnull('.$this->table.'.out_of_legal_working_holiday_night_overtime_hours, 0)) as out_of_legal_working_holiday_night_overtime_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.legal_working_holiday_hours, 0)) as legal_working_holiday_hours')
+                ->selectRaw('sum(ifnull('.$this->table.'.legal_working_holiday_night_overtime_hours, 0)) as legal_working_holiday_night_overtime_hours')
                 ->selectRaw('sum('.$str_replace_working_status8.') as total_working_status')
                 ->selectRaw('sum('.$str_replace_go_out2.') as total_go_out')
-                ->selectRaw('sum('.$str_replace_paid_holidays1.') as total_paid_holidays')
-                ->selectRaw('sum('.$str_replace_holiday_kubun13.') as total_holiday_kubun')
+                ->selectRaw('sum('.$str_replace_paid_holidays3.') as total_paid_holidays')
+                ->selectRaw('sum('.$str_replace_holiday_kubun11.') as total_holiday_kubun')
                 ->selectRaw('sum('.$str_replace_leave_early_kubun1.') as total_leave_early')
                 ->selectRaw('sum('.$str_replace_late_kubun1.') as total_late')
                 ->selectRaw('sum('.$str_replace_absence_kubun1.') as total_absence');
@@ -2595,11 +2700,6 @@ class WorkingTimedate extends Model
             $subquery = $this->setWhereSql($subquery);
             
             $case_where_1 = "";
-            $case_where_working_time_name = "";
-            $case_where_predeter_time_name = "";
-            $case_where_predeter_time_secondname = "";
-            $case_where_predeter_night_time_name = "";
-            $case_where_predeter_night_time_secondname = "";
             if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
                 $array_groupby[] = $this->table.'.working_date';
 
@@ -2608,51 +2708,6 @@ class WorkingTimedate extends Model
                 $case_where_1 .= " WHEN {5} THEN '{6}' ";
                 $case_where_1 .= " ELSE '{2}' ";
                 $case_where_1 .= ' END as {7}';
-    
-                $case_where_working_time_name = str_replace('{0}', 't21.business_kubun', $case_where_1);
-                $case_where_working_time_name = str_replace('{1}', Config::get('const.C007.basic'), $case_where_working_time_name);
-                $case_where_working_time_name = str_replace('{2}', Config::get('const.WORKING_TIME_NAME.basic'), $case_where_working_time_name);
-                $case_where_working_time_name = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_working_time_name);
-                $case_where_working_time_name = str_replace('{4}', Config::get('const.WORKING_TIME_NAME.legal_holoday'), $case_where_working_time_name);
-                $case_where_working_time_name = str_replace('{5}', Config::get('const.C007.legal_out_holoday'), $case_where_working_time_name);
-                $case_where_working_time_name = str_replace('{6}', Config::get('const.WORKING_TIME_NAME.legal_out_holoday'), $case_where_working_time_name);
-                $case_where_working_time_name = str_replace('{7}', 'working_time_name', $case_where_working_time_name);
-    
-                $case_where_predeter_time_name = str_replace('{0}', 't21.business_kubun', $case_where_1);
-                $case_where_predeter_time_name = str_replace('{1}', Config::get('const.C007.basic'), $case_where_predeter_time_name);
-                $case_where_predeter_time_name = str_replace('{2}', Config::get('const.PREDETER_TIME_NAME.basic'), $case_where_predeter_time_name);
-                $case_where_predeter_time_name = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_predeter_time_name);
-                $case_where_predeter_time_name = str_replace('{4}', Config::get('const.PREDETER_TIME_NAME.legal_holoday'), $case_where_predeter_time_name);
-                $case_where_predeter_time_name = str_replace('{5}', Config::get('const.C007.legal_out_holoday'), $case_where_predeter_time_name);
-                $case_where_predeter_time_name = str_replace('{6}', Config::get('const.PREDETER_TIME_NAME.legal_out_holoday'), $case_where_predeter_time_name);
-                $case_where_predeter_time_name = str_replace('{7}', 'predeter_time_name', $case_where_predeter_time_name);
-    
-                $case_where_predeter_time_secoundname = str_replace('{0}', 't21.business_kubun', $case_where_1);
-                $case_where_predeter_time_secoundname = str_replace('{1}', Config::get('const.C007.basic'), $case_where_predeter_time_secoundname);
-                $case_where_predeter_time_secoundname = str_replace('{2}', Config::get('const.PREDETER_TIME_SECONDNAME.basic'), $case_where_predeter_time_secoundname);
-                $case_where_predeter_time_secoundname = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_predeter_time_secoundname);
-                $case_where_predeter_time_secoundname = str_replace('{4}', Config::get('const.PREDETER_TIME_SECONDNAME.legal_holoday'), $case_where_predeter_time_secoundname);
-                $case_where_predeter_time_secoundname = str_replace('{5}', Config::get('const.C007.legal_out_holoday'), $case_where_predeter_time_secoundname);
-                $case_where_predeter_time_secoundname = str_replace('{6}', Config::get('const.PREDETER_TIME_SECONDNAME.legal_out_holoday'), $case_where_predeter_time_secoundname);
-                $case_where_predeter_time_secoundname = str_replace('{7}', 'predeter_time_secoundname', $case_where_predeter_time_secoundname);
-    
-                $case_where_predeter_night_time_name = str_replace('{0}', 't21.business_kubun', $case_where_1);
-                $case_where_predeter_night_time_name = str_replace('{1}', Config::get('const.C007.basic'), $case_where_predeter_night_time_name);
-                $case_where_predeter_night_time_name = str_replace('{2}', Config::get('const.PREDETER_NIGHT_TIME_NAME.basic'), $case_where_predeter_night_time_name);
-                $case_where_predeter_night_time_name = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_predeter_night_time_name);
-                $case_where_predeter_night_time_name = str_replace('{4}', Config::get('const.PREDETER_NIGHT_TIME_NAME.legal_holoday'), $case_where_predeter_night_time_name);
-                $case_where_predeter_night_time_name = str_replace('{5}', Config::get('const.C007.legal_out_holoday'), $case_where_predeter_night_time_name);
-                $case_where_predeter_night_time_name = str_replace('{6}', Config::get('const.PREDETER_NIGHT_TIME_NAME.legal_out_holoday'), $case_where_predeter_night_time_name);
-                $case_where_predeter_night_time_name = str_replace('{7}', 'predeter_night_time_name', $case_where_predeter_night_time_name);
-    
-                $case_where_predeter_night_time_secoundname = str_replace('{0}', 't21.business_kubun', $case_where_1);
-                $case_where_predeter_night_time_secoundname = str_replace('{1}', Config::get('const.C007.basic'), $case_where_predeter_night_time_secoundname);
-                $case_where_predeter_night_time_secoundname = str_replace('{2}', Config::get('const.PREDETER_NIGHT_TIME_SECONDNAME.basic'), $case_where_predeter_night_time_secoundname);
-                $case_where_predeter_night_time_secoundname = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_predeter_night_time_secoundname);
-                $case_where_predeter_night_time_secoundname = str_replace('{4}', Config::get('const.PREDETER_NIGHT_TIME_SECONDNAME.legal_holoday'), $case_where_predeter_night_time_secoundname);
-                $case_where_predeter_night_time_secoundname = str_replace('{5}', Config::get('const.C007.legal_out_holoday'), $case_where_predeter_night_time_secoundname);
-                $case_where_predeter_night_time_secoundname = str_replace('{6}', Config::get('const.PREDETER_NIGHT_TIME_SECONDNAME.legal_out_holoday'), $case_where_predeter_night_time_secoundname);
-                $case_where_predeter_night_time_secoundname = str_replace('{7}', 'predeter_night_time_secoundname', $case_where_predeter_night_time_secoundname);
             }
             if(!empty($this->param_employment_status)){
                 $array_groupby[] = $this->table.'.employment_status';
@@ -2682,7 +2737,9 @@ class WorkingTimedate extends Model
                 ->selectRaw(str_replace('{1}', 'public_going_out_hours', str_replace('{0}', 't1.public_going_out_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'missing_middle_hours', str_replace('{0}', 't1.missing_middle_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'out_of_legal_working_holiday_hours', str_replace('{0}', 't1.out_of_legal_working_holiday_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'out_of_legal_working_holiday_night_overtime_hours', str_replace('{0}', 't1.out_of_legal_working_holiday_night_overtime_hours', $case_where)))
                 ->selectRaw(str_replace('{1}', 'legal_working_holiday_hours', str_replace('{0}', 't1.legal_working_holiday_hours', $case_where)))
+                ->selectRaw(str_replace('{1}', 'legal_working_holiday_night_overtime_hours', str_replace('{0}', 't1.legal_working_holiday_night_overtime_hours', $case_where)))
                 ->selectRaw('ifnull(t1.total_working_status, 0) as total_working_status' )
                 ->selectRaw('ifnull(t1.total_go_out, 0) as total_go_out' )
                 ->selectRaw('ifnull(t1.total_paid_holidays, 0) as total_paid_holidays' )
@@ -2690,24 +2747,6 @@ class WorkingTimedate extends Model
                 ->selectRaw('ifnull(t1.total_leave_early, 0) as total_leave_early' )
                 ->selectRaw('ifnull(t1.total_late, 0) as total_late' )
                 ->selectRaw('ifnull(t1.total_absence, 0) as total_absence' );
-            if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
-                $mainquery
-                    ->selectRaw($case_where_working_time_name)
-                    ->selectRaw($case_where_predeter_time_name)
-                    ->selectRaw($case_where_predeter_time_secoundname)
-                    ->selectRaw($case_where_predeter_night_time_name)
-                    ->selectRaw($case_where_predeter_night_time_secoundname);
-
-                $subquery2 = DB::table($this->table_calendars)
-                    ->select(
-                        $this->table_calendars.'.date',
-                        $this->table_calendars.'.business_kubun'
-                    )
-                    ->groupBy($this->table_calendars.'.date', $this->table_calendars.'.business_kubun');
-                $mainquery->leftJoinSub($subquery2, 't21', function ($join) { 
-                    $join->on('t21.date', '=', 't1.working_date' );
-                });
-            }
                 
             $array_setBindingsStr = array();
             $cnt = 0;
@@ -2912,13 +2951,13 @@ class WorkingTimedate extends Model
                         $temp_collect['missing_middle_return_time_positions_'.$i] = DB::raw("(GeomFromText('POINT(".$item_data.")'))");
                     }
                 }
-                for ($i=1;$i<=5;$i++) {
+                for ($i=1;$i<=7;$i++) {
                     if (isset($temp_collect['public_going_out_time_positions_'.$i]) && $temp_collect['public_going_out_time_positions_'.$i] != "") {
                         $item_data = $temp_collect['public_going_out_time_positions_'.$i];
                         $temp_collect['public_going_out_time_positions_'.$i] = DB::raw("(GeomFromText('POINT(".$item_data.")'))");
                     }
                 }
-                for ($i=1;$i<=5;$i++) {
+                for ($i=1;$i<=7;$i++) {
                     if (isset($temp_collect['public_going_out_return_time_positions_'.$i]) && $temp_collect['public_going_out_return_time_positions_'.$i] != "") {
                         $item_data = $temp_collect['public_going_out_return_time_positions_'.$i];
                         $temp_collect['public_going_out_return_time_positions_'.$i] = DB::raw("(GeomFromText('POINT(".$item_data.")'))");

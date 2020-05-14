@@ -6,12 +6,12 @@
         この条件で表示する</button>
     </div>
     <div v-if="btnMode === 'basicswitch'" class="btn-group d-flex" v-on:click="switchclickBtn()">
-      <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
         <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-outlined-flag-b.svg" alt="">詳細を表示する</button> -->
         詳細を表示する</button>
     </div>
     <div v-if="btnMode === 'detailswitch'" class="btn-group d-flex" v-on:click="switchclickBtn()">
-      <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
         <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-outlined-flag-b.svg" alt="">詳細を非表示にする</button> -->
         詳細を非表示にする</button>
     </div>
@@ -22,11 +22,11 @@
     </div>
     <div v-if="btnMode === 'gosubdate' && isDisplay === true" class="btn-group d-flex" v-on:click="gosubdateclickBtn()">
       <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
-        前日</button>
+        &lt;&lt; 前日</button>
     </div>
     <div v-if="btnMode === 'goadddate' && isDisplay === true" class="btn-group d-flex" v-on:click="goadddateclickBtn()">
       <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
-        翌日</button>
+        翌日 &gt;&gt;</button>
     </div>
 
     <div v-if="btnMode === 'update'" class="btn-group d-flex" v-on:click="updateclickBtn()">
@@ -146,7 +146,7 @@
       <img class="icon-size-sm mr-2 pb-1" src="/images/file-upload-icon-vector-01.svg" alt="">
         CSVから作成する</button>
     </div>
-    <div v-if="btnMode === 'csvusers'" class="btn-group d-flex" v-on:click="usersdownloadclickBtn()">
+    <div v-if="btnMode === 'usersdownload'" class="btn-group d-flex" v-on:click="usersdownloadclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
       <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
       ユーザー情報ダウンロード</button>
@@ -175,10 +175,6 @@ export default {
           default: false,
           type: Boolean
       }
-  },
-  // マウント時
-  mounted() {
-    console.log("WorkTimeSearchButton Component mounted.");
   },
   data: function() {
     return {
@@ -259,13 +255,13 @@ export default {
       this.$emit('goaddateclick-event',event);
     },
     csvcalcclickBtn : function() {
-      this.$emit('csvcalc-event',event);
+      this.$emit('csv-event',event);
     },
     csvsalaryclickBtn : function() {
-      this.$emit('csvsalary-event',event);
+      this.$emit('csv-event',event);
     },
     csvlogclickBtn : function() {
-      this.$emit('csvlog-event',event);
+      this.$emit('csv-event',event);
     },
     filedownloadclickBtn : function() {
       this.$emit('filedownload-event',event);
@@ -280,7 +276,7 @@ export default {
       this.$emit('usersupload-event',event);
     },
     usersdownloadclickBtn : function() {
-      this.$emit('usersdownload-event',event);
+      this.$emit('csv-event',event);
     },
     // tooltips
     edttooltips: function(value1) {

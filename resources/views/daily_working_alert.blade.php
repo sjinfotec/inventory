@@ -42,6 +42,7 @@
 						v-bind:generaluser="{{ $generaluser }}"
 						v-bind:generalapproveruser="{{ $generalapproveruser }}"
 						v-bind:adminuser="{{ $adminuser }}"
+						v-bind:indexorhome="{{ $indexorhome }}"
 					>
 					</daily-working-alert>
 @endsection

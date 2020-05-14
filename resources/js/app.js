@@ -16,9 +16,12 @@ import Vue from "vue";
 // import VueSwal from "vue-swal";
 import VueSweetalert2 from "vue-sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
-import ElementUI from "element-ui";
+//import ElementUI from "element-ui";
+import { Dialog, Select, Option, TimePicker, Button } from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
-import locale from "element-ui/lib/locale/lang/ja";
+//import locale from "element-ui/lib/locale/lang/ja";
+import lang from "element-ui/lib/locale/lang/ja";
+import locale from "element-ui/lib/locale";
 
 var options = {
     position: "bottom-center",
@@ -31,7 +34,8 @@ Vue.use(toasted, options);
 Vue.use(VCalendar);
 Vue.use(VModal);
 // Vue.use(VueSwal);
-Vue.use(ElementUI, { locale });
+locale.use(lang);
+//Vue.use(ElementUI, { locale });
 Vue.use(VueSweetalert2);
 
 Vue.prototype.$axios = axios;
@@ -47,6 +51,16 @@ Vue.prototype.$axios = axios;
 
 // const files = require.context('./', true, /\.vue$/i);
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default));
+
+Vue.component("app-component", require("./components/App.vue").default);
+
+Vue.component(Dialog.name, Dialog);
+Vue.component(Select.name, Select);
+Vue.component(Option.name, Option);
+Vue.component(TimePicker.name, TimePicker);
+Vue.component(Button.name, Button);
+
+// ホーム画面
 Vue.component(
     "home-component",
     require("./components/HomeComponent.vue").default
@@ -80,6 +94,12 @@ Vue.component(
 );
 
 Vue.component(
+    "daily-working-alert-table",
+    require("./components/DailyWorkingAlertTable.vue").default
+);
+
+// 月次集計
+Vue.component(
     "monthly-working-information",
     require("./components/MonthlyWorkingInformation.vue").default
 );
@@ -89,29 +109,83 @@ Vue.component(
     require("./components/MonthlyWorkingInfoTable.vue").default
 );
 
+// 月次警告
 Vue.component(
     "monthly-working-alert",
     require("./components/MonthlyWorkingAlert.vue").default
 );
 
 Vue.component(
+    "monthly-working-alert-table",
+    require("./components/MonthlyWorkingAlertTable.vue").default
+);
+
+// 勤怠ログ
+Vue.component(
     "attendance-log",
     require("./components/AttendanceLog.vue").default
 );
 
-Vue.component("app-component", require("./components/App.vue").default);
-
-Vue.component(
-    "create-shift-time",
-    require("./components/CreateShiftTime.vue").default
-);
-
+// -------------------------- 編集 ----------------------------------------------
+// シフト編集
 Vue.component(
     "setting-shift-time",
     require("./components/SettingShiftTime.vue").default
 );
+// 未使用
+// Vue.component(
+//     "create-shift-time",
+//     require("./components/CreateShiftTime.vue").default
+// );
+// 勤怠編集
+Vue.component(
+    "edit-work-times",
+    require("./components/EditWorkTimes.vue").default
+);
+// 勤怠編集テーブル
+Vue.component(
+    "edit-work-times-table",
+    require("./components/EditWorkTimesTable.vue").default
+);
 
-// 操作
+// -------------------------- 設定 ----------------------------------------------
+// 会社設定
+Vue.component(
+    "create-company-information",
+    require("./components/CreateCompanyInformation.vue").default
+);
+// 組織設定
+Vue.component(
+    "create-department",
+    require("./components/CreateDepartment.vue").default
+);
+// 労働時間基本設定
+Vue.component("setting-calc", require("./components/SettingCalc.vue").default);
+// タイムテーブル設定
+Vue.component(
+    "create-time-table",
+    require("./components/CreateTimeTable.vue").default
+);
+// カレンダー設定
+Vue.component(
+    "setting-calendar",
+    require("./components/SettingCalendar.vue").default
+);
+Vue.component(
+    "init-calendar",
+    require("./components/InitCalendar.vue").default
+);
+// 未使用
+// Vue.component(
+//     "edit-calendar",
+//     require("./components/EditCalendar.vue").default
+// );
+// ユーザー情報設定
+Vue.component("edit-user", require("./components/EditUser.vue").default);
+// 未使用
+// Vue.component("user-add", require("./components/UserAdd.vue").default);
+
+// -------------------------- 操作 ----------------------------------------------
 // パスワード変更
 Vue.component("user-pass", require("./components/UserPass.vue").default);
 // ダウンロード
@@ -120,6 +194,8 @@ Vue.component(
     require("./components/FileDownload.vue").default
 );
 
+// -------------------------- 共通 ----------------------------------------------
+// ボタン類
 Vue.component("btn-work-time", require("./components/BtnWorkTime.vue").default);
 
 Vue.component(
@@ -238,16 +314,6 @@ Vue.component(
 );
 
 Vue.component(
-    "daily-working-alert-table",
-    require("./components/DailyWorkingAlertTable.vue").default
-);
-
-Vue.component(
-    "monthly-working-alert-table",
-    require("./components/MonthlyWorkingAlertTable.vue").default
-);
-
-Vue.component(
     "message-waiting",
     require("./components/MessageWaiting.vue").default
 );
@@ -361,10 +427,10 @@ Vue.component(
 );
 
 // 使えないコントロールなので途中で断念した（sizeとか）。使用不可
-Vue.component(
-    "select-elcommonlist",
-    require("./components/SelectElCommonList.vue").default
-);
+// Vue.component(
+//     "select-elcommonlist",
+//     require("./components/SelectElCommonList.vue").default
+// );
 
 // 勤怠ログ
 // 勤怠ログ登録
@@ -388,6 +454,11 @@ Vue.component(
 Vue.component(
     "setting-paid-holiday",
     require("./components/SettingPaidHoliday.vue").default
+);
+// 地図Map
+Vue.component(
+    "show-map-dialog",
+    require("./components/ShowMapDialog.vue").default
 );
 
 /**

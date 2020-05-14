@@ -78,23 +78,27 @@
                     <table class="table table-striped border-bottom font-size-sm text-nowrap">
                       <thead>
                         <tr>
-                          <td class="text-center align-middle mw-rem-3">No.</td>
-                          <td class="text-center align-middle mw-rem-15">打刻日付</td>
-                          <td class="text-center align-middle mw-rem-15">勤怠モード</td>
-                          <td class="text-center align-middle mw-rem-10">時刻</td>
+                          <td class="text-center align-middle mw-rem-2">No.</td>
+                          <td class="text-center align-middle mw-rem-20">打刻日付</td>
+                          <td class="text-center align-middle mw-rem-10">勤怠モード</td>
+                          <td class="text-center align-middle mw-rem-15">時刻</td>
                           <td class="text-center align-middle mw-rem-20">勤務区分</td>
-                          <td class="text-center align-middle mw-rem-10">操作</td>
+                          <td class="text-center align-middle mw-rem-5">操作</td>
                         </tr>
                       </thead>
                       <tbody>
                         <tr v-for="(item,index) in details" v-bind:key="item.id">
-                          <td class="text-right align-middle mw-rem-3">
+                          <td class="text-right align-middle mw-rem-2">
                             <label>{{ index+1 }}</label>
                           </td>
-                          <td class="text-center align-middle mw-rem-15">
+                          <td class="text-center align-middle mw-rem-20"
+                            v-if="!details[index].record_ymd || valuesubadddate === details[index].record_ymd">
                             {{ details[index].record_date }}
                           </td>
-                          <td class="text-center align-middle mw-rem-15">
+                          <td class="text-center align-middle mw-rem-20 color-red" v-else>
+                            {{ details[index].record_date }}で更新します。
+                          </td>
+                          <td class="text-center align-middle mw-rem-10">
                             <div class="input-group">
                               <select
                                 class="custom-select"
@@ -110,7 +114,7 @@
                               </select>
                             </div>
                           </td>
-                          <td class="text-center align-middle mw-rem-10">
+                          <td class="text-center align-middle mw-rem-15">
                             <div class>
                               <input
                                 type="time"
@@ -136,11 +140,11 @@
                             </div>
                           </td>
                           <td class="text-center align-middle mw-rem-20" v-else></td>
-                          <td class="text-center align-middle mw-rem-10" v-if="login_user_role === login_adminuser_role">
+                          <td class="text-center align-middle mw-rem-5" v-if="login_user_role === login_adminuser_role">
                             <i class="fa fa-trash" style="color: #808080;ccursor: hand; cursor:pointer;" v-on:click="rowDelClick(index)">
                            </i>
                           </td>
-                          <td class="text-center align-middle mw-rem-10" v-else></td>
+                          <td class="text-center align-middle mw-rem-5" v-else></td>
                         </tr>
                       </tbody>
                     </table>
@@ -171,6 +175,15 @@
               v-bind:btn-mode="'editfix'"
               v-bind:is-push="issearchbutton"
             ></btn-work-time>
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+        <!-- .row -->
+        <div class="row justify-content-between">
+          <!-- col -->
+          <div class="col-md-12 pb-2">
+            <btn-work-time v-bind:btn-mode="'cancel'" v-on:cancelclick-event="cancelclick"></btn-work-time>
           </div>
           <!-- /.col -->
         </div>
@@ -257,9 +270,9 @@ export default {
       login_adminuser_role: "",
       messagevalidatesEdt: [],
       details: [],
-      old_details: [],
+      before_details: [],
       valuesubadddate: "",
-      before_user_holiday_kbns: [],
+      before_user_holiday_kbn: "",
       before_id: [],
       count: 0,
       before_count: 0,
@@ -271,7 +284,8 @@ export default {
       isgosubdatebutton: false,
       isgoadddatebutton: false,
       ja: ja,
-      validate: false
+      validate: false,
+      dspdates: []
     };
   },
   components: {
@@ -281,8 +295,6 @@ export default {
   mounted() {
     this.login_user_code = this.authusers['code'];
     this.login_user_role = this.authusers['role'];
-    console.log('this.login_user_code = ' + this.login_user_code);
-    console.log('this.login_user_role = ' + this.login_user_role);
     this.login_generaluser_role = this.generaluser;
     this.login_generalapproveruser_role = this.generalapproveruser;
     this.login_adminuser_role = this.adminuser;
@@ -432,32 +444,16 @@ export default {
             } else if (result == ALLDAYCALC) {
               // 勤怠モードと時刻
               if (this.details[index].mode != "" && this.details[index].mode != null) {
-                required = true;
-                equalength = 0;
-                maxlength = 0;
-                itemname = '時刻';
-                chkArray = 
-                  this.checkDetail(this.details[index].time, required, equalength, maxlength, itemname, index+1) ;
-                if (chkArray.length > 0) {
-                  if (this.messagevalidatesEdt.length == 0) {
-                    this.messagevalidatesEdt = chkArray;
-                  } else {
-                    this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-                  }
-                }
-              } else {
-                required = true;
-                equalength = 0;
-                maxlength = 0;
-                itemname = '勤怠モード';
-                chkArray =
-                  this.checkDetail(this.details[index].mode, required, equalength, maxlength, itemname, index+1);
-                if (chkArray.length > 0) {
-                  if (this.messagevalidatesEdt.length == 0) {
-                    this.messagevalidatesEdt = chkArray;
-                  } else {
-                    this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-                  }
+                chkArray.push("No." + (index+1) + "の勤務区分では" + "勤怠モードは入力できません");
+              }
+              if (this.details[index].time != "" && this.details[index].time != null) {
+                chkArray.push("No." + (index+1) + "の勤務区分では" + "時刻は入力できません");
+              }
+              if (chkArray.length > 0) {
+                if (this.messagevalidatesEdt.length == 0) {
+                  this.messagevalidatesEdt = chkArray;
+                } else {
+                  this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
                 }
               }
             }
@@ -472,41 +468,42 @@ export default {
     // ------------------------ イベント処理 ------------------------------------
     // 勤怠モードが変更された場合の処理
     changeMode: function(index) {
-      /*if ((this.details[index].mode != "" && this.details[index].mode != null) &&
-        (this.details[index].time != "" && this.details[index].time != null)){
-        this.details[index].user_holiday_kbn = "";
-        this.details[index].kbn_flag = 0;
-      } */
+      //
     },
     // 時間が変更された場合の処理
     changeTime: function(index) {
-      /*if ((this.details[index].mode != "" && this.details[index].mode != null) &&
-        (this.details[index].time != "" && this.details[index].time != null)){
-        this.details[index].user_holiday_kbn = "";
-        this.details[index].kbn_flag = 0;
-      } */
+      //
     },
     // 休暇区分が変更された場合の処理
     changeHolidayKbn: function(index) {
       this.value_user_holiday_kbn = this.details[index].user_holiday_kbn;
+      for (var i=0;i<this.details.length;i++) {
+        this.details[i].kbn_flag = 0;
+      }
       if (this.value_user_holiday_kbn != "" && this.value_user_holiday_kbn != null) {
+        this.details[index].kbn_flag = 1;
         // 編集前の休暇区分と比較
-        if((this.before_user_holiday_kbns.length == 0) || 
-            (this.before_user_holiday_kbns.length > 0 && this.before_user_holiday_kbns[index] != this.value_user_holiday_kbn)) {
+        if(this.before_user_holiday_kbn != this.value_user_holiday_kbn) {
           var result = this.jdgeHolidayKbn(this.value_user_holiday_kbn);
           if (result == ALLDAY) {
             // 明細テーブル編集
             this.edtDetailes(this.details);
             this.count = this.details.length
+            this.before_user_holiday_kbn = this.value_user_holiday_kbn;
           } else if (result == HALFDAY_AM) {
             this.getWorkinghour();
+            this.before_user_holiday_kbn = this.value_user_holiday_kbn;
           } else if (result == HALFDAY_PM) {
             this.getWorkinghour();
+            this.before_user_holiday_kbn = this.value_user_holiday_kbn;
           } else if (result == DEEMED) {
             // 該当日付の所定時刻を取得する（みなし）
             this.getWorkinghour();
+            this.before_user_holiday_kbn = this.value_user_holiday_kbn;
           } else if (result == ALLDAYCALC) {
-            this.getWorkinghour();
+            this.edtDetailes(this.details);
+            this.count = this.details.length
+            this.before_user_holiday_kbn = this.value_user_holiday_kbn;
           }
         }        
       }
@@ -545,16 +542,18 @@ export default {
             department_code : this.edtdepartmentcode,
             record_time : "",
             mode : "",
-            x_positions : "",
-            y_positions : "",
+            user_holiday_kubuns_id : "",
             user_name : this.edtUsername,
             department_name : this.edtdepartmentname,
             code_name : "",
-            kbn_flag : 0,
             user_holiday_kbn : "",
+            record_ymd : moment(this.valuesubadddate).format("YYYYMMDD"),
+            record_date : moment(this.valuesubadddate).format("YYYY年MM月DD日"),
             date : moment(this.valuesubadddate).format("YYYY/MM/DD"),
             time : "",
-            record_date : moment(this.valuesubadddate).format("YYYY年MM月DD日")
+            x_positions : "",
+            y_positions : "",
+            kbn_flag : 0
           };
         this.details.push(arrayobject);
         this.count = this.details.length
@@ -603,6 +602,9 @@ export default {
         this.details.splice(index, 1);
         this.count = this.details.length
       }
+    },
+    cancelclick : function() {
+      this.$emit('cancelclick-event',event);
     },
     // -------------------- サーバー処理 ----------------------------
     // 勤怠取得処理
@@ -670,35 +672,6 @@ export default {
     
 
     // -------------------- 共通 ----------------------------
-    // 取得正常処理
-    getThen(response) {
-      this.details = [];
-      this.before_user_holiday_kbns = [];
-      this.before_id = [];
-      var res = response.data;
-      if (res.result) {
-        this.details = res.details;
-        this.before_details = this.details;
-        for(var i=0;i<this.details.length;i++) {
-          this.before_id[i] = this.details[i].id;
-          this.before_user_holiday_kbns[i] = this.details[i].user_holiday_kbn;
-        }
-        this.count = this.details.length;
-        this.before_count = this.count;
-        if (res.details.length == 0) {
-          var messages = [];
-          messages.push("勤怠データありませんでした。");
-          messages.push("プラスアイコンで追加できます。");
-          this.htmlMessageSwal("確認", messages, "info", true, false);
-        }
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
-        } else {
-          this.serverCatch("勤怠編集", "取得");
-        }
-      }
-    },
     // 取得正常処理（勤怠モード選択リスト）
     getThenc005(response, value) {
       var res = response.data;
@@ -746,8 +719,8 @@ export default {
       var res = response.data;
       var arrayobject = [];
       if (res.result) {
-        if (res.details.length > 0) {
-          // 明細テーブル編集
+        // 明細テーブル編集
+        if (Object.keys(res.details).length > 0) {
           this.edtDetailes(res.details);
           this.count = this.details.length
         }
@@ -762,15 +735,22 @@ export default {
     // 取得正常処理
     getThenWorkTime(response) {
       this.details = [];
-      this.before_user_holiday_kbns = [];
+      this.before_user_holiday_kbn = null;
       this.before_id = [];
       var res = response.data;
       if (res.result) {
         this.details = res.details;
         this.before_details = this.details;
         for(var i=0;i<this.details.length;i++) {
+          if (i==0) {
+            this.value_user_holiday_kbn = this.details[i].user_holiday_kbn;
+            this.before_user_holiday_kbn = this.details[i].user_holiday_kbn;
+          }
           this.before_id[i] = this.details[i].id;
-          this.before_user_holiday_kbns[i] = this.details[i].user_holiday_kbn;
+          if (this.details[i].time == "00:00") {
+            this.details[i].time = null;
+          }
+          this.dspdates[i] = this.details[i].record_date;
         }
         this.count = this.details.length;
         this.before_count = this.count;
@@ -833,132 +813,115 @@ export default {
     edtDetailes: function(edtdetail) {
       this.generalList_c013.forEach(item => {
         if (this.value_user_holiday_kbn == item.code) {
-          var old_details = this.details;
+          var old_details = this.before_details;
           this.details = [];
           // 1日休暇
           if (item.description == ALLDAY_NAME) {
-            this.details.push(this.edtDetailesAllDay(edtdetail[0]));
+            this.details.push(this.edtDetailesAllDay());
           // 午前半休
           } else if (item.description == HALFDAY_AM_NAME) {
-            // TODO 昼休み終わり設定 現段階では入力させる
-            // 旧detailsから出勤を設定なければ空白設定
-            old_details.forEach(detail => {
-              if (detail.mode != "" && detail.mode != null && detail.mode == ATTENDANCE) {
-                this.details.push(this.edtDetailesfromOld(detail));
-              }
-            });
             // 出勤自動設定
-            if (this.details.length == 0) {
-              this.details.push(this.edtDetailesDummy(edtdetail, ATTENDANCE));
-            }
-            // 旧detailsから出勤以外を設定
-            old_details.forEach(detail => {
-              if (detail.mode != "" && detail.mode != null && detail.mode != ATTENDANCE) {
-                this.details.push(this.edtDetailesfromOld(detail));
-              }
-            });
+            this.details.push(this.edtDetailesBreakAttendance(edtdetail));
+            // if (this.before_count > 0) {
+            //   // 旧detailsから出勤以外を設定
+            //   old_details.forEach(detail => {
+            //     if (detail.mode != "" && detail.mode != null && detail.mode != ATTENDANCE) {
+            //       this.details.push(this.edtDetailesfromOld(detail));
+            //     }
+            //   });
+            // }
           // 午後半休
           } else if (item.code_name == HALFDAY_PM_NAME) {
-            // 旧detailsから退勤以外を設定
-            old_details.forEach(detail => {
-              if (detail.mode != "" && detail.mode != null && detail.mode != LEAVING) {
-                this.details.push(this.edtDetailesfromOld(detail));
-              }
-            });
-            // TODO 昼休み始まり設定 現段階では入力させる
-            // 旧detailsから退出勤を設定なければ空白設定
-            old_details.forEach(detail => {
-              if (detail.mode != "" && detail.mode != null && detail.mode == LEAVING) {
-                this.details.push(this.edtDetailesfromOld(detail));
-              }
-            });
+            // if (this.before_count > 0) {
+            //   // 旧detailsから出勤以外を設定
+            //   old_details.forEach(detail => {
+            //     if (detail.mode != "" && detail.mode != null && detail.mode != LEAVING) {
+            //       this.details.push(this.edtDetailesfromOld(detail));
+            //     }
+            //   });
+            // }
             // 退勤自動設定
-            if (this.details.length == 0) {
-              this.details.push(this.edtDetailesDummy(edtdetail, LEAVING));
-            }
+            this.details.push(this.edtDetailesBreakLeaving(edtdetail));
           // みなし
           } else if (item.code_name == DEEMED_BUSINESS_TRIP) {
-            edtdetail.forEach(detail => {
-              // 出勤自動設定
-              this.details.push(this.edtDetailesAttendance(detail));
-              // 退勤自動設定
-              this.details.push(this.edtDetailesLeaving(detail));
-            });
+            // 出勤自動設定
+            this.details.push(this.edtDetailesAttendance(edtdetail));
+            // 退勤自動設定
+            this.details.push(this.edtDetailesLeaving(edtdetail));
           } else if (item.code_name == DEEMED_DIRECT_GO) {
-            edtdetail.forEach(detail => {
-              // 出勤自動設定
-              this.details.push(this.edtDetailesAttendance(detail));
-            });
-            // 旧detailsから出勤以外を設定
-            old_details.forEach(detail => {
-              if (detail.mode != "" && detail.mode != null && detail.mode != ATTENDANCE) {
-                this.details.push(this.edtDetailesfromOld(detail));
-              }
-            });
+            // 出勤自動設定
+            this.details.push(this.edtDetailesAttendance(edtdetail));
+            // if (this.before_count > 0) {
+            //   // 旧detailsから出勤以外を設定
+            //   old_details.forEach(detail => {
+            //     if (detail.mode != "" && detail.mode != null && detail.mode != ATTENDANCE) {
+            //       this.details.push(this.edtDetailesfromOld(detail));
+            //     }
+            //   });
+            // }
           } else if (item.code_name == DEEMED_DIRECT_RETURN) {
-            // 旧detailsから退勤以外を設定
-            old_details.forEach(detail => {
-              if (detail.mode != "" && detail.mode != null && detail.mode != LEAVING) {
-                this.details.push(this.edtDetailesfromOld(detail));
-              }
-            });
-            edtdetail.forEach(detail => {
-              // 退勤自動設定
-              this.details.push(this.edtDetailesLeaving(detail));
-            });
+            // if (this.before_count > 0) {
+            //   // 旧detailsから退勤以外を設定
+            //   old_details.forEach(detail => {
+            //     if (detail.mode != "" && detail.mode != null && detail.mode != LEAVING) {
+            //       this.details.push(this.edtDetailesfromOld(detail));
+            //     }
+            //   });
+            // }
+            // 退勤自動設定
+            this.details.push(this.edtDetailesLeaving(edtdetail));
           // 1日集計対象休暇
           } else if (item.description == ALLDAY_CALC_NAME) {
-            edtdetail.forEach(detail => {
-              // 出勤自動設定
-              this.details.push(this.edtDetailesAttendance(detail));
-              // 退勤自動設定
-              this.details.push(this.edtDetailesLeaving(detail));
-            });
+            this.details.push(this.edtDetailesAllDay());
           }
         }
       });
     },
     // 明細テーブル編集（1日休暇）
-    edtDetailesAllDay: function(detail) {
+    edtDetailesAllDay: function() {
       // 時刻をクリア
       var arrayobject = {
         id : "",
-        user_code : detail.user_code,
-        department_code : detail.department_code,
+        user_code : this.edtUsercode,
+        department_code : this.edtdepartmentcode,
         record_time : "",
         mode : "",
-        x_positions : "",
-        y_positions : "",
+        user_holiday_kubuns_id : "",
         user_name : this.edtUsername,
         department_name : this.edtdepartmentname,
         code_name : "",
-        kbn_flag : 1,
         user_holiday_kbn : this.value_user_holiday_kbn,
+        record_ymd : moment(this.valuesubadddate).format("YYYYMMDD"),
+        record_date : moment(this.valuesubadddate).format("YYYY年MM月DD日"),
         date : moment(this.valuesubadddate).format("YYYY/MM/DD"),
         time : "",
-        record_date : moment(this.valuesubadddate).format("YYYY年MM月DD日")
+        x_positions : "",
+        y_positions : "",
+        kbn_flag : 1
       };
       return arrayobject;
     },
     // 明細テーブル編集（1日集計対象休暇）
-    edtDetailesAllDayCalc: function(detail) {
+    edtDetailesAllDayCalc: function() {
       // 時刻をクリア
       var arrayobject = {
         id : "",
-        user_code : detail.user_code,
-        department_code : detail.department_code,
+        user_code : this.edtUsercode,
+        department_code : this.edtdepartmentcode,
         record_time : "",
         mode : "",
-        x_positions : "",
-        y_positions : "",
+        user_holiday_kubuns_id : "",
         user_name : this.edtUsername,
         department_name : this.edtdepartmentname,
         code_name : "",
-        kbn_flag : 1,
         user_holiday_kbn : this.value_user_holiday_kbn,
+        record_ymd : moment(this.valuesubadddate).format("YYYYMMDD"),
+        record_date : moment(this.valuesubadddate).format("YYYY年MM月DD日"),
         date : moment(this.valuesubadddate).format("YYYY/MM/DD"),
         time : "",
-        record_date : moment(this.valuesubadddate).format("YYYY年MM月DD日")
+        x_positions : "",
+        y_positions : "",
+        kbn_flag : 1
       };
       return arrayobject;
     },
@@ -967,20 +930,46 @@ export default {
       // 出勤を自動設定
       var arrayobject = {
         id : "",
-        user_code : detail.user_code,
-        department_code : detail.department_code,
-        record_time : detail.working_timetable_from_record_time,
+        user_code : this.edtUsercode,
+        department_code : this.edtdepartmentcode,
+        record_time : detail.regular_start_recordtime,
         mode : ATTENDANCE,
-        x_positions : "",
-        y_positions : "",
+        user_holiday_kubuns_id : "",
         user_name : this.edtUsername,
         department_name : this.edtdepartmentname,
         code_name : "",
-        kbn_flag : 1,
         user_holiday_kbn : this.value_user_holiday_kbn,
-        date : moment(this.valuesubadddate).format("YYYY/MM/DD"),
-        time : detail.working_timetable_from_time,
-        record_date : moment(this.valuesubadddate).format("YYYY年MM月DD日")
+        record_ymd : moment(detail.regular_start_recordtime).format("YYYYMMDD"),
+        record_date : moment(detail.regular_start_recordtime).format("YYYY年MM月DD日"),
+        date : moment(detail.regular_start_recordtime).format("YYYY/MM/DD"),
+        time : detail.regular_start_time,
+        x_positions : "",
+        y_positions : "",
+        kbn_flag : 1
+      };
+      return arrayobject;
+    },
+    // 明細テーブル編集（午前半休）
+    edtDetailesBreakAttendance: function(detail) {
+      // 出勤を自動設定
+      var arrayobject = {
+        id : "",
+        user_code : this.edtUsercode,
+        department_code : this.edtdepartmentcode,
+        record_time : detail.lunch_end_recordtime,
+        mode : ATTENDANCE,
+        user_holiday_kubuns_id : "",
+        user_name : this.edtUsername,
+        department_name : this.edtdepartmentname,
+        code_name : "",
+        user_holiday_kbn : this.value_user_holiday_kbn,
+        record_ymd : moment(detail.lunch_end_recordtime).format("YYYYMMDD"),
+        record_date : moment(detail.lunch_end_recordtime).format("YYYY年MM月DD日"),
+        date : moment(detail.lunch_end_recordtime).format("YYYY/MM/DD"),
+        time : detail.lunch_end_time,
+        x_positions : "",
+        y_positions : "",
+        kbn_flag : 1
       };
       return arrayobject;
     },
@@ -989,63 +978,94 @@ export default {
       // 出勤を自動設定
       var arrayobject = {
         id : "",
-        user_code : detail.user_code,
-        department_code : detail.department_code,
-        record_time : detail.working_timetable_to_record_time,
+        user_code : this.edtUsercode,
+        department_code : this.edtdepartmentcode,
+        record_time : detail.regular_end_recordtime,
         mode : LEAVING,
-        x_positions : "",
-        y_positions : "",
+        user_holiday_kubuns_id : "",
         user_name : this.edtUsername,
         department_name : this.edtdepartmentname,
         code_name : "",
-        kbn_flag : 1,
         user_holiday_kbn : this.value_user_holiday_kbn,
-        date : moment(this.valuesubadddate).format("YYYY/MM/DD"),
-        time : detail.working_timetable_to_time,
-        record_date : moment(this.valuesubadddate).format("YYYY年MM月DD日")
+        record_ymd : moment(detail.regular_end_recordtime).format("YYYYMMDD"),
+        record_date : moment(detail.regular_end_recordtime).format("YYYY年MM月DD日"),
+        date : moment(detail.regular_end_recordtime).format("YYYY/MM/DD"),
+        time : detail.regular_end_time,
+        x_positions : "",
+        y_positions : "",
+        kbn_flag : 1
+      };
+      return arrayobject;
+    },
+    // 明細テーブル編集（午後半休）
+    edtDetailesBreakLeaving: function(detail) {
+      // 出勤を自動設定
+      var arrayobject = {
+        id : "",
+        user_code : this.edtUsercode,
+        department_code : this.edtdepartmentcode,
+        record_time : detail.lunch_start_recordtime,
+        mode : LEAVING,
+        user_holiday_kubuns_id : "",
+        user_name : this.edtUsername,
+        department_name : this.edtdepartmentname,
+        code_name : "",
+        user_holiday_kbn : this.value_user_holiday_kbn,
+        record_ymd : moment(detail.lunch_start_recordtime).format("YYYYMMDD"),
+        record_date : moment(detail.lunch_start_recordtime).format("YYYY年MM月DD日"),
+        date : moment(detail.lunch_start_recordtime).format("YYYY/MM/DD"),
+        time : detail.lunch_start_time,
+        x_positions : "",
+        y_positions : "",
+        kbn_flag : 1
       };
       return arrayobject;
     },
     // 明細テーブル編集（旧）
     edtDetailesfromOld: function(detail) {
+      // user_holiday_kbnは現在に置き換え
       var arrayobject = {
         id : detail.id,
         user_code : detail.user_code,
         department_code : detail.department_code,
         record_time : detail.record_time,
         mode : detail.mode,
-        x_positions : detail.x_positions,
-        y_positions : detail.y_positions,
+        user_holiday_kubuns_id : "",
         user_name : detail.user_name,
         department_name : detail.department_name,
         code_name : detail.code_name,
-        kbn_flag : detail.kbn_flag,
-        user_holiday_kbn : detail.user_holiday_kbn,
+        user_holiday_kbn : this.value_user_holiday_kbn,
+        record_ymd : moment(detail.record_time).format("YYYYMMDD"),
+        record_date : detail.record_date,
         date : detail.date,
         time : detail.time,
-        record_date : detail.record_date
+        x_positions : detail.x_positions,
+        y_positions : detail.y_positions,
+        kbn_flag : detail.kbn_flag
       };
       return arrayobject;
     },
     // 明細テーブル編集（空）
-    edtDetailesDummy: function(detail, mode) {
+    edtDetailesDummy: function(mode) {
       // 出勤を自動設定
       var arrayobject = {
         id : "",
-        user_code : detail.user_code,
-        department_code : detail.department_code,
+        user_code : this.edtUsercode,
+        department_code : this.edtdepartmentcode,
         record_time : "",
         mode : mode,
-        x_positions : "",
-        y_positions : "",
+        user_holiday_kubuns_id : "",
         user_name : this.edtUsername,
         department_name : this.edtdepartmentname,
         code_name : "",
-        kbn_flag : 1,
         user_holiday_kbn : this.value_user_holiday_kbn,
+        record_ymd : moment(this.valuesubadddate).format("YYYYMMDD"),
+        record_date : moment(this.valuesubadddate).format("YYYY年MM月DD日"),
         date : moment(this.valuesubadddate).format("YYYY/MM/DD"),
         time : detail.working_timetable_from_time,
-        record_date : moment(this.valuesubadddate).format("YYYY年MM月DD日")
+        x_positions : "",
+        y_positions : "",
+        kbn_flag : 1
       };
       return arrayobject;
     },
@@ -1070,8 +1090,8 @@ tbody {
     border-color: #95c5ed #dee2e6 !important;
 }
 
-.mw-rem-3 {
-  min-width: 3rem;
+.mw-rem-2 {
+  min-width: 2rem;
 }
 
 .mw-rem-8 {

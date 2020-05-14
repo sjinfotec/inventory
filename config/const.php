@@ -126,7 +126,7 @@ return [
         'value' => 'C013',
         'non_set' => "",
         'target_calc_time' => "1日集計対象休暇",
-        'half_am_' => "午前半休",
+        'half_am' => "午前半休",
         'half_pm' => "午後半休",
         'non_calc_time' => "1日休暇",
         'late_work' => "遅刻",
@@ -334,10 +334,81 @@ return [
         'value' => 'C036'
     ],
  
+    'C035' => [
+        'value' => 'C035',
+        'attendance_time' => 1,
+        'leaving_time' => 2,
+        'missing_middle_time' => 11,
+        'missing_middle_return_time' => 12,
+        'public_going_out_time' => 21,
+        'public_going_out_return_time' => 22
+    ],
+ 
+    'C036' => [
+        'value' => 'C036',
+        'date' => 1,
+        'hour' => 2
+    ],
+ 
+    'C037' => [
+        'value' => 'C037',
+        'csvcalc' => 1,
+        'csvsalary' => 2,
+        'csvlog' => 3,
+        'usersdownload' => 4
+    ],
+ 
+    'C037_DESC_VALUE' => [
+        'array' => array('C037', 'csvcalc', 'csvsalary', 'csvlog', 'usersdownload')
+    ],
+
+    'C038' => [
+        'value' => 'C038',
+        'calc_block' => 1,
+        'daily' => 2,
+        'monthly' => 3,
+        'alert_block' => 4,
+        'daily_alert' => 5,
+        'monthly_alert' => 6,
+        'attendancelog_block' => 7,
+        'store_attendancelog' => 8,
+        'edit_attendancelog' => 9,
+        'edit_block' => 10,
+        'create_shift_time' => 11,
+        'edit_work_times' => 12,
+        'demand_block' => 13,
+        'demand' => 14,
+        'approval' => 15,
+        'confirm' => 16,
+        'setting_block' => 17,
+        'create_company_information' => 18,
+        'create_department' => 19,
+        'setting_calc' => 20,
+        'create_time_table' => 21,
+        'setting_calendar' => 22,
+        'edit_user' => 23,
+        'operation_block' => 24,
+        'user_pass' => 25,
+        'file_download' => 26,
+        'edit_worktime_user' => 27,
+        'edit_worktime_user_conditional' => 28,
+        'TeamViewer' => 29,
+        'account_admin' => 30,
+        'clientServer' => 31
+    ],
+ 
     'C999' => [
         'value' => 'C999',
         'main' => 1,
-        'sub' => 2
+        'sub' => 2,
+        'timetable_no' => 3
+    ],
+ 
+    'C999_NAME' => [
+        'value' => 'C999',
+        'main' => 9999,
+        'sub' => 'systemuser',
+        'timetable_no' => 9999
     ],
 
     'WEEK_KANJI' => [
@@ -385,8 +456,8 @@ return [
         'leaving_time' => 5,
         'missing_middle_time' => 5,
         'missing_middle_return_time' => 5,
-        'public_going_out_time' => 5,
-        'public_going_out_return_time' => 5
+        'public_going_out_time' => 7,
+        'public_going_out_return_time' => 7
     ],
 
     'SHOW_OR_UPDATE' => [
@@ -521,6 +592,11 @@ return [
         'items_12' => '特別条項の上限規制：年720時間（休日労働含めない）'
     ],
  
+    'LUNCH_BREAK' => [
+        'STARTAFTERTIME' => 2,
+        'HOURS' => 0.5
+    ],
+ 
     'ALERT_INFO_RESULT' => [
         'OK' => 'OK',
         'WA' => 'WA',
@@ -651,10 +727,12 @@ return [
         'DEBUG' => 'DEBUG'
     ],
 
+    // 未使用
     'DISTRIBUTION' => [
-        'DISTRIBUTION' => 2
+        'DISTRIBUTION' => 1
     ],
 
+    // 未使用
     'DISTRIBUTION_VALUE' => [
         '43z' => 1,
         'SSJJOO' => 2,
@@ -662,7 +740,7 @@ return [
     ],
 
     'EDITION' => [
-        'EDITION' => 4
+        'EDITION' => 3
     ],
 
     'EDITION_VALUE' => [
@@ -671,6 +749,48 @@ return [
         'CROUD' => 3,
         'SSJJOO' => 4,
         'CLIENT' => 5
+    ],
+
+    // SSJJOO00:三条 SD03TA00:清水勧業 CSD1000L:丸高水産
+    'ACCOUNTID' => [
+        'account_id' => 'SSJJOO00'
+    ],
+
+    // メニュー項目数   未使用
+    'MENUITEMCOUNT' => [
+        'count' => 26
+    ],
+
+    // 未使用
+    'MENUITEM' => [
+        'calc_block' => 1,
+        'daily' => 2,
+        'monthly' => 3,
+        'alert_block' => 4,
+        'daily_alert' => 5,
+        'monthly_alert' => 6,
+        'attendancelog_block' => 7,
+        'store_attendancelog' => 8,
+        'edit_attendancelog' => 9,
+        'edit_block' => 10,
+        'create_shift_time' => 11,
+        'edit_work_times' => 12,
+        'demand_block' => 13,
+        'demand' => 14,
+        'approval' => 15,
+        'confirm' => 16,
+        'setting_block' => 17,
+        'create_company_information' => 18,
+        'create_department' => 19,
+        'setting_calc' => 20,
+        'create_time_table' => 21,
+        'setting_calendar' => 22,
+        'edit_user' => 23,
+        'operation_block' => 24,
+        'user_pass' => 25,
+        'file_download' => 26,
+        'edit_worktime_user' => 101,
+        'edit_worktime_user_conditional' => 102
     ]
 
 ];

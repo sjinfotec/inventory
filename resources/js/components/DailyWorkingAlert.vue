@@ -159,6 +159,7 @@
           v-bind:generalapproveruser="generalapproveruser"
           v-bind:adminuser="adminuser"
           v-bind:heads="detailsEdt"
+          v-on:cancelclick-event="cancelClick"
         >
         </edit-work-times-table>
       </div>
@@ -195,6 +196,10 @@ export default {
         type: Number,
         default: 0
     },
+    indexorhome: {
+        type: Number,
+        default: 0
+    },
   },
   data: function() {
     return {
@@ -224,6 +229,7 @@ export default {
       login_generaluser_role: "",
       login_generalapproveruser_role: "",
       login_adminuser_role: "",
+      index_or_home: "",
       showeditworktimestable: true,
       showdailyworkingalerttable: true
     };
@@ -238,6 +244,8 @@ export default {
     if (this.login_user_role == this.login_adminuser_role) {
       this.isEdit = true;
     }
+    this.login_adminuser_role = this.adminuser;
+    this.index_or_home = this.indexorhome;
     this.valuefromdate = this.defaultDate;
     moment.locale("ja");
     this.applytermdate = ""
@@ -246,6 +254,13 @@ export default {
     }
     this.$refs.selectdepartmentlist.getList(this.applytermdate);
     this.getUserSelected();
+    // 1:index 2:homeindex
+    if (this.index_or_home == 2) {
+      this.selectMode = '';
+      this.itemClear();
+      this.getItem();
+      this.refreshDailyWorkingAlertTable();
+    }
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -361,6 +376,11 @@ export default {
       this.selectMode = 'EDT';
       this.detailsEdt = this.details[index];
       this.refreshEdtWorkingTimesTable();
+    },
+    // キャンセルボタンクリックされた場合の処理
+    cancelClick: function(e, arrayitem) {
+      this.selectMode = '';
+      this.refreshDailyWorkingAlertTable();
     },
     // ------------------------ サーバー処理 ----------------------------
     // 日次警告取得処理

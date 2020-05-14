@@ -125,10 +125,8 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-csv-download
-                  v-bind:btn-mode="'csvusers'"
-                  v-bind:csv-data="calcresults"
+                  v-bind:btn-mode="'usersdownload'"
                   v-bind:is-csvbutton="iscsvbutton"
-                  v-bind:csv-date="datejaFormat"
                 ></btn-csv-download>
               </div>
               <!-- /.col -->
@@ -1413,7 +1411,9 @@ export default {
       latest_user_code: "",
       messageshowsearch: false,
       login_user_code: "",
-      login_user_role: ""
+      login_user_role: "",
+      input_mobile_address: "",
+      iscsvbutton: false
     };
   },
   // マウント時
@@ -2024,7 +2024,7 @@ export default {
     addroleChange: function(value, arrayitem) {
       this.form.role = value;
     },
-    // CSVボタンクリック処理
+    // CSVから作成するボタンクリック処理
     usersuploadclick: function() {
       this.selectMode = "UPUSERS";
     },
@@ -2207,6 +2207,7 @@ export default {
         var add_official_position = this.details[0].official_position;
         var add_working_timetable_no = this.details[0].working_timetable_no;
         var add_email = this.details[0].email;
+        var add_mobile_email = this.details[0].mobile_email;
         var add_management = this.details[0].management;
         var add_role = this.details[0].role;
         var add_password = this.details[0].password;
@@ -2220,6 +2221,7 @@ export default {
           official_position: add_official_position,
           working_timetable_no: add_working_timetable_no,
           email: add_email,
+          mobile_email: add_mobile_email,
           password: add_password,
           management: add_management,
           role: add_role,
@@ -2516,6 +2518,7 @@ export default {
         var user_name = "";
         var user_kana = "";
         var user_official_position = "";
+        var user_apply_term_from = "";
         var user_kill_from_date = "";
         var user_working_timetable_name = "";
         var user_email = "";
@@ -2528,7 +2531,7 @@ export default {
         for (var i = 1; i < array_linetext.length; i++) {
           linetext = array_linetext[i].split(",");
           // TODO:linetext.length=1はSKIPとするが(EOF)EOF以外のデータの場合でもSKIPとなる
-          if (linetext.length == 12) {
+          if (linetext.length == 13) {
             array_object.push({
               user_code: linetext[0].trim(),
               user_department_name: linetext[1].trim(),
@@ -2536,12 +2539,13 @@ export default {
               user_name: linetext[3].trim(),
               user_kana: linetext[4].trim(),
               user_official_position: linetext[5].trim(),
-              user_kill_from_date: linetext[6].trim(),
-              user_working_timetable_name: linetext[7].trim(),
-              user_email: linetext[8].trim(),
-              user_mobile_email: linetext[9].trim(),
-              user_management: linetext[10].trim(),
-              user_role: linetext[11].trim()
+              user_apply_term_from: linetext[6].trim(),
+              user_kill_from_date: linetext[7].trim(),
+              user_working_timetable_name: linetext[8].trim(),
+              user_email: linetext[9].trim(),
+              user_mobile_email: linetext[10].trim(),
+              user_management: linetext[11].trim(),
+              user_role: linetext[12].trim()
             });
           } else if (linetext.length != 1) {
             return false;

@@ -37,5 +37,11 @@
 					</div>
 					<!-- /main contentns row -->
 					@endif
-					<daily-working-information></daily-working-information>
+					<daily-working-information
+						v-bind:authusers="{{ $authusers }}"
+						v-bind:accountdatas="{{ $account_datas }}"
+						v-bind:menudatas="{{ $menu_selections }}"
+						v-bind:const_generaldatas="{{ $const_general_datas }}"
+					>
+					</daily-working-information>
 @endsection

@@ -140,15 +140,6 @@
                 <!-- <message-waiting v-bind:is-message-show="messageshowsearch"></message-waiting> -->
               </div>
               <!-- /.col -->
-              <!-- col -->
-              <div v-if="isswitchvisible" class="col-md-12 pb-2">
-                <btn-work-time
-                  v-on:switchclick-event="switchclick"
-                  v-bind:btn-mode="btnmodeswitch"
-                  v-bind:is-push="isswitchbutton"
-                ></btn-work-time>
-              </div>
-              <!-- /.col -->
             </div>
             <!-- /.row -->
             <!-- /.panel contents -->
@@ -174,7 +165,7 @@
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- col -->
-              <div class="col-md-3 pb-2">
+              <div class="col-md-4 pb-2">
                 <btn-work-time
                   v-on:gosubateclick-event="gosubateclick"
                   v-bind:btn-mode="'gosubdate'"
@@ -184,7 +175,16 @@
               </div>
               <!-- /.col -->
               <!-- col -->
-              <div class="col-md-3 pb-2">
+              <div class="col-md-4 pb-2">
+                <btn-work-time
+                  v-on:switchclick-event="switchclick"
+                  v-bind:btn-mode="btnmodeswitch"
+                  v-bind:is-push="isswitchbutton"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+              <!-- col -->
+              <div class="col-md-4 pb-2">
                 <btn-work-time
                   v-on:goaddateclick-event="goaddateclick"
                   v-bind:btn-mode="'goadddate'"
@@ -206,9 +206,13 @@
                 v-bind:date-name="dateName"
                 v-bind:predeter-time-name="predetertimename"
                 v-bind:predeter-night-time-name="predeternighttimename"
-                v-bind:predeter-time-secondname="predetertimesecondname"
-                v-bind:predeter-night-time-secondname="predeternighttimesecondname"
+                v-bind:predeter-time-second-name="predetertimesecondname"
+                v-bind:predeter-night-time-second-name="predeternighttimesecondname"
                 v-bind:btn-mode="btnmodeswitch"
+                v-bind:login-user="authusers['code']"
+                v-bind:login-role="authusers['role']"
+                v-bind:account-data="accountdatas['account_id']"
+                v-bind:menu-data="menudatas"
               ></daily-working-info-table>
               <!-- ----------- 日次集計テーブル END ---------------- -->
             </div>
@@ -252,9 +256,30 @@ import { dialogable } from "../mixins/dialogable.js";
 import { checkable } from "../mixins/checkable.js";
 import { requestable } from "../mixins/requestable.js";
 
+// CONST
+const CONST_C025 = 'C025';
+
 export default {
   name: "dailyworkingtime",
   mixins: [dialogable, checkable, requestable],
+  props: {
+    authusers: {
+        type: Array,
+        default: []
+    },
+    accountdatas: {
+        type: Array,
+        default: []
+    },
+    menudatas: {
+        type: Array,
+        default: []
+    },
+    const_generaldatas: {
+        type: Array,
+        default: []
+    }
+  },
   data: function() {
     return {
       valuedate: "",
@@ -269,7 +294,6 @@ export default {
       applytermdate: "",
       valuefromdate: "",
       valuesubadddate: "",
-      userrole: "",
       DatePickerFormat: "yyyy年MM月dd日",
       defaultDate: new Date(),
       stringtext: "",
@@ -296,15 +320,26 @@ export default {
       isswitchbutton: false,
       isswitchvisible: false,
       validate: true,
-      initialized: false
+      initialized: false,
+      const_C025_data: []
     };
+  },
+  computed: {
   },
   // マウント時
   mounted() {
+    // メソッドで使用するのでcomputedでなくてOK
+    var i = 0;
+    let $this = this;
+    this.const_generaldatas.forEach( function( item ) {
+      if (item.identification_id == CONST_C025) {
+        $this.const_C025_data.push($this.const_generaldatas[i]);
+      }
+      i++;
+    });
     this.valuedate = this.defaultDate;
     this.valuefromdate = moment(this.defaultDate).format("YYYYMMDD");
     this.valuesubadddate = this.valuefromdate;
-    this.getUserRole();
     this.applytermdate = "";
     if (this.valuefromdate) {
       this.applytermdate = this.valuefromdate;
@@ -344,7 +379,7 @@ export default {
         this.validate = false;
       }
       // 所属部署
-      if (this.userrole < "8") {
+      if (this.authusers['role'] < this.const_C025_data[2]['code']) {
         required = true;
         equalength = 0;
         maxlength = 0;
@@ -506,17 +541,6 @@ export default {
       }
     },
     // ------------------------ サーバー処理 ----------------------------
-    // ログインユーザーの権限を取得
-    getUserRole: function() {
-      var arrayParams = [];
-      this.postRequest("/get_login_user_role", arrayParams)
-        .then(response => {
-          this.getThenrole(response);
-        })
-        .catch(reason => {
-          this.serverCatch("ユーザー権限", "取得");
-        });
-    },
     // 日次集計取得処理
     getItem(datevalue) {
       // 処理中メッセージ表示
@@ -563,25 +587,6 @@ export default {
         this.selectedDepartmentValue,
         this.selectedEmploymentValue
       );
-    },
-    // 取得正常処理（ユーザー権限）
-    getThenrole(response) {
-      var res = response.data;
-      if (res.result) {
-        this.userrole = res.role;
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal(
-            "エラー",
-            res.messagedata,
-            "error",
-            true,
-            false
-          );
-        } else {
-          this.serverCatch("ユーザー権限", "取得");
-        }
-      }
     },
     // 取得正常処理
     getThen(response) {

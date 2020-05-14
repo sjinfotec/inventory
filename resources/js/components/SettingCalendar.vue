@@ -240,12 +240,12 @@
         <div class="card shadow-pl" v-if="details.length">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:header-text1="'◆カレンダー表示'"
+            v-bind:header-text1="'◆カレンダー個別表示'"
             v-bind:header-text2="stringtext"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <!-- main contentns row -->
-          <!-- ----------- 一括編集部 START ---------------- -->
+          <!-- ----------- 個別編集部 START ---------------- -->
           <!-- panel contents -->
           <!-- .row -->
           <div class="col-md-3 pb-2 w-15 text-center align-middle">
@@ -266,6 +266,15 @@
             v-on:detaileditclick-event="detailEdtClick"
           ></table-calendarmonth>
           <!-- ----------- 項目部 END ---------------- -->
+          <!-- ----------- 個別編集部 END ---------------- -->
+          <!-- panel header -->
+          <daily-working-information-panel-header
+            v-bind:header-text1="'◆カレンダー一括編集'"
+            v-bind:header-text2="stringtext2"
+          ></daily-working-information-panel-header>
+          <!-- main contentns row -->
+          <!-- ----------- 一括編集部 START ---------------- -->
+          <!-- panel contents -->
           <!-- .row -->
           <div class="col-md-3 pb-2 w-15 text-center align-middle">
             <col-note
@@ -291,6 +300,7 @@
             </div>
             <!-- /.row -->
             <!-- ----------- メッセージ部 END ---------------- -->
+            <!-- ----------- 日付指定変数部 START ---------------- -->
             <!-- .row -->
             <div class="row">
               <div class="col-12">
@@ -335,7 +345,7 @@
                           <select class="form-control" v-model="businessbatch" @change="businessbatchChanges(businessbatch)">
                             <option value></option>
                             <option
-                              v-for="blist in BusinessDayList"
+                              v-for="blist in get_C007"
                               :value="blist.code"
                               v-bind:key="blist.code"
                             >{{ blist.code_name }}</option>
@@ -345,7 +355,7 @@
                           <select class="form-control" v-model="holidaybatch" @change="holiDaybatchChanges(holidaybatch)">
                             <option value></option>
                             <option
-                              v-for="hlist in HoliDayList"
+                              v-for="hlist in get_C013"
                               :value="hlist.code"
                               v-bind:key="hlist.code"
                             >{{ hlist.code_name }}</option>
@@ -367,8 +377,73 @@
               </div>
             </div>
             <!-- /.row -->
+            <!-- ----------- 日付指定編集部 END ---------------- -->
+            <!-- ----------- 曜日指定編集部 START ---------------- -->
+            <!-- .row -->
+            <div class="row">
+              <div class="col-12">
+                <div class="table-responsive">
+                  <table class="table table-striped border-bottom font-size-sm text-nowrap">
+                    <thead>
+                      <tr>
+                        <td class="text-center align-middle w-20 mw-rem-6">曜日<span class="color-red">[必須]</span></td>
+                        <td class="text-center align-middle w-30">営業日区分<span class="color-red">[必須]</span></td>
+                        <td class="text-center align-middle w-30">休暇区分</td>
+                        <td class="text-center align-middle w-20">操作</td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td class="text-center align-middle">
+                          <select class="form-control" v-model="weekbatch" @change="weekdaysChanges(weekbatch)">
+                            <option value></option>
+                            <option
+                              v-for="(wlist,index) in this.formweekdays"
+                              :value="index"
+                              v-bind:key="index"
+                            >{{ wlist }}</option>
+                          </select>
+                        </td>
+                        <td class="text-center align-middle">
+                          <select class="form-control" v-model="businessbatch_w" @change="businessbatchWChanges(businessbatch_w)">
+                            <option value></option>
+                            <option
+                              v-for="blist in get_C007"
+                              :value="blist.code"
+                              v-bind:key="blist.code"
+                            >{{ blist.code_name }}</option>
+                          </select>
+                        </td>
+                        <td class="text-center align-middle">
+                          <select class="form-control" v-model="holidaybatch_w" @change="holiDaybatchWChanges(holidaybatch_w)">
+                            <option value></option>
+                            <option
+                              v-for="hlist in get_C013"
+                              :value="hlist.code"
+                              v-bind:key="hlist.code"
+                            >{{ hlist.code_name }}</option>
+                          </select>
+                        </td>
+                        <td class="text-center align-middle">
+                          <div class="btn-group">
+                            <button
+                              type="button"
+                              class="btn btn-success"
+                              @click="fixbatchWclick()"
+                            >この内容で一括更新する</button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <!-- /.row -->
+            <!-- ----------- 日付指定編集部 END ---------------- -->
           </div>
           <!-- /main contentns row -->
+          <!-- ----------- 一括編集部 START ---------------- -->
         </div>
       </div>
       <!-- ========================== 表示部 END ========================== -->
@@ -444,7 +519,7 @@
                             <select class="form-control" v-model="business[index1]" @change="businessDayChanges(business[index1], index1)">
                               <option value></option>
                               <option
-                                v-for="blist in BusinessDayList"
+                                v-for="blist in get_C007"
                                 :value="blist.code"
                                 v-bind:key="blist.code"
                               >{{ blist.code_name }}</option>
@@ -454,7 +529,7 @@
                             <select class="form-control" v-model="holiday[index1]" @change="holiDayChanges(holiday[index1], index1)">
                               <option value></option>
                               <option
-                                v-for="hlist in HoliDayList"
+                                v-for="hlist in get_C013"
                                 :value="hlist.code"
                                 v-bind:key="hlist.code"
                               >{{ hlist.code_name }}</option>
@@ -605,7 +680,7 @@
                                             <select class="form-control" v-model="form.initptn_business[index]" @change="formbusinessDayChanges(index)">
                                               <option value></option>
                                               <option
-                                                v-for="blist in BusinessDayList"
+                                                v-for="blist in get_C007"
                                                 :value="blist.code"
                                                 v-bind:key="blist.code"
                                               >{{ blist.code_name }}</option>
@@ -617,7 +692,7 @@
                                             <select class="form-control" v-model="form.initptn_holiday[index]" @change="formholiDayChanges(index)">
                                               <option value></option>
                                               <option
-                                                v-for="hlist in HoliDayList"
+                                                v-for="hlist in get_C013"
                                                 :value="hlist.code"
                                                 v-bind:key="hlist.code"
                                               >{{ hlist.code_name }}</option>
@@ -675,11 +750,60 @@ import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
+// CONST
+const CONST_C007 = 'C007';
+const CONST_C008 = 'C008';
+const CONST_C013 = 'C013';
+
 export default {
   name: "SettingCalendar",
   mixins: [ dialogable, checkable, requestable ],
+  props: {
+    const_generaldatas: {
+        type: Array,
+        default: []
+    }
+  },
+  computed: {
+    get_C007: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C007) {
+          $this.const_C007_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C007_data;
+    },
+    // get_C008: function() {
+    //   let $this = this;
+    //   var i = 0;
+    //   this.const_generaldatas.forEach( function( item ) {
+    //     if (item.identification_id == CONST_C008) {
+    //       $this.const_C008_data.push($this.const_generaldatas[i]);
+    //     }
+    //     i++;
+    //   });    
+    //   return this.const_C008_data;
+    // },
+    get_C013: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C013) {
+          $this.const_C013_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C013_data;
+    }
+  },
   data() {
     return {
+      const_C007_data: [],
+      const_C008_data: [],
+      const_C013_data: [],
       selectedEmploymentValue: "",
       selectedDepartmentValue : "",
       valueDepartmentkillcheck : false,
@@ -715,10 +839,9 @@ export default {
       selectedC024Value: "",
       valueC024killcheck: false,
       stringtext: "",
+      stringtext2: "",
       details: [],
       detail_dates: [],
-      BusinessDayList: [],
-      HoliDayList: [],
       business: [{}],
       holiday: [{}],
       formptns: [
@@ -755,6 +878,9 @@ export default {
       valuetoday : "",
       businessbatch : "",
       holidaybatch : "",
+      weekbatch : "",
+      businessbatch_w : "",
+      holidaybatch_w : "",
       input_date : moment().format("YYYYMMDD"),
       date_endof : moment().endOf('month').format("DD")
     };
@@ -766,8 +892,6 @@ export default {
     this.month = moment(this.valueym).format("MM");
     this.valueyear = this.year;
     this.valuemonth = this.month;
-    this.getGeneralList("C007");
-    this.getGeneralList("C008");
     this.setPanelHeader();
   },
   created() {
@@ -993,7 +1117,7 @@ export default {
       }
       return flag;
     },
-    // バリデーション（一括更新）
+    // バリデーション（一括更新日付）
     checkFormBatch: function() {
       this.messagevalidatesBatch = [];
       var flag = true;
@@ -1059,6 +1183,47 @@ export default {
       itemname = '営業日区分';
       chkArray = 
         this.checkHeader(this.businessbatch, required, equalength, maxlength, itemname, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesBatch.length == 0) {
+          this.messagevalidatesBatch = chkArray;
+        } else {
+          this.messagevalidatesBatch = this.messagevalidatesBatch.concat(chkArray);
+        }
+      }
+
+      if (this.messagevalidatesBatch.length > 0) {
+        flag = false;
+      }
+      return flag;
+    },
+    // バリデーション（一括更新曜日）
+    checkFormBatchW: function() {
+      this.messagevalidatesBatch = [];
+      var flag = true;
+      // 曜日
+      var chkArray = [];
+      var required = true;
+      var equalength = 0;
+      var maxlength = 0;
+      var itemname = '曜日';
+      chkArray = 
+        this.checkHeader(this.weekbatch, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesBatch.length == 0) {
+          this.messagevalidatesBatch = chkArray;
+        } else {
+          this.messagevalidatesBatch = this.messagevalidatesBatch.concat(chkArray);
+        }
+      }
+
+      // 営業日区分
+      chkArray = [];
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '営業日区分';
+      chkArray = 
+        this.checkHeader(this.businessbatch_w, required, equalength, maxlength, itemname, itemname);
       if (chkArray.length > 0) {
         if (this.messagevalidatesBatch.length == 0) {
           this.messagevalidatesBatch = chkArray;
@@ -1159,47 +1324,49 @@ export default {
       // パネルに表示
       this.setPanelHeader();
     },
-    // 出勤区分がクリアされた場合の処理
+    // 出勤区分が変更された場合の処理
     businessDayChanges: function(value, index) {
       if (value < 2) {
         this.holiday[index] = null;
       }
     },
-    // 休暇区分がクリアされた場合の処理
+    // 休暇区分が変更された場合の処理
     holiDayChanges: function(value, index) {
-      if (value < 1) {
-        this.business[index] = 1;
-      } else {
-        this.business[index] = 3;
-      }
+      this.business[index] = this.setBussinessAuto(value);
     },
-    // 出勤区分がクリアされた場合の処理
+    // 出勤区分が変更された場合の処理
     businessbatchChanges: function(value) {
       if (value < 2) {
         this.holidaybatch = null;
       }
     },
-    // 休暇区分がクリアされた場合の処理
+    // 休暇区分が変更された場合の処理
     holiDaybatchChanges: function(value) {
-      if (value < 1) {
-        this.businessbatch = 1;
-      } else {
-        this.businessbatch = 3;
-      }
+      this.businessbatch = this.setBussinessAuto(value);
     },
-    // 出勤区分がクリアされた場合の処理
-    formbusinessDayChanges: function(value, index) {
+    // 曜日が変更された場合の処理
+    weekdaysChanges: function(value) {
+      console.log('weekdaysChanges value = ' + value);
+    },
+    // 出勤区分が変更された場合の処理
+    businessbatchWChanges: function(value) {
       if (value < 2) {
-        this.initptn_holiday[index] = null;
+        this.holidaybatch_w = null;
       }
     },
-    // 休暇区分がクリアされた場合の処理
-    formholiDayChanges: function(value, index) {
-      if (value < 1) {
-        this.initptn_business[index] = 1;
-      } else {
-        this.initptn_business[index] = 3;
+    // 休暇区分が変更された場合の処理
+    holiDaybatchWChanges: function(value) {
+      this.businessbatch_w = this.setBussinessAuto(value);
+    },
+    // 出勤区分が変更された場合の処理
+    formbusinessDayChanges: function(index) {
+      if (this.form.initptn_business[index] < 2) {
+        this.form.initptn_holiday[index] = null;
       }
+    },
+    // 休暇区分が変更された場合の処理
+    formholiDayChanges: function(index) {
+      this.form.initptn_business[index] = this.setBussinessAuto(this.form.initptn_holiday[index]);
     },
     // 表示ボタンクリック処理
     searchclick() {
@@ -1319,7 +1486,7 @@ export default {
       //   });
       }
     },
-    // 一括更新ボタンクリック処理
+    // 一括更新ボタンクリック処理（日付）
     fixbatchclick() {
       this.messageClear();
       var flag = this.checkFormBatch();
@@ -1330,6 +1497,28 @@ export default {
           .then(result  => {
             if (result) {
               this.FixDetailbatch("一括更新");
+            }
+        });
+      // 項目数が多い場合以下コメントアウト
+      } else {
+        this.countswal("エラー", this.messagevalidatesBatch, "error", true, false, true)
+          .then(result  => {
+            if (result) {
+            }
+        });
+      }
+    },
+    // 一括更新ボタンクリック処理（曜日）
+    fixbatchWclick() {
+      this.messageClear();
+      var flag = this.checkFormBatchW();
+      if (flag) {
+        var messages = [];
+        messages.push("この内容で一括更新しますか？");
+        this.htmlMessageSwal("確認", messages, "info", true, true)
+          .then(result  => {
+            if (result) {
+              this.FixDetailbatchW("一括更新");
             }
         });
       // 項目数が多い場合以下コメントアウト
@@ -1514,28 +1703,42 @@ export default {
           });
       }
     },
-    // コード選択リスト取得処理
-    getGeneralList(value) {
-      var arrayParams = { identificationid : value };
-      this.postRequest("/get_general_list", arrayParams)
+    // カレンダー一括更新処理（曜日）
+    FixDetailbatchW(eventname) {
+      var arrayParams = {
+          employmentstatus : this.selectedEmploymentValue,
+          departmentcode : this.selectedDepartmentValue,
+          usercode : this.selectedUserValue,
+          fromyear : this.valueyear,
+          frommonth : this.valuemonth,
+          weekdays : this.weekbatch,
+          businessdays: this.businessbatch_w,
+          holidays : this.holidaybatch_w
+      };
+      this.postRequest("/setting_calendar/fixbatchw", arrayParams)
         .then(response  => {
-          if (value == "C007") {
-            this.getThenbusinesskbn(response, "出勤区分");
-          }
-          if (value == "C008") {
-            this.getThenholidaykbn(response, "休暇区分");
-          }
+          this.putThenBatch(response, eventname);
         })
         .catch(reason => {
-          if (value == "C007") {
-            this.serverCatch("出勤区分", "取得");
-          }
-          if (value == "C008") {
-            this.serverCatch("休暇区分", "取得");
-          }
+          this.serverCatch("カレンダー", eventname);
         });
     },
     // -------------------- 共通 ----------------------------
+    // 休暇区分による出勤区分の自動設定
+    setBussinessAuto: function(code) {
+      var valuebusiness = 1;
+      let $this = this;
+      Object.keys(this.const_C013_data).forEach(function (value, key) {
+        if (code == $this.const_C013_data[key]['code']) {
+          if ($this.const_C013_data[key]['use_free_item'] == 1) {
+            valuebusiness = 3;
+          } else {
+            valuebusiness = 1;
+          }
+        }
+      });
+      return valuebusiness;
+    },
     // 取得正常処理
     getThen(response) {
       this.details = [];
@@ -1604,32 +1807,6 @@ export default {
       messages.push(kbn + eventtext + "に失敗しました");
       this.htmlMessageSwal("エラー", messages, "error", true, false)
     },
-    // 取得正常処理（明細出勤区分）
-    getThenbusinesskbn(response) {
-      var res = response.data;
-      if (res.result) {
-        this.BusinessDayList = res.details;
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false)
-        } else {
-          this.serverCatch("出勤区分", "取得");
-        }
-      }
-    },
-    // 取得正常処理（明細休暇区分）
-    getThenholidaykbn(response, value) {
-      var res = response.data;
-      if (res.result) {
-        this.HoliDayList = res.details;
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false)
-        } else {
-          this.serverCatch("休暇区分", "取得");
-        }
-      }
-    },
     inputClear() {
       this.details = [];
     },
@@ -1647,6 +1824,7 @@ export default {
       moment.locale("ja");
       var datejaFormat = "";
       this.stringtext = "";
+      this.stringtext2 = "";
       if (this.valueyear != null && this.valueyear != "") {
         if (this.valuemonth != null && this.valuemonth != "") {
           datejaFormat +=  moment(this.valueyear + this.valuemonth + '15').format("YYYY年MM月");
@@ -1656,6 +1834,8 @@ export default {
           } else {
             this.stringtext =
               datejaFormat + "のカレンダーを1日から表示";
+            this.stringtext2 =
+              datejaFormat + "のカレンダーを一括編集";
           }
         } else {
           datejaFormat +=  moment(this.valueyear + '0115').format("YYYY年");
@@ -1698,6 +1878,10 @@ export default {
 }
 
 .mw-rem-3 {
+  min-width: 3rem;
+}
+
+.mw-rem-6 {
   min-width: 3rem;
 }
 </style>

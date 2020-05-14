@@ -97,29 +97,30 @@ class EditWorkTimesController extends Controller
             $work_times->setParamEndDateAttribute($ymd_end);
     
             $details = $work_times->getUserDetails();
-            $count = 0;
-            $before_date = "";
-            $apicommon_model = new ApiCommonController();
-            foreach ($details as $detail) {
-                $detail->kbn_flag = 0;
-                $detail->user_holiday_kbn="";
-                if(isset($detail->record_time)){
-                    $carbon = new Carbon($detail->record_time);
-                    $detail->date = $carbon->copy()->format('Y/m/d');
-                    $search_date = $carbon->copy()->format('Ymd');
-                    // 個人休暇区分取得
-                    $holiday_kbn = $apicommon_model->getUserHolidaykbn($code, $search_date);
-                    $detail->time = $carbon->copy()->format('H:i');
-                    /*if($detail->date != $before_date){
-                        $detail->kbn_flag = 1;
-                    } */
-                    if(isset($holiday_kbn)){
-                        $detail->kbn_flag = 1;
-                        $detail->user_holiday_kbn=$holiday_kbn;
-                    }
-                    $before_date = $detail->date;
-                }
-            }
+            // $count = 0;
+            // $before_date = "";
+            // $apicommon_model = new ApiCommonController();
+            // foreach ($details as $detail) {
+            //     $detail->kbn_flag = 0;
+            //     $detail->user_holiday_kbn="";
+            //     if(isset($detail->record_time)){
+            //         $carbon = new Carbon($detail->record_time);
+            //         $detail->date = $carbon->copy()->format('Y/m/d');
+            //         $search_date = $carbon->copy()->format('Ymd');
+            //         // 個人休暇区分取得
+            //         $holiday_kbn = $apicommon_model->getUserHolidaykbn($code, $search_date);
+            //         $detail->time = $carbon->copy()->format('H:i');
+            //         /*if($detail->date != $before_date){
+            //             $detail->kbn_flag = 1;
+            //         } */
+            //         if(isset($holiday_kbn)){
+            //             $detail->kbn_flag = 1;
+            //             $detail->user_holiday_kbn=$holiday_kbn;
+            //         }
+            //         $before_date = $detail->date;
+            //         Log::debug('$detail->time = '.$detail->user_holiday_kbn);
+            //     }
+            // }
             /*if (count($details) == 0) {
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_found_data');
                 $result = false;
@@ -247,6 +248,47 @@ class EditWorkTimesController extends Controller
                 $login_department_code = $item->department_code;
                 break;
             }
+            $department_code = null;
+            // 休暇登録
+            //部署選択されていない場合は部署コードないためApiCommonControllerで取得
+            if ($department_code == null) {
+                $dep_results = $apicommon_model->getUserDepartment($user_code, $target_date);
+                foreach($dep_results as $dep_result) {
+                    $department_code = $dep_result->department_code;
+                    break;
+                }
+            }
+            $working_date = $target_date;
+            $user_holiday = new UserHolidayKubun();
+            $user_holiday->setParamUsercodeAttribute($user_code);
+            $user_holiday->setParamDepartmentcodeAttribute($department_code);
+            $user_holiday->setParamdatefromAttribute($working_date);
+            $user_holiday->setSystemDateAttribute($systemdate);
+            // 既に存在する場合は論理削除する
+            $is_exists = $user_holiday->isExistsKbn();
+            if($is_exists){
+                $user_holiday->delKbn();
+            }
+            $user_holiday_kubuns_id = null;
+            foreach($details as $item) {
+                if($item['kbn_flag'] == 1){     // 休暇区分のみ登録
+                    $user_holiday->setWorkingdateAttribute($working_date);
+                    $user_holiday->setDepartmentcodeAttribute($department_code);
+                    $user_holiday->setUsercodeAttribute($user_code);
+                    $user_holiday->setHolidaykubunAttribute($item['user_holiday_kbn']);
+                    $user_holiday->setCreateduserAttribute($login_user_code);
+                    $user_holiday->insertKbn();
+                    // 勤怠時刻にIDを登録するのでSELECTする
+                    $id_results = $user_holiday->getDetail();
+                    foreach($id_results as $item_id) {
+                        $user_holiday_kubuns_id = $item_id->id;
+                        break;
+                    }
+                    // 休暇の場合は先頭行のみの処理でよいのでbreakする
+                    break;
+                }
+            }
+            // 勤怠時刻登録
             // beforeidsが存在した場合は論理削除する
             for($i=0;$i<count($beforeids);$i++) {
                 $work_time_model->setIdAttribute($beforeids[$i]);
@@ -256,8 +298,6 @@ class EditWorkTimesController extends Controller
                 $work_time_model->setSystemDateAttribute($systemdate);
                 $work_time_model->delWorkTime();
             }
-            // 勤怠時刻登録
-            $department_code = null;
             foreach($details as $item) {
                 //部署選択されていない場合は部署コードないためApiCommonControllerで取得
                 if ($department_code == null) {
@@ -289,6 +329,7 @@ class EditWorkTimesController extends Controller
                 $work_time_model->setDepartmentcodeAttribute($department_code);
                 $work_time_model->setRecordtimeAttribute($record_time);
                 $work_time_model->setModeAttribute($item['mode']);
+                $work_time_model->setUserholidaykubunsidAttribute($user_holiday_kubuns_id);
                 $work_time_model->setCreateduserAttribute($login_user_code);
                 $work_time_model->setSystemDateAttribute($systemdate);
                 $positions_data = null; 
@@ -302,36 +343,6 @@ class EditWorkTimesController extends Controller
                 $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
                 $work_time_model->setEditorusercodeAttribute($login_user_code);
                 $work_time_model->insertWorkTime();
-            }
-            // 休暇登録
-            //部署選択されていない場合は部署コードないためApiCommonControllerで取得
-            if ($department_code == null) {
-                $dep_results = $apicommon_model->getUserDepartment($user_code, $target_date);
-                foreach($dep_results as $dep_result) {
-                    $department_code = $dep_result->department_code;
-                    break;
-                }
-            }
-            $working_date = $target_date;
-            $user_holiday = new UserHolidayKubun();
-            $user_holiday->setParamUsercodeAttribute($user_code);
-            $user_holiday->setParamDepartmentcodeAttribute($department_code);
-            $user_holiday->setParamdatefromAttribute($working_date);
-            $user_holiday->setSystemDateAttribute($systemdate);
-            // 既に存在する場合は論理削除する
-            $is_exists = $user_holiday->isExistsKbn();
-            if($is_exists){
-                $user_holiday->delKbn();
-            }
-            foreach($details as $item) {
-                if($item['kbn_flag'] == 1){     // 休暇区分のみ登録
-                    $user_holiday->setWorkingdateAttribute($working_date);
-                    $user_holiday->setDepartmentcodeAttribute($department_code);
-                    $user_holiday->setUsercodeAttribute($user_code);
-                    $user_holiday->setHolidaykubunAttribute($item['user_holiday_kbn']);
-                    $user_holiday->setCreateduserAttribute($login_user_code);
-                    $user_holiday->insertKbn();
-                }
             }
             DB::commit();
 

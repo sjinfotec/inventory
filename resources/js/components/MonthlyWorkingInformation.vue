@@ -207,26 +207,14 @@
             <!-- panel contents -->
             <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
-            <div class="row">
+            <div class="row" v-for="(item,index) in get_c037">
               <div class="col-md-12 pb-2">
                 <!-- col -->
                 <btn-csv-download
-                  v-bind:btn-mode="'csvcalc'"
+                  v-bind:btn-mode="item['code']"
                   v-bind:csv-data="calcresults"
-                  v-bind:is-csvbutton="iscsvbutton"
-                  v-bind:csv-date="datejaFormat"
-                >
-                </btn-csv-download>
-                <!-- /.col -->
-              </div>
-            </div>
-            <!-- /.row -->
-            <div class="row">
-              <div class="col-md-12 pb-2">
-                <!-- col -->
-                <btn-csv-download
-                  v-bind:btn-mode="'csvsalary'"
-                  v-bind:csv-data="calcresults"
+                  v-bind:general-data="get_c037"
+                  v-bind:general-description="item['description']"
                   v-bind:is-csvbutton="iscsvbutton"
                   v-bind:csv-date="datejaFormat"
                 >
@@ -383,11 +371,6 @@
         </div>
       </div>
       <!-- /.panel -->
-    </div>
-    <!-- ========================== 表示部 END ========================== -->
-    <!-- /main contentns row -->
-    <!-- main contentns row -->
-    <div class="row justify-content-between print-none" v-if="serchorshow === 'show'">
       <!-- .panel -->
       <div class="col-md pt-3">
         <div class="card shadow-pl">
@@ -410,16 +393,20 @@
           </div>
           <!-- /collapse -->
           <!-- panel body -->
-          <div class="card-body mb-3 py-0 pt-4 border-top print-none">
+          <!-- ----------- ボタン部 START ---------------- -->
+          <div
+            class="card-body mb-3 py-0 pt-4 border-top print-none"
+          >
             <!-- panel contents -->
-            <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
-            <div class="row">
+            <div class="row" v-for="(item,index) in get_c037">
               <div class="col-md-12 pb-2">
                 <!-- col -->
                 <btn-csv-download
-                  v-bind:btn-mode="'csvcalc'"
+                  v-bind:btn-mode="item['code']"
                   v-bind:csv-data="calcresults"
+                  v-bind:general-data="get_c037"
+                  v-bind:general-description="item['description']"
                   v-bind:is-csvbutton="iscsvbutton"
                   v-bind:csv-date="datejaFormat"
                 >
@@ -428,27 +415,14 @@
               </div>
             </div>
             <!-- /.row -->
-            <div class="row">
-              <div class="col-md-12 pb-2">
-                <!-- col -->
-                <btn-csv-download
-                  v-bind:btn-mode="'csvsalary'"
-                  v-bind:csv-data="calcresults"
-                  v-bind:is-csvbutton="iscsvbutton"
-                  v-bind:csv-date="datejaFormat"
-                >
-                </btn-csv-download>
-                <!-- /.col -->
-              </div>
-            </div>
-            <!-- /.row -->
-            <!-- ----------- ボタン部 END ---------------- -->
           </div>
+          <!-- ----------- ボタン部 END ---------------- -->
         </div>
         <!-- /panel -->
       </div>
       <!-- /main contentns row -->
     </div>
+    <!-- ========================== 表示部 END ========================== -->
   </div>
 </template>
 <script>
@@ -457,9 +431,37 @@ import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
+// CONST
+const CONST_C037 = 'C037';
+
 export default {
   name: "monthlyworkingtime",
   mixins: [ dialogable, checkable, requestable ],
+  props: {
+    authusers: {
+        type: Array,
+        default: []
+    },
+    const_generaldatas: {
+        type: Array,
+        default: []
+    }
+  },
+  computed: {
+    get_c037: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C037) {
+          if (item.code <= 2) {
+            $this.const_C037_data.push($this.const_generaldatas[i]);
+          }
+        }
+        i++;
+      });    
+      return this.const_C037_data;
+    }
+  },
   data: function() {
     return {
       valuefromdate: "",
@@ -485,13 +487,15 @@ export default {
       isswitchbutton: false,
       serchorshow: "search",
       company_name: "",
-      userrole: "",
+      login_user_code: "",
+      login_user_role: "",
       stringtext: "",
       stringtext2: "",
       datejaFormat: "",
       resresults: [],
       calcresults: [],
       sumresults: [],
+      const_C037_data: [],
       messagedatasserver: [],
       messagedatadepartment: [],
       messagedatauser: []
@@ -499,12 +503,13 @@ export default {
   },
   // マウント時
   mounted() {
+    this.login_user_code = this.authusers['code'];
+    this.login_user_role = this.authusers['role'];
     // 今月初末を取得
     const defaultfromDate = moment().startOf('month');
     const defaulttoDate = moment().endOf('month');
     this.valuefromdate = new Date(defaultfromDate);
     this.valuetodate = new Date(defaulttoDate);
-    this.getUserRole();
     this.applytermdate = ""
     if (this.valuetodate) {
       this.applytermdate = moment(this.valuetodate).format("YYYYMMDD");
@@ -553,7 +558,7 @@ export default {
       equalength = 0;
       maxlength = 0;
       itemname = '氏名';
-      if (this.userrole < "8") {
+      if (this.login_user_role < "8") {
         chkArray = 
           this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
         if (chkArray.length > 0) {
@@ -623,7 +628,7 @@ export default {
       equalength = 0;
       maxlength = 0;
       itemname = '氏名';
-      if (this.userrole < "8") {
+      if (this.login_user_role < "8") {
         chkArray = 
           this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
         if (chkArray.length > 0) {
@@ -745,17 +750,6 @@ export default {
       });
     },
     // ------------------------ サーバー処理 ----------------------------
-    // ログインユーザーの権限を取得
-    getUserRole: function() {
-      var arrayParams = [];
-      this.postRequest("/get_login_user_role", arrayParams)
-        .then(response  => {
-          this.getThenrole(response);
-        })
-        .catch(reason => {
-          this.serverCatch("ユーザー権限", "取得");
-        });
-    },
     // 月次集計取得処理
     getItem(showorupdate) {
       // 処理中メッセージ表示
@@ -824,19 +818,6 @@ export default {
         this.selectedDepartmentValue,
         this.selectedEmploymentValue
       );
-    },
-    // 取得正常処理（ユーザー権限）
-    getThenrole(response) {
-      var res = response.data;
-      if (res.result) {
-        this.userrole = res.role;
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
-        } else {
-          this.serverCatch("ユーザー権限", "取得");
-        }
-      }
     },
     // 取得正常処理
     getThen(response) {

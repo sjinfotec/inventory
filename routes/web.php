@@ -20,6 +20,7 @@ Auth::routes();
 //     return view('app');
 // })->where('any', '.*');
 
+// ------------------ ホーム --------------------------------
 Route::get('/', 'HomeController@index')->middleware('auth');
 Route::get('/home', 'HomeController@index')->name('home');
 // ------------------ 集計 --------------------------------
@@ -37,6 +38,8 @@ Route::post('/attendancelog/show', 'AttendanceLogController@show')->middleware('
 // ------------------ 警告 --------------------------------
 // 日次警告通知
 Route::get('/daily_alert', 'DailyWorkingAlertController@index')->middleware('auth');
+Route::get('/daily_alert/home', 'DailyWorkingAlertController@homeindex')->middleware('auth');
+Route::get('/daily_alert/alerthome', 'DailyWorkingAlertController@alerthome')->middleware('auth')->name('daily_alert.alerthome');
 Route::post('/daily_alert/show', 'DailyWorkingAlertController@show')->middleware('auth');
 // 月次警告通知
 Route::get('/monthly_alert', 'MonthlyWorkingAlertController@index')->middleware('auth');
@@ -79,13 +82,11 @@ Route::post('/edit_work_times/fixtime', 'EditWorkTimesController@fixtime')->midd
 Route::post('/edit_work_times/del', 'EditWorkTimesController@del')->middleware('auth');
 Route::post('/edit_work_times/add', 'EditWorkTimesController@add')->middleware('auth');
 // シフト
-Route::get('/create_shift_time', 'CreateShiftTimeController@index')->middleware('auth');
-Route::post('/create_shift_time/store', 'CreateShiftTimeController@store')->middleware('auth');
-Route::post('/create_shift_time/get', 'CreateShiftTimeController@get')->middleware('auth');
-Route::post('/create_shift_time/del', 'CreateShiftTimeController@del')->middleware('auth');
+// Route::get('/create_shift_time', 'CreateShiftTimeController@index')->middleware('auth');        // 未使用
+// Route::post('/create_shift_time/store', 'CreateShiftTimeController@store')->middleware('auth'); // 未使用
+// Route::post('/create_shift_time/get', 'CreateShiftTimeController@get')->middleware('auth');     // 未使用
+// Route::post('/create_shift_time/del', 'CreateShiftTimeController@del')->middleware('auth');     // 未使用
 Route::get('/setting_shift_time', 'SttingShiftTimeController@index')->middleware('auth');
-Route::post('/get_user_list', 'ApiCommonController@getUserList')->middleware('auth');
-Route::post('/get_user_shift', 'ApiCommonController@getShiftInformation')->middleware('auth');
 Route::post('/setting_shift_time/del', 'SttingShiftTimeController@del')->middleware('auth');
 Route::post('/setting_shift_time/store', 'SttingShiftTimeController@store')->middleware('auth');
 Route::post('/setting_shift_time/range_del', 'SttingShiftTimeController@rangeDel')->middleware('auth');
@@ -125,6 +126,7 @@ Route::get('/setting_calendar', 'EditCalendarController@index')->middleware('aut
 Route::post('/setting_calendar/get', 'EditCalendarController@getDetail')->middleware('auth');
 Route::post('/setting_calendar/fix', 'EditCalendarController@fix')->middleware('auth');
 Route::post('/setting_calendar/fixbatch', 'EditCalendarController@fixbatch')->middleware('auth');
+Route::post('/setting_calendar/fixbatchw', 'EditCalendarController@fixbatchW')->middleware('auth');
 Route::post('/setting_calendar/init', 'EditCalendarController@init')->middleware('auth');
 Route::post('/setting_calendar/copyinit', 'EditCalendarController@copyinit')->middleware('auth');
 // 有給設定
@@ -171,6 +173,9 @@ Route::post('/approval_root_list', 'ApiCommonController@getApprovalroutenoList')
 Route::get('/get_paid_list', 'ApiCommonController@getPaidTypeList')->middleware('auth');
 Route::post('/update_paid_informations', 'SettingPaidHolidayController@updatePaidInformations')->middleware('auth');
 
+Route::post('/get_user_list', 'ApiCommonController@getUserList')->middleware('auth');
+Route::post('/get_user_list/csv', 'ApiCommonController@getUserListCsv')->middleware('auth');
+Route::post('/get_user_shift', 'ApiCommonController@getShiftInformation')->middleware('auth');
 // 締日取得
 Route::post('/get_closing_day', 'ApiCommonController@getClosingDay')->middleware('auth');
 // ユーザー権限取得
@@ -185,5 +190,7 @@ Route::post('/del_post_informations', 'ApiCommonController@delPostInformations')
 Route::post('/get_working_hours', 'ApiCommonController@getWorkingHours')->middleware('auth');
 // 勤務状況取得
 Route::post('/get_working_status/get', 'ApiCommonController@getWorgingStatusInfo')->middleware('auth');
+// CSV項目取得
+Route::post('/get_csv_item', 'ApiCommonController@getCsvItem')->middleware('auth');
 
 
