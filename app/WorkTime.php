@@ -635,6 +635,7 @@ class WorkTime extends Model
                     't3.business_kubun as business_kubun',
                     't12.code_name as business_name',
                     't3.holiday_kubun as holiday_kubun',
+                    't13.use_free_item as use_free_item',
                     't13.code_name as holiday_name',
                     't4.closing as closing',
                     't4.uplimit_time as uplimit_time',
@@ -729,7 +730,7 @@ class WorkTime extends Model
                 })
                 ->leftJoin($this->table_generalcodes.' as t13', function ($join) { 
                     $join->on('t13.code', '=', 't3.holiday_kubun')
-                    ->where('t13.identification_id', '=', Config::get('const.C008.value'))
+                    ->where('t13.identification_id', '=', Config::get('const.C013.value'))
                     ->where('t3.is_deleted', '=', 0)
                     ->where('t13.is_deleted', '=', 0);
                 })

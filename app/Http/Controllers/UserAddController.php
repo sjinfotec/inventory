@@ -25,8 +25,11 @@ class UserAddController extends Controller
      */
     public function index()
     {
-        //return view('user_add');
-        return view('edit_user');
+        $authusers = Auth::user();
+        return view('edit_user',
+            compact(
+                'authusers'
+            ));
     }
 
     /**

@@ -121,6 +121,22 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
+            <div class="row" v-for="(item,index) in get_C037">
+              <div class="col-md-12 pb-2">
+                <!-- col -->
+                <btn-csv-download
+                  v-bind:btn-mode="item['code']"
+                  v-bind:general-data="get_C037"
+                  v-bind:general-description="item['description']"
+                  v-bind:is-csvbutton="iscsvbutton"
+                  v-bind:csv-date="''"
+                >
+                </btn-csv-download>
+                <!-- /.col -->
+              </div>
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
             <div class="row justify-content-between">
               <!-- col -->
               <div class="col-md-12 pb-2">
@@ -342,6 +358,10 @@
                 </div>
               </div>
               <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <div class="input-group">
@@ -360,6 +380,28 @@
                     v-model="form.email"
                     pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$"
                     name="email"
+                  />
+                </div>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      id="basic-addon1"
+                    >
+                      モバイル用アドレス
+                      <!-- <span class="color-red">[必須]</span> -->
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    class="form-control"
+                    v-model="form.mobile_email"
+                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$"
+                    name="mobile_email"
                   />
                 </div>
               </div>
@@ -402,17 +444,18 @@
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
-                    >
-                      モバイル用アドレス
-                      <!-- <span class="color-red">[必須]</span> -->
-                    </span>
+                      data-toggle="tooltip"
+                      data-placement="top"
+                      v-bind:title="'新規登録時はパスワードはログインIDとなります。'"
+                    >パスワード</span>
                   </div>
                   <input
                     type="text"
                     class="form-control"
-                    v-model="form.mobile_email"
-                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$"
-                    name="mobile_email"
+                    v-model="form.password"
+                    name="password"
+                    title="新規登録時はパスワードはログインIDとなります。"
+                    disabled
                   />
                 </div>
               </div>
@@ -447,6 +490,32 @@
               <div class="col-md-6 pb-2">
                 <div class="input-group">
                   <div class="input-group-prepend">
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      for="inputGroupSelect02"
+                    >
+                      権限
+                      <span class="color-red">[必須]</span>
+                    </label>
+                  </div>
+                  <select-generallist
+                    v-bind:blank-data="false"
+                    v-bind:placeholder-data="'勤怠管理の権限を選択してください'"
+                    v-bind:selected-value="form.role"
+                    v-bind:identification-id="'C025'"
+                    v-on:change-event="addroleChange"
+                  ></select-generallist>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
                     <span
                       class="input-group-text font-size-sm line-height-xs label-width-150"
                       id="basic-addon1"
@@ -470,51 +539,26 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between">
-              <!-- .col -->
-              <div class="col-md-6 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <label
-                      class="input-group-text font-size-sm line-height-xs label-width-150"
-                      for="inputGroupSelect02"
+              <div class="col-md-12 pb-2">
+                <div class="form-group">
+                  <div class="form-check">
+                    <div
+                        v-for="timetableptn in get_C041"
+                        :key="timetableptn.key"
                     >
-                      権限
-                      <span class="color-red">[必須]</span>
-                    </label>
+                      <label>
+                        <input
+                          type="radio"
+                          v-model="timetable_check.chkptn"
+                          :value="timetableptn.value"
+                            @change="timetablechkptnChanges(timetable_check.chkptn)"
+                        />
+                        {{ timetableptn.label }}
+                      </label>
+                    </div>
                   </div>
-                  <select-generallist
-                    v-bind:blank-data="false"
-                    v-bind:placeholder-data="'勤怠管理の権限を選択してください'"
-                    v-bind:selected-value="form.role"
-                    v-bind:identification-id="'C025'"
-                    v-on:change-event="addroleChange"
-                  ></select-generallist>
                 </div>
               </div>
-              <!-- /.col -->
-              <!-- .col -->
-              <div class="col-md-6 pb-2">
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <span
-                      class="input-group-text font-size-sm line-height-xs label-width-150"
-                      id="basic-addon1"
-                      data-toggle="tooltip"
-                      data-placement="top"
-                      v-bind:title="'新規登録時はパスワードはログインIDとなります。'"
-                    >パスワード</span>
-                  </div>
-                  <input
-                    type="text"
-                    class="form-control"
-                    v-model="form.password"
-                    name="password"
-                    title="新規登録時はパスワードはログインIDとなります。"
-                    disabled
-                  />
-                </div>
-              </div>
-              <!-- /.col -->
             </div>
             <!-- /.row -->
             <!-- ----------- 項目部 END ---------------- -->
@@ -1351,6 +1395,15 @@ import encoding from "encoding-japanese";
 import { dialogable } from "../mixins/dialogable.js";
 import { checkable } from "../mixins/checkable.js";
 import { requestable } from "../mixins/requestable.js";
+
+// CONST
+const CONST_C001 = 'C001';
+const CONST_C017 = 'C017';
+const CONST_C025 = 'C025';
+const CONST_C037 = 'C037';
+const CONST_C041 = 'C041';
+const CONST_USER_DOWNLOAD = '4';    // ユーザー情報ダウンロードのC037 code
+
 export default {
   name: "EditUser",
   mixins: [dialogable, checkable, requestable],
@@ -1358,10 +1411,90 @@ export default {
     authusers: {
       type: Array,
       default: []
+    },
+    const_generaldatas: {
+        type: Array,
+        default: []
     }
+  },
+  computed: {
+    get_C001: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C001) {
+          $this.const_C001_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C001_data;
+    },
+    get_C017: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C017) {
+          $this.const_C017_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C017_data;
+    },
+    get_C025: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C025) {
+          $this.const_C025_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C025_data;
+    },
+    get_C037: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C037) {
+          if (item.code == CONST_USER_DOWNLOAD) {
+            $this.const_C037_data.push($this.const_generaldatas[i]);
+          }
+        }
+        i++;
+      });    
+      return this.const_C037_data;
+    },
+    get_C041: function() {
+      let $this = this;
+      var i = 0;
+      var array_set = [{}];
+      var check_value = false;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C041) {
+          array_set = {
+            key: $this.const_generaldatas[i]['code'],
+            value: $this.const_generaldatas[i]['code'],
+            label: $this.const_generaldatas[i]['code_name'],
+            checked: check_value
+          };
+          $this.const_C041_data.push(array_set);
+          // check_value = false;
+        }
+        i++;
+      });    
+      return this.const_C041_data;
+    },
   },
   data() {
     return {
+      const_C001_data: [],
+      const_C017_data: [],
+      const_C025_data: [],
+      const_C037_data: [],
+      const_C041_data: [],
+      timetable_check: {
+        chkptn : 1
+      },
       selectedDepartmentValue: "",
       valueDepartmentkillcheck: false,
       showdepartmentlist: true,
@@ -1426,6 +1559,8 @@ export default {
     this.getTimeTableList("");
     this.getGeneralList("C017");
     this.getGeneralList("C025");
+  },
+  created() {
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -1986,6 +2121,7 @@ export default {
       this.selectedUserValue = value;
       if (value == "" || value == null) {
         this.selectMode = "NEW";
+        this.timetable_check.chkptn = this.const_C041_data.find(timetableptn => timetableptn.checked).value
         this.newItemClear();
         this.form.department_code = this.selectedDepartmentValue;
         this.refreshaddDepartmentList();
@@ -2023,6 +2159,9 @@ export default {
     // 新規作成権限が変更された場合の処理
     addroleChange: function(value, arrayitem) {
       this.form.role = value;
+    },
+    // 選択が変更された場合の処理
+    timetablechkptnChanges: function(value) {
     },
     // CSVから作成するボタンクリック処理
     usersuploadclick: function() {

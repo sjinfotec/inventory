@@ -24,7 +24,7 @@ export default {
     },
     csvData: {
       type: Array,
-      required: true
+      default: []
     },
     generalData: {
       type: Array,
