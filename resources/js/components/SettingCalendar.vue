@@ -296,7 +296,7 @@
                     type="radio"
                     v-model="batch.initptn"
                     :value="batchptn.value"
-                      @change="batchinitptnChanges(batch.initptn)"
+                    @change="batchinitptnChanges(batch.initptn)"
                   />
                   {{ batchptn.label }}
                 </label>
