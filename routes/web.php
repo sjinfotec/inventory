@@ -129,6 +129,10 @@ Route::post('/setting_calendar/fixbatch', 'EditCalendarController@fixbatch')->mi
 Route::post('/setting_calendar/fixbatchw', 'EditCalendarController@fixbatchW')->middleware('auth');
 Route::post('/setting_calendar/init', 'EditCalendarController@init')->middleware('auth');
 Route::post('/setting_calendar/copyinit', 'EditCalendarController@copyinit')->middleware('auth');
+// 有給設定
+Route::get('/setting_paid_holiday', 'SettingPaidHolidayController@index')->middleware('auth');
+Route::get('/setting_paid_holiday/get', 'SettingPaidHolidayController@get')->middleware('auth');
+
 // ユーザー情報設定
 // Route::get('/user_add', 'UserAddController@index')->middleware('auth');
 // Route::post('/user_add/store', 'UserAddController@store')->middleware('auth');
@@ -166,6 +170,9 @@ Route::post('/get_demand_list', 'ApiCommonController@getDemandList')->middleware
 Route::post('/get_confirm_list', 'ApiCommonController@getConfirmlList')->middleware('auth');
 Route::post('/get_company_info_apply', 'ApiCommonController@getCompanyInfoApply')->middleware('auth');
 Route::post('/approval_root_list', 'ApiCommonController@getApprovalroutenoList')->middleware('auth');
+Route::get('/get_paid_list', 'ApiCommonController@getPaidTypeList')->middleware('auth');
+Route::post('/update_paid_informations', 'SettingPaidHolidayController@updatePaidInformations')->middleware('auth');
+
 Route::post('/get_user_list', 'ApiCommonController@getUserList')->middleware('auth');
 Route::post('/get_user_list/csv', 'ApiCommonController@getUserListCsv')->middleware('auth');
 Route::post('/get_user_shift', 'ApiCommonController@getShiftInformation')->middleware('auth');

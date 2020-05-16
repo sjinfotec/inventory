@@ -17,13 +17,11 @@ import Vue from "vue";
 import VueSweetalert2 from "vue-sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 //import ElementUI from "element-ui";
-import {
-    Dialog, Select, Option, TimePicker, Button
-} from "element-ui";
+import { Dialog, Select, Option, TimePicker, Button } from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
 //import locale from "element-ui/lib/locale/lang/ja";
-import lang from 'element-ui/lib/locale/lang/ja';
-import locale from 'element-ui/lib/locale';
+import lang from "element-ui/lib/locale/lang/ja";
+import locale from "element-ui/lib/locale";
 
 var options = {
     position: "bottom-center",
@@ -31,7 +29,6 @@ var options = {
     fullWidth: false,
     type: "info"
 };
-
 
 Vue.use(toasted, options);
 Vue.use(VCalendar);
@@ -225,6 +222,52 @@ Vue.component(
     require("./components/InputTimeDisabled.vue").default
 );
 
+Vue.component("user-add", require("./components/UserAdd.vue").default);
+
+Vue.component("edit-user", require("./components/EditUser.vue").default);
+
+Vue.component(
+    "create-department",
+    require("./components/CreateDepartment.vue").default
+);
+
+Vue.component(
+    "create-time-table",
+    require("./components/CreateTimeTable.vue").default
+);
+
+Vue.component(
+    "edit-calendar",
+    require("./components/EditCalendar.vue").default
+);
+
+Vue.component(
+    "setting-calendar",
+    require("./components/SettingCalendar.vue").default
+);
+
+Vue.component(
+    "init-calendar",
+    require("./components/InitCalendar.vue").default
+);
+
+// 勤怠編集
+Vue.component(
+    "edit-work-times",
+    require("./components/EditWorkTimes.vue").default
+);
+// 勤怠編集テーブル
+Vue.component(
+    "edit-work-times-table",
+    require("./components/EditWorkTimesTable.vue").default
+);
+
+Vue.component(
+    "create-company-information",
+    require("./components/CreateCompanyInformation.vue").default
+);
+
+Vue.component("setting-calc", require("./components/SettingCalc.vue").default);
 
 Vue.component("message-data", require("./components/MessageData.vue").default);
 
@@ -281,7 +324,10 @@ Vue.component(
 );
 // 申請
 //  承認ルート作成
-Vue.component("create-approvalroot", require("./components/CreateApprovalRouteNo.vue").default);
+Vue.component(
+    "create-approvalroot",
+    require("./components/CreateApprovalRouteNo.vue").default
+);
 Vue.component("setting-root", require("./components/SettingRoot.vue").default); // 削除予定
 
 Vue.component("make-demand", require("./components/MakeDemand.vue").default);
@@ -404,6 +450,11 @@ Vue.component(
     require("./components/TableWorkingStatus.vue").default
 );
 
+// 有給設定
+Vue.component(
+    "setting-paid-holiday",
+    require("./components/SettingPaidHoliday.vue").default
+);
 // 地図Map
 Vue.component(
     "show-map-dialog",

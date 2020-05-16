@@ -329,6 +329,10 @@ return [
         'closing' => 1,
         'first' => 2
     ],
+
+    'C036' => [
+        'value' => 'C036'
+    ],
  
     'C035' => [
         'value' => 'C035',

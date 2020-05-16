@@ -5,12 +5,16 @@
     <div class="card-body" v-if="ondetails_length > 0 || offdetails_length > 0">
       <!-- .row -->
       <div class="row">
-        <div class="col-6" v-if="ondetails_length">
-          <p>在席者数：{{ ondetails_length}}名</p>
-          <div class="table-responsive">
-            <table class="table table-striped border-bottom font-size-sm text-nowrap">
-            <!-- <table class="table"> -->
-              <thead>
+        <div class="card w-50" v-if="ondetails_length">
+          <div class="card-body table-responsive bg-color-exists">
+            <!-- <p class="pr-2">在席者数：{{ ondetails_length}}名</p> -->
+            <button type="button" class="btn btn-primary mb-1">
+              在席者数：
+              <span class="badge badge-light">{{ ondetails_length}}名</span>
+            </button>
+            <table class="table table-sm table-bordered table-hover table-striped thead-dark">
+              <!-- <table class="table"> -->
+              <thead class="thead-dark">
                 <tr>
                   <td class="text-center align-middle mw-rem-10">部署</td>
                   <td class="text-center align-middle mw-rem-10">氏名</td>
@@ -49,27 +53,55 @@
                       item['x_positions'],
                       item['y_positions'],
                       item['mode_name'])"
-                  >
-                  </daily-working-info-time-table>
+                  ></daily-working-info-time-table>
                   <td class="text-center align-middle mw-rem-5">{{ item['mode_name'] }}</td>
                   <td
                     class="text-center align-middle mw-rem-10"
                     v-if="item['holiday_kubun_name']"
                   >{{ item['holiday_kubun_name'] }}</td>
-                  <td
-                    class="text-center align-middle mw-rem-10"
-                    v-else
-                  >{{ item['mode_sub_name'] }}</td>
-              </tr>
+                  <td class="text-center align-middle mw-rem-10" v-else>{{ item['mode_sub_name'] }}</td>
+                </tr>
               </tbody>
             </table>
           </div>
         </div>
-        <div class="col-6" v-if="offdetails_length">
-          <p>離席者数：{{ offdetails_length}}名</p>
-          <div class="table-responsive">
-            <table class="table table-striped border-bottom font-size-sm text-nowrap">
-            <!-- <table class="table"> -->
+        <div v-else class="card w-50">
+          <div class="card-body table-responsive bg-color-exists">
+            <button type="button" class="btn btn-primary mb-1">
+              在席者数：
+              <span class="badge badge-light">{{ ondetails_length}}名</span>
+            </button>
+            <table class="table table-sm table-bordered table-hover table-striped thead-dark">
+              <thead class="thead-dark">
+                <tr>
+                  <td class="text-center align-middle mw-rem-10">部署</td>
+                  <td class="text-center align-middle mw-rem-10">氏名</td>
+                  <td class="text-center align-middle mw-rem-8">打刻時刻</td>
+                  <td class="text-center align-middle mw-rem-5">モード</td>
+                  <td class="text-center align-middle mw-rem-10">勤務状況</td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card w-50" v-if="offdetails_length">
+          <div class="card-body table-responsive bg-color-not-exists">
+            <!-- <p class="pr-2">離席者数：{{ offdetails_length}}名</p> -->
+            <button type="button" class="btn btn-danger mb-1">
+              離席者数：
+              <span class="badge badge-light">{{ offdetails_length}}名</span>
+            </button>
+            <table class="table table-sm table-bordered table-hover table-striped thead-dark">
+              <!-- <table class="table"> -->
               <thead>
                 <tr>
                   <td class="text-center align-middle mw-rem-10">部署</td>
@@ -89,11 +121,36 @@
                     class="text-center align-middle mw-rem-10"
                     v-if="item['holiday_kubun_name']"
                   >{{ item['holiday_kubun_name'] }}</td>
-                  <td
-                    class="text-center align-middle mw-rem-10"
-                    v-else
-                  >{{ item['mode_sub_name'] }}</td>
-              </tr>
+                  <td class="text-center align-middle mw-rem-10" v-else>{{ item['mode_sub_name'] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div v-else class="card w-50">
+          <div class="card-body table-responsive bg-color-not-exists">
+            <button type="button" class="btn btn-primary mb-1">
+              離席者数：
+              <span class="badge badge-light">{{ offdetails_length}}名</span>
+            </button>
+            <table class="table table-sm table-bordered table-hover table-striped thead-dark">
+              <thead class="thead-dark">
+                <tr>
+                  <td class="text-center align-middle mw-rem-10">部署</td>
+                  <td class="text-center align-middle mw-rem-10">氏名</td>
+                  <td class="text-center align-middle mw-rem-8">打刻時刻</td>
+                  <td class="text-center align-middle mw-rem-5">モード</td>
+                  <td class="text-center align-middle mw-rem-10">勤務状況</td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -105,9 +162,7 @@
       <!-- .row -->
       <div class="row">
         <div class="col-12">
-          <div class="table-responsive">
-              本日の出勤者はいません
-          </div>
+          <div class="table-responsive">本日の出勤者はいません</div>
         </div>
       </div>
       <!-- /.row -->
@@ -122,8 +177,7 @@
       v-bind:record_time="record_time"
       v-bind:user_name="user_name"
       v-bind:mode_name="mode_name"
-    >
-    </show-map-dialog>
+    ></show-map-dialog>
     <!-- ----------- 地図表示部 END ---------------- -->
   </div>
 </template>
@@ -134,10 +188,10 @@ import { checkable } from "../mixins/checkable.js";
 import { requestable } from "../mixins/requestable.js";
 
 // const
-const C_USER_INDEX = 26;              // 編集者表示
-const C_USER_CON_INDEX = 27;          // 条件付き編集者表示
-const C_SSJJOO_ID = 'SSJJOO00';       // 三条ID
-const C_EDIT_USER = '23';             // 三条編集者ID
+const C_USER_INDEX = 26; // 編集者表示
+const C_USER_CON_INDEX = 27; // 条件付き編集者表示
+const C_SSJJOO_ID = "SSJJOO00"; // 三条ID
+const C_EDIT_USER = "23"; // 三条編集者ID
 
 export default {
   name: "TableWorkingStatus",
@@ -162,7 +216,7 @@ export default {
     menuData: {
       type: Array,
       default: []
-    },
+    }
   },
   computed: {
     userindex: function() {
@@ -204,10 +258,11 @@ export default {
   },
   methods: {
     // ------------------------ サーバー処理 ------------------------------------
-    // 
+    //
     getItem() {
       var arrayParams = {
-        target_date: this.targetYmd
+        // target_date: this.targetYmd
+        target_date: "20190801"
       };
       this.postRequest("/get_working_status/get", arrayParams)
         .then(response => {
@@ -250,14 +305,13 @@ export default {
       this.record_time = time;
       this.mode_name = mode;
       this.dialogVisible = true;
-    },
+    }
   }
 };
-
 </script>
 <style scoped>
-
-thead, tbody {
+thead,
+tbody {
   display: block !important;
 }
 
@@ -267,15 +321,21 @@ tbody {
   height: 300px !important;
 }
 
-.table th, .table td {
-    padding: 0rem !important;
-    border-style: solid dashed !important;
-    border-width: 1px !important;
-    border-color: #95c5ed #dee2e6 !important;
+/* .table th,
+.table td {
+  padding: 0rem !important;
+  border-style: solid dashed !important;
+  border-width: 1px !important;
+  border-color: #95c5ed #dee2e6 !important;
+} */
+.bg-color-exists {
+  background-color: aliceblue;
+}
+.bg-color-not-exists {
+  background-color: floralwhite;
 }
 
 .mw-rem-8 {
   min-width: 8rem;
 }
-
 </style>
