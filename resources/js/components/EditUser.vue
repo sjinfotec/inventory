@@ -105,8 +105,33 @@
               <!-- /.col -->
             </div>
             <!-- /.row -->
-            <!-- ----------- 選択ボタン類 START ---------------- -->
             <!-- ----------- ボタン部 START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <btn-work-time
+                  v-on:searchclick-event="searchclick"
+                  v-bind:btn-mode="'search'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-12 pb-2">
+                <btn-work-time
+                  v-on:timetableedit-event="timetableeditclick"
+                  v-bind:btn-mode="'timetableedit'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- col -->
@@ -136,18 +161,6 @@
               </div>
             </div>
             <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <!-- col -->
-              <div class="col-md-12 pb-2">
-                <btn-csv-download
-                  v-bind:btn-mode="'usersdownload'"
-                  v-bind:is-csvbutton="iscsvbutton"
-                ></btn-csv-download>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
             <!-- ----------- ボタン部 END ---------------- -->
           </div>
           <!-- panel contents -->
@@ -159,7 +172,7 @@
     <div class="row justify-content-between">
       <!-- ========================== アップロード部 START ========================== -->
       <!-- .panel -->
-      <div class="col-md pt-3 print-none" v-if="selectMode=='UPUSERS'">
+      <div class="col-md pt-3 print-none" v-if="selectMode==='UPL'">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -210,9 +223,142 @@
       <!-- /.panel -->
       <!-- ========================== アップロード部 END ========================== -->
       <!-- /.panel -->
+      <!-- ========================== タイムテーブル登録部 START ========================== -->
+      <!-- .panel -->
+      <div class="col-md pt-3 print-none" v-if="selectMode==='TMT'">
+        <div class="card shadow-pl">
+          <!-- panel header -->
+          <daily-working-information-panel-header
+            v-bind:header-text1="'◆タイムテーブル設定'"
+            v-bind:header-text2="''"
+          ></daily-working-information-panel-header>
+          <!-- /.panel header -->
+          <!-- ----------- メッセージ部 START ---------------- -->
+          <!-- .row -->
+          <div class="row justify-content-between" v-if="messagevalidatestimetable.length">
+            <!-- col -->
+            <div class="col-md-12 pb-2">
+              <ul class="error-red color-red">
+                <li v-for="(messagevalidate,index) in messagevalidatestimetable" v-bind:key="index">{{ messagevalidate }}</li>
+              </ul>
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+          <!-- ----------- メッセージ部 END ---------------- -->
+          <!-- panel contents -->
+          <div class="card-body pt-2">
+            <!-- ----------- 編集入力部 START ---------------- -->
+            <!-- .sub panel -->
+            <div class="card shadow-pl">
+              <!-- panel header -->
+              <daily-working-information-panel-header
+                v-bind:header-text1="'設定内容指定'"
+                v-bind:header-text2="'設定内容を指定します。'"
+              ></daily-working-information-panel-header>
+              <!-- /.panel header -->
+              <div class="card-body pt-2">
+                <!-- .row -->
+                <div class="row justify-content-between">
+                  <div class="col-md-12 pb-2">
+                    <div class="form-group">
+                      <div class="form-check">
+                        <div
+                            v-for="(timetableptn, index) in get_C041"
+                            :key="timetableptn.key"
+                        >
+                          <label>
+                            <input
+                              type="radio"
+                              v-model="timetable_check.chkptn"
+                              :value="timetableptn.value"
+                                @change="timetablechkptnChanges(timetable_check.chkptn, index)"
+                            />
+                            {{ timetableptn.label }}
+                          </label>
+                          <div class="input-group" v-if="index===0">
+                            <select
+                              v-bind:disabled="isTabledisabled[index]"
+                              class="custom-select"
+                              v-model="timetable.timeptn_business"
+                              data-toggle="tooltip"
+                              data-placement="top"
+                              v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
+                            >
+                              <option value></option>
+                              <option
+                                v-for="tlist in timetableList"
+                                :value="tlist.no"
+                                v-bind:key="tlist.no"
+                              >{{ tlist.name }}</option>
+                            </select>
+                          </div>
+                          <div class="input-group" v-if="index===1">
+                            <table
+                              class="table table-striped border-bottom font-size-sm text-nowrap">
+                              <thead>
+                                <tr>
+                                  <td class="text-center align-middle w-10">曜日</td>
+                                  <td class="text-center align-middle w-30 mw-rem-10">タイムテーブル<span class="color-red">[必須]</span></td>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr v-for="(n,index1) in 7" :key="index">
+                                  <td class="text-center align-middle">{{ formweekdays[index1] }}</td>
+                                  <td class="text-center align-middle">
+                                    <div class="input-group">
+                                      <select
+                                        class="custom-select"
+                                        v-bind:disabled="isTabledisabled[index]"
+                                        v-model="timetable.timeptn_business[index1]"
+                                        data-toggle="tooltip"
+                                        data-placement="top"
+                                        v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
+                                      >
+                                        <option value></option>
+                                        <option
+                                          v-for="tlist in timetableList"
+                                          :value="tlist.no"
+                                          v-bind:key="tlist.no"
+                                        >{{ tlist.name }}</option>
+                                      </select>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- /.row -->
+                <!-- ----------- ボタン部 START ---------------- -->
+                <!-- .row -->
+                <div class="row justify-content-between">
+                  <!-- col -->
+                  <div class="col-md-12 pb-2">
+                    <btn-work-time
+                      v-on:fixclick-event="fixclick"
+                      v-bind:btn-mode="'fix'"
+                      v-bind:is-push="false"
+                    ></btn-work-time>
+                  </div>
+                  <!-- /.col -->
+                </div>
+                <!-- /.row -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /.panel -->
+      <!-- ========================== タイムテーブル登録部 END ========================== -->
+      <!-- /.panel -->
       <!-- ========================== 新規部 START ========================== -->
       <!-- .panel -->
-      <div class="col-md-12 pt-3" v-if="selectMode=='NEW'">
+      <div class="col-md-12 pt-3" v-if="selectMode==='NEW'">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -537,30 +683,6 @@
               <!-- /.col -->
             </div>
             <!-- /.row -->
-            <!-- .row -->
-            <div class="row justify-content-between">
-              <div class="col-md-12 pb-2">
-                <div class="form-group">
-                  <div class="form-check">
-                    <div
-                        v-for="timetableptn in get_C041"
-                        :key="timetableptn.key"
-                    >
-                      <label>
-                        <input
-                          type="radio"
-                          v-model="timetable_check.chkptn"
-                          :value="timetableptn.value"
-                            @change="timetablechkptnChanges(timetable_check.chkptn)"
-                        />
-                        {{ timetableptn.label }}
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- /.row -->
             <!-- ----------- 項目部 END ---------------- -->
             <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
@@ -590,7 +712,7 @@
         <div class="card shadow-pl" v-if="details.length">
           <!-- panel header -->
           <daily-working-information-panel-header
-            v-bind:header-text1="'◆　' + selectedUserName"
+            v-bind:header-text1="'◆　' + searchedUserName"
             v-bind:header-text2="''"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
@@ -770,7 +892,7 @@
                           <select class="custom-select" v-model="item.employment_status">
                             <option value></option>
                             <option
-                              v-for="elist in employStatusList"
+                              v-for="elist in get_C001"
                               :value="elist.code"
                               v-bind:key="elist.code"
                             >{{ elist.code_name }}</option>
@@ -921,7 +1043,7 @@
                           <select class="custom-select" v-model="item.management">
                             <option value></option>
                             <option
-                              v-for="mlist in generalList_m"
+                              v-for="mlist in get_C017"
                               :value="mlist.code"
                               v-bind:key="mlist.code"
                             >{{ mlist.code_name }}</option>
@@ -973,7 +1095,7 @@
                           <select class="custom-select" v-model="item.role">
                             <option value></option>
                             <option
-                              v-for="rlist in generalList_r"
+                              v-for="rlist in get_C025"
                               :value="rlist.code"
                               v-bind:key="rlist.code"
                             >{{ rlist.code_name }}</option>
@@ -1149,7 +1271,7 @@
                           <select disabled class="custom-select" v-model="item.employment_status">
                             <option value></option>
                             <option
-                              v-for="elist in employStatusList"
+                              v-for="elist in get_C001"
                               :value="elist.code"
                               v-bind:key="elist.code"
                             >{{ elist.code_name }}</option>
@@ -1286,7 +1408,7 @@
                           <select disabled class="custom-select" v-model="item.management">
                             <option value></option>
                             <option
-                              v-for="mlist in generalList_m"
+                              v-for="mlist in get_C017"
                               :value="mlist.code"
                               v-bind:key="mlist.code"
                             >{{ mlist.code_name }}</option>
@@ -1333,7 +1455,7 @@
                           <select disabled class="custom-select" v-model="item.role">
                             <option value></option>
                             <option
-                              v-for="rlist in generalList_r"
+                              v-for="rlist in get_C025"
                               :value="rlist.code"
                               v-bind:key="rlist.code"
                             >{{ rlist.code_name }}</option>
@@ -1402,7 +1524,9 @@ const CONST_C017 = 'C017';
 const CONST_C025 = 'C025';
 const CONST_C037 = 'C037';
 const CONST_C041 = 'C041';
-const CONST_USER_DOWNLOAD = '4';    // ユーザー情報ダウンロードのC037 code
+const CONST_TIMETABLE_EQUALITY = 0;       // タイムテーブル設定方法一律C041 index
+const CONST_TIMETABLE_WEEK = 1;           // タイムテーブル設定方法WEEKC041 index
+const CONST_USER_DOWNLOAD = '4';          // ユーザー情報ダウンロードのC037 code
 
 export default {
   name: "EditUser",
@@ -1495,11 +1619,26 @@ export default {
       timetable_check: {
         chkptn : 1
       },
+      isTabledisabled : [false, true],
+      formweekdays: [
+        '月曜日',
+        '火曜日',
+        '水曜日',
+        '木曜日',
+        '金曜日',
+        '土曜日',
+        '日曜日'
+      ],
+      timetable: {
+        timeptn : 1,
+        timeptn_business : ["","","","","","",""]
+      },
       selectedDepartmentValue: "",
       valueDepartmentkillcheck: false,
       showdepartmentlist: true,
       showadddepartmentlist: true,
       selectedUserValue: "",
+      selectedUserName: "",
       valueUserkillcheck: false,
       isUsermanagement: true,
       showuserlist: true,
@@ -1508,8 +1647,11 @@ export default {
       selectMode: "",
       messagevalidatesNew: [],
       messagevalidatesEdt: [],
+      messagevalidatestimetable: [],
       messageUp: [],
-      selectedUserName: "",
+      searchedUserValue: "",
+      searchedUserName: "",
+      searchedDepartmentValue: "",
       showrelease: true,
       details: [],
       usersups: [],
@@ -1536,8 +1678,6 @@ export default {
       departmentList: [],
       applytermdate: moment(new Date()).format("YYYYMMDD"),
       timetableList: [],
-      generalList_m: [],
-      generalList_r: [],
       cardId: "",
       mobile_address: "",
       dialogVisible: false,
@@ -1555,10 +1695,7 @@ export default {
     this.login_user_role = this.authusers["role"];
     this.details = [];
     this.getDepartmentList("");
-    this.getGeneralList("C001");
     this.getTimeTableList("");
-    this.getGeneralList("C017");
-    this.getGeneralList("C025");
   },
   created() {
   },
@@ -2090,6 +2227,48 @@ export default {
       }
       return flag;
     },
+    // バリデーション
+    checkFormTimetable: function() {
+      this.messagevalidatestimetable = [];
+      var flag = true;
+      var chkArray = [];
+      var required = true;
+      var equalength = 0;
+      var maxlength = 0;
+      var itemname = '';
+
+      if (this.timetable_check.chkptn == this.const_C041_data[CONST_TIMETABLE_EQUALITY]['code']) {
+        // タイムテーブルリスト
+        itemname = 'タイムテーブルリスト';
+        chkArray = 
+          this.checkHeader(this.timetable.timeptn_business, required, equalength, maxlength, itemname);
+        if (chkArray.length > 0) {
+          if (this.messagevalidatestimetable.length == 0) {
+            this.messagevalidatestimetable = chkArray;
+          } else {
+            this.messagevalidatestimetable = this.messagevalidatestimetable.concat(chkArray);
+          }
+        }
+      }else {
+        // バリデーション
+        for(var i=0;i<7;i++) {
+          itemname = formweekdays + 'のタイムテーブルリスト';
+          chkArray = 
+            this.checkHeader(this.timetable.timeptn_business[i], required, equalength, maxlength, itemname);
+          if (chkArray.length > 0) {
+            if (this.messagevalidatestimetable.length == 0) {
+              this.messagevalidatestimetable = chkArray;
+            } else {
+              this.messagevalidatestimetable = this.messagevalidatestimetable.concat(chkArray);
+            }
+          }
+        }
+      }
+      if (this.messagevalidatestimetable.length > 0) {
+        flag = false;
+      }
+      return flag;
+    },
     // ------------------------ イベント処理 ------------------------------------
 
     // 部署選択が変更された場合の処理
@@ -2113,23 +2292,8 @@ export default {
     },
     // ユーザー選択が変更された場合の処理
     userChanges: function(value, arrayitem) {
-      // 入力項目の部署クリア
-      this.selectMode = "";
-      this.messagevalidatesNew = [];
-      this.messagevalidatesEdt = [];
-      this.messageUp = [];
       this.selectedUserValue = value;
-      if (value == "" || value == null) {
-        this.selectMode = "NEW";
-        this.timetable_check.chkptn = this.const_C041_data.find(timetableptn => timetableptn.checked).value
-        this.newItemClear();
-        this.form.department_code = this.selectedDepartmentValue;
-        this.refreshaddDepartmentList();
-      } else {
-        this.selectMode = "EDT";
-        this.selectedUserName = arrayitem["name"];
-        this.getItem();
-      }
+      this.selectedUserName = arrayitem["name"];
     },
     // 廃止チェックボックスが変更された場合の処理
     checkboxChangeUser: function() {
@@ -2161,16 +2325,83 @@ export default {
       this.form.role = value;
     },
     // 選択が変更された場合の処理
-    timetablechkptnChanges: function(value) {
+    timetablechkptnChanges: function(value, index) {
+      if (index == 0) {
+        this.isTabledisabled[0] = false;
+        this.isTabledisabled[1] = true;
+      } else {
+        this.isTabledisabled[0] = true;
+        this.isTabledisabled[1] = false;
+      }
     },
+    // 表示するボタンクリック処理
+    searchclick: function() {
+      // 入力項目の部署クリア
+      this.selectMode = "";
+      this.messagevalidatesNew = [];
+      this.messagevalidatesEdt = [];
+      this.messagevalidatestimetable = [];
+      this.messageUp = [];
+      this.searchedUserValue = this.selectedUserValue;
+      this.searchedUserName = this.selectedUserName;
+      this.searchedDepartmentValue = this.selectedDepartmentValue;
+      if (this.selectedUserValue == "" || this.selectedUserValue == null) {
+        this.selectMode = 'NEW';
+        this.newItemClear();
+        this.form.department_code = this.searchedDepartmentValue;
+        this.refreshaddDepartmentList();
+      } else {
+        this.selectMode = 'EDT';
+        this.getItem();
+      }
+    },
+    // タイムテーブルを設定するボタンクリック処理
+    timetableeditclick: function() {
+      this.searchedUserValue = this.selectedUserValue;
+      this.searchedUserName = this.selectedUserName;
+      this.searchedDepartmentValue = this.selectedDepartmentValue;
+      this.selectMode = 'TMT';
+      // this.timetable_check.chkptn = this.const_C041_data.find(timetableptn => timetableptn.checked).value
+    },
+    // タイムテーブルを更新するボタンクリック処理
+    fixclick: function() {
+      this.messagevalidatesNew = [];
+      this.messagevalidatesEdt = [];
+      this.messagevalidatestimetable = [];
+      var flag = this.checkFormTimetable();
+      if (flag) {
+        var messages = [];
+        var item_name = this.jdgSearchItemInput();
+        if (item_name != null) {
+          messages.push(item_name + "が変更されていますが");
+          messages.push("変更前の条件で更新します。");
+        }
+        messages.push("更新してよろしいですか？");
+        this.htmlMessageSwal("確認", messages, "info", true, true)
+          .then(result  => {
+            if (result) {
+              this.FixDetailbatch("一括更新");
+            }
+        });
+      // 項目数が多い場合以下コメントアウト
+      } else {
+        this.countswal("エラー", this.messagevalidatesBatch, "error", true, false, true)
+          .then(result  => {
+            if (result) {
+            }
+        });
+      }
+    },
+    
     // CSVから作成するボタンクリック処理
     usersuploadclick: function() {
-      this.selectMode = "UPUSERS";
+      this.selectMode = 'UPL';
     },
     // アップロードボタンがクリックされた場合の処理
     upclick: function(e) {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messagevalidatestimetable = [];
       this.messageUp = [];
       var messages = [];
       messages.push("登録しているユーザー情報をクリアしてから登録します。");
@@ -2199,6 +2430,7 @@ export default {
     storeclick() {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messagevalidatestimetable = [];
       this.messageUp = [];
       var flag = this.checkFormStore();
       if (flag) {
@@ -2230,10 +2462,16 @@ export default {
     fixclick(index) {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messagevalidatestimetable = [];
       this.messageUp = [];
       var flag = this.checkFormFix(index);
       if (flag) {
         var messages = [];
+        var item_name = this.jdgSearchItemInput();
+        if (item_name != null) {
+          messages.push(item_name + "が変更されていますが、");
+          messages.push("変更前の条件で更新します。");
+        }
         if (
           this.details[index].kill_from_date == "" ||
           this.details[index].kill_from_date == null
@@ -2271,6 +2509,7 @@ export default {
     addClick(index) {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messagevalidatestimetable = [];
       this.messageUp = [];
       var flag = this.checkFormFix(index);
       if (flag) {
@@ -2312,8 +2551,14 @@ export default {
     delClick(index) {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messagevalidatestimetable = [];
       this.messageUp = [];
       var messages = [];
+      var item_name = this.jdgSearchItemInput();
+      if (item_name != null) {
+        messages.push(item_name + "が変更されていますが、");
+        messages.push("変更前の条件で削除します。");
+      }
       messages.push("この内容を削除しますか？");
       this.htmlMessageSwal("確認", messages, "info", true, true).then(
         result => {
@@ -2327,6 +2572,7 @@ export default {
     appendRowClick: function() {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messagevalidatestimetable = [];
       this.messageUp = [];
       if (this.before_count < this.count) {
         var messages = [];
@@ -2377,6 +2623,7 @@ export default {
     rowDelClick: function(index) {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messagevalidatestimetable = [];
       this.messageUp = [];
       if (this.checkRowData(index)) {
         var messages = [];
@@ -2398,8 +2645,14 @@ export default {
     releaseclick(index) {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
+      this.messagevalidatestimetable = [];
       this.messageUp = [];
       var messages = [];
+      var item_name = this.jdgSearchItemInput();
+      if (item_name != null) {
+        messages.push(item_name + "が変更されていますが、");
+        messages.push("変更前の条件で解除します。");
+      }
       messages.push("カード情報の紐づけを解除しますか？");
       this.htmlMessageSwal("確認", messages, "info", true, true).then(
         result => {
@@ -2413,7 +2666,7 @@ export default {
     // 氏名取得処理
     getItem() {
       var arrayParams = {
-        code: this.selectedUserValue,
+        code: this.searchedUserValue,
         killvalue: this.isUsermanagement
       };
       this.postRequest("/edit_user/get", arrayParams)
@@ -2539,33 +2792,6 @@ export default {
           }
           if (this.selectedEmploymentValue == null) {
             this.selectedEmploymentValue = "";
-          }
-        });
-    },
-    // コード選択リスト取得処理
-    getGeneralList(value) {
-      var arrayParams = { identificationid: value };
-      this.postRequest("/get_general_list", arrayParams)
-        .then(response => {
-          if (value == "C001") {
-            this.getThenemployment(response, "雇用形態");
-          }
-          if (value == "C017") {
-            this.getThenmanagement(response, "勤怠管理");
-          }
-          if (value == "C025") {
-            this.getThenrole(response, "権限");
-          }
-        })
-        .catch(reason => {
-          if (value == "C001") {
-            this.serverCatch("雇用形態", "取得");
-          }
-          if (value == "C017") {
-            this.serverCatch("勤怠管理", "取得");
-          }
-          if (value == "C025") {
-            this.serverCatch("権限", "取得");
           }
         });
     },
@@ -2753,19 +2979,6 @@ export default {
         }
       }
     },
-    // 取得正常処理（明細雇用形態選択リスト）
-    getThenemployment(response) {
-      var res = response.data;
-      if (res.result) {
-        this.employStatusList = res.details;
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
-        } else {
-          this.serverCatch("雇用形態", "取得");
-        }
-      }
-    },
     // 取得正常処理（明細タイムテーブル対象選択リスト）
     getThentimetable(response) {
       var res = response.data;
@@ -2776,32 +2989,6 @@ export default {
           this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("明細タイムテーブル", "取得");
-        }
-      }
-    },
-    // 取得正常処理（明細勤怠管理対象選択リスト）
-    getThenmanagement(response, value) {
-      var res = response.data;
-      if (res.result) {
-        this.generalList_m = res.details;
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
-        } else {
-          this.serverCatch("明細勤怠管理", "取得");
-        }
-      }
-    },
-    // 取得正常処理（明細コード権限選択リスト）
-    getThenrole(response, value) {
-      var res = response.data;
-      if (res.result) {
-        this.generalList_r = res.details;
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
-        } else {
-          this.serverCatch("明細権限", "取得");
         }
       }
     },
@@ -2882,7 +3069,9 @@ export default {
       this.form.id = "";
       this.form.code = "";
       this.selectedUserValue = "";
+      this.searchedUserValue = "";
       this.selectedUserName = "";
+      this.searchedUserName = "";
       this.selectMode = "";
       this.count = 0;
       this.before_count = 0;
@@ -2978,7 +3167,31 @@ export default {
     refreshreleaseCardbottun() {
       this.showrelease = false;
       this.$nextTick(() => (this.showrelease = true));
-    }
+    },
+    // 検索項目入力変更判定
+    jdgSearchItemInput: function() {
+      if (this.searchedDepartmentValue != this.selectedDepartmentValue) {
+        return "所属部署";
+      }
+      if (this.searchedUserValue != this.selectedUserValue) {
+        return "氏名";
+      }
+      return null;
+    },
   }
 };
 </script>
+<style scoped>
+
+.table th, .table td {
+    padding: 0rem !important;
+}
+
+.mw-rem-3 {
+  min-width: 3rem;
+}
+
+.mw-rem-6 {
+  min-width: 3rem;
+}
+</style>

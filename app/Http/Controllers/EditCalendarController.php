@@ -301,14 +301,11 @@ class EditCalendarController extends Controller
         try{
             $isupdate = true;
             foreach ($params['converts'] as $data) {
-                Log::debug("data['date'] = ".$data['date']);
                 // パラメータから更新対象のユーザーリストを作成する
-                Log::debug("data['date'] = ".$data['date']);
                 $userslist = $apicommon_model->getUserInfo($data['date'], $user_code, $department_code, $employment_status);
                 foreach ($userslist as $usersitem) {
                     $isupdate = true;
                     // 一括更新の場合は、元データがあった場合休日であれば更新しない
-                    Log::debug("initptn = ".$initptn);
                     if ($isbatch && $initptn == Config::get('const.C040.holiday_noupdate')) {
                         $calendar_model->setParamdepartmentcodeAttribute($usersitem->department_code);
                         $calendar_model->setParamemploymentstatusAttribute($usersitem->employment_status);
@@ -323,7 +320,6 @@ class EditCalendarController extends Controller
                             }
                         }
                     }
-                    Log::debug("isupdate = ".$isupdate);
                     if ($isupdate) {
                         // カレンダー更新
                         $calendar_model->setParamdepartmentcodeAttribute($usersitem->department_code);

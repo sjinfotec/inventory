@@ -151,7 +151,10 @@
       <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
       ユーザー情報ダウンロード</button>
     </div>
-  </button>
+    <div v-if="btnMode ==='timetableedit'" class="btn-group d-flex" v-on:click="timetableeditclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
+        登録しているユーザーのタイムテーブルを一括設定する</button>
+    </div>
   </div>
 </template>
 <script>
@@ -277,6 +280,9 @@ export default {
     },
     usersdownloadclickBtn : function() {
       this.$emit('csv-event',event);
+    },
+    timetableeditclickBtn : function() {
+      this.$emit('timetableedit-event',event);
     },
     // tooltips
     edttooltips: function(value1) {
