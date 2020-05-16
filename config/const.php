@@ -405,6 +405,11 @@ return [
         'holiday_update' => 2
     ],
  
+    'C041' => [
+        'value' => 'C041',
+        'timetable_week' => 1
+    ],
+ 
     'C999' => [
         'value' => 'C999',
         'main' => 1,

@@ -1808,15 +1808,15 @@ class TempWorkingTimeDate extends Model
                 ->selectRaw('(case when t2.public_going_out_time_3 is not null then t2.public_going_out_time_3 else null end) as public_going_out_time_3')
                 ->selectRaw('(case when t2.public_going_out_time_4 is not null then t2.public_going_out_time_4 else null end) as public_going_out_time_4')
                 ->selectRaw('(case when t2.public_going_out_time_5 is not null then t2.public_going_out_time_5 else null end) as public_going_out_time_5')
-                ->selectRaw('(case when t2.public_going_out_time_6 is not null then t2.public_going_out_time_5 else null end) as public_going_out_time_6')
-                ->selectRaw('(case when t2.public_going_out_time_7 is not null then t2.public_going_out_time_5 else null end) as public_going_out_time_7')
+                ->selectRaw('(case when t2.public_going_out_time_6 is not null then t2.public_going_out_time_6 else null end) as public_going_out_time_6')
+                ->selectRaw('(case when t2.public_going_out_time_7 is not null then t2.public_going_out_time_7 else null end) as public_going_out_time_7')
                 ->selectRaw('(case when t2.public_going_out_return_time_1 is not null then t2.public_going_out_return_time_1 else null end) as public_going_out_return_time_1')
                 ->selectRaw('(case when t2.public_going_out_return_time_2 is not null then t2.public_going_out_return_time_2 else null end) as public_going_out_return_time_2')
                 ->selectRaw('(case when t2.public_going_out_return_time_3 is not null then t2.public_going_out_return_time_3 else null end) as public_going_out_return_time_3')
                 ->selectRaw('(case when t2.public_going_out_return_time_4 is not null then t2.public_going_out_return_time_4 else null end) as public_going_out_return_time_4')
                 ->selectRaw('(case when t2.public_going_out_return_time_5 is not null then t2.public_going_out_return_time_5 else null end) as public_going_out_return_time_5')
-                ->selectRaw('(case when t2.public_going_out_return_time_6 is not null then t2.public_going_out_return_time_5 else null end) as public_going_out_return_time_6')
-                ->selectRaw('(case when t2.public_going_out_return_time_7 is not null then t2.public_going_out_return_time_5 else null end) as public_going_out_return_time_7');
+                ->selectRaw('(case when t2.public_going_out_return_time_6 is not null then t2.public_going_out_return_time_6 else null end) as public_going_out_return_time_6')
+                ->selectRaw('(case when t2.public_going_out_return_time_7 is not null then t2.public_going_out_return_time_7 else null end) as public_going_out_return_time_7');
             $mainquery
                 ->addselect('t2.attendance_time_positions_1')
                 ->addselect('t2.attendance_time_positions_2')
@@ -2297,7 +2297,7 @@ class TempWorkingTimeDate extends Model
                 'public_editor_user_code_4' => $this->array_public_editor_user_code[3],
                 'public_editor_user_code_5' => $this->array_public_editor_user_code[4],
                 'public_editor_user_code_6' => $this->array_public_editor_user_code[5],
-                'public_editor_user_code_5' => $this->array_public_editor_user_code[6],
+                'public_editor_user_code_7' => $this->array_public_editor_user_code[6],
                 'public_editor_user_name_1' => $this->array_public_editor_user_name[0],
                 'public_editor_user_name_2' => $this->array_public_editor_user_name[1],
                 'public_editor_user_name_3' => $this->array_public_editor_user_name[2],
@@ -2393,6 +2393,8 @@ class TempWorkingTimeDate extends Model
                 'fixedtime' => $this->fixedtime,
                 'created_at'=>$this->systemdate
             );
+            $array_length = count($this->array_attendance_time_positions);
+            if ($array_length > 5) {$array_length = 5;}
             for ($i=0;$i<count($this->array_attendance_time_positions);$i++) {
                 if (isset($this->array_attendance_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
@@ -2404,6 +2406,8 @@ class TempWorkingTimeDate extends Model
                     );
                 }
             }
+            $array_length = count($this->array_leaving_time_positions);
+            if ($array_length > 5) {$array_length = 5;}
             for ($i=0;$i<count($this->array_leaving_time_positions);$i++) {
                 if (isset($this->array_leaving_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
@@ -2415,6 +2419,8 @@ class TempWorkingTimeDate extends Model
                     );
                 }
             }
+            $array_length = count($this->array_missing_middle_time_positions);
+            if ($array_length > 5) {$array_length = 5;}
             for ($i=0;$i<count($this->array_missing_middle_time_positions);$i++) {
                 if (isset($this->array_missing_middle_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
@@ -2426,6 +2432,8 @@ class TempWorkingTimeDate extends Model
                     );
                 }
             }
+            $array_length = count($this->array_missing_middle_return_time_positions);
+            if ($array_length > 5) {$array_length = 5;}
             for ($i=0;$i<count($this->array_missing_middle_return_time_positions);$i++) {
                 if (isset($this->array_missing_middle_return_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
@@ -2437,7 +2445,10 @@ class TempWorkingTimeDate extends Model
                     );
                 }
             }
-            for ($i=0;$i<count($this->array_public_going_out_time_positions);$i++) {
+            // 
+            $array_length = count($this->array_public_going_out_time_positions);
+            if ($array_length > 7) {$array_length = 7;}
+            for ($i=0;$i<$array_length;$i++) {
                 if (isset($this->array_public_going_out_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
                         array('public_going_out_time_positions_'.($i+1) => DB::raw("(GeomFromText('POINT(".$this->array_public_going_out_time_positions[$i].")'))"))
@@ -2448,6 +2459,8 @@ class TempWorkingTimeDate extends Model
                     );
                 }
             }
+            $array_length = count($this->array_public_going_out_return_time_positions);
+            if ($array_length > 7) {$array_length = 7;}
             for ($i=0;$i<count($this->array_public_going_out_return_time_positions);$i++) {
                 if (isset($this->array_public_going_out_return_time_positions[$i])) {
                     $array_insert_items = array_merge($array_insert_items,
