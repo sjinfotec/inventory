@@ -572,6 +572,15 @@ export default {
       if (this.messagevalidatesSearch.length > 0) {
         flag  = false;
       }
+      if (flag) {
+        if (this.valuefromdate > this.valuetodate) {
+          flag = false;
+          this.messagevalidatesSearch.push("開始日付＞終了日付となっています");
+        }
+      }
+      if (this.messagevalidatesSearch.length > 0) {
+        flag  = false;
+      }
 
       e.preventDefault();
       return flag;
@@ -640,6 +649,15 @@ export default {
         }
       }
 
+      if (this.messagevalidatesSearch.length > 0) {
+        flag  = false;
+      }
+      if (flag) {
+        if (this.valuefromdate > this.valuetodate) {
+          flag = false;
+          this.messagevalidatesSearch.push("開始日付＞終了日付となっています");
+        }
+      }
       if (this.messagevalidatesSearch.length > 0) {
         flag  = false;
       }
@@ -912,6 +930,10 @@ export default {
 };
 </script>
 <style scoped>
+@page {
+    size : landscape;
+}
+
 .table th, .table td {
     padding: 0.4rem !important;
 }

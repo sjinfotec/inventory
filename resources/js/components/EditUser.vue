@@ -146,7 +146,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row" v-for="(item,index) in get_C037">
+            <div class="row" v-for="(item,index) in get_C037_TARGET">
               <div class="col-md-12 pb-2">
                 <!-- col -->
                 <btn-csv-download
@@ -258,29 +258,81 @@
               ></daily-working-information-panel-header>
               <!-- /.panel header -->
               <div class="card-body pt-2">
+                <!-- ----------- 日付 START ---------------- -->
+                <!-- panel contents -->
                 <!-- .row -->
                 <div class="row justify-content-between">
-                  <div class="col-md-12 pb-2">
-                    <div class="form-group">
-                      <div class="form-check">
-                        <div
-                            v-for="(timetableptn, index) in get_C041"
-                            :key="timetableptn.key"
-                        >
-                          <label>
-                            <input
-                              type="radio"
-                              v-model="timetable_check.chkptn"
-                              :value="timetableptn.value"
-                                @change="timetablechkptnChanges(timetable_check.chkptn, index)"
-                            />
-                            {{ timetableptn.label }}
-                          </label>
-                          <div class="input-group" v-if="index===0">
+                  <div class="col-md-6 pb-2">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span
+                          class="input-group-text font-size-sm line-height-xs label-width-120"
+                          id="basic-addon1"
+                        >開始日付<span class="color-red">[必須]</span></span>
+                      </div>
+                      <input-datepicker
+                        v-bind:default-date="valuefromdate"
+                        v-bind:date-format="DatePickerFormat"
+                        v-bind:place-holder="'開始日付を選択してください'"
+                        v-on:change-event="fromdateChanges"
+                        v-on:clear-event="fromdateCleared"
+                      ></input-datepicker>
+                    </div>
+                  </div>
+                  <!-- /.col -->
+                  <!-- .col -->
+                  <div class="col-md-6 pb-2">
+                    <div class="input-group">
+                      <div class="input-group-prepend">
+                        <span
+                          class="input-group-text font-size-sm line-height-xs label-width-120"
+                          id="basic-addon1"
+                        >終了日付<span class="color-red">[必須]</span></span>
+                      </div>
+                      <input-datepicker
+                        v-bind:default-date="valuetodate"
+                        v-bind:date-format="DatePickerFormat"
+                        v-bind:place-holder="'終了日付を選択してください'"
+                        v-on:change-event="fromtoChanges"
+                        v-on:clear-event="fromtoCleared"
+                      ></input-datepicker>
+                    </div>
+                  </div>
+                  <!-- /.col -->
+                </div>
+                <!-- /.row -->
+                <!-- ----------- 日付リスト END ---------------- -->
+                <div
+                  v-for="(timetableptn, index) in get_C041"
+                  :key="timetableptn.key"
+                >
+                  <!-- .row -->
+                  <div class="row justify-content-between">
+                    <div class="col-md-12 pb-2">
+                      <div class="input-group">
+                        <label>
+                          <input
+                            type="radio"
+                            v-model="timetable_check.chkptn"
+                            :value="timetableptn.value"
+                            @change="timetablechkptnChanges(timetable_check.chkptn, index)"
+                          />
+                          {{ timetableptn.label }}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- /.row -->
+                  <!-- .row -->
+                  <div class="row justify-content-between">
+                    <div class="col-md-12 pb-2">
+                      <div class="form-group">
+                        <div class="form-check">
+                          <div v-if="index===0">
                             <select
                               v-bind:disabled="isTabledisabled[index]"
                               class="custom-select"
-                              v-model="timetable.timeptn_business"
+                              v-model="timetable.timeptn_timetable"
                               data-toggle="tooltip"
                               data-placement="top"
                               v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
@@ -293,7 +345,7 @@
                               >{{ tlist.name }}</option>
                             </select>
                           </div>
-                          <div class="input-group" v-if="index===1">
+                          <div v-if="index===1">
                             <table
                               class="table table-striped border-bottom font-size-sm text-nowrap">
                               <thead>
@@ -310,7 +362,7 @@
                                       <select
                                         class="custom-select"
                                         v-bind:disabled="isTabledisabled[index]"
-                                        v-model="timetable.timeptn_business[index1]"
+                                        v-model="timetable.timeptn_timetable_w[index1]"
                                         data-toggle="tooltip"
                                         data-placement="top"
                                         v-bind:title="'「勤務時間設定」で登録したタイムテーブルのリストから選択します。'"
@@ -340,7 +392,7 @@
                   <!-- col -->
                   <div class="col-md-12 pb-2">
                     <btn-work-time
-                      v-on:fixclick-event="fixclick"
+                      v-on:fixclick-event="fixTimetableclick"
                       v-bind:btn-mode="'fix'"
                       v-bind:is-push="false"
                     ></btn-work-time>
@@ -1580,13 +1632,24 @@ export default {
       var i = 0;
       this.const_generaldatas.forEach( function( item ) {
         if (item.identification_id == CONST_C037) {
-          if (item.code == CONST_USER_DOWNLOAD) {
-            $this.const_C037_data.push($this.const_generaldatas[i]);
-          }
+          $this.const_C037_data.push($this.const_generaldatas[i]);
         }
         i++;
       });    
       return this.const_C037_data;
+    },
+    get_C037_TARGET: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C037) {
+          if (item.code == CONST_USER_DOWNLOAD) {
+            $this.const_C037_data_target.push($this.const_generaldatas[i]);
+          }
+        }
+        i++;
+      });    
+      return this.const_C037_data_target;
     },
     get_C041: function() {
       let $this = this;
@@ -1615,6 +1678,7 @@ export default {
       const_C017_data: [],
       const_C025_data: [],
       const_C037_data: [],
+      const_C037_data_target: [],
       const_C041_data: [],
       timetable_check: {
         chkptn : 1
@@ -1631,7 +1695,8 @@ export default {
       ],
       timetable: {
         timeptn : 1,
-        timeptn_business : ["","","","","","",""]
+        timeptn_timetable : "",
+        timeptn_timetable_w : ["","","","","","",""]
       },
       selectedDepartmentValue: "",
       valueDepartmentkillcheck: false,
@@ -1686,7 +1751,10 @@ export default {
       login_user_code: "",
       login_user_role: "",
       input_mobile_address: "",
-      iscsvbutton: false
+      iscsvbutton: false,
+      valuefromdate: "",
+      valuetodate: "",
+      DatePickerFormat: "yyyy年MM月dd日"
     };
   },
   // マウント時
@@ -2232,16 +2300,40 @@ export default {
       this.messagevalidatestimetable = [];
       var flag = true;
       var chkArray = [];
+      // 開始日付
       var required = true;
       var equalength = 0;
       var maxlength = 0;
-      var itemname = '';
+      var itemname = '開始日付';
+      chkArray = 
+        this.checkHeader(this.valuefromdate, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatestimetable.length == 0) {
+          this.messagevalidatestimetable = chkArray;
+        } else {
+          this.messagevalidatestimetable = this.messagevalidatestimetable.concat(chkArray);
+        }
+      }
+      // 終了日付
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '終了日付';
+      chkArray = 
+        this.checkHeader(this.valuetodate, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatestimetable.length == 0) {
+          this.messagevalidatestimetable = chkArray;
+        } else {
+          this.messagevalidatestimetable = this.messagevalidatestimetable.concat(chkArray);
+        }
+      }
 
-      if (this.timetable_check.chkptn == this.const_C041_data[CONST_TIMETABLE_EQUALITY]['code']) {
+      if (this.timetable_check.chkptn == this.const_C041_data[CONST_TIMETABLE_EQUALITY]['value']) {
         // タイムテーブルリスト
         itemname = 'タイムテーブルリスト';
         chkArray = 
-          this.checkHeader(this.timetable.timeptn_business, required, equalength, maxlength, itemname);
+          this.checkHeader(this.timetable.timeptn_timetable, required, equalength, maxlength, itemname);
         if (chkArray.length > 0) {
           if (this.messagevalidatestimetable.length == 0) {
             this.messagevalidatestimetable = chkArray;
@@ -2252,9 +2344,9 @@ export default {
       }else {
         // バリデーション
         for(var i=0;i<7;i++) {
-          itemname = formweekdays + 'のタイムテーブルリスト';
+          itemname = this.formweekdays[i] + 'のタイムテーブルリスト';
           chkArray = 
-            this.checkHeader(this.timetable.timeptn_business[i], required, equalength, maxlength, itemname);
+            this.checkHeader(this.timetable.timeptn_timetable_w[i], required, equalength, maxlength, itemname);
           if (chkArray.length > 0) {
             if (this.messagevalidatestimetable.length == 0) {
               this.messagevalidatestimetable = chkArray;
@@ -2364,7 +2456,7 @@ export default {
       // this.timetable_check.chkptn = this.const_C041_data.find(timetableptn => timetableptn.checked).value
     },
     // タイムテーブルを更新するボタンクリック処理
-    fixclick: function() {
+    fixTimetableclick: function() {
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
       this.messagevalidatestimetable = [];
@@ -2374,13 +2466,13 @@ export default {
         var item_name = this.jdgSearchItemInput();
         if (item_name != null) {
           messages.push(item_name + "が変更されていますが");
-          messages.push("変更前の条件で更新します。");
+          messages.push("変更前の条件で設定します。");
         }
-        messages.push("更新してよろしいですか？");
+        messages.push("よろしいですか？");
         this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
-              this.FixDetailbatch("一括更新");
+              this.FixTimetable("一括設定");
             }
         });
       // 項目数が多い場合以下コメントアウト
@@ -2391,6 +2483,22 @@ export default {
             }
         });
       }
+    },
+    // 開始日付が変更された場合の処理
+    fromdateChanges: function(value) {
+      this.valuefromdate = value;
+    },
+    // 開始日付がクリアされた場合の処理
+    fromdateCleared: function() {
+      this.valuefromdate = "";
+    },
+    // 終了日付が変更された場合の処理
+    fromtoChanges: function(value, arrayitem) {
+      this.valuetodate = value;
+    },
+    // 終了日付がクリアされた場合の処理
+    fromtoCleared: function() {
+      this.valuetodate = "";
     },
     
     // CSVから作成するボタンクリック処理
@@ -2677,12 +2785,30 @@ export default {
           this.serverCatch("ユーザ", "取得");
         });
     },
-    // 氏名登録処理
-    store() {
-      var arrayParams = { details: this.form };
-      this.postRequest("/edit_user/store", arrayParams)
+    // タイムテーブル設定処理
+    FixTimetable() {
+      this.timetable['timeptn'] = this.timetable_check.chkptn;
+      var arrayParams = {
+        datefrom : moment(this.valuefromdate).format("YYYYMMDD"),
+        dateto : moment(this.valuetodate).format("YYYYMMDD"),
+        department_code: this.searchedDepartmentValue,
+        user_code: this.searchedUserValue,
+        details: this.timetable
+      };
+      this.postRequest("/edit_user/fixtimetable", arrayParams)
         .then(response => {
-          this.putThenHead(response, "登録");
+          this.timputThenTimetable(response, "設定");
+        })
+        .catch(reason => {
+          this.serverCatch("タイムテーブル", "設定");s
+        });
+    },
+    // 氏名更新処理（明細）
+    FixDetail(kbnname, index) {
+      var arrayParams = { details: this.details[index] };
+      this.postRequest("/edit_user/fix", arrayParams)
+        .then(response => {
+          this.putThenDetail(response, kbnname);
         })
         .catch(reason => {
           this.serverCatch("ユーザ", "登録");
@@ -2993,21 +3119,18 @@ export default {
       }
     },
     // 更新系正常処理
-    putThenHead(response, eventtext) {
+    timputThenTimetable(response, eventtext) {
       var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("ユーザーを" + eventtext + "しました。");
-        messages.push(
-          "個人のカレンダー設定する場合はカレンダー設定処理をしてください。"
-        );
+        messages.push("タイムテーブルを" + eventtext + "しました。");
         this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
         this.refreshUserList();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
-          this.serverCatch("ユーザー", eventtext);
+          this.serverCatch("タイムテーブル", eventtext);
         }
       }
     },

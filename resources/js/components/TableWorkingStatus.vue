@@ -261,8 +261,8 @@ export default {
     //
     getItem() {
       var arrayParams = {
-        // target_date: this.targetYmd
-        target_date: "20190801"
+        target_date: this.targetYmd
+        //target_date: "20190801"
       };
       this.postRequest("/get_working_status/get", arrayParams)
         .then(response => {

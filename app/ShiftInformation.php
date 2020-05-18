@@ -570,7 +570,39 @@ class ShiftInformation extends Model
             throw $e;
         }
         return $is_exists;
-}
+    }
+
+    /**
+     * シフト論理削除
+     *
+     * @return void
+     */
+    public function delShiftInfoIsdelete(){
+        try {
+            $mainquery = DB::table($this->table);
+            if(!empty($this->param_user_code)){
+                $mainquery->where('user_code', $this->param_user_code);                 //user_code指定
+            }
+            if(!empty($this->param_department_code)){
+                $mainquery->where('department_code', $this->param_department_code);     //department_code指定
+            }
+            if(!empty($this->param_fromdate) && !empty($this->param_todate)){
+                $mainquery->whereBetween('target_date', [$this->param_fromdate,$this->param_todate]);
+            }
+            $mainquery->update([
+                'is_deleted' => 1,
+                'updated_at' => $this->updated_at
+            ]);
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
 
     /**
      * シフト削除

@@ -14,7 +14,10 @@ use App\Department;
 use App\WorkingTimeTable;
 use App\GeneralCodes;
 use App\Calendar;
+use App\ShiftInformation;
 use Carbon\Carbon;
+use App\Http\Controllers\ApiCommonController;
+use App\Http\Controllers\SttingShiftTimeController;
 
 class UserAddController extends Controller
 {
@@ -207,6 +210,94 @@ class UserAddController extends Controller
     }
 
     /**
+     * ユーザー編集
+     *
+     * @param Request $request
+     * @return response
+     */
+    public function fixTimeTable(Request $request){
+        $this->array_messagedata = array();
+        $details = array();
+        $result = true;
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['datefrom'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "datefrom", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (!isset($params['dateto'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "dateto", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (!isset($params['details'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $datefrom = $params['datefrom'];
+            $dateto = $params['dateto'];
+            $department_code = null;
+            if (isset($params['department_code'])) {
+                if ($params['department_code'] != "") {
+                    $department_code = $params['department_code'];
+                }
+            }
+            $user_code = null;
+            if (isset($params['user_code'])) {
+                if ($params['user_code'] != "") {
+                    $user_code = $params['user_code'];
+                }
+            }
+            $details = $params['details'];
+            // updateTimetable implement
+            $array_impl_updateTimetable = array (
+                'datefrom' => $datefrom,
+                'dateto' => $dateto,
+                'department_code' => $department_code,
+                'user_code' => $user_code,
+                'details' => $details
+            );
+            $this->updateTimetable($array_impl_updateTimetable);
+            return response()->json(
+                ['result' => true,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            return response()->json(
+                ['result' => false,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            return response()->json(
+                ['result' => false,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }
+    }
+
+    /**
      * UPDATE
      *
      * @param [type] $details
@@ -262,6 +353,72 @@ class UserAddController extends Controller
             DB::rollBack();
             throw $pe;
         }catch(\Exception $e){
+            Log::error($e->getMessage());
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * UPDATE
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function updateTimetable($params){
+        $datefrom = $params['datefrom'];
+        $dateto = $params['dateto'];
+        $department_code = $params['department_code'];
+        $user_code = $params['user_code'];
+        $details = $params['details'];
+        $systemdate = Carbon::now();
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        DB::beginTransaction();
+        try{
+            // ユーザー情報のテーブルNOを変更
+            if ($details['timeptn'] == Config::get('const.C041.timetable_batch')) {
+                $user_model = new UserModel();
+                $user_model->setParamcodeAttribute($user_code);
+                $user_model->setParamdepartmentcodeAttribute($department_code);
+                $user_model->setWorkingtimetablenoAttribute($details['timeptn_timetable']);
+                $user_model->setUpdateduserAttribute($login_user_code);
+                $user_model->setUpdatedatAttribute($systemdate);
+                $user_model->updateTimeTableNo();
+            }
+            // ユーザーシフト情報を登録する
+            // 期間内のシフト情報を論理削除する
+            $shift_model = new ShiftInformation();
+            $shift_model->setParamusercodeAttribute($user_code);
+            $shift_model->setParamdepartmentcodeAttribute($department_code);
+            $shift_model->setParamfromdateAttribute($datefrom);
+            $shift_model->setParamtodateAttribute($dateto);
+            $shift_model->setUpdatedatAttribute($systemdate);
+            $shift_model->delShiftInfoIsdelete();
+            // 期間内のシフト情報を曜日ごとに登録する
+            if ($details['timeptn'] == Config::get('const.C041.timetable_week')) {
+                $settingshift_model = new SttingShiftTimeController();
+                $apicommon_model = new ApiCommonController();
+                $user_data = $apicommon_model->getUserInfo($datefrom, $user_code, $department_code, null);
+                foreach($user_data as $item) {
+                    // updateTimetable implement
+                    $array_impl_insertWeek = array (
+                        'datefrom' => $datefrom,
+                        'dateto' => $dateto,
+                        'department_code' => $item->department_code,
+                        'user_code' => $item->code,
+                        'details' => $details
+                    );
+                    $settingshift_model->insertWeek($array_impl_insertWeek);
+                }
+            }
+            DB::commit();
+
+        }catch(\PDOException $pe){
+            DB::rollBack();
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "users shift_informations", Config::get('const.LOG_MSG.data_access_erorr')));
             Log::error($e->getMessage());
             DB::rollBack();
             throw $e;
