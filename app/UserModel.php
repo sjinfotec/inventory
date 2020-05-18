@@ -731,6 +731,36 @@ class UserModel extends Model
     }
 
     /**
+     * タイムテーブルNO変更
+     * 
+     * @return void
+     */
+    public function updateTimeTableNo(){
+        try {
+            $mainquery = DB::table($this->table);
+            if(!empty($this->param_code)){
+                $mainquery->where('code', $this->param_code);                               //user_code指定
+            }
+            if(!empty($this->param_department_code)){
+                $mainquery->where('department_code', $this->param_department_code);     //department_code指定
+            }
+            $mainquery->update([
+                'working_timetable_no' => $this->working_timetable_no,
+                'updated_user'=>$this->updated_user,
+                'updated_at' => $this->updated_at
+            ]);
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
      * パスワード変更
      * 
      * @return void

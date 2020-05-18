@@ -180,13 +180,13 @@
         </div>
         <!-- /.row -->
         <!-- .row -->
-        <div class="row justify-content-between">
+        <!-- <div class="row justify-content-between"> -->
           <!-- col -->
-          <div class="col-md-12 pb-2">
+          <!-- <div class="col-md-12 pb-2">
             <btn-work-time v-bind:btn-mode="'cancel'" v-on:cancelclick-event="cancelclick"></btn-work-time>
-          </div>
+          </div> -->
           <!-- /.col -->
-        </div>
+        <!-- </div> -->
         <!-- /.row -->
         <!-- /.panel contents -->
       </div>
@@ -641,25 +641,6 @@ export default {
     },
     // 勤怠更新確定処理（明細）
     FixData(kbnname) {
-      for(var i=0;i<this.details.length;i++) {
-        console.log('id = ' + this.details[i].id);
-        console.log('user_code = ' + this.details[i].user_code);
-        console.log('department_code = ' + this.details[i].department_code);
-        console.log('record_time = ' + this.details[i].record_time);
-        console.log('mode = ' + this.details[i].mode);
-        console.log('user_holiday_kubuns_id = ' + this.details[i].user_holiday_kubuns_id);
-        console.log('user_name = ' + this.details[i].user_name);
-        console.log('department_name = ' + this.details[i].department_name);
-        console.log('code_name = ' + this.details[i].code_name);
-        console.log('user_holiday_kbn = ' + this.details[i].user_holiday_kbn);
-        console.log('record_ymd = ' + this.details[i].record_ymd);
-        console.log('record_date = ' + this.details[i].record_date);
-        console.log('date = ' + this.details[i].date);
-        console.log('time = ' + this.details[i].time);
-        console.log('x_positions = ' + this.details[i].x_positions);
-        console.log('y_positions = ' + this.details[i].y_positions);
-        console.log('kbn_flag = ' + this.details[i].kbn_flag);
-      }
       var messages = [];
       var arrayParams = {
         user_code : this.edtUsercode,

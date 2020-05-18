@@ -296,7 +296,6 @@
                     type="radio"
                     v-model="batch.initptn"
                     :value="batchptn.value"
-                    @change="batchinitptnChanges(batch.initptn)"
                   />
                   {{ batchptn.label }}
                 </label>
@@ -1871,7 +1870,6 @@ export default {
     FixDetailbatchW(eventname) {
       // 出勤日以外の場合は指定期間内すべて上書き更新にする
       var batch_initptn = this.batch.initptn;
-        console.log('this.batch.initptn = ' + this.batch.initptn);
       if (this.businessbatch != this.const_C007_data[CONST_C007_ATTENDANCE]['code']) {
         batch_initptn = 0;
       }

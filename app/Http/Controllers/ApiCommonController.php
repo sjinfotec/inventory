@@ -554,6 +554,7 @@ class ApiCommonController extends Controller
      */
     public function getUserListCsv(Request $request){
 
+        Log::debug('getUserListCsv = ');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;

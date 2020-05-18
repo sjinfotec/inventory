@@ -411,7 +411,8 @@ return [
  
     'C041' => [
         'value' => 'C041',
-        'timetable_week' => 1
+        'timetable_batch' => 1,
+        'timetable_week' => 2
     ],
  
     'C999' => [
@@ -785,7 +786,7 @@ return [
         'day_holiday' => 1          // 1日休日かの判定文字位置（0始まり）
     ],
     
-    // 未使用
+    //
     'MENUITEM' => [
         'calc_block' => 1,
         'daily' => 2,
