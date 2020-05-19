@@ -307,6 +307,7 @@ class DailyWorkingInformationController extends Controller
             $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
             $working_model->setParamEmploymentStatusAttribute($employmentstatus);
             $working_model->setParamDepartmentcodeAttribute($departmentcode);
+            $working_model->setParamUsercodeAttribute($usercode);
             if ($working_model->isExistsWorkingTimeDate()) {
                 $working_model->delWorkingTimeDate();
             }
