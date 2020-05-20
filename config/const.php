@@ -772,7 +772,7 @@ return [
 
     // SSJJOO00:三条 SD03TA00:清水勧業 CSD1000L:丸高水産
     'ACCOUNTID' => [
-        'account_id' => 'SSJJOO00'
+        'account_id' => 'S02DTA00'
     ],
 
     // メニュー項目数   未使用

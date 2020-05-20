@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
 use App\GeneralCodes;
 use App\MenuItemSelection;
+use App\FeatureItemSelection;
 
 class CommonServiceProvider extends ServiceProvider
 {
@@ -43,6 +44,13 @@ class CommonServiceProvider extends ServiceProvider
         $menu_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
         $menu_data = $menu_model->getMenuItem();
         View::share('menu_selections', $menu_data);
+
+        //feature_item_selections
+        $feature_model = new FeatureItemSelection();
+        $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+        $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+        $feature_data = $feature_model->getItem();
+        View::share('feature_item_selections', $feature_data);
 
         //const
         $general_model = new GeneralCodes();
