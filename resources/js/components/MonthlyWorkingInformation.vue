@@ -736,7 +736,7 @@ export default {
         this.iscsvbutton = true;
         // 入力項目クリア
         this.itemClear();
-        this.getItem("show");
+        this.getItem("show", this.valuefromdate);
       }
     },
     // 詳細表示ボタンがクリックされた場合の処理
@@ -762,14 +762,14 @@ export default {
               this.iscsvbutton = true;
               // 入力項目クリア
               this.itemClear();
-              this.getItem("update");
+              this.getItem("update", this.valuefromdate);
             }
           }
       });
     },
     // ------------------------ サーバー処理 ----------------------------
     // 月次集計取得処理
-    getItem(showorupdate) {
+    getItem(showorupdate, valuefrom) {
       // 処理中メッセージ表示
       this.$swal({
         title: "処　理　中...",
@@ -781,15 +781,16 @@ export default {
           this.$swal.showLoading();
           this.postRequest("/monthly/show",
             { showorupdate : showorupdate,
-              datefrom : moment(this.valuefromdate).format("YYYYMMDD"),
+              datefrom : moment(valuefrom).format("YYYYMMDD"),
               dateto : moment(this.valuetodate).format("YYYYMMDD"),
               employmentstatus : this.selectedEmploymentValue,
               departmentcode : this.selectedDepartmentValue,
-              usercode : this.selectedUserValue
+              usercode : this.selectedUserValue,
+              svdatefrom : moment(this.valuefromdate).format("YYYYMMDD")
             })
             .then(response  => {
               this.$swal.close();
-              this.getThen(response);
+              this.getThen(response, showorupdate);
             })
             .catch(reason => {
               this.$swal.close();
@@ -838,8 +839,27 @@ export default {
       );
     },
     // 取得正常処理
-    getThen(response) {
+    getThen(response, showorupdate) {
       this.resresults = response.data;
+      var dt_end = null;
+      var dateto = moment(this.valuetodate).format("YYYYMMDD");
+      if (showorupdate == "show") {
+        this.setData(this.resresults);
+      } else if (showorupdate == "update") {
+        if (this.resresults.dt_end == null) {
+          this.setData(this.resresults);
+        } else {
+          dt_end = moment(this.resresults.dt_end).format("YYYYMMDD");
+          if (dateto <= dt_end) {
+            this.setData(this.resresults);
+          } else {
+            this.getItem(showorupdate, moment(this.resresults.dt_end).add(1, 'd'));
+          }
+        }
+      }
+    },
+    // データ編集処理
+    setData(res) {
       if (this.resresults.calcresults != null) {
         this.calcresults = this.resresults.calcresults;
         if (Object.keys(this.calcresults).length > 0) {

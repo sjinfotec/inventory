@@ -554,7 +554,7 @@ class ApiCommonController extends Controller
      */
     public function getUserListCsv(Request $request){
 
-        Log::debug('getUserListCsv = ');
+        // Log::debug('getUserListCsv = ');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -1583,35 +1583,35 @@ class ApiCommonController extends Controller
                             // 所定時間が日またぎの場合
                             $w_working_timetable_from_record_datetime = $item->working_timetable_from_record_time;
                             $w_working_timetable_to_record_datetime = $item->working_timetable_to_record_time;
-                            Log::debug('getWorkingHours  $item->working_timetable_from_record_time = '.$item->working_timetable_from_record_time);
-                            Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
+                            // Log::debug('getWorkingHours  $item->working_timetable_from_record_time = '.$item->working_timetable_from_record_time);
+                            // Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
                             if ($item->working_timetable_from_record_time < $regular_start_recordtime) {
                                 $w_working_timetable_from_record_datetime = 
                                     date_format(new Carbon($regular_end_record_date.' '.$item->working_timetable_from_time),'Y-m-d H:i:s');
                             }
-                            Log::debug('getWorkingHours  $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
-                            Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
+                            // Log::debug('getWorkingHours  $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
+                            // Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
                             if ($item->working_timetable_to_record_time < $regular_start_recordtime) {
                                 $w_working_timetable_to_record_datetime = 
                                     date_format(new Carbon($regular_end_record_date.' '.$item->working_timetable_to_time),'Y-m-d H:i:s');
                             }
-                            Log::debug('getWorkingHours  $w_working_timetable_from_record_datetime = '.$w_working_timetable_from_record_datetime);
-                            Log::debug('getWorkingHours  $w_working_timetable_to_record_datetime = '.$w_working_timetable_to_record_datetime);
+                            // Log::debug('getWorkingHours  $w_working_timetable_from_record_datetime = '.$w_working_timetable_from_record_datetime);
+                            // Log::debug('getWorkingHours  $w_working_timetable_to_record_datetime = '.$w_working_timetable_to_record_datetime);
                             if (($w_working_timetable_from_record_datetime >= $regular_start_recordtime &&
                                 $w_working_timetable_from_record_datetime <= $regular_end_recordtime) &&
                                 ($w_working_timetable_to_record_datetime >= $regular_start_recordtime &&
                                 $w_working_timetable_to_record_datetime <= $regular_end_recordtime)) {
                                 $working_timetable_from_record_datetime = $w_working_timetable_from_record_datetime;
                                 $working_timetable_to_record_datetime = $w_working_timetable_to_record_datetime;
-                                Log::debug('getWorkingHours  $working_timetable_from_record_datetime = '.$working_timetable_from_record_datetime);
-                                Log::debug('getWorkingHours  $working_timetable_to_record_datetime = '.$working_timetable_to_record_datetime);
+                                // Log::debug('getWorkingHours  $working_timetable_from_record_datetime = '.$working_timetable_from_record_datetime);
+                                // Log::debug('getWorkingHours  $working_timetable_to_record_datetime = '.$working_timetable_to_record_datetime);
                             }
                         }
                         if ($working_timetable_from_record_datetime != null && $working_timetable_to_record_datetime != null) {
                             if ($working_timetable_from_record_datetime >= $regular_2after_recordtime) {
                                 $calc_times = $this->diffTimeSerial($working_timetable_from_record_datetime, $working_timetable_to_record_datetime);
                                 // from-toで30分以上か？
-                                Log::debug('getWorkingHours  $calc_times = '.$calc_times);
+                                // Log::debug('getWorkingHours  $calc_times = '.$calc_times);
                                 if ($calc_times >= 1800) {
                                     $lunch_start_time = $item->working_timetable_from_time;
                                     $lunch_start_recordtime = $working_timetable_from_record_datetime;
@@ -2099,10 +2099,10 @@ class ApiCommonController extends Controller
         if (isset($setting_from_datetime) && isset($setting_to_datetime)) {
             // タイムテーブル設定時刻のチェックを行う場合
             // タイムテーブル時間範囲内に休憩開始終了時刻がある場合に計算する
-            Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-            Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
-            Log::debug('calcBetweenBreakTime $setting_from_datetime = '.$setting_from_datetime);
-            Log::debug('calcBetweenBreakTime $setting_to_datetime = '.$setting_to_datetime);
+            // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+            // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+            // Log::debug('calcBetweenBreakTime $setting_from_datetime = '.$setting_from_datetime);
+            // Log::debug('calcBetweenBreakTime $setting_to_datetime = '.$setting_to_datetime);
             if (($time_calc_from <= $setting_from_datetime || $time_calc_from >= $setting_to_datetime) &&
                 ($time_calc_to <= $setting_from_datetime || $time_calc_to >= $setting_to_datetime)) {
                 $chk_time = false;
@@ -2110,10 +2110,10 @@ class ApiCommonController extends Controller
         }
         if ($chk_time) {
             //  指定時間範囲内に休憩開始終了時刻がある場合に計算する
-            Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-            Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
-            Log::debug('calcBetweenBreakTime $target_from_datetime = '.$target_from_datetime);
-            Log::debug('calcBetweenBreakTime $target_to_datetime = '.$target_to_datetime);
+            // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+            // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+            // Log::debug('calcBetweenBreakTime $target_from_datetime = '.$target_from_datetime);
+            // Log::debug('calcBetweenBreakTime $target_to_datetime = '.$target_to_datetime);
             if (($time_calc_from >= $target_from_datetime && $time_calc_from <= $target_to_datetime) ||
                 ($time_calc_to >= $target_from_datetime && $time_calc_to <= $target_to_datetime)) {
                 if ($target_from_datetime > $time_calc_from) {
@@ -2122,8 +2122,8 @@ class ApiCommonController extends Controller
                 if ($target_to_datetime < $time_calc_to) {
                     $time_calc_to = $target_to_datetime;
                 }
-                Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-                Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+                // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+                // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
                 if ($time_calc_from < $time_calc_to) {
                     $calc_times += $this->diffTimeSerial($time_calc_from, $time_calc_to);
                 }
@@ -2927,7 +2927,7 @@ class ApiCommonController extends Controller
             $w_time_decimal_part_3 = $w_time_decimal_part * 100;
             $w_time_decimal_part_31 = $w_time_decimal_part_3 - floor($w_time_decimal_part_3);
             if ($w_time_decimal_part_31 > 0) {
-                $convert_time += round($w_time_decimal_part, 2);
+                $convert_time += (ceil($w_time_decimal_part_3) / 100);
             } else {
                 $convert_time += $w_time_decimal_part;
             }
