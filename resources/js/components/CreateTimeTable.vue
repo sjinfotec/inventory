@@ -114,27 +114,30 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div
+              v-for="(item, index) in get_ATTENDANCE_COUNT" v-bind:key="index"
+              class="row justify-content-between"
+            >
               <!-- 所定労働開始時間 -->
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <input-time
-                  v-bind:item-title="'所定労働開始時間'"
+                  v-bind:item-title="'所定労働開始時間 '+(index+1)"
                   v-bind:item-required="true"
                   v-bind:place-holder="'※開始時刻を半角で入力します'"
-                  v-bind:value-data="form.regularFrom"
-                  v-on:change-event="timeChanges($event, '1')"
+                  v-bind:value-data="regularTime[index]['regularFrom']"
+                  v-on:change-event="timeChanges($event, '1', index)"
                 ></input-time>
               </div>
               <!-- /.col -->
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <input-time
-                  v-bind:item-title="'所定労働終了時間'"
+                  v-bind:item-title="'所定労働終了時間 '+(index+1)"
                   v-bind:item-required="true"
                   v-bind:place-holder="'※終了時刻を半角で入力します'"
-                  v-bind:value-data="form.regularTo"
-                  v-on:change-event="timeChanges($event, '2')"
+                  v-bind:value-data="form.regular[index]['regularTo']"
+                  v-on:change-event="regularTime($event, '2', index)"
                 ></input-time>
               </div>
               <!-- /.col -->
@@ -161,7 +164,7 @@
                   v-bind:item-required="false"
                   v-bind:place-holder="'※開始時刻を半角で入力します'"
                   v-bind:value-data="form.regularRestFrom1"
-                  v-on:change-event="timeChanges($event, '3')"
+                  v-on:change-event="timeChanges($event, '3', 0)"
                 ></input-time>
               </div>
               <!-- /.col -->
@@ -172,7 +175,7 @@
                   v-bind:item-required="false"
                   v-bind:place-holder="'※終了時刻を半角で入力します'"
                   v-bind:value-data="form.regularRestTo1"
-                  v-on:change-event="timeChanges($event, '4')"
+                  v-on:change-event="timeChanges($event, '4', 0)"
                 ></input-time>
               </div>
               <!-- /.col -->
@@ -184,7 +187,7 @@
                   v-bind:item-required="false"
                   v-bind:place-holder="'※開始時刻を半角で入力します'"
                   v-bind:value-data="form.regularRestFrom2"
-                  v-on:change-event="timeChanges($event, '5')"
+                  v-on:change-event="timeChanges($event, '5', 0)"
                 ></input-time>
               </div>
               <!-- /.col -->
@@ -195,7 +198,7 @@
                   v-bind:item-required="false"
                   v-bind:place-holder="'※終了時刻を半角で入力します'"
                   v-bind:value-data="form.regularRestTo2"
-                  v-on:change-event="timeChanges($event, '6')"
+                  v-on:change-event="timeChanges($event, '6', 0)"
                 ></input-time>
               </div>
               <!-- /.col -->
@@ -207,7 +210,7 @@
                   v-bind:item-required="false"
                   v-bind:place-holder="'※開始時刻を半角で入力します'"
                   v-bind:value-data="form.regularRestFrom3"
-                  v-on:change-event="timeChanges($event, '7')"
+                  v-on:change-event="timeChanges($event, '7', 0)"
                 ></input-time>
               </div>
               <!-- /.col -->
@@ -218,7 +221,7 @@
                   v-bind:item-required="false"
                   v-bind:place-holder="'※終了時刻を半角で入力します'"
                   v-bind:value-data="form.regularRestTo3"
-                  v-on:change-event="timeChanges($event, '8')"
+                  v-on:change-event="timeChanges($event, '8', 0)"
                 ></input-time>
               </div>
               <!-- /.col -->
@@ -230,7 +233,7 @@
                   v-bind:item-required="false"
                   v-bind:place-holder="'※開始時刻を半角で入力します'"
                   v-bind:value-data="form.regularRestFrom4"
-                  v-on:change-event="timeChanges($event, '9')"
+                  v-on:change-event="timeChanges($event, '9', 0)"
                 ></input-time>
               </div>
               <!-- /.col -->
@@ -241,7 +244,7 @@
                   v-bind:item-required="false"
                   v-bind:place-holder="'※終了時刻を半角で入力します'"
                   v-bind:value-data="form.regularRestTo4"
-                  v-on:change-event="timeChanges($event, '10')"
+                  v-on:change-event="timeChanges($event, '10', 0)"
                 ></input-time>
               </div>
               <!-- /.col -->
@@ -253,7 +256,7 @@
                   v-bind:item-required="false"
                   v-bind:place-holder="'※開始時刻を半角で入力します'"
                   v-bind:value-data="form.regularRestFrom5"
-                  v-on:change-event="timeChanges($event, '11')"
+                  v-on:change-event="timeChanges($event, '11', 0)"
                 ></input-time>
               </div>
               <!-- /.col -->
@@ -264,7 +267,7 @@
                   v-bind:item-required="false"
                   v-bind:place-holder="'※終了時刻を半角で入力します'"
                   v-bind:value-data="form.regularRestTo5"
-                  v-on:change-event="timeChanges($event, '12')"
+                  v-on:change-event="timeChanges($event, '12', 0)"
                 ></input-time>
               </div>
               <!-- /.col -->
@@ -291,7 +294,7 @@
                   v-bind:item-required="true"
                   v-bind:place-holder="'※開始時刻を半角で入力します'"
                   v-bind:value-data="form.irregularMidNightFrom"
-                  v-on:change-event="timeChanges($event, '13')"
+                  v-on:change-event="timeChanges($event, '13', 0)"
                 ></input-time>
               </div>
               <!-- /.col -->
@@ -302,7 +305,7 @@
                   v-bind:item-required="true"
                   v-bind:place-holder="'※終了時刻を半角で入力します'"
                   v-bind:value-data="form.irregularMidNightTo"
-                  v-on:change-event="timeChanges($event, '14')"
+                  v-on:change-event="timeChanges($event, '14', 0)"
                 ></input-time>
               </div>
               <!-- /.col -->
@@ -962,9 +965,18 @@ import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
+// CONST
+const CONST_ATTENDANCE_COUNT_CODE = '1';
+
 export default {
   name: "CreateTimeTable",
   mixins: [ dialogable, checkable, requestable ],
+  props: {
+    feature_item_selections: {
+        type: Array,
+        default: []
+    }
+  },
   data() {
     return {
       showlist: true,
@@ -981,8 +993,7 @@ export default {
         apply_term_from: "",
         id: "",
         no: "",
-        regularFrom: "",
-        regularTo: "",
+        regular: [],
         regularRestFrom1: "",
         regularRestTo1: "",
         regularRestFrom2: "",
@@ -996,9 +1007,32 @@ export default {
         irregularMidNightFrom: "",
         irregularMidNightTo: ""
       },
+      regularTime: [],
       count: 0,
       before_count: 0
     };
+  },
+  computed: {
+    get_ATTENDANCE_COUNT: function() {
+      var attendance_count = 0;
+      var array_set = [{}];
+      let $this = this;
+      this.feature_item_selections.forEach( function( item ) {
+        if (item.item_code == CONST_ATTENDANCE_COUNT_CODE) {
+          attendance_count = Number(item.value_select);
+          for(var i=0;i<attendance_count;i++) {
+              array_set = {
+                regularFrom: "",
+                regularTo: ""
+              };
+              $this.regularTime.push(array_set);
+          }
+          return $this.regularTime;
+        }
+      });
+
+      return this.regularTime;
+    }
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -1321,11 +1355,11 @@ export default {
 
     }, */
     // 時刻が変更された場合の処理
-    timeChanges: function(value, type) {
+    timeChanges: function(value, type, index) {
       if (type == '1') {
-        this.form.regularFrom = value;
+        this.regularTime[index]['regularFrom'] = value;
       } else if (type == '2') {
-        this.form.regularTo = value;
+        this.regularTime[index]['regularTo'] = value;
       } else if (type == '3') {
         this.form.regularRestFrom1 = value;
       } else if (type == '4') {
