@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Config;
 class FeatureItemSelection extends Model
 {
     protected $table = 'feature_item_selections';
-    protected $table_users = 'users';
     protected $guarded = array('id');
 
     private $id;                        // ID
@@ -196,8 +195,10 @@ class FeatureItemSelection extends Model
         $this->is_deleted = $value;
     }
 
+    // -----------------------------------------
     private $param_account_id;          // アカウントID
     private $param_selection_code;      // 選択種類
+    private $param_item_code;           // 項目コード
 
 
     // アカウントID
@@ -220,6 +221,17 @@ class FeatureItemSelection extends Model
     public function setParamselectioncodeAttribute($value)
     {
         $this->param_selection_code = $value;
+    }
+
+    // 項目コード
+    public function getParamitemcodeAttribute()
+    {
+        return $this->param_item_code;
+    }
+
+    public function setParamitemcodeAttribute($value)
+    {
+        $this->param_item_code = $value;
     }
     
     /**
@@ -245,6 +257,9 @@ class FeatureItemSelection extends Model
             }
             if ($this->param_selection_code != null && $this->param_selection_code != "") {
                 $query->where('selection_code', $this->param_selection_code);
+            }
+            if ($this->param_item_code != null && $this->param_item_code != "") {
+                $query->where('item_code', $this->param_item_code);
             }
             $data  = $query->where('is_deleted',0)
                     ->orderBy('account_id', 'asc')
