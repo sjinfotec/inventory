@@ -28,7 +28,7 @@
       </div>
       <!-- 勤怠履歴登録 -->
       <div class="p-4" v-if="menudatas[get_c038[7]['sort_seq'] - 1]['is_select']">
-        <a class href="/edit_attendancelog">
+        <a class href="/store_attendancelog">
           <img width="100" height="100" class src="/images/icon19.svg" alt />
         </a>
       </div>
