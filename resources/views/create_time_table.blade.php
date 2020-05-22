@@ -39,7 +39,7 @@
 	@endif
 	@can('admin-higher')
 		<create-time-table
-			v-bind:feature_item="{{ $feature_item_selections }}"
+			v-bind:feature_item_selections="{{ $feature_item_selections }}"
 		>
 		</create-time-table>
 	@endcan

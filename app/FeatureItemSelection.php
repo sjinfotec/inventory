@@ -20,7 +20,8 @@ class FeatureItemSelection extends Model
     private $item_seq;                  // 出力順
     private $item_name;                 // 項目名
     private $item_kanji_name;           // 項目漢字名
-    private $value_select;              // 選択値
+    private $item_out_name;             // 出力項目名
+    private $value_select;              // 項目選択値
     private $created_user;              // 作成ユーザー
     private $updated_user;              // 修正ユーザー
     private $created_at;                // 作成日時
@@ -111,7 +112,19 @@ class FeatureItemSelection extends Model
     }
 
 
-    // 選択有無
+    // 出力項目名
+    public function getItemoutnameAttribute()
+    {
+        return $this->item_out_name;
+    }
+
+    public function setItemoutnameAttribute($value)
+    {
+        $this->item_out_name = $value;
+    }
+
+
+    // 項目選択値
     public function getValueselectAttribute()
     {
         return $this->value_select;
@@ -182,9 +195,10 @@ class FeatureItemSelection extends Model
         $this->is_deleted = $value;
     }
 
-
+    // -----------------------------------------
     private $param_account_id;          // アカウントID
     private $param_selection_code;      // 選択種類
+    private $param_item_code;           // 項目コード
 
 
     // アカウントID
@@ -207,6 +221,17 @@ class FeatureItemSelection extends Model
     public function setParamselectioncodeAttribute($value)
     {
         $this->param_selection_code = $value;
+    }
+
+    // 項目コード
+    public function getParamitemcodeAttribute()
+    {
+        return $this->param_item_code;
+    }
+
+    public function setParamitemcodeAttribute($value)
+    {
+        $this->param_item_code = $value;
     }
     
     /**
@@ -233,6 +258,9 @@ class FeatureItemSelection extends Model
             if ($this->param_selection_code != null && $this->param_selection_code != "") {
                 $query->where('selection_code', $this->param_selection_code);
             }
+            if ($this->param_item_code != null && $this->param_item_code != "") {
+                $query->where('item_code', $this->param_item_code);
+            }
             $data  = $query->where('is_deleted',0)
                     ->orderBy('account_id', 'asc')
                     ->orderBy('selection_code', 'asc')
@@ -249,6 +277,6 @@ class FeatureItemSelection extends Model
             Log::error($e->getMessage());
             throw $e;
         }
-
     }
+
 }

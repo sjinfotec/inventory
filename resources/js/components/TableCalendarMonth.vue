@@ -24,8 +24,8 @@
                   <td class="text-left align-middle mw-rem-10">{{ item1['department_name'] }}</td>
                   <td class="text-left align-middle mw-rem-10">{{ item1['employment_name'] }}</td>
                   <td class="text-left align-middle mw-rem-15">{{ item1['user_name'] }}</td>
-                  <td class="text-center align-middle mw-rem-2-6" style="text-align:center" v-if="isEdtbutton"
-                    <input type="button" value="編集" v-on:click="detailEdtClick(rowIndex1)">
+                  <td class="text-center align-middle mw-rem-2-6" style="text-align:center" v-if="isEdtbutton">
+                    <input type="image" src="images/btn01.svg" v-on:click="detailEdtClick(rowIndex1)" alt />
                   </td>
                   <td v-for="(item2,rowIndex2) in item1['array_user_date_data']" v-bind:key="item2['date']"
                     class="text-center align-middle mw-rem-5">
@@ -94,4 +94,7 @@ tbody {
   min-width: 2.6rem;
 }
 
+input {
+    vertical-align : middle;
+}
 </style>

@@ -33,6 +33,7 @@ class StoreAttendanceLogController extends Controller
      * @return response
      */
     public function store(Request $request){
+        Log::debug('  store in');
         $this->array_messagedata = array();
         $details = array();
         $result = true;
@@ -70,11 +71,13 @@ class StoreAttendanceLogController extends Controller
             $eventlogs = $params['eventlogs'];
             $department_code = null;
             $employment_status = null;
+            Log::debug('  user_code >= '.$user_code);
             // eventlogsの検索パラメータ設定
             // 部署雇用形態はusersから
             $apicommon_model = new ApiCommonController();
             $result = $apicommon_model->getUserDepartmentEmploymentRole($login_user_code, null);
             foreach($result as $item) {
+                Log::debug('  department_code >= '.$item->department_code);
                 $department_code = $item->department_code;
                 $employment_status = $item->employment_status;
                 break;

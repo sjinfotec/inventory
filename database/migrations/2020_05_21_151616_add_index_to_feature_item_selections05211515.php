@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddIndexToFeatureItemSelections05201604 extends Migration
+class AddIndexToFeatureItemSelections05211515 extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class AddIndexToFeatureItemSelections05201604 extends Migration
     public function up()
     {
         Schema::table('feature_item_selections', function (Blueprint $table) {
-            $table->index(['account_id', 'selection_code', 'item_code', 'item_seq'],'account_selection_item_seq_index');
+            $table->index(['account_id', 'selection_code', 'item_code', 'item_seq'],'account_selection_code_seq_index');
         });
     }
 
@@ -26,7 +26,7 @@ class AddIndexToFeatureItemSelections05201604 extends Migration
     public function down()
     {
         Schema::table('feature_item_selections', function (Blueprint $table) {
-            $table->dropIndex('account_selection_item_seq_index');
+            $table->dropIndex('account_selection_code_seq_index');
         });
     }
 }

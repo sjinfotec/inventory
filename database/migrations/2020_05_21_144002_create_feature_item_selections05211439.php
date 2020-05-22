@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateFeatureItemSelections05201546 extends Migration
+class CreateFeatureItemSelections05211439 extends Migration
 {
     /**
      * Run the migrations.
@@ -16,13 +16,13 @@ class CreateFeatureItemSelections05201546 extends Migration
         Schema::create('feature_item_selections', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->char('account_id',8)->comment('アカウントID');
-            $table->unsignedDecimal('selection_code',1,0)->comment('選択種類');
+            $table->unsignedDecimal('selection_code',2,0)->comment('選択種類');
             $table->unsignedDecimal('item_code',2,0)->comment('項目コード 1から連番（内部コード）');
             $table->unsignedDecimal('item_seq',2,0)->comment('出力順');
             $table->String('item_name')->nullable()->comment('項目名');
             $table->String('item_kanji_name')->nullable()->comment('項目漢字名');
             $table->String('item_out_name')->nullable()->comment('出力項目名');
-            $table->String('value_select')->default(1)->comment('選択値');
+            $table->boolean('value_select')->default(1)->comment('項目選択値');
             $table->String('created_user')->nullable()->comment('作成ユーザー');
             $table->String('updated_user')->nullable()->comment('修正ユーザー');
             $table->timestamps();

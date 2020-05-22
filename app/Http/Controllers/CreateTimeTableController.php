@@ -7,11 +7,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreTimeTablePost;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
 use App\WorkingTimeTable;
-use Illuminate\Support\Facades\Validator;
+use App\FeatureItemSelection;
 
 class CreateTimeTableController extends Controller
 {
@@ -139,29 +140,39 @@ class CreateTimeTableController extends Controller
                     );
                 }
             }
+            //feature selection
+            $feature_model = new FeatureItemSelection();
+            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+            $feature_model->setParamitemcodeAttribute(Config::get('const.C042.attendance_count'));
+            $feature_data = $feature_model->getItem();
+            $regularTime_count = 0;
+            foreach($feature_data as $item) {
+                if (isset($item->value_select)) {
+                    $regularTime_count = intval($item->value_select);
+                }
+            }
             $details = $params['details'];
             $data[0]['apply_term_from'] = $details['apply_term_from'];
-            $data[0]['working_time_kubun'] = 1;
-            $data[0]['from_time'] = $details['regularFrom'];
-            $data[0]['to_time'] = $details['regularTo'];
-            $data[1]['working_time_kubun'] = 2;
-            $data[1]['from_time'] = $details['regularRestFrom1'];
-            $data[1]['to_time'] = $details['regularRestTo1'];
-            $data[2]['working_time_kubun'] = 2;
-            $data[2]['from_time'] = $details['regularRestFrom2'];
-            $data[2]['to_time'] = $details['regularRestTo2'];
-            $data[3]['working_time_kubun'] = 2;
-            $data[3]['from_time'] = $details['regularRestFrom3'];
-            $data[3]['to_time'] = $details['regularRestTo3'];
-            $data[4]['working_time_kubun'] = 2;
-            $data[4]['from_time'] = $details['regularRestFrom4'];
-            $data[4]['to_time'] = $details['regularRestTo4'];
-            $data[5]['working_time_kubun'] = 2;
-            $data[5]['from_time'] = $details['regularRestFrom5'];
-            $data[5]['to_time'] = $details['regularRestTo5'];
-            $data[6]['working_time_kubun'] = 4;
-            $data[6]['from_time'] = $details['irregularMidNightFrom'];
-            $data[6]['to_time'] = $details['irregularMidNightTo'];
+            $data_index = 0;
+            for ($i=0;$i<$regularTime_count;$i++) {
+                $data[$data_index]['working_time_kubun'] = 1;
+                $data[$data_index]['from_time'] = $details['regularTime'][$i]['fromTime'];
+                $data[$data_index]['to_time'] = $details['regularTime'][$i]['toTime'];
+                $data_index++;
+            }
+            for ($i=0;$i<5;$i++) {
+                $data[$data_index]['working_time_kubun'] = 2;
+                $data[$data_index]['from_time'] = $details['regularRestTime'][$i]['fromTime'];
+                $data[$data_index]['to_time'] = $details['regularRestTime'][$i]['toTime'];
+                $data_index++;
+            }
+            for ($i=0;$i<1;$i++) {
+                $data[$data_index]['working_time_kubun'] = 4;
+                $data[$data_index]['from_time'] = $details['midnightTime'][$i]['fromTime'];
+                $data[$data_index]['to_time'] = $details['midnightTime'][$i]['toTime'];
+                $data_index++;
+            }
             $resultno = $this->insert($data ,$no, $name);
             return response()->json(
                 ['result' => true, 'no' => $resultno,

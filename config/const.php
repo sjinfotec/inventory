@@ -415,6 +415,11 @@ return [
         'timetable_week' => 2
     ],
  
+    'C042' => [
+        'value' => 'C042',
+        'attendance_count' => 1
+    ],
+ 
     'C999' => [
         'value' => 'C999',
         'main' => 1,

@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class ChangeFeatureItemSelections05201607 extends Migration
+class ChangeMenuItemSelections05211434 extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class ChangeFeatureItemSelections05201607 extends Migration
      */
     public function up()
     {
-        Schema::table('feature_item_selections', function (Blueprint $table) {
+        Schema::table('menu_item_selections', function (Blueprint $table) {
             $table->unsignedDecimal('selection_code',2,0)->change();
         });
     }

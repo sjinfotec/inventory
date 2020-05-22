@@ -45,13 +45,12 @@ class CommonServiceProvider extends ServiceProvider
         $menu_data = $menu_model->getMenuItem();
         View::share('menu_selections', $menu_data);
 
-        //feature_item_selections
+        //feature selection
         $feature_model = new FeatureItemSelection();
         $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
         $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
         $feature_data = $feature_model->getItem();
         View::share('feature_item_selections', $feature_data);
-
         //const
         $general_model = new GeneralCodes();
         $general_datas = $general_model->getGeneralcode();
