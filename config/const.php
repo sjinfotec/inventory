@@ -415,11 +415,6 @@ return [
         'timetable_week' => 2
     ],
  
-    'C042' => [
-        'value' => 'C042',
-        'attendance_count' => 1
-    ],
- 
     'C999' => [
         'value' => 'C999',
         'main' => 1,
@@ -753,7 +748,7 @@ return [
 
     // 未使用
     'DISTRIBUTION' => [
-        'DISTRIBUTION' => 1
+        'DISTRIBUTION' => 3
     ],
 
     // 未使用
@@ -764,7 +759,7 @@ return [
     ],
 
     'EDITION' => [
-        'EDITION' => 3
+        'EDITION' => 5
     ],
 
     'EDITION_VALUE' => [
@@ -775,9 +770,8 @@ return [
         'CLIENT' => 5
     ],
 
-    // SSJJOO00:三条 SD03TA00:清水勧業 CSD1000L:丸高水産
     'ACCOUNTID' => [
-        'account_id' => 'S02DTA00'
+        'account_id' => 'CSD1000L'
     ],
 
     // メニュー項目数   未使用
