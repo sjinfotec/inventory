@@ -823,7 +823,7 @@ export default {
           .catch(reason => {
           var messages = [];
           messages.push("部署選択リスト作成エラー");
-          this.messageswal("エラー", messages, "error", true, false, true);
+          this.htmlMessageSwal("エラー", messages, "error", true, false);
         });
     },
     getEmploymentStatusList() {

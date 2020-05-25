@@ -47,6 +47,10 @@ export default {
     rowIndex: {
         type: Number,
         default: 0
+    },
+    setShift: {
+        type: Boolean,
+        default: false
     }
   },
   data() {
@@ -71,8 +75,6 @@ export default {
     },
     // -------------------- サーバー処理 ----------------------------
     getList(targetdate){
-      console.log('getList in targetdate = ' + targetdate);
-      console.log('getList in this.killValue = ' + this.killValue);
       if (targetdate == '') {
           targetdate = moment(new Date()).format("YYYYMMDD");
       }
@@ -98,14 +100,21 @@ export default {
               this.itemList.unshift(this.object);
             }
           } else {
-            this.placeholderData = "はじめに「所定就業時間の登録」を選択してください"
-            this.object = { apply_term_from: "", name: "所定就業時間の登録", no: "" };
-            this.itemList.unshift(this.object);
+            if (this.setShift) {
+              this.placeholderData = "はじめに「所定就業時間の登録」を選択してください"
+              this.object = { apply_term_from: "", name: "所定就業時間の登録", no: "" };
+              this.itemList.unshift(this.object);
+            } else {
+              var messages = [];
+              messages.push("タイムテーブルが設定されていません。");
+              messages.push("勤務帯時間設定でタイムテーブルを設定してください。");
+              this.htmlMessageSwal("確認", messages, "info", true, false);
+            }
           }
           // 固有処理 end
       } else {
           if (res.messagedata.length > 0) {
-              this.messageswal("エラー", res.messagedata, "error", true, false, true);
+              this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
           } else {
               this.serverCatch("タイムテーブル");
           }
@@ -115,7 +124,7 @@ export default {
     serverCatch(kbn) {
       var messages = [];
       messages.push(kbn + "選択リスト作成に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     // 選択テキスト取得
     getText : function(value) {

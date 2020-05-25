@@ -39,7 +39,17 @@
 		<!-- /main contentns row -->
 		@endif
 		@can('admin-higher')
-			<edit-user></edit-user>
+			<edit-user
+				v-bind:authusers="{{ $authusers }}"
+				v-bind:const_generaldatas="{{ $const_general_datas }}"
+			>
+			</edit-user>
+		@else
+		<edit-user
+				v-bind:authusers="{{ $authusers }}"
+				v-bind:const_generaldatas="{{ $const_general_datas }}"
+			>
+			</edit-user>
 		@endcan
 		<!-- /main contentns row -->
 @endsection

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -23,6 +24,11 @@ class DailyWorkingInformationController extends Controller
     // 打刻データ配列
     private $array_working_mode = array();
     private $array_working_datetime = array();
+    private $array_working_datetime_id = array();
+    private $array_working_editor_department_code = array();
+    private $array_working_editor_department_name = array();
+    private $array_working_editor_user_code = array();
+    private $array_working_editor_user_name = array();
     private $array_timetable_from_time  = array();
     private $array_timetable_to_time = array();
     private $array_check_result = array();
@@ -36,9 +42,15 @@ class DailyWorkingInformationController extends Controller
     private $array_calc_time = array();
     private $array_calc_status = array();
     private $array_calc_note = array();
+    private $calc_late_night_working_hours = 0;     // 深夜労働時間arrayにしないで処理する
+    // 表示用配列
+    private $array_dsp_time_id = array();
+    private $array_dsp_editor_department_code = array();
+    private $array_dsp_editor_department_name = array();
+    private $array_dsp_editor_user_code = array();
+    private $array_dsp_editor_user_name = array();
     // mobile位置情報
     private $array_calc_mobile_positions = array();
-
     private $array_calc_late = array();
     private $array_calc_leave_early = array();
     private $array_calc_calc = array();
@@ -62,7 +74,11 @@ class DailyWorkingInformationController extends Controller
      */
     public function index()
     {
-        return view('daily_working_information');
+        $authusers = Auth::user();
+        return view('daily_working_information',
+            compact(
+                'authusers'
+            ));
     }
 
     /**
@@ -72,76 +88,217 @@ class DailyWorkingInformationController extends Controller
      */
     public function show(Request $request){
 
-        Log::debug('------------- 日次集計開始 show in----------------');
-        Log::debug('    パラメータ  $request->datefrom= '.$request->datefrom);
-        Log::debug('    パラメータ  $request->dateto = '.$request->dateto);
-        Log::debug('    パラメータ  $request->employmentstatus = '.$request->employmentstatus);
-        Log::debug('    パラメータ  $request->departmentcode = '.$request->departmentcode);
-        Log::debug('    パラメータ  userc$request->usercodeode = '.$request->usercode);
-        $calc_result = true;
-        $add_result = true;
-        // reqestクエリーセット
-        $datefrom = null;
-        if(isset($request->datefrom)){
-            $datefrom = $request->datefrom;
-        }
-        $dateto = null;
-        if(isset($request->dateto)){
-            $dateto = $request->dateto;
-        }
-        $employmentstatus = null;
-        if(isset($request->employmentstatus)){
-            $employmentstatus = $request->employmentstatus;
-        }
-        $departmentcode = null;
-        if(isset($request->departmentcode)){
-            $departmentcode =$request->departmentcode;
-        }
-        $usercode = null;
-        if(isset($request->usercode)){
-            $usercode = $request->usercode;
-        }
-
+        $this->array_messagedata = array();
+        $array_working_time_dates = array();
+        $working_time_sum = new collection();
         $apicommon = new ApiCommonController();
-        $work_time = new WorkTime();
+        try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['calcresults' => $array_working_time_dates,
+                    'sumresults' => $working_time_sum,
+                    'datename' => "",
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            if (!isset($params['datefrom'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "datefrom", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['calcresults' => $array_working_time_dates,
+                    'sumresults' => $working_time_sum,
+                    'datename' => "",
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            // 開始日付のフォーマット 2019年10月01日(火)
+            $datefrom = $params['datefrom'];
+            $date_name = $apicommon->getYMDWeek($datefrom);
+            if (!isset($params['dateto'])) {
+                return response()->json(
+                    ['calcresults' => $array_working_time_dates,
+                    'sumresults' => $working_time_sum,
+                    'datename' => $date_name,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            // パラメータセット
+            $employmentstatus = null;
+            $departmentcode = null;
+            $usercode = null;
+            $dateto = $params['dateto'];
+            if (isset($params['employmentstatus'])) {
+                $employmentstatus = $params['employmentstatus'];
+            }
+            if (isset($params['departmentcode'])) {
+                $departmentcode = $params['departmentcode'];
+            }
+            if (isset($params['usercode'])) {
+                $usercode = $params['usercode'];
+            }
+            // 日次集計計算 showCalc implement
+            $array_impl_showCalc = array (
+                'datefrom' => $datefrom,
+                'dateto' => $dateto,
+                'employmentstatus' => $employmentstatus,
+                'departmentcode' => $departmentcode,
+                'usercode' => $usercode
+            );
+            // 日次集計計算
+            $array_result_showCalc = $this->showCalc($array_impl_showCalc);
+            if (count($this->array_messagedata) > 0) {
+                return response()->json(
+                    ['calcresults' => $array_working_time_dates,
+                    'sumresults' => $working_time_sum,
+                    'datename' => $date_name,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $array_working_time_dates = $array_result_showCalc['array_working_time_dates'];
+            $working_time_sum = $array_result_showCalc['working_time_sum'];
+
+            return response()->json(
+                ['calcresults' => $array_working_time_dates,
+                    'sumresults' => $working_time_sum,
+                    'datename' => $date_name,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 日次集計計算 
+     *
+     * @return void
+     */
+    public function showCalc($params){
 
         $business_kubun = "";
+        $datefrom = $params['datefrom'];
+        $dateto = $params['dateto'];
+        $employmentstatus = $params['employmentstatus'];
+        $departmentcode = $params['departmentcode'];
+        $usercode = $params['usercode'];
+        $array_result_calcMain = array();
+        try {
+            $apicommon = new ApiCommonController();
+            $work_time = new WorkTime();
+            // パラメータのチェック
+            $array_chk_work_time = $this->chkWorkingTimeData($params);
+            $chk_work_time = $array_chk_work_time['result'];
+            if ($chk_work_time) {
+                $work_time = $array_chk_work_time['work_time'];
+                // 休日判定
+                // jdgBusinessKbn implement
+                $array_impl_jdgBusinessKbn = array (
+                    'departmentcode' => $departmentcode,
+                    'employmentstatus' => $employmentstatus,
+                    'usercode' => $usercode,
+                    'datefrom' => $datefrom
+                );
+                $business_kubun = $apicommon->jdgBusinessKbn($array_impl_jdgBusinessKbn);
+                if (!isset($business_kubun)) {
+                    $dt = date_format(new Carbon($datefrom), 'Y年m月d日');
+                    $this->array_messagedata[] = 
+                        array( Config::get('const.RESPONCE_ITEM.message') => str_replace('{0}', $dt, Config::get('const.MSG_ERROR.not_setting_calendar')));
+                    Log::error(str_replace('{0}', $datefrom, Config::get('const.MSG_ERROR.not_setting_calendar')));
+                    $chk_work_time = false;
+                }
+            }
+            if ($chk_work_time) {
+                // calcMain implement
+                $array_impl_calcMain = array (
+                    'work_time' => $work_time,
+                    'datefrom' => $datefrom,
+                    'dateto' => $dateto,
+                    'employmentstatus' => $employmentstatus,
+                    'departmentcode' => $departmentcode,
+                    'usercode' => $usercode,
+                    'business_kubun' => $business_kubun
+                );
+                $array_result_calcMain = $this->calcMain($array_impl_calcMain);
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $array_result_calcMain;
+    }
+
+    /**
+     * パラメータのチェック 
+     *
+     * @return void
+     */
+    public function chkWorkingTimeData($param){
+
+        try {
+            // 打刻時刻を取得
+            $work_time = new WorkTime();
+            $work_time->setParamDatefromAttribute($param['datefrom']);
+            $work_time->setParamDatetoAttribute($param['dateto']);
+            $work_time->setParamemploymentstatusAttribute($param['employmentstatus']);
+            $work_time->setParamDepartmentcodeAttribute($param['departmentcode']);
+            $work_time->setParamUsercodeAttribute($param['usercode']);
+            $result = $work_time->chkWorkingTimeData();
+            if (!$result) {
+                $this->array_messagedata[] =  array( Config::get('const.RESPONCE_ITEM.message') => $work_time->getMassegedataAttribute());
+            }
+            return array (
+                'result' => $result,
+                'work_time' => $work_time
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 日次集計計算 
+     *
+     * @return void
+     */
+    public function calcMain($params){
+
+        // Log::debug('------------- 日次集計計算開始 calcMain in----------------');
+        $work_time = $params['work_time'];
+        $datefrom = $params['datefrom'];
+        $dateto = $params['dateto'];
+        $employmentstatus = $params['employmentstatus'];
+        $departmentcode = $params['departmentcode'];
+        $usercode = $params['usercode'];
+        $business_kubun = $params['business_kubun'];
+        // 変数初期化
         $working_time_dates = new collection();
         $array_working_time_dates = array();
-        $array_working_time_attendances = array();
         $working_time_sum = new collection();
-
-        // 打刻時刻を取得
-        $work_time->setParamDatefromAttribute($datefrom);
-        $work_time->setParamDatetoAttribute($dateto);
-        $work_time->setParamemploymentstatusAttribute($employmentstatus);
-        $work_time->setParamDepartmentcodeAttribute($departmentcode);
-        $work_time->setParamUsercodeAttribute($usercode);
-        // パラメータのチェック
-        // datefromとdatetoがあるが、このメソッドではdatefrom=datetoであること
-        $chk_work_time = $work_time->chkWorkingTimeData();
-        if ($chk_work_time) {
-            // 休日判定
-            $business_kubun = $apicommon->jdgBusinessKbn($datefrom);
-            if (!isset($business_kubun)) {
-                $dt = date_format(new Carbon($datefrom), 'Y年m月d日');
-                $this->array_messagedata[] = 
-                    array( Config::get('const.RESPONCE_ITEM.message') => str_replace('{0}', $dt, Config::get('const.MSG_ERROR.not_setting_calendar')));
-                Log::error(str_replace('{0}', $datefrom, Config::get('const.MSG_ERROR.not_setting_calendar')));
-                $chk_work_time = false;
-            }
-        } else {
-            $this->array_messagedata[] =  array( Config::get('const.RESPONCE_ITEM.message') => $work_time->getMassegedataAttribute());
-        }
-        if ($chk_work_time) {
-            Log::debug('------------- パラメータのチェック OK  ----------------');
+        DB::beginTransaction();
+        try {
             // -------------- debug -------------- start --------
             if ($business_kubun == 1) {
-                Log::debug('------------- 集計開始 日付 = '.$datefrom.' 出勤日　business_kubun = '.$business_kubun );
+                // Log::debug('------------- 集計開始 日付 = '.$datefrom.' 出勤日　business_kubun = '.$business_kubun );
             } else if($business_kubun == 2) {
-                Log::debug('------------- 集計開始 日付 = '.$datefrom.' 法定外休日　business_kubun = '.$business_kubun );
+                // Log::debug('------------- 集計開始 日付 = '.$datefrom.' 法定外休日　business_kubun = '.$business_kubun );
             } else {
-                Log::debug('------------- 集計開始 日付 = '.$datefrom.' 法定休日　business_kubun = '.$business_kubun );
+                // Log::debug('------------- 集計開始 日付 = '.$datefrom.' 法定休日　business_kubun = '.$business_kubun );
             }
             // -------------- debug -------------- end --------
             // パラメータの内容でworking_time_datesを削除
@@ -150,249 +307,81 @@ class DailyWorkingInformationController extends Controller
             $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
             $working_model->setParamEmploymentStatusAttribute($employmentstatus);
             $working_model->setParamDepartmentcodeAttribute($departmentcode);
-            DB::beginTransaction();
-            try{
-                if ($working_model->isExistsWorkingTimeDate()) {
-                    $working_model->delWorkingTimeDate();
-                };
-                $addCalc = $this->addDailyCalc(
-                    $work_time,
-                    $datefrom,
-                    $dateto,
-                    $employmentstatus,
-                    $departmentcode,
-                    $usercode,
-                    $business_kubun);
-                if ($addCalc) {
-                    $working_model = new WorkingTimedate();
-                    $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
-                    $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
-                    $working_model->setParamEmploymentStatusAttribute($employmentstatus);
-                    $working_model->setParamDepartmentcodeAttribute($departmentcode);
-                    $working_model->setParamUsercodeAttribute($usercode);
-                    // 集計結果
-                    $working_time_dates = 
-                        $working_model->getWorkingTimeDateTimeFormat(
-                            Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'),
-                            $working_model->getParamdatefromAttribute(), $business_kubun);
-                    // 合計結果
-                    if (count($working_time_dates) > 0) {
-                        $working_time_sum = $working_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'));
-                    } else {
-                        $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_workintime'));
-                    }
-                    Log::debug('------------- 集計終了 日付 = '.$datefrom.' business_kubun = '.$business_kubun );
+            $working_model->setParamUsercodeAttribute($usercode);
+            if ($working_model->isExistsWorkingTimeDate()) {
+                $working_model->delWorkingTimeDate();
+            }
+            // 日次集計表示
+            // addDailyCalc implement
+            $array_impl_addDailyCalc = array (
+                'work_time' => $work_time,
+                'datefrom' => $datefrom,
+                'dateto' => $dateto,
+                'employmentstatus' => $employmentstatus,
+                'departmentcode' => $departmentcode,
+                'usercode' => $usercode,
+                'business_kubun' => $business_kubun
+            );
+            $addCalc = $this->addDailyCalc($array_impl_addDailyCalc);
+            if ($addCalc) {
+                $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
+                $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
+                $working_model->setParamEmploymentStatusAttribute($employmentstatus);
+                $working_model->setParamDepartmentcodeAttribute($departmentcode);
+                $working_model->setParamUsercodeAttribute($usercode);
+                // 集計結果
+                $working_time_dates = 
+                    $working_model->getWorkingTimeDateTimeFormat(
+                        Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'),
+                        $working_model->getParamdatefromAttribute(), $business_kubun);
+                // 合計結果
+                if (count($working_time_dates) > 0) {
+                    $working_time_sum = $working_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic'));
                 } else {
-                    $add_result = false;
+                    $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_workintime'));
+                }
+
+                // 勤怠集計結果コレクション設定
+                $json_working_time_dates = $working_time_dates->toJson();
+                $dict_working_time_dates = json_decode ($json_working_time_dates, true);
+                foreach ($dict_working_time_dates as $key => $value) {
+                    $array_working_time_attendances = array();
+                    $time_cnt = 1;
+                    $array_working_time_attendances = array_merge($array_working_time_attendances, $this->setCollect_Working_time($value, $time_cnt, true));
+                    for ($i=$time_cnt+1; $i<6; $i++) {
+                        $array_working_time_attendances = array_merge($array_working_time_attendances, $this->setCollect_Working_time($value, $i, false));
+                    }
+                    $time_cnt = 5;
+                    for ($i=$time_cnt+1; $i<8; $i++) {
+                        $array_working_time_attendances = array_merge($array_working_time_attendances, $this->setCollect_Working_time_public($value, $i, false));
+                    }
+                    // 集計結果配列設定
+                    $array_w = array();
+                    $array_w = $this->setArray_Working_time($value, $array_working_time_attendances);
+                    for ($i=0;$i<count($array_w);$i++) {
+                        $array_working_time_dates[] = $array_w[$i];
+                    }
                 }
                 DB::commit();
-                Log::debug(' calc commit ');
-            }catch(\PDOException $pe){
-                DB::rollBack();
-                Log::debug(' calc rollBack ');
-                $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
-            }catch(\Exception $e){
-                DB::rollBack();
-                Log::debug(' calc rollBack ');
-                $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
-                $add_result = false;
-            }
-        } else {
-            Log::debug('------------- パラメータのチェック NG  ----------------');
-            $add_result = false;
-        }
-
-        // 勤怠集計結果コレクション設定
-        $array_working_time_dates = array();
-        foreach ($working_time_dates as $working_time) {
-            $array_working_time_attendances = array();
-            if ( isset($working_time->attendance_time_1) ||
-                isset($working_time->leaving_time_1) ||
-                isset($working_time->missing_middle_time_1) ||
-                isset($working_time->missing_middle_return_time_1) ||
-                isset($working_time->public_going_out_time_1) ||
-                isset($working_time->public_going_out_return_time_1) ) {
-                $array_working_time_attendances[] = array(
-                    'attendance_time' => $working_time->attendance_time_1,
-                    'x_attendance_time_positions' => $working_time->x_attendance_time_positions_1,
-                    'y_attendance_time_positions' => $working_time->y_attendance_time_positions_1,
-                    'leaving_time' => $working_time->leaving_time_1,
-                    'x_leaving_time_positions' => $working_time->x_leaving_time_positions_1,
-                    'y_leaving_time_positions' => $working_time->y_leaving_time_positions_1,
-                    'missing_middle_time' => $working_time->missing_middle_time_1,
-                    'x_missing_middle_time_positions' => $working_time->x_missing_middle_time_positions_1,
-                    'y_missing_middle_time_positions' => $working_time->y_missing_middle_time_positions_1,
-                    'missing_middle_return_time' => $working_time->missing_middle_return_time_1,
-                    'x_missing_middle_return_time_positions' => $working_time->x_missing_middle_return_time_positions_1,
-                    'y_missing_middle_return_time_positions' => $working_time->y_missing_middle_return_time_positions_1,
-                    'public_going_out_time' => $working_time->public_going_out_time_1,
-                    'x_public_going_out_time_positions' => $working_time->x_public_going_out_time_positions_1,
-                    'y_public_going_out_time_positions' => $working_time->y_public_going_out_time_positions_1,
-                    'public_going_out_return_time' => $working_time->public_going_out_return_time_1,
-                    'x_public_going_out_return_time_positions' => $working_time->x_public_going_out_return_time_positions_1,
-                    'y_public_going_out_return_time_positions' => $working_time->y_public_going_out_return_time_positions_1
-                );
             } else {
-                $array_working_time_attendances[] = array(
-                    'attendance_time' => '',
-                    'x_attendance_time_positions' => '',
-                    'y_attendance_time_positions' => '',
-                    'leaving_time' => '',
-                    'x_leaving_time_positions' => '',
-                    'y_leaving_time_positions' => '',
-                    'missing_middle_time' => '',
-                    'x_missing_middle_time_positions' => '',
-                    'y_missing_middle_time_positions' => '',
-                    'missing_middle_return_time' => '',
-                    'x_missing_middle_return_time_positions' => '',
-                    'y_missing_middle_return_time_positions' => '',
-                    'public_going_out_time' => '',
-                    'x_public_going_out_time_positions' => '',
-                    'y_public_going_out_time_positions' => '',
-                    'public_going_out_return_time' => '',
-                    'x_public_going_out_return_time_positions' => '',
-                    'y_public_going_out_return_time_positions' => ''
-                );
-            }
-            if ( isset($working_time->attendance_time_2) ||
-                isset($working_time->leaving_time_2) ||
-                isset($working_time->missing_middle_time_2) ||
-                isset($working_time->missing_middle_return_time_2) ||
-                isset($working_time->public_going_out_time_2) ||
-                isset($working_time->public_going_out_return_time_2) ) {
-                $array_working_time_attendances[] = array(
-                    'attendance_time' => $working_time->attendance_time_2,
-                    'x_attendance_time_positions' => $working_time->x_attendance_time_positions_2,
-                    'y_attendance_time_positions' => $working_time->y_attendance_time_positions_2,
-                    'leaving_time' => $working_time->leaving_time_2,
-                    'x_leaving_time_positions' => $working_time->x_leaving_time_positions_2,
-                    'y_leaving_time_positions' => $working_time->y_leaving_time_positions_2,
-                    'missing_middle_time' => $working_time->missing_middle_time_2,
-                    'x_missing_middle_time_positions' => $working_time->x_missing_middle_time_positions_2,
-                    'y_missing_middle_time_positions' => $working_time->y_missing_middle_time_positions_2,
-                    'missing_middle_return_time' => $working_time->missing_middle_return_time_2,
-                    'x_missing_middle_return_time_positions' => $working_time->x_missing_middle_return_time_positions_2,
-                    'y_missing_middle_return_time_positions' => $working_time->y_missing_middle_return_time_positions_2,
-                    'public_going_out_time' => $working_time->public_going_out_time_2,
-                    'x_public_going_out_time_positions' => $working_time->x_public_going_out_time_positions_2,
-                    'y_public_going_out_time_positions' => $working_time->y_public_going_out_time_positions_2,
-                    'public_going_out_return_time' => $working_time->public_going_out_return_time_2,
-                    'x_public_going_out_return_time_positions' => $working_time->x_public_going_out_return_time_positions_2,
-                    'y_public_going_out_return_time_positions' => $working_time->y_public_going_out_return_time_positions_2
-                );
-            }
-            if ( isset($working_time->attendance_time_3) ||
-                isset($working_time->leaving_time_3) ||
-                isset($working_time->missing_middle_time_3) ||
-                isset($working_time->missing_middle_return_time_3) ||
-                isset($working_time->public_going_out_time_3) ||
-                isset($working_time->public_going_out_return_time_3) ) {
-                $array_working_time_attendances[] = array(
-                    'attendance_time' => $working_time->attendance_time_3,
-                    'x_attendance_time_positions' => $working_time->x_attendance_time_positions_3,
-                    'y_attendance_time_positions' => $working_time->y_attendance_time_positions_3,
-                    'leaving_time' => $working_time->leaving_time_3,
-                    'x_leaving_time_positions' => $working_time->x_leaving_time_positions_3,
-                    'y_leaving_time_positions' => $working_time->y_leaving_time_positions_3,
-                    'missing_middle_time' => $working_time->missing_middle_time_3,
-                    'x_missing_middle_time_positions' => $working_time->x_missing_middle_time_positions_3,
-                    'y_missing_middle_time_positions' => $working_time->y_missing_middle_time_positions_3,
-                    'missing_middle_return_time' => $working_time->missing_middle_return_time_3,
-                    'x_missing_middle_return_time_positions' => $working_time->x_missing_middle_return_time_positions_3,
-                    'y_missing_middle_return_time_positions' => $working_time->y_missing_middle_return_time_positions_3,
-                    'public_going_out_time' => $working_time->public_going_out_time_3,
-                    'x_public_going_out_time_positions' => $working_time->x_public_going_out_time_positions_3,
-                    'y_public_going_out_time_positions' => $working_time->y_public_going_out_time_positions_3,
-                    'public_going_out_return_time' => $working_time->public_going_out_return_time_3,
-                    'x_public_going_out_return_time_positions' => $working_time->x_public_going_out_return_time_positions_3,
-                    'y_public_going_out_return_time_positions' => $working_time->y_public_going_out_return_time_positions_3
-                );
-            }
-            if ( isset($working_time->attendance_time_4) ||
-                isset($working_time->leaving_time_4) ||
-                isset($working_time->missing_middle_time_4) ||
-                isset($working_time->missing_middle_return_time_4) ||
-                isset($working_time->public_going_out_time_4) ||
-                isset($working_time->public_going_out_return_time_4) ) {
-                $array_working_time_attendances[] = array(
-                    'attendance_time' => $working_time->attendance_time_4,
-                    'x_attendance_time_positions' => $working_time->x_attendance_time_positions_4,
-                    'y_attendance_time_positions' => $working_time->y_attendance_time_positions_4,
-                    'leaving_time' => $working_time->leaving_time_4,
-                    'x_leaving_time_positions' => $working_time->x_leaving_time_positions_4,
-                    'y_leaving_time_positions' => $working_time->y_leaving_time_positions_4,
-                    'missing_middle_time' => $working_time->missing_middle_time_4,
-                    'x_missing_middle_time_positions' => $working_time->x_missing_middle_time_positions_4,
-                    'y_missing_middle_time_positions' => $working_time->y_missing_middle_time_positions_4,
-                    'missing_middle_return_time' => $working_time->missing_middle_return_time_4,
-                    'x_missing_middle_return_time_positions' => $working_time->x_missing_middle_return_time_positions_4,
-                    'y_missing_middle_return_time_positions' => $working_time->y_missing_middle_return_time_positions_4,
-                    'public_going_out_time' => $working_time->public_going_out_time_4,
-                    'x_public_going_out_time_positions' => $working_time->x_public_going_out_time_positions_4,
-                    'y_public_going_out_time_positions' => $working_time->y_public_going_out_time_positions_4,
-                    'public_going_out_return_time' => $working_time->public_going_out_return_time_4,
-                    'x_public_going_out_return_time_positions' => $working_time->x_public_going_out_return_time_positions_4,
-                    'y_public_going_out_return_time_positions' => $working_time->y_public_going_out_return_time_positions_4
-                );
-            }
-            if ( isset($working_time->attendance_time_5) ||
-                isset($working_time->leaving_time_5) ||
-                isset($working_time->missing_middle_time_5) ||
-                isset($working_time->missing_middle_return_time_5) ||
-                isset($working_time->public_going_out_time_5) ||
-                isset($working_time->public_going_out_return_time_5) ) {
-                $array_working_time_attendances[] = array(
-                    'attendance_time' => $working_time->attendance_time_5,
-                    'x_attendance_time_positions' => $working_time->x_attendance_time_positions_5,
-                    'y_attendance_time_positions' => $working_time->y_attendance_time_positions_5,
-                    'leaving_time' => $working_time->leaving_time_5,
-                    'x_leaving_time_positions' => $working_time->x_leaving_time_positions_5,
-                    'y_leaving_time_positions' => $working_time->y_leaving_time_positions_5,
-                    'missing_middle_time' => $working_time->missing_middle_time_5,
-                    'x_missing_middle_time_positions' => $working_time->x_missing_middle_time_positions_5,
-                    'y_missing_middle_time_positions' => $working_time->y_missing_middle_time_positions_5,
-                    'missing_middle_return_time' => $working_time->missing_middle_return_time_5,
-                    'x_missing_middle_return_time_positions' => $working_time->x_missing_middle_return_time_positions_5,
-                    'y_missing_middle_return_time_positions' => $working_time->y_missing_middle_return_time_positions_5,
-                    'public_going_out_time' => $working_time->public_going_out_time_5,
-                    'x_public_going_out_time_positions' => $working_time->x_public_going_out_time_positions_5,
-                    'y_public_going_out_time_positions' => $working_time->y_public_going_out_time_positions_5,
-                    'public_going_out_return_time' => $working_time->public_going_out_return_time_5,
-                    'x_public_going_out_return_time_positions' => $working_time->x_public_going_out_return_time_positions_5,
-                    'y_public_going_out_return_time_positions' => $working_time->y_public_going_out_return_time_positions_5
-                );
+                DB::rollBack();
             }
 
-            // 集計結果配列設定
-            $array_w = array();
-            $array_w = $this->setArray_Working_time($working_time, $array_working_time_attendances);
-            for ($i=0;$i<count($array_w);$i++) {
-                $array_working_time_dates[] = $array_w[$i];
-            }
+        }catch(\PDOException $pe){
+            DB::rollBack();
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
+            throw $pe;
+        }catch(\Exception $e){
+            DB::rollBack();
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
+            throw $e;
         }
+        // Log::debug('------------- 日次集計計算終了 calcMain end  日付 = '.$datefrom.' business_kubun = '.$business_kubun );
 
-        $date_name = '';
-        $calender_model = new Calendar();
-        $calender_model->setDateAttribute(date_format(new Carbon($datefrom), 'Ymd'));
-        $calendars = $calender_model->getCalenderDate();
-        if (count($calendars) > 0) {
-            foreach ($calendars as $result) {
-                if (isset($result->date_name)) {
-                    $date_name = $result->date_name;
-                }
-                break;
-            }
-        }
-
-        Log::debug('    集計結果　$array_working_time_dates = '.count($array_working_time_dates));
-        Log::debug('    合計結果  $working_time_sum = '.count($working_time_sum));
-        Log::debug('    メッセージ  $array_messagedata = '.count($this->array_messagedata));
-
-        return response()->json(
-            ['calcresults' => $array_working_time_dates,
-                'sumresults' => $working_time_sum,
-                'datename' => $date_name,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]);
+        return array (
+            'array_working_time_dates' => $array_working_time_dates,
+            'working_time_sum' => $working_time_sum
+        );
     }
 
     /**
@@ -400,17 +389,24 @@ class DailyWorkingInformationController extends Controller
      *
      * @return void
      */
-    public function addDailyCalc($work_time, $datefrom, $dateto, $employmentstatus, $departmentcode, $usercode, $business_kubun) {
-        Log::DEBUG('---------------------- addDailyCalc in ------------------------ '.$datefrom);
+    public function addDailyCalc($params) {
+        // Log::debug('---------------------- 日次集計表示 addDailyCalc in ------------------------ ');
+        $work_time = $params['work_time'];
+        $datefrom = $params['datefrom'];
+        $dateto = $params['dateto'];
+        $employmentstatus = $params['employmentstatus'];
+        $departmentcode = $params['departmentcode'];
+        $usercode = $params['usercode'];
+        $business_kubun = $params['business_kubun'];
 
         $calc_result = true;
         $add_result = true;
 
-        // 打刻時刻を取得
         $temp_working_model = new TempWorkingTimeDate();
+        $timetable_model = new WorkingTimeTable();
         $apicommon = new ApiCommonController();
         // シフト打刻を取得するために$datetoの翌日をParamDatetoを再設定
-        $nextdt =$apicommon->getNextDay($dateto, 'Y/m/d');
+        $nextdt = $apicommon->getNextDay($dateto, 'Y/m/d');
         // getWorkTimegetParamDatetoAttributeしている
         $work_time->setParamDatetoAttribute($nextdt);
         // 終了日付で検索（最新の情報として）
@@ -418,53 +414,45 @@ class DailyWorkingInformationController extends Controller
         if(count($work_time_results) > 0){
             $temp_calc_model = new TempCalcWorkingTime();
             // temporary削除処理
-            //DB::beginTransaction();
             try{
                 $temp_calc_model->delTempCalcWorkingtime();
                 $temp_working_model->delTempWorkingTimeDate();
                 try{
                     // 日次集計計算登録
-                    Log::debug('---------------- 日次集計計算登録(temp_calc_workingtimes) start -----------------------');
-                    $calc_result = $this->calcWorkingTimeDate($work_time_results, $work_time->getParamDatefromAttribute(), $business_kubun);
-                    Log::debug('---------------- 日次集計計算登録(temp_calc_workingtimes) end -----------------------');
+                    // calcWorkingTimeDate implement
+                    $array_impl_calcWorkingTimeDate = array (
+                        'worktimes' => $work_time_results,
+                        'target_date' => $work_time->getParamDatefromAttribute(),
+                        'business_kubun' => $business_kubun
+                    );
+                    $calc_result = $this->calcWorkingTimeDate($array_impl_calcWorkingTimeDate);
                     if ($calc_result) {
                         // タイムテーブルを取得
-                        $timetable_model = new WorkingTimeTable();
                         $timetable_model->setParamdatefromAttribute($datefrom);
                         $timetable_model->setParamdatetoAttribute($dateto);
                         $timetable_model->setParamemploymentstatusAttribute($employmentstatus);
                         $timetable_model->setParamDepartmentcodeAttribute($departmentcode);
                         $timetables = $timetable_model->getWorkingTimeTableJoin();
-                        Log::DEBUG('        $getWorkingTimeTableJoin  count = '.count($timetables));
                         if (count($timetables) > 0) {
-                            Log::debug('---------------- 日次集計登録(temp_working_time_dates) start -----------------------');
                             // 日次集計
-                            $add_result = $this->calcTempWorkingTimeDate($timetables);
-                            Log::debug('---------------- 日次集計登録(temp_working_time_dates) end -----------------------');
+                            $add_result = $this->calcTempWorkingTimeDate($timetables, $datefrom);
                         } else {
                             $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_setting_timetable'));
                             Log::error(Config::get('const.LOG_MSG.not_setting_timetable'));
                             $add_result = false;
                         }
                     } else {
-                        Log::debug('$calc_result = false');
                         $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_workintime'));
                         Log::error(Config::get('const.LOG_MSG.not_workintime'));
                         $add_result = false;
                     }
-                    //DB::commit();
-                    //Log::debug('temporary commit');
                 }catch(\PDOException $pe){
-                    //DB::rollBack();
-                    //Log::debug('temporary rollBack');
                     $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                     Log::error(Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                     Log::error($pe->getMessage());
                     $add_result = false;
                     throw $pe;
                 }catch(\Exception $e){
-                    //DB::rollBack();
-                    //Log::debug('temporary rollBack');
                     $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
                     Log::error(Config::get('const.LOG_MSG.data_error_dailycalc'));
                     Log::error($e->getMessage());
@@ -472,8 +460,6 @@ class DailyWorkingInformationController extends Controller
                     throw $e;
                 }
             }catch(\PDOException $pe){
-                //DB::rollBack();
-                //Log::debug('temporary rollBack');
                 $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                 Log::error($pe->getMessage());
                 $add_result = false;
@@ -481,7 +467,6 @@ class DailyWorkingInformationController extends Controller
             }
         } else {
             $add_result = false;
-            Log::debug(Config::get('const.MSG_ERROR.not_workintime'));
             $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.not_workintime'));
         }
 
@@ -489,44 +474,26 @@ class DailyWorkingInformationController extends Controller
         $working_time_dates = new Collection();
         $working_time_sum = new Collection();
         if ($add_result) {
-            Log::debug(' ---- datefrom = '.$datefrom);
-            Log::debug(' ---- dateto = '.$dateto);
             $temp_working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
             $temp_working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
             $temp_working_model->setParamEmploymentStatusAttribute($employmentstatus);
             $temp_working_model->setParamDepartmentcodeAttribute($departmentcode);
             $temp_working_model->setParamUsercodeAttribute($usercode);
             try{
-                Log::debug('出勤・退勤データtempから登録 ');
                 $temp_working_time_dates = $temp_working_model->getTempWorkingTimeDateUserJoin($dateto);
-                Log::debug('temp_working_time_dates =  '.count($temp_working_time_dates));
                 if (count($temp_working_time_dates) > 0) {
-                    Log::debug('isset $temp_working_time_dates true ');
                     $working_model = new WorkingTimedate();
                     $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
                     $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
                     $working_model->setParamEmploymentStatusAttribute($employmentstatus);
                     $working_model->setParamDepartmentcodeAttribute($departmentcode);
                     $working_model->setParamUsercodeAttribute($usercode);
-                    //DB::beginTransaction();
-                    //Log::debug(' calc beginTransaction ');
                     try{
-                        //if ($working_model->isExistsWorkingTimeDate()) {
-                        //    Log::debug(' $delWorkingTimeDate  ');
-                         //   $working_model->delWorkingTimeDate();
-                        //};
-                        Log::debug(' $insertWorkingTimeDateFromTemp  ');
                         $working_model->insertWorkingTimeDateFromTemp($temp_working_time_dates);
-                        //DB::commit();
-                        //Log::debug(' calc commit ');
                     }catch(\PDOException $pe){
-                        //DB::rollBack();
-                        //Log::debug(' calc rollBack ');
                         $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
                         throw $pe;
                     }catch(\Exception $e){
-                        //DB::rollBack();
-                        //Log::debug(' calc rollBack ');
                         $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
                         $add_result = false;
                         throw $e;
@@ -544,6 +511,7 @@ class DailyWorkingInformationController extends Controller
                 throw $e;
             }
         }
+        // Log::debug('---------------------- 日次集計表示 addDailyCalc end ------------------------ ');
 
         return $add_result;
     }
@@ -567,9 +535,12 @@ class DailyWorkingInformationController extends Controller
      *
      * @return sql取得結果
      */
-    private function calcWorkingTimeDate($worktimes, $target_date, $business_kubun){
+    private function calcWorkingTimeDate($params){
+        // Log::debug('---------------------- 日次労働時間取得 calcWorkingTimeDate in ------------------------ ');
+        $worktimes = $params['worktimes'];
+        $target_date = $params['target_date'];
+        $business_kubun = $params['business_kubun'];
 
-        Log::DEBUG('---------------------- calcWorkingTimeDate in データ件数 = ------------------------ '.count($worktimes));
         $current_date = null;
         $current_department_code = null;
         $current_user_code = null;
@@ -584,90 +555,142 @@ class DailyWorkingInformationController extends Controller
         $before_holiday_user_code = null;
         $before_holiday_department_code = null;
         $before_holiday_kubun = null;
+        $before_business_kubun = null;
         // 打刻データ配列の初期化
         $this->iniArrayWorkingTime();
         $add_results = true;
-        $noinput_user_cnt = 0;
+        // $noinput_user_cnt = 0;
+        $user_temp_out_cnt = 0;
         $target_flg = false;
-        $attendance_target_flg = false;      // 出勤のときの集計対象FLG
-        $this->user_temp_seq = 0;           // ユーザー単位のtemp出力時のseq
+        $attendance_target_flg = false;         // 出勤打刻があるか
+        $this->user_temp_seq = 0;               // ユーザー単位のtemp出力時のseq
         $before_out_flg = false;
         // ユーザー単位処理
         foreach ($worktimes as $result) {
             // 打刻データありの場合
-            Log::DEBUG('----日次労働時間取得 code = '.$result->user_code.' '.$result->user_name. ' 開始   計算ターゲット日付'.$target_date_ymd.' ------------------------ ');
-            Log::DEBUG('        部署  $result->department_name   = '.$result->department_name);
-            Log::DEBUG('        打刻時刻 $result->record_datetime = '.$result->record_datetime);
-            Log::DEBUG('        打刻日  $result->record_date = '.$result->record_date);
-            Log::DEBUG('        モード  $result->mode = '.$result->mode);
-            if (isset($before_result)) {
-                Log::DEBUG('        　前回モード $before_result->mode  = '.$before_result->mode);
-            } else {
-                Log::DEBUG('        　前回モード   なし');
-            }
-            Log::DEBUG('        出勤区分 $result->business_kubun = '.$result->business_kubun);
-            Log::DEBUG('                $result->business_name  = '.$result->business_name);
-            Log::DEBUG('        ユーザー休暇区分 $result->user_holiday_kubun = '.$result->user_holiday_kubun);
-            Log::DEBUG('                        $result->user_holiday_name  = '.$result->user_holiday_name);
-            Log::DEBUG('        タイムテーブル　開始時刻　$result->working_timetable_from_time = '.$result->working_timetable_from_time);
-            Log::DEBUG('        タイムテーブル　終了時刻　result->working_timetable_to_time    = '.$result->working_timetable_to_time);
-            if ($target_flg) {
-                Log::DEBUG('        集計対象判断前 target_flg = true');
-            } else {
-                Log::DEBUG('        集計対象判断前 target_flg = false');
-            }
+            // Log::debug('------ 日次労働時間取得 code = '.$result->user_code.' '.$result->user_name. ' 開始   計算ターゲット日付'.$target_date_ymd.' ------------------------ ');
+            // Log::debug('         部署  $result->department_name   = '.$result->department_name);
+            // Log::debug('         打刻時刻 $result->record_datetime = '.$result->record_datetime);
+            // Log::debug('         打刻日  $result->record_date = '.$result->record_date);
+            // Log::debug('         モード  $result->mode = '.$result->mode);
+            // Log::debug('         出勤区分 $result->business_kubun = '.$result->business_kubun);
+            // Log::debug('                 $result->business_name  = '.$result->business_name);
+            // Log::debug('         ユーザー休暇区分 $result->user_holiday_kubun = '.$result->user_holiday_kubun);
+            // Log::debug('                         $result->user_holiday_name  = '.$result->user_holiday_name);
+            // Log::debug('                         $result->user_holiday_description  = '.$result->user_holiday_description);
+            // Log::debug('         タイムテーブル  no = '.$result->working_timetable_no);
+            // Log::debug('         タイムテーブル  name = '.$result->working_timetable_name);
+            // Log::debug('         タイムテーブル　開始時刻　$result->working_timetable_from_time = '.$result->working_timetable_from_time);
+            // Log::debug('         タイムテーブル　終了時刻　result->working_timetable_to_time    = '.$result->working_timetable_to_time);
             if ($result->record_datetime != null && $result->mode != null) {
                 // 設定値確認
                 $chk_setting = $this->chkSettingData($result);
                 // 設定が正常である場合
                 if ($chk_setting == 0)  {
                     // 翌日退勤した場合を考慮し、同日処理を行うようにするため、$current_dateは$target_date_ymdとする
-                    // よって日付ブレーク処理は無意味となる
+                    // よって日付ブレーク処理は無意味となるけど
                     $current_date = $target_date_ymd;
                     $current_department_code = $result->department_code;
                     $current_user_code = $result->user_code;
                     $current_result = $result;
+                    if ($current_date != $before_date ||
+                        $current_department_code != $before_department_code ||
+                        $current_user_code != $before_user_code) {
+                        $attendance_target_flg = false;
+                    }
                     // 指定日付<=であれば集計対象、>であれば打刻なしとして登録
                     if ($result->mode == Config::get('const.C012.attendance')) {
-                        if ($result->record_date > $target_date_ymd) {
-                            $target_flg = false;
+                        $dt = new Carbon($target_date_ymd);
+                        $w_minus1_ymd = date_format($dt->copy()->subDay(), 'Y-m-d');
+                        $w_today_ymd = date_format($dt->copy(), 'Y-m-d');
+                        $w_plus1_ymd = date_format($dt->copy()->addDay(), 'Y-m-d');
+                        $w_plus2_ymd = date_format($dt->copy()->addDay(2), 'Y-m-d');
+                        // 所定時間内であれば対象
+                        // Log::debug('         $w_minus1_ymd = '.$w_minus1_ymd);
+                        // Log::debug('         $w_today_ymd = '.$w_today_ymd);
+                        // Log::debug('         $w_plus1_ymd = '.$w_plus1_ymd);
+                        // Log::debug('         $w_plus2_ymd = '.$w_plus2_ymd);
+                        //  タイムテーブル　開始時刻
+                        $w_minus1_from_datetime = $w_minus1_ymd.' '.$result->working_timetable_from_time;
+                        $w_today_from_datetime = $w_today_ymd.' '.$result->working_timetable_from_time;
+                        $w_plus1_from_datetime = $w_plus1_ymd.' '.$result->working_timetable_from_time;
+                        $w_minus1_to_datetime = null;
+                        $w_today_to_datetime = null;
+                        $w_plus1_to_datetime = null;
+                        if ($result->working_timetable_from_time <= $result->working_timetable_to_time) {
+                            $w_minus1_to_datetime = $w_minus1_ymd.' '.$result->working_timetable_to_time;
+                            $w_today_to_datetime = $w_today_ymd.' '.$result->working_timetable_to_time;
+                            $w_plus1_to_datetime = $w_plus1_ymd.' '.$result->working_timetable_to_time;
                         } else {
+                            $w_minus1_to_datetime = $w_today_ymd.' '.$result->working_timetable_to_time;
+                            $w_today_to_datetime = $w_plus1_ymd.' '.$result->working_timetable_to_time;
+                            $w_plus1_to_datetime = $w_plus2_ymd.' '.$result->working_timetable_to_time;
+                        }
+                        // Log::debug('         w_minus1_from_datetime = '.$w_minus1_from_datetime);
+                        // Log::debug('         w_minus1_to_datetime = '.$w_minus1_to_datetime);
+                        // Log::debug('         w_today_from_datetime = '.$w_today_from_datetime);
+                        // Log::debug('         w_today_to_datetime = '.$w_today_to_datetime);
+                        // Log::debug('         w_plus1_from_datetime = '.$w_plus1_from_datetime);
+                        // Log::debug('         w_plus1_to_datetime = '.$w_plus1_to_datetime);
+                        if ($result->record_datetime >= $w_today_from_datetime &&
+                            $result->record_datetime <= $w_today_to_datetime) {
                             $target_flg = true;
+                        } else {
+                            if ($result->record_datetime >= $w_minus1_to_datetime &&
+                                $result->record_datetime < $w_today_from_datetime) {
+                                $target_flg = true;
+                            } else {
+                                $target_flg = false;
+                            }
                         }
                         $attendance_target_flg = $target_flg;
                     } else {
                         // 出勤ではない場合は前の出勤モードの集計対象
-                        if ($current_department_code != $before_department_code ||
-                            $current_user_code != $before_user_code) {
-                            $attendance_target_flg = false;
+                        // 出勤ではない場合、
+                        // 出勤打刻があった場合は集計対象
+                        // 出勤打刻がなかった場合は
+                        // タイムテーブル開始時刻>タイムテーブル終了時刻の場合は前日計算とするため集計対象外とする
+                        if ($attendance_target_flg) {
+                            $target_flg = true;
+                        } else {
+                            if ($result->working_timetable_from_time <= $result->working_timetable_to_time) {
+                                $target_flg = false;
+                            } else {
+                                if ($result->record_date > $target_date_ymd) {
+                                    $target_flg = true;
+                                } else {
+                                    $target_flg = false;
+                                }
+                            }
                         }
-                        $target_flg = $attendance_target_flg;
-                        if ($result->mode == Config::get('const.C012.leaving')) {
-                            $attendance_target_flg = false;
-                        }
+                        // -----------------------　20200321コメント化 start --------------------- 
+                        // if ($current_department_code != $before_department_code ||
+                        //     $current_user_code != $before_user_code) {
+                        //     $attendance_target_flg = false;
+                        // }
+                        // $target_flg = $attendance_target_flg;
+                        // -----------------------　20200321コメント化 end --------------------- 
+                        // -----------------------　20200215コメント化 start --------------------- 
+                        // if ($result->mode == Config::get('const.C012.leaving')) {
+                        //     $attendance_target_flg = false;
+                        // }
+                        // -----------------------　20200215コメント化 end --------------------- 
                     }
-                    if ($target_flg) {
-                        Log::DEBUG('        集計対象判断 target_flg = true');
-                    } else {
-                        Log::DEBUG('        集計対象判断 target_flg = false');
-                    }
-                    if ($attendance_target_flg) {
-                        Log::DEBUG('        集計対象判断 出勤　attendance_target_flg = true');
-                    } else {
-                        Log::DEBUG('        集計対象判断 出勤　attendance_target_flg = false');
-                    }
-                            // 20191012 end
+                    // 20191012 end
+                    // Log::debug('        出勤打刻があるか $attendance_target_flg ='.$attendance_target_flg);
+                    // Log::debug('        出勤打刻があるか $target_flg ='.$target_flg);
                     if ($before_date == null) {$before_date = $current_date;}
                     if ($before_department_code == null) {$before_department_code = $current_department_code;}
                     if ($before_user_code == null) {$before_user_code = $current_user_code;}
                     if ($before_result == null) {$before_result = $result;}
                     if ($target_flg == true) {
-                        Log::DEBUG('        打刻あり、当日計算対象データ');
+                        // Log::debug('        当日の打刻あり、当日計算対象データ');
                         // ユーザー休暇区分判定用
                         $before_holiday_date = null;
                         $before_holiday_user_code = null;
                         $before_holiday_department_code = null;
                         $before_holiday_kubun = null;
+                        $before_business_kubun = null;
                         $before_out_flg = true;
                         // 同じキーの場合
                         if ($current_date == $before_date &&
@@ -678,71 +701,77 @@ class DailyWorkingInformationController extends Controller
                         } elseif ($current_date == $before_date &&
                             $current_department_code == $before_department_code) {
                             // ユーザーが変わった場合
-                            Log::DEBUG('    ユーザーが変わった場合 ');
+                            // Log::debug('    ユーザーが変わった場合 ');
                             // ユーザー労働時間計算(１個前のユーザーを計算する)
-                            Log::DEBUG('        temp_calc_workingtimesの登録開始');
-                            Log::DEBUG('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
-                            Log::DEBUG('            部署     = '.$before_result->department_name);
-                            Log::DEBUG('            打刻時刻 = '.$before_result->record_datetime);
-                            Log::DEBUG('            モード   = '.$before_result->mode);
-                            Log::DEBUG('            打刻日   = '.$before_result->record_date);
-                            $this->calcWorkingTime(
-                                $before_date,
-                                $before_user_code,
-                                $before_department_code,
-                                $business_kubun,
-                                $before_result->interval,
-                                $before_result->user_holiday_kubun,
-                                $before_result->record_datetime
+                            // Log::debug('        temp_calc_workingtimesの登録開始');
+                            // Log::debug('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
+                            // Log::debug('            部署     = '.$before_result->department_name);
+                            // Log::debug('            打刻時刻 = '.$before_result->record_datetime);
+                            // Log::debug('            モード   = '.$before_result->mode);
+                            // Log::debug('            打刻日   = '.$before_result->record_date);
+                            // ユーザー労働時間計算
+                            // calcWorkingTimeDate implement
+                            $array_impl_calcWorkingTime = array (
+                                'target_date' => $before_date,
+                                'target_user_code' => $before_user_code,
+                                'target_department_code' => $before_department_code,
+                                'target_business_kubun' => $business_kubun,
+                                'target_result' => $before_result
                             );
+                            $this->calcWorkingTime($array_impl_calcWorkingTime);
                             try{
                                 // temporaryに登録する
-                                $this->insTempCalcItem($before_date, $before_result);
+                                // calcWorkingTimeDate implement
+                                $array_impl_insTempCalcItem = array (
+                                    'target_date' => $before_date,
+                                    'target_result' => $before_result
+                                );
+                                $this->insTempCalcItem($array_impl_insTempCalcItem);
                             }catch(\PDOException $pe){
                                 $add_results = false;
                                 throw $pe;
                             }
-                            Log::DEBUG('        temp_calc_workingtimesの登録終了');
+                            // Log::debug('        temp_calc_workingtimesの登録終了');
                             // 次データ計算事前処理
                             // beforeArrayWorkingTimeは現データが有効の場合の事前処理
                             $this->beforeArrayWorkingTime($result);
                             // ユーザーを同じく設定
                             $before_user_code = $current_user_code;
                             $before_out_flg = true;
-                            $target_flg = false;
                             $this->user_temp_seq = 0;
-                            if ($target_flg) {
-                                Log::DEBUG('        集計対象処理後 target_flg = true');
-                            } else {
-                                Log::DEBUG('        集計対象処理後 target_flg = false');
-                            }
                         } elseif ($current_date == $before_date) {
                             // 部署が変わった場合
-                            Log::DEBUG('    部署が変わった場合 ');
+                            // Log::debug('    部署が変わった場合 ');
                             // ユーザー労働時間計算(１個前のユーザーを計算する)
-                            Log::DEBUG('    temp_calc_workingtimesの登録開始');
-                            Log::DEBUG('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
-                            Log::DEBUG('            部署     = '.$before_result->department_name);
-                            Log::DEBUG('            打刻時刻 = '.$before_result->record_datetime);
-                            Log::DEBUG('            モード   = '.$before_result->mode);
-                            Log::DEBUG('            打刻日   = '.$before_result->record_date);
-                            $this->calcWorkingTime(
-                                $before_date,
-                                $before_user_code,
-                                $before_department_code,
-                                $business_kubun,
-                                $before_result->interval,
-                                $before_result->user_holiday_kubun,
-                                $before_result->record_datetime
+                            // Log::debug('    temp_calc_workingtimesの登録開始');
+                            // Log::debug('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
+                            // Log::debug('            部署     = '.$before_result->department_name);
+                            // Log::debug('            打刻時刻 = '.$before_result->record_datetime);
+                            // Log::debug('            モード   = '.$before_result->mode);
+                            // Log::debug('            打刻日   = '.$before_result->record_date);
+                            // ユーザー労働時間計算
+                            // calcWorkingTimeDate implement
+                            $array_impl_calcWorkingTime = array (
+                                'target_date' => $before_date,
+                                'target_user_code' => $before_user_code,
+                                'target_department_code' => $before_department_code,
+                                'target_business_kubun' => $business_kubun,
+                                'target_result' => $before_result
                             );
+                            $this->calcWorkingTime($array_impl_calcWorkingTime);
                             try{
                                 // temporaryに登録する
-                                $this->insTempCalcItem($before_date, $before_result);
+                                // calcWorkingTimeDate implement
+                                $array_impl_insTempCalcItem = array (
+                                    'target_date' => $before_date,
+                                    'target_result' => $before_result
+                                );
+                                $this->insTempCalcItem($array_impl_insTempCalcItem);
                             }catch(\PDOException $pe){
                                 $add_results = false;
                                 throw $pe;
                             }
-                            Log::DEBUG('    temp_calc_workingtimesの登録終了');
+                            // Log::debug('    temp_calc_workingtimesの登録終了');
                             // 次データ計算事前処理
                             // beforeArrayWorkingTimeは現データが有効の場合の事前処理
                             $this->beforeArrayWorkingTime($result);
@@ -751,32 +780,28 @@ class DailyWorkingInformationController extends Controller
                             // ユーザーを同じく設定
                             $before_user_code = $current_user_code;
                             $before_out_flg = true;
-                            $target_flg = false;
                             $this->user_temp_seq = 0;
-                            if ($target_flg) {
-                                Log::DEBUG('        集計対象処理後 target_flg = true');
-                            } else {
-                                Log::DEBUG('        集計対象処理後 target_flg = false');
-                            }
                         } else {
                             // 日付が変わった場合
-                            Log::DEBUG('    日付が変わった ');
+                            // Log::debug('    日付が変わった ');
                             try{
                                 // ユーザー労働時間登録(１個前のユーザーを登録する)
-                                Log::DEBUG('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
-                                Log::DEBUG('            部署     = '.$before_result->department_name);
-                                Log::DEBUG('            打刻時刻 = '.$before_result->record_datetime);
-                                Log::DEBUG('            モード   = '.$before_result->mode);
-                                Log::DEBUG('            打刻日   = '.$before_result->record_date);
-                                $add_results = $this->addWorkingTime(
-                                    $before_date,
-                                    $before_user_code,
-                                    $before_department_code,
-                                    $before_result,
-                                    $business_kubun,
-                                    $before_result->interval,
-                                    $before_result->user_holiday_kubun);
-                                Log::DEBUG('    １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
+                                // Log::debug('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
+                                // Log::debug('            部署     = '.$before_result->department_name);
+                                // Log::debug('            打刻時刻 = '.$before_result->record_datetime);
+                                // Log::debug('            モード   = '.$before_result->mode);
+                                // Log::debug('            打刻日   = '.$before_result->record_date);
+                                // ユーザー労働時間登録
+                                // array_impl_addWorkingTime implement
+                                $array_impl_addWorkingTime = array (
+                                    'target_date' => $before_date,
+                                    'target_user_code' => $before_user_code,
+                                    'target_department_code' => $before_department_code,
+                                    'target_business_kubun' => $business_kubun,
+                                    'target_result' => $before_result
+                                );
+                                $add_results = $this->addWorkingTime($array_impl_addWorkingTime);
+                                // Log::debug('    １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
                                 // 次データ計算事前処理
                                 // beforeArrayWorkingTimeは現データが有効の場合の事前処理
                                 $this->beforeArrayWorkingTime($result);
@@ -787,12 +812,6 @@ class DailyWorkingInformationController extends Controller
                                 // ユーザーを同じく設定
                                 $before_user_code = $current_user_code;
                                 $before_out_flg = true;
-                                $target_flg = false;
-                                if ($target_flg) {
-                                    Log::DEBUG('        集計対象処理後 target_flg = true');
-                                } else {
-                                    Log::DEBUG('        集計対象処理後 target_flg = false');
-                                }
                             }catch(\PDOException $pe){
                                 $add_results = false;
                                 throw $pe;
@@ -802,29 +821,30 @@ class DailyWorkingInformationController extends Controller
                             }
                         }
                     } else {
-                        Log::DEBUG('        打刻なし、当日計算対象データ');
+                        // Log::debug('        当日の打刻なし、当日計算対象データ');
                         // 前のデータが打刻ありであれば計算する
                         $user_holiday_kubun = null;
                         $user_holiday_name = null;
                         $user_working_date = null;
                         if (count($this->array_working_mode) > 0) {
                             try{
-                                Log::DEBUG('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
-                                Log::DEBUG('            部署     = '.$before_result->department_name);
-                                Log::DEBUG('            打刻時刻 = '.$before_result->record_datetime);
-                                Log::DEBUG('            モード   = '.$before_result->mode);
-                                Log::DEBUG('            打刻日   = '.$before_result->record_date);
-                                // ユーザー労働時間登録(１個前のユーザーを登録する)
-                                $add_results = $this->addWorkingTime(
-                                    $before_date,
-                                    $before_user_code,
-                                    $before_department_code,
-                                    $before_result,
-                                    $business_kubun,
-                                    $before_result->interval,
-                                    $before_result->user_holiday_kubun);
+                                // Log::debug('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
+                                // Log::debug('            部署     = '.$before_result->department_name);
+                                // Log::debug('            打刻時刻 = '.$before_result->record_datetime);
+                                // Log::debug('            モード   = '.$before_result->mode);
+                                // Log::debug('            打刻日   = '.$before_result->record_date);
+                                // ユーザー労働時間登録
+                                // array_impl_addWorkingTime implement
+                                $array_impl_addWorkingTime = array (
+                                    'target_date' => $before_date,
+                                    'target_user_code' => $before_user_code,
+                                    'target_department_code' => $before_department_code,
+                                    'target_business_kubun' => $business_kubun,
+                                    'target_result' => $before_result
+                                );
+                                $add_results = $this->addWorkingTime($array_impl_addWorkingTime);
                                 // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
-                                Log::DEBUG('        １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
+                                // Log::debug('        １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
                                 $before_date = null;
                                 $before_user_code = null;
                                 $before_department_code = null;
@@ -834,7 +854,6 @@ class DailyWorkingInformationController extends Controller
                                 // 計算用配列の初期化
                                 $this->iniArrayCalc();
                                 $before_out_flg = true;
-                                $target_flg = false;
                             }catch(\PDOException $pe){
                                 $add_results = false;
                                 throw $pe;
@@ -844,78 +863,109 @@ class DailyWorkingInformationController extends Controller
                             }
                         }
                         // 打刻ないデータはtempに出力
-                        Log::DEBUG('        打刻ないデータはtempに出力するか判定 $current_date = '.$current_date);
-                        Log::DEBUG('            $before_date = '.$before_date);
-                        Log::DEBUG('            打刻時刻      = '.$result->record_datetime);
-                        Log::DEBUG('            打刻日付      = '.$result->record_date);
-                        Log::DEBUG('            ターゲット日付   = '.$target_date_ymd);
-                        Log::DEBUG('            ユーザー休暇   = '.$user_holiday_kubun);
-                        Log::DEBUG('            1件前出力      = '.$before_out_flg);
+                        // // Log::debug('        打刻ないデータはtempに出力するか判定 $current_date = '.$current_date);
+                        // // Log::debug('            $before_date = '.$before_date);
+                        // // Log::debug('            打刻時刻      = '.$result->record_datetime);
+                        // // Log::debug('            打刻日付      = '.$result->record_date);
+                        // // Log::debug('            タイムテーブルNO      = '.$result->working_timetable_no);
+                        // // Log::debug('            ターゲット日付   = '.$target_date_ymd);
+                        // // Log::debug('            ユーザー休暇   = '.$user_holiday_kubun);
+                        // // Log::debug('            1件前出力      = '.$before_out_flg);
                         // 1件前の日付がnullである場合、いきなり対象日付がないということなので出力
                         //if (!isset($result->record_datetime) || isset($user_holiday_kubun)) {
                         //if (!$before_out_flg || isset($user_holiday_kubun)) {
-                        if (!isset($result->record_datetime) && (!$before_out_flg || isset($user_holiday_kubun))) {
-                        //if ($temp_out_flg ) {   // 20191012
-                            try{
-                                Log::DEBUG('        打刻ないデータはtempに出力 $current_date = ');
-                                // 同じキーの場合
-                                if ($current_date == $before_date &&
-                                    $current_department_code == $before_department_code &&
-                                    $current_user_code == $before_user_code) {
-                                    $noinput_user_cnt++;
-                                } else {
-                                    $noinput_user_cnt = 1;
-                                }
-                                if ($noinput_user_cnt == 1) {
-                                    $ptn = 0;
-                                } else {
-                                    $ptn = 6;
-                                }
-                                if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
-                                if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
-                                if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
-                                if ($before_holiday_department_code != $result->department_code ||
-                                    $before_holiday_user_code != $result->user_code ||
-                                    $before_holiday_date != $result->user_working_date ||
-                                    $before_holiday_kubun != $user_holiday_kubun) {
-                                    Log::DEBUG('    temp_calc_workingtimesの登録開始');
-                                    $dt = date_format(new Carbon($target_date), 'Ymd');
-                                    Log::DEBUG('            ターゲット日付 = '.$dt);
-                                    Log::DEBUG('            ユーザー休暇   = '.$user_holiday_name);
-                                    Log::DEBUG('            　　　　日付   = '.$user_working_date);
-                                    $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date, $result->working_timetable_no));
-                                    // temporaryに登録する
-                                    Log::DEBUG('    temp_calc_workingtimesの登録開始');
-                                    Log::DEBUG('        現ユーザー = '.$current_user_code.' record_time = '.$result->record_datetime);
-                                    $this->insTempCalcItem($target_date, $result);
-                                    Log::DEBUG('    temp_calc_workingtimesの登録終了');
-                                }
-                                // 日付とユーザー休暇区分を保存
-                                $before_holiday_date = $result->user_working_date;
-                                $before_holiday_user_code = $result->user_code;
-                                $before_holiday_department_code = $result->department_code;
-                                $before_holiday_kubun = $user_holiday_kubun;
-                            }catch(\PDOException $pe){
-                                $add_results = false;
-                                throw $pe;
-                            }
-                            // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
-                            $before_date = null;
-                            $before_user_code = null;
-                            $before_department_code = null;
-                            $before_result = null;
-                            $before_out_flg = true;
-                            $target_flg = false;
-                            // 次データ計算事前処理
-                            // 打刻データ配列の初期化
-                            $this->iniArrayWorkingTime();
-                            // 計算用配列の初期化
-                            $this->iniArrayCalc();
-                        } else {
-                            $before_out_flg = true;
-                            $target_flg = false;
-                            Log::DEBUG('        打刻ないデータはtempに出力しない '.$result->record_datetime);
-                        }
+                        // 1件前出力していず、休暇扱いか出勤日である場合は空の情報として出力する
+                        // if (!isset($result->record_datetime) &&
+                        //      (!$before_out_flg || isset($user_holiday_kubun)))
+                        // {
+                        // 有効打刻データがなくて、休暇扱いか出勤日である場合はtempに出力
+                        // 打刻されていれば出勤以外は出力対象外
+                        // $temp_out_flg1 = false;
+                        // $temp_out_flg2 = false;
+                        // $temp_out_flg3 = false;
+                        // if (isset($user_holiday_kubun) && $user_holiday_kubun >= (int)Config::get('const.C013.paid_holiday')) {
+                        //     $temp_out_flg1 = true;
+                        // }
+                        // if ($result->business_kubun == Config::get('const.C007.basic')) {
+                        //     $temp_out_flg2 = true;
+                        // }
+                        // if (!$attendance_target_flg)
+                        // {
+                        //     $temp_out_flg3 = true;
+                        // }
+                        // if ($temp_out_flg3 && ($temp_out_flg1 || $temp_out_flg2))
+                        // {
+                        // //if ($temp_out_flg ) {   // 20191012
+                        //     try{
+                        //         // Log::debug('        打刻ないデータはtempに出力 $current_date = ');
+                        //         // 同じキーの場合
+                        //         if ($current_date == $before_date &&
+                        //             $current_department_code == $before_department_code &&
+                        //             $current_user_code == $before_user_code) {
+                        //             $noinput_user_cnt++;
+                        //         } else {
+                        //             $noinput_user_cnt = 1;
+                        //         }
+                        //         if ($noinput_user_cnt == 1) {
+                        //             $ptn = 0;
+                        //         } else {
+                        //             $ptn = 6;
+                        //         }
+                        //         if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
+                        //         if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
+                        //         if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
+                        //         if ($before_holiday_department_code != $result->department_code ||
+                        //             $before_holiday_user_code != $result->user_code ||
+                        //             $before_holiday_date != $result->user_working_date ||
+                        //             $before_holiday_kubun != $user_holiday_kubun) {
+                        //             $dt = date_format(new Carbon($target_date), 'Ymd');
+                        //             // Log::debug('            ターゲット日付 = '.$dt);
+                        //             // Log::debug('            ユーザー休暇   = '.$user_holiday_name);
+                        //             // Log::debug('            　　　　日付   = '.$user_working_date);
+                        //             // setNoInputTimePtn implement
+                        //             $array_impl_setNoInputTimePtn = array (
+                        //                 'ptn' => $ptn,
+                        //                 'user_holiday_name' => $user_holiday_name,
+                        //                 'target_date' => $dt,
+                        //                 'hpliday_date' => $user_working_date,
+                        //                 'value_working_timetable_no' => $result->working_timetable_no
+                        //             );
+                        //             $this->pushArrayCalc($this->setNoInputTimePtn($array_impl_setNoInputTimePtn));
+                        //             // temporaryに登録する
+                        //             // Log::debug('    temp_calc_workingtimesの登録開始');
+                        //             // Log::debug('        現ユーザー = '.$current_user_code.' record_time = '.$result->record_datetime);
+                        //             // calcWorkingTimeDate implement
+                        //             $array_impl_insTempCalcItem = array (
+                        //                 'target_date' => $target_date,
+                        //                 'target_result' => $result
+                        //             );
+                        //             $this->insTempCalcItem($array_impl_insTempCalcItem);
+                        //             // Log::debug('    temp_calc_workingtimesの登録終了');
+                        //         }
+                        //         // 日付とユーザー休暇区分を保存
+                        //         $before_holiday_date = $result->user_working_date;
+                        //         $before_holiday_user_code = $result->user_code;
+                        //         $before_holiday_department_code = $result->department_code;
+                        //         $before_holiday_kubun = $user_holiday_kubun;
+                        //     }catch(\PDOException $pe){
+                        //         $add_results = false;
+                        //         throw $pe;
+                        //     }
+                        //     // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
+                        //     $before_date = null;
+                        //     $before_user_code = null;
+                        //     $before_department_code = null;
+                        //     $before_result = null;
+                        //     $before_out_flg = true;
+                        //     // 次データ計算事前処理
+                        //     // 打刻データ配列の初期化
+                        //     $this->iniArrayWorkingTime();
+                        //     // 計算用配列の初期化
+                        //     $this->iniArrayCalc();
+                        // } else {
+                        //     $before_out_flg = true;
+                        //     // Log::debug('        打刻ないデータはtempに出力しない '.$result->record_datetime);
+                        // }
                     }
                 } else {
                     // 前のデータが打刻ありであれば計算する
@@ -924,28 +974,27 @@ class DailyWorkingInformationController extends Controller
                     $user_working_date = null;
                     if (count($this->array_working_mode) > 0) {
                         try{
-                            Log::DEBUG('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
-                            Log::DEBUG('            部署     = '.$before_result->department_name);
-                            Log::DEBUG('            打刻時刻 = '.$before_result->record_datetime);
-                            Log::DEBUG('            モード   = '.$before_result->mode);
-                            Log::DEBUG('            打刻日   = '.$before_result->record_date);
-                            // ユーザー労働時間登録(１個前のユーザーを登録する)
-                            $add_results = $this->addWorkingTime(
-                                $before_date,
-                                $before_user_code,
-                                $before_department_code,
-                                $before_result,
-                                $business_kubun,
-                                $before_result->interval,
-                                $before_result->user_holiday_kubun);
-                                Log::DEBUG('    １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
+                            // Log::debug('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
+                            // Log::debug('            部署     = '.$before_result->department_name);
+                            // Log::debug('            打刻時刻 = '.$before_result->record_datetime);
+                            // Log::debug('            モード   = '.$before_result->mode);
+                            // Log::debug('            打刻日   = '.$before_result->record_date);
+                            // ユーザー労働時間登録
+                            // array_impl_addWorkingTime implement
+                            $array_impl_addWorkingTime = array (
+                                'target_date' => $before_date,
+                                'target_user_code' => $before_user_code,
+                                'target_department_code' => $before_department_code,
+                                'target_business_kubun' => $business_kubun,
+                                'target_result' => $before_result
+                            );
+                            $add_results = $this->addWorkingTime($array_impl_addWorkingTime);
                             // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
                             $before_date = null;
                             $before_user_code = null;
                             $before_department_code = null;
                             $before_result = null;
                             $before_out_flg = true;
-                            $target_flg = false;
                             // 次データ計算事前処理
                             // 打刻データ配列の初期化
                             $this->iniArrayWorkingTime();
@@ -960,8 +1009,8 @@ class DailyWorkingInformationController extends Controller
                         }
                     }
                     try{
-                        Log::DEBUG('    temp_calc_workingtimesの登録開始');
-                        Log::DEBUG('        現ユーザー = '.$result->user_code.' record_time = '.$result->record_datetime);
+                        // Log::debug('    temp_calc_workingtimesの登録開始');
+                        // Log::debug('        現ユーザー = '.$result->user_code.' record_time = '.$result->record_datetime);
                         // temporaryに登録する
                         if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
                         if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
@@ -970,21 +1019,35 @@ class DailyWorkingInformationController extends Controller
                             $before_holiday_user_code != $result->user_code ||
                             $before_holiday_date != $result->user_working_date ||
                             $before_holiday_kubun != $user_holiday_kubun) {
-                            Log::DEBUG('    temp_calc_workingtimesの登録開始');
+                            // Log::debug('    temp_calc_workingtimesの登録開始');
                             $dt = date_format(new Carbon($target_date), 'Ymd');
-                            Log::DEBUG('            ターゲット日付 = '.$target_date);
-                            Log::DEBUG('            ユーザー休暇  ='.$user_holiday_name);
-                            Log::DEBUG('        　　　　    日付  = '.$user_working_date);
+                            // Log::debug('            ターゲット日付 = '.$target_date);
+                            // Log::debug('            ユーザー休暇  ='.$user_holiday_name);
+                            // Log::debug('        　　　　    日付  = '.$user_working_date);
                             $ptn = $chk_setting;
-                            $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date, $result->working_timetable_no));
-                            $this->insTempCalcItem($result->record_date, $result);
-                            Log::DEBUG('    temp_calc_workingtimesの登録終了');
+                            // setNoInputTimePtn implement
+                            $array_impl_setNoInputTimePtn = array (
+                                'ptn' => $ptn,
+                                'user_holiday_name' => $user_holiday_name,
+                                'target_date' => $dt,
+                                'hpliday_date' => $user_working_date,
+                                'value_working_timetable_no' => $result->working_timetable_no
+                            );
+                            $this->pushArrayCalc($this->setNoInputTimePtn($array_impl_setNoInputTimePtn));
+                            // calcWorkingTimeDate implement
+                            $array_impl_insTempCalcItem = array (
+                                'target_date' => $result->record_date,
+                                'target_result' => $result
+                            );
+                            $this->insTempCalcItem($array_impl_insTempCalcItem);
+                            // Log::debug('    temp_calc_workingtimesの登録終了');
                         }
                         // 日付とユーザー休暇区分を保存
                         $before_holiday_date = $result->user_working_date;
                         $before_holiday_user_code = $result->user_code;
                         $before_holiday_department_code = $result->department_code;
                         $before_holiday_kubun = $user_holiday_kubun;
+                        $before_business_kubun = $result->business_kubun;
                     }catch(\PDOException $pe){
                         $add_results = false;
                         throw $pe;
@@ -996,7 +1059,7 @@ class DailyWorkingInformationController extends Controller
                     $this->iniArrayCalc();
                 }
             } else {
-                Log::DEBUG('        打刻データなし ');
+                // Log::debug('        $result->record_datetime = null 打刻データなし count($this->array_working_mode) = '.count($this->array_working_mode));
                 // 前のデータが打刻ありであれば計算する
                 $user_holiday_kubun = null;
                 $user_holiday_name = null;
@@ -1004,32 +1067,27 @@ class DailyWorkingInformationController extends Controller
                 if (count($this->array_working_mode) > 0) {
                     try{
                         // ユーザー労働時間登録(１個前のユーザーを登録する)
-                        Log::DEBUG('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
-                        Log::DEBUG('            部署     = '.$before_result->department_name);
-                        Log::DEBUG('            打刻時刻 = '.$before_result->record_datetime);
-                        Log::DEBUG('            モード   = '.$before_result->mode);
-                        Log::DEBUG('            打刻日   = '.$before_result->record_date);
-                        $add_results = $this->addWorkingTime(
-                            $before_date,
-                            $before_user_code,
-                            $before_department_code,
-                            $before_result,
-                            $business_kubun,
-                            $before_result->interval,
-                            $before_result->user_holiday_kubun);
-                            Log::DEBUG('        １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
+                        // Log::debug('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
+                        // Log::debug('            部署     = '.$before_result->department_name);
+                        // Log::debug('            打刻時刻 = '.$before_result->record_datetime);
+                        // Log::debug('            モード   = '.$before_result->mode);
+                        // Log::debug('            打刻日   = '.$before_result->record_date);
+                        // ユーザー労働時間登録
+                        // array_impl_addWorkingTime implement
+                        $array_impl_addWorkingTime = array (
+                            'target_date' => $before_date,
+                            'target_user_code' => $before_user_code,
+                            'target_department_code' => $before_department_code,
+                            'target_business_kubun' => $business_kubun,
+                            'target_result' => $before_result
+                        );
+                        $add_results = $this->addWorkingTime($array_impl_addWorkingTime);
                         // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
                         /*$before_date = null;
                         $before_user_code = null;
                         $before_department_code = null;
                         $before_result = null;*/
                         $before_out_flg = true;
-                        $target_flg = false;
-                        if ($target_flg) {
-                            Log::DEBUG('        集計対象処理後 target_flg = true');
-                        } else {
-                            Log::DEBUG('        集計対象処理後 target_flg = false');
-                        }
                     // 打刻データ配列の初期化
                         $this->iniArrayWorkingTime();
                         // 計算用配列の初期化
@@ -1043,59 +1101,121 @@ class DailyWorkingInformationController extends Controller
                     }
                 }
                 // 打刻ないデータはtempに出力
+                // 20200414 add start
+                // Log::debug('        打刻ないデータ');
+                if ($before_department_code != $result->department_code ||
+                    $before_user_code != $result->user_code ||
+                    $before_holiday_date != $result->user_working_date) {
+                    // Log::debug('        データ break $result->user_holiday_kubun= '.$result->user_holiday_kubun);
+                    // Log::debug('        データ break $result->business_kubun= '.$result->business_kubun);
+                    // 有効打刻データがなくて、休暇扱いか出勤日である場合はtempに出力
+                    // 打刻されていれば出勤以外は出力対象外
+                    $temp_out_flg1 = false;
+                    $temp_out_flg2 = false;
+                    $temp_out_flg3 = false;
+                    if (isset($result->user_holiday_kubun) && $result->user_holiday_kubun >= (int)Config::get('const.C013.paid_holiday')) {
+                        $temp_out_flg1 = true;
+                    }
+                    if ($result->business_kubun == Config::get('const.C007.basic')) {
+                        $temp_out_flg2 = true;
+                    }
+                    if (!$attendance_target_flg)
+                    {
+                        $temp_out_flg3 = true;
+                    }
+                    // Log::debug('        データ $temp_out_flg1 '.$temp_out_flg1);
+                    // Log::debug('        データ $temp_out_flg2 '.$temp_out_flg2);
+                    // Log::debug('        データ $temp_out_flg3 '.$temp_out_flg3);
+                    if ($temp_out_flg3 && ($temp_out_flg1 || $temp_out_flg2))
+                    {
+                        $array_impl_addHolidayTemp = array (
+                        'current_date' => $target_date_ymd,
+                        'current_result' => $result
+                        );
+                        $this->addHolidayTemp($array_impl_addHolidayTemp);
+                    }
+                    // } else {
+                    //     // if (!$before_out_flg) {
+                    //     //     $temp_non_date_flg = true;
+                    //     // }
+                    //     // Log::debug('        打刻ないデータ 日付とユーザー休暇区分が１件前と同じ');
+                    //     $temp_non_date_flg = $before_out_flg;       // 20200303修正
+                    // }
+                }
+                // 20200414 add end
+
                 // ただし、日付とユーザー休暇区分が１件前と同じ場合は出力しない
-                Log::DEBUG('        打刻ないデータ = '.$result->user_code.' record_time = '.$result->record_datetime.' before_out_flg = '.$before_out_flg);
-                $temp_non_date_flg = false;
-                if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
-                if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
-                if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
-                if (isset($before_result)) {
-                    if ($before_result->department_code != $result->department_code ||
-                        $before_result->user_code != $result->user_code ||
-                        $before_result->user_working_date != $result->user_working_date ||
-                        $before_holiday_kubun != $user_holiday_kubun) {
-                        if (!$before_out_flg) {
-                            $temp_non_date_flg = true;
-                        }
-                    } else {
-                        if (!$before_out_flg) {
-                            $temp_non_date_flg = true;
-                        }
-                    }
-                }
+                // // Log::debug('        打刻ないデータ = '.$result->user_code.' record_time = '.$result->record_datetime.' before_out_flg = '.$before_out_flg);
+                // $temp_non_date_flg = false;
+                // if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
+                // if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
+                // if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
+                // if (isset($before_result)) {
+                //     // Log::debug('        打刻ないデータ before_result あり');
+                //     if ($before_result->department_code != $result->department_code ||
+                //         $before_result->user_code != $result->user_code ||
+                //         $before_result->user_working_date != $result->user_working_date ||
+                //         $before_holiday_kubun != $user_holiday_kubun) {
+                //         // if (!$before_out_flg) {
+                //         //     $temp_non_date_flg = true;
+                //         // }
+                //         // Log::debug('        打刻ないデータ 日付とユーザー休暇区分が１件前と同じでない');
+                //         $temp_non_date_flg = $before_out_flg;       // 20200303修正
+                //     } else {
+                //         // if (!$before_out_flg) {
+                //         //     $temp_non_date_flg = true;
+                //         // }
+                //         // Log::debug('        打刻ないデータ 日付とユーザー休暇区分が１件前と同じ');
+                //         $temp_non_date_flg = $before_out_flg;       // 20200303修正
+                //     }
+                // }
                 // 1件前の日付がnullである場合、いきなり対象日付がないということなので出力
-                if (!$before_out_flg) {
-                    $temp_non_date_flg = true;
-                }
-                try{
-                    if($temp_non_date_flg) {
-                        Log::DEBUG('    temp_calc_workingtimesの登録開始');
-                        $ptn = 0;
-                        $dt = date_format(new Carbon($target_date), 'Ymd');
-                        Log::DEBUG('            ターゲット日付 = '.$dt);
-                        Log::DEBUG('            ユーザー休暇  = '.$user_holiday_name);
-                        Log::DEBUG('            　　　　日付  = '.$user_working_date);
-                        $this->pushArrayCalc($this->setNoInputTimePtn($ptn, $user_holiday_name, $dt, $user_working_date, $result->working_timetable_no));
-                        // temporaryに登録する
-                        $this->insTempCalcItem($target_date, $result);
-                        Log::DEBUG('    temp_calc_workingtimesの登録終了');
-                    }
+                // if (!$before_out_flg) {
+                //     // Log::debug('        打刻ないデータ いきなり対象日付がない');
+                //     $temp_non_date_flg = true;
+                // }
+                // try{
+                //     if($temp_non_date_flg) {
+                //         // Log::debug('    temp_calc_workingtimesの登録開始');
+                //         $ptn = 0;
+                //         $dt = date_format(new Carbon($target_date), 'Ymd');
+                //         // Log::debug('            ターゲット日付 = '.$dt);
+                //         // Log::debug('            ユーザー休暇  = '.$user_holiday_name);
+                //         // Log::debug('            　　　　日付  = '.$user_working_date);
+                //         // setNoInputTimePtn implement
+                //         $array_impl_setNoInputTimePtn = array (
+                //             'ptn' => $ptn,
+                //             'user_holiday_name' => $user_holiday_name,
+                //             'target_date' => $dt,
+                //             'hpliday_date' => $user_working_date,
+                //             'value_working_timetable_no' => $result->working_timetable_no
+                //         );
+                //         $this->pushArrayCalc($this->setNoInputTimePtn($array_impl_setNoInputTimePtn));
+                //         // temporaryに登録する
+                //         // calcWorkingTimeDate implement
+                //         $array_impl_insTempCalcItem = array (
+                //             'target_date' => $target_date,
+                //             'target_result' => $result
+                //         );
+                //         $this->insTempCalcItem($array_impl_insTempCalcItem);
+                //         // Log::debug('    temp_calc_workingtimesの登録終了');
+                //     }
                     // 日付とユーザー休暇区分を保存
                     $before_holiday_date = $result->user_working_date;
                     $before_holiday_user_code = $result->user_code;
                     $before_holiday_department_code = $result->department_code;
                     $before_holiday_kubun = $user_holiday_kubun;
-                }catch(\PDOException $pe){
-                    $add_results = false;
-                    throw $pe;
-                }
+                    $before_business_kubun = $result->business_kubun;
+                    // }catch(\PDOException $pe){
+                //     $add_results = false;
+                //     throw $pe;
+                // }
                 // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
                 $before_date = null;
                 $before_user_code = null;
                 $before_department_code = null;
                 $before_result = null;
                 $before_out_flg = true;
-                $target_flg = false;
                 // 次データ計算事前処理
                 // 打刻データ配列の初期化
                 $this->iniArrayWorkingTime();
@@ -1105,24 +1225,25 @@ class DailyWorkingInformationController extends Controller
             $before_result = $result;
         }
 
+        // Log::debug('            count($this->array_working_mode) = '.count($this->array_working_mode));
         if (count($this->array_working_mode) > 0) {
             try{
-                Log::DEBUG('    最終残のユーザーを登録開始 $current_user_code = '.$current_user_code.' record_time = '.$current_result->record_datetime);
-                // ユーザー労働時間登録(１個前のユーザーを登録する)
-                $add_results = $this->addWorkingTime(
-                    $current_date,
-                    $current_user_code,
-                    $current_department_code,
-                    $current_result,
-                    $business_kubun,
-                    $current_result->interval,
-                    $current_result->user_holiday_kubun);
-                    // 次データ計算事前処理
+                // Log::debug('    最終残のユーザーを登録開始 $current_user_code = '.$current_user_code.' record_time = '.$current_result->record_datetime);
+                // ユーザー労働時間登録
+                // array_impl_addWorkingTime implement
+                $array_impl_addWorkingTime = array (
+                    'target_date' => $current_date,
+                    'target_user_code' => $current_user_code,
+                    'target_department_code' => $current_department_code,
+                    'target_business_kubun' => $business_kubun,
+                    'target_result' => $current_result
+                );
+                $add_results = $this->addWorkingTime($array_impl_addWorkingTime);
                 // 打刻データ配列の初期化
                 $this->iniArrayWorkingTime();
                 // 計算用配列の初期化
                 $this->iniArrayCalc();
-                Log::DEBUG('    最終残のユーザーを登録終了 $current_user_code = '.$current_user_code);
+                // Log::debug('    最終残のユーザーを登録終了 $current_user_code = '.$current_user_code);
             }catch(\PDOException $pe){
                 $add_results = false;
                 throw $pe;
@@ -1130,44 +1251,129 @@ class DailyWorkingInformationController extends Controller
                 $add_results = false;
                 throw $e;
             }
+        // } else {
+        //     // 打刻ないデータはtempに出力
+        //     // 20200414 add start
+        //     // Log::debug('        最終残打刻ないデータ');
+        //     // 有効打刻データがなくて、休暇扱いか出勤日である場合はtempに出力
+        //     // 打刻されていれば出勤以外は出力対象外
+        //     $temp_out_flg1 = false;
+        //     $temp_out_flg2 = false;
+        //     $temp_out_flg3 = false;
+        //     if (isset($before_result->user_holiday_kubun) && $before_result->user_holiday_kubun >= (int)Config::get('const.C013.paid_holiday')) {
+        //         $temp_out_flg1 = true;
+        //     }
+        //     if ($before_result->business_kubun == Config::get('const.C007.basic')) {
+        //         $temp_out_flg2 = true;
+        //     }
+        //     if (!$attendance_target_flg)
+        //     {
+        //         $temp_out_flg3 = true;
+        //     }
+        //     // Log::debug('        最終残データ $temp_out_flg1 '.$temp_out_flg1);
+        //     // Log::debug('        最終残データ $temp_out_flg2 '.$temp_out_flg2);
+        //     // Log::debug('        最終残データ $temp_out_flg3 '.$temp_out_flg3);
+        //     if ($temp_out_flg3 && ($temp_out_flg1 || $temp_out_flg2))
+        //     {
+        //         $array_impl_addHolidayTemp = array (
+        //         'current_date' => $target_date_ymd,
+        //         'current_result' => $before_result
+        //         );
+        //         $this->addHolidayTemp($array_impl_addHolidayTemp);
+        //     }
+        //     // 20200414 add end
         }
 
-        Log::DEBUG('---------------------- calcWorkingTimeDate end ------------------------ ');
+        // Log::debug('---------------------- 日次労働時間取得 calcWorkingTimeDate end ------------------------ ');
 
         return $add_results;
 
     }
 
     /**
+     * ユーザー休暇データ登録
+     *
+     * @return 登録結果
+     */
+    private function addHolidayTemp($params)
+    {
+        // Log::debug('---------------------- ユーザー休暇データ登録 addHolidayTemp in ------------------------ ');
+        $current_date = $params['current_date'];
+        $current_result = $params['current_result'];
+        $user_holiday_name = $current_result->user_holiday_name;
+        $user_working_date = $current_result->user_working_date;
+        $working_timetable_no = $current_result->working_timetable_no;
+
+        try{
+            // Log::debug('        打刻ないデータはtempに出力 $current_date = '.$current_date);
+            $ptn = 0;
+            $dt = date_format(new Carbon($current_date), 'Ymd');
+            // Log::debug('            ターゲット日付 = '.$dt);
+            // Log::debug('            ユーザー休暇   = '.$user_holiday_name);
+            // Log::debug('            　　　　日付   = '.$user_working_date);
+            // setNoInputTimePtn implement
+            $array_impl_setNoInputTimePtn = array (
+                'ptn' => $ptn,
+                'user_holiday_name' => $user_holiday_name,
+                'target_date' => $dt,
+                'hpliday_date' => $user_working_date,
+                'value_working_timetable_no' => $working_timetable_no
+            );
+            $this->pushArrayCalc($this->setNoInputTimePtn($array_impl_setNoInputTimePtn));
+            // temporaryに登録する
+            // calcWorkingTimeDate implement
+            $array_impl_insTempCalcItem = array (
+                'target_date' => $current_date,
+                'target_result' => $current_result
+            );
+            $this->insTempCalcItem($array_impl_insTempCalcItem);
+            // Log::debug('    temp_calc_workingtimesの登録終了');
+        }catch(\PDOException $pe){
+            $add_results = false;
+            throw $pe;
+        }
+
+        // Log::debug('---------------------- ユーザー休暇データ登録 addHolidayTemp end ------------------------ ');
+
+    }
+                
+    /**
      * ユーザー労働時間登録
      *
      * @return 登録結果
      */
-    private function addWorkingTime(
-        $target_date, $target_user_code, $target_department_code, $target_result, $business_kubun, $interval, $user_holiday_kubun)
+    private function addWorkingTime($params)
     {
-        Log::DEBUG('---------------------- addWorkingTime in ------------------------ ');
-        Log::DEBUG('    temp_calc_workingtimesの登録開始');
-        Log::DEBUG('        １個前のユーザー = '.$target_user_code.' record_time = '.$target_result->record_datetime);
+        // Log::debug('---------------------- addWorkingTime in ------------------------ ');
+        // パラメータ設定
+        $target_date = $params['target_date'];
+        $target_user_code = $params['target_user_code'];
+        $target_department_code = $params['target_department_code'];
+        $business_kubun = $params['target_business_kubun'];
+        $target_result = $params['target_result'];
         // ユーザー労働時間計算(１個前のユーザーを計算する)
-        $this->calcWorkingTime(
-            $target_date,
-            $target_user_code,
-            $target_department_code,
-            $business_kubun,
-            $interval,
-            $user_holiday_kubun,
-            $target_result->record_datetime
+        // calcWorkingTimeDate implement
+        $array_impl_calcWorkingTime = array (
+            'target_date' => $target_date,
+            'target_user_code' => $target_user_code,
+            'target_department_code' => $target_department_code,
+            'target_business_kubun' => $business_kubun,
+            'target_result' => $target_result
         );
+        $this->calcWorkingTime($array_impl_calcWorkingTime);
         // temporaryに登録する
         try{
-            $this->insTempCalcItem($target_date, $target_result);
+            // calcWorkingTimeDate implement
+            $array_impl_insTempCalcItem = array (
+                'target_date' => $target_date,
+                'target_result' => $target_result
+            );
+            $this->insTempCalcItem($array_impl_insTempCalcItem);
         }catch(\PDOException $pe){
             throw $pe;
         }
-        Log::DEBUG('    temp_calc_workingtimesの登録終了');
 
-        Log::DEBUG('---------------------- addWorkingTime end ------------------------ ');
+        // Log::debug('---------------------- addWorkingTime end ------------------------ ');
         return true;
 
     }
@@ -1177,26 +1383,26 @@ class DailyWorkingInformationController extends Controller
      *
      * @return 労働時間計算結果
      */
-    private function calcWorkingTime(
-        $target_date, $target_user_code, $target_department_code, $business_kubun, $interval, $user_holiday_kubun, $target_record_time)
+    private function calcWorkingTime($params)
     {
-        Log::DEBUG('---------------------- calcWorkingTime in ---$target_user_code = '.$target_user_code);
-        Log::DEBUG('                       calcWorkingTime in ---$target_record_time = '.$target_record_time);
+        // Log::debug('---------------------- calcWorkingTime in ---');
+        // パラメータ設定
+        $target_date = $params['target_date'];
+        $target_user_code = $params['target_user_code'];
+        $target_department_code = $params['target_department_code'];
+        $business_kubun = $params['target_business_kubun'];
+        $target_result = $params['target_result'];
+        $interval = $target_result->interval;
+        $user_holiday_kubun = $target_result->user_holiday_kubun;
+        $target_record_time = $target_result->record_datetime;
+
         $work_time = new WorkTime();
         $work_time->setParamDepartmentcodeAttribute($target_department_code);
         $work_time->setParamUsercodeAttribute($target_user_code);
         $work_time->setParamStartDateAttribute($target_date);
         $work_time->setParamDatetoAttribute($target_date);
-        $attendance_time = null;
-        $leaving_time = null;
-        $missing_middle_time = null;
-        $missing_middle_return_time = null;
-        $public_going_out_time = null;
-        $public_going_out_return_time = null;
-        $working_status = null;
         $cnt = 0;
         // 前提 count($array_working_mode) = count($array_working_datetime)
-        Log::DEBUG('        array_working_mode count = '.count($this->array_working_mode));
         // working_timetable_noは出勤時刻のworking_timetable_noとする（日付が変わって退勤などがあるとworking_timetable_noが異なっている場合があるため）
         // また出勤時刻のworking_timetable_noがない場合はresultのworking_timetable_noとする
         $working_timetable_no_set = false;
@@ -1205,27 +1411,24 @@ class DailyWorkingInformationController extends Controller
         for($i=0;$i<count($this->array_working_mode);$i++){
             $value_mode = $this->array_working_mode[$i];
             $value_record_datetime = $this->array_working_datetime[$i];
+            $value_record_datetime_id = $this->array_working_datetime_id[$i];
+            $value_editor_department_code= $this->array_working_editor_department_code[$i];
+            $value_editor_department_name = $this->array_working_editor_department_name[$i];
+            $value_editor_user_code = $this->array_working_editor_user_code[$i];
+            $value_editor_user_name = $this->array_working_editor_user_name[$i];
             $value_timetable_from_time = $this->array_timetable_from_time[$i];
             $value_timetable_to_time = $this->array_timetable_to_time[$i];
             $value_check_result = $this->array_check_result[$i];
             $value_check_max_times = $this->array_check_max_times[$i];
             $value_check_interval = $this->array_check_interval[$i];
             $value_mobile_positions = $this->array_mobile_positions[$i];
+            // Log::debug('        ユーザー労働時間計算 $value_mode = '.$value_mode);
+            // Log::debug('        ユーザー労働時間計算 $value_timetable_from_time = '.$value_timetable_from_time);
+            // Log::debug('        ユーザー労働時間計算 $value_timetable_to_time = '.$value_timetable_to_time);
             $dt = new Carbon($value_record_datetime);
             $record_date = date_format($dt, 'Ymd');
-            Log::DEBUG('        ユーザー労働時間計算 cnt = '.$cnt);
-            Log::DEBUG('        ユーザー労働時間計算 value_mode = '.$value_mode);
-            Log::DEBUG('        ユーザー労働時間計算 value_record_datetime = '.$value_record_datetime);
-            Log::DEBUG('        ユーザー労働時間計算 value_timetable_from_time = '.$value_timetable_from_time);
-            Log::DEBUG('        ユーザー労働時間計算 value_timetable_to_time = '.$value_timetable_to_time);
-            Log::DEBUG('        ユーザー労働時間計算 value_check_result = '.$value_check_result);
-            Log::DEBUG('        ユーザー労働時間計算 value_check_max_times = '.$value_check_max_times);
-            Log::DEBUG('        ユーザー労働時間計算 value_check_interval = '.$value_check_interval);
-            Log::DEBUG('        ユーザー労働時間計算 value_mobile_positions = '.$value_mobile_positions);
-            Log::DEBUG('        ユーザー労働時間計算 value_working_timetable_no = '.$value_working_timetable_no);
-            Log::DEBUG('        ユーザー労働時間計算 target_date = '.$target_date);
-            Log::DEBUG('        ユーザー労働時間計算 record_date = '.$record_date);
             // 事前にテーブル再取得（テーブル取得1日以前のMAX打刻時刻）しておく
+            // Log::debug('        テーブル取得1日以前のMAX打刻時刻 $value_record_datetime = '.$value_record_datetime);
             $before_value_mode = null;
             $before_value_datetime = null;
             $work_time->setParamStartDateAttribute($value_record_datetime);
@@ -1237,6 +1440,8 @@ class DailyWorkingInformationController extends Controller
                 $before_value_datetime = $before_result->record_datetime;
                 break;
             }
+            // Log::debug('        テーブル取得1日以前のMAX打刻時刻 $before_value_mode = '.$before_value_mode);
+            // Log::debug('        テーブル取得1日以前のMAX打刻時刻 $before_value_datetime = '.$before_value_datetime);
             // 事前にテーブル再取得（テーブル取得1日以降のMIN打刻時刻）しておく
             $after_value_mode = null;
             $after_value_datetime = null;
@@ -1247,33 +1452,39 @@ class DailyWorkingInformationController extends Controller
                 $after_value_datetime = $after_result->record_datetime;
                 break;
             }
-            Log::DEBUG('        ユーザー労働時間計算 $before_value_mode = '.$before_value_mode);
-            Log::DEBUG('        ユーザー労働時間計算 $before_value_datetime = '.$before_value_datetime);
-            Log::DEBUG('        ユーザー労働時間計算 $after_value_mode = '.$after_value_mode);
-            Log::DEBUG('        ユーザー労働時間計算 $after_value_datetime = '.$after_value_datetime);
+            // Log::debug('        テーブル取得1日以降のMIN打刻時刻 $after_value_mode = '.$after_value_mode);
+            // Log::debug('        テーブル取得1日以降のMIN打刻時刻 $after_value_datetime = '.$after_value_datetime);
             $work_time->setParamDatefromAttribute($target_date);
             $work_time->setParamDatetoAttribute($target_date);
             // 出勤打刻の場合
             if ($value_mode == Config::get('const.C005.attendance_time')) {
                 $value_working_timetable_no = $this->array_working_timetable_no[$i];
                 $working_timetable_no_set = true;
-                $this->setAttendancetime(
-                    $cnt,
-                    $work_time,
-                    $value_record_datetime,
-                    $value_timetable_from_time,
-                    $value_timetable_to_time,
-                    $value_check_result,
-                    $value_check_max_times,
-                    $value_check_interval,
-                    $value_mobile_positions,
-                    $before_value_mode,
-                    $before_value_datetime,
-                    $business_kubun,
-                    $interval,
-                    $user_holiday_kubun,
-                    $value_working_timetable_no
+                // 出勤状態設定
+                // setAttendancetime implement
+                $array_impl_setAttendancetime = array (
+                    'cnt' => $cnt,
+                    'work_time' => $work_time,
+                    'value_record_datetime' => $value_record_datetime,
+                    'value_timetable_from_time' => $value_timetable_from_time,
+                    'value_timetable_to_time' => $value_timetable_to_time,
+                    'value_check_result' => $value_check_result,
+                    'value_check_max_times' => $value_check_max_times,
+                    'value_check_interval' => $value_check_interval,
+                    'value_record_datetime_id' => $value_record_datetime_id,
+                    'value_editor_department_code' => $value_editor_department_code,
+                    'value_editor_department_name' => $value_editor_department_name,
+                    'value_editor_user_code' => $value_editor_user_code,
+                    'value_editor_user_name' => $value_editor_user_name,
+                    'value_mobile_positions' => $value_mobile_positions,
+                    'before_value_mode' => $before_value_mode,
+                    'before_value_datetime' => $before_value_datetime,
+                    'business_kubun' => $business_kubun,
+                    'interval' => $interval,
+                    'user_holiday_kubun' => $user_holiday_kubun,
+                    'value_working_timetable_no' => $value_working_timetable_no
                 );
+                $this->setAttendancetime($array_impl_setAttendancetime);
                 if ($target_date == $record_date) {
                     $attendance_time_index = $i;
                 }
@@ -1281,102 +1492,150 @@ class DailyWorkingInformationController extends Controller
                 if (!$working_timetable_no_set) {
                     $value_working_timetable_no = $this->array_working_timetable_no[$i];
                 }
-                $this->setLeavingtime(
-                    $cnt,
-                    $work_time,
-                    $value_record_datetime,
-                    $value_timetable_from_time,
-                    $value_timetable_to_time,
-                    $value_check_result,
-                    $value_check_max_times,
-                    $value_mobile_positions,
-                    $before_value_mode,
-                    $before_value_datetime,
-                    $business_kubun,
-                    $user_holiday_kubun,
-                    $value_working_timetable_no,
-                    $attendance_time_index
+                // 退勤状態設定
+                // setAttendancetime implement
+                $array_impl_setLeavingtime = array (
+                    'cnt' => $cnt,
+                    'work_time' => $work_time,
+                    'value_record_datetime' => $value_record_datetime,
+                    'value_record_datetime_id' => $value_record_datetime_id,
+                    'value_editor_department_code' => $value_editor_department_code,
+                    'value_editor_department_name' => $value_editor_department_name,
+                    'value_editor_user_code' => $value_editor_user_code,
+                    'value_editor_user_name' => $value_editor_user_name,
+                    'value_timetable_from_time' => $value_timetable_from_time,
+                    'value_timetable_to_time' => $value_timetable_to_time,
+                    'value_check_result' => $value_check_result,
+                    'value_check_max_times' => $value_check_max_times,
+                    'value_mobile_positions' => $value_mobile_positions,
+                    'before_value_mode' => $before_value_mode,
+                    'before_value_datetime' => $before_value_datetime,
+                    'business_kubun' => $business_kubun,
+                    'user_holiday_kubun' => $user_holiday_kubun,
+                    'value_working_timetable_no' => $value_working_timetable_no,
+                    'attendance_time_index' => $attendance_time_index
                 );
+                $this->setLeavingtime($array_impl_setLeavingtime);
                 $working_timetable_no_set = false;
             } elseif ($value_mode == Config::get('const.C005.missing_middle_time')) {       // 私用外出の場合
                 if (!$working_timetable_no_set) {
                     $value_working_timetable_no = $this->array_working_timetable_no[$i];
                 }
-                $this->setMissingMiddleTime(
-                    $cnt,
-                    $work_time,
-                    $value_record_datetime,
-                    $value_timetable_from_time,
-                    $value_timetable_to_time,
-                    $value_check_result,
-                    $value_check_max_times,
-                    $value_mobile_positions,
-                    $before_value_mode,
-                    $before_value_datetime,
-                    $value_working_timetable_no,
-                    $attendance_time_index
+                // 私用外出状態設定
+                // setMissingMiddleTime implement
+                $array_impl_setMissingMiddleTime = array (
+                    'cnt' => $cnt,
+                    'work_time' => $work_time,
+                    'value_record_datetime' => $value_record_datetime,
+                    'value_record_datetime_id' => $value_record_datetime_id,
+                    'value_editor_department_code' => $value_editor_department_code,
+                    'value_editor_department_name' => $value_editor_department_name,
+                    'value_editor_user_code' => $value_editor_user_code,
+                    'value_editor_user_name' => $value_editor_user_name,
+                    'value_timetable_from_time' => $value_timetable_from_time,
+                    'value_timetable_to_time' => $value_timetable_to_time,
+                    'value_check_result' => $value_check_result,
+                    'value_check_max_times' => $value_check_max_times,
+                    'value_mobile_positions' => $value_mobile_positions,
+                    'before_value_mode' => $before_value_mode,
+                    'before_value_datetime' => $before_value_datetime,
+                    'business_kubun' => $business_kubun,
+                    'user_holiday_kubun' => $user_holiday_kubun,
+                    'value_working_timetable_no' => $value_working_timetable_no,
+                    'attendance_time_index' => $attendance_time_index
                 );
+                $this->setMissingMiddleTime($array_impl_setMissingMiddleTime);
             } elseif ($value_mode == Config::get('const.C005.missing_middle_return_time')) {        // 私用外出戻りの場合
                 if (!$working_timetable_no_set) {
                     $value_working_timetable_no = $this->array_working_timetable_no[$i];
                 }
-                $this->setMissingMiddleReturnTime(
-                    $cnt,
-                    $work_time,
-                    $value_record_datetime,
-                    $value_timetable_from_time,
-                    $value_timetable_to_time,
-                    $value_check_result,
-                    $value_check_max_times,
-                    $value_mobile_positions,
-                    $before_value_mode,
-                    $before_value_datetime,
-                    $value_working_timetable_no,
-                    $attendance_time_index
+                // 私用外出戻り状態設定
+                // setMissingMiddleReturnTime implement
+                $array_impl_setMissingMiddleReturnTime = array (
+                    'cnt' => $cnt,
+                    'work_time' => $work_time,
+                    'value_record_datetime' => $value_record_datetime,
+                    'value_record_datetime_id' => $value_record_datetime_id,
+                    'value_editor_department_code' => $value_editor_department_code,
+                    'value_editor_department_name' => $value_editor_department_name,
+                    'value_editor_user_code' => $value_editor_user_code,
+                    'value_editor_user_name' => $value_editor_user_name,
+                    'value_timetable_from_time' => $value_timetable_from_time,
+                    'value_timetable_to_time' => $value_timetable_to_time,
+                    'value_check_result' => $value_check_result,
+                    'value_check_max_times' => $value_check_max_times,
+                    'value_mobile_positions' => $value_mobile_positions,
+                    'before_value_mode' => $before_value_mode,
+                    'before_value_datetime' => $before_value_datetime,
+                    'business_kubun' => $business_kubun,
+                    'user_holiday_kubun' => $user_holiday_kubun,
+                    'value_working_timetable_no' => $value_working_timetable_no,
+                    'attendance_time_index' => $attendance_time_index
                 );
+                $this->setMissingMiddleReturnTime($array_impl_setMissingMiddleReturnTime);
             } elseif ($value_mode == Config::get('const.C005.public_going_out_time')) {             // 公用外出の場合
                 if (!$working_timetable_no_set) {
                     $value_working_timetable_no = $this->array_working_timetable_no[$i];
                 }
-                $this->setPubliGoingOutTime(
-                    $cnt,
-                    $work_time,
-                    $value_record_datetime,
-                    $value_timetable_from_time,
-                    $value_timetable_to_time,
-                    $value_check_result,
-                    $value_check_max_times,
-                    $value_mobile_positions,
-                    $before_value_mode,
-                    $before_value_datetime,
-                    $value_working_timetable_no,
-                    $attendance_time_index
+                // 公用外出状態設定
+                // setPubliGoingOutTime implement
+                $array_impl_setPubliGoingOutTime = array (
+                    'cnt' => $cnt,
+                    'work_time' => $work_time,
+                    'value_record_datetime' => $value_record_datetime,
+                    'value_record_datetime_id' => $value_record_datetime_id,
+                    'value_editor_department_code' => $value_editor_department_code,
+                    'value_editor_department_name' => $value_editor_department_name,
+                    'value_editor_user_code' => $value_editor_user_code,
+                    'value_editor_user_name' => $value_editor_user_name,
+                    'value_timetable_from_time' => $value_timetable_from_time,
+                    'value_timetable_to_time' => $value_timetable_to_time,
+                    'value_check_result' => $value_check_result,
+                    'value_check_max_times' => $value_check_max_times,
+                    'value_mobile_positions' => $value_mobile_positions,
+                    'before_value_mode' => $before_value_mode,
+                    'before_value_datetime' => $before_value_datetime,
+                    'business_kubun' => $business_kubun,
+                    'user_holiday_kubun' => $user_holiday_kubun,
+                    'value_working_timetable_no' => $value_working_timetable_no,
+                    'attendance_time_index' => $attendance_time_index
                 );
+                $this->setPubliGoingOutTime($array_impl_setPubliGoingOutTime);
             } elseif ($value_mode == Config::get('const.C005.public_going_out_return_time')) {      // 公用外出戻りの場合
                 if (!$working_timetable_no_set) {
                     $value_working_timetable_no = $this->array_working_timetable_no[$i];
                 }
-                $this->setPublicGoingOutReturnTime(
-                    $cnt,
-                    $work_time,
-                    $value_record_datetime,
-                    $value_timetable_from_time,
-                    $value_timetable_to_time,
-                    $value_check_result,
-                    $value_check_max_times,
-                    $value_mobile_positions,
-                    $before_value_mode,
-                    $before_value_datetime,
-                    $value_working_timetable_no,
-                    $attendance_time_index
+                // 公用外出状態設定
+                // setPublicGoingOutReturnTime implement
+                $array_impl_setPublicGoingOutReturnTime = array (
+                    'cnt' => $cnt,
+                    'work_time' => $work_time,
+                    'value_record_datetime' => $value_record_datetime,
+                    'value_record_datetime_id' => $value_record_datetime_id,
+                    'value_editor_department_code' => $value_editor_department_code,
+                    'value_editor_department_name' => $value_editor_department_name,
+                    'value_editor_user_code' => $value_editor_user_code,
+                    'value_editor_user_name' => $value_editor_user_name,
+                    'value_timetable_from_time' => $value_timetable_from_time,
+                    'value_timetable_to_time' => $value_timetable_to_time,
+                    'value_check_result' => $value_check_result,
+                    'value_check_max_times' => $value_check_max_times,
+                    'value_mobile_positions' => $value_mobile_positions,
+                    'before_value_mode' => $before_value_mode,
+                    'before_value_datetime' => $before_value_datetime,
+                    'business_kubun' => $business_kubun,
+                    'user_holiday_kubun' => $user_holiday_kubun,
+                    'value_working_timetable_no' => $value_working_timetable_no,
+                    'attendance_time_index' => $attendance_time_index
                 );
+                $this->setPublicGoingOutReturnTime($array_impl_setPublicGoingOutReturnTime);
             }
             $before_value_mode = $value_mode;
             $before_value_datetime = $value_record_datetime;
             $cnt = $cnt + 1;
         }
 
-        Log::DEBUG('---------------------- calcWorkingTime end ------------------------ ');
+        // Log::debug('---------------------- calcWorkingTime end ------------------------ ');
        
     }
 
@@ -1388,14 +1647,30 @@ class DailyWorkingInformationController extends Controller
      *         １個前のモード
      * @return void
      */
-    private function setAttendancetime($cnt, $work_time,
-        $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $value_check_interval, $value_mobile_positions, $before_value_mode,
-        $before_value_datetime, $business_kubun, $interval, $user_holiday_kubun, $working_timetable_no)
+    private function setAttendancetime($params)
     {
 
-        Log::DEBUG('---------------------- setAttendancetime in ------------------------ ');
-        Log::DEBUG('        出勤打刻処理 start');
+        // Log::debug('---------------------- setAttendancetime in ------------------------ ');
+        $cnt = $params['cnt'];
+        $work_time = $params['work_time'];
+        $value_record_datetime = $params['value_record_datetime'];
+        $value_timetable_from_time = $params['value_timetable_from_time'];
+        $value_timetable_to_time = $params['value_timetable_to_time'];
+        $value_check_result = $params['value_check_result'];
+        $value_check_max_times = $params['value_check_max_times'];
+        $value_check_interval = $params['value_check_interval'];
+        $value_record_datetime_id = $params['value_record_datetime_id'];
+        $value_editor_department_code = $params['value_editor_department_code'];
+        $value_editor_department_name = $params['value_editor_department_name'];
+        $value_editor_user_code = $params['value_editor_user_code'];
+        $value_editor_user_name = $params['value_editor_user_name'];
+        $value_mobile_positions = $params['value_mobile_positions'];
+        $before_value_mode = $params['before_value_mode'];
+        $before_value_datetime = $params['before_value_datetime'];
+        $business_kubun = $params['business_kubun'];
+        $interval = $params['interval'];
+        $user_holiday_kubun = $params['user_holiday_kubun'];
+        $value_working_timetable_no = $params['value_working_timetable_no'];
         $apicommon = new ApiCommonController();
         $attendance_from_date = new Carbon($work_time->getParamDatefromAttribute());        // 出勤1日のはじめ
         $attendance_from_date_format = date_format($attendance_from_date, 'Y/m/d');
@@ -1414,40 +1689,40 @@ class DailyWorkingInformationController extends Controller
             $attendance_from_date_format.' 23:59:59');                                      // 出勤1日の終わり
         $record_datetime = new Carbon($value_record_datetime);                              // 打刻日付時刻
         $record_before_datetime = new Carbon($before_value_datetime);                       // １個前の打刻時刻
-        Log::DEBUG('            attendance_from_date  = '.$attendance_from_date);
-        Log::DEBUG('            timetable_from_date  = '.$timetable_from_date);
-        Log::DEBUG('            timetable_to_date  = '.$timetable_to_date);
-        Log::DEBUG('            attendance_to_date  = '.$attendance_to_date);
-        Log::DEBUG('            record_datetime  = '.$record_datetime);
-        Log::DEBUG('            record_before_datetime = '.$record_before_datetime);
-        Log::DEBUG('            before_value_mode = '.$before_value_mode);
-        Log::DEBUG('            cnt  = '.$cnt);
+        // Log::debug('            attendance_from_date  = '.$attendance_from_date);
+        // Log::debug('            timetable_from_date  = '.$timetable_from_date);
+        // Log::debug('            timetable_to_date  = '.$timetable_to_date);
+        // Log::debug('            attendance_to_date  = '.$attendance_to_date);
+        // Log::debug('            record_datetime  = '.$record_datetime);
+        // Log::debug('            record_before_datetime = '.$record_before_datetime);
+        // Log::debug('            before_value_mode = '.$before_value_mode);
+        // Log::debug('            cnt  = '.$cnt);
         // パターン設定
         $ptn = null;
 
         // ---------------------出勤が最初の場合 -----------------------------------------------------------------------------------
         if ($cnt == 0) {
             if ($before_value_mode == Config::get('const.C005.attendance_time')) {          // １個前のモードが出勤である場合
-                Log::DEBUG('        １個前のモードが出勤である');
+                // Log::debug('        １個前のモードが出勤である');
                 if ($record_before_datetime < $attendance_from_date) {                      // １個前の打刻時刻 < 出勤1日のはじめ
                     // パターン２（打刻ミス（出勤済）（要確認）。勤務状態は打刻なし）
                     $ptn = '2';
                 }
             } elseif ($before_value_mode == Config::get('const.C005.leaving_time')) {       // １個前のモードが退勤である場合
-                Log::DEBUG('        １個前のモードが退勤である');
+                // Log::debug('        １個前のモードが退勤である');
                 if ($record_datetime >= $attendance_from_date &&
-                            $record_datetime < $timetable_from_date) {                      // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
+                            $record_datetime <= $timetable_from_date) {                      // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
                     $ptn = '1';
                     // 退勤から出勤までのタイム差を取得しインターバルチェック
                     $value_check_interval = $apicommon->chkInteval($record_datetime, $record_before_datetime);
                 } elseif ($record_datetime >= $timetable_from_date &&
-                            $record_datetime < $timetable_to_date) {                        // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
+                            $record_datetime <= $timetable_to_date) {                        // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
                     // パターン３（遅刻出勤（遅刻=1）。勤務状態は出勤状態）
                     $ptn = '3';
                     // 退勤から出勤までのタイム差を取得しインターバルチェック
                     $value_check_interval = $apicommon->chkInteval($record_datetime, $record_before_datetime);
                 } elseif ($record_datetime >= $timetable_to_date &&
-                            $record_datetime < $attendance_to_date) {                       // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
+                            $record_datetime <= $attendance_to_date) {                       // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
                     //if ($record_before_datetime < $attendance_from_date) {                  // １個前の打刻時刻 < 出勤1日のはじめ
                         // パターン４（遅刻出勤（要確認）。勤務状態は出勤状態）
                         $ptn = '4';
@@ -1461,41 +1736,39 @@ class DailyWorkingInformationController extends Controller
                         $log_data = $work_time->getParamDatefromAttribute();
                         $log_data .= $work_time->getParamUsercodeAttribute();
                         $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                        Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setAttendancetime1 '.$log_data);
                     }
                 } else {
                     // 不明データ
                     $log_data = $work_time->getParamDatefromAttribute();
                     $log_data .= $work_time->getParamUsercodeAttribute();
                     $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                    Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setAttendancetime2 '.$log_data);
                 }
             } elseif ($before_value_mode == Config::get('const.C005.missing_middle_time') ||
                 $before_value_mode == Config::get('const.C005.public_going_out_time')) {    // １個前のモードが私用または公用外出である場合
-                Log::DEBUG('        １個前のモードが外出である');
+                // Log::debug('        １個前のモードが外出である');
                 if ($record_before_datetime < $attendance_from_date) {                      // １個前の打刻時刻 < 出勤1日のはじめ
                     // パターン５（打刻ミス（外出戻りしていない）。勤務状態は打刻なし）
                     $ptn = '5';
                 }
-            } elseif ($before_value_mode == Config::get('const.C005.missing_middle_return_time') ||
+            } elseif ($before_value_mode == Config::get('const.C005.missing_middle_time_return_time') ||
                 $before_value_mode == Config::get('const.C005.public_going_out_return_time')) {     // １個前のモードが戻り
-                Log::DEBUG('        １個前のモードが外出戻りである');
+                // Log::debug('        １個前のモードが外出戻りである');
                 if ($record_before_datetime < $attendance_from_date) {                      // １個前の打刻時刻 < 出勤1日のはじめ
                     // パターン６（打刻ミス（退勤していない）。勤務状態は打刻なし）
                     $ptn = '6';
                 }
             } else {                                                                        // １個前のモードがない
-                Log::DEBUG('        １個前のモードがない ');
+                // Log::debug('        １個前のモードがない ');
                 if ($record_datetime >= $attendance_from_date &&
-                    $record_datetime < $timetable_from_date) {                              // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
+                    $record_datetime <= $timetable_from_date) {                              // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
                     // パターン１（正常出勤。勤務状態は出勤状態）
                     $ptn = '1';
                 } elseif ($record_datetime >= $timetable_from_date &&
-                            $record_datetime < $timetable_to_date) {                        // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
+                            $record_datetime <= $timetable_to_date) {                        // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
                     // パターン３（遅刻出勤（遅刻=1）。勤務状態は出勤状態）
                     $ptn = '3';
                 } elseif ($record_datetime >= $timetable_to_date &&
-                            $record_datetime < $attendance_to_date) {                       // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
+                            $record_datetime <= $attendance_to_date) {                       // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
                     // パターン４（遅刻出勤（要確認）。勤務状態は出勤状態）
                     $ptn = '4';
                 } elseif ($record_datetime > $attendance_to_date) {                         // 出勤1日の終わり < 打刻時刻
@@ -1504,44 +1777,42 @@ class DailyWorkingInformationController extends Controller
                     $log_data = $work_time->getParamDatefromAttribute();
                     $log_data .= $work_time->getParamUsercodeAttribute();
                     $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                    Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setAttendancetime3 '.$log_data);
                 } else {
                     // 不明データ
                     $log_data = $work_time->getParamDatefromAttribute();
                     $log_data .= $work_time->getParamUsercodeAttribute();
                     $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                    Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setAttendancetime4 '.$log_data);
                 }
             }
         // ---------------------出勤が２番目以降の場合 -----------------------------------------------------------------------------------
         } else {
             if ($before_value_mode == Config::get('const.C005.attendance_time')) {          // １個前のモードが出勤
                 if ($record_before_datetime >= $attendance_from_date &&
-                            $record_before_datetime < $attendance_to_date) {                // 出勤1日のはじめ <= １個前の打刻時刻 < 出勤1日の終わり
+                            $record_before_datetime <= $attendance_to_date) {                // 出勤1日のはじめ <= １個前の打刻時刻 < 出勤1日の終わり
                     // パターン６（打刻ミス（退勤していない）。勤務状態は打刻なし）
                     $ptn = '6';
                 }
             } elseif ($before_value_mode == Config::get('const.C005.leaving_time')) {       // １個前のモードが退勤
                 if ($record_datetime >= $attendance_from_date &&
-                            $record_datetime < $timetable_from_date) {                      // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
+                            $record_datetime <= $timetable_from_date) {                      // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
                     if ($record_before_datetime >= $attendance_from_date &&
-                                $record_before_datetime < $timetable_from_date) {           // 出勤1日のはじめ <= １個前の打刻時刻 < タイムテーブルの始業時刻
+                                $record_before_datetime <= $timetable_from_date) {           // 出勤1日のはじめ <= １個前の打刻時刻 < タイムテーブルの始業時刻
                         // パターン１（正常出勤。勤務状態は出勤状態）
                         $ptn = '1';
                         // 退勤から出勤までのタイム差を取得しインターバルチェック
                         $value_check_interval = $apicommon->chkInteval($record_datetime, $record_before_datetime);
                     }
                 } elseif ($record_datetime >= $timetable_from_date &&
-                                 $record_datetime < $timetable_to_date) {                   // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
+                                 $record_datetime <= $timetable_to_date) {                   // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
                     if ($record_before_datetime >= $attendance_from_date &&
-                                     $record_before_datetime < $timetable_to_date) {        // 出勤1日のはじめ <= １個前の打刻時刻 < タイムテーブルの終業時刻
+                                     $record_before_datetime <= $timetable_to_date) {        // 出勤1日のはじめ <= １個前の打刻時刻 < タイムテーブルの終業時刻
                         // パターン３（遅刻出勤（遅刻=1）。勤務状態は出勤状態）
                         $ptn = '3';
                         // 退勤から出勤までのタイム差を取得しインターバルチェック
                         $value_check_interval = $apicommon->chkInteval($record_datetime, $record_before_datetime);
                     }
                 } elseif ($record_datetime >= $timetable_to_date &&
-                                $record_datetime < $attendance_to_date) {                   // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
+                                $record_datetime <= $attendance_to_date) {                   // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
                     if ($record_before_datetime >= $attendance_from_date &&
                                     $record_before_datetime < $attendance_to_date) {        // 出勤1日のはじめ <= １個前の打刻時刻 < 出勤1日の終わり
                         // パターン４（遅刻出勤（要確認）。勤務状態は出勤状態）
@@ -1555,13 +1826,11 @@ class DailyWorkingInformationController extends Controller
                     $log_data = $work_time->getParamDatefromAttribute();
                     $log_data .= $work_time->getParamUsercodeAttribute();
                     $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                    Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setAttendancetime5 '.$log_data);
                 } else {
                     // 不明データ
                     $log_data = $work_time->getParamDatefromAttribute();
                     $log_data .= $work_time->getParamUsercodeAttribute();
                     $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                    Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setAttendancetime6 '.$log_data);
                 }
             } elseif ($before_value_mode == Config::get('const.C005.missing_middle_time') ||
                 $before_value_mode == Config::get('const.C005.public_going_out_time')) {    // １個前のモードが私用または公用外出である場合
@@ -1579,21 +1848,21 @@ class DailyWorkingInformationController extends Controller
                 }
             } else {                                                                        // １個前のモードがない
                 if ($record_datetime >= $attendance_from_date &&
-                            $record_datetime < $timetable_from_date) {                      // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
+                            $record_datetime <= $timetable_from_date) {                      // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
                     if ($record_before_datetime >= $attendance_from_date &&
                                 $record_before_datetime < $timetable_from_date) {           // 出勤1日のはじめ <= １個前の打刻時刻 < タイムテーブルの始業時刻
                         // パターン１（正常出勤。勤務状態は出勤状態）
                         $ptn = '1';
                     }
                 } elseif ($record_datetime >= $timetable_from_date &&
-                                 $record_datetime < $timetable_to_date) {                   // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
+                                 $record_datetime <= $timetable_to_date) {                   // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
                     if ($record_before_datetime >= $attendance_from_date &&
                                      $record_before_datetime < $timetable_to_date) {        // 出勤1日のはじめ <= １個前の打刻時刻 < タイムテーブルの終業時刻
                         // パターン３（遅刻出勤（遅刻=1）。勤務状態は出勤状態）
                         $ptn = '3';
                     }
                 } elseif ($record_datetime >= $timetable_to_date &&
-                                $record_datetime < $attendance_to_date) {                   // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
+                                $record_datetime <= $attendance_to_date) {                   // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
                     if ($record_before_datetime >= $attendance_from_date &&
                                     $record_before_datetime < $attendance_to_date) {        // 出勤1日のはじめ <= １個前の打刻時刻 < 出勤1日の終わり
                         // パターン４（遅刻出勤（要確認）。勤務状態は出勤状態）
@@ -1605,43 +1874,39 @@ class DailyWorkingInformationController extends Controller
                     $log_data = $work_time->getParamDatefromAttribute();
                     $log_data .= $work_time->getParamUsercodeAttribute();
                     $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                    Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setAttendancetime7 '.$log_data);
                 } else {
                     // 不明データ
                     $log_data = $work_time->getParamDatefromAttribute();
                     $log_data .= $work_time->getParamUsercodeAttribute();
                     $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                    Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setAttendancetime8 '.$log_data);
                 }
             }
         }
 
-        if ($ptn != null) {
-            $this->pushArrayCalc($this->setAttendanceCollectPtn(
-                $ptn,
-                $record_datetime,
-                $value_check_result,
-                $value_check_max_times,
-                $value_check_interval,
-                $value_mobile_positions,
-                $business_kubun,
-                $user_holiday_kubun,
-                $working_timetable_no));
-        } else {
-            // 不明データとして作成する
-            $this->pushArrayCalc($this->setAttendanceCollectPtn(
-                '',
-                $record_datetime,
-                $value_check_result,
-                $value_check_max_times,
-                $value_check_interval,
-                $value_mobile_positions,
-                $business_kubun,
-                $user_holiday_kubun,
-                $working_timetable_no));
+        if ($ptn == null) {
+            $ptn = '';
         }
+        // setAttendanceCollectPtn implement
+        $array_impl_setAttendanceCollectPtn = array (
+            'ptn' => $ptn,
+            'record_datetime' => $record_datetime,
+            'value_record_datetime_id' => $value_record_datetime_id,
+            'value_editor_department_code' => $value_editor_department_code,
+            'value_editor_department_name' => $value_editor_department_name,
+            'value_editor_user_code' => $value_editor_user_code,
+            'value_editor_user_name' => $value_editor_user_name,
+            'value_check_result' => $value_check_result,
+            'value_check_max_times' => $value_check_max_times,
+            'value_check_interval' => $value_check_interval,
+            'value_mobile_positions' => $value_mobile_positions,
+            'business_kubun' => $business_kubun,
+            'user_holiday_kubun' => $user_holiday_kubun,
+            'value_working_timetable_no' => $value_working_timetable_no
+        );
+        $this->pushArrayCalc($this->setAttendanceCollectPtn($array_impl_setAttendanceCollectPtn));
+
         $this->check_interval2 = $value_check_interval;
-        Log::DEBUG('---------------------- setAttendancetime end ------------------------ ');
+        // Log::debug('---------------------- setAttendancetime end ------------------------ ');
             
     }
 
@@ -1662,17 +1927,34 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setAttendanceCollectPtn(
-        $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_check_interval,$value_mobile_positions,
-        $business_kubun, $user_holiday_kubun, $working_timetable_no)
+    private function setAttendanceCollectPtn($params)
     {
-        Log::DEBUG('---------------------- setAttendanceCollectPtn in -- 出勤 ptn = '.$ptn.' ---------------------- '.$record_datetime);
-        Log::DEBUG('                                                  -- working_timetable_no = '.$working_timetable_no);
+        // Log::debug('---------------------- setAttendanceCollectPtn in -- -------------------- ');
+        // パラメータ設定
+        $ptn = $params['ptn'];
+        $record_datetime = $params['record_datetime'];
+        $value_record_datetime_id = $params['value_record_datetime_id'];
+        $value_editor_department_code = $params['value_editor_department_code'];
+        $value_editor_department_name = $params['value_editor_department_name'];
+        $value_editor_user_code = $params['value_editor_user_code'];
+        $value_editor_user_name = $params['value_editor_user_name'];
+        $value_check_result = $params['value_check_result'];
+        $value_check_max_times = $params['value_check_max_times'];
+        $value_check_interval = $params['value_check_interval'];
+        $value_mobile_positions = $params['value_mobile_positions'];
+        $business_kubun = $params['business_kubun'];
+        $user_holiday_kubun = $params['user_holiday_kubun'];
+        $working_timetable_no = $params['value_working_timetable_no'];
         $temp_calc_model = new TempCalcWorkingTime();
 
         if ($ptn == '1') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
             $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
@@ -1688,12 +1970,17 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
             $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_001'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -1703,6 +1990,11 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '3') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
             $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
@@ -1728,6 +2020,11 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '4') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
             $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_001'));
@@ -1753,12 +2050,17 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '5') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
             $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_003'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -1768,12 +2070,17 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '6') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
             $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_001'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -1784,12 +2091,17 @@ class DailyWorkingInformationController extends Controller
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.attendance_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
             $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
-            $temp_calc_model->setCurrentcalcAttribute('0');
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -1798,7 +2110,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         }
 
-        Log::DEBUG('---------------------- setAttendanceCollectPtn end ------------------------ ');
+        // Log::debug('---------------------- setAttendanceCollectPtn end ------------------------ ');
         return $temp_calc_model;
             
     }
@@ -1811,13 +2123,30 @@ class DailyWorkingInformationController extends Controller
      *         １個前のモード
      * @return チェック結果
      */
-    private function setLeavingtime($cnt, $work_time,
-        $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $value_mobile_positions, $before_value_mode, $before_value_datetime,
-        $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index)
+    private function setLeavingtime($params)
     {
-        Log::DEBUG('---------------------- setLeavingtime in ------------------------ ');
-        Log::DEBUG('        退勤打刻処理 start');
+        // Log::debug('---------------------- setLeavingtime in ------------------------ ');
+        $cnt = $params['cnt'];
+        $work_time = $params['work_time'];
+        $value_record_datetime = $params['value_record_datetime'];
+        $value_record_datetime_id = $params['value_record_datetime_id'];
+        $value_editor_department_code = $params['value_editor_department_code'];
+        $value_editor_department_name = $params['value_editor_department_name'];
+        $value_editor_user_code = $params['value_editor_user_code'];
+        $value_editor_user_name = $params['value_editor_user_name'];
+        $value_timetable_from_time = $params['value_timetable_from_time'];
+        $value_timetable_to_time = $params['value_timetable_to_time'];
+        $value_check_result = $params['value_check_result'];
+        $value_check_max_times = $params['value_check_max_times'];
+        $value_mobile_positions = $params['value_mobile_positions'];
+        $before_value_mode = $params['before_value_mode'];
+        $before_value_datetime = $params['before_value_datetime'];
+        $business_kubun = $params['business_kubun'];
+        $user_holiday_kubun = $params['user_holiday_kubun'];
+        $value_working_timetable_no = $params['value_working_timetable_no'];
+        $attendance_time_index = $params['attendance_time_index'];
+
+        $array_impl_setLeavingCollectPtn = null;
         $apicommon = new ApiCommonController();
         $attendance_from_date = new Carbon($work_time->getParamDatefromAttribute());        // 出勤1日のはじめ
         $attendance_from_date_format = date_format($attendance_from_date, 'Y/m/d');
@@ -1836,15 +2165,15 @@ class DailyWorkingInformationController extends Controller
             $attendance_from_date_format.' 23:59:59');                                      // 出勤1日の終わり
         $record_datetime = new Carbon($value_record_datetime);                              // 打刻日付時刻
         $record_before_datetime = new Carbon($before_value_datetime);                       // １個前の打刻時刻
-        Log::DEBUG('            attendance_from_date set = '.$attendance_from_date);
-        Log::DEBUG('            timetable_from_date set = '.$timetable_from_date);
-        Log::DEBUG('            timetable_to_date set = '.$timetable_to_date);
-        Log::DEBUG('            attendance_to_date set = '.$attendance_to_date);
-        Log::DEBUG('            record_datetime set = '.$record_datetime);
-        Log::DEBUG('            record_before_datetime set = '.$record_before_datetime);
-        Log::DEBUG('            before_value_mode set = '.$before_value_mode);
-        Log::DEBUG('            before_value_datetime set = '.$before_value_datetime);
-        Log::DEBUG('            cnt set = '.$cnt);
+        // Log::debug('            attendance_from_date set = '.$attendance_from_date);
+        // Log::debug('            timetable_from_date set = '.$timetable_from_date);
+        // Log::debug('            timetable_to_date set = '.$timetable_to_date);
+        // Log::debug('            attendance_to_date set = '.$attendance_to_date);
+        // Log::debug('            record_datetime set = '.$record_datetime);
+        // Log::debug('            record_before_datetime set = '.$record_before_datetime);
+        // Log::debug('            before_value_mode set = '.$before_value_mode);
+        // Log::debug('            before_value_datetime set = '.$before_value_datetime);
+        // Log::debug('            cnt set = '.$cnt);
         // パターン設定
         $ptn = null;
 
@@ -1854,58 +2183,102 @@ class DailyWorkingInformationController extends Controller
                 $before_value_mode == Config::get('const.C005.missing_middle_return_time') ||
                 $before_value_mode == Config::get('const.C005.public_going_out_return_time')) {     // １個前のモードが出勤または戻りである場合
                 if ($record_datetime >= $attendance_from_date &&
-                            $record_datetime < $timetable_from_date) {                      // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
+                            $record_datetime <= $timetable_from_date) {                      // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
                     if ($record_before_datetime < $attendance_from_date) {                  // １個前の打刻時刻 < 出勤1日のはじめ
                         // パターン１（正常退勤。勤務状態は退勤状態。当日時間計算なし。）
                         $ptn = '1';
                     }
                 } elseif ($record_datetime >= $timetable_from_date &&
-                            $record_datetime < $timetable_to_date) {                        // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
+                            $record_datetime <= $timetable_to_date) {                        // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
                     if ($record_before_datetime < $attendance_from_date) {                  // １個前の打刻時刻 < 出勤1日のはじめ
                         // パターン２３４
                         $ptn = '2';
-                        $this->pushArrayCalc(
-                            $this->setLeavingCollectPtn(
-                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
-                                $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
+                        // setLeavingCollectPtn implement
+                        // $array_impl_setLeavingCollectPtn = array (
+                        //     'ptn' => $ptn,
+                        //     'record_datetime' => $record_datetime,
+                        //     'value_record_datetime_id' => $value_record_datetime_id,
+                        //     'value_editor_department_code' => $value_editor_department_code,
+                        //     'value_editor_department_name' => $value_editor_department_name,
+                        //     'value_editor_user_code' => $value_editor_user_code,
+                        //     'value_editor_user_name' => $value_editor_user_name,
+                        //     'value_check_result' => $value_check_result,
+                        //     'value_check_max_times' => $value_check_max_times,
+                        //     'value_mobile_positions' => $value_mobile_positions,
+                        //     'business_kubun' => $business_kubun,
+                        //     'user_holiday_kubun' => $user_holiday_kubun,
+                        //     'value_working_timetable_no' => $value_working_timetable_no,
+                        //     'attendance_time_index' => $attendance_time_index
+                        // );
+                        // $this->pushArrayCalc(
+                        //     $this->setLeavingCollectPtn($array_impl_setLeavingCollectPtn));
                         /*$ptn = '3';
                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                         // パターン4は下で設定
-                        $ptn = '4';
+                        // $ptn = '4';
                     }
                 } elseif ($record_datetime >= $timetable_to_date &&
-                            $record_datetime < $attendance_to_date) {                       // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
+                            $record_datetime <= $attendance_to_date) {                       // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
                     if ($record_before_datetime < $attendance_from_date) {                  // １個前の打刻時刻 < 出勤1日のはじめ
                         // パターン２３５
                         $ptn = '2';
-                        $this->pushArrayCalc(
-                            $this->setLeavingCollectPtn(
-                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
-                                $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
+                        // setLeavingCollectPtn implement
+                        // $array_impl_setLeavingCollectPtn = array (     20200321 start
+                        //     'ptn' => $ptn,
+                        //     'record_datetime' => $record_datetime,
+                        //     'value_record_datetime_id' => $value_record_datetime_id,
+                        //     'value_editor_department_code' => $value_editor_department_code,
+                        //     'value_editor_department_name' => $value_editor_department_name,
+                        //     'value_editor_user_code' => $value_editor_user_code,
+                        //     'value_editor_user_name' => $value_editor_user_name,
+                        //     'value_check_result' => $value_check_result,
+                        //     'value_check_max_times' => $value_check_max_times,
+                        //     'value_mobile_positions' => $value_mobile_positions,
+                        //     'business_kubun' => $business_kubun,
+                        //     'user_holiday_kubun' => $user_holiday_kubun,
+                        //     'value_working_timetable_no' => $value_working_timetable_no,
+                        //     'attendance_time_index' => $attendance_time_index
+                        // );
+                        // $this->pushArrayCalc(
+                        //     $this->setLeavingCollectPtn($array_impl_setLeavingCollectPtn));  20200321 end
                         /*$ptn = '3';
                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                         // パターン5は下で設定
-                        $ptn = '5';
+                        // $ptn = '5';  20200321
                     }
                 } elseif ($record_datetime > $attendance_to_date) {                         // 出勤1日の終わり < 打刻時刻
-                    if ($record_before_datetime < $attendance_from_date) {                  // １個前の打刻時刻 < 出勤1日のはじめ
+                    if ($record_before_datetime <= $attendance_from_date) {                  // １個前の打刻時刻 < 出勤1日のはじめ
                         // パターン２３５
                         $ptn = '2';
-                        $this->pushArrayCalc(
-                            $this->setLeavingCollectPtn(
-                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
-                                $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
+                        // setLeavingCollectPtn implement
+                        // $array_impl_setLeavingCollectPtn = array (
+                        //     'ptn' => $ptn,
+                        //     'record_datetime' => $record_datetime,
+                        //     'value_record_datetime_id' => $value_record_datetime_id,
+                        //     'value_editor_department_code' => $value_editor_department_code,
+                        //     'value_editor_department_name' => $value_editor_department_name,
+                        //     'value_editor_user_code' => $value_editor_user_code,
+                        //     'value_editor_user_name' => $value_editor_user_name,
+                        //     'value_check_result' => $value_check_result,
+                        //     'value_check_max_times' => $value_check_max_times,
+                        //     'value_mobile_positions' => $value_mobile_positions,
+                        //     'business_kubun' => $business_kubun,
+                        //     'user_holiday_kubun' => $user_holiday_kubun,
+                        //     'value_working_timetable_no' => $value_working_timetable_no,
+                        //     'attendance_time_index' => $attendance_time_index
+                        // );
+                        // $this->pushArrayCalc(
+                        //     $this->setLeavingCollectPtn($array_impl_setLeavingCollectPtn));
                         /*$ptn = '3';
                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                         // パターン5は下で設定
-                        $ptn = '5';
+                        // $ptn = '5';  20200321
                     }
                 } else {
                     // 不明データとして作成する
                     $log_data = $work_time->getParamDatefromAttribute();
                     $log_data .= $work_time->getParamUsercodeAttribute();
                     $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                    Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setLeavingtime1 '.$log_data);
                 }
             } elseif ($before_value_mode == Config::get('const.C005.leaving_time')) {       // １個前のモードが退勤である場合
                 if ($record_before_datetime < $attendance_from_date) {                      // １個前の打刻時刻 < 出勤1日のはじめ
@@ -1926,21 +2299,21 @@ class DailyWorkingInformationController extends Controller
         } else {
             if ($before_value_mode == Config::get('const.C005.attendance_time')) {          // １個前のモードが出勤
                 if ($record_datetime >= $attendance_from_date &&
-                    $record_datetime < $timetable_from_date) {                              // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
+                    $record_datetime <= $timetable_from_date) {                              // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
                     if ($record_before_datetime >= $attendance_from_date &&
                         $record_before_datetime < $timetable_from_date) {                   // 出勤1日のはじめ <= １個前の打刻時刻 < タイムテーブルの始業時刻
                         // パターン４（早退（要確認）。勤務状態は退勤状態。当日計算。）
                         $ptn = '4';
                     }
                 } elseif ($record_datetime >= $timetable_from_date &&
-                            $record_datetime < $timetable_to_date) {                        // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
+                            $record_datetime <= $timetable_to_date) {                        // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
                     if ($record_before_datetime >= $attendance_from_date &&
                         $record_before_datetime < $timetable_to_date) {                     // 出勤1日のはじめ <= １個前の打刻時刻 < タイムテーブルの終業時刻
                         // パターン４（早退（要確認）。勤務状態は退勤状態。当日計算。）
                         $ptn = '4';
                     }
                 } elseif ($record_datetime >= $timetable_to_date &&
-                            $record_datetime < $attendance_to_date) {                       // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
+                            $record_datetime <= $attendance_to_date) {                       // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
                     if ($record_before_datetime >= $attendance_from_date &&
                         $record_before_datetime < $timetable_to_date) {                     // 出勤1日のはじめ <= １個前の打刻時刻 < 出勤1日の終わり
                         // パターン８（勤務状態は退勤状態。当日計算。）
@@ -1970,7 +2343,7 @@ class DailyWorkingInformationController extends Controller
             } elseif ($before_value_mode == Config::get('const.C005.missing_middle_return_time') ||
                 $before_value_mode == Config::get('const.C005.public_going_out_return_time')) {     // １個前のモードが戻り
                 if ($record_datetime >= $attendance_from_date &&
-                            $record_datetime < $timetable_from_date) {                      // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
+                            $record_datetime <= $timetable_from_date) {                      // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
                     if ($record_before_datetime >= $attendance_from_date &&
                                 $record_before_datetime < $timetable_from_date) {           // 出勤1日のはじめ <= １個前の打刻時刻 < タイムテーブルの始業時刻
                         // これより前の出勤打刻履歴を調査
@@ -1993,7 +2366,7 @@ class DailyWorkingInformationController extends Controller
                         }
                     }
                 } elseif ($record_datetime >= $timetable_from_date &&
-                                 $record_datetime < $timetable_to_date) {                   // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
+                                 $record_datetime <= $timetable_to_date) {                   // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
                     if ($record_before_datetime >= $attendance_from_date &&
                                      $record_before_datetime < $timetable_to_date) {        // 出勤1日のはじめ <= １個前の打刻時刻 < タイムテーブルの終業時刻
                         // これより前の出勤打刻履歴を調査
@@ -2003,25 +2376,55 @@ class DailyWorkingInformationController extends Controller
                                     if ($this->array_working_datetime[$i] < $attendance_from_date) {     // ２個前の出勤時刻 < 出勤1日のはじめ
                                         // パターン２３４
                                         $ptn = '2';
-                                        $this->pushArrayCalc(
-                                            $this->setLeavingCollectPtn(
-                                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
-                                                $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
+                                        // setLeavingCollectPtn implement
+                                        // $array_impl_setLeavingCollectPtn = array (
+                                        //     'ptn' => $ptn,
+                                        //     'record_datetime' => $record_datetime,
+                                        //     'value_record_datetime_id' => $value_record_datetime_id,
+                                        //     'value_editor_department_code' => $value_editor_department_code,
+                                        //     'value_editor_department_name' => $value_editor_department_name,
+                                        //     'value_editor_user_code' => $value_editor_user_code,
+                                        //     'value_editor_user_name' => $value_editor_user_name,
+                                        //     'value_check_result' => $value_check_result,
+                                        //     'value_check_max_times' => $value_check_max_times,
+                                        //     'value_mobile_positions' => $value_mobile_positions,
+                                        //     'business_kubun' => $business_kubun,
+                                        //     'user_holiday_kubun' => $user_holiday_kubun,
+                                        //     'value_working_timetable_no' => $value_working_timetable_no,
+                                        //     'attendance_time_index' => $attendance_time_index
+                                        // );
+                                        // $this->pushArrayCalc(
+                                        //     $this->setLeavingCollectPtn($array_impl_setLeavingCollectPtn));
                                         /*$ptn = '3';
                                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                                         // パターン4は下で設定
-                                        $ptn = '4';
+                                        // $ptn = '4';
                                     } else {
                                         // パターン２３５
                                         $ptn = '2';
-                                        $this->pushArrayCalc(
-                                            $this->setLeavingCollectPtn(
-                                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
-                                                $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
+                                        // setLeavingCollectPtn implement
+                                        // $array_impl_setLeavingCollectPtn = array (
+                                        //     'ptn' => $ptn,
+                                        //     'record_datetime' => $record_datetime,
+                                        //     'value_record_datetime_id' => $value_record_datetime_id,
+                                        //     'value_editor_department_code' => $value_editor_department_code,
+                                        //     'value_editor_department_name' => $value_editor_department_name,
+                                        //     'value_editor_user_code' => $value_editor_user_code,
+                                        //     'value_editor_user_name' => $value_editor_user_name,
+                                        //     'value_check_result' => $value_check_result,
+                                        //     'value_check_max_times' => $value_check_max_times,
+                                        //     'value_mobile_positions' => $value_mobile_positions,
+                                        //     'business_kubun' => $business_kubun,
+                                        //     'user_holiday_kubun' => $user_holiday_kubun,
+                                        //     'value_working_timetable_no' => $value_working_timetable_no,
+                                        //     'attendance_time_index' => $attendance_time_index
+                                        // );
+                                        // $this->pushArrayCalc(
+                                        //     $this->setLeavingCollectPtn($array_impl_setLeavingCollectPtn));
                                         /*$ptn = '3';
                                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                                         // パターン5は下で設定
-                                        $ptn = '5';
+                                        // $ptn = '5';  20200321
                                     }
                                     break;
                                 }
@@ -2029,18 +2432,33 @@ class DailyWorkingInformationController extends Controller
                         } else {
                             // パターン２３４
                             $ptn = '2';
-                            $this->pushArrayCalc(
-                                $this->setLeavingCollectPtn(
-                                    $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
-                                    $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
+                            // setLeavingCollectPtn implement
+                            // $array_impl_setLeavingCollectPtn = array (
+                            //     'ptn' => $ptn,
+                            //     'record_datetime' => $record_datetime,
+                            //     'value_record_datetime_id' => $value_record_datetime_id,
+                            //     'value_editor_department_code' => $value_editor_department_code,
+                            //     'value_editor_department_name' => $value_editor_department_name,
+                            //     'value_editor_user_code' => $value_editor_user_code,
+                            //     'value_editor_user_name' => $value_editor_user_name,
+                            //     'value_check_result' => $value_check_result,
+                            //     'value_check_max_times' => $value_check_max_times,
+                            //     'value_mobile_positions' => $value_mobile_positions,
+                            //     'business_kubun' => $business_kubun,
+                            //     'user_holiday_kubun' => $user_holiday_kubun,
+                            //     'value_working_timetable_no' => $value_working_timetable_no,
+                            //     'attendance_time_index' => $attendance_time_index
+                            // );
+                            // $this->pushArrayCalc(
+                            //     $this->setLeavingCollectPtn($array_impl_setLeavingCollectPtn));
                             /*$ptn = '3';
                             $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                             // パターン4は下で設定
-                            $ptn = '4';
+                            // $ptn = '4';
                         }
                     }
                 } elseif ($record_datetime >= $timetable_to_date &&
-                                $record_datetime < $attendance_to_date) {                   // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
+                                $record_datetime <= $attendance_to_date) {                   // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
                     if ($record_before_datetime >= $attendance_from_date &&
                                     $record_before_datetime < $attendance_to_date) {        // 出勤1日のはじめ <= １個前の打刻時刻 < 出勤1日の終わり
                         // これより前の出勤打刻履歴を調査
@@ -2050,14 +2468,29 @@ class DailyWorkingInformationController extends Controller
                                     if ($this->array_working_datetime[$i] < $attendance_from_date) {     // ２個前の出勤時刻 < 出勤1日のはじめ
                                         // パターン２３５
                                         $ptn = '2';
-                                        $this->pushArrayCalc(
-                                            $this->setLeavingCollectPtn(
-                                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
-                                                $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
+                                        // setLeavingCollectPtn implement
+                                        // $array_impl_setLeavingCollectPtn = array (
+                                        //     'ptn' => $ptn,
+                                        //     'record_datetime' => $record_datetime,
+                                        //     'value_record_datetime_id' => $value_record_datetime_id,
+                                        //     'value_editor_department_code' => $value_editor_department_code,
+                                        //     'value_editor_department_name' => $value_editor_department_name,
+                                        //     'value_editor_user_code' => $value_editor_user_code,
+                                        //     'value_editor_user_name' => $value_editor_user_name,
+                                        //     'value_check_result' => $value_check_result,
+                                        //     'value_check_max_times' => $value_check_max_times,
+                                        //     'value_mobile_positions' => $value_mobile_positions,
+                                        //     'business_kubun' => $business_kubun,
+                                        //     'user_holiday_kubun' => $user_holiday_kubun,
+                                        //     'value_working_timetable_no' => $value_working_timetable_no,
+                                        //     'attendance_time_index' => $attendance_time_index
+                                        // );
+                                        // $this->pushArrayCalc(
+                                        //     $this->setLeavingCollectPtn($array_impl_setLeavingCollectPtn));
                                         /*$ptn = '3';
                                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                                         // パターン5は下で設定
-                                        $ptn = '5';
+                                        // $ptn = '5';  20200321
                                     } else {
                                         // パターン８（勤務状態は退勤状態。当日計算。）
                                         $ptn = '8';
@@ -2068,14 +2501,29 @@ class DailyWorkingInformationController extends Controller
                         } else {
                             // パターン２３５
                             $ptn = '2';
-                            $this->pushArrayCalc(
-                                $this->setLeavingCollectPtn(
-                                    $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
-                                    $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
+                            // setLeavingCollectPtn implement
+                            // $array_impl_setLeavingCollectPtn = array (
+                            //     'ptn' => $ptn,
+                            //     'record_datetime' => $record_datetime,
+                            //     'value_record_datetime_id' => $value_record_datetime_id,
+                            //     'value_editor_department_code' => $value_editor_department_code,
+                            //     'value_editor_department_name' => $value_editor_department_name,
+                            //     'value_editor_user_code' => $value_editor_user_code,
+                            //     'value_editor_user_name' => $value_editor_user_name,
+                            //     'value_check_result' => $value_check_result,
+                            //     'value_check_max_times' => $value_check_max_times,
+                            //     'value_mobile_positions' => $value_mobile_positions,
+                            //     'business_kubun' => $business_kubun,
+                            //     'user_holiday_kubun' => $user_holiday_kubun,
+                            //     'value_working_timetable_no' => $value_working_timetable_no,
+                            //     'attendance_time_index' => $attendance_time_index
+                            // );
+                            // $this->pushArrayCalc(
+                            //     $this->setLeavingCollectPtn($array_impl_setLeavingCollectPtn));
                             /*$ptn = '3';
                             $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                             // パターン5は下で設定
-                            $ptn = '5';
+                            // $ptn = '5';  20200321
                         }
                     }
                 } elseif ($record_datetime > $attendance_to_date) {
@@ -2086,14 +2534,29 @@ class DailyWorkingInformationController extends Controller
                                 if ($this->array_working_datetime[$i] < $attendance_from_date) {     // ２個前の出勤時刻 < 出勤1日のはじめ
                                     // パターン２３５
                                     $ptn = '2';
-                                    $this->pushArrayCalc(
-                                        $this->setLeavingCollectPtn(
-                                            $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
-                                            $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
+                                    // setLeavingCollectPtn implement
+                                    // $array_impl_setLeavingCollectPtn = array (
+                                    //     'ptn' => $ptn,
+                                    //     'record_datetime' => $record_datetime,
+                                    //     'value_record_datetime_id' => $value_record_datetime_id,
+                                    //     'value_editor_department_code' => $value_editor_department_code,
+                                    //     'value_editor_department_name' => $value_editor_department_name,
+                                    //     'value_editor_user_code' => $value_editor_user_code,
+                                    //     'value_editor_user_name' => $value_editor_user_name,
+                                    //     'value_check_result' => $value_check_result,
+                                    //     'value_check_max_times' => $value_check_max_times,
+                                    //     'value_mobile_positions' => $value_mobile_positions,
+                                    //     'business_kubun' => $business_kubun,
+                                    //     'user_holiday_kubun' => $user_holiday_kubun,
+                                    //     'value_working_timetable_no' => $value_working_timetable_no,
+                                    //     'attendance_time_index' => $attendance_time_index
+                                    // );
+                                    // $this->pushArrayCalc(
+                                    //     $this->setLeavingCollectPtn($array_impl_setLeavingCollectPtn));
                                     /*$ptn = '3';
                                     $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                                     // パターン5は下で設定
-                                    $ptn = '5';
+                                    // $ptn = '5';  20200321
                                 } else {
                                     // パターン８（勤務状態は退勤状態。当日計算。）
                                     $ptn = '8';
@@ -2104,45 +2567,67 @@ class DailyWorkingInformationController extends Controller
                     } else {
                         // パターン２３５
                         $ptn = '2';
-                        $this->pushArrayCalc(
-                            $this->setLeavingCollectPtn(
-                                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
-                                $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
+                        // setLeavingCollectPtn implement
+                        // $array_impl_setLeavingCollectPtn = array (
+                        //     'ptn' => $ptn,
+                        //     'record_datetime' => $record_datetime,
+                        //     'value_record_datetime_id' => $value_record_datetime_id,
+                        //     'value_editor_department_code' => $value_editor_department_code,
+                        //     'value_editor_department_name' => $value_editor_department_name,
+                        //     'value_editor_user_code' => $value_editor_user_code,
+                        //     'value_editor_user_name' => $value_editor_user_name,
+                        //     'value_check_result' => $value_check_result,
+                        //     'value_check_max_times' => $value_check_max_times,
+                        //     'value_mobile_positions' => $value_mobile_positions,
+                        //     'business_kubun' => $business_kubun,
+                        //     'user_holiday_kubun' => $user_holiday_kubun,
+                        //     'value_working_timetable_no' => $value_working_timetable_no,
+                        //     'attendance_time_index' => $attendance_time_index
+                        // );
+                        // $this->pushArrayCalc(
+                        //     $this->setLeavingCollectPtn($array_impl_setLeavingCollectPtn));
                         /*$ptn = '3';
                         $this->pushArrayCalc($this->setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, $value_check_max_times, $business_kubun));*/
                         // パターン5は下で設定
-                        $ptn = '5';
+                        // $ptn = '5';  20200321
                     }
                 } else {
                     // 不明データとして作成する
                     $log_data = $work_time->getParamDatefromAttribute();
                     $log_data .= $work_time->getParamUsercodeAttribute();
                     $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                    Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setLeavingtime2 '.$log_data);
                 }
             } else {                                                                        // １個前のモードがない
                 // 不明データとして作成する
                 $log_data = $work_time->getParamDatefromAttribute();
                 $log_data .= $work_time->getParamUsercodeAttribute();
                 $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setLeavingtime3 '.$log_data);
             }
         }
 
-        if ($ptn != null) {
-            $this->pushArrayCalc(
-                $this->setLeavingCollectPtn(
-                    $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
-                    $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
-        } else {
-            // 不明データとして作成する
-            $this->pushArrayCalc(
-                $this->setLeavingCollectPtn(
-                    '', $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions,
-                    $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index));
+        if ($ptn == null) {
+            $ptn = '';
         }
-        Log::DEBUG('        退勤打刻処理 end');
-        Log::DEBUG('---------------------- setLeavingtime end ------------------------ ');
+        // setLeavingCollectPtn implement
+        $array_impl_setLeavingCollectPtn = array (
+            'ptn' => $ptn,
+            'record_datetime' => $record_datetime,
+            'value_record_datetime_id' => $value_record_datetime_id,
+            'value_editor_department_code' => $value_editor_department_code,
+            'value_editor_department_name' => $value_editor_department_name,
+            'value_editor_user_code' => $value_editor_user_code,
+            'value_editor_user_name' => $value_editor_user_name,
+            'value_check_result' => $value_check_result,
+            'value_check_max_times' => $value_check_max_times,
+            'value_mobile_positions' => $value_mobile_positions,
+            'business_kubun' => $business_kubun,
+            'user_holiday_kubun' => $user_holiday_kubun,
+            'value_working_timetable_no' => $value_working_timetable_no,
+            'attendance_time_index' => $attendance_time_index
+        );
+        $this->pushArrayCalc(
+            $this->setLeavingCollectPtn($array_impl_setLeavingCollectPtn));
+        // Log::debug('---------------------- setLeavingtime end ------------------------ ');
             
     }
 
@@ -2163,18 +2648,35 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setLeavingCollectPtn($ptn, $record_datetime, $value_check_result, 
-         $value_check_max_times, $value_mobile_positions, $business_kubun, $user_holiday_kubun, $working_timetable_no, $attendance_time_index)
+    private function setLeavingCollectPtn($params)
     {
-        Log::DEBUG('---------------------- setLeavingCollectPtn in -- 退勤 ptn = '.$ptn.' ---------------------- '.$record_datetime);
-        Log::DEBUG('                                                  -- working_timetable_no = '.$working_timetable_no);
-        Log::DEBUG('                                                  -- attendance_time_index = '.$attendance_time_index);
-        $temp_calc_model = new TempCalcWorkingTime();
+        // Log::debug('---------------------- setLeavingCollectPtn in ----------------- ');
+        // パラメータ設定
+        $ptn = $params['ptn'];
+        $record_datetime = $params['record_datetime'];
+        $value_record_datetime_id = $params['value_record_datetime_id'];
+        $value_editor_department_code = $params['value_editor_department_code'];
+        $value_editor_department_name = $params['value_editor_department_name'];
+        $value_editor_user_code = $params['value_editor_user_code'];
+        $value_editor_user_name = $params['value_editor_user_name'];
+        $value_check_result = $params['value_check_result'];
+        $value_check_max_times = $params['value_check_max_times'];
+        $value_mobile_positions = $params['value_mobile_positions'];
+        $business_kubun = $params['business_kubun'];
+        $user_holiday_kubun = $params['user_holiday_kubun'];
+        $value_working_timetable_no = $params['value_working_timetable_no'];
+        $attendance_time_index = $params['attendance_time_index'];
 
+        $temp_calc_model = new TempCalcWorkingTime();
         if ($ptn == '1') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
@@ -2184,6 +2686,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2193,7 +2696,12 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
@@ -2203,6 +2711,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2213,7 +2722,12 @@ class DailyWorkingInformationController extends Controller
             // 自動設定はなしにする
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.attendance'));
             $temp_calc_model->setNoteAttribute('');
             $temp_calc_model->setLateAttribute('0');
@@ -2223,6 +2737,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2233,7 +2748,12 @@ class DailyWorkingInformationController extends Controller
             // なしにする
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
@@ -2253,6 +2773,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2262,7 +2783,12 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '5') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
@@ -2272,6 +2798,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2281,7 +2808,12 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '6') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
@@ -2291,6 +2823,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2300,7 +2833,12 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '7') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_003'));
             $temp_calc_model->setLateAttribute('0');
@@ -2310,6 +2848,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2319,7 +2858,12 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '8') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.leaving'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
@@ -2329,6 +2873,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2339,7 +2884,12 @@ class DailyWorkingInformationController extends Controller
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.leaving_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
             $temp_calc_model->setLateAttribute('0');
@@ -2349,6 +2899,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2357,7 +2908,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         }
             
-        Log::DEBUG('---------------------- setLeavingCollectPtn end ------------------------ ');
+        // Log::debug('---------------------- setLeavingCollectPtn end ------------------------ ');
         return $temp_calc_model;
     }
 
@@ -2369,12 +2920,29 @@ class DailyWorkingInformationController extends Controller
      *         １個前のモード
      * @return チェック結果
      */
-    private function setMissingMiddleTime($cnt, $work_time,
-        $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $value_mobile_positions, $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
+    private function setMissingMiddleTime($params)
     {
-        Log::DEBUG('---------------------- setMissingMiddleTime in ------------------------ ');
-        Log::DEBUG('        私用外出打刻処理');
+        // Log::debug('---------------------- setMissingMiddleTime in ------------------------ ');
+        $cnt = $params['cnt'];
+        $work_time = $params['work_time'];
+        $value_record_datetime = $params['value_record_datetime'];
+        $value_record_datetime_id = $params['value_record_datetime_id'];
+        $value_editor_department_code = $params['value_editor_department_code'];
+        $value_editor_department_name = $params['value_editor_department_name'];
+        $value_editor_user_code = $params['value_editor_user_code'];
+        $value_editor_user_name = $params['value_editor_user_name'];
+        $value_timetable_from_time = $params['value_timetable_from_time'];
+        $value_timetable_to_time = $params['value_timetable_to_time'];
+        $value_check_result = $params['value_check_result'];
+        $value_check_max_times = $params['value_check_max_times'];
+        $value_mobile_positions = $params['value_mobile_positions'];
+        $before_value_mode = $params['before_value_mode'];
+        $before_value_datetime = $params['before_value_datetime'];
+        $business_kubun = $params['business_kubun'];
+        $user_holiday_kubun = $params['user_holiday_kubun'];
+        $value_working_timetable_no = $params['value_working_timetable_no'];
+        $attendance_time_index = $params['attendance_time_index'];
+
         $apicommon = new ApiCommonController();
         $attendance_from_date = new Carbon($work_time->getParamDatefromAttribute());        // 出勤1日のはじめ
         $attendance_from_date_format = date_format($attendance_from_date, 'Y/m/d');
@@ -2393,12 +2961,12 @@ class DailyWorkingInformationController extends Controller
             $attendance_from_date_format.' 23:59:59');                                      // 出勤1日の終わり
         $record_datetime = new Carbon($value_record_datetime);                              // 打刻日付時刻
         $record_before_datetime = new Carbon($before_value_datetime);                       // １個前の打刻時刻
-        Log::DEBUG('            attendance_from_date set = '.$attendance_from_date);
-        Log::DEBUG('            timetable_from_date set = '.$timetable_from_date);
-        Log::DEBUG('            timetable_to_date set = '.$timetable_to_date);
-        Log::DEBUG('            attendance_to_date set = '.$attendance_to_date);
-        Log::DEBUG('            record_datetime set = '.$record_datetime);
-        Log::DEBUG('            record_before_datetime set = '.$record_before_datetime);
+        // Log::debug('            attendance_from_date set = '.$attendance_from_date);
+        // Log::debug('            timetable_from_date set = '.$timetable_from_date);
+        // Log::debug('            timetable_to_date set = '.$timetable_to_date);
+        // Log::debug('            attendance_to_date set = '.$attendance_to_date);
+        // Log::debug('            record_datetime set = '.$record_datetime);
+        // Log::debug('            record_before_datetime set = '.$record_before_datetime);
         // パターン設定
         $ptn = null;
 
@@ -2430,7 +2998,6 @@ class DailyWorkingInformationController extends Controller
                 $log_data = $work_time->getParamDatefromAttribute();
                 $log_data .= $work_time->getParamUsercodeAttribute();
                 $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setMissingMiddleTime1 '.$log_data);
             }
         // ---------------------私用外出が２番目以降の場合 -----------------------------------------------------------------------------------
         } else {
@@ -2469,7 +3036,6 @@ class DailyWorkingInformationController extends Controller
                     $log_data = $work_time->getParamDatefromAttribute();
                     $log_data .= $work_time->getParamUsercodeAttribute();
                     $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                    Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setMissingMiddleTime2 '.$log_data);
                 }
             } elseif ($before_value_mode == Config::get('const.C005.leaving_time')) {       // １個前のモードが退勤
                 if ($record_before_datetime >= $attendance_from_date) {                     // 出勤1日のはじめ <= １個前の打刻時刻
@@ -2480,9 +3046,7 @@ class DailyWorkingInformationController extends Controller
                 $before_value_mode == Config::get('const.C005.public_going_out_time')) {    // １個前のモードが私用外出
                 if ($record_before_datetime >= $attendance_from_date) {                     // 出勤1日のはじめ <= １個前の打刻時刻
                     // 不明データとして作成する
-                    $collect_working_times = $this->setMissingmiddleCollectPtn(
-                        '', $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index);
-                    return $collect_working_times;
+                    $ptn = '';
                 }
             } else {                                                                        // １個前のモードがない
                 // 不明データとして作成する
@@ -2493,16 +3057,28 @@ class DailyWorkingInformationController extends Controller
             }
         }
 
-        if ($ptn != null) {
-            $this->pushArrayCalc($this->setMissingmiddleCollectPtn(
-                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
-        } else {
-            // 不明データとして作成する
-            $this->pushArrayCalc($this->setMissingmiddleCollectPtn(
-                '', $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
+        if ($ptn == null) {
+            $ptn = '';
         }
-        Log::DEBUG('---------------------- setMissingMiddleTime end ------------------------ ');
-        Log::DEBUG('        私用外出打刻処理 end');
+        // setMissingmiddleCollectPtn implement
+        $array_impl_setMissingmiddleCollectPtn = array (
+            'ptn' => $ptn,
+            'record_datetime' => $record_datetime,
+            'value_record_datetime_id' => $value_record_datetime_id,
+            'value_editor_department_code' => $value_editor_department_code,
+            'value_editor_department_name' => $value_editor_department_name,
+            'value_editor_user_code' => $value_editor_user_code,
+            'value_editor_user_name' => $value_editor_user_name,
+            'value_check_result' => $value_check_result,
+            'value_check_max_times' => $value_check_max_times,
+            'value_mobile_positions' => $value_mobile_positions,
+            'business_kubun' => $business_kubun,
+            'user_holiday_kubun' => $user_holiday_kubun,
+            'value_working_timetable_no' => $value_working_timetable_no,
+            'attendance_time_index' => $attendance_time_index
+        );
+        $this->pushArrayCalc($this->setMissingmiddleCollectPtn($array_impl_setMissingmiddleCollectPtn));
+        // Log::debug('---------------------- setMissingMiddleTime end ------------------------ ');
             
     }
 
@@ -2523,16 +3099,36 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setMissingmiddleCollectPtn(
-        $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index)
+    private function setMissingmiddleCollectPtn($params)
     {
-        Log::DEBUG('---------------------- setMissingmiddleCollectPtn in ------------------------ ');
+        // Log::debug('---------------------- setMissingmiddleCollectPtn in ------------------------ ');
+        // パラメータ設定
+        $ptn = $params['ptn'];
+        $record_datetime = $params['record_datetime'];
+        $value_record_datetime_id = $params['value_record_datetime_id'];
+        $value_editor_department_code = $params['value_editor_department_code'];
+        $value_editor_department_name = $params['value_editor_department_name'];
+        $value_editor_user_code = $params['value_editor_user_code'];
+        $value_editor_user_name = $params['value_editor_user_name'];
+        $value_check_result = $params['value_check_result'];
+        $value_check_max_times = $params['value_check_max_times'];
+        $value_mobile_positions = $params['value_mobile_positions'];
+        $business_kubun = $params['business_kubun'];
+        $user_holiday_kubun = $params['user_holiday_kubun'];
+        $value_working_timetable_no = $params['value_working_timetable_no'];
+        $attendance_time_index = $params['attendance_time_index'];
+
         $temp_calc_model = new TempCalcWorkingTime();
 
         if ($ptn == '1') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.missing_middle'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
@@ -2542,6 +3138,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2551,7 +3148,12 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_008'));
             $temp_calc_model->setLateAttribute('0');
@@ -2561,6 +3163,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2570,7 +3173,12 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '3') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_003'));
             $temp_calc_model->setLateAttribute('0');
@@ -2580,6 +3188,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2590,7 +3199,12 @@ class DailyWorkingInformationController extends Controller
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
             $temp_calc_model->setLateAttribute('0');
@@ -2600,6 +3214,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2608,7 +3223,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         }
 
-        Log::DEBUG('---------------------- setMissingmiddleCollectPtn end ------------------------ ');
+        // Log::debug('---------------------- setMissingmiddleCollectPtn end ------------------------ ');
         return $temp_calc_model;
             
     }
@@ -2621,13 +3236,29 @@ class DailyWorkingInformationController extends Controller
      *         １個前のモード
      * @return チェック結果
      */
-    private function setMissingMiddleReturnTime($cnt, $work_time,
-        $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $value_mobile_positions,
-        $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
+    private function setMissingMiddleReturnTime($params)
     {
-        Log::DEBUG('---------------------- setMissingMiddleReturnTime in ------------------------ ');
-        Log::DEBUG('        私用外出戻り打刻処理');
+        // Log::debug('---------------------- setMissingMiddleReturnTime in ------------------------ ');
+        $cnt = $params['cnt'];
+        $work_time = $params['work_time'];
+        $value_record_datetime = $params['value_record_datetime'];
+        $value_record_datetime_id = $params['value_record_datetime_id'];
+        $value_editor_department_code = $params['value_editor_department_code'];
+        $value_editor_department_name = $params['value_editor_department_name'];
+        $value_editor_user_code = $params['value_editor_user_code'];
+        $value_editor_user_name = $params['value_editor_user_name'];
+        $value_timetable_from_time = $params['value_timetable_from_time'];
+        $value_timetable_to_time = $params['value_timetable_to_time'];
+        $value_check_result = $params['value_check_result'];
+        $value_check_max_times = $params['value_check_max_times'];
+        $value_mobile_positions = $params['value_mobile_positions'];
+        $before_value_mode = $params['before_value_mode'];
+        $before_value_datetime = $params['before_value_datetime'];
+        $business_kubun = $params['business_kubun'];
+        $user_holiday_kubun = $params['user_holiday_kubun'];
+        $value_working_timetable_no = $params['value_working_timetable_no'];
+        $attendance_time_index = $params['attendance_time_index'];
+
         $apicommon = new ApiCommonController();
         $attendance_from_date = new Carbon($work_time->getParamDatefromAttribute());        // 出勤1日のはじめ
         $attendance_from_date_format = date_format($attendance_from_date, 'Y/m/d');
@@ -2646,12 +3277,12 @@ class DailyWorkingInformationController extends Controller
             $attendance_from_date_format.' 23:59:59');                                      // 出勤1日の終わり
         $record_datetime = new Carbon($value_record_datetime);                              // 打刻日付時刻
         $record_before_datetime = new Carbon($before_value_datetime);                       // １個前の打刻時刻
-        Log::DEBUG('            attendance_from_date set = '.$attendance_from_date);
-        Log::DEBUG('            timetable_from_date set = '.$timetable_from_date);
-        Log::DEBUG('            timetable_to_date set = '.$timetable_to_date);
-        Log::DEBUG('            attendance_to_date set = '.$attendance_to_date);
-        Log::DEBUG('            record_datetime set = '.$record_datetime);
-        Log::DEBUG('            record_before_datetime set = '.$record_before_datetime);
+        // Log::debug('            attendance_from_date set = '.$attendance_from_date);
+        // Log::debug('            timetable_from_date set = '.$timetable_from_date);
+        // Log::debug('            timetable_to_date set = '.$timetable_to_date);
+        // Log::debug('            attendance_to_date set = '.$attendance_to_date);
+        // Log::debug('            record_datetime set = '.$record_datetime);
+        // Log::debug('            record_before_datetime set = '.$record_before_datetime);
         // パターン設定
         $ptn = null;
 
@@ -2679,7 +3310,6 @@ class DailyWorkingInformationController extends Controller
                 $log_data = $work_time->getParamDatefromAttribute();
                 $log_data .= $work_time->getParamUsercodeAttribute();
                 $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setMissingMiddleReturnTime1 '.$log_data);
             }
         // ---------------------私用外出戻りが２番目以降の場合 -----------------------------------------------------------------------------------
         } else {
@@ -2726,27 +3356,37 @@ class DailyWorkingInformationController extends Controller
                     $log_data = $work_time->getParamDatefromAttribute();
                     $log_data .= $work_time->getParamUsercodeAttribute();
                     $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                    Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setMissingMiddleReturnTime2 '.$log_data);
                 }
             } else {                                                                        // １個前のモードがない
                 // 不明データとして作成する
                 $log_data = $work_time->getParamDatefromAttribute();
                 $log_data .= $work_time->getParamUsercodeAttribute();
                 $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setMissingMiddleReturnTime3 '.$log_data);
             }
         }
 
-        if ($ptn != null) {
-            $this->pushArrayCalc($this->setMissingmiddleReturnCollectPtn(
-                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
-        } else {
-            // 不明データとして作成する
-            $this->pushArrayCalc($this->setMissingmiddleReturnCollectPtn(
-                '', $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
+        if ($ptn == null) {
+            $ptn = '';
         }
-        Log::DEBUG('        私用外出戻り打刻処理 end');
-        Log::DEBUG('---------------------- setMissingMiddleReturnTime end ------------------------ ');
+        // setMissingmiddleCollectPtn implement
+        $array_impl_setMissingmiddleReturnCollectPtn = array (
+            'ptn' => $ptn,
+            'record_datetime' => $record_datetime,
+            'value_record_datetime_id' => $value_record_datetime_id,
+            'value_editor_department_code' => $value_editor_department_code,
+            'value_editor_department_name' => $value_editor_department_name,
+            'value_editor_user_code' => $value_editor_user_code,
+            'value_editor_user_name' => $value_editor_user_name,
+            'value_check_result' => $value_check_result,
+            'value_check_max_times' => $value_check_max_times,
+            'value_mobile_positions' => $value_mobile_positions,
+            'business_kubun' => $business_kubun,
+            'user_holiday_kubun' => $user_holiday_kubun,
+            'value_working_timetable_no' => $value_working_timetable_no,
+            'attendance_time_index' => $attendance_time_index
+        );
+        $this->pushArrayCalc($this->setMissingmiddleReturnCollectPtn($array_impl_setMissingmiddleReturnCollectPtn));
+        // Log::debug('---------------------- setMissingMiddleReturnTime end ------------------------ ');
             
     }
 
@@ -2767,16 +3407,36 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setMissingmiddleReturnCollectPtn(
-        $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index)
+    private function setMissingmiddleReturnCollectPtn($params)
     {
-        Log::DEBUG('---------------------- setMissingmiddleReturnCollectPtn in ------------------------ ');
+        // Log::debug('---------------------- setMissingmiddleReturnCollectPtn in ------------------------ ');
+        // パラメータ設定
+        $ptn = $params['ptn'];
+        $record_datetime = $params['record_datetime'];
+        $value_record_datetime_id = $params['value_record_datetime_id'];
+        $value_editor_department_code = $params['value_editor_department_code'];
+        $value_editor_department_name = $params['value_editor_department_name'];
+        $value_editor_user_code = $params['value_editor_user_code'];
+        $value_editor_user_name = $params['value_editor_user_name'];
+        $value_check_result = $params['value_check_result'];
+        $value_check_max_times = $params['value_check_max_times'];
+        $value_mobile_positions = $params['value_mobile_positions'];
+        $business_kubun = $params['business_kubun'];
+        $user_holiday_kubun = $params['user_holiday_kubun'];
+        $value_working_timetable_no = $params['value_working_timetable_no'];
+        $attendance_time_index = $params['attendance_time_index'];
+
         $temp_calc_model = new TempCalcWorkingTime();
 
         if ($ptn == '1') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_return_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_009'));
             $temp_calc_model->setLateAttribute('0');
@@ -2786,6 +3446,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2795,8 +3456,13 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_return_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
-            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.missing_middle_return'));
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.missing_return'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
@@ -2805,6 +3471,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2815,7 +3482,12 @@ class DailyWorkingInformationController extends Controller
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.missing_middle_return_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
             $temp_calc_model->setLateAttribute('0');
@@ -2825,6 +3497,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -2833,7 +3506,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         }
 
-        Log::DEBUG('---------------------- setMissingmiddleReturnCollectPtn end ------------------------ ');
+        // Log::debug('---------------------- setMissingmiddleReturnCollectPtn end ------------------------ ');
         return $temp_calc_model;
             
     }
@@ -2846,13 +3519,29 @@ class DailyWorkingInformationController extends Controller
      *         １個前のモード
      * @return チェック結果
      */
-    private function setPubliGoingOutTime($cnt, $work_time,
-        $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $value_mobile_positions, 
-        $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
+    private function setPubliGoingOutTime($params)
     {
-        Log::DEBUG('---------------------- setPubliGoingOutTime in ------------------------ ');
-        Log::DEBUG('        公用外出打刻処理');
+        // Log::debug('---------------------- setPubliGoingOutTime in ------------------------ ');
+        $cnt = $params['cnt'];
+        $work_time = $params['work_time'];
+        $value_record_datetime = $params['value_record_datetime'];
+        $value_record_datetime_id = $params['value_record_datetime_id'];
+        $value_editor_department_code = $params['value_editor_department_code'];
+        $value_editor_department_name = $params['value_editor_department_name'];
+        $value_editor_user_code = $params['value_editor_user_code'];
+        $value_editor_user_name = $params['value_editor_user_name'];
+        $value_timetable_from_time = $params['value_timetable_from_time'];
+        $value_timetable_to_time = $params['value_timetable_to_time'];
+        $value_check_result = $params['value_check_result'];
+        $value_check_max_times = $params['value_check_max_times'];
+        $value_mobile_positions = $params['value_mobile_positions'];
+        $before_value_mode = $params['before_value_mode'];
+        $before_value_datetime = $params['before_value_datetime'];
+        $business_kubun = $params['business_kubun'];
+        $user_holiday_kubun = $params['user_holiday_kubun'];
+        $value_working_timetable_no = $params['value_working_timetable_no'];
+        $attendance_time_index = $params['attendance_time_index'];
+
         $apicommon = new ApiCommonController();
         $attendance_from_date = new Carbon($work_time->getParamDatefromAttribute());        // 出勤1日のはじめ
         $attendance_from_date_format = date_format($attendance_from_date, 'Y/m/d');
@@ -2871,12 +3560,12 @@ class DailyWorkingInformationController extends Controller
             $attendance_from_date_format.' 23:59:59');                                      // 出勤1日の終わり
         $record_datetime = new Carbon($value_record_datetime);                              // 打刻日付時刻
         $record_before_datetime = new Carbon($before_value_datetime);                       // １個前の打刻時刻
-        Log::DEBUG('            attendance_from_date set = '.$attendance_from_date);
-        Log::DEBUG('            timetable_from_date set = '.$timetable_from_date);
-        Log::DEBUG('            timetable_to_date set = '.$timetable_to_date);
-        Log::DEBUG('            attendance_to_date set = '.$attendance_to_date);
-        Log::DEBUG('            record_datetime set = '.$record_datetime);
-        Log::DEBUG('            record_before_datetime set = '.$record_before_datetime);
+        // Log::debug('            attendance_from_date set = '.$attendance_from_date);
+        // Log::debug('            timetable_from_date set = '.$timetable_from_date);
+        // Log::debug('            timetable_to_date set = '.$timetable_to_date);
+        // Log::debug('            attendance_to_date set = '.$attendance_to_date);
+        // Log::debug('            record_datetime set = '.$record_datetime);
+        // Log::debug('            record_before_datetime set = '.$record_before_datetime);
         // パターン設定
         $ptn = null;
 
@@ -2908,7 +3597,6 @@ class DailyWorkingInformationController extends Controller
                 $log_data = $work_time->getParamDatefromAttribute();
                 $log_data .= $work_time->getParamUsercodeAttribute();
                 $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setPubliGoingOutTime1 '.$log_data);
             }
         // ---------------------公用外出が２番目以降の場合 -----------------------------------------------------------------------------------
         } else {
@@ -2947,7 +3635,6 @@ class DailyWorkingInformationController extends Controller
                     $log_data = $work_time->getParamDatefromAttribute();
                     $log_data .= $work_time->getParamUsercodeAttribute();
                     $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                    Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setPubliGoingOutTime2 '.$log_data);
                 }
             } elseif ($before_value_mode == Config::get('const.C005.leaving_time')) {       // １個前のモードが退勤
                 if ($record_before_datetime >= $attendance_from_date) {                     // 出勤1日のはじめ <= １個前の打刻時刻
@@ -2958,30 +3645,39 @@ class DailyWorkingInformationController extends Controller
                 $before_value_mode == Config::get('const.C005.public_going_out_time')) {    // １個前のモードが私用外出
                 if ($record_before_datetime >= $attendance_from_date) {                     // 出勤1日のはじめ <= １個前の打刻時刻
                     // 不明データとして作成する
-                    $collect_working_times = $this->setPublicGoingOutCollectPtn(
-                        '', $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index);
-                    return $collect_working_times;
+                    $ptn = '';
                 }
             } else {                                                                        // １個前のモードがない
                 // 不明データとして作成する
                 $log_data = $work_time->getParamDatefromAttribute();
                 $log_data .= $work_time->getParamUsercodeAttribute();
                 $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setPubliGoingOutTime3 '.$log_data);
             }
         }
-
-        if ($ptn != null) {
-            $this->pushArrayCalc($this->setPublicGoingOutCollectPtn(
-                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
-        } else {
-            // 不明データとして作成する
-            $this->pushArrayCalc($this->setPublicGoingOutCollectPtn(
-                '', $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
+        if ($ptn == null) {
+            $ptn = '';
         }
+        // setPublicGoingOutCollectPtn implement
+        $array_impl_setPublicGoingOutCollectPtn = array (
+            'ptn' => $ptn,
+            'record_datetime' => $record_datetime,
+            'value_record_datetime_id' => $value_record_datetime_id,
+            'value_editor_department_code' => $value_editor_department_code,
+            'value_editor_department_name' => $value_editor_department_name,
+            'value_editor_user_code' => $value_editor_user_code,
+            'value_editor_user_name' => $value_editor_user_name,
+            'value_check_result' => $value_check_result,
+            'value_check_max_times' => $value_check_max_times,
+            'value_mobile_positions' => $value_mobile_positions,
+            'business_kubun' => $business_kubun,
+            'user_holiday_kubun' => $user_holiday_kubun,
+            'value_working_timetable_no' => $value_working_timetable_no,
+            'attendance_time_index' => $attendance_time_index
+        );
+        $this->pushArrayCalc($this->setPublicGoingOutCollectPtn($array_impl_setPublicGoingOutCollectPtn));
 
-        Log::DEBUG('---------------------- setPubliGoingOutTime end ------------------------ ');
-        Log::DEBUG('        公用外出打刻処理 end');
+        // Log::debug('---------------------- setPubliGoingOutTime end ------------------------ ');
+        // Log::debug('        公用外出打刻処理 end');
             
     }
 
@@ -3002,16 +3698,36 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setPublicGoingOutCollectPtn(
-        $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index)
+    private function setPublicGoingOutCollectPtn($params)
     {
-        Log::DEBUG('---------------------- setPublicGoingOutCollectPtn in ------------------------ ');
+        // Log::debug('---------------------- setPublicGoingOutCollectPtn in ------------------------ ');
+        // パラメータ設定
+        $ptn = $params['ptn'];
+        $record_datetime = $params['record_datetime'];
+        $value_record_datetime_id = $params['value_record_datetime_id'];
+        $value_editor_department_code = $params['value_editor_department_code'];
+        $value_editor_department_name = $params['value_editor_department_name'];
+        $value_editor_user_code = $params['value_editor_user_code'];
+        $value_editor_user_name = $params['value_editor_user_name'];
+        $value_check_result = $params['value_check_result'];
+        $value_check_max_times = $params['value_check_max_times'];
+        $value_mobile_positions = $params['value_mobile_positions'];
+        $business_kubun = $params['business_kubun'];
+        $user_holiday_kubun = $params['user_holiday_kubun'];
+        $value_working_timetable_no = $params['value_working_timetable_no'];
+        $attendance_time_index = $params['attendance_time_index'];
+
         $temp_calc_model = new TempCalcWorkingTime();
 
         if ($ptn == '1') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.public_going_out'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
@@ -3021,6 +3737,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -3030,7 +3747,12 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_008'));
             $temp_calc_model->setLateAttribute('0');
@@ -3040,6 +3762,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -3049,7 +3772,12 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '3') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_003'));
             $temp_calc_model->setLateAttribute('0');
@@ -3059,6 +3787,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -3069,7 +3798,12 @@ class DailyWorkingInformationController extends Controller
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
             $temp_calc_model->setLateAttribute('0');
@@ -3079,6 +3813,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -3087,7 +3822,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         }
 
-        Log::DEBUG('---------------------- setPublicGoingOutCollectPtn end ------------------------ ');
+        // Log::debug('---------------------- setPublicGoingOutCollectPtn end ------------------------ ');
         return $temp_calc_model;
             
     }
@@ -3100,13 +3835,29 @@ class DailyWorkingInformationController extends Controller
      *         １個前のモード
      * @return チェック結果
      */
-    private function setPublicGoingOutReturnTime($cnt, $work_time,
-        $value_record_datetime, $value_timetable_from_time, $value_timetable_to_time,
-        $value_check_result, $value_check_max_times, $value_mobile_positions, 
-        $before_value_mode, $before_value_datetime, $working_timetable_no, $attendance_time_index)
+    private function setPublicGoingOutReturnTime($params)
     {
-        Log::DEBUG('---------------------- setPublicGoingOutReturnTime in ------------------------ ');
-        Log::DEBUG('        公用外出戻り打刻処理');
+        // Log::debug('---------------------- setPublicGoingOutReturnTime in ------------------------ ');
+        $cnt = $params['cnt'];
+        $work_time = $params['work_time'];
+        $value_record_datetime = $params['value_record_datetime'];
+        $value_record_datetime_id = $params['value_record_datetime_id'];
+        $value_editor_department_code = $params['value_editor_department_code'];
+        $value_editor_department_name = $params['value_editor_department_name'];
+        $value_editor_user_code = $params['value_editor_user_code'];
+        $value_editor_user_name = $params['value_editor_user_name'];
+        $value_timetable_from_time = $params['value_timetable_from_time'];
+        $value_timetable_to_time = $params['value_timetable_to_time'];
+        $value_check_result = $params['value_check_result'];
+        $value_check_max_times = $params['value_check_max_times'];
+        $value_mobile_positions = $params['value_mobile_positions'];
+        $before_value_mode = $params['before_value_mode'];
+        $before_value_datetime = $params['before_value_datetime'];
+        $business_kubun = $params['business_kubun'];
+        $user_holiday_kubun = $params['user_holiday_kubun'];
+        $value_working_timetable_no = $params['value_working_timetable_no'];
+        $attendance_time_index = $params['attendance_time_index'];
+
         $apicommon = new ApiCommonController();
         $attendance_from_date = new Carbon($work_time->getParamDatefromAttribute());        // 出勤1日のはじめ
         $attendance_from_date_format = date_format($attendance_from_date, 'Y/m/d');
@@ -3125,12 +3876,12 @@ class DailyWorkingInformationController extends Controller
             $attendance_from_date_format.' 23:59:59');                                      // 出勤1日の終わり
         $record_datetime = new Carbon($value_record_datetime);                              // 打刻日付時刻
         $record_before_datetime = new Carbon($before_value_datetime);                       // １個前の打刻時刻
-        Log::DEBUG('            attendance_from_date set = '.$attendance_from_date);
-        Log::DEBUG('            timetable_from_date set = '.$timetable_from_date);
-        Log::DEBUG('            timetable_to_date set = '.$timetable_to_date);
-        Log::DEBUG('            attendance_to_date set = '.$attendance_to_date);
-        Log::DEBUG('            record_datetime set = '.$record_datetime);
-        Log::DEBUG('            record_before_datetime set = '.$record_before_datetime);
+        // Log::debug('            attendance_from_date set = '.$attendance_from_date);
+        // Log::debug('            timetable_from_date set = '.$timetable_from_date);
+        // Log::debug('            timetable_to_date set = '.$timetable_to_date);
+        // Log::debug('            attendance_to_date set = '.$attendance_to_date);
+        // Log::debug('            record_datetime set = '.$record_datetime);
+        // Log::debug('            record_before_datetime set = '.$record_before_datetime);
         // パターン設定
         $ptn = null;
 
@@ -3153,12 +3904,10 @@ class DailyWorkingInformationController extends Controller
                     $ptn = '2';
                 }
             } else {                                                                        // １個前のモードがない
-                Log::DEBUG('c $ptn = ');
                 // 不明データとして作成する
                 $log_data = $work_time->getParamDatefromAttribute();
                 $log_data .= $work_time->getParamUsercodeAttribute();
                 $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setPublicGoingReturnTime1 '.$log_data);
             }
         // ---------------------公用外出戻りが２番目以降の場合 -----------------------------------------------------------------------------------
         } else {
@@ -3204,27 +3953,37 @@ class DailyWorkingInformationController extends Controller
                     $log_data = $work_time->getParamDatefromAttribute();
                     $log_data .= $work_time->getParamUsercodeAttribute();
                     $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                    Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setPublicGoingReturnTime2 '.$log_data);
                 }
             } else {                                                                        // １個前のモードがない
                 // 不明データとして作成する
                 $log_data = $work_time->getParamDatefromAttribute();
                 $log_data .= $work_time->getParamUsercodeAttribute();
                 $log_data .= $work_time->getParamDepartmentcodeAttribute();
-                Log::error(Config::get('const.MSG_ERROR.mismatch_data').' method = setPublicGoingOutReturnTime3 '.$log_data);
             }
         }
-
-        if ($ptn != null) {
-            $this->pushArrayCalc($this->setPublicGoingOutReturnCollectPtn(
-                $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
-        } else {
-            // 不明データとして作成する
-            $this->pushArrayCalc($this->setPublicGoingOutReturnCollectPtn(
-                '', $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index));
+        if ($ptn == null) {
+            $ptn = '';
         }
-        Log::DEBUG('        公用外出戻り打刻処理 end');
-        Log::DEBUG('---------------------- setPublicGoingOutReturnTime end ------------------------ ');
+        // setPublicGoingOutReturnCollectPtn implement
+        $array_impl_setPublicGoingOutReturnCollectPtn = array (
+            'ptn' => $ptn,
+            'record_datetime' => $record_datetime,
+            'value_record_datetime_id' => $value_record_datetime_id,
+            'value_editor_department_code' => $value_editor_department_code,
+            'value_editor_department_name' => $value_editor_department_name,
+            'value_editor_user_code' => $value_editor_user_code,
+            'value_editor_user_name' => $value_editor_user_name,
+            'value_check_result' => $value_check_result,
+            'value_check_max_times' => $value_check_max_times,
+            'value_mobile_positions' => $value_mobile_positions,
+            'business_kubun' => $business_kubun,
+            'user_holiday_kubun' => $user_holiday_kubun,
+            'value_working_timetable_no' => $value_working_timetable_no,
+            'attendance_time_index' => $attendance_time_index
+        );
+        $this->pushArrayCalc($this->setPublicGoingOutReturnCollectPtn($array_impl_setPublicGoingOutReturnCollectPtn));
+
+        // Log::debug('---------------------- setPublicGoingOutReturnTime end ------------------------ ');
             
     }
 
@@ -3245,16 +4004,36 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setPublicGoingOutReturnCollectPtn(
-        $ptn, $record_datetime, $value_check_result, $value_check_max_times, $value_mobile_positions, $working_timetable_no, $attendance_time_index)
+    private function setPublicGoingOutReturnCollectPtn($params)
     {
-        Log::DEBUG('---------------------- setPublicGoingOutReturnCollectPtn in ------------------------ ');
+        // Log::debug('---------------------- setPublicGoingOutReturnCollectPtn in ------------------------ ');
+        // パラメータ設定
+        $ptn = $params['ptn'];
+        $record_datetime = $params['record_datetime'];
+        $value_record_datetime_id = $params['value_record_datetime_id'];
+        $value_editor_department_code = $params['value_editor_department_code'];
+        $value_editor_department_name = $params['value_editor_department_name'];
+        $value_editor_user_code = $params['value_editor_user_code'];
+        $value_editor_user_name = $params['value_editor_user_name'];
+        $value_check_result = $params['value_check_result'];
+        $value_check_max_times = $params['value_check_max_times'];
+        $value_mobile_positions = $params['value_mobile_positions'];
+        $business_kubun = $params['business_kubun'];
+        $user_holiday_kubun = $params['user_holiday_kubun'];
+        $value_working_timetable_no = $params['value_working_timetable_no'];
+        $attendance_time_index = $params['attendance_time_index'];
+
         $temp_calc_model = new TempCalcWorkingTime();
 
         if ($ptn == '1') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_return_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_009'));
             $temp_calc_model->setLateAttribute('0');
@@ -3264,6 +4043,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -3273,8 +4053,13 @@ class DailyWorkingInformationController extends Controller
         } elseif ($ptn == '2') {
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_return_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
-            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.public_going_out_return'));
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.public_return'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_NON'));
             $temp_calc_model->setLateAttribute('0');
             $temp_calc_model->setLeaveearlyAttribute('0');
@@ -3283,6 +4068,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('0');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -3293,7 +4079,12 @@ class DailyWorkingInformationController extends Controller
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute(Config::get('const.C005.public_going_out_return_time'));
             $temp_calc_model->setRecorddatetimeAttribute($record_datetime);
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_timetable_no);
+            $temp_calc_model->setWorktimesidAttribute($value_record_datetime_id);
+            $temp_calc_model->setEditordepartmentcodeAttribute($value_editor_department_code);
+            $temp_calc_model->setEditordepartmentnameAttribute($value_editor_department_name);
+            $temp_calc_model->setEditorusercodeAttribute($value_editor_user_code);
+            $temp_calc_model->setEditorusernameAttribute($value_editor_user_name);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
             $temp_calc_model->setLateAttribute('0');
@@ -3303,6 +4094,7 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setCurrentcalcAttribute('0');
             }
+            $temp_calc_model->setCurrentcalcAttribute('1'); // 必ず当日計算にしてみた 20200221
             $temp_calc_model->setTobeconfirmedAttribute('1');
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute($value_check_result);
@@ -3311,7 +4103,7 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPositionsAttribute($value_mobile_positions);
         }
 
-        Log::DEBUG('---------------------- setPublicGoingOutReturnCollectPtn end ------------------------ ');
+        // Log::debug('---------------------- setPublicGoingOutReturnCollectPtn end ------------------------ ');
         return $temp_calc_model;
             
     }
@@ -3333,19 +4125,22 @@ class DailyWorkingInformationController extends Controller
      * @param  打刻時刻
      * @return テーブル
      */
-    private function setNoInputTimePtn($ptn, $user_holiday_name, $target_date, $hpliday_date, $working_time_no)
+    private function setNoInputTimePtn($params)
     {
-        Log::DEBUG('---------------------- setNoInputTimePtn in ------------------------ ');
+        // Log::debug('---------------------- setNoInputTimePtn in ------------------------ ');
+        // パラメータ設定
+        $ptn = $params['ptn'];
+        $user_holiday_name = $params['user_holiday_name'];
+        $target_date = $params['target_date'];
+        $hpliday_date = $params['hpliday_date'];
+        $value_working_timetable_no = $params['value_working_timetable_no'];
+
         $temp_calc_model = new TempCalcWorkingTime();
-        Log::DEBUG('        パターン = '.$ptn);
-        Log::DEBUG('        ユーザー休暇区分 = '.$user_holiday_name);
-        Log::DEBUG('            ターゲット日付 = '.$target_date);
-        Log::DEBUG('            ユーザー休暇日付 = '.$hpliday_date);
 
         if ($ptn == '0') {
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute('0');
             if (isset($user_holiday_name) && $user_holiday_name != '') {
                 $temp_calc_model->setNoteAttribute('');
@@ -3364,10 +4159,11 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         } elseif ($ptn == '1') {    // 設定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_010'));
             $temp_calc_model->setLateAttribute('0');
@@ -3377,10 +4173,11 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         } elseif ($ptn == '2') {    // 設定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_011'));
             $temp_calc_model->setLateAttribute('0');
@@ -3390,10 +4187,11 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         } elseif ($ptn == '3') {    // 設定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_012'));
             $temp_calc_model->setLateAttribute('0');
@@ -3403,10 +4201,11 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         } elseif ($ptn == '4') {    // 設定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_013'));
             $temp_calc_model->setLateAttribute('0');
@@ -3416,10 +4215,11 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         } elseif ($ptn == '5') {    // ���定ミス
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_014'));
             $temp_calc_model->setLateAttribute('0');
@@ -3429,10 +4229,11 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         } elseif ($ptn == '6') {    // ptn=1のnoteなし
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute('0');
             $temp_calc_model->setNoteAttribute('');
             $temp_calc_model->setLateAttribute('0');
@@ -3442,11 +4243,12 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         } else {
             // 不明データとして作成する
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
-            $temp_calc_model->setWorkingtimetablenoAttribute($working_time_no);
+            $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
             $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.unknown'));
             $temp_calc_model->setNoteAttribute(Config::get('const.MEMO_DATA.MEMO_DATA_004'));
             $temp_calc_model->setLateAttribute('0');
@@ -3456,9 +4258,10 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setPatternAttribute($ptn);
             $temp_calc_model->setCheckresultAttribute(0);
             $temp_calc_model->setCheckmaxtimesAttribute(0);
+            $temp_calc_model->setPositionsAttribute(null);
         }
 
-        Log::DEBUG('---------------------- setNoInputTimePtn end ------------------------ ');
+        // Log::debug('---------------------- setNoInputTimePtn end ------------------------ ');
         return $temp_calc_model;
             
     }
@@ -3470,7 +4273,7 @@ class DailyWorkingInformationController extends Controller
      */
     private function chkSettingData($chkdata)
     {
-        Log::DEBUG('---------------------- chkSettingData in ------------------------ ');
+        // Log::debug('---------------------- chkSettingData in ------------------------ ');
         $chk_setting = 0;
         // 部署設定されているか
         if ($chkdata->department_code == null) {
@@ -3511,7 +4314,7 @@ class DailyWorkingInformationController extends Controller
             $chk_setting = 5;
         }
 
-        Log::DEBUG('---------------------- chkSettingData end ------------------------ ');
+        // Log::debug('---------------------- chkSettingData end ------------------------ ');
         return $chk_setting;
             
     }
@@ -3523,14 +4326,14 @@ class DailyWorkingInformationController extends Controller
      */
     private function beforeArrayWorkingTime($result)
     {
-        Log::DEBUG('---------------------- beforeArrayWorkingTime in ------------------------ ');
+        // Log::debug('---------------------- beforeArrayWorkingTime in ------------------------ ');
         // 打刻データ配列の初期化
         $this->iniArrayWorkingTime();
         // 打刻データ配列の設定
         $this->pushArrayWorkingTime($result);
         // 計算用配列の初期化
         $this->iniArrayCalc();
-        Log::DEBUG('---------------------- beforeArrayWorkingTime end ------------------------ ');
+        // Log::debug('---------------------- beforeArrayWorkingTime end ------------------------ ');
     }
 
     /**
@@ -3540,11 +4343,16 @@ class DailyWorkingInformationController extends Controller
      */
     private function iniArrayWorkingTime()
     {
-        Log::DEBUG('---------------------- iniArrayWorkingTime in ------------------------ ');
+        // Log::debug('---------------------- iniArrayWorkingTime in ------------------------ ');
         // 打刻データ配列
         $this->array_messagedata = array();
         $this->array_working_mode = array();
         $this->array_working_datetime = array();
+        $this->array_working_datetime_id = array();
+        $this->array_working_editor_department_code = array();
+        $this->array_working_editor_department_name = array();
+        $this->array_working_editor_user_code = array();
+        $this->array_working_editor_user_name = array();
         $this->array_timetable_from_time = array();
         $this->array_timetable_to_time = array();
         $this->array_check_result = array();
@@ -3552,7 +4360,7 @@ class DailyWorkingInformationController extends Controller
         $this->array_check_interval = array();
         $this->array_working_timetable_no = array();
         $this->array_mobile_positions = array();
-        Log::DEBUG('---------------------- iniArrayWorkingTime end ------------------------ ');
+        // Log::debug('---------------------- iniArrayWorkingTime end ------------------------ ');
     }
 
     /**
@@ -3562,10 +4370,15 @@ class DailyWorkingInformationController extends Controller
      */
     private function pushArrayWorkingTime($result)
     {
-        Log::DEBUG('---------------------- pushArrayWorkingTime in ------------------------ ');
+        // Log::debug('---------------------- pushArrayWorkingTime in ------------------------ ');
         // 打刻データ配列
         $this->array_working_mode[] = $result->mode;
         $this->array_working_datetime[] = $result->record_datetime;
+        $this->array_working_datetime_id[] = $result->record_datetime_id;
+        $this->array_working_editor_department_code[] = $result->editor_department_code;
+        $this->array_working_editor_department_name[] = $result->editor_department_name;
+        $this->array_working_editor_user_code[] = $result->editor_user_code;
+        $this->array_working_editor_user_name[] = $result->editor_user_code_name;
         $this->array_timetable_from_time[] = $result->working_timetable_from_time;
         $this->array_timetable_to_time[] = $result->working_timetable_to_time;
         if (isset($result->check_result)) {
@@ -3593,7 +4406,7 @@ class DailyWorkingInformationController extends Controller
         } else {
             $this->array_mobile_positions[] = null;
         }
-        Log::DEBUG('---------------------- pushArrayWorkingTime end ------------------------ ');
+        // Log::debug('---------------------- pushArrayWorkingTime end ------------------------ ');
     }
 
     /**
@@ -3603,11 +4416,12 @@ class DailyWorkingInformationController extends Controller
      */
     private function iniArrayCalc()
     {
-        Log::DEBUG('---------------------- iniArrayCalc in ------------------------ ');
+        // Log::debug('---------------------- iniArrayCalc in ------------------------ ');
         // 計算用配列
         $this->array_calc_mode = array();
         $this->array_calc_working_timetable_no = array();
         $this->array_calc_time = array();
+        $this->calc_late_night_working_hours = 0;
         $this->array_calc_status = array();
         $this->array_calc_note = array();
         $this->array_calc_late = array();
@@ -3619,7 +4433,13 @@ class DailyWorkingInformationController extends Controller
         $this->array_calc_check_max_times = array();
         $this->array_calc_check_interval = array();
         $this->array_calc_mobile_positions = array();
-        Log::DEBUG('---------------------- iniArrayCalc end ------------------------ ');
+        // 表示用配列
+        $this->array_dsp_time_id = array();
+        $this->array_dsp_editor_department_code = array();
+        $this->array_dsp_editor_department_name = array();
+        $this->array_dsp_editor_user_code = array();
+        $this->array_dsp_editor_user_name = array();
+        // Log::debug('---------------------- iniArrayCalc end ------------------------ ');
     }
 
     /**
@@ -3629,14 +4449,12 @@ class DailyWorkingInformationController extends Controller
      */
     private function pushArrayCalc($temp_calc_model)
     {
-        Log::DEBUG('---------------------- pushArrayCalc in ------------------------ ');
+        // Log::debug('---------------------- pushArrayCalc in ------------------------ ');
         // 計算用配列配列
         $this->array_calc_mode[] = $temp_calc_model->getModeAttribute();
         $this->array_calc_working_timetable_no[] = $temp_calc_model->getWorkingtimetablenoAttribute();
-        Log::DEBUG('      ◇◇◇◇◇◇◇◇◇◇◇ getWorkingtimetablenoAttribute '.$temp_calc_model->getWorkingtimetablenoAttribute());
         $this->array_calc_time[] = $temp_calc_model->getRecorddatetimeAttribute();
         $this->array_calc_status[] = $temp_calc_model->getWorkingstatusAttribute();
-        Log::DEBUG('      ◇◇◇◇◇◇◇◇◇◇◇ getWorkingstatusAttribute '.$temp_calc_model->getWorkingstatusAttribute());
         $this->array_calc_note[] = $temp_calc_model->getNoteAttribute();
         $this->array_calc_late[] = $temp_calc_model->getLateAttribute();
         $this->array_calc_leave_early[] = $temp_calc_model->getLeaveearlyAttribute();
@@ -3647,7 +4465,13 @@ class DailyWorkingInformationController extends Controller
         $this->array_calc_check_max_times[] = $temp_calc_model->getCheckmaxtimesAttribute();
         $this->array_calc_check_interval[] = $temp_calc_model->getCheckintervalAttribute();
         $this->array_calc_mobile_positions[] = $temp_calc_model->getPositionsAttribute();
-        Log::DEBUG('---------------------- pushArrayCalc end ------------------------ ');
+        // 表示用配列配列
+        $this->array_dsp_time_id[] = $temp_calc_model->getWorktimesidAttribute();
+        $this->array_dsp_editor_department_code[] = $temp_calc_model->getEditordepartmentcodeAttribute();
+        $this->array_dsp_editor_department_name[] = $temp_calc_model->getEditordepartmentnameAttribute();
+        $this->array_dsp_editor_user_code[] = $temp_calc_model->getEditorusercodeAttribute();
+        $this->array_dsp_editor_user_name[] = $temp_calc_model->getEditorusernameAttribute();
+        // Log::debug('---------------------- pushArrayCalc end ------------------------ ');
     }
 
     /**
@@ -3655,9 +4479,12 @@ class DailyWorkingInformationController extends Controller
      *
      * @return void
      */
-    private function insTempCalcItem($target_date, $result)
+    private function insTempCalcItem($params)
     {
-        Log::DEBUG('---------------------- insTempCalcItem in ------------------------ ');
+        // Log::debug('---------------------- insTempCalcItem in ------------------------ ');
+        // パラメータ設定
+        $target_date = $params['target_date'];
+        $result = $params['target_result'];
         $temp_calc_model = new TempCalcWorkingTime();
     
         // 計算用配列からtemporary項目を設定する
@@ -3706,18 +4533,18 @@ class DailyWorkingInformationController extends Controller
         $temp_calc_model->setYearAttribute($result->year);
         $temp_calc_model->setSystemDateAttribute(Carbon::now());
 
-        Log::DEBUG('    登録処理　：　登録件数 count($this->array_calc_mode) = '.count($this->array_calc_mode));
         for($i=0;$i<count($this->array_calc_mode);$i++){
             $this->user_temp_seq++;
             $temp_calc_model->setSeqAttribute($this->user_temp_seq);
-            Log::DEBUG('        $result->holiday_kubun = '.$result->holiday_kubun);
-            Log::DEBUG('        $this->array_calc_time[$i] = '.$this->array_calc_time[$i]);
-            Log::DEBUG('        $this->array_calc_status[$i] = '.$this->array_calc_status[$i]);
-            Log::DEBUG('        $this->array_calc_working_timetable_no[$i] = '.$this->array_calc_working_timetable_no[$i]);
             if (isset($result->holiday_kubun)) {
                 if ($result->holiday_kubun == Config::get('const.C013.morning_off') || $result->holiday_kubun == Config::get('const.C013.afternoon_off')) {
                     $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
                     $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
+                    $temp_calc_model->setWorktimesidAttribute($this->array_dsp_time_id[$i]);
+                    $temp_calc_model->setEditordepartmentcodeAttribute($this->array_dsp_editor_department_code[$i]);
+                    $temp_calc_model->setEditordepartmentnameAttribute($this->array_dsp_editor_department_name[$i]);
+                    $temp_calc_model->setEditorusercodeAttribute($this->array_dsp_editor_user_code[$i]);
+                    $temp_calc_model->setEditorusernameAttribute($this->array_dsp_editor_user_name[$i]);
                     $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
                     if (isset($this->array_calc_time[$i])) {
                         $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
@@ -3735,6 +4562,12 @@ class DailyWorkingInformationController extends Controller
                 } elseif ($result->holiday_kubun == Config::get('const.C013.non_set')) {
                     $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
                     $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
+                    $temp_calc_model->setWorktimesidAttribute($this->array_dsp_time_id[$i]);
+                    $temp_calc_model->setEditordepartmentcodeAttribute($this->array_dsp_editor_department_code[$i]);
+                    $temp_calc_model->setEditordepartmentnameAttribute($this->array_dsp_editor_department_name[$i]);
+                    $temp_calc_model->setEditorusercodeAttribute($this->array_dsp_editor_user_code[$i]);
+                    $temp_calc_model->setEditorusernameAttribute($this->array_dsp_editor_user_name[$i]);
+                    $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
                     $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
                     if (isset($this->array_calc_time[$i])) {
                         $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
@@ -3753,6 +4586,11 @@ class DailyWorkingInformationController extends Controller
                     $temp_calc_model->setModeAttribute(null);
                     $temp_calc_model->setRecorddatetimeAttribute(null);
                     $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
+                    $temp_calc_model->setWorktimesidAttribute($this->array_dsp_time_id[$i]);
+                    $temp_calc_model->setEditordepartmentcodeAttribute($this->array_dsp_editor_department_code[$i]);
+                    $temp_calc_model->setEditordepartmentnameAttribute($this->array_dsp_editor_department_name[$i]);
+                    $temp_calc_model->setEditorusercodeAttribute($this->array_dsp_editor_user_code[$i]);
+                    $temp_calc_model->setEditorusernameAttribute($this->array_dsp_editor_user_name[$i]);
                     if (isset($this->array_calc_time[$i])) {
                         $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
                         $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
@@ -3770,16 +4608,19 @@ class DailyWorkingInformationController extends Controller
             } else {
                 $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
                 $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
+                $temp_calc_model->setWorktimesidAttribute($this->array_dsp_time_id[$i]);
+                $temp_calc_model->setEditordepartmentcodeAttribute($this->array_dsp_editor_department_code[$i]);
+                $temp_calc_model->setEditordepartmentnameAttribute($this->array_dsp_editor_department_name[$i]);
+                $temp_calc_model->setEditorusercodeAttribute($this->array_dsp_editor_user_code[$i]);
+                $temp_calc_model->setEditorusernameAttribute($this->array_dsp_editor_user_name[$i]);
                 $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
                 if (isset($this->array_calc_time[$i]) && $this->array_calc_time[$i] != '') {
-                    Log::DEBUG('isset($this->array_calc_time[$i]) = '.$this->array_calc_time[$i]);
                     $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
                     $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
                     $temp_calc_model->setRecordmonthAttribute($edt_calc_datetime->format('m'));
                     $temp_calc_model->setRecorddateAttribute($edt_calc_datetime->format('Ymd'));
                     $temp_calc_model->setRecordtimeAttribute($edt_calc_datetime->format('His'));
                 } else {
-                    Log::DEBUG('isset($this->array_calc_time[$i]) = null'.$this->array_calc_time[$i]);
                     $temp_calc_model->setRecordyearAttribute($dt->format('Y'));
                     $temp_calc_model->setRecordmonthAttribute($dt->format('m'));
                     $temp_calc_model->setRecorddateAttribute($dt->format('Ymd'));
@@ -3804,7 +4645,7 @@ class DailyWorkingInformationController extends Controller
                 throw $pe;
             }
         }
-        Log::DEBUG('---------------------- insTempCalcItem end ------------------------ ');
+        // Log::debug('---------------------- insTempCalcItem end ------------------------ ');
     }
 
     /**
@@ -3813,9 +4654,9 @@ class DailyWorkingInformationController extends Controller
      *
      * @return 集計結果
      */
-    private function calcTempWorkingTimeDate($timetables){
+    private function calcTempWorkingTimeDate($timetables, $target_date){
 
-        Log::DEBUG('---------------------- calcTempWorkingTimeDate in ------------------------ ');
+        // Log::debug('---------------------- calcTempWorkingTimeDate in ------------------------ ');
         $this->not_employment_working = 0;
         $current_date = null;
         $current_department_code = null;
@@ -3842,9 +4683,9 @@ class DailyWorkingInformationController extends Controller
         $attendance_time_positions = null;
         $leaving_time_positions = null;
         $missing_middle_time_positions = null;
-        $missing_middle_return_time_positions = null;
+        $missing_return_time_positions = null;
         $public_going_out_time_positions = null;
-        $public_going_out_return_time_positions = null;
+        $public_return_time_positions = null;
         //
         $working_status = 0;
         $array_working_time_kubun = array(Config::get('const.C004.regular_working_time'),
@@ -3871,20 +4712,52 @@ class DailyWorkingInformationController extends Controller
         for ($i=0;$i<count($array_working_time_kubun);$i++) {
             $array_public_going_out_time[$i] = 0; 
         }
+        // 深夜労働時間
+        $this->calc_late_night_working_hours = 0;
         // データ登録用出勤・退勤の労働時刻数配列
         $array_add_attendance_time = array();
+        $array_add_attendance_time_id = array();
+        $array_add_attendance_editor_department_code = array();
+        $array_add_attendance_editor_department_name = array();
+        $array_add_attendance_editor_user_code = array();
+        $array_add_attendance_editor_user_name = array();
         $array_add_attendance_time_positions = array();
         $array_add_leaving_time = array();
+        $array_add_leaving_time_id = array();
+        $array_add_leaving_editor_department_code = array();
+        $array_add_leaving_editor_department_name = array();
+        $array_add_leaving_editor_user_code = array();
+        $array_add_leaving_editor_user_name = array();
         $array_add_leaving_time_positions = array();
         // データ登録用外出・戻りの労働時刻数配列
         $array_add_missing_middle_time = array();
+        $array_add_missing_middle_time_id = array();
+        $array_add_missing_middle_editor_department_code = array();
+        $array_add_missing_middle_editor_department_name = array();
+        $array_add_missing_middle_editor_user_code = array();
+        $array_add_missing_middle_editor_user_name = array();
         $array_add_missing_middle_time_positions = array();
-        $array_add_missing_middle_return_time = array();
-        $array_add_missing_middle_return_time_positions = array();
+        $array_add_missing_return_time = array();
+        $array_add_missing_return_time_id = array();
+        $array_add_missing_return_editor_department_code = array();
+        $array_add_missing_return_editor_department_name = array();
+        $array_add_missing_return_editor_user_code = array();
+        $array_add_missing_return_editor_user_name = array();
+        $array_add_missing_return_time_positions = array();
         $array_add_public_going_out_time = array();
+        $array_add_public_going_out_time_id = array();
+        $array_add_public_going_out_editor_department_code = array();
+        $array_add_public_going_out_editor_department_name = array();
+        $array_add_public_going_out_editor_user_code = array();
+        $array_add_public_going_out_editor_user_name = array();
         $array_add_public_going_out_time_positions = array();
-        $array_add_public_going_out_return_time = array();
-        $array_add_public_going_out_return_time_positions = array();
+        $array_add_public_return_time = array();
+        $array_add_public_return_time_id = array();
+        $array_add_public_return_editor_department_code = array();
+        $array_add_public_return_editor_department_name = array();
+        $array_add_public_return_editor_user_code = array();
+        $array_add_public_return_editor_user_name = array();
+        $array_add_public_return_time_positions = array();
         // ユーザー休暇区分判定用
         $before_holiday_date = null;
         $before_holiday_user_code = null;
@@ -3892,6 +4765,15 @@ class DailyWorkingInformationController extends Controller
         $before_holiday_kubun = null;
         $before_holiday_set = false;
 
+        $apicommon = new ApiCommonController();
+        // TODO: 引数の$timetablesと1.と2.を纏められないか
+        // 1.時間丸め用にタイムテーブル労働開始終了時間テーブル設定する
+        $array_get_timetable_result = $apicommon->setWorkingStartEndTimeTable($target_date);
+        // 2.集計必要な休暇用のタイムテーブルを取得
+        $timetable_model = new WorkingTimeTable();
+        $timetable_model->setParamdatefromAttribute($target_date);
+        $timetable_model->setParamdatetoAttribute($target_date);
+        $array_break_worktimetable_result = $timetable_model->getAllTimeTables();
         // ユーザー単位処理
         $temp_calc_model = new TempCalcWorkingTime();
         $worktimes = $temp_calc_model->getTempCalcWorkingtime();
@@ -3900,25 +4782,27 @@ class DailyWorkingInformationController extends Controller
             return false;
         }
         $calc_nobreak_cnt = 0;
+        $set_calcTimes_flg = false;
         foreach ($worktimes as $result) {
             // 現在の情報保存
-            Log::DEBUG('日次集計 ユーザー  code = '.$result->user_code.' '.$result->user_name);
-            Log::DEBUG('        部署 = '.$result->department_name);
-            Log::DEBUG('        打刻日 = '.$result->working_date);
-            Log::DEBUG('        モード = '.$result->mode);
-            Log::DEBUG('        打刻日時刻 = '.$result->record_datetime);
-            Log::DEBUG('        打刻日 = '.$result->record_date);
-            Log::DEBUG('        打刻時刻 = '.$result->record_time);
-            Log::DEBUG('        ノート = '.$result->note);
-            Log::DEBUG('        遅刻 = '.$result->late);
-            Log::DEBUG('        早退 = '.$result->leave_early);
-            Log::DEBUG('        出勤日 = '.$result->business_kubun);
-            Log::DEBUG('        　　　 = '.$result->business_name);
-            Log::DEBUG('        休暇 = '.$result->holiday_kubun);
-            Log::DEBUG('        　　　= '.$result->holiday_name);
-            Log::DEBUG('        当日分計算　=  '.$result->current_calc);
-            Log::DEBUG('        当日分計算　=  '.$result->current_calc);
-            Log::DEBUG('        勤務状態 =  '.$result->working_status);
+            // Log::debug('日次集計 ユーザー  code = '.$result->user_code.' '.$result->user_name);
+            // Log::debug('        部署 = '.$result->department_name);
+            // Log::debug('        打刻日 = '.$result->working_date);
+            // Log::debug('        モード = '.$result->mode);
+            // Log::debug('        打刻日時刻 = '.$result->record_datetime);
+            // Log::debug('        打刻日 = '.$result->record_date);
+            // Log::debug('        打刻時刻 = '.$result->record_time);
+            // Log::debug('        打刻時刻ID = '.$result->work_times_id);
+            // Log::debug('        ノート = '.$result->note);
+            // Log::debug('        遅刻 = '.$result->late);
+            // Log::debug('        早退 = '.$result->leave_early);
+            // Log::debug('        出勤日 = '.$result->business_kubun);
+            // Log::debug('        　　　 = '.$result->business_name);
+            // Log::debug('        休暇 = '.$result->holiday_kubun);
+            // Log::debug('        　　　= '.$result->holiday_name);
+            // Log::debug('        　　　= '.$result->holiday_description);
+            // Log::debug('        当日分計算　=  '.$result->current_calc);
+            // Log::debug('        勤務状態 =  '.$result->working_status);
             $current_date = $result->working_date;
             $current_department_code = $result->department_code;
             $current_user_code = $result->user_code;
@@ -3938,10 +4822,17 @@ class DailyWorkingInformationController extends Controller
             if ($current_date == $before_date &&
                 $current_department_code == $current_department_code &&
                 $current_user_code == $before_user_code) {
-                Log::DEBUG('    同じキーの場合  ');
+                // Log::debug('    同じキーの場合  ');
                 $calc_nobreak_cnt++;
                 if ($result->mode == Config::get('const.C005.attendance_time')) {
+                    // Log::debug('        temp_working_time_dates 出勤  $result->record_datetime = '.$result->record_datetime);
+                    // Log::debug('        temp_working_time_dates 出勤  $result->work_times_id = '.$result->work_times_id);
                     $attendance_time = $result->record_datetime;
+                    $attendance_time_id = $result->work_times_id;
+                    $attendance_editor_department_code = $result->editor_department_code;
+                    $attendance_editor_department_name = $result->editor_department_name;
+                    $attendance_editor_user_code = $result->editor_user_code;
+                    $attendance_editor_user_name = $result->editor_user_name;
                     if (isset($result->x_positions) && isset($result->y_positions)) {
                         $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
                     } else {
@@ -3949,7 +4840,14 @@ class DailyWorkingInformationController extends Controller
                     }               
                 }
                 if ($result->mode == Config::get('const.C005.leaving_time')) {
+                    // Log::debug('        temp_working_time_dates 退勤  $result->record_datetime = '.$result->record_datetime);
+                    // Log::debug('        temp_working_time_dates 退勤  $result->work_times_id = '.$result->work_times_id);
                     $leaving_time = $result->record_datetime;
+                    $leaving_time_id = $result->work_times_id;
+                    $leaving_editor_department_code = $result->editor_department_code;
+                    $leaving_editor_department_name = $result->editor_department_name;
+                    $leaving_editor_user_code = $result->editor_user_code;
+                    $leaving_editor_user_name = $result->editor_user_name;
                     if (isset($result->x_positions) && isset($result->y_positions)) {
                         $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
                     } else {
@@ -3958,22 +4856,37 @@ class DailyWorkingInformationController extends Controller
                 }
                 if ($result->mode == Config::get('const.C005.missing_middle_time')) {
                     $missing_middle_time = $result->record_datetime;
+                    $missing_middle_time_id = $result->work_times_id;
+                    $missing_middle_editor_department_code = $result->editor_department_code;
+                    $missing_middle_editor_department_name = $result->editor_department_name;
+                    $missing_middle_editor_user_code = $result->editor_user_code;
+                    $missing_middle_editor_user_name = $result->editor_user_name;
                     if (isset($result->x_positions) && isset($result->y_positions)) {
-                        $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
+                        $missing_middle_time_positions = $result->x_positions.' '.$result->y_positions;
                     } else {
-                        $missing_middle_time_time_positions = null;
+                        $missing_middle_time_positions = null;
                     }               
                 }
                 if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
                     $missing_middle_return_time = $result->record_datetime;
+                    $missing_middle_return_time_id = $result->work_times_id;
+                    $missing_return_editor_department_code = $result->editor_department_code;
+                    $missing_return_editor_department_name = $result->editor_department_name;
+                    $missing_return_editor_user_code = $result->editor_user_code;
+                    $missing_return_editor_user_name = $result->editor_user_name;
                     if (isset($result->x_positions) && isset($result->y_positions)) {
-                        $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
+                        $missing_return_time_positions = $result->x_positions.' '.$result->y_positions;
                     } else {
-                        $missing_middle_return_time_positions = null;
+                        $missing_return_time_positions = null;
                     }               
                 }
                 if ($result->mode == Config::get('const.C005.public_going_out_time')) {
                     $public_going_out_time = $result->record_datetime;
+                    $public_going_out_time_id = $result->work_times_id;
+                    $public_going_out_editor_department_code = $result->editor_department_code;
+                    $public_going_out_editor_department_name = $result->editor_department_name;
+                    $public_going_out_editor_user_code = $result->editor_user_code;
+                    $public_going_out_editor_user_name = $result->editor_user_name;
                     if (isset($result->x_positions) && isset($result->y_positions)) {
                         $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
                     } else {
@@ -3982,10 +4895,15 @@ class DailyWorkingInformationController extends Controller
                 }
                 if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
                     $public_going_out_return_time = $result->record_datetime;
+                    $public_going_out_return_time_id = $result->work_times_id;
+                    $public_return_editor_department_code = $result->editor_department_code;
+                    $public_return_editor_department_name = $result->editor_department_name;
+                    $public_return_editor_user_code = $result->editor_user_code;
+                    $public_return_editor_user_name = $result->editor_user_name;
                     if (isset($result->x_positions) && isset($result->y_positions)) {
-                        $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
+                        $public_return_time_positions = $result->x_positions.' '.$result->y_positions;
                     } else {
-                        $public_going_out_return_time_positions = null;
+                        $public_return_time_positions = null;
                     }               
                 }
                 $array_notelateetc = $this->setNoteLateEtc($result);
@@ -3995,12 +4913,12 @@ class DailyWorkingInformationController extends Controller
                 $to_be_confirmed = $array_notelateetc[3];
                 $working_timetable_no = $result->working_timetable_no;
                 $dtNow = new Carbon();
-                if ($result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
+                if ($result->current_calc == '1' && $result->record_datetime < $dtNow) {    // 打刻時刻 < 現在時刻
                     $working_status = $result->working_status;
                 }
                 // 労働時間の計算
-                $set_calcTimes_flg = false;
                 if ($result->current_calc == '1') {     // 当日分である場合
+                    $set_calcTimes_flg = false;
                     // ユーザー休暇区分判定用
                     $before_holiday_date = null;
                     $before_holiday_user_code = null;
@@ -4009,36 +4927,57 @@ class DailyWorkingInformationController extends Controller
                     // 計算セットフラグ　　calcTimes実行ならtrueにする
                     // ----------------------- 私用外出 -------------------------------------------
                     // 私用外出は複数ある可能性があるので私用外出計算は戻り時点で計算する。
-                    Log::DEBUG('        私用外出 $missing_middle_time = '.$missing_middle_time);
                     if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
                         $array_add_missing_middle_time[] = $missing_middle_time;
+                        $array_add_missing_middle_time_id[] = $missing_middle_time_id;
+                        $array_add_missing_middle_editor_department_code[] = $missing_middle_editor_department_code;
+                        $array_add_missing_middle_editor_department_name[] = $missing_middle_editor_department_name;
+                        $array_add_missing_middle_editor_user_code[] = $missing_middle_editor_user_code;
+                        $array_add_missing_middle_editor_user_name[] = $missing_middle_editor_user_name;
                         $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
                     }
-                    Log::DEBUG('        私用外出戻り $missing_middle_return_time = '.$missing_middle_return_time);
                     if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                        $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                        $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
+                        $array_add_missing_return_time[] = $missing_middle_return_time;
+                        $array_add_missing_return_time_id[] = $missing_middle_return_time_id;
+                        $array_add_missing_return_editor_department_code[] = $missing_return_editor_department_code;
+                        $array_add_missing_return_editor_department_name[] = $missing_return_editor_department_name;
+                        $array_add_missing_return_editor_user_code[] = $missing_return_editor_user_code;
+                        $array_add_missing_return_editor_user_name[] = $missing_return_editor_user_name;
+                        $array_add_missing_return_time_positions[] = $missing_return_time_positions;
                     }
                     if ($missing_middle_time <> '' && $missing_middle_return_time <> ''){
-                        Log::DEBUG('        私用外出データ集計  count($array_working_time_kubun) = '.count($array_working_time_kubun));
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
                             if (($array_working_time_kubun[$i] <> Config::get('const.C004.regular_working_breaks_time')) &&
                                 ($array_working_time_kubun[$i] <> Config::get('const.C004.working_breaks_time')))  {
+                                // roundTimeByTimeStart implement
+                                $array_roundTimeByTimeStart = array (
+                                    'current_date' => $current_date,
+                                    'start_time' => $missing_middle_time,
+                                    'time_unit' => $result->time_unit,
+                                    'time_rounding' => $result->time_rounding,
+                                    'working_timetable_no' => $working_timetable_no,
+                                    'array_get_timetable_result' => $array_get_timetable_result
+                                );
+                                // roundTimeByTimeEnd implement
+                                $array_roundTimeByTimeEnd = array (
+                                    'current_date' => $current_date,
+                                    'end_time' => $missing_middle_return_time,
+                                    'time_unit' => $result->time_unit,
+                                    'time_rounding' => $result->time_rounding,
+                                    'working_timetable_no' => $working_timetable_no,
+                                    'array_get_timetable_result' => $array_get_timetable_result
+                                );
                                 $array_missing_middle_time[$i] += 
                                     $this->calcTimes(Config::get('const.INC_NO.missing_return'),
                                         $timetables,
                                         $working_timetable_no,
                                         $array_working_time_kubun[$i],
                                         $current_date,
-                                        $missing_middle_time,
-                                        $missing_middle_return_time,
+                                        $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart),
+                                        $apicommon->roundTimeByTimeEnd($array_roundTimeByTimeEnd),
                                         $array_calc_time,
-                                        $array_missing_middle_time);
-                                Log::DEBUG('        私用外出データ　$i =  '.$i);
-                                Log::DEBUG('        私用外出データ　array_working_time_kubun[$i] =  '.$array_working_time_kubun[$i]);
-                                Log::DEBUG('        私用外出データ　array_missing_middle_time[$i] =  '.$array_missing_middle_time[$i]);
-                                Log::DEBUG('        私用外出データ　amissing_middle_time =  '.$missing_middle_time);
-                                Log::DEBUG('        私用外出データ　missing_middle_return_time =  '.$missing_middle_return_time);
+                                        $array_missing_middle_time
+                                    );
                                 $set_calcTimes_flg = true;
                             }
                         }
@@ -4048,23 +4987,30 @@ class DailyWorkingInformationController extends Controller
                     }
                     // ----------------------- 公用外出 -------------------------------------------
                     // 公用外出は複数ある可能性があるので公用外出計算は戻り時点で計算する。
-                    Log::DEBUG('        公用外出 $public_going_out_time = '.$public_going_out_time);
                     if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
                         $array_add_public_going_out_time[] = $public_going_out_time;
+                        $array_add_public_going_out_time_id[] = $public_going_out_time_id;
+                        $array_add_public_going_out_editor_department_code[] = $public_going_out_editor_department_code;
+                        $array_add_public_going_out_editor_department_name[] = $public_going_out_editor_department_name;
+                        $array_add_public_going_out_editor_user_code[] = $public_going_out_editor_user_code;
+                        $array_add_public_going_out_editor_user_name[] = $public_going_out_editor_user_name;
                         $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
                     }
-                    Log::DEBUG('        公用外出戻り $public_going_out_return_time = '.$public_going_out_return_time);
                     if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                        $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                        $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
+                        $array_add_public_return_time[] = $public_going_out_return_time;
+                        $array_add_public_return_time_id[] = $public_going_out_return_time_id;
+                        $array_add_public_return_editor_department_code[] = $public_return_editor_department_code;
+                        $array_add_public_return_editor_department_name[] = $public_return_editor_department_name;
+                        $array_add_public_return_editor_user_code[] = $public_return_editor_user_code;
+                        $array_add_public_return_editor_user_name[] = $public_return_editor_user_name;
+                        $array_add_public_return_time_positions[] = $public_return_time_positions;
                     }
                     if ($public_going_out_time <> '' && $public_going_out_return_time <> ''){
-                        Log::DEBUG('        公用外出データ集計  count($array_working_time_kubun) = '.count($array_working_time_kubun));
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
                             if (($array_working_time_kubun[$i] <> Config::get('const.C004.regular_working_breaks_time')) &&
                                 ($array_working_time_kubun[$i] <> Config::get('const.C004.working_breaks_time')))  {
                                 $array_public_going_out_time[$i] += 
-                                    $this->calcTimes(Config::get('const.INC_NO.public_going_out_return'),
+                                    $this->calcTimes(Config::get('const.INC_NO.public_return'),
                                         $timetables,
                                         $working_timetable_no,
                                         $array_working_time_kubun[$i],
@@ -4072,12 +5018,8 @@ class DailyWorkingInformationController extends Controller
                                         $public_going_out_time,
                                         $public_going_out_return_time,
                                         $array_calc_time,
-                                        $array_public_going_out_time);
-                                Log::DEBUG('        公用外出データ　$i =  '.$i);
-                                Log::DEBUG('        公用外出データ　array_working_time_kubun[$i] =  '.$array_working_time_kubun[$i]);
-                                Log::DEBUG('        公用外出データ　array_public_going_out_time[$i] =  '.$array_public_going_out_time[$i]);
-                                Log::DEBUG('        公用外出データ　public_going_out_time =  '.$public_going_out_time);
-                                Log::DEBUG('        公用外出データ　public_going_out_return_time =  '.$public_going_out_return_time);
+                                        $array_public_going_out_time
+                                    );
                                 $set_calcTimes_flg = true;
                             }
                         }
@@ -4087,34 +5029,60 @@ class DailyWorkingInformationController extends Controller
                     }
                     // ----------------------- 出勤 -------------------------------------------
                     if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
+                        // Log::debug('        temp_working_time_dates 出勤  $attendance_time = '.$attendance_time);
+                        // Log::debug('        temp_working_time_dates 出勤  $attendance_time_id = '.$attendance_time_id);
                         $array_add_attendance_time[] = $attendance_time;
+                        $array_add_attendance_time_id[] = $attendance_time_id;
+                        $array_add_attendance_editor_department_code[] = $attendance_editor_department_code;
+                        $array_add_attendance_editor_department_name[] = $attendance_editor_department_name;
+                        $array_add_attendance_editor_user_code[] = $attendance_editor_user_code;
+                        $array_add_attendance_editor_user_name[] = $attendance_editor_user_name;
                         $array_add_attendance_time_positions[] = $attendance_time_positions;
                     }
                     // ----------------------- 退勤 -------------------------------------------
                     // 退勤データの場合計算開始
                     if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                        Log::DEBUG('        出勤退勤データ集計  count($array_working_time_kubun) = '.count($array_working_time_kubun));
+                        // Log::debug('        出勤退勤データ集計  count($array_working_time_kubun) = '.count($array_working_time_kubun));
                         $array_add_leaving_time[] = $leaving_time;
+                        $array_add_leaving_time_id[] = $leaving_time_id;
+                        $array_add_leaving_editor_department_code[] = $leaving_editor_department_code;
+                        $array_add_leaving_editor_department_name[] = $leaving_editor_department_name;
+                        $array_add_leaving_editor_user_code[] = $leaving_editor_user_code;
+                        $array_add_leaving_editor_user_name[] = $leaving_editor_user_name;
                         $array_add_leaving_time_positions[] = $leaving_time_positions;
                         $index = (int)(Config::get('const.C004.regular_working_time'))-1;
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
                             if (($array_working_time_kubun[$i] <> Config::get('const.C004.regular_working_breaks_time')) &&
                                 ($array_working_time_kubun[$i] <> Config::get('const.C004.working_breaks_time')))  {
+                                // roundTimeByTimeStart implement
+                                $array_roundTimeByTimeStart = array (
+                                    'current_date' => $current_date,
+                                    'start_time' => $attendance_time,
+                                    'time_unit' => $result->time_unit,
+                                    'time_rounding' => $result->time_rounding,
+                                    'working_timetable_no' => $working_timetable_no,
+                                    'array_get_timetable_result' => $array_get_timetable_result
+                                );
+                                // roundTimeByTimeEnd implement
+                                $array_roundTimeByTimeEnd = array (
+                                    'current_date' => $current_date,
+                                    'end_time' => $leaving_time,
+                                    'time_unit' => $result->time_unit,
+                                    'time_rounding' => $result->time_rounding,
+                                    'working_timetable_no' => $working_timetable_no,
+                                    'array_get_timetable_result' => $array_get_timetable_result
+                                );
                                 $array_calc_time[$i] += 
                                     $this->calcTimes(Config::get('const.INC_NO.attendace_leaving'),
                                         $timetables,
                                         $working_timetable_no,
                                         $array_working_time_kubun[$i],
                                         $current_date,
-                                        $attendance_time,
-                                        $leaving_time,
+                                        $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart),
+                                        $apicommon->roundTimeByTimeEnd($array_roundTimeByTimeEnd),
                                         $array_calc_time,
-                                        $array_missing_middle_time);
-                                Log::DEBUG('        退勤データ　$i =  '.$i);
-                                Log::DEBUG('        退勤データ　array_working_time_kubun[$i] =  '.$array_working_time_kubun[$i]);
-                                Log::DEBUG('        退勤データ　array_calc_time[$i] =  '.$array_calc_time[$i]);
-                                Log::DEBUG('        退勤データ　attendance_time =  '.$attendance_time);
-                                Log::DEBUG('        退勤データ　leaving_time =  '.$leaving_time);
+                                        $array_missing_middle_time
+                                    );
                                 $set_calcTimes_flg = true;
                             } else {
                                 // 休憩時間を別途計算する
@@ -4124,8 +5092,9 @@ class DailyWorkingInformationController extends Controller
                                         $working_timetable_no,
                                         $array_working_time_kubun[$i],
                                         $current_date,
-                                        $attendance_time,
-                                        $leaving_time);
+                                        $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart),
+                                        $apicommon->roundTimeByTimeEnd($array_roundTimeByTimeEnd)
+                                    );
                             }
                         }
                         // 出勤退勤時刻を初期化して次の計算準備
@@ -4136,138 +5105,174 @@ class DailyWorkingInformationController extends Controller
                     // 出勤していなく１日休暇設定されていればデータ作成
                     // 出勤していなく休暇設定されていなければデータ作成
                     //if (!$set_calcTimes_flg && isset($result->holiday_kubun)) {
-                    Log::DEBUG('        temp_working_time_datesデータ作成事前条件チェック $set_calcTimes_flg = '.$set_calcTimes_flg);
-                    Log::DEBUG('        temp_working_time_datesデータ作成事前条件チェック $mode_chk = '.$mode_chk);
+                    // Log::debug('        temp_working_time_datesデータ作成事前条件チェック $set_calcTimes_flg = '.$set_calcTimes_flg);
+                    // Log::debug('        temp_working_time_datesデータ作成事前条件チェック $mode_chk = '.$mode_chk);
                     if (!$set_calcTimes_flg && !$mode_chk) {
-                        Log::DEBUG('        temp_working_time_datesデータ作成開始 ');
-                        Log::DEBUG('            calcTimes計算対象外データ作成 =  '.$current_user_code);
-                        Log::DEBUG('                休暇区分  = '.$result->holiday_kubun);
+                        // Log::debug('        temp_working_time_datesデータ作成開始 ');
+                        // Log::debug('            calcTimes計算対象外データ作成 =  '.$current_user_code);
+                        // Log::debug('                休暇区分  = '.$result->holiday_kubun);
                         if (($result->holiday_kubun != Config::get('const.C013.non_set') &&
                             $result->holiday_kubun != Config::get('const.C013.morning_off') &&
                             $result->holiday_kubun != Config::get('const.C013.afternoon_off') &&
                             $result->holiday_kubun != Config::get('const.C013.absence_work') &&
                             $result->holiday_kubun != Config::get('const.C013.late_work') &&
-                            $result->holiday_kubun != Config::get('const.C013.leave_early_work')) ||
+                            $result->holiday_kubun != Config::get('const.C013.leave_early_work') &&
+                            $result->holiday_kubun != Config::get('const.C013.deemed_business_trip') &&
+                            $result->holiday_kubun != Config::get('const.C013.deemed_direct_go') &&
+                            $result->holiday_kubun != Config::get('const.C013.deemed_direct_return')) ||
                             (!isset($result->holiday_kubun) ||
                             $result->holiday_kubun != Config::get('const.C013.non_set'))) {
-                            $add_result = $this->addTempWorkingTimeDate(
-                                $current_date,
-                                $current_user_code,
-                                $current_department_code,
-                                $current_result,
-                                $note,
-                                $working_status,
-                                $array_calc_time,
-                                $array_missing_middle_time,
-                                $array_public_going_out_time,
-                                $array_add_attendance_time,
-                                $array_add_attendance_time_positions,
-                                $array_add_leaving_time,
-                                $array_add_leaving_time_positions,
-                                $array_add_missing_middle_time,
-                                $array_add_missing_middle_time_positions,
-                                $array_add_missing_middle_return_time,
-                                $array_add_missing_middle_return_time_positions,
-                                $array_add_public_going_out_time,
-                                $array_add_public_going_out_time_positions,
-                                $array_add_public_going_out_return_time,
-                                $array_add_public_going_out_return_time_positions);
-                            Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
+                            // setLeavingCollectPtn implement
+                            $array_impl_addTempWorkingTimeDate = array (
+                                'target_date' => $current_date,
+                                'target_user_code' => $current_user_code,
+                                'target_department_code' => $current_department_code,
+                                'target_result' => $current_result,
+                                'note' => $note,
+                                'working_status' => $working_status,
+                                'timetables' => $timetables,
+                                'array_calc_time' => $array_calc_time,
+                                'array_missing_middle_time' => $array_missing_middle_time,
+                                'array_public_going_out_time' => $array_public_going_out_time,
+                                'array_add_attendance_time' => $array_add_attendance_time,
+                                'array_add_attendance_time_id' => $array_add_attendance_time_id,
+                                'array_add_attendance_editor_department_code' => $array_add_attendance_editor_department_code,
+                                'array_add_attendance_editor_department_name' => $array_add_attendance_editor_department_name,
+                                'array_add_attendance_editor_user_code' => $array_add_attendance_editor_user_code,
+                                'array_add_attendance_editor_user_name' => $array_add_attendance_editor_user_name,
+                                'array_add_attendance_time_positions' => $array_add_attendance_time_positions,
+                                'array_add_leaving_time' => $array_add_leaving_time,
+                                'array_add_leaving_time_id' => $array_add_leaving_time_id,
+                                'array_add_leaving_editor_department_code' => $array_add_leaving_editor_department_code,
+                                'array_add_leaving_editor_department_name' => $array_add_leaving_editor_department_name,
+                                'array_add_leaving_editor_user_code' => $array_add_leaving_editor_user_code,
+                                'array_add_leaving_editor_user_name' => $array_add_leaving_editor_user_name,
+                                'array_add_leaving_time_positions' => $array_add_leaving_time_positions,
+                                'array_add_missing_middle_time' => $array_add_missing_middle_time,
+                                'array_add_missing_middle_time_id' => $array_add_missing_middle_time_id,
+                                'array_add_missing_middle_editor_department_code' => $array_add_missing_middle_editor_department_code,
+                                'array_add_missing_middle_editor_department_name' => $array_add_missing_middle_editor_department_name,
+                                'array_add_missing_middle_editor_user_code' => $array_add_missing_middle_editor_user_code,
+                                'array_add_missing_middle_editor_user_name' => $array_add_missing_middle_editor_user_name,
+                                'array_add_missing_middle_time_positions' => $array_add_missing_middle_time_positions,
+                                'array_add_missing_return_time' => $array_add_missing_return_time,
+                                'array_add_missing_return_time_id' => $array_add_missing_return_time_id,
+                                'array_add_missing_return_editor_department_code' => $array_add_missing_return_editor_department_code,
+                                'array_add_missing_return_editor_department_name' => $array_add_missing_return_editor_department_name,
+                                'array_add_missing_return_editor_user_code' => $array_add_missing_return_editor_user_code,
+                                'array_add_missing_return_editor_user_name' => $array_add_missing_return_editor_user_name,
+                                'array_add_missing_return_time_positions' => $array_add_missing_return_time_positions,
+                                'array_add_public_going_out_time' => $array_add_public_going_out_time,
+                                'array_add_public_going_out_time_id' => $array_add_public_going_out_time_id,
+                                'array_add_public_going_out_editor_department_code' => $array_add_public_going_out_editor_department_code,
+                                'array_add_public_going_out_editor_department_name' => $array_add_public_going_out_editor_department_name,
+                                'array_add_public_going_out_editor_user_code' => $array_add_public_going_out_editor_user_code,
+                                'array_add_public_going_out_editor_user_name' => $array_add_public_going_out_editor_user_name,
+                                'array_add_public_going_out_time_positions' => $array_add_public_going_out_time_positions,
+                                'array_add_public_return_time' => $array_add_public_return_time,
+                                'array_add_public_return_time_id' => $array_add_public_return_time_id,
+                                'array_add_public_return_editor_department_code' => $array_add_public_return_editor_department_code,
+                                'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
+                                'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
+                                'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
+                                'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                                'array_break_worktimetable_result' => $array_break_worktimetable_result
+                            );
+
+                            $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                             // 次データ計算事前処理
-                            for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                                $array_calc_time[$i] = 0; 
-                            }
-                            for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                                $array_missing_middle_time[$i] = 0; 
-                            }
-                            for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                                $array_public_going_out_time[$i] = 0; 
-                            }
-                            if ($result->mode == Config::get('const.C005.attendance_time')) {
-                                $attendance_time = $result->record_datetime;
-                                if (isset($result->x_positions) && isset($result->y_positions)) {
-                                    $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
-                                } else {
-                                    $attendance_time_positions = null;
-                                }               
-                            }
-                            if ($result->mode == Config::get('const.C005.leaving_time')) {
-                                $leaving_time = $result->record_datetime;
-                                if (isset($result->x_positions) && isset($result->y_positions)) {
-                                    $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
-                                } else {
-                                    $leaving_time_positions = null;
-                                }               
-                            }
-                            if ($result->mode == Config::get('const.C005.missing_middle_time')) {
-                                $missing_middle_time = $result->record_datetime;
-                                if (isset($result->x_positions) && isset($result->y_positions)) {
-                                    $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
-                                } else {
-                                    $missing_middle_time_time_positions = null;
-                                }               
-                            }
-                            if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
-                                $missing_middle_return_time = $result->record_datetime;
-                                if (isset($result->x_positions) && isset($result->y_positions)) {
-                                    $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                                } else {
-                                    $missing_middle_return_time_positions = null;
-                                }               
-                            }
-                            if ($result->mode == Config::get('const.C005.public_going_out_time')) {
-                                $public_going_out_time = $result->record_datetime;
-                                if (isset($result->x_positions) && isset($result->y_positions)) {
-                                    $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
-                                } else {
-                                    $public_going_out_time_positions = null;
-                                }               
-                            }
-                            if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
-                                $public_going_out_return_time = $result->record_datetime;
-                                if (isset($result->x_positions) && isset($result->y_positions)) {
-                                    $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                                } else {
-                                    $public_going_out_return_time_positions = null;
-                                }               
-                            }
-                            $array_add_attendance_time = array();
-                            $array_add_leaving_time = array();
-                            $array_add_missing_middle_time = array();
-                            $array_add_missing_middle_return_time = array();
-                            $array_add_public_going_out_time = array();
-                            $array_add_public_going_out_return_time = array();
-                            $array_add_attendance_time_positions = array();
-                            $array_add_leaving_time_positions = array();
-                            $array_add_missing_middle_time_positions = array();
-                            $array_add_missing_middle_return_time_positions = array();
-                            $array_add_public_going_out_time_positions = array();
-                            $array_add_public_going_out_return_time_positions = array();
-                            if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
-                                $array_add_missing_middle_time[] = $missing_middle_time;
-                                $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
-                            }
-                            if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                                $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                                $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
-                                Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
-                            }
-                            if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
-                                $array_add_public_going_out_time[] = $public_going_out_time;
-                                $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
-                            }
-                            if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                                $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                                $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
-                            }
-                            if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
-                                $array_add_attendance_time[] = $attendance_time;
-                                $array_add_attendance_time_positions[] = $attendance_time_positions;
-                            }
-                            if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                                $array_add_leaving_time[] = $leaving_time;
-                                $array_add_leaving_time_positions[] = $leaving_time_positions;
-                            }
+                            $array_result_NextData =
+                                $this->calcTempWorkingTimeDateNextData(
+                                    $array_working_time_kubun,
+                                    $result
+                                );
+                            $array_calc_time = $array_result_NextData['array_calc_time'];
+                            $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                            $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                            $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                            $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                            $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                            $array_add_missing_return_time = $array_result_NextData['array_add_missing_return_time'];
+                            $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                            $array_add_public_return_time = $array_result_NextData['array_add_public_return_time'];
+                            $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                            $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                            $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                            $array_add_missing_return_time_positions = $array_result_NextData['array_add_missing_return_time_positions'];
+                            $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                            $array_add_public_return_time_positions = $array_result_NextData['array_add_public_return_time_positions'];
+                            $array_add_attendance_time_id = $array_result_NextData['array_add_attendance_time_id'];
+                            $array_add_attendance_editor_department_code = $array_result_NextData['array_add_attendance_editor_department_code'];
+                            $array_add_attendance_editor_department_name = $array_result_NextData['array_add_attendance_editor_department_name'];
+                            $array_add_attendance_editor_user_code = $array_result_NextData['array_add_attendance_editor_user_code'];
+                            $array_add_attendance_editor_user_name = $array_result_NextData['array_add_attendance_editor_user_name'];
+                            $array_add_leaving_time_id = $array_result_NextData['array_add_leaving_time_id'];
+                            $array_add_leaving_editor_department_code = $array_result_NextData['array_add_leaving_editor_department_code'];
+                            $array_add_leaving_editor_department_name = $array_result_NextData['array_add_leaving_editor_department_name'];
+                            $array_add_leaving_editor_user_code = $array_result_NextData['array_add_leaving_editor_user_code'];
+                            $array_add_leaving_editor_user_name = $array_result_NextData['array_add_leaving_editor_user_name'];
+                            $array_add_missing_middle_time_id = $array_result_NextData['array_add_missing_middle_time_id'];
+                            $array_add_missing_middle_editor_department_code = $array_result_NextData['array_add_missing_middle_editor_department_code'];
+                            $array_add_missing_middle_editor_department_name = $array_result_NextData['array_add_missing_middle_editor_department_name'];
+                            $array_add_missing_middle_editor_user_code = $array_result_NextData['array_add_missing_middle_editor_user_code'];
+                            $array_add_missing_middle_editor_user_name = $array_result_NextData['array_add_missing_middle_editor_user_name'];
+                            $array_add_missing_return_time_id = $array_result_NextData['array_add_missing_return_time_id'];
+                            $array_add_missing_return_editor_department_code = $array_result_NextData['array_add_missing_return_editor_department_code'];
+                            $array_add_missing_return_editor_department_name = $array_result_NextData['array_add_missing_return_editor_department_name'];
+                            $array_add_missing_return_editor_user_code = $array_result_NextData['array_add_missing_return_editor_user_code'];
+                            $array_add_missing_return_editor_user_name = $array_result_NextData['array_add_missing_return_editor_user_name'];
+                            $array_add_public_going_out_time_id = $array_result_NextData['array_add_public_going_out_time_id'];
+                            $array_add_public_going_out_editor_department_code = $array_result_NextData['array_add_public_going_out_editor_department_code'];
+                            $array_add_public_going_out_editor_department_name = $array_result_NextData['array_add_public_going_out_editor_department_name'];
+                            $array_add_public_going_out_editor_user_code = $array_result_NextData['array_add_public_going_out_editor_user_code'];
+                            $array_add_public_going_out_editor_user_name = $array_result_NextData['array_add_public_going_out_editor_user_name'];
+                            $array_add_public_return_time_id = $array_result_NextData['array_add_public_return_time_id'];
+                            $array_add_public_return_editor_department_code = $array_result_NextData['array_add_public_return_editor_department_code'];
+                            $array_add_public_return_editor_department_name = $array_result_NextData['array_add_public_return_editor_department_name'];
+                            $array_add_public_return_editor_user_code = $array_result_NextData['array_add_public_return_editor_user_code'];
+                            $array_add_public_return_editor_user_name = $array_result_NextData['array_add_public_return_editor_user_name'];
+                            $attendance_time = $array_result_NextData['attendance_time'];
+                            $leaving_time = $array_result_NextData['leaving_time'];
+                            $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                            $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                            $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                            $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                            $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                            $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                            $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                            $missing_return_time_positions = $array_result_NextData['missing_return_time_positions'];
+                            $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                            $public_return_time_positions = $array_result_NextData['public_return_time_positions'];
+                            $attendance_time_id = $array_result_NextData['attendance_time_id'];
+                            $leaving_time_id = $array_result_NextData['leaving_time_id'];
+                            $missing_middle_time_id = $array_result_NextData['missing_middle_time_id'];
+                            $missing_middle_return_time_id = $array_result_NextData['missing_middle_return_time_id'];
+                            $public_going_out_time_id = $array_result_NextData['public_going_out_time_id'];
+                            $public_going_out_return_time_id = $array_result_NextData['public_going_out_return_time_id'];
+                            $attendance_editor_department_code = $array_result_NextData['attendance_editor_department_code'];
+                            $attendance_editor_department_name = $array_result_NextData['attendance_editor_department_name'];
+                            $attendance_editor_user_code = $array_result_NextData['attendance_editor_user_code'];
+                            $attendance_editor_user_name = $array_result_NextData['attendance_editor_user_name'];
+                            $leaving_editor_department_code = $array_result_NextData['leaving_editor_department_code'];
+                            $leaving_editor_department_name = $array_result_NextData['leaving_editor_department_name'];
+                            $leaving_editor_user_code = $array_result_NextData['leaving_editor_user_code'];
+                            $leaving_editor_user_name = $array_result_NextData['leaving_editor_user_name'];
+                            $missing_middle_editor_department_code = $array_result_NextData['missing_middle_editor_department_code'];
+                            $missing_middle_editor_department_name = $array_result_NextData['missing_middle_editor_department_name'];
+                            $missing_middle_editor_user_code = $array_result_NextData['missing_middle_editor_user_code'];
+                            $missing_middle_editor_user_name = $array_result_NextData['missing_middle_editor_user_name'];
+                            $missing_return_editor_department_code = $array_result_NextData['missing_return_editor_department_code'];
+                            $missing_return_editor_department_name = $array_result_NextData['missing_return_editor_department_name'];
+                            $missing_return_editor_user_code = $array_result_NextData['missing_return_editor_user_code'];
+                            $missing_return_editor_user_name = $array_result_NextData['missing_return_editor_user_name'];
+                            $public_going_out_editor_department_code = $array_result_NextData['public_going_out_editor_department_code'];
+                            $public_going_out_editor_department_name = $array_result_NextData['public_going_out_editor_department_name'];
+                            $public_going_out_editor_user_code = $array_result_NextData['public_going_out_editor_user_code'];
+                            $public_going_out_editor_user_name = $array_result_NextData['public_going_out_editor_user_name'];
+                            $public_return_editor_department_code = $array_result_NextData['public_return_editor_department_code'];
+                            $public_return_editor_department_name = $array_result_NextData['public_return_editor_department_name'];
+                            $public_return_editor_user_code = $array_result_NextData['public_return_editor_user_code'];
+                            $public_return_editor_user_name = $array_result_NextData['public_return_editor_user_name'];
                             // 同じ値にする
                             $before_date = $current_date;
                             $before_department_code = $current_department_code;
@@ -4296,913 +5301,229 @@ class DailyWorkingInformationController extends Controller
                     }
                 } else {
                     // 時刻だけ設定する
-                    Log::DEBUG('    当日分計算対象外');
+                    // Log::debug('    当日分計算対象外');
                     // ----------------------- 私用外出 -------------------------------------------
-                    Log::DEBUG('    私用外出打刻時刻 = '.$missing_middle_time);
+                    // Log::debug('    私用外出打刻時刻 = '.$missing_middle_time);
                     if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
                         $array_add_missing_middle_time[] = $missing_middle_time;
+                        $array_add_missing_middle_time_id[] = $missing_middle_time_id;
+                        $array_add_missing_middle_editor_department_code[] = $missing_middle_editor_department_code;
+                        $array_add_missing_middle_editor_department_name[] = $missing_middle_editor_department_name;
+                        $array_add_missing_middle_editor_user_code[] = $missing_middle_editor_user_code;
+                        $array_add_missing_middle_editor_user_name[] = $missing_middle_editor_user_name;
+                        $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
                     }
-                    Log::DEBUG('    私用外出戻り打刻時刻 = '.$missing_middle_return_time);
+                    // Log::debug('    私用外出戻り打刻時刻 = '.$missing_middle_return_time);
                     if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                        $array_add_missing_middle_return_time[] = $missing_middle_return_time;
+                        $array_add_missing_return_time[] = $missing_middle_return_time;
+                        $array_add_missing_return_time_id[] = $missing_middle_return_time_id;
+                        $array_add_missing_return_editor_department_code[] = $missing_return_editor_department_code;
+                        $array_add_missing_return_editor_department_name[] = $missing_return_editor_department_name;
+                        $array_add_missing_return_editor_user_code[] = $missing_return_editor_user_code;
+                        $array_add_missing_return_editor_user_name[] = $missing_return_editor_user_name;
+                        $array_add_missing_return_time_positions[] = $missing_return_time_positions;
                     }
                     // ----------------------- 公用外出 -------------------------------------------
-                    Log::DEBUG('    公用外出打刻時刻 = '.$public_going_out_time);
+                    // Log::debug('    公用外出打刻時刻 = '.$public_going_out_time);
                     if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
                         $array_add_public_going_out_time[] = $public_going_out_time;
+                        $array_add_public_going_out_time_id[] = $public_going_out_time_id;
+                        $array_add_public_going_out_editor_department_code[] = $public_going_out_editor_department_code;
+                        $array_add_public_going_out_editor_department_name[] = $public_going_out_editor_department_name;
+                        $array_add_public_going_out_editor_user_code[] = $public_going_out_editor_user_code;
+                        $array_add_public_going_out_editor_user_name[] = $public_going_out_editor_user_name;
+                        $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
                     }
-                    Log::DEBUG('    公用外出戻り打刻時刻 = '.$public_going_out_return_time);
+                    // Log::debug('    公用外出戻り打刻時刻 = '.$public_going_out_return_time);
                     if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                        $array_add_public_going_out_return_time[] = $public_going_out_return_time;
+                        $array_add_public_return_time[] = $public_going_out_return_time;
+                        $array_add_public_return_time_id[] = $public_going_out_return_time_id;
+                        $array_add_public_return_editor_department_code[] = $public_return_editor_department_code;
+                        $array_add_public_return_editor_department_name[] = $public_return_editor_department_name;
+                        $array_add_public_return_editor_user_code[] = $public_return_editor_user_code;
+                        $array_add_public_return_editor_user_name[] = $public_return_editor_user_name;
+                        $array_add_public_return_time_positions[] = $public_return_time_positions;
                     }
                     // ----------------------- 出勤 -------------------------------------------
-                    Log::DEBUG('    出勤打刻時刻 = '.$attendance_time);
+                    // Log::debug('    出勤打刻時刻 = '.$attendance_time);
                     if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
                         $array_add_attendance_time[] = $attendance_time;
+                        $array_add_attendance_time_id[] = $attendance_time_id;
+                        $array_add_attendance_editor_department_code[] = $attendance_editor_department_code;
+                        $array_add_attendance_editor_department_name[] = $attendance_editor_department_name;
+                        $array_add_attendance_editor_user_code[] = $attendance_editor_user_code;
+                        $array_add_attendance_editor_user_name[] = $attendance_editor_user_name;
                         $array_add_attendance_time_positions[] = $attendance_time_positions;
                     }
                     // ----------------------- 退勤 -------------------------------------------
-                    Log::DEBUG('    退勤打刻時刻 = '.$leaving_time);
+                    // Log::debug('    退勤打刻時刻 = '.$leaving_time);
                     if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
                         $array_add_leaving_time[] = $leaving_time;
+                        $array_add_leaving_time_id[] = $leaving_time_id;
+                        $array_add_leaving_editor_department_code[] = $leaving_editor_department_code;
+                        $array_add_leaving_editor_department_name[] = $leaving_editor_department_name;
+                        $array_add_leaving_editor_user_code[] = $leaving_editor_user_code;
+                        $array_add_leaving_editor_user_name[] = $leaving_editor_user_name;
+                        $array_add_leaving_time_positions[] = $leaving_time_positions;
                     }
                     // 前のデータが計算対象であれば出力する
                     // 計算セットフラグ
+                    // Log::debug('        前のデータが計算対象であれば出力する $set_calcTimes_flg = '.$set_calcTimes_flg);
                     if ($set_calcTimes_flg) {
-                        Log::DEBUG('        temp_working_time_datesデータ作成開始 ');
-                        Log::DEBUG('            １個前のユーザーを登録 '.$before_user_code);
+                        // Log::debug('        temp_working_time_datesデータ作成開始 ');
+                        // Log::debug('            １個前のユーザーを登録 '.$before_user_code);
                         // ユーザー労働時間登録(１個前のユーザーを登録する)
-                        $add_result = $this->addTempWorkingTimeDate(
-                            $before_date,
-                            $before_user_code,
-                            $before_department_code,
-                            $before_result,
-                            $note,
-                            $working_status,
-                            $array_calc_time,
-                            $array_missing_middle_time,
-                            $array_public_going_out_time,
-                            $array_add_attendance_time,
-                            $array_add_attendance_time_positions,
-                            $array_add_leaving_time,
-                            $array_add_leaving_time_positions,
-                            $array_add_missing_middle_time,
-                            $array_add_missing_middle_time_positions,
-                            $array_add_missing_middle_return_time,
-                            $array_add_missing_middle_return_time_positions,
-                            $array_add_public_going_out_time,
-                            $array_add_public_going_out_time_positions,
-                            $array_add_public_going_out_return_time,
-                            $array_add_public_going_out_return_time_positions);
-                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$before_user_code);
+                        // setLeavingCollectPtn implement
+                        $array_impl_addTempWorkingTimeDate = array (
+                            'target_date' => $before_date,
+                            'target_user_code' => $before_user_code,
+                            'target_department_code' => $before_department_code,
+                            'target_result' => $before_result,
+                            'note' => $note,
+                            'working_status' => $working_status,
+                            'timetables' => $timetables,
+                            'array_calc_time' => $array_calc_time,
+                            'array_missing_middle_time' => $array_missing_middle_time,
+                            'array_public_going_out_time' => $array_public_going_out_time,
+                            'array_add_attendance_time' => $array_add_attendance_time,
+                            'array_add_attendance_time_id' => $array_add_attendance_time_id,
+                            'array_add_attendance_editor_department_code' => $array_add_attendance_editor_department_code,
+                            'array_add_attendance_editor_department_name' => $array_add_attendance_editor_department_name,
+                            'array_add_attendance_editor_user_code' => $array_add_attendance_editor_user_code,
+                            'array_add_attendance_editor_user_name' => $array_add_attendance_editor_user_name,
+                            'array_add_attendance_time_positions' => $array_add_attendance_time_positions,
+                            'array_add_leaving_time' => $array_add_leaving_time,
+                            'array_add_leaving_time_id' => $array_add_leaving_time_id,
+                            'array_add_leaving_editor_department_code' => $array_add_leaving_editor_department_code,
+                            'array_add_leaving_editor_department_name' => $array_add_leaving_editor_department_name,
+                            'array_add_leaving_editor_user_code' => $array_add_leaving_editor_user_code,
+                            'array_add_leaving_editor_user_name' => $array_add_leaving_editor_user_name,
+                            'array_add_leaving_time_positions' => $array_add_leaving_time_positions,
+                            'array_add_missing_middle_time' => $array_add_missing_middle_time,
+                            'array_add_missing_middle_time_id' => $array_add_missing_middle_time_id,
+                            'array_add_missing_middle_editor_department_code' => $array_add_missing_middle_editor_department_code,
+                            'array_add_missing_middle_editor_department_name' => $array_add_missing_middle_editor_department_name,
+                            'array_add_missing_middle_editor_user_code' => $array_add_missing_middle_editor_user_code,
+                            'array_add_missing_middle_editor_user_name' => $array_add_missing_middle_editor_user_name,
+                            'array_add_missing_middle_time_positions' => $array_add_missing_middle_time_positions,
+                            'array_add_missing_return_time' => $array_add_missing_return_time,
+                            'array_add_missing_return_time_id' => $array_add_missing_return_time_id,
+                            'array_add_missing_return_editor_department_code' => $array_add_missing_return_editor_department_code,
+                            'array_add_missing_return_editor_department_name' => $array_add_missing_return_editor_department_name,
+                            'array_add_missing_return_editor_user_code' => $array_add_missing_return_editor_user_code,
+                            'array_add_missing_return_editor_user_name' => $array_add_missing_return_editor_user_name,
+                            'array_add_missing_return_time_positions' => $array_add_missing_return_time_positions,
+                            'array_add_public_going_out_time' => $array_add_public_going_out_time,
+                            'array_add_public_going_out_time_id' => $array_add_public_going_out_time_id,
+                            'array_add_public_going_out_editor_department_code' => $array_add_public_going_out_editor_department_code,
+                            'array_add_public_going_out_editor_department_name' => $array_add_public_going_out_editor_department_name,
+                            'array_add_public_going_out_editor_user_code' => $array_add_public_going_out_editor_user_code,
+                            'array_add_public_going_out_editor_user_name' => $array_add_public_going_out_editor_user_name,
+                            'array_add_public_going_out_time_positions' => $array_add_public_going_out_time_positions,
+                            'array_add_public_return_time' => $array_add_public_return_time,
+                            'array_add_public_return_time_id' => $array_add_public_return_time_id,
+                            'array_add_public_return_editor_department_code' => $array_add_public_return_editor_department_code,
+                            'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
+                            'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
+                            'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
+                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                            'array_break_worktimetable_result' => $array_break_worktimetable_result
+                        );
+                        $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                     }
-                }
-            } elseif ($current_date == $before_date &&
-                    $current_department_code == $before_department_code) {
-                Log::DEBUG('--- '.$before_result->user_name.' 終了  ------ '.$before_date.' モード  ------ '.$before_result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
-                Log::DEBUG('--- '.$result->user_name.' 開始  ------ '.$current_date.' モード  ------ '.$result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
-                // ユーザーが変わった場合
-                Log::DEBUG('    ユーザーが変わった場合 ');
-                Log::DEBUG('        $result->user_code  '.$before_user_code.'->'.$result->user_code);
-                Log::DEBUG('        $result->mode  '.$result->mode);
-                Log::DEBUG('        $result->record_datetime  '.$result->record_datetime);
-                Log::DEBUG('        $result->working_timetable_from_time  '.$result->working_timetable_from_time);
-                Log::DEBUG('        $result->working_timetable_to_time  '.$result->working_timetable_to_time);
-                try{
-                    Log::DEBUG('        $working_status  '.$working_status);
-                    if ($working_status == 0 ) {
-                        Log::DEBUG('        当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
-                        Log::DEBUG('        当日分　勤務状態 現在時刻 =  '.$dtNow);
-                        if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
-                            $working_status = $before_result->working_status;
-                        }
-                        Log::DEBUG('当日分　勤務状態 =  '.$working_status);
-                    }
-                    Log::DEBUG('        $calc_nobreak_cnt  '.$calc_nobreak_cnt);
-                    if ($calc_nobreak_cnt == 0) {
-                        $array_notelateetc = $this->setNoteLateEtc($before_result);
-                        $note .= $array_notelateetc[0];
-                        Log::DEBUG('        setNoteLateEtc $note =  '.$note);
-                        $late = $array_notelateetc[1];
-                        $leave_early = $array_notelateetc[2];
-                        $to_be_confirmed = $array_notelateetc[3];
-                    }
-                    // １個前のユーザーが休暇設定されていた場合はすでに登録済み
-                    Log::DEBUG('        before_holiday_set = '.$before_holiday_set);
-                    Log::DEBUG('        before_holiday_kubun = '.$before_holiday_kubun);
-                    Log::DEBUG('        result->holiday_kubun = '.$result->holiday_kubun);
-                    if ($before_holiday_set == false) {
-                        Log::DEBUG('        temp_working_time_datesデータ作成開始 ');
-                        Log::DEBUG('            １個前のユーザーを登録 '.$before_user_code);
-                        // ユーザー労働時間登録(１個前のユーザーを登録する)
-                        $add_result = $this->addTempWorkingTimeDate(
-                            $before_date,
-                            $before_user_code,
-                            $before_department_code,
-                            $before_result,
-                            $note,
-                            $working_status,
-                            $array_calc_time,
-                            $array_missing_middle_time,
-                            $array_public_going_out_time,
-                            $array_add_attendance_time,
-                            $array_add_attendance_time_positions,
-                            $array_add_leaving_time,
-                            $array_add_leaving_time_positions,
-                            $array_add_missing_middle_time,
-                            $array_add_missing_middle_time_positions,
-                            $array_add_missing_middle_return_time,
-                            $array_add_missing_middle_return_time_positions,
-                            $array_add_public_going_out_time,
-                            $array_add_public_going_out_time_positions,
-                            $array_add_public_going_out_return_time,
-                            $array_add_public_going_out_return_time_positions);
-                        Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$before_user_code);
-                    }
-                    $before_holiday_set = false;
-                    // 日付とユーザー休暇区分を保存
-                    $before_holiday_date = $current_date;
-                    $before_holiday_user_code = $current_user_code;
-                    $before_holiday_department_code = $current_department_code;
-                    $before_holiday_kubun = $result->holiday_kubun;
                     // 次データ計算事前処理
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_calc_time[$i] = 0; 
-                    }
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_missing_middle_time[$i] = 0; 
-                    }
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_public_going_out_time[$i] = 0; 
-                    }
-                    if ($result->mode == Config::get('const.C005.attendance_time')) {
-                        $attendance_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $attendance_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.leaving_time')) {
-                        $leaving_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $leaving_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.missing_middle_time')) {
-                        $missing_middle_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $missing_middle_time_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
-                        $missing_middle_return_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $missing_middle_return_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.public_going_out_time')) {
-                        $public_going_out_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $public_going_out_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
-                        $public_going_out_return_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $public_going_out_return_time_positions = null;
-                        }               
-                    }
-                        $array_add_attendance_time = array();
-                    $array_add_leaving_time = array();
-                    $array_add_missing_middle_time = array();
-                    $array_add_missing_middle_return_time = array();
-                    $array_add_public_going_out_time = array();
-                    $array_add_public_going_out_return_time = array();
-                    $array_add_attendance_time_positions = array();
-                    $array_add_leaving_time_positions = array();
-                    $array_add_missing_middle_time_positions = array();
-                    $array_add_missing_middle_return_time_positions = array();
-                    $array_add_public_going_out_time_positions = array();
-                    $array_add_public_going_out_return_time_positions = array();
-                    Log::DEBUG('        addTempWorkingTimeDate後 $result->current_calc  '.$result->current_calc);
-                    Log::DEBUG('        addTempWorkingTimeDate後 $result->mode  '.$result->mode);
-                    Log::DEBUG('        addTempWorkingTimeDate後 $leaving_time  '.$leaving_time);
-                    Log::DEBUG('        addTempWorkingTimeDate後 count($array_add_attendance_time)  '.count($array_add_attendance_time));
-                    Log::DEBUG('        count($array_add_attendance_time_positions)  '.count($array_add_attendance_time_positions));
-                    //if ($result->current_calc == '1') {             // 当日分である場合
-                        if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
-                            $array_add_missing_middle_time[] = $missing_middle_time;
-                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                            $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
-                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
-                            $array_add_public_going_out_time[] = $public_going_out_time;
-                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                            $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
-                            $array_add_attendance_time[] = $attendance_time;
-                            $array_add_attendance_time_positions[] = $attendance_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                            $array_add_leaving_time[] = $leaving_time;
-                            $array_add_leaving_time_positions[] = $leaving_time_positions;
-                        }
-                    //}
-                    Log::DEBUG('        $array_add_leaving_time  '.count($array_add_leaving_time));
-                    // 同じ値にする
-                    $before_user_code = $current_user_code; 
-                    $before_result = $result;
-                    $this->not_employment_working = 0;
-                    $working_status = $result->working_status;
-                    $note = '';
-                    $late = '';
-                    $leave_early = '';
-                    $to_be_confirmed = '';
-                    $calc_nobreak_cnt = 0;
-                    $array_notelateetc = $this->setNoteLateEtc($result);
-                    $note .= $array_notelateetc[0];
-                    Log::DEBUG('        setNoteLateEtc $note =  '.$note);
-                    $late = $array_notelateetc[1];
-                    $leave_early = $array_notelateetc[2];
-                    $to_be_confirmed = $array_notelateetc[3];
-                    $calc_nobreak_cnt++;
-                }catch(\PDOException $pe){
-                    $add_result = false;
-                    throw $pe;
-                }catch(\Exception $e){
-                    $add_result = false;
-                    throw $e;
-                }
-                // 現データが当日計算対象で、出勤していない休暇設定されていればデータ作成
-                //if ($result->current_calc == '1' && isset($result->holiday_kubun)) {
-                if ($result->current_calc == '1' && !$mode_chk) {
-                    Log::DEBUG('        temp_working_time_datesデータ作成開始 ');
-                    Log::DEBUG('            現データが当日計算対象データ作成 =  '.$current_user_code);
-                    Log::DEBUG('                休暇区分  = '.$result->holiday_kubun);
-                    if (($result->holiday_kubun != Config::get('const.C013.non_set') &&
-                        $result->holiday_kubun != Config::get('const.C013.morning_off') &&
-                        $result->holiday_kubun != Config::get('const.C013.afternoon_off') &&
-                        $result->holiday_kubun != Config::get('const.C013.absence_work') &&
-                        $result->holiday_kubun != Config::get('const.C013.late_work') &&
-                        $result->holiday_kubun != Config::get('const.C013.leave_early_work')) ||
-                        (!isset($result->holiday_kubun) ||
-                        $result->holiday_kubun != Config::get('const.C013.non_set'))) {
-                        $add_result = $this->addTempWorkingTimeDate(
-                            $current_date,
-                            $current_user_code,
-                            $current_department_code,
-                            $current_result,
-                            $note,
-                            $working_status,
-                            $array_calc_time,
-                            $array_missing_middle_time,
-                            $array_public_going_out_time,
-                            $array_add_attendance_time,
-                            $array_add_attendance_time_positions,
-                            $array_add_leaving_time,
-                            $array_add_leaving_time_positions,
-                            $array_add_missing_middle_time,
-                            $array_add_missing_middle_time_positions,
-                            $array_add_missing_middle_return_time,
-                            $array_add_missing_middle_return_time_positions,
-                            $array_add_public_going_out_time,
-                            $array_add_public_going_out_time_positions,
-                            $array_add_public_going_out_return_time,
-                            $array_add_public_going_out_return_time_positions);
-                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
-                        // 次データ計算事前処理
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_calc_time[$i] = 0; 
-                        }
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_missing_middle_time[$i] = 0; 
-                        }
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_public_going_out_time[$i] = 0; 
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time')) {
-                            $attendance_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $attendance_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time')) {
-                            $leaving_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $leaving_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_time')) {
-                            $missing_middle_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $missing_middle_time_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
-                            $missing_middle_return_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $missing_middle_return_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time')) {
-                            $public_going_out_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $public_going_out_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
-                            $public_going_out_return_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $public_going_out_return_time_positions = null;
-                            }               
-                        }
-                                $array_add_attendance_time = array();
-                        $array_add_leaving_time = array();
-                        $array_add_missing_middle_time = array();
-                        $array_add_missing_middle_return_time = array();
-                        $array_add_public_going_out_time = array();
-                        $array_add_public_going_out_return_time = array();
-                        $array_add_attendance_time_positions = array();
-                        $array_add_leaving_time_positions = array();
-                        $array_add_missing_middle_time_positions = array();
-                        $array_add_missing_middle_return_time_positions = array();
-                        $array_add_public_going_out_time_positions = array();
-                        $array_add_public_going_out_return_time_positions = array();
-                        if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
-                            $array_add_missing_middle_time[] = $missing_middle_time;
-                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
-                            }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                            $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
-                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
-                            $array_add_public_going_out_time[] = $public_going_out_time;
-                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                            $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
-                            $array_add_attendance_time[] = $attendance_time;
-                            $array_add_attendance_time_positions[] = $attendance_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                            $array_add_leaving_time[] = $leaving_time;
-                            $array_add_leaving_time_positions[] = $leaving_time_positions;
-                        }
-                        // 同じ値にする
-                        $before_date = $current_date;
-                        $before_department_code = $current_department_code;
-                        $before_user_code = $current_user_code; 
-                        $before_result = $result;
-                        $this->not_employment_working = 0;
-                        $working_status = 0;
-                        $note = '';
-                        $late = '';
-                        $leave_early = '';
-                        $to_be_confirmed = '';
-                        $calc_nobreak_cnt = 0;
-                        $array_notelateetc = $this->setNoteLateEtc($result);
-                        $note .= $array_notelateetc[0];
-                        Log::DEBUG('setNoteLateEtc $note =  '.$note);
-                        $late = $array_notelateetc[1];
-                        $leave_early = $array_notelateetc[2];
-                        $to_be_confirmed = $array_notelateetc[3];
-                        $calc_nobreak_cnt++;
-                        // ユーザー休暇区分判定用
-                        $before_holiday_set = true;
-                        $before_holiday_date = $current_date;
-                        $before_holiday_user_code = $current_user_code;
-                        $before_holiday_department_code = $current_department_code;
-                        $before_holiday_kubun = $result->holiday_kubun;
-                    }
-                }
-            } elseif ($current_date == $before_date) {
-                // 部署が変わった場合
-                Log::DEBUG('部署が変わった場合 ');
-                Log::DEBUG('--- '.$before_result->user_name.' 終了  ------ '.$before_date.' モード  ------ '.$before_result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
-                Log::DEBUG('--- '.$result->user_name.' 開始  ------ '.$current_date.' モード  ------ '.$result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
-                try{
-                    if ($working_status == 0 ) {
-                        Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
-                        Log::DEBUG('当日分　勤務状態 現在���刻 =  '.$dtNow);
-                        if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
-                            $working_status = $before_result->working_status;
-                        }
-                        Log::DEBUG('当日分　勤務状態 =  '.$working_status);
-                    }
-                    if ($calc_nobreak_cnt == 0) {
-                        $array_notelateetc = $this->setNoteLateEtc($before_result);
-                        $note .= $array_notelateetc[0];
-                        Log::DEBUG('setNoteLateEtc $note =  '.$note);
-                        $late = $array_notelateetc[1];
-                        $leave_early = $array_notelateetc[2];
-                        $to_be_confirmed = $array_notelateetc[3];
-                    }
-                    // １個前のユーザーが休暇設定されていた場合はすでに登録済み
-                    if ($before_holiday_set == false) {
-                        // ユーザー労働時間登録(１個前のユーザーを登録する)
-                        Log::DEBUG('        temp_working_time_datesデータ作成開始 ');
-                        Log::DEBUG('            １個前のユーザーを登録 '.$before_user_code);
-                        $add_result = $this->addTempWorkingTimeDate(
-                            $before_date,
-                            $before_user_code,
-                            $before_department_code,
-                            $before_result,
-                            $note,
-                            $working_status,
-                            $array_calc_time,
-                            $array_missing_middle_time,
-                            $array_public_going_out_time,
-                            $array_add_attendance_time,
-                            $array_add_attendance_time_positions,
-                            $array_add_leaving_time,
-                            $array_add_leaving_time_positions,
-                            $array_add_missing_middle_time,
-                            $array_add_missing_middle_time_positions,
-                            $array_add_missing_middle_return_time,
-                            $array_add_missing_middle_return_time_positions,
-                            $array_add_public_going_out_time,
-                            $array_add_public_going_out_time_positions,
-                            $array_add_public_going_out_return_time,
-                            $array_add_public_going_out_return_time_positions);
-                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$before_user_code);
-                    }
-                    $before_holiday_set = false;
-                    // 日付とユーザー休暇区分を保存
-                    $before_holiday_date = $current_date;
-                    $before_holiday_user_code = $current_user_code;
-                    $before_holiday_department_code = $current_department_code;
-                    $before_holiday_kubun = $result->holiday_kubun;
-                    // 次データ計算事前処理
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_calc_time[$i] = 0; 
-                    }
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_missing_middle_time[$i] = 0; 
-                    }
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_public_going_out_time[$i] = 0; 
-                    }
-                    if ($result->mode == Config::get('const.C005.attendance_time')) {
-                        $attendance_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $attendance_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.leaving_time')) {
-                        $leaving_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $leaving_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.missing_middle_time')) {
-                        $missing_middle_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $missing_middle_time_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
-                        $missing_middle_return_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $missing_middle_return_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.public_going_out_time')) {
-                        $public_going_out_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $public_going_out_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
-                        $public_going_out_return_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $public_going_out_return_time_positions = null;
-                        }               
-                    }
-                        $array_add_attendance_time = array();
-                    $array_add_leaving_time = array();
-                    $array_add_missing_middle_time = array();
-                    $array_add_missing_middle_return_time = array();
-                    $array_add_public_going_out_time = array();
-                    $array_add_public_going_out_return_time = array();
-                    $array_add_attendance_time_positions = array();
-                    $array_add_leaving_time_positions = array();
-                    $array_add_missing_middle_time_positions = array();
-                    $array_add_missing_middle_return_time_positions = array();
-                    $array_add_public_going_out_time_positions = array();
-                    $array_add_public_going_out_return_time_positions = array();
-                    //if ($result->current_calc == '1') {             // 当日分である場合
-                        if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
-                            $array_add_missing_middle_time[] = $missing_middle_time;
-                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                            $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
-                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
-                            $array_add_public_going_out_time[] = $public_going_out_time;
-                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                            $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
-                            $array_add_attendance_time[] = $attendance_time;
-                            $array_add_attendance_time_positions[] = $attendance_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                            $array_add_leaving_time[] = $leaving_time;
-                            $array_add_leaving_time_positions[] = $leaving_time_positions;
-                        }
-                    //}
-                    // 同じ値にする
-                    $before_department_code = $current_department_code;
-                    $before_user_code = $current_user_code; 
-                    $before_result = $result;
-                    $this->not_employment_working = 0;
-                    $working_status = $result->working_status;
-                    $note = '';
-                    $late = '';
-                    $leave_early = '';
-                    $to_be_confirmed = '';
-                    $calc_nobreak_cnt = 0;
-                    $array_notelateetc = $this->setNoteLateEtc($result);
-                    $note .= $array_notelateetc[0];
-                    Log::DEBUG('setNoteLateEtc $note =  '.$note);
-                    $late = $array_notelateetc[1];
-                    $leave_early = $array_notelateetc[2];
-                    $to_be_confirmed = $array_notelateetc[3];
-                    $calc_nobreak_cnt++;
-                }catch(\PDOException $pe){
-                    $add_result = false;
-                    throw $pe;
-                }catch(\Exception $e){
-                    $add_result = false;
-                    throw $e;
-                }
-                // 現データが当日計算対象で、出勤していない休暇設定されていればデータ作成
-                //if ($result->current_calc == '1' && isset($result->holiday_kubun)) {
-                if ($result->current_calc == '1' && !$mode_chk) {
-                    Log::DEBUG('        temp_working_time_datesデータ作成開始 ');
-                    Log::DEBUG('            現データが当日計算対象データ作成 =  '.$current_user_code);
-                    Log::DEBUG('                休暇区分  = '.$result->holiday_kubun);
-                    if (($result->holiday_kubun != Config::get('const.C013.non_set') &&
-                        $result->holiday_kubun != Config::get('const.C013.morning_off') &&
-                        $result->holiday_kubun != Config::get('const.C013.afternoon_off') &&
-                        $result->holiday_kubun != Config::get('const.C013.absence_work') &&
-                        $result->holiday_kubun != Config::get('const.C013.late_work') &&
-                        $result->holiday_kubun != Config::get('const.C013.leave_early_work')) ||
-                        (!isset($result->holiday_kubun) ||
-                        $result->holiday_kubun != Config::get('const.C013.non_set'))) {
-                        $add_result = $this->addTempWorkingTimeDate(
-                            $current_date,
-                            $current_user_code,
-                            $current_department_code,
-                            $current_result,
-                            $note,
-                            $working_status,
-                            $array_calc_time,
-                            $array_missing_middle_time,
-                            $array_public_going_out_time,
-                            $array_add_attendance_time,
-                            $array_add_attendance_time_positions,
-                            $array_add_leaving_time,
-                            $array_add_leaving_time_positions,
-                            $array_add_missing_middle_time,
-                            $array_add_missing_middle_time_positions,
-                            $array_add_missing_middle_return_time,
-                            $array_add_missing_middle_return_time_positions,
-                            $array_add_public_going_out_time,
-                            $array_add_public_going_out_time_positions,
-                            $array_add_public_going_out_return_time,
-                            $array_add_public_going_out_return_time_positions);
-                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
-                        // 次データ計算事前処理
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_calc_time[$i] = 0; 
-                        }
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_missing_middle_time[$i] = 0; 
-                        }
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_public_going_out_time[$i] = 0; 
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time')) {
-                            $attendance_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $attendance_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time')) {
-                            $leaving_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $leaving_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_time')) {
-                            $missing_middle_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $missing_middle_time_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
-                            $missing_middle_return_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $missing_middle_return_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time')) {
-                            $public_going_out_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $public_going_out_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
-                            $public_going_out_return_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $public_going_out_return_time_positions = null;
-                            }               
-                        }
-                                $array_add_attendance_time = array();
-                        $array_add_leaving_time = array();
-                        $array_add_missing_middle_time = array();
-                        $array_add_missing_middle_return_time = array();
-                        $array_add_public_going_out_time = array();
-                        $array_add_public_going_out_return_time = array();
-                        $array_add_attendance_time_positions = array();
-                        $array_add_leaving_time_positions = array();
-                        $array_add_missing_middle_time_positions = array();
-                        $array_add_missing_middle_return_time_positions = array();
-                        $array_add_public_going_out_time_positions = array();
-                        $array_add_public_going_out_return_time_positions = array();
-                        if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
-                            $array_add_missing_middle_time[] = $missing_middle_time;
-                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                            $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
-                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
-                            $array_add_public_going_out_time[] = $public_going_out_time;
-                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                            $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
-                            $array_add_attendance_time[] = $attendance_time;
-                            $array_add_attendance_time_positions[] = $attendance_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                            $array_add_leaving_time[] = $leaving_time;
-                            $array_add_leaving_time_positions[] = $leaving_time_positions;
-                        }
-                        // 同じ値にする
-                        $before_date = $current_date;
-                        $before_department_code = $current_department_code;
-                        $before_user_code = $current_user_code; 
-                        $before_result = $result;
-                        $this->not_employment_working = 0;
-                        $working_status = $result->working_status;
-                        $note = '';
-                        $late = '';
-                        $leave_early = '';
-                        $to_be_confirmed = '';
-                        $calc_nobreak_cnt = 0;
-                        $array_notelateetc = $this->setNoteLateEtc($result);
-                        $note .= $array_notelateetc[0];
-                        Log::DEBUG('setNoteLateEtc $note =  '.$note);
-                        $late = $array_notelateetc[1];
-                        $leave_early = $array_notelateetc[2];
-                        $to_be_confirmed = $array_notelateetc[3];
-                        $calc_nobreak_cnt++;
-                        // ユーザー休暇区分判定用
-                        $before_holiday_set = true;
-                        $before_holiday_date = $current_date;
-                        $before_holiday_user_code = $current_user_code;
-                        $before_holiday_department_code = $current_department_code;
-                        $before_holiday_kubun = $result->holiday_kubun;
-                    }
-                }
-            } else {
-                // 日付が変わった場合
-                Log::DEBUG('日付が変わった場合 ');
-                Log::DEBUG('--- '.$before_result->user_name.' 終了  ------ '.$before_date.' モード  ------ '.$before_result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
-                Log::DEBUG('--- '.$result->user_name.' 開始  ------ '.$current_date.' モード  ------ '.$result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
-                try{
-                    if ($working_status == 0 ) {
-                        Log::DEBUG('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
-                        Log::DEBUG('当日分　勤務状態 現在時刻 =  '.$dtNow);
-                        if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
-                            $working_status = $before_result->working_status;
-                        }
-                        Log::DEBUG('当日分　勤務状態 =  '.$working_status);
-                    }
-                    if ($calc_nobreak_cnt == 0) {
-                        $array_notelateetc = $this->setNoteLateEtc($before_result);
-                        $note .= $array_notelateetc[0];
-                        Log::DEBUG('setNoteLateEtc $note =  '.$note);
-                        $late = $array_notelateetc[1];
-                        $leave_early = $array_notelateetc[2];
-                        $to_be_confirmed = $array_notelateetc[3];
-                    }
-                    // １個前のユーザーが休暇設定されていた場合はすでに登録済み
-                    if ($before_holiday_set == false) {
-                        // ユーザー労働時間登録(１個前のユーザーを登録する)
-                        Log::DEBUG('        temp_working_time_datesデータ作成開始 ');
-                        Log::DEBUG('            １個前のユーザーを登録 '.$before_user_code);
-                        $add_result = $this->addTempWorkingTimeDate(
-                            $before_date,
-                            $before_user_code,
-                            $before_department_code,
-                            $before_result,
-                            $note,
-                            $working_status,
-                            $array_calc_time,
-                            $array_missing_middle_time,
-                            $array_public_going_out_time,
-                            $array_add_attendance_time,
-                            $array_add_attendance_time_positions,
-                            $array_add_leaving_time,
-                            $array_add_leaving_time_positions,
-                            $array_add_missing_middle_time,
-                            $array_add_missing_middle_time_positions,
-                            $array_add_missing_middle_return_time,
-                            $array_add_missing_middle_return_time_positions,
-                            $array_add_public_going_out_time,
-                            $array_add_public_going_out_time_positions,
-                            $array_add_public_going_out_return_time,
-                            $array_add_public_going_out_return_time_positions);
-                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$before_user_code);
-                    }
-                    $before_holiday_set = false;
-                    // 日付とユーザー休暇区分を保存
-                    $before_holiday_date = $current_date;
-                    $before_holiday_user_code = $current_user_code;
-                    $before_holiday_department_code = $current_department_code;
-                    $before_holiday_kubun = $result->holiday_kubun;
-                    // 次データ計算事前処理
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_calc_time[$i] = 0; 
-                    }
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_missing_middle_time[$i] = 0; 
-                    }
-                    for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                        $array_public_going_out_time[$i] = 0; 
-                    }
-                    if ($result->mode == Config::get('const.C005.attendance_time')) {
-                        $attendance_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $attendance_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.leaving_time')) {
-                        $leaving_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $leaving_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.missing_middle_time')) {
-                        $missing_middle_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $missing_middle_time_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
-                        $missing_middle_return_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $missing_middle_return_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.public_going_out_time')) {
-                        $public_going_out_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $public_going_out_time_positions = null;
-                        }               
-                    }
-                    if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
-                        $public_going_out_return_time = $result->record_datetime;
-                        if (isset($result->x_positions) && isset($result->y_positions)) {
-                            $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                        } else {
-                            $public_going_out_return_time_positions = null;
-                        }               
-                    }
-                        $array_add_attendance_time = array();
-                    $array_add_leaving_time = array();
-                    $array_add_missing_middle_time = array();
-                    $array_add_missing_middle_return_time = array();
-                    $array_add_public_going_out_time = array();
-                    $array_add_public_going_out_return_time = array();
-                    $array_add_attendance_time_positions = array();
-                    $array_add_leaving_time_positions = array();
-                    $array_add_missing_middle_time_positions = array();
-                    $array_add_missing_middle_return_time_positions = array();
-                    $array_add_public_going_out_time_positions = array();
-                    $array_add_public_going_out_return_time_positions = array();
-                    //if ($result->current_calc == '1') {             // 当日分である場合
-                        if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
-                            $array_add_missing_middle_time[] = $missing_middle_time;
-                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                            $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
-                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
-                            $array_add_public_going_out_time[] = $public_going_out_time;
-                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                            $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
-                            $array_add_attendance_time[] = $attendance_time;
-                            $array_add_attendance_time_positions[] = $attendance_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                            $array_add_leaving_time[] = $leaving_time;
-                            $array_add_leaving_time_positions[] = $leaving_time_positions;
-                        }
-                    //}
+                    $array_result_NextData =
+                        $this->calcTempWorkingTimeDateNextData(
+                            $array_working_time_kubun,
+                            $result
+                        );
+                    $array_calc_time = $array_result_NextData['array_calc_time'];
+                    $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                    $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                    $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                    $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                    $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                    $array_add_missing_return_time = $array_result_NextData['array_add_missing_return_time'];
+                    $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                    $array_add_public_return_time = $array_result_NextData['array_add_public_return_time'];
+                    $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                    $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                    $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                    $array_add_missing_return_time_positions = $array_result_NextData['array_add_missing_return_time_positions'];
+                    $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                    $array_add_public_return_time_positions = $array_result_NextData['array_add_public_return_time_positions'];
+                    $array_add_attendance_time_id = $array_result_NextData['array_add_attendance_time_id'];
+                    $array_add_attendance_editor_department_code = $array_result_NextData['array_add_attendance_editor_department_code'];
+                    $array_add_attendance_editor_department_name = $array_result_NextData['array_add_attendance_editor_department_name'];
+                    $array_add_attendance_editor_user_code = $array_result_NextData['array_add_attendance_editor_user_code'];
+                    $array_add_attendance_editor_user_name = $array_result_NextData['array_add_attendance_editor_user_name'];
+                    $array_add_leaving_time_id = $array_result_NextData['array_add_leaving_time_id'];
+                    $array_add_leaving_editor_department_code = $array_result_NextData['array_add_leaving_editor_department_code'];
+                    $array_add_leaving_editor_department_name = $array_result_NextData['array_add_leaving_editor_department_name'];
+                    $array_add_leaving_editor_user_code = $array_result_NextData['array_add_leaving_editor_user_code'];
+                    $array_add_leaving_editor_user_name = $array_result_NextData['array_add_leaving_editor_user_name'];
+                    $array_add_missing_middle_time_id = $array_result_NextData['array_add_missing_middle_time_id'];
+                    $array_add_missing_middle_editor_department_code = $array_result_NextData['array_add_missing_middle_editor_department_code'];
+                    $array_add_missing_middle_editor_department_name = $array_result_NextData['array_add_missing_middle_editor_department_name'];
+                    $array_add_missing_middle_editor_user_code = $array_result_NextData['array_add_missing_middle_editor_user_code'];
+                    $array_add_missing_middle_editor_user_name = $array_result_NextData['array_add_missing_middle_editor_user_name'];
+                    $array_add_missing_return_time_id = $array_result_NextData['array_add_missing_return_time_id'];
+                    $array_add_missing_return_editor_department_code = $array_result_NextData['array_add_missing_return_editor_department_code'];
+                    $array_add_missing_return_editor_department_name = $array_result_NextData['array_add_missing_return_editor_department_name'];
+                    $array_add_missing_return_editor_user_code = $array_result_NextData['array_add_missing_return_editor_user_code'];
+                    $array_add_missing_return_editor_user_name = $array_result_NextData['array_add_missing_return_editor_user_name'];
+                    $array_add_public_going_out_time_id = $array_result_NextData['array_add_public_going_out_time_id'];
+                    $array_add_public_going_out_editor_department_code = $array_result_NextData['array_add_public_going_out_editor_department_code'];
+                    $array_add_public_going_out_editor_department_name = $array_result_NextData['array_add_public_going_out_editor_department_name'];
+                    $array_add_public_going_out_editor_user_code = $array_result_NextData['array_add_public_going_out_editor_user_code'];
+                    $array_add_public_going_out_editor_user_name = $array_result_NextData['array_add_public_going_out_editor_user_name'];
+                    $array_add_public_return_time_id = $array_result_NextData['array_add_public_return_time_id'];
+                    $array_add_public_return_editor_department_code = $array_result_NextData['array_add_public_return_editor_department_code'];
+                    $array_add_public_return_editor_department_name = $array_result_NextData['array_add_public_return_editor_department_name'];
+                    $array_add_public_return_editor_user_code = $array_result_NextData['array_add_public_return_editor_user_code'];
+                    $array_add_public_return_editor_user_name = $array_result_NextData['array_add_public_return_editor_user_name'];
+                    $attendance_time = $array_result_NextData['attendance_time'];
+                    $leaving_time = $array_result_NextData['leaving_time'];
+                    $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                    $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                    $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                    $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                    $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                    $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                    $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                    $missing_return_time_positions = $array_result_NextData['missing_return_time_positions'];
+                    $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                    $public_return_time_positions = $array_result_NextData['public_return_time_positions'];
+                    $attendance_time_id = $array_result_NextData['attendance_time_id'];
+                    $leaving_time_id = $array_result_NextData['leaving_time_id'];
+                    $missing_middle_time_id = $array_result_NextData['missing_middle_time_id'];
+                    $missing_middle_return_time_id = $array_result_NextData['missing_middle_return_time_id'];
+                    $public_going_out_time_id = $array_result_NextData['public_going_out_time_id'];
+                    $public_going_out_return_time_id = $array_result_NextData['public_going_out_return_time_id'];
+                    $attendance_editor_department_code = $array_result_NextData['attendance_editor_department_code'];
+                    $attendance_editor_department_name = $array_result_NextData['attendance_editor_department_name'];
+                    $attendance_editor_user_code = $array_result_NextData['attendance_editor_user_code'];
+                    $attendance_editor_user_name = $array_result_NextData['attendance_editor_user_name'];
+                    $leaving_editor_department_code = $array_result_NextData['leaving_editor_department_code'];
+                    $leaving_editor_department_name = $array_result_NextData['leaving_editor_department_name'];
+                    $leaving_editor_user_code = $array_result_NextData['leaving_editor_user_code'];
+                    $leaving_editor_user_name = $array_result_NextData['leaving_editor_user_name'];
+                    $missing_middle_editor_department_code = $array_result_NextData['missing_middle_editor_department_code'];
+                    $missing_middle_editor_department_name = $array_result_NextData['missing_middle_editor_department_name'];
+                    $missing_middle_editor_user_code = $array_result_NextData['missing_middle_editor_user_code'];
+                    $missing_middle_editor_user_name = $array_result_NextData['missing_middle_editor_user_name'];
+                    $missing_return_editor_department_code = $array_result_NextData['missing_return_editor_department_code'];
+                    $missing_return_editor_department_name = $array_result_NextData['missing_return_editor_department_name'];
+                    $missing_return_editor_user_code = $array_result_NextData['missing_return_editor_user_code'];
+                    $missing_return_editor_user_name = $array_result_NextData['missing_return_editor_user_name'];
+                    $public_going_out_editor_department_code = $array_result_NextData['public_going_out_editor_department_code'];
+                    $public_going_out_editor_department_name = $array_result_NextData['public_going_out_editor_department_name'];
+                    $public_going_out_editor_user_code = $array_result_NextData['public_going_out_editor_user_code'];
+                    $public_going_out_editor_user_name = $array_result_NextData['public_going_out_editor_user_name'];
+                    $public_return_editor_department_code = $array_result_NextData['public_return_editor_department_code'];
+                    $public_return_editor_department_name = $array_result_NextData['public_return_editor_department_name'];
+                    $public_return_editor_user_code = $array_result_NextData['public_return_editor_user_code'];
+                    $public_return_editor_user_name = $array_result_NextData['public_return_editor_user_name'];
                     // 同じ値にする
                     $before_date = $current_date;
                     $before_department_code = $current_department_code;
@@ -5217,7 +5538,224 @@ class DailyWorkingInformationController extends Controller
                     $calc_nobreak_cnt = 0;
                     $array_notelateetc = $this->setNoteLateEtc($result);
                     $note .= $array_notelateetc[0];
-                    Log::DEBUG('setNoteLateEtc $note =  '.$note);
+                    $late = $array_notelateetc[1];
+                    $leave_early = $array_notelateetc[2];
+                    $to_be_confirmed = $array_notelateetc[3];
+                    $calc_nobreak_cnt++;
+                    // ユーザー休暇区分判定用
+                    $before_holiday_set = true;
+                    $before_holiday_date = $current_date;
+                    $before_holiday_user_code = $current_user_code;
+                    $before_holiday_department_code = $current_department_code;
+                    $before_holiday_kubun = $result->holiday_kubun;
+                }
+            } elseif ($current_date == $before_date &&
+                    $current_department_code == $before_department_code) {
+                // Log::debug('--- '.$before_result->user_name.' 終了  ------ '.$before_date.' モード  ------ '.$before_result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
+                // Log::debug('--- '.$result->user_name.' 開始  ------ '.$current_date.' モード  ------ '.$result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
+                // ユーザーが変わった場合
+                // Log::debug('    ユーザーが変わった場合 ');
+                // Log::debug('        $result->user_code  '.$before_user_code.'->'.$result->user_code);
+                // Log::debug('        $result->mode  '.$result->mode);
+                // Log::debug('        $result->record_datetime  '.$result->record_datetime);
+                // Log::debug('        $result->working_timetable_from_time  '.$result->working_timetable_from_time);
+                // Log::debug('        $result->working_timetable_to_time  '.$result->working_timetable_to_time);
+                try{
+                    // Log::debug('        $working_status  '.$working_status);
+                    if ($working_status == 0 ) {
+                        // Log::debug('        当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
+                        // Log::debug('        当日分　勤務状態 現在時刻 =  '.$dtNow);
+                        if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
+                            $working_status = $before_result->working_status;
+                        }
+                        // Log::debug('当日分　勤務状態 =  '.$working_status);
+                    }
+                    // Log::debug('        $calc_nobreak_cnt  '.$calc_nobreak_cnt);
+                    if ($calc_nobreak_cnt == 0) {
+                        $array_notelateetc = $this->setNoteLateEtc($before_result);
+                        $note .= $array_notelateetc[0];
+                        // Log::debug('        setNoteLateEtc $note =  '.$note);
+                        $late = $array_notelateetc[1];
+                        $leave_early = $array_notelateetc[2];
+                        $to_be_confirmed = $array_notelateetc[3];
+                    }
+                    // １個前のユーザーが休暇設定されていた場合はすでに登録済み
+                    // Log::debug('        before_holiday_set = '.$before_holiday_set);
+                    // Log::debug('        before_holiday_kubun = '.$before_holiday_kubun);
+                    // Log::debug('        result->holiday_kubun = '.$result->holiday_kubun);
+                    if ($before_holiday_set == false) {
+                        // Log::debug('        temp_working_time_datesデータ作成開始 ');
+                        // Log::debug('            １個前のユーザーを登録 '.$before_user_code);
+                        // ユーザー労働時間登録(１個前のユーザーを登録する)
+                        // setLeavingCollectPtn implement
+                        $array_impl_addTempWorkingTimeDate = array (
+                            'target_date' => $before_date,
+                            'target_user_code' => $before_user_code,
+                            'target_department_code' => $before_department_code,
+                            'target_result' => $before_result,
+                            'note' => $note,
+                            'working_status' => $working_status,
+                            'timetables' => $timetables,
+                            'array_calc_time' => $array_calc_time,
+                            'array_missing_middle_time' => $array_missing_middle_time,
+                            'array_public_going_out_time' => $array_public_going_out_time,
+                            'array_add_attendance_time' => $array_add_attendance_time,
+                            'array_add_attendance_time_id' => $array_add_attendance_time_id,
+                            'array_add_attendance_editor_department_code' => $array_add_attendance_editor_department_code,
+                            'array_add_attendance_editor_department_name' => $array_add_attendance_editor_department_name,
+                            'array_add_attendance_editor_user_code' => $array_add_attendance_editor_user_code,
+                            'array_add_attendance_editor_user_name' => $array_add_attendance_editor_user_name,
+                            'array_add_attendance_time_positions' => $array_add_attendance_time_positions,
+                            'array_add_leaving_time' => $array_add_leaving_time,
+                            'array_add_leaving_time_id' => $array_add_leaving_time_id,
+                            'array_add_leaving_editor_department_code' => $array_add_leaving_editor_department_code,
+                            'array_add_leaving_editor_department_name' => $array_add_leaving_editor_department_name,
+                            'array_add_leaving_editor_user_code' => $array_add_leaving_editor_user_code,
+                            'array_add_leaving_editor_user_name' => $array_add_leaving_editor_user_name,
+                            'array_add_leaving_time_positions' => $array_add_leaving_time_positions,
+                            'array_add_missing_middle_time' => $array_add_missing_middle_time,
+                            'array_add_missing_middle_time_id' => $array_add_missing_middle_time_id,
+                            'array_add_missing_middle_editor_department_code' => $array_add_missing_middle_editor_department_code,
+                            'array_add_missing_middle_editor_department_name' => $array_add_missing_middle_editor_department_name,
+                            'array_add_missing_middle_editor_user_code' => $array_add_missing_middle_editor_user_code,
+                            'array_add_missing_middle_editor_user_name' => $array_add_missing_middle_editor_user_name,
+                            'array_add_missing_middle_time_positions' => $array_add_missing_middle_time_positions,
+                            'array_add_missing_return_time' => $array_add_missing_return_time,
+                            'array_add_missing_return_time_id' => $array_add_missing_return_time_id,
+                            'array_add_missing_return_editor_department_code' => $array_add_missing_return_editor_department_code,
+                            'array_add_missing_return_editor_department_name' => $array_add_missing_return_editor_department_name,
+                            'array_add_missing_return_editor_user_code' => $array_add_missing_return_editor_user_code,
+                            'array_add_missing_return_editor_user_name' => $array_add_missing_return_editor_user_name,
+                            'array_add_missing_return_time_positions' => $array_add_missing_return_time_positions,
+                            'array_add_public_going_out_time' => $array_add_public_going_out_time,
+                            'array_add_public_going_out_time_id' => $array_add_public_going_out_time_id,
+                            'array_add_public_going_out_editor_department_code' => $array_add_public_going_out_editor_department_code,
+                            'array_add_public_going_out_editor_department_name' => $array_add_public_going_out_editor_department_name,
+                            'array_add_public_going_out_editor_user_code' => $array_add_public_going_out_editor_user_code,
+                            'array_add_public_going_out_editor_user_name' => $array_add_public_going_out_editor_user_name,
+                            'array_add_public_going_out_time_positions' => $array_add_public_going_out_time_positions,
+                            'array_add_public_return_time' => $array_add_public_return_time,
+                            'array_add_public_return_time_id' => $array_add_public_return_time_id,
+                            'array_add_public_return_editor_department_code' => $array_add_public_return_editor_department_code,
+                            'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
+                            'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
+                            'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
+                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                            'array_break_worktimetable_result' => $array_break_worktimetable_result
+                        );
+                        $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
+                    }
+                    $before_holiday_set = false;
+                    // 日付とユーザー休暇区分を保存
+                    $before_holiday_date = $current_date;
+                    $before_holiday_user_code = $current_user_code;
+                    $before_holiday_department_code = $current_department_code;
+                    $before_holiday_kubun = $result->holiday_kubun;
+                    // 次データ計算事前処理
+                    $array_result_NextData =
+                        $this->calcTempWorkingTimeDateNextData(
+                            $array_working_time_kubun,
+                            $result
+                        );
+                    $array_calc_time = $array_result_NextData['array_calc_time'];
+                    $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                    $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                    $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                    $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                    $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                    $array_add_missing_return_time = $array_result_NextData['array_add_missing_return_time'];
+                    $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                    $array_add_public_return_time = $array_result_NextData['array_add_public_return_time'];
+                    $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                    $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                    $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                    $array_add_missing_return_time_positions = $array_result_NextData['array_add_missing_return_time_positions'];
+                    $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                    $array_add_public_return_time_positions = $array_result_NextData['array_add_public_return_time_positions'];
+                    $array_add_attendance_time_id = $array_result_NextData['array_add_attendance_time_id'];
+                    $array_add_attendance_editor_department_code = $array_result_NextData['array_add_attendance_editor_department_code'];
+                    $array_add_attendance_editor_department_name = $array_result_NextData['array_add_attendance_editor_department_name'];
+                    $array_add_attendance_editor_user_code = $array_result_NextData['array_add_attendance_editor_user_code'];
+                    $array_add_attendance_editor_user_name = $array_result_NextData['array_add_attendance_editor_user_name'];
+                    $array_add_leaving_time_id = $array_result_NextData['array_add_leaving_time_id'];
+                    $array_add_leaving_editor_department_code = $array_result_NextData['array_add_leaving_editor_department_code'];
+                    $array_add_leaving_editor_department_name = $array_result_NextData['array_add_leaving_editor_department_name'];
+                    $array_add_leaving_editor_user_code = $array_result_NextData['array_add_leaving_editor_user_code'];
+                    $array_add_leaving_editor_user_name = $array_result_NextData['array_add_leaving_editor_user_name'];
+                    $array_add_missing_middle_time_id = $array_result_NextData['array_add_missing_middle_time_id'];
+                    $array_add_missing_middle_editor_department_code = $array_result_NextData['array_add_missing_middle_editor_department_code'];
+                    $array_add_missing_middle_editor_department_name = $array_result_NextData['array_add_missing_middle_editor_department_name'];
+                    $array_add_missing_middle_editor_user_code = $array_result_NextData['array_add_missing_middle_editor_user_code'];
+                    $array_add_missing_middle_editor_user_name = $array_result_NextData['array_add_missing_middle_editor_user_name'];
+                    $array_add_missing_return_time_id = $array_result_NextData['array_add_missing_return_time_id'];
+                    $array_add_missing_return_editor_department_code = $array_result_NextData['array_add_missing_return_editor_department_code'];
+                    $array_add_missing_return_editor_department_name = $array_result_NextData['array_add_missing_return_editor_department_name'];
+                    $array_add_missing_return_editor_user_code = $array_result_NextData['array_add_missing_return_editor_user_code'];
+                    $array_add_missing_return_editor_user_name = $array_result_NextData['array_add_missing_return_editor_user_name'];
+                    $array_add_public_going_out_time_id = $array_result_NextData['array_add_public_going_out_time_id'];
+                    $array_add_public_going_out_editor_department_code = $array_result_NextData['array_add_public_going_out_editor_department_code'];
+                    $array_add_public_going_out_editor_department_name = $array_result_NextData['array_add_public_going_out_editor_department_name'];
+                    $array_add_public_going_out_editor_user_code = $array_result_NextData['array_add_public_going_out_editor_user_code'];
+                    $array_add_public_going_out_editor_user_name = $array_result_NextData['array_add_public_going_out_editor_user_name'];
+                    $array_add_public_return_time_id = $array_result_NextData['array_add_public_return_time_id'];
+                    $array_add_public_return_editor_department_code = $array_result_NextData['array_add_public_return_editor_department_code'];
+                    $array_add_public_return_editor_department_name = $array_result_NextData['array_add_public_return_editor_department_name'];
+                    $array_add_public_return_editor_user_code = $array_result_NextData['array_add_public_return_editor_user_code'];
+                    $array_add_public_return_editor_user_name = $array_result_NextData['array_add_public_return_editor_user_name'];
+                    $attendance_time = $array_result_NextData['attendance_time'];
+                    $leaving_time = $array_result_NextData['leaving_time'];
+                    $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                    $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                    $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                    $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                    $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                    $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                    $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                    $missing_return_time_positions = $array_result_NextData['missing_return_time_positions'];
+                    $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                    $public_return_time_positions = $array_result_NextData['public_return_time_positions'];
+                    $attendance_time_id = $array_result_NextData['attendance_time_id'];
+                    $leaving_time_id = $array_result_NextData['leaving_time_id'];
+                    $missing_middle_time_id = $array_result_NextData['missing_middle_time_id'];
+                    $missing_middle_return_time_id = $array_result_NextData['missing_middle_return_time_id'];
+                    $public_going_out_time_id = $array_result_NextData['public_going_out_time_id'];
+                    $public_going_out_return_time_id = $array_result_NextData['public_going_out_return_time_id'];
+                    $attendance_editor_department_code = $array_result_NextData['attendance_editor_department_code'];
+                    $attendance_editor_department_name = $array_result_NextData['attendance_editor_department_name'];
+                    $attendance_editor_user_code = $array_result_NextData['attendance_editor_user_code'];
+                    $attendance_editor_user_name = $array_result_NextData['attendance_editor_user_name'];
+                    $leaving_editor_department_code = $array_result_NextData['leaving_editor_department_code'];
+                    $leaving_editor_department_name = $array_result_NextData['leaving_editor_department_name'];
+                    $leaving_editor_user_code = $array_result_NextData['leaving_editor_user_code'];
+                    $leaving_editor_user_name = $array_result_NextData['leaving_editor_user_name'];
+                    $missing_middle_editor_department_code = $array_result_NextData['missing_middle_editor_department_code'];
+                    $missing_middle_editor_department_name = $array_result_NextData['missing_middle_editor_department_name'];
+                    $missing_middle_editor_user_code = $array_result_NextData['missing_middle_editor_user_code'];
+                    $missing_middle_editor_user_name = $array_result_NextData['missing_middle_editor_user_name'];
+                    $missing_return_editor_department_code = $array_result_NextData['missing_return_editor_department_code'];
+                    $missing_return_editor_department_name = $array_result_NextData['missing_return_editor_department_name'];
+                    $missing_return_editor_user_code = $array_result_NextData['missing_return_editor_user_code'];
+                    $missing_return_editor_user_name = $array_result_NextData['missing_return_editor_user_name'];
+                    $public_going_out_editor_department_code = $array_result_NextData['public_going_out_editor_department_code'];
+                    $public_going_out_editor_department_name = $array_result_NextData['public_going_out_editor_department_name'];
+                    $public_going_out_editor_user_code = $array_result_NextData['public_going_out_editor_user_code'];
+                    $public_going_out_editor_user_name = $array_result_NextData['public_going_out_editor_user_name'];
+                    $public_return_editor_department_code = $array_result_NextData['public_return_editor_department_code'];
+                    $public_return_editor_department_name = $array_result_NextData['public_return_editor_department_name'];
+                    $public_return_editor_user_code = $array_result_NextData['public_return_editor_user_code'];
+                    $public_return_editor_user_name = $array_result_NextData['public_return_editor_user_name'];
+                    // 同じ値にする
+                    $before_user_code = $current_user_code; 
+                    $before_result = $result;
+                    $this->not_employment_working = 0;
+                    $working_status = $result->working_status;
+                    $note = '';
+                    $late = '';
+                    $leave_early = '';
+                    $to_be_confirmed = '';
+                    $calc_nobreak_cnt = 0;
+                    $array_notelateetc = $this->setNoteLateEtc($result);
+                    $note .= $array_notelateetc[0];
                     $late = $array_notelateetc[1];
                     $leave_early = $array_notelateetc[2];
                     $to_be_confirmed = $array_notelateetc[3];
@@ -5232,135 +5770,170 @@ class DailyWorkingInformationController extends Controller
                 // 現データが当日計算対象で、出勤していない休暇設定されていればデータ作成
                 //if ($result->current_calc == '1' && isset($result->holiday_kubun)) {
                 if ($result->current_calc == '1' && !$mode_chk) {
-                    Log::DEBUG('        temp_working_time_datesデータ作成開始 ');
-                    Log::DEBUG('            現データが当日計算対象データ作成 =  '.$current_user_code);
-                    Log::DEBUG('                休暇区分  = '.$result->holiday_kubun);
+                    // Log::debug('        temp_working_time_datesデータ作成開始 ');
+                    // Log::debug('            現データが当日計算対象データ作成 =  '.$current_user_code);
+                    // Log::debug('                休暇区分  = '.$result->holiday_kubun);
                     if (($result->holiday_kubun != Config::get('const.C013.non_set') &&
                         $result->holiday_kubun != Config::get('const.C013.morning_off') &&
                         $result->holiday_kubun != Config::get('const.C013.afternoon_off') &&
                         $result->holiday_kubun != Config::get('const.C013.absence_work') &&
                         $result->holiday_kubun != Config::get('const.C013.late_work') &&
-                        $result->holiday_kubun != Config::get('const.C013.leave_early_work')) ||
+                        $result->holiday_kubun != Config::get('const.C013.leave_early_work') &&
+                        $result->holiday_kubun != Config::get('const.C013.deemed_business_trip') &&
+                        $result->holiday_kubun != Config::get('const.C013.deemed_direct_go') &&
+                        $result->holiday_kubun != Config::get('const.C013.deemed_direct_return')) ||
                         (!isset($result->holiday_kubun) ||
                         $result->holiday_kubun != Config::get('const.C013.non_set'))) {
-                        $add_result = $this->addTempWorkingTimeDate(
-                            $current_date,
-                            $current_user_code,
-                            $current_department_code,
-                            $current_result,
-                            $note,
-                            $working_status,
-                            $array_calc_time,
-                            $array_missing_middle_time,
-                            $array_public_going_out_time,
-                            $array_add_attendance_time,
-                            $array_add_attendance_time_positions,
-                            $array_add_leaving_time,
-                            $array_add_leaving_time_positions,
-                            $array_add_missing_middle_time,
-                            $array_add_missing_middle_time_positions,
-                            $array_add_missing_middle_return_time,
-                            $array_add_missing_middle_return_time_positions,
-                            $array_add_public_going_out_time,
-                            $array_add_public_going_out_time_positions,
-                            $array_add_public_going_out_return_time,
-                            $array_add_public_going_out_return_time_positions);
-                    Log::DEBUG('        temp_working_time_datesデータ作成終了 '.$current_user_code);
+                        // setLeavingCollectPtn implement
+                        $array_impl_addTempWorkingTimeDate = array (
+                            'target_date' => $current_date,
+                            'target_user_code' => $current_user_code,
+                            'target_department_code' => $current_department_code,
+                            'target_result' => $current_result,
+                            'note' => $note,
+                            'working_status' => $working_status,
+                            'timetables' => $timetables,
+                            'array_calc_time' => $array_calc_time,
+                            'array_missing_middle_time' => $array_missing_middle_time,
+                            'array_public_going_out_time' => $array_public_going_out_time,
+                            'array_add_attendance_time' => $array_add_attendance_time,
+                            'array_add_attendance_time_id' => $array_add_attendance_time_id,
+                            'array_add_attendance_editor_department_code' => $array_add_attendance_editor_department_code,
+                            'array_add_attendance_editor_department_name' => $array_add_attendance_editor_department_name,
+                            'array_add_attendance_editor_user_code' => $array_add_attendance_editor_user_code,
+                            'array_add_attendance_editor_user_name' => $array_add_attendance_editor_user_name,
+                            'array_add_attendance_time_positions' => $array_add_attendance_time_positions,
+                            'array_add_leaving_time' => $array_add_leaving_time,
+                            'array_add_leaving_time_id' => $array_add_leaving_time_id,
+                            'array_add_leaving_editor_department_code' => $array_add_leaving_editor_department_code,
+                            'array_add_leaving_editor_department_name' => $array_add_leaving_editor_department_name,
+                            'array_add_leaving_editor_user_code' => $array_add_leaving_editor_user_code,
+                            'array_add_leaving_editor_user_name' => $array_add_leaving_editor_user_name,
+                            'array_add_leaving_time_positions' => $array_add_leaving_time_positions,
+                            'array_add_missing_middle_time' => $array_add_missing_middle_time,
+                            'array_add_missing_middle_time_id' => $array_add_missing_middle_time_id,
+                            'array_add_missing_middle_editor_department_code' => $array_add_missing_middle_editor_department_code,
+                            'array_add_missing_middle_editor_department_name' => $array_add_missing_middle_editor_department_name,
+                            'array_add_missing_middle_editor_user_code' => $array_add_missing_middle_editor_user_code,
+                            'array_add_missing_middle_editor_user_name' => $array_add_missing_middle_editor_user_name,
+                            'array_add_missing_middle_time_positions' => $array_add_missing_middle_time_positions,
+                            'array_add_missing_return_time' => $array_add_missing_return_time,
+                            'array_add_missing_return_time_id' => $array_add_missing_return_time_id,
+                            'array_add_missing_return_editor_department_code' => $array_add_missing_return_editor_department_code,
+                            'array_add_missing_return_editor_department_name' => $array_add_missing_return_editor_department_name,
+                            'array_add_missing_return_editor_user_code' => $array_add_missing_return_editor_user_code,
+                            'array_add_missing_return_editor_user_name' => $array_add_missing_return_editor_user_name,
+                            'array_add_missing_return_time_positions' => $array_add_missing_return_time_positions,
+                            'array_add_public_going_out_time' => $array_add_public_going_out_time,
+                            'array_add_public_going_out_time_id' => $array_add_public_going_out_time_id,
+                            'array_add_public_going_out_editor_department_code' => $array_add_public_going_out_editor_department_code,
+                            'array_add_public_going_out_editor_department_name' => $array_add_public_going_out_editor_department_name,
+                            'array_add_public_going_out_editor_user_code' => $array_add_public_going_out_editor_user_code,
+                            'array_add_public_going_out_editor_user_name' => $array_add_public_going_out_editor_user_name,
+                            'array_add_public_going_out_time_positions' => $array_add_public_going_out_time_positions,
+                            'array_add_public_return_time' => $array_add_public_return_time,
+                            'array_add_public_return_time_id' => $array_add_public_return_time_id,
+                            'array_add_public_return_editor_department_code' => $array_add_public_return_editor_department_code,
+                            'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
+                            'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
+                            'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
+                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                            'array_break_worktimetable_result' => $array_break_worktimetable_result
+                        );
+                        $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                         // 次データ計算事前処理
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_calc_time[$i] = 0; 
-                        }
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_missing_middle_time[$i] = 0; 
-                        }
-                        for ($i=0;$i<count($array_working_time_kubun);$i++) {
-                            $array_public_going_out_time[$i] = 0; 
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time')) {
-                            $attendance_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $attendance_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $attendance_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time')) {
-                            $leaving_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $leaving_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $leaving_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_time')) {
-                            $missing_middle_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_time_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $missing_middle_time_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
-                            $missing_middle_return_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $missing_middle_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $missing_middle_return_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time')) {
-                            $public_going_out_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $public_going_out_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $public_going_out_time_positions = null;
-                            }               
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
-                            $public_going_out_return_time = $result->record_datetime;
-                            if (isset($result->x_positions) && isset($result->y_positions)) {
-                                $public_going_out_return_time_positions = $result->x_positions.' '.$result->y_positions;
-                            } else {
-                                $public_going_out_return_time_positions = null;
-                            }               
-                        }
-                                $array_add_attendance_time = array();
-                        $array_add_leaving_time = array();
-                        $array_add_missing_middle_time = array();
-                        $array_add_missing_middle_return_time = array();
-                        $array_add_public_going_out_time = array();
-                        $array_add_public_going_out_return_time = array();
-                        $array_add_attendance_time_positions = array();
-                        $array_add_leaving_time_positions = array();
-                        $array_add_missing_middle_time_positions = array();
-                        $array_add_missing_middle_return_time_positions = array();
-                        $array_add_public_going_out_time_positions = array();
-                        $array_add_public_going_out_return_time_positions = array();
-                        if ($result->mode == Config::get('const.C005.missing_middle_time') && $missing_middle_time <> ''){
-                            $array_add_missing_middle_time[] = $missing_middle_time;
-                            $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.missing_middle_return_time') && $missing_middle_return_time <> ''){
-                            $array_add_missing_middle_return_time[] = $missing_middle_return_time;
-                            $array_add_missing_middle_return_time_positions[] = $missing_middle_return_time_positions;
-                            Log::DEBUG('    $missing_middle_return_time_positions =  '.$missing_middle_return_time_positions);
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_time') && $public_going_out_time <> ''){
-                            $array_add_public_going_out_time[] = $public_going_out_time;
-                            $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.public_going_out_return_time') && $public_going_out_return_time <> ''){
-                            $array_add_public_going_out_return_time[] = $public_going_out_return_time;
-                            $array_add_public_going_out_return_time_positions[] = $public_going_out_return_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.attendance_time') && $attendance_time <> ''){
-                            $array_add_attendance_time[] = $attendance_time;
-                            $array_add_attendance_time_positions[] = $attendance_time_positions;
-                        }
-                        if ($result->mode == Config::get('const.C005.leaving_time') && $leaving_time <> ''){
-                            $array_add_leaving_time[] = $leaving_time;
-                            $array_add_leaving_time_positions[] = $leaving_time_positions;
-                        }
+                        $array_result_NextData =
+                            $this->calcTempWorkingTimeDateNextData(
+                                $array_working_time_kubun,
+                                $result
+                            );
+                        $array_calc_time = $array_result_NextData['array_calc_time'];
+                        $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                        $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                        $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                        $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                        $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                        $array_add_missing_return_time = $array_result_NextData['array_add_missing_return_time'];
+                        $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                        $array_add_public_return_time = $array_result_NextData['array_add_public_return_time'];
+                        $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                        $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                        $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                        $array_add_missing_return_time_positions = $array_result_NextData['array_add_missing_return_time_positions'];
+                        $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                        $array_add_public_return_time_positions = $array_result_NextData['array_add_public_return_time_positions'];
+                        $array_add_attendance_time_id = $array_result_NextData['array_add_attendance_time_id'];
+                        $array_add_attendance_editor_department_code = $array_result_NextData['array_add_attendance_editor_department_code'];
+                        $array_add_attendance_editor_department_name = $array_result_NextData['array_add_attendance_editor_department_name'];
+                        $array_add_attendance_editor_user_code = $array_result_NextData['array_add_attendance_editor_user_code'];
+                        $array_add_attendance_editor_user_name = $array_result_NextData['array_add_attendance_editor_user_name'];
+                        $array_add_leaving_time_id = $array_result_NextData['array_add_leaving_time_id'];
+                        $array_add_leaving_editor_department_code = $array_result_NextData['array_add_leaving_editor_department_code'];
+                        $array_add_leaving_editor_department_name = $array_result_NextData['array_add_leaving_editor_department_name'];
+                        $array_add_leaving_editor_user_code = $array_result_NextData['array_add_leaving_editor_user_code'];
+                        $array_add_leaving_editor_user_name = $array_result_NextData['array_add_leaving_editor_user_name'];
+                        $array_add_missing_middle_time_id = $array_result_NextData['array_add_missing_middle_time_id'];
+                        $array_add_missing_middle_editor_department_code = $array_result_NextData['array_add_missing_middle_editor_department_code'];
+                        $array_add_missing_middle_editor_department_name = $array_result_NextData['array_add_missing_middle_editor_department_name'];
+                        $array_add_missing_middle_editor_user_code = $array_result_NextData['array_add_missing_middle_editor_user_code'];
+                        $array_add_missing_middle_editor_user_name = $array_result_NextData['array_add_missing_middle_editor_user_name'];
+                        $array_add_missing_return_time_id = $array_result_NextData['array_add_missing_return_time_id'];
+                        $array_add_missing_return_editor_department_code = $array_result_NextData['array_add_missing_return_editor_department_code'];
+                        $array_add_missing_return_editor_department_name = $array_result_NextData['array_add_missing_return_editor_department_name'];
+                        $array_add_missing_return_editor_user_code = $array_result_NextData['array_add_missing_return_editor_user_code'];
+                        $array_add_missing_return_editor_user_name = $array_result_NextData['array_add_missing_return_editor_user_name'];
+                        $array_add_public_going_out_time_id = $array_result_NextData['array_add_public_going_out_time_id'];
+                        $array_add_public_going_out_editor_department_code = $array_result_NextData['array_add_public_going_out_editor_department_code'];
+                        $array_add_public_going_out_editor_department_name = $array_result_NextData['array_add_public_going_out_editor_department_name'];
+                        $array_add_public_going_out_editor_user_code = $array_result_NextData['array_add_public_going_out_editor_user_code'];
+                        $array_add_public_going_out_editor_user_name = $array_result_NextData['array_add_public_going_out_editor_user_name'];
+                        $array_add_public_return_time_id = $array_result_NextData['array_add_public_return_time_id'];
+                        $array_add_public_return_editor_department_code = $array_result_NextData['array_add_public_return_editor_department_code'];
+                        $array_add_public_return_editor_department_name = $array_result_NextData['array_add_public_return_editor_department_name'];
+                        $array_add_public_return_editor_user_code = $array_result_NextData['array_add_public_return_editor_user_code'];
+                        $array_add_public_return_editor_user_name = $array_result_NextData['array_add_public_return_editor_user_name'];
+                        $attendance_time = $array_result_NextData['attendance_time'];
+                        $leaving_time = $array_result_NextData['leaving_time'];
+                        $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                        $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                        $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                        $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                        $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                        $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                        $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                        $missing_return_time_positions = $array_result_NextData['missing_return_time_positions'];
+                        $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                        $public_return_time_positions = $array_result_NextData['public_return_time_positions'];
+                        $attendance_time_id = $array_result_NextData['attendance_time_id'];
+                        $leaving_time_id = $array_result_NextData['leaving_time_id'];
+                        $missing_middle_time_id = $array_result_NextData['missing_middle_time_id'];
+                        $missing_middle_return_time_id = $array_result_NextData['missing_middle_return_time_id'];
+                        $public_going_out_time_id = $array_result_NextData['public_going_out_time_id'];
+                        $public_going_out_return_time_id = $array_result_NextData['public_going_out_return_time_id'];
+                        $attendance_editor_department_code = $array_result_NextData['attendance_editor_department_code'];
+                        $attendance_editor_department_name = $array_result_NextData['attendance_editor_department_name'];
+                        $attendance_editor_user_code = $array_result_NextData['attendance_editor_user_code'];
+                        $attendance_editor_user_name = $array_result_NextData['attendance_editor_user_name'];
+                        $leaving_editor_department_code = $array_result_NextData['leaving_editor_department_code'];
+                        $leaving_editor_department_name = $array_result_NextData['leaving_editor_department_name'];
+                        $leaving_editor_user_code = $array_result_NextData['leaving_editor_user_code'];
+                        $leaving_editor_user_name = $array_result_NextData['leaving_editor_user_name'];
+                        $missing_middle_editor_department_code = $array_result_NextData['missing_middle_editor_department_code'];
+                        $missing_middle_editor_department_name = $array_result_NextData['missing_middle_editor_department_name'];
+                        $missing_middle_editor_user_code = $array_result_NextData['missing_middle_editor_user_code'];
+                        $missing_middle_editor_user_name = $array_result_NextData['missing_middle_editor_user_name'];
+                        $missing_return_editor_department_code = $array_result_NextData['missing_return_editor_department_code'];
+                        $missing_return_editor_department_name = $array_result_NextData['missing_return_editor_department_name'];
+                        $missing_return_editor_user_code = $array_result_NextData['missing_return_editor_user_code'];
+                        $missing_return_editor_user_name = $array_result_NextData['missing_return_editor_user_name'];
+                        $public_going_out_editor_department_code = $array_result_NextData['public_going_out_editor_department_code'];
+                        $public_going_out_editor_department_name = $array_result_NextData['public_going_out_editor_department_name'];
+                        $public_going_out_editor_user_code = $array_result_NextData['public_going_out_editor_user_code'];
+                        $public_going_out_editor_user_name = $array_result_NextData['public_going_out_editor_user_name'];
+                        $public_return_editor_department_code = $array_result_NextData['public_return_editor_department_code'];
+                        $public_return_editor_department_name = $array_result_NextData['public_return_editor_department_name'];
+                        $public_return_editor_user_code = $array_result_NextData['public_return_editor_user_code'];
+                        $public_return_editor_user_name = $array_result_NextData['public_return_editor_user_name'];
                         // 同じ値にする
                         $before_date = $current_date;
                         $before_department_code = $current_department_code;
@@ -5375,7 +5948,813 @@ class DailyWorkingInformationController extends Controller
                         $calc_nobreak_cnt = 0;
                         $array_notelateetc = $this->setNoteLateEtc($result);
                         $note .= $array_notelateetc[0];
-                        Log::DEBUG('setNoteLateEtc $note =  '.$note);
+                        // Log::debug('setNoteLateEtc $note =  '.$note);
+                        $late = $array_notelateetc[1];
+                        $leave_early = $array_notelateetc[2];
+                        $to_be_confirmed = $array_notelateetc[3];
+                        $calc_nobreak_cnt++;
+                        // ユーザー休暇区分判定用
+                        $before_holiday_set = true;
+                        $before_holiday_date = $current_date;
+                        $before_holiday_user_code = $current_user_code;
+                        $before_holiday_department_code = $current_department_code;
+                        $before_holiday_kubun = $result->holiday_kubun;
+                    }
+                }
+            } elseif ($current_date == $before_date) {
+                // 部署が変わった場合
+                // Log::debug('部署が変わった場合 ');
+                // Log::debug('--- '.$before_result->user_name.' 終了  ------ '.$before_date.' モード  ------ '.$before_result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
+                // Log::debug('--- '.$result->user_name.' 開始  ------ '.$current_date.' モード  ------ '.$result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
+                try{
+                    if ($working_status == 0 ) {
+                        // Log::debug('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
+                        // Log::debug('当日分　勤務状態 現在刻 =  '.$dtNow);
+                        if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
+                            $working_status = $before_result->working_status;
+                        }
+                        // Log::debug('当日分　勤務状態 =  '.$working_status);
+                    }
+                    if ($calc_nobreak_cnt == 0) {
+                        $array_notelateetc = $this->setNoteLateEtc($before_result);
+                        $note .= $array_notelateetc[0];
+                        // Log::debug('setNoteLateEtc $note =  '.$note);
+                        $late = $array_notelateetc[1];
+                        $leave_early = $array_notelateetc[2];
+                        $to_be_confirmed = $array_notelateetc[3];
+                    }
+                    // １個前のユーザーが休暇設定されていた場合はすでに登録済み
+                    if ($before_holiday_set == false) {
+                        // ユーザー労働時間登録(１個前のユーザーを登録する)
+                        // Log::debug('        temp_working_time_datesデータ作成開始 ');
+                        // Log::debug('            １個前のユーザーを登録 '.$before_user_code);
+                        // setLeavingCollectPtn implement
+                        $array_impl_addTempWorkingTimeDate = array (
+                            'target_date' => $before_date,
+                            'target_user_code' => $before_user_code,
+                            'target_department_code' => $before_department_code,
+                            'target_result' => $before_result,
+                            'note' => $note,
+                            'working_status' => $working_status,
+                            'timetables' => $timetables,
+                            'array_calc_time' => $array_calc_time,
+                            'array_missing_middle_time' => $array_missing_middle_time,
+                            'array_public_going_out_time' => $array_public_going_out_time,
+                            'array_add_attendance_time' => $array_add_attendance_time,
+                            'array_add_attendance_time_id' => $array_add_attendance_time_id,
+                            'array_add_attendance_editor_department_code' => $array_add_attendance_editor_department_code,
+                            'array_add_attendance_editor_department_name' => $array_add_attendance_editor_department_name,
+                            'array_add_attendance_editor_user_code' => $array_add_attendance_editor_user_code,
+                            'array_add_attendance_editor_user_name' => $array_add_attendance_editor_user_name,
+                            'array_add_attendance_time_positions' => $array_add_attendance_time_positions,
+                            'array_add_leaving_time' => $array_add_leaving_time,
+                            'array_add_leaving_time_id' => $array_add_leaving_time_id,
+                            'array_add_leaving_editor_department_code' => $array_add_leaving_editor_department_code,
+                            'array_add_leaving_editor_department_name' => $array_add_leaving_editor_department_name,
+                            'array_add_leaving_editor_user_code' => $array_add_leaving_editor_user_code,
+                            'array_add_leaving_editor_user_name' => $array_add_leaving_editor_user_name,
+                            'array_add_leaving_time_positions' => $array_add_leaving_time_positions,
+                            'array_add_missing_middle_time' => $array_add_missing_middle_time,
+                            'array_add_missing_middle_time_id' => $array_add_missing_middle_time_id,
+                            'array_add_missing_middle_editor_department_code' => $array_add_missing_middle_editor_department_code,
+                            'array_add_missing_middle_editor_department_name' => $array_add_missing_middle_editor_department_name,
+                            'array_add_missing_middle_editor_user_code' => $array_add_missing_middle_editor_user_code,
+                            'array_add_missing_middle_editor_user_name' => $array_add_missing_middle_editor_user_name,
+                            'array_add_missing_middle_time_positions' => $array_add_missing_middle_time_positions,
+                            'array_add_missing_return_time' => $array_add_missing_return_time,
+                            'array_add_missing_return_time_id' => $array_add_missing_return_time_id,
+                            'array_add_missing_return_editor_department_code' => $array_add_missing_return_editor_department_code,
+                            'array_add_missing_return_editor_department_name' => $array_add_missing_return_editor_department_name,
+                            'array_add_missing_return_editor_user_code' => $array_add_missing_return_editor_user_code,
+                            'array_add_missing_return_editor_user_name' => $array_add_missing_return_editor_user_name,
+                            'array_add_missing_return_time_positions' => $array_add_missing_return_time_positions,
+                            'array_add_public_going_out_time' => $array_add_public_going_out_time,
+                            'array_add_public_going_out_time_id' => $array_add_public_going_out_time_id,
+                            'array_add_public_going_out_editor_department_code' => $array_add_public_going_out_editor_department_code,
+                            'array_add_public_going_out_editor_department_name' => $array_add_public_going_out_editor_department_name,
+                            'array_add_public_going_out_editor_user_code' => $array_add_public_going_out_editor_user_code,
+                            'array_add_public_going_out_editor_user_name' => $array_add_public_going_out_editor_user_name,
+                            'array_add_public_going_out_time_positions' => $array_add_public_going_out_time_positions,
+                            'array_add_public_return_time' => $array_add_public_return_time,
+                            'array_add_public_return_time_id' => $array_add_public_return_time_id,
+                            'array_add_public_return_editor_department_code' => $array_add_public_return_editor_department_code,
+                            'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
+                            'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
+                            'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
+                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                            'array_break_worktimetable_result' => $array_break_worktimetable_result
+                        );
+                        $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
+                    }
+                    $before_holiday_set = false;
+                    // 日付とユーザー休暇区分を保存
+                    $before_holiday_date = $current_date;
+                    $before_holiday_user_code = $current_user_code;
+                    $before_holiday_department_code = $current_department_code;
+                    $before_holiday_kubun = $result->holiday_kubun;
+                    // 次データ計算事前処理
+                    $array_result_NextData =
+                        $this->calcTempWorkingTimeDateNextData(
+                            $array_working_time_kubun,
+                            $result
+                        );
+                    $array_calc_time = $array_result_NextData['array_calc_time'];
+                    $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                    $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                    $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                    $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                    $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                    $array_add_missing_return_time = $array_result_NextData['array_add_missing_return_time'];
+                    $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                    $array_add_public_return_time = $array_result_NextData['array_add_public_return_time'];
+                    $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                    $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                    $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                    $array_add_missing_return_time_positions = $array_result_NextData['array_add_missing_return_time_positions'];
+                    $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                    $array_add_public_return_time_positions = $array_result_NextData['array_add_public_return_time_positions'];
+                    $array_add_attendance_time_id = $array_result_NextData['array_add_attendance_time_id'];
+                    $array_add_attendance_editor_department_code = $array_result_NextData['array_add_attendance_editor_department_code'];
+                    $array_add_attendance_editor_department_name = $array_result_NextData['array_add_attendance_editor_department_name'];
+                    $array_add_attendance_editor_user_code = $array_result_NextData['array_add_attendance_editor_user_code'];
+                    $array_add_attendance_editor_user_name = $array_result_NextData['array_add_attendance_editor_user_name'];
+                    $array_add_leaving_time_id = $array_result_NextData['array_add_leaving_time_id'];
+                    $array_add_leaving_editor_department_code = $array_result_NextData['array_add_leaving_editor_department_code'];
+                    $array_add_leaving_editor_department_name = $array_result_NextData['array_add_leaving_editor_department_name'];
+                    $array_add_leaving_editor_user_code = $array_result_NextData['array_add_leaving_editor_user_code'];
+                    $array_add_leaving_editor_user_name = $array_result_NextData['array_add_leaving_editor_user_name'];
+                    $array_add_missing_middle_time_id = $array_result_NextData['array_add_missing_middle_time_id'];
+                    $array_add_missing_middle_editor_department_code = $array_result_NextData['array_add_missing_middle_editor_department_code'];
+                    $array_add_missing_middle_editor_department_name = $array_result_NextData['array_add_missing_middle_editor_department_name'];
+                    $array_add_missing_middle_editor_user_code = $array_result_NextData['array_add_missing_middle_editor_user_code'];
+                    $array_add_missing_middle_editor_user_name = $array_result_NextData['array_add_missing_middle_editor_user_name'];
+                    $array_add_missing_return_time_id = $array_result_NextData['array_add_missing_return_time_id'];
+                    $array_add_missing_return_editor_department_code = $array_result_NextData['array_add_missing_return_editor_department_code'];
+                    $array_add_missing_return_editor_department_name = $array_result_NextData['array_add_missing_return_editor_department_name'];
+                    $array_add_missing_return_editor_user_code = $array_result_NextData['array_add_missing_return_editor_user_code'];
+                    $array_add_missing_return_editor_user_name = $array_result_NextData['array_add_missing_return_editor_user_name'];
+                    $array_add_public_going_out_time_id = $array_result_NextData['array_add_public_going_out_time_id'];
+                    $array_add_public_going_out_editor_department_code = $array_result_NextData['array_add_public_going_out_editor_department_code'];
+                    $array_add_public_going_out_editor_department_name = $array_result_NextData['array_add_public_going_out_editor_department_name'];
+                    $array_add_public_going_out_editor_user_code = $array_result_NextData['array_add_public_going_out_editor_user_code'];
+                    $array_add_public_going_out_editor_user_name = $array_result_NextData['array_add_public_going_out_editor_user_name'];
+                    $array_add_public_return_time_id = $array_result_NextData['array_add_public_return_time_id'];
+                    $array_add_public_return_editor_department_code = $array_result_NextData['array_add_public_return_editor_department_code'];
+                    $array_add_public_return_editor_department_name = $array_result_NextData['array_add_public_return_editor_department_name'];
+                    $array_add_public_return_editor_user_code = $array_result_NextData['array_add_public_return_editor_user_code'];
+                    $array_add_public_return_editor_user_name = $array_result_NextData['array_add_public_return_editor_user_name'];
+                    $attendance_time = $array_result_NextData['attendance_time'];
+                    $leaving_time = $array_result_NextData['leaving_time'];
+                    $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                    $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                    $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                    $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                    $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                    $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                    $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                    $missing_return_time_positions = $array_result_NextData['missing_return_time_positions'];
+                    $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                    $public_return_time_positions = $array_result_NextData['public_return_time_positions'];
+                    $attendance_time_id = $array_result_NextData['attendance_time_id'];
+                    $leaving_time_id = $array_result_NextData['leaving_time_id'];
+                    $missing_middle_time_id = $array_result_NextData['missing_middle_time_id'];
+                    $missing_middle_return_time_id = $array_result_NextData['missing_middle_return_time_id'];
+                    $public_going_out_time_id = $array_result_NextData['public_going_out_time_id'];
+                    $public_going_out_return_time_id = $array_result_NextData['public_going_out_return_time_id'];
+                    $attendance_editor_department_code = $array_result_NextData['attendance_editor_department_code'];
+                    $attendance_editor_department_name = $array_result_NextData['attendance_editor_department_name'];
+                    $attendance_editor_user_code = $array_result_NextData['attendance_editor_user_code'];
+                    $attendance_editor_user_name = $array_result_NextData['attendance_editor_user_name'];
+                    $leaving_editor_department_code = $array_result_NextData['leaving_editor_department_code'];
+                    $leaving_editor_department_name = $array_result_NextData['leaving_editor_department_name'];
+                    $leaving_editor_user_code = $array_result_NextData['leaving_editor_user_code'];
+                    $leaving_editor_user_name = $array_result_NextData['leaving_editor_user_name'];
+                    $missing_middle_editor_department_code = $array_result_NextData['missing_middle_editor_department_code'];
+                    $missing_middle_editor_department_name = $array_result_NextData['missing_middle_editor_department_name'];
+                    $missing_middle_editor_user_code = $array_result_NextData['missing_middle_editor_user_code'];
+                    $missing_middle_editor_user_name = $array_result_NextData['missing_middle_editor_user_name'];
+                    $missing_return_editor_department_code = $array_result_NextData['missing_return_editor_department_code'];
+                    $missing_return_editor_department_name = $array_result_NextData['missing_return_editor_department_name'];
+                    $missing_return_editor_user_code = $array_result_NextData['missing_return_editor_user_code'];
+                    $missing_return_editor_user_name = $array_result_NextData['missing_return_editor_user_name'];
+                    $public_going_out_editor_department_code = $array_result_NextData['public_going_out_editor_department_code'];
+                    $public_going_out_editor_department_name = $array_result_NextData['public_going_out_editor_department_name'];
+                    $public_going_out_editor_user_code = $array_result_NextData['public_going_out_editor_user_code'];
+                    $public_going_out_editor_user_name = $array_result_NextData['public_going_out_editor_user_name'];
+                    $public_return_editor_department_code = $array_result_NextData['public_return_editor_department_code'];
+                    $public_return_editor_department_name = $array_result_NextData['public_return_editor_department_name'];
+                    $public_return_editor_user_code = $array_result_NextData['public_return_editor_user_code'];
+                    $public_return_editor_user_name = $array_result_NextData['public_return_editor_user_name'];
+                    // 同じ値にする
+                    $before_department_code = $current_department_code;
+                    $before_user_code = $current_user_code; 
+                    $before_result = $result;
+                    $this->not_employment_working = 0;
+                    $working_status = $result->working_status;
+                    $note = '';
+                    $late = '';
+                    $leave_early = '';
+                    $to_be_confirmed = '';
+                    $calc_nobreak_cnt = 0;
+                    $array_notelateetc = $this->setNoteLateEtc($result);
+                    $note .= $array_notelateetc[0];
+                    // Log::debug('setNoteLateEtc $note =  '.$note);
+                    $late = $array_notelateetc[1];
+                    $leave_early = $array_notelateetc[2];
+                    $to_be_confirmed = $array_notelateetc[3];
+                    $calc_nobreak_cnt++;
+                }catch(\PDOException $pe){
+                    $add_result = false;
+                    throw $pe;
+                }catch(\Exception $e){
+                    $add_result = false;
+                    throw $e;
+                }
+                // 現データが当日計算対象で、出勤していない休暇設定されていればデータ作成
+                //if ($result->current_calc == '1' && isset($result->holiday_kubun)) {
+                if ($result->current_calc == '1' && !$mode_chk) {
+                    // Log::debug('        temp_working_time_datesデータ作成開始 ');
+                    // Log::debug('            現データが当日計算対象データ作成 =  '.$current_user_code);
+                    // Log::debug('                休暇区分  = '.$result->holiday_kubun);
+                    if (($result->holiday_kubun != Config::get('const.C013.non_set') &&
+                        $result->holiday_kubun != Config::get('const.C013.morning_off') &&
+                        $result->holiday_kubun != Config::get('const.C013.afternoon_off') &&
+                        $result->holiday_kubun != Config::get('const.C013.absence_work') &&
+                        $result->holiday_kubun != Config::get('const.C013.late_work') &&
+                        $result->holiday_kubun != Config::get('const.C013.leave_early_work') &&
+                        $result->holiday_kubun != Config::get('const.C013.deemed_business_trip') &&
+                        $result->holiday_kubun != Config::get('const.C013.deemed_direct_go') &&
+                        $result->holiday_kubun != Config::get('const.C013.deemed_direct_return')) ||
+                        (!isset($result->holiday_kubun) ||
+                        $result->holiday_kubun != Config::get('const.C013.non_set'))) {
+                        // setLeavingCollectPtn implement
+                        $array_impl_addTempWorkingTimeDate = array (
+                            'target_date' => $current_date,
+                            'target_user_code' => $current_user_code,
+                            'target_department_code' => $current_department_code,
+                            'target_result' => $current_result,
+                            'note' => $note,
+                            'working_status' => $working_status,
+                            'timetables' => $timetables,
+                            'array_calc_time' => $array_calc_time,
+                            'array_missing_middle_time' => $array_missing_middle_time,
+                            'array_public_going_out_time' => $array_public_going_out_time,
+                            'array_add_attendance_time' => $array_add_attendance_time,
+                            'array_add_attendance_time_id' => $array_add_attendance_time_id,
+                            'array_add_attendance_editor_department_code' => $array_add_attendance_editor_department_code,
+                            'array_add_attendance_editor_department_name' => $array_add_attendance_editor_department_name,
+                            'array_add_attendance_editor_user_code' => $array_add_attendance_editor_user_code,
+                            'array_add_attendance_editor_user_name' => $array_add_attendance_editor_user_name,
+                            'array_add_attendance_time_positions' => $array_add_attendance_time_positions,
+                            'array_add_leaving_time' => $array_add_leaving_time,
+                            'array_add_leaving_time_id' => $array_add_leaving_time_id,
+                            'array_add_leaving_editor_department_code' => $array_add_leaving_editor_department_code,
+                            'array_add_leaving_editor_department_name' => $array_add_leaving_editor_department_name,
+                            'array_add_leaving_editor_user_code' => $array_add_leaving_editor_user_code,
+                            'array_add_leaving_editor_user_name' => $array_add_leaving_editor_user_name,
+                            'array_add_leaving_time_positions' => $array_add_leaving_time_positions,
+                            'array_add_missing_middle_time' => $array_add_missing_middle_time,
+                            'array_add_missing_middle_time_id' => $array_add_missing_middle_time_id,
+                            'array_add_missing_middle_editor_department_code' => $array_add_missing_middle_editor_department_code,
+                            'array_add_missing_middle_editor_department_name' => $array_add_missing_middle_editor_department_name,
+                            'array_add_missing_middle_editor_user_code' => $array_add_missing_middle_editor_user_code,
+                            'array_add_missing_middle_editor_user_name' => $array_add_missing_middle_editor_user_name,
+                            'array_add_missing_middle_time_positions' => $array_add_missing_middle_time_positions,
+                            'array_add_missing_return_time' => $array_add_missing_return_time,
+                            'array_add_missing_return_time_id' => $array_add_missing_return_time_id,
+                            'array_add_missing_return_editor_department_code' => $array_add_missing_return_editor_department_code,
+                            'array_add_missing_return_editor_department_name' => $array_add_missing_return_editor_department_name,
+                            'array_add_missing_return_editor_user_code' => $array_add_missing_return_editor_user_code,
+                            'array_add_missing_return_editor_user_name' => $array_add_missing_return_editor_user_name,
+                            'array_add_missing_return_time_positions' => $array_add_missing_return_time_positions,
+                            'array_add_public_going_out_time' => $array_add_public_going_out_time,
+                            'array_add_public_going_out_time_id' => $array_add_public_going_out_time_id,
+                            'array_add_public_going_out_editor_department_code' => $array_add_public_going_out_editor_department_code,
+                            'array_add_public_going_out_editor_department_name' => $array_add_public_going_out_editor_department_name,
+                            'array_add_public_going_out_editor_user_code' => $array_add_public_going_out_editor_user_code,
+                            'array_add_public_going_out_editor_user_name' => $array_add_public_going_out_editor_user_name,
+                            'array_add_public_going_out_time_positions' => $array_add_public_going_out_time_positions,
+                            'array_add_public_return_time' => $array_add_public_return_time,
+                            'array_add_public_return_time_id' => $array_add_public_return_time_id,
+                            'array_add_public_return_editor_department_code' => $array_add_public_return_editor_department_code,
+                            'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
+                            'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
+                            'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
+                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                            'array_break_worktimetable_result' => $array_break_worktimetable_result
+                        );
+                        $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
+                        // 次データ計算事前処理
+                        $array_result_NextData =
+                            $this->calcTempWorkingTimeDateNextData(
+                                $array_working_time_kubun,
+                                $result
+                            );
+                        $array_calc_time = $array_result_NextData['array_calc_time'];
+                        $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                        $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                        $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                        $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                        $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                        $array_add_missing_return_time = $array_result_NextData['array_add_missing_return_time'];
+                        $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                        $array_add_public_return_time = $array_result_NextData['array_add_public_return_time'];
+                        $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                        $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                        $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                        $array_add_missing_return_time_positions = $array_result_NextData['array_add_missing_return_time_positions'];
+                        $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                        $array_add_public_return_time_positions = $array_result_NextData['array_add_public_return_time_positions'];
+                        $array_add_attendance_time_id = $array_result_NextData['array_add_attendance_time_id'];
+                        $array_add_attendance_editor_department_code = $array_result_NextData['array_add_attendance_editor_department_code'];
+                        $array_add_attendance_editor_department_name = $array_result_NextData['array_add_attendance_editor_department_name'];
+                        $array_add_attendance_editor_user_code = $array_result_NextData['array_add_attendance_editor_user_code'];
+                        $array_add_attendance_editor_user_name = $array_result_NextData['array_add_attendance_editor_user_name'];
+                        $array_add_leaving_time_id = $array_result_NextData['array_add_leaving_time_id'];
+                        $array_add_leaving_editor_department_code = $array_result_NextData['array_add_leaving_editor_department_code'];
+                        $array_add_leaving_editor_department_name = $array_result_NextData['array_add_leaving_editor_department_name'];
+                        $array_add_leaving_editor_user_code = $array_result_NextData['array_add_leaving_editor_user_code'];
+                        $array_add_leaving_editor_user_name = $array_result_NextData['array_add_leaving_editor_user_name'];
+                        $array_add_missing_middle_time_id = $array_result_NextData['array_add_missing_middle_time_id'];
+                        $array_add_missing_middle_editor_department_code = $array_result_NextData['array_add_missing_middle_editor_department_code'];
+                        $array_add_missing_middle_editor_department_name = $array_result_NextData['array_add_missing_middle_editor_department_name'];
+                        $array_add_missing_middle_editor_user_code = $array_result_NextData['array_add_missing_middle_editor_user_code'];
+                        $array_add_missing_middle_editor_user_name = $array_result_NextData['array_add_missing_middle_editor_user_name'];
+                        $array_add_missing_return_time_id = $array_result_NextData['array_add_missing_return_time_id'];
+                        $array_add_missing_return_editor_department_code = $array_result_NextData['array_add_missing_return_editor_department_code'];
+                        $array_add_missing_return_editor_department_name = $array_result_NextData['array_add_missing_return_editor_department_name'];
+                        $array_add_missing_return_editor_user_code = $array_result_NextData['array_add_missing_return_editor_user_code'];
+                        $array_add_missing_return_editor_user_name = $array_result_NextData['array_add_missing_return_editor_user_name'];
+                        $array_add_public_going_out_time_id = $array_result_NextData['array_add_public_going_out_time_id'];
+                        $array_add_public_going_out_editor_department_code = $array_result_NextData['array_add_public_going_out_editor_department_code'];
+                        $array_add_public_going_out_editor_department_name = $array_result_NextData['array_add_public_going_out_editor_department_name'];
+                        $array_add_public_going_out_editor_user_code = $array_result_NextData['array_add_public_going_out_editor_user_code'];
+                        $array_add_public_going_out_editor_user_name = $array_result_NextData['array_add_public_going_out_editor_user_name'];
+                        $array_add_public_return_time_id = $array_result_NextData['array_add_public_return_time_id'];
+                        $array_add_public_return_editor_department_code = $array_result_NextData['array_add_public_return_editor_department_code'];
+                        $array_add_public_return_editor_department_name = $array_result_NextData['array_add_public_return_editor_department_name'];
+                        $array_add_public_return_editor_user_code = $array_result_NextData['array_add_public_return_editor_user_code'];
+                        $array_add_public_return_editor_user_name = $array_result_NextData['array_add_public_return_editor_user_name'];
+                        $attendance_time = $array_result_NextData['attendance_time'];
+                        $leaving_time = $array_result_NextData['leaving_time'];
+                        $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                        $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                        $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                        $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                        $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                        $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                        $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                        $missing_return_time_positions = $array_result_NextData['missing_return_time_positions'];
+                        $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                        $public_return_time_positions = $array_result_NextData['public_return_time_positions'];
+                        $attendance_time_id = $array_result_NextData['attendance_time_id'];
+                        $leaving_time_id = $array_result_NextData['leaving_time_id'];
+                        $missing_middle_time_id = $array_result_NextData['missing_middle_time_id'];
+                        $missing_middle_return_time_id = $array_result_NextData['missing_middle_return_time_id'];
+                        $public_going_out_time_id = $array_result_NextData['public_going_out_time_id'];
+                        $public_going_out_return_time_id = $array_result_NextData['public_going_out_return_time_id'];
+                        $attendance_editor_department_code = $array_result_NextData['attendance_editor_department_code'];
+                        $attendance_editor_department_name = $array_result_NextData['attendance_editor_department_name'];
+                        $attendance_editor_user_code = $array_result_NextData['attendance_editor_user_code'];
+                        $attendance_editor_user_name = $array_result_NextData['attendance_editor_user_name'];
+                        $leaving_editor_department_code = $array_result_NextData['leaving_editor_department_code'];
+                        $leaving_editor_department_name = $array_result_NextData['leaving_editor_department_name'];
+                        $leaving_editor_user_code = $array_result_NextData['leaving_editor_user_code'];
+                        $leaving_editor_user_name = $array_result_NextData['leaving_editor_user_name'];
+                        $missing_middle_editor_department_code = $array_result_NextData['missing_middle_editor_department_code'];
+                        $missing_middle_editor_department_name = $array_result_NextData['missing_middle_editor_department_name'];
+                        $missing_middle_editor_user_code = $array_result_NextData['missing_middle_editor_user_code'];
+                        $missing_middle_editor_user_name = $array_result_NextData['missing_middle_editor_user_name'];
+                        $missing_return_editor_department_code = $array_result_NextData['missing_return_editor_department_code'];
+                        $missing_return_editor_department_name = $array_result_NextData['missing_return_editor_department_name'];
+                        $missing_return_editor_user_code = $array_result_NextData['missing_return_editor_user_code'];
+                        $missing_return_editor_user_name = $array_result_NextData['missing_return_editor_user_name'];
+                        $public_going_out_editor_department_code = $array_result_NextData['public_going_out_editor_department_code'];
+                        $public_going_out_editor_department_name = $array_result_NextData['public_going_out_editor_department_name'];
+                        $public_going_out_editor_user_code = $array_result_NextData['public_going_out_editor_user_code'];
+                        $public_going_out_editor_user_name = $array_result_NextData['public_going_out_editor_user_name'];
+                        $public_return_editor_department_code = $array_result_NextData['public_return_editor_department_code'];
+                        $public_return_editor_department_name = $array_result_NextData['public_return_editor_department_name'];
+                        $public_return_editor_user_code = $array_result_NextData['public_return_editor_user_code'];
+                        $public_return_editor_user_name = $array_result_NextData['public_return_editor_user_name'];
+                        // 同じ値にする
+                        $before_date = $current_date;
+                        $before_department_code = $current_department_code;
+                        $before_user_code = $current_user_code; 
+                        $before_result = $result;
+                        $this->not_employment_working = 0;
+                        $working_status = $result->working_status;
+                        $note = '';
+                        $late = '';
+                        $leave_early = '';
+                        $to_be_confirmed = '';
+                        $calc_nobreak_cnt = 0;
+                        $array_notelateetc = $this->setNoteLateEtc($result);
+                        $note .= $array_notelateetc[0];
+                        // Log::debug('setNoteLateEtc $note =  '.$note);
+                        $late = $array_notelateetc[1];
+                        $leave_early = $array_notelateetc[2];
+                        $to_be_confirmed = $array_notelateetc[3];
+                        $calc_nobreak_cnt++;
+                        // ユーザー休暇区分判定用
+                        $before_holiday_set = true;
+                        $before_holiday_date = $current_date;
+                        $before_holiday_user_code = $current_user_code;
+                        $before_holiday_department_code = $current_department_code;
+                        $before_holiday_kubun = $result->holiday_kubun;
+                    }
+                }
+            } else {
+                // 日付が変わった場合
+                // Log::debug('日付が変わった場合 ');
+                // Log::debug('--- '.$before_result->user_name.' 終了  ------ '.$before_date.' モード  ------ '.$before_result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
+                // Log::debug('--- '.$result->user_name.' 開始  ------ '.$current_date.' モード  ------ '.$result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
+                try{
+                    if ($working_status == 0 ) {
+                        // Log::debug('当日分　勤務状態 打刻時刻 =  '.$before_result->record_datetime);
+                        // Log::debug('当日分　勤務状態 現在時刻 =  '.$dtNow);
+                        if ($before_result->record_datetime < $dtNow) {                            // 打刻時刻 < 現在時刻
+                            $working_status = $before_result->working_status;
+                        }
+                        // Log::debug('当日分　勤務状態 =  '.$working_status);
+                    }
+                    if ($calc_nobreak_cnt == 0) {
+                        $array_notelateetc = $this->setNoteLateEtc($before_result);
+                        $note .= $array_notelateetc[0];
+                        // Log::debug('setNoteLateEtc $note =  '.$note);
+                        $late = $array_notelateetc[1];
+                        $leave_early = $array_notelateetc[2];
+                        $to_be_confirmed = $array_notelateetc[3];
+                    }
+                    // １個前のユーザーが休暇設定されていた場合はすでに登録済み
+                    if ($before_holiday_set == false) {
+                        // ユーザー労働時間登録(１個前のユーザーを登録する)
+                        // Log::debug('        temp_working_time_datesデータ作成開始 ');
+                        // Log::debug('            １個前のユーザーを登録 '.$before_user_code);
+                        // setLeavingCollectPtn implement
+                        $array_impl_addTempWorkingTimeDate = array (
+                            'target_date' => $before_date,
+                            'target_user_code' => $before_user_code,
+                            'target_department_code' => $before_department_code,
+                            'target_result' => $before_result,
+                            'note' => $note,
+                            'working_status' => $working_status,
+                            'timetables' => $timetables,
+                            'array_calc_time' => $array_calc_time,
+                            'array_missing_middle_time' => $array_missing_middle_time,
+                            'array_public_going_out_time' => $array_public_going_out_time,
+                            'array_add_attendance_time' => $array_add_attendance_time,
+                            'array_add_attendance_time_id' => $array_add_attendance_time_id,
+                            'array_add_attendance_editor_department_code' => $array_add_attendance_editor_department_code,
+                            'array_add_attendance_editor_department_name' => $array_add_attendance_editor_department_name,
+                            'array_add_attendance_editor_user_code' => $array_add_attendance_editor_user_code,
+                            'array_add_attendance_editor_user_name' => $array_add_attendance_editor_user_name,
+                            'array_add_attendance_time_positions' => $array_add_attendance_time_positions,
+                            'array_add_leaving_time' => $array_add_leaving_time,
+                            'array_add_leaving_time_id' => $array_add_leaving_time_id,
+                            'array_add_leaving_editor_department_code' => $array_add_leaving_editor_department_code,
+                            'array_add_leaving_editor_department_name' => $array_add_leaving_editor_department_name,
+                            'array_add_leaving_editor_user_code' => $array_add_leaving_editor_user_code,
+                            'array_add_leaving_editor_user_name' => $array_add_leaving_editor_user_name,
+                            'array_add_leaving_time_positions' => $array_add_leaving_time_positions,
+                            'array_add_missing_middle_time' => $array_add_missing_middle_time,
+                            'array_add_missing_middle_time_id' => $array_add_missing_middle_time_id,
+                            'array_add_missing_middle_editor_department_code' => $array_add_missing_middle_editor_department_code,
+                            'array_add_missing_middle_editor_department_name' => $array_add_missing_middle_editor_department_name,
+                            'array_add_missing_middle_editor_user_code' => $array_add_missing_middle_editor_user_code,
+                            'array_add_missing_middle_editor_user_name' => $array_add_missing_middle_editor_user_name,
+                            'array_add_missing_middle_time_positions' => $array_add_missing_middle_time_positions,
+                            'array_add_missing_return_time' => $array_add_missing_return_time,
+                            'array_add_missing_return_time_id' => $array_add_missing_return_time_id,
+                            'array_add_missing_return_editor_department_code' => $array_add_missing_return_editor_department_code,
+                            'array_add_missing_return_editor_department_name' => $array_add_missing_return_editor_department_name,
+                            'array_add_missing_return_editor_user_code' => $array_add_missing_return_editor_user_code,
+                            'array_add_missing_return_editor_user_name' => $array_add_missing_return_editor_user_name,
+                            'array_add_missing_return_time_positions' => $array_add_missing_return_time_positions,
+                            'array_add_public_going_out_time' => $array_add_public_going_out_time,
+                            'array_add_public_going_out_time_id' => $array_add_public_going_out_time_id,
+                            'array_add_public_going_out_editor_department_code' => $array_add_public_going_out_editor_department_code,
+                            'array_add_public_going_out_editor_department_name' => $array_add_public_going_out_editor_department_name,
+                            'array_add_public_going_out_editor_user_code' => $array_add_public_going_out_editor_user_code,
+                            'array_add_public_going_out_editor_user_name' => $array_add_public_going_out_editor_user_name,
+                            'array_add_public_going_out_time_positions' => $array_add_public_going_out_time_positions,
+                            'array_add_public_return_time' => $array_add_public_return_time,
+                            'array_add_public_return_time_id' => $array_add_public_return_time_id,
+                            'array_add_public_return_editor_department_code' => $array_add_public_return_editor_department_code,
+                            'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
+                            'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
+                            'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
+                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                            'array_break_worktimetable_result' => $array_break_worktimetable_result
+                        );
+                        $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
+                    }
+                    $before_holiday_set = false;
+                    // 日付とユーザー休暇区分を保存
+                    $before_holiday_date = $current_date;
+                    $before_holiday_user_code = $current_user_code;
+                    $before_holiday_department_code = $current_department_code;
+                    $before_holiday_kubun = $result->holiday_kubun;
+                    // 次データ計算事前処理
+                    $array_result_NextData =
+                        $this->calcTempWorkingTimeDateNextData(
+                            $array_working_time_kubun,
+                            $result
+                        );
+                    $array_calc_time = $array_result_NextData['array_calc_time'];
+                    $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                    $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                    $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                    $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                    $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                    $array_add_missing_return_time = $array_result_NextData['array_add_missing_return_time'];
+                    $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                    $array_add_public_return_time = $array_result_NextData['array_add_public_return_time'];
+                    $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                    $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                    $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                    $array_add_missing_return_time_positions = $array_result_NextData['array_add_missing_return_time_positions'];
+                    $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                    $array_add_public_return_time_positions = $array_result_NextData['array_add_public_return_time_positions'];
+                    $array_add_attendance_time_id = $array_result_NextData['array_add_attendance_time_id'];
+                    $array_add_attendance_editor_department_code = $array_result_NextData['array_add_attendance_editor_department_code'];
+                    $array_add_attendance_editor_department_name = $array_result_NextData['array_add_attendance_editor_department_name'];
+                    $array_add_attendance_editor_user_code = $array_result_NextData['array_add_attendance_editor_user_code'];
+                    $array_add_attendance_editor_user_name = $array_result_NextData['array_add_attendance_editor_user_name'];
+                    $array_add_leaving_time_id = $array_result_NextData['array_add_leaving_time_id'];
+                    $array_add_leaving_editor_department_code = $array_result_NextData['array_add_leaving_editor_department_code'];
+                    $array_add_leaving_editor_department_name = $array_result_NextData['array_add_leaving_editor_department_name'];
+                    $array_add_leaving_editor_user_code = $array_result_NextData['array_add_leaving_editor_user_code'];
+                    $array_add_leaving_editor_user_name = $array_result_NextData['array_add_leaving_editor_user_name'];
+                    $array_add_missing_middle_time_id = $array_result_NextData['array_add_missing_middle_time_id'];
+                    $array_add_missing_middle_editor_department_code = $array_result_NextData['array_add_missing_middle_editor_department_code'];
+                    $array_add_missing_middle_editor_department_name = $array_result_NextData['array_add_missing_middle_editor_department_name'];
+                    $array_add_missing_middle_editor_user_code = $array_result_NextData['array_add_missing_middle_editor_user_code'];
+                    $array_add_missing_middle_editor_user_name = $array_result_NextData['array_add_missing_middle_editor_user_name'];
+                    $array_add_missing_return_time_id = $array_result_NextData['array_add_missing_return_time_id'];
+                    $array_add_missing_return_editor_department_code = $array_result_NextData['array_add_missing_return_editor_department_code'];
+                    $array_add_missing_return_editor_department_name = $array_result_NextData['array_add_missing_return_editor_department_name'];
+                    $array_add_missing_return_editor_user_code = $array_result_NextData['array_add_missing_return_editor_user_code'];
+                    $array_add_missing_return_editor_user_name = $array_result_NextData['array_add_missing_return_editor_user_name'];
+                    $array_add_public_going_out_time_id = $array_result_NextData['array_add_public_going_out_time_id'];
+                    $array_add_public_going_out_editor_department_code = $array_result_NextData['array_add_public_going_out_editor_department_code'];
+                    $array_add_public_going_out_editor_department_name = $array_result_NextData['array_add_public_going_out_editor_department_name'];
+                    $array_add_public_going_out_editor_user_code = $array_result_NextData['array_add_public_going_out_editor_user_code'];
+                    $array_add_public_going_out_editor_user_name = $array_result_NextData['array_add_public_going_out_editor_user_name'];
+                    $array_add_public_return_time_id = $array_result_NextData['array_add_public_return_time_id'];
+                    $array_add_public_return_editor_department_code = $array_result_NextData['array_add_public_return_editor_department_code'];
+                    $array_add_public_return_editor_department_name = $array_result_NextData['array_add_public_return_editor_department_name'];
+                    $array_add_public_return_editor_user_code = $array_result_NextData['array_add_public_return_editor_user_code'];
+                    $array_add_public_return_editor_user_name = $array_result_NextData['array_add_public_return_editor_user_name'];
+                    $attendance_time = $array_result_NextData['attendance_time'];
+                    $leaving_time = $array_result_NextData['leaving_time'];
+                    $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                    $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                    $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                    $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                    $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                    $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                    $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                    $missing_return_time_positions = $array_result_NextData['missing_return_time_positions'];
+                    $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                    $public_return_time_positions = $array_result_NextData['public_return_time_positions'];
+                    $attendance_time_id = $array_result_NextData['attendance_time_id'];
+                    $leaving_time_id = $array_result_NextData['leaving_time_id'];
+                    $missing_middle_time_id = $array_result_NextData['missing_middle_time_id'];
+                    $missing_middle_return_time_id = $array_result_NextData['missing_middle_return_time_id'];
+                    $public_going_out_time_id = $array_result_NextData['public_going_out_time_id'];
+                    $public_going_out_return_time_id = $array_result_NextData['public_going_out_return_time_id'];
+                    $attendance_editor_department_code = $array_result_NextData['attendance_editor_department_code'];
+                    $attendance_editor_department_name = $array_result_NextData['attendance_editor_department_name'];
+                    $attendance_editor_user_code = $array_result_NextData['attendance_editor_user_code'];
+                    $attendance_editor_user_name = $array_result_NextData['attendance_editor_user_name'];
+                    $leaving_editor_department_code = $array_result_NextData['leaving_editor_department_code'];
+                    $leaving_editor_department_name = $array_result_NextData['leaving_editor_department_name'];
+                    $leaving_editor_user_code = $array_result_NextData['leaving_editor_user_code'];
+                    $leaving_editor_user_name = $array_result_NextData['leaving_editor_user_name'];
+                    $missing_middle_editor_department_code = $array_result_NextData['missing_middle_editor_department_code'];
+                    $missing_middle_editor_department_name = $array_result_NextData['missing_middle_editor_department_name'];
+                    $missing_middle_editor_user_code = $array_result_NextData['missing_middle_editor_user_code'];
+                    $missing_middle_editor_user_name = $array_result_NextData['missing_middle_editor_user_name'];
+                    $missing_return_editor_department_code = $array_result_NextData['missing_return_editor_department_code'];
+                    $missing_return_editor_department_name = $array_result_NextData['missing_return_editor_department_name'];
+                    $missing_return_editor_user_code = $array_result_NextData['missing_return_editor_user_code'];
+                    $missing_return_editor_user_name = $array_result_NextData['missing_return_editor_user_name'];
+                    $public_going_out_editor_department_code = $array_result_NextData['public_going_out_editor_department_code'];
+                    $public_going_out_editor_department_name = $array_result_NextData['public_going_out_editor_department_name'];
+                    $public_going_out_editor_user_code = $array_result_NextData['public_going_out_editor_user_code'];
+                    $public_going_out_editor_user_name = $array_result_NextData['public_going_out_editor_user_name'];
+                    $public_return_editor_department_code = $array_result_NextData['public_return_editor_department_code'];
+                    $public_return_editor_department_name = $array_result_NextData['public_return_editor_department_name'];
+                    $public_return_editor_user_code = $array_result_NextData['public_return_editor_user_code'];
+                    $public_return_editor_user_name = $array_result_NextData['public_return_editor_user_name'];
+                    // 同じ値にする
+                    $before_date = $current_date;
+                    $before_department_code = $current_department_code;
+                    $before_user_code = $current_user_code; 
+                    $before_result = $result;
+                    $this->not_employment_working = 0;
+                    $working_status = $result->working_status;
+                    $note = '';
+                    $late = '';
+                    $leave_early = '';
+                    $to_be_confirmed = '';
+                    $calc_nobreak_cnt = 0;
+                    $array_notelateetc = $this->setNoteLateEtc($result);
+                    $note .= $array_notelateetc[0];
+                    // Log::debug('setNoteLateEtc $note =  '.$note);
+                    $late = $array_notelateetc[1];
+                    $leave_early = $array_notelateetc[2];
+                    $to_be_confirmed = $array_notelateetc[3];
+                    $calc_nobreak_cnt++;
+                }catch(\PDOException $pe){
+                    $add_result = false;
+                    throw $pe;
+                }catch(\Exception $e){
+                    $add_result = false;
+                    throw $e;
+                }
+                // 現データが当日計算対象で、出勤していない休暇設定されていればデータ作成
+                //if ($result->current_calc == '1' && isset($result->holiday_kubun)) {
+                if ($result->current_calc == '1' && !$mode_chk) {
+                    // Log::debug('        temp_working_time_datesデータ作成開始 ');
+                    // Log::debug('            現データが当日計算対象データ作成 =  '.$current_user_code);
+                    // Log::debug('                休暇区分  = '.$result->holiday_kubun);
+                    if (($result->holiday_kubun != Config::get('const.C013.non_set') &&
+                        $result->holiday_kubun != Config::get('const.C013.morning_off') &&
+                        $result->holiday_kubun != Config::get('const.C013.afternoon_off') &&
+                        $result->holiday_kubun != Config::get('const.C013.absence_work') &&
+                        $result->holiday_kubun != Config::get('const.C013.late_work') &&
+                        $result->holiday_kubun != Config::get('const.C013.leave_early_work') &&
+                        $result->holiday_kubun != Config::get('const.C013.deemed_business_trip') &&
+                        $result->holiday_kubun != Config::get('const.C013.deemed_direct_go') &&
+                        $result->holiday_kubun != Config::get('const.C013.deemed_direct_return')) ||
+                        (!isset($result->holiday_kubun) ||
+                        $result->holiday_kubun != Config::get('const.C013.non_set'))) {
+                        // setLeavingCollectPtn implement
+                        $array_impl_addTempWorkingTimeDate = array (
+                            'target_date' => $current_date,
+                            'target_user_code' => $current_user_code,
+                            'target_department_code' => $current_department_code,
+                            'target_result' => $current_result,
+                            'note' => $note,
+                            'working_status' => $working_status,
+                            'timetables' => $timetables,
+                            'array_calc_time' => $array_calc_time,
+                            'array_missing_middle_time' => $array_missing_middle_time,
+                            'array_public_going_out_time' => $array_public_going_out_time,
+                            'array_add_attendance_time' => $array_add_attendance_time,
+                            'array_add_attendance_time_id' => $array_add_attendance_time_id,
+                            'array_add_attendance_editor_department_code' => $array_add_attendance_editor_department_code,
+                            'array_add_attendance_editor_department_name' => $array_add_attendance_editor_department_name,
+                            'array_add_attendance_editor_user_code' => $array_add_attendance_editor_user_code,
+                            'array_add_attendance_editor_user_name' => $array_add_attendance_editor_user_name,
+                            'array_add_attendance_time_positions' => $array_add_attendance_time_positions,
+                            'array_add_leaving_time' => $array_add_leaving_time,
+                            'array_add_leaving_time_id' => $array_add_leaving_time_id,
+                            'array_add_leaving_editor_department_code' => $array_add_leaving_editor_department_code,
+                            'array_add_leaving_editor_department_name' => $array_add_leaving_editor_department_name,
+                            'array_add_leaving_editor_user_code' => $array_add_leaving_editor_user_code,
+                            'array_add_leaving_editor_user_name' => $array_add_leaving_editor_user_name,
+                            'array_add_leaving_time_positions' => $array_add_leaving_time_positions,
+                            'array_add_missing_middle_time' => $array_add_missing_middle_time,
+                            'array_add_missing_middle_time_id' => $array_add_missing_middle_time_id,
+                            'array_add_missing_middle_editor_department_code' => $array_add_missing_middle_editor_department_code,
+                            'array_add_missing_middle_editor_department_name' => $array_add_missing_middle_editor_department_name,
+                            'array_add_missing_middle_editor_user_code' => $array_add_missing_middle_editor_user_code,
+                            'array_add_missing_middle_editor_user_name' => $array_add_missing_middle_editor_user_name,
+                            'array_add_missing_middle_time_positions' => $array_add_missing_middle_time_positions,
+                            'array_add_missing_return_time' => $array_add_missing_return_time,
+                            'array_add_missing_return_time_id' => $array_add_missing_return_time_id,
+                            'array_add_missing_return_editor_department_code' => $array_add_missing_return_editor_department_code,
+                            'array_add_missing_return_editor_department_name' => $array_add_missing_return_editor_department_name,
+                            'array_add_missing_return_editor_user_code' => $array_add_missing_return_editor_user_code,
+                            'array_add_missing_return_editor_user_name' => $array_add_missing_return_editor_user_name,
+                            'array_add_missing_return_time_positions' => $array_add_missing_return_time_positions,
+                            'array_add_public_going_out_time' => $array_add_public_going_out_time,
+                            'array_add_public_going_out_time_id' => $array_add_public_going_out_time_id,
+                            'array_add_public_going_out_editor_department_code' => $array_add_public_going_out_editor_department_code,
+                            'array_add_public_going_out_editor_department_name' => $array_add_public_going_out_editor_department_name,
+                            'array_add_public_going_out_editor_user_code' => $array_add_public_going_out_editor_user_code,
+                            'array_add_public_going_out_editor_user_name' => $array_add_public_going_out_editor_user_name,
+                            'array_add_public_going_out_time_positions' => $array_add_public_going_out_time_positions,
+                            'array_add_public_return_time' => $array_add_public_return_time,
+                            'array_add_public_return_time_id' => $array_add_public_return_time_id,
+                            'array_add_public_return_editor_department_code' => $array_add_public_return_editor_department_code,
+                            'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
+                            'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
+                            'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
+                            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                            'array_break_worktimetable_result' => $array_break_worktimetable_result
+                        );
+                        $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
+                        // 次データ計算事前処理
+                        $array_result_NextData =
+                            $this->calcTempWorkingTimeDateNextData(
+                                $array_working_time_kubun,
+                                $result
+                            );
+                        $array_calc_time = $array_result_NextData['array_calc_time'];
+                        $array_missing_middle_time = $array_result_NextData['array_missing_middle_time'];
+                        $array_public_going_out_time = $array_result_NextData['array_public_going_out_time'];
+                        $array_add_attendance_time = $array_result_NextData['array_add_attendance_time'];
+                        $array_add_leaving_time = $array_result_NextData['array_add_leaving_time'];
+                        $array_add_missing_middle_time = $array_result_NextData['array_add_missing_middle_time'];
+                        $array_add_missing_return_time = $array_result_NextData['array_add_missing_return_time'];
+                        $array_add_public_going_out_time = $array_result_NextData['array_add_public_going_out_time'];
+                        $array_add_public_return_time = $array_result_NextData['array_add_public_return_time'];
+                        $array_add_attendance_time_positions = $array_result_NextData['array_add_attendance_time_positions'];
+                        $array_add_leaving_time_positions = $array_result_NextData['array_add_leaving_time_positions'];
+                        $array_add_missing_middle_time_positions = $array_result_NextData['array_add_missing_middle_time_positions'];
+                        $array_add_missing_return_time_positions = $array_result_NextData['array_add_missing_return_time_positions'];
+                        $array_add_public_going_out_time_positions = $array_result_NextData['array_add_public_going_out_time_positions'];
+                        $array_add_public_return_time_positions = $array_result_NextData['array_add_public_return_time_positions'];
+                        $array_add_attendance_time_id = $array_result_NextData['array_add_attendance_time_id'];
+                        $array_add_attendance_editor_department_code = $array_result_NextData['array_add_attendance_editor_department_code'];
+                        $array_add_attendance_editor_department_name = $array_result_NextData['array_add_attendance_editor_department_name'];
+                        $array_add_attendance_editor_user_code = $array_result_NextData['array_add_attendance_editor_user_code'];
+                        $array_add_attendance_editor_user_name = $array_result_NextData['array_add_attendance_editor_user_name'];
+                        $array_add_leaving_time_id = $array_result_NextData['array_add_leaving_time_id'];
+                        $array_add_leaving_editor_department_code = $array_result_NextData['array_add_leaving_editor_department_code'];
+                        $array_add_leaving_editor_department_name = $array_result_NextData['array_add_leaving_editor_department_name'];
+                        $array_add_leaving_editor_user_code = $array_result_NextData['array_add_leaving_editor_user_code'];
+                        $array_add_leaving_editor_user_name = $array_result_NextData['array_add_leaving_editor_user_name'];
+                        $array_add_missing_middle_time_id = $array_result_NextData['array_add_missing_middle_time_id'];
+                        $array_add_missing_middle_editor_department_code = $array_result_NextData['array_add_missing_middle_editor_department_code'];
+                        $array_add_missing_middle_editor_department_name = $array_result_NextData['array_add_missing_middle_editor_department_name'];
+                        $array_add_missing_middle_editor_user_code = $array_result_NextData['array_add_missing_middle_editor_user_code'];
+                        $array_add_missing_middle_editor_user_name = $array_result_NextData['array_add_missing_middle_editor_user_name'];
+                        $array_add_missing_return_time_id = $array_result_NextData['array_add_missing_return_time_id'];
+                        $array_add_missing_return_editor_department_code = $array_result_NextData['array_add_missing_return_editor_department_code'];
+                        $array_add_missing_return_editor_department_name = $array_result_NextData['array_add_missing_return_editor_department_name'];
+                        $array_add_missing_return_editor_user_code = $array_result_NextData['array_add_missing_return_editor_user_code'];
+                        $array_add_missing_return_editor_user_name = $array_result_NextData['array_add_missing_return_editor_user_name'];
+                        $array_add_public_going_out_time_id = $array_result_NextData['array_add_public_going_out_time_id'];
+                        $array_add_public_going_out_editor_department_code = $array_result_NextData['array_add_public_going_out_editor_department_code'];
+                        $array_add_public_going_out_editor_department_name = $array_result_NextData['array_add_public_going_out_editor_department_name'];
+                        $array_add_public_going_out_editor_user_code = $array_result_NextData['array_add_public_going_out_editor_user_code'];
+                        $array_add_public_going_out_editor_user_name = $array_result_NextData['array_add_public_going_out_editor_user_name'];
+                        $array_add_public_return_time_id = $array_result_NextData['array_add_public_return_time_id'];
+                        $array_add_public_return_editor_department_code = $array_result_NextData['array_add_public_return_editor_department_code'];
+                        $array_add_public_return_editor_department_name = $array_result_NextData['array_add_public_return_editor_department_name'];
+                        $array_add_public_return_editor_user_code = $array_result_NextData['array_add_public_return_editor_user_code'];
+                        $array_add_public_return_editor_user_name = $array_result_NextData['array_add_public_return_editor_user_name'];
+                        $attendance_time = $array_result_NextData['attendance_time'];
+                        $leaving_time = $array_result_NextData['leaving_time'];
+                        $missing_middle_time = $array_result_NextData['missing_middle_time'];
+                        $missing_middle_return_time = $array_result_NextData['missing_middle_return_time'];
+                        $public_going_out_time = $array_result_NextData['public_going_out_time'];
+                        $public_going_out_return_time = $array_result_NextData['public_going_out_return_time'];
+                        $attendance_time_positions = $array_result_NextData['attendance_time_positions'];
+                        $leaving_time_positions = $array_result_NextData['leaving_time_positions'];
+                        $missing_middle_time_positions = $array_result_NextData['missing_middle_time_positions'];
+                        $missing_return_time_positions = $array_result_NextData['missing_return_time_positions'];
+                        $public_going_out_time_positions = $array_result_NextData['public_going_out_time_positions'];
+                        $public_return_time_positions = $array_result_NextData['public_return_time_positions'];
+                        $attendance_time_id = $array_result_NextData['attendance_time_id'];
+                        $leaving_time_id = $array_result_NextData['leaving_time_id'];
+                        $missing_middle_time_id = $array_result_NextData['missing_middle_time_id'];
+                        $missing_middle_return_time_id = $array_result_NextData['missing_middle_return_time_id'];
+                        $public_going_out_time_id = $array_result_NextData['public_going_out_time_id'];
+                        $public_going_out_return_time_id = $array_result_NextData['public_going_out_return_time_id'];
+                        $attendance_editor_department_code = $array_result_NextData['attendance_editor_department_code'];
+                        $attendance_editor_department_name = $array_result_NextData['attendance_editor_department_name'];
+                        $attendance_editor_user_code = $array_result_NextData['attendance_editor_user_code'];
+                        $attendance_editor_user_name = $array_result_NextData['attendance_editor_user_name'];
+                        $leaving_editor_department_code = $array_result_NextData['leaving_editor_department_code'];
+                        $leaving_editor_department_name = $array_result_NextData['leaving_editor_department_name'];
+                        $leaving_editor_user_code = $array_result_NextData['leaving_editor_user_code'];
+                        $leaving_editor_user_name = $array_result_NextData['leaving_editor_user_name'];
+                        $missing_middle_editor_department_code = $array_result_NextData['missing_middle_editor_department_code'];
+                        $missing_middle_editor_department_name = $array_result_NextData['missing_middle_editor_department_name'];
+                        $missing_middle_editor_user_code = $array_result_NextData['missing_middle_editor_user_code'];
+                        $missing_middle_editor_user_name = $array_result_NextData['missing_middle_editor_user_name'];
+                        $missing_return_editor_department_code = $array_result_NextData['missing_return_editor_department_code'];
+                        $missing_return_editor_department_name = $array_result_NextData['missing_return_editor_department_name'];
+                        $missing_return_editor_user_code = $array_result_NextData['missing_return_editor_user_code'];
+                        $missing_return_editor_user_name = $array_result_NextData['missing_return_editor_user_name'];
+                        $public_going_out_editor_department_code = $array_result_NextData['public_going_out_editor_department_code'];
+                        $public_going_out_editor_department_name = $array_result_NextData['public_going_out_editor_department_name'];
+                        $public_going_out_editor_user_code = $array_result_NextData['public_going_out_editor_user_code'];
+                        $public_going_out_editor_user_name = $array_result_NextData['public_going_out_editor_user_name'];
+                        $public_return_editor_department_code = $array_result_NextData['public_return_editor_department_code'];
+                        $public_return_editor_department_name = $array_result_NextData['public_return_editor_department_name'];
+                        $public_return_editor_user_code = $array_result_NextData['public_return_editor_user_code'];
+                        $public_return_editor_user_name = $array_result_NextData['public_return_editor_user_name'];
+                        // 同じ値にする
+                        $before_date = $current_date;
+                        $before_department_code = $current_department_code;
+                        $before_user_code = $current_user_code; 
+                        $before_result = $result;
+                        $this->not_employment_working = 0;
+                        $working_status = 0;
+                        $note = '';
+                        $late = '';
+                        $leave_early = '';
+                        $to_be_confirmed = '';
+                        $calc_nobreak_cnt = 0;
+                        $array_notelateetc = $this->setNoteLateEtc($result);
+                        $note .= $array_notelateetc[0];
                         $late = $array_notelateetc[1];
                         $leave_early = $array_notelateetc[2];
                         $to_be_confirmed = $array_notelateetc[3];
@@ -5391,62 +6770,88 @@ class DailyWorkingInformationController extends Controller
             }
         }
 
-        Log::DEBUG('        残り　$calc_nobreak_cnt  =  '.$calc_nobreak_cnt);
-        Log::DEBUG('        残り　$current_result->current_calc  =  '.$current_result->current_calc);
-        Log::DEBUG('        残り　$current_result->holiday_kubun  =  '.$current_result->holiday_kubun);
-        Log::DEBUG('        残り　$array_add_missing_middle_time  =  '.count($array_add_missing_middle_time));
-        Log::DEBUG('        残り　$array_add_missing_middle_return_time  =  '.count($array_add_missing_middle_return_time));
-        Log::DEBUG('        残り　$array_add_public_going_out_time  =  '.count($array_add_public_going_out_time));
-        Log::DEBUG('        残り　$array_add_public_going_out_return_time  =  '.count($array_add_public_going_out_return_time));
-        Log::DEBUG('        残り　$array_add_attendance_time  =  '.count($array_add_attendance_time));
-        Log::DEBUG('        残り　$array_add_leaving_time  =  '.count($array_add_leaving_time));
         if ($calc_nobreak_cnt > 0 && $current_result->current_calc != 0) {
             if (count($array_add_attendance_time) > 0 ||
                 count($array_add_leaving_time) > 0 ||
                 count($array_add_missing_middle_time) > 0 ||
-                count($array_add_missing_middle_return_time) > 0 ||
+                count($array_add_missing_return_time) > 0 ||
                 count($array_add_public_going_out_time) > 0 ||
-                count($array_add_public_going_out_return_time) > 0) {
+                count($array_add_public_return_time) > 0) {
                 try{
-                    Log::DEBUG('--- '.$current_result->user_name.' 終了  ------ '.$current_date.' モード  ------ '.$current_result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
-                    Log::DEBUG('        残り　当日分　勤務状態 =  '.$working_status);
-                    Log::DEBUG('            temp_working_time_datesデータ作成開始 ');
-                    Log::DEBUG('                現ユーザーを登録 '.$current_user_code);
-                    $add_result = $this->addTempWorkingTimeDate(
-                        $current_date,
-                        $current_user_code,
-                        $current_department_code,
-                        $current_result,
-                        $note,
-                        $working_status,
-                        $array_calc_time,
-                        $array_missing_middle_time,
-                        $array_public_going_out_time,
-                        $array_add_attendance_time,
-                        $array_add_attendance_time_positions,
-                        $array_add_leaving_time,
-                        $array_add_leaving_time_positions,
-                        $array_add_missing_middle_time,
-                        $array_add_missing_middle_time_positions,
-                        $array_add_missing_middle_return_time,
-                        $array_add_missing_middle_return_time_positions,
-                        $array_add_public_going_out_time,
-                        $array_add_public_going_out_time_positions,
-                        $array_add_public_going_out_return_time,
-                        $array_add_public_going_out_return_time_positions);
-        }catch(\PDOException $pe){
+                    // Log::debug('--- '.$current_result->user_name.' 終了  ------ '.$current_date.' モード  ------ '.$current_result->mode.' ---- $calc_nobreak_cnt = '.$calc_nobreak_cnt );
+                    // Log::debug('        残り　当日分　勤務状態 =  '.$working_status);
+                    // Log::debug('            temp_working_time_datesデータ作成開始 ');
+                    // Log::debug('                現ユーザーを登録 '.$current_user_code);
+                    // setLeavingCollectPtn implement
+                    $array_impl_addTempWorkingTimeDate = array (
+                        'target_date' => $current_date,
+                        'target_user_code' => $current_user_code,
+                        'target_department_code' => $current_department_code,
+                        'target_result' => $current_result,
+                        'note' => $note,
+                        'working_status' => $working_status,
+                        'timetables' => $timetables,
+                        'array_calc_time' => $array_calc_time,
+                        'array_missing_middle_time' => $array_missing_middle_time,
+                        'array_public_going_out_time' => $array_public_going_out_time,
+                        'array_add_attendance_time' => $array_add_attendance_time,
+                        'array_add_attendance_time_id' => $array_add_attendance_time_id,
+                        'array_add_attendance_editor_department_code' => $array_add_attendance_editor_department_code,
+                        'array_add_attendance_editor_department_name' => $array_add_attendance_editor_department_name,
+                        'array_add_attendance_editor_user_code' => $array_add_attendance_editor_user_code,
+                        'array_add_attendance_editor_user_name' => $array_add_attendance_editor_user_name,
+                        'array_add_attendance_time_positions' => $array_add_attendance_time_positions,
+                        'array_add_leaving_time' => $array_add_leaving_time,
+                        'array_add_leaving_time_id' => $array_add_leaving_time_id,
+                        'array_add_leaving_editor_department_code' => $array_add_leaving_editor_department_code,
+                        'array_add_leaving_editor_department_name' => $array_add_leaving_editor_department_name,
+                        'array_add_leaving_editor_user_code' => $array_add_leaving_editor_user_code,
+                        'array_add_leaving_editor_user_name' => $array_add_leaving_editor_user_name,
+                        'array_add_leaving_time_positions' => $array_add_leaving_time_positions,
+                        'array_add_missing_middle_time' => $array_add_missing_middle_time,
+                        'array_add_missing_middle_time_id' => $array_add_missing_middle_time_id,
+                        'array_add_missing_middle_editor_department_code' => $array_add_missing_middle_editor_department_code,
+                        'array_add_missing_middle_editor_department_name' => $array_add_missing_middle_editor_department_name,
+                        'array_add_missing_middle_editor_user_code' => $array_add_missing_middle_editor_user_code,
+                        'array_add_missing_middle_editor_user_name' => $array_add_missing_middle_editor_user_name,
+                        'array_add_missing_middle_time_positions' => $array_add_missing_middle_time_positions,
+                        'array_add_missing_return_time' => $array_add_missing_return_time,
+                        'array_add_missing_return_time_id' => $array_add_missing_return_time_id,
+                        'array_add_missing_return_editor_department_code' => $array_add_missing_return_editor_department_code,
+                        'array_add_missing_return_editor_department_name' => $array_add_missing_return_editor_department_name,
+                        'array_add_missing_return_editor_user_code' => $array_add_missing_return_editor_user_code,
+                        'array_add_missing_return_editor_user_name' => $array_add_missing_return_editor_user_name,
+                        'array_add_missing_return_time_positions' => $array_add_missing_return_time_positions,
+                        'array_add_public_going_out_time' => $array_add_public_going_out_time,
+                        'array_add_public_going_out_time_id' => $array_add_public_going_out_time_id,
+                        'array_add_public_going_out_editor_department_code' => $array_add_public_going_out_editor_department_code,
+                        'array_add_public_going_out_editor_department_name' => $array_add_public_going_out_editor_department_name,
+                        'array_add_public_going_out_editor_user_code' => $array_add_public_going_out_editor_user_code,
+                        'array_add_public_going_out_editor_user_name' => $array_add_public_going_out_editor_user_name,
+                        'array_add_public_going_out_time_positions' => $array_add_public_going_out_time_positions,
+                        'array_add_public_return_time' => $array_add_public_return_time,
+                        'array_add_public_return_time_id' => $array_add_public_return_time_id,
+                        'array_add_public_return_editor_department_code' => $array_add_public_return_editor_department_code,
+                        'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
+                        'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
+                        'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
+                        'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+                        'array_break_worktimetable_result' => $array_break_worktimetable_result
+                    );
+                    $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
+                }catch(\PDOException $pe){
                     $add_result = false;
                     throw $pe;
                 }catch(\Exception $e){
-                    Log::DEBUG('Exception'.$e->getMessage());
+                    // Log::debug('Exception'.$e->getMessage());
                     $add_result = false;
                     throw $e;
                 }
-                Log::DEBUG('        temp_working_time_datesデータ作成終了 ');
+                // Log::debug('        temp_working_time_datesデータ作成終了 ');
             }
         }
 
-        Log::DEBUG('---------------------- calcTempWorkingTimeDate end ------------------------ ');
+        // Log::debug('---------------------- calcTempWorkingTimeDate end ------------------------ ');
         return $add_result;
 
     }
@@ -5464,7 +6869,7 @@ class DailyWorkingInformationController extends Controller
     private function calcTimes($inc, $timetables, $working_timetable_no, $working_time_kubun, $current_date,$target_from_time, $target_to_time,
         $array_calc_time, $array_gouing_out_time)
     {
-        Log::DEBUG('---------------------- calcTimes in working_time_kubun = '.$working_time_kubun.' ------------------------ ');
+        // Log::debug('---------------------- calcTimes in working_time_kubun = '.$working_time_kubun.' ------------------------ ');
         $apicommon = new ApiCommonController();
         $working_times = 0;             // 労働時間
         $calc_times = 0;
@@ -5479,6 +6884,9 @@ class DailyWorkingInformationController extends Controller
             $from_time = $result_time['from_time'];
             // 時間登録の終了時間
             $to_time = $result_time['to_time'];
+            // Log::debug(' ◆◆◆◆◆　労働時間計算　 ◆◆◆◆◆◆');
+            // Log::debug('            タイムテーブル from_time = '.$from_time);
+            // Log::debug('            タイムテーブル to_time = '.$to_time);
             if (isset($from_time) && isset($to_time)) {
                 // from_time日付付与
                 $working_time_from_time = $apicommon->convTimeToDateFrom($from_time, $current_date, $target_from_time, $target_to_time);         
@@ -5487,18 +6895,17 @@ class DailyWorkingInformationController extends Controller
                 $working_time_to_time = $apicommon->convTimeToDateTo($from_time, $to_time, $current_date, $target_from_time, $target_to_time);         
                 $working_time_calc_to = $working_time_to_time;
                 // ------------------ DEBUG strat ----------------------------------------
-                Log::DEBUG(' ◆◆◆◆◆　労働時間計算　 ◆◆◆◆◆◆');
-                Log::DEBUG(' 　　　　　　working_time_kubun = '.$working_time_kubun);
-                Log::DEBUG('　　　　　　 出勤時刻  target_from_time = '.$target_from_time);
-                Log::DEBUG('            退勤時刻  target_to_time = '.$target_to_time);
-                Log::DEBUG('            設定開始時刻  working_time_calc_from = '.$working_time_calc_from);
-                Log::DEBUG('            設定終了時刻  working_time_calc_to = '.$working_time_calc_to);
-                Log::DEBUG('            inc = '.$inc);
+                // Log::debug('            working_time_from_time = '.$working_time_from_time);
+                // Log::debug('　　　　　　 出勤時刻または外出  target_from_time = '.$target_from_time);
+                // Log::debug('            退勤時刻または戻り  target_to_time = '.$target_to_time);
+                // Log::debug('            設定開始時刻  working_time_calc_from = '.$working_time_calc_from);
+                // Log::debug('            設定終了時刻  working_time_calc_to = '.$working_time_calc_to);
+                // Log::debug('            inc = '.$inc);
                 // ------------------ DEBUG end ----------------------------------------
                 // 深夜労働残業時間以外の場合
                 if ($working_time_kubun != Config::get('const.C004.out_of_regular_night_working_time') ||
                     $inc == Config::get('const.INC_NO.missing_return') ||
-                    $inc == Config::get('const.INC_NO.public_going_out_return')) {
+                    $inc == Config::get('const.INC_NO.public_return')) {
                     // 打刻時刻$targetが所定時間内$working_timeの場合
                     if ($apicommon->chkBetweenTime($target_from_time, $target_to_time, $working_time_calc_from, $working_time_calc_to)) {
                         if ($working_time_calc_from < $working_time_calc_to) {
@@ -5511,12 +6918,12 @@ class DailyWorkingInformationController extends Controller
                             $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
                             $working_times += $calc_times;
                             // ------------------ DEBUG strat ----------------------------------------
-                            Log::DEBUG('          　深夜労働残業時間以外の場合');
-                            Log::DEBUG(' 　　　　　　打刻時刻が所定時間内の場合 ');
-                            Log::DEBUG('　　　　　　 計算開始時刻  working_time_calc_from = '.$working_time_calc_from);
-                            Log::DEBUG('　　　　　　 計算終了時刻  working_time_calc_to = '.$working_time_calc_to);
-                            Log::DEBUG('            労働時間      calc_times = '.$calc_times."  ".$calc_times / 60 / 60);
-                            Log::DEBUG('            累計労働時間  working_times = '.$working_times."  ".$working_times / 60 / 60);
+                            // Log::debug('          　深夜労働残業時間以外の場合');
+                            // Log::debug(' 　　　　　　打刻時刻が所定時間内の場合 ');
+                            // Log::debug('　　　　　　 計算開始時刻  working_time_calc_from = '.$working_time_calc_from);
+                            // Log::debug('　　　　　　 計算終了時刻  working_time_calc_to = '.$working_time_calc_to);
+                            // Log::debug('            労働時間      calc_times = '.$calc_times."  ".$calc_times / 60 / 60);
+                            // Log::debug('            累計労働時間  working_times = '.$working_times."  ".$working_times / 60 / 60);
                             // ------------------ DEBUG end ----------------------------------------
                         }
                     }
@@ -5526,13 +6933,13 @@ class DailyWorkingInformationController extends Controller
                     $working_time_calc_to_nextday = $apicommon->getNextDay($working_time_to_time, 'Y-m-d H:i:s');
                     if ($apicommon->chkBetweenTime($target_from_time, $target_to_time, $working_time_calc_from_nextday, $working_time_calc_to_nextday)) {
                         // ------------------ DEBUG strat ----------------------------------------
-                        Log::DEBUG('          　夜勤の場合の翌日労働時間計算');
-                        Log::DEBUG('          　打刻開始時刻  target_from_time = '.$target_from_time);
-                        Log::DEBUG('          　打刻計算終了時刻  target_to_time = '.$target_to_time);
-                        Log::DEBUG('          　当日計算開始時刻  working_time_calc_from = '.$working_time_calc_from);
-                        Log::DEBUG('          　当日計算終了時刻  working_time_calc_to = '.$working_time_calc_to);
-                        Log::DEBUG('          　翌日計算開始時刻  working_time_calc_from_nextday = '.$working_time_calc_from_nextday);
-                        Log::DEBUG('          　翌日計算終了時刻  working_time_calc_to_nextday = '.$working_time_calc_to_nextday);
+                        // Log::debug('          　夜勤の場合の翌日労働時間計算');
+                        // Log::debug('          　打刻開始時刻  target_from_time = '.$target_from_time);
+                        // Log::debug('          　打刻計算終了時刻  target_to_time = '.$target_to_time);
+                        // Log::debug('          　当日計算開始時刻  working_time_calc_from = '.$working_time_calc_from);
+                        // Log::debug('          　当日計算終了時刻  working_time_calc_to = '.$working_time_calc_to);
+                        // Log::debug('          　翌日計算開始時刻  working_time_calc_from_nextday = '.$working_time_calc_from_nextday);
+                        // Log::debug('          　翌日計算終了時刻  working_time_calc_to_nextday = '.$working_time_calc_to_nextday);
                         // ------------------ DEBUG end ----------------------------------------
                         if ($working_time_calc_from_nextday < $working_time_calc_to_nextday) {
                             /*if ($target_from_time > $working_time_calc_from) {
@@ -5547,197 +6954,239 @@ class DailyWorkingInformationController extends Controller
                             $calc_times = $apicommon->diffTimeSerial($working_time_calc_from_nextday, $working_time_calc_to_nextday);
                             $working_times += $calc_times;
                             // ------------------ DEBUG strat ----------------------------------------
-                            Log::DEBUG('          　翌日計算開始時刻 調整 working_time_calc_from_nextday = '.$working_time_calc_from_nextday);
-                            Log::DEBUG('          　翌日計算終了時刻 調整 working_time_calc_to_nextday = '.$working_time_calc_to_nextday);
-                            Log::DEBUG('            労働時間      calc_times = '.$calc_times."  ".$calc_times / 60 / 60);
-                            Log::DEBUG('            累計労働時間  working_times = '.$working_times."  ".$working_times / 60 / 60);
+                            // Log::debug('          　翌日計算開始時刻 調整 working_time_calc_from_nextday = '.$working_time_calc_from_nextday);
+                            // Log::debug('          　翌日計算終了時刻 調整 working_time_calc_to_nextday = '.$working_time_calc_to_nextday);
+                            // Log::debug('            労働時間      calc_times = '.$calc_times."  ".$calc_times / 60 / 60);
+                            // Log::debug('            累計労働時間  working_times = '.$working_times."  ".$working_times / 60 / 60);
                             // ------------------ DEBUG end ----------------------------------------
                         }
+                    }
+                    if ($working_times != 0) {
+                        // 打刻時間内に休憩時間を含んでいる場合、休憩時間累計を求めて減算する
+                        //  計算対象のタイムテーブルの開始終了日時の範囲内に休憩開始終了時刻がある場合で
+                        $braek_time = 0;
+                        $braek_time = $apicommon->calcBetweenBreakTime(
+                            $target_from_time,
+                            $target_to_time,
+                            $current_date,
+                            $timetables,
+                            $working_timetable_no,
+                            $working_time_calc_from,
+                            $working_time_calc_to);
+                        // Log::debug('            休憩時間累計      braek_time = '.$braek_time."  ".$braek_time / 60 / 60);
+                        $working_times -= $braek_time;
                     }
                 } else {
                     // 深夜労働残業時間
-                    $w_time = 0;
-                    // target_to_timeは退勤時刻
-                    // 退勤時刻 > 深夜残業開始の場合
                     // ------------------ DEBUG strat ----------------------------------------
-                    Log::DEBUG('           【深夜労働残業時間 計算開始】');
+                    // Log::debug('           【深夜労働残業時間 計算開始】');
                     // ------------------ DEBUG end ----------------------------------------
+                    // 退勤時刻 > 深夜労働時間開始時刻
                     if ($target_to_time > $working_time_calc_from) {
-                        // ------------------ DEBUG strat ----------------------------------------
-                        Log::DEBUG('　　　　　　 退勤時刻 >  設定開始時刻の場合');
-                        Log::DEBUG('　　　　　　 退勤時刻  target_to_time = '.$target_to_time);
-                        Log::DEBUG('　　　　　　 設定開始時刻  working_time_calc_from = '.$working_time_calc_from);
-                        // ------------------ DEBUG end ----------------------------------------
-                        // ここまでに計算された労働時間と私用外出時間から労働時間を算出
-                        $index = (int)(Config::get('const.C004.regular_working_time'))-1;
-                        $w_time += $array_calc_time[$index];
-                        // ------------------ DEBUG strat ----------------------------------------
-                        Log::DEBUG('　　　　　　 所定労働時間加算　$array_calc_time[$index]  = '.$array_calc_time[$index]);
-                        Log::DEBUG('　　　　　　 加算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
-                        // ------------------ DEBUG end ----------------------------------------
-                        $index = (int)(Config::get('const.C004.regular_working_breaks_time'))-1;
-                        $w_time -= $array_calc_time[$index];
-                        // ------------------ DEBUG strat ----------------------------------------
-                        Log::DEBUG('　　　　　　 所定休憩時間減算　$array_calc_time[$index]  = '.$array_calc_time[$index]);
-                        Log::DEBUG('　　　　　　 減算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
-                        // ------------------ DEBUG end ----------------------------------------
-                        $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
-                        $w_time += $array_calc_time[$index];
-                        // ------------------ DEBUG strat ----------------------------------------
-                        Log::DEBUG('　　　　　　 時間外時間加算　$array_calc_time[$index]  = '.$array_calc_time[$index]);
-                        Log::DEBUG('　　　　　　 加算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
-                        // ------------------ DEBUG end ----------------------------------------
-                        $index = (int)(Config::get('const.C004.regular_working_time'))-1;
-                        $w_time -= $array_gouing_out_time[$index];
-                        // ------------------ DEBUG strat ----------------------------------------
-                        Log::DEBUG('　　　　　　 所定労働時間内私用外出減算　$array_gouing_out_time[$index]  = '.$array_gouing_out_time[$index]);
-                        Log::DEBUG('　　　　　　 減算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
-                        // ------------------ DEBUG end ----------------------------------------
-                        $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
-                        $w_time -= $array_gouing_out_time[$index];
-                        // ------------------ DEBUG strat ----------------------------------------
-                        Log::DEBUG('　　　　　　 時間外私用外出減算　$array_gouing_out_time[$index]  = '.$array_gouing_out_time[$index]);
-                        Log::DEBUG('　　　　　　 減算結果　$w_time  = '.$w_time."  ".$w_time / 60 / 60);
-                        // ------------------ DEBUG end ----------------------------------------
-                        // ここまでに計算された労働時間が8Hを超えている場合は深夜残業を計算する
-                        if ($w_time > (double)Config::get('const.C002.legal_working_hours_day') * 60 * 60) {
-                            // 退勤時刻<=深夜残業終了
-                            if ($target_to_time <= $working_time_calc_to) {
-                                // 出勤時刻<=深夜残業開始
-                                if ($target_from_time <= $working_time_calc_from) {
-                                    // 深夜残業開始から退勤時刻を深夜残業とする
+                        // 深夜残業時間集計
+                        // 出勤時刻から休憩時間を含めた基準時間（8時間後）を求める
+                        $after_legal_working_hours_day = Config::get('const.C002.legal_working_hours_day') * 60 * 60;
+                        $after_target_from_time = $target_from_time;
+                        $after_daytime = "";            // 実働8時間後時刻
+                        // 休憩時間がなくなるまで実働8時間後を求める
+                        while(true){
+                            $after_daytime = $apicommon->getAfterDayTime(
+                                $after_target_from_time,
+                                $after_legal_working_hours_day,
+                                'Y-m-d H:i:s');
+                            $braek_time = $apicommon->calcBetweenBreakTime(
+                                $after_target_from_time,
+                                $after_daytime,
+                                $current_date,
+                                $timetables,
+                                $working_timetable_no,
+                                null, null);
+                            if ($braek_time == 0) {
+                                break;
+                            }
+                            // Log::debug('　　　　　　 休憩時間  = '.$braek_time);
+                            $after_target_from_time = $after_daytime;
+                            // $braek_timeは秒数なので
+                            $after_legal_working_hours_day = $braek_time;
+                        }
+                        // Log::debug('　　　　　　 出勤時刻から休憩時間を含めた基準時間（8時間後）を求める ');
+                        // Log::debug('　　　　　　 実働8時間後時刻  = '.$after_daytime);
+                        // 実働8時間後時刻 < 深夜労働時間開始時刻
+                        if ($after_daytime < $working_time_calc_from) {
+                            // 退勤時刻 > 深夜労働時間開始時刻
+                            if ($target_to_time > $working_time_calc_from) {
+                                // 退勤時刻 < 深夜労働時間終了時刻
+                                if ($target_to_time < $working_time_calc_to) {
+                                    // 深夜労働時間開始時刻から退勤時刻を深夜残業時間とする
                                     $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $target_to_time);
+                                    // Log::debug('　　　　　　深夜労働時間開始時刻から退勤時刻を深夜残業時間とする = '.$calc_times);
                                 } else {
-                                    // 出勤時刻から退勤時刻を深夜残業とする
-                                    $calc_times = $apicommon->diffTimeSerial($target_from_time, $target_to_time);
-                                }
-                            } else {
-                                // 出勤時刻<=深夜残業開始
-                                if ($target_from_time <= $working_time_calc_from) {
-                                    // 深夜残業開始から深夜残業終了を深夜残業とする
+                                    // 深夜労働時間開始時刻から深夜労働時間終了時刻を深夜残業時間とする
                                     $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
-                                } else {
-                                    // 出勤時刻から深夜残業終了を深夜残業とする
-                                    $calc_times = $apicommon->diffTimeSerial($target_from_time, $working_time_calc_to);
+                                    // Log::debug('　　　　　　深夜労働時間開始時刻から深夜労働時間終了時刻を深夜残業時間とする = '.$calc_times);
                                 }
                             }
-                            $working_times += $calc_times;
-                            // ------------------ DEBUG strat ----------------------------------------
-                            Log::DEBUG('　　　　　　 労働時間が8H超えため、深夜労働残業時間を計算');
-                            Log::DEBUG('　　　　　　 退勤時刻<=深夜残業終了か？ $target_to_time = '.$target_to_time);
-                            Log::DEBUG('　　　　　　 退勤時刻<=深夜残業終了か？ $working_time_calc_from = '.$working_time_calc_from);
-                            Log::DEBUG('　　　　　　 退勤時刻<=深夜残業終了か？ $working_time_calc_to = '.$working_time_calc_to);
-                            Log::DEBUG('　　　　　　 計算結果　$calc_times  = '.$calc_times."  ".$calc_times / 60 / 60);
-                            Log::DEBUG('　　　　　　 累計計算結果　$working_times  = '.$working_times."  ".$working_times / 60 / 60);
-                            // ------------------ DEBUG end ----------------------------------------
-                        }
-                        // さらにシフト勤務などは所定労働時間と重複する時間となりうるので、重複時間があれば減算する。
-                        $filtered_regular = 
-                            $timetables->where('no', $working_timetable_no)->where('working_time_kubun', Config::get('const.C004.regular_working_time'));
-                        foreach($filtered_regular as $result_regular) {
-                            Log::DEBUG('重複時間 $result_regular->from_time = '.$result_regular->from_time);
-                            Log::DEBUG('重複時間 $result_regular->to_time = '.$result_regular->to_time);
-                            // 所定労働時間登録の開始時間
-                            $from_time_regular = $result_regular->from_time;
-                            // 所定労働時間登録の終了時間
-                            $to_time_regular = $result_regular->to_time;
-                            if (isset($from_time_regular) && isset($to_time_regular)) {
-                                // from_time_regular日付付与
-                                // fromdate
-                                $working_time_calc_from_regular = 
-                                    $apicommon->convTimeToDateFrom($from_time_regular, $current_date, $target_from_time, $target_to_time);         
-                                // to_time_regular日付付与
-                                $working_time_calc_to_regular = 
-                                    $apicommon->convTimeToDateTo($from_time_regular, $to_time_regular, $current_date, $target_from_time, $target_to_time);         
-                                Log::DEBUG('重複時間 所定労働時間 $working_time_calc_from_regular = '.$working_time_calc_from_regular);
-                                Log::DEBUG('重複時間 所定労働時間 $working_time_calc_to_regular = '.$working_time_calc_to_regular);
-                                Log::DEBUG('重複時間 所定労働時間 $working_time_calc_from = '.$working_time_calc_from);
-                                Log::DEBUG('重複時間 所定労働時間 $working_time_calc_to = '.$working_time_calc_to);
-                                if (($working_time_calc_from > $working_time_calc_from_regular && $working_time_calc_from < $working_time_calc_to_regular) ||
-                                    ($working_time_calc_to > $working_time_calc_from_regular && $working_time_calc_to < $working_time_calc_to_regular)) {
-                                    // 時間登録の終了時間<=所定労働時間登録終了
-                                    if ($working_time_calc_to <= $working_time_calc_to_regular) {
-                                        // 所定労働時間登録開始<= 時間登録の開始時間
-                                        if ($working_time_calc_from_regular <= $working_time_calc_from) {
-                                            // 時間登録の開始時間から時間登録の終了時間を計算する
-                                            $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
-                                        } else {
-                                            // 所定労働時間登録開始から時間登録の終了を計算する
-                                            $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from_regular, $working_time_calc_to);
-                                        }
+                        } else {
+                            // 実働8時間後時刻 < 深夜労働時間終了時刻
+                            if ($after_daytime < $working_time_calc_to) {
+                                // 退勤時刻 > 実働8時間後時刻
+                                if ($target_to_time > $after_daytime) {
+                                    // 退勤時刻 < 深夜労働時間終了時刻
+                                    if ($target_to_time < $working_time_calc_to) {
+                                        // 実働8時間後時刻から退勤時刻を深夜残業時間とする
+                                        $calc_times = $apicommon->diffTimeSerial($after_daytime, $target_to_time);
+                                        // Log::debug('　　　　　　実働8時間後時刻から退勤時刻を深夜残業時間とする = '.$calc_times);
                                     } else {
-                                        // 所定労働時間登録開始<=時間登録の開始時間
-                                        if ($working_time_calc_from_regular <= $working_time_calc_from) {
-                                            // 時間登録の開始時間から所定労働時間登録終了を計算する
-                                            $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to_regular);
-                                        } else {
-                                            // 所定労働時間登録開始から所定労働時間登録終了を計算する
-                                            $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from_regular, $working_time_calc_to_regular);
-                                        }
+                                        // 深夜労働時間開始時刻から深夜労働時間終了時刻を深夜残業時間とする
+                                        $calc_times = $apicommon->diffTimeSerial($after_daytime, $working_time_calc_to);
+                                        // Log::debug('　　　　　　実働8時間後時刻から深夜労働時間終了時刻を深夜残業時間とする = '.$calc_times);
                                     }
                                 }
                             }
-                            break;
-                        }       
-                        Log::DEBUG('$calc_times_regular = '.$calc_times_regular);
-                        $working_times -= $calc_times_regular;
-                        Log::DEBUG('$working_times = '.$working_times);
+                        }
+                        // 深夜労働時間集計
+                        $w_time = 0;
+                        // 退勤時刻 <= 深夜労働時間終了時刻
+                        if ($target_to_time <= $working_time_calc_to) {
+                            // 出勤時刻 <= 深夜労働時間開始時刻
+                            if ($target_from_time <= $working_time_calc_from) {
+                                // 深夜労働時間開始時刻から退勤時刻を深夜労働時間とする
+                                $w_time = $apicommon->diffTimeSerial($working_time_calc_from, $target_to_time);
+                                // Log::debug('　　　　　　深夜労働時間開始時刻から退勤時刻を深夜労働時間とする = '.$w_time);
+                            } else {
+                                // 出勤時刻から退勤時刻を深夜労働時間とする
+                                $w_time = $apicommon->diffTimeSerial($target_from_time, $target_to_time);
+                                // Log::debug('　　　　　　出勤時刻から退勤時刻を深夜労働時間とする = '.$w_time);
+                            }
+                        } else {
+                            // 出勤時刻 <= 深夜労働時間開始時刻
+                            if ($target_from_time <= $working_time_calc_from) {
+                                // 深夜労働時間開始時刻から深夜労働時間終了時刻を深夜労働時間とする
+                                $w_time = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
+                                // Log::debug('　　　　　　深夜労働時間開始時刻から深夜労働時間終了時刻を深夜労働時間とする = '.$w_time);
+                            } else {
+                                // 出勤時刻から深夜労働時間終了時刻を深夜労働時間とする
+                                $w_time = $apicommon->diffTimeSerial($target_from_time, $working_time_calc_to);
+                                // Log::debug('　　　　　　出勤時刻から深夜労働時間終了時刻を深夜労働時間とする = '.$w_time);
+                            }
+                        }
+                        $this->calc_late_night_working_hours += ($w_time - $calc_times);
+                        $working_times += $calc_times;
+                        // ------------------ DEBUG strat ----------------------------------------
+                        // Log::debug('　　　　　　 深夜労働残業時間を計算 = '.$calc_times );
+                        // Log::debug('　　　　　　 深夜労働残業時間を累計計算 = '.$working_times );
+                        // Log::debug('　　　　　　 w_time = '.$w_time );
+                        // Log::debug('　　　　　　 深夜労働時間集計を計算 $w_time - $calc_times = '.($w_time - $calc_times));
+                        // Log::debug('　　　　　　 深夜労働時間集計を累計計算 = '.$this->calc_late_night_working_hours);
+                        // ------------------ DEBUG end ----------------------------------------
+                        // さらにシフト勤務などは所定労働時間と重複する時間となりうるので、重複時間があれば減算する。
+                        // // Log::debug('　　　　　　 タイムテーブルNO = '.$working_timetable_no);
+                        // $filtered_regular = 
+                        //     $timetables->where('no', $working_timetable_no)->where('working_time_kubun', Config::get('const.C004.regular_working_time'));
+                        // foreach($filtered_regular as $result_regular) {
+                        //     // Log::debug('　　　　　　 重複時間 $result_regular->from_time = '.$result_regular->from_time);
+                        //     // Log::debug('　　　　　　 重複時間 $result_regular->to_time = '.$result_regular->to_time);
+                        //     // 所定労働時間登録の開始時間
+                        //     $from_time_regular = $result_regular->from_time;
+                        //     // 所定労働時間登録の終了時間
+                        //     $to_time_regular = $result_regular->to_time;
+                        //     if (isset($from_time_regular) && isset($to_time_regular)) {
+                        //         // from_time_regular日付付与
+                        //         // fromdate
+                        //         $working_time_calc_from_regular = 
+                        //             $apicommon->convTimeToDateFrom($from_time_regular, $current_date, $target_from_time, $target_to_time);         
+                        //         // to_time_regular日付付与
+                        //         $working_time_calc_to_regular = 
+                        //             $apicommon->convTimeToDateTo($from_time_regular, $to_time_regular, $current_date, $target_from_time, $target_to_time);         
+                        //         // Log::debug('　　　　　　 重複時間 所定労働時間 $working_time_calc_from_regular = '.$working_time_calc_from_regular);
+                        //         // Log::debug('　　　　　　 重複時間 所定労働時間 $working_time_calc_to_regular = '.$working_time_calc_to_regular);
+                        //         // Log::debug('　　　　　　 重複時間 所定労働時間 $working_time_calc_from = '.$working_time_calc_from);
+                        //         // Log::debug('　　　　　　 重複時間 所定労働時間 $working_time_calc_to = '.$working_time_calc_to);
+                        //         if (($working_time_calc_from > $working_time_calc_from_regular && $working_time_calc_from < $working_time_calc_to_regular) ||
+                        //             ($working_time_calc_to > $working_time_calc_from_regular && $working_time_calc_to < $working_time_calc_to_regular)) {
+                        //             // 時間登録の終了時間<=所定労働時間登録終了
+                        //             if ($working_time_calc_to <= $working_time_calc_to_regular) {
+                        //                 // 所定労働時間登録開始<= 時間登録の開始時間
+                        //                 if ($working_time_calc_from_regular <= $working_time_calc_from) {
+                        //                     // 時間登録の開始時間から時間登録の終了時間を計算する
+                        //                     $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
+                        //                 } else {
+                        //                     // 所定労働時間登録開始から時間登録の終了を計算する
+                        //                     $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from_regular, $working_time_calc_to);
+                        //                 }
+                        //             } else {
+                        //                 // 所定労働時間登録開始<=時間登録の開始時間
+                        //                 if ($working_time_calc_from_regular <= $working_time_calc_from) {
+                        //                     // 時間登録の開始時間から所定労働時間登録終了を計算する
+                        //                     $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to_regular);
+                        //                 } else {
+                        //                     // 所定労働時間登録開始から所定労働時間登録終了を計算する
+                        //                     $calc_times_regular = $apicommon->diffTimeSerial($working_time_calc_from_regular, $working_time_calc_to_regular);
+                        //                 }
+                        //             }
+                        //         }
+                        //     }
+                        //     break;
+                        // }       
+                        // // Log::debug('$calc_times_regular = '.$calc_times_regular);
+                        // $working_times -= $calc_times_regular;
+                        // // Log::debug('$working_times = '.$working_times);
                     }
                 }
                 // 休憩時間を含んでいる場合、休憩時間累計（所定労働時間内の休憩時間を累計することになる）
-                if ($working_times != 0) {
-                    // 休憩時間を含んでいる場合、休憩時間累計を求めて減算する
-                    $filtered = $timetables->where('no', $working_timetable_no)
-                        ->where('working_time_kubun', Config::get('const.C004.regular_working_breaks_time'));
-                    // 休憩時間帯は複数あるかも
-                    foreach($filtered as $result_breaks_time) {
-                        $from_time = $result_breaks_time->from_time;        // 休憩開始時刻
-                        $to_time = $result_breaks_time->to_time;            // 休憩終了時刻
-                        Log::DEBUG('休憩時間 from_time = '.$from_time);
-                        Log::DEBUG('休憩時間 to_time = '.$to_time);
-                        if (isset($from_time) && isset($to_time)) {
-                            // from_time日付付与
-                            $time_calc_from = 
-                                $apicommon->convTimeToDateFrom($from_time, $current_date, $target_from_time, $target_to_time);         
-                            // to_time日付付与
-                            $time_calc_to = 
-                                $apicommon->convTimeToDateTo($from_time, $to_time, $current_date, $target_from_time, $target_to_time);         
-                            Log::DEBUG('休憩時間 time_calc_from = '.$time_calc_from);
-                            Log::DEBUG('休憩時間 time_calc_to = '.$time_calc_to);
-                            Log::DEBUG('休憩時間 working_time_calc_from = '.$working_time_calc_from);
-                            Log::DEBUG('休憩時間 working_time_calc_to = '.$working_time_calc_to);
-                            Log::DEBUG('休憩時間 target_from_time = '.$target_from_time);
-                            Log::DEBUG('休憩時間 target_to_time = '.$target_to_time);
-                            //  計算対象のタイムテーブルの開始終了日時の範囲内に休憩開始終了時刻がある場合で
-                            if (($time_calc_from > $working_time_calc_from && $time_calc_from < $working_time_calc_to) ||
-                                ($time_calc_to > $working_time_calc_from && $time_calc_to < $working_time_calc_to)) {
-                                //  出退勤時間の範囲内に休憩開始終了時刻がある場合に計算する
-                                if (($time_calc_from > $target_from_time && $time_calc_from < $target_to_time) ||
-                                    ($time_calc_to > $target_from_time && $time_calc_to < $target_to_time)) {
-                                    if ($target_from_time > $time_calc_from) {
-                                        $time_calc_from = $target_from_time;
-                                    }
-                                    if ($target_to_time < $time_calc_to) {
-                                        $time_calc_to = $target_to_time;
-                                    }
-                                    Log::DEBUG('time_calc_from = '.$time_calc_from);
-                                    Log::DEBUG('time_calc_to = '.$time_calc_to);
-                                    if ($time_calc_from < $time_calc_to) {
-                                        $calc_times = $apicommon->diffTimeSerial($time_calc_from, $time_calc_to);
-                                        Log::DEBUG('休憩時間 calc_times = '.$calc_times);
-                                        $working_times -= $calc_times;
-                                        Log::DEBUG('休憩時間 $working_times = '.$working_times);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                // if ($working_times != 0) {
+                //     // 休憩時間を含んでいる場合、休憩時間累計を求めて減算する
+                //     $filtered = $timetables->where('no', $working_timetable_no)
+                //         ->where('working_time_kubun', Config::get('const.C004.regular_working_breaks_time'));
+                //     // 休憩時間帯は複数あるかも
+                //     foreach($filtered as $result_breaks_time) {
+                //         $from_time = $result_breaks_time->from_time;        // 休憩開始時刻
+                //         $to_time = $result_breaks_time->to_time;            // 休憩終了時刻
+                //         // Log::debug('休憩時間 from_time = '.$from_time);
+                //         // Log::debug('休憩時間 to_time = '.$to_time);
+                //         if (isset($from_time) && isset($to_time)) {
+                //             // from_time日付付与
+                //             $time_calc_from = 
+                //                 $apicommon->convTimeToDateFrom($from_time, $current_date, $target_from_time, $target_to_time);         
+                //             // to_time日付付与
+                //             $time_calc_to = 
+                //                 $apicommon->convTimeToDateTo($from_time, $to_time, $current_date, $target_from_time, $target_to_time);         
+                //             // Log::debug('休憩時間 time_calc_from = '.$time_calc_from);
+                //             // Log::debug('休憩時間 time_calc_to = '.$time_calc_to);
+                //             // Log::debug('休憩時間 working_time_calc_from = '.$working_time_calc_from);
+                //             // Log::debug('休憩時間 working_time_calc_to = '.$working_time_calc_to);
+                //             // Log::debug('休憩時間 target_from_time = '.$target_from_time);
+                //             // Log::debug('休憩時間 target_to_time = '.$target_to_time);
+                //             //  計算対象のタイムテーブルの開始終了日時の範囲内に休憩開始終了時刻がある場合で
+                //             if (($time_calc_from > $working_time_calc_from && $time_calc_from < $working_time_calc_to) ||
+                //                 ($time_calc_to > $working_time_calc_from && $time_calc_to < $working_time_calc_to)) {
+                //                 //  出退勤時間の範囲内に休憩開始終了時刻がある場合に計算する
+                //                 if (($time_calc_from > $target_from_time && $time_calc_from < $target_to_time) ||
+                //                     ($time_calc_to > $target_from_time && $time_calc_to < $target_to_time)) {
+                //                     if ($target_from_time > $time_calc_from) {
+                //                         $time_calc_from = $target_from_time;
+                //                     }
+                //                     if ($target_to_time < $time_calc_to) {
+                //                         $time_calc_to = $target_to_time;
+                //                     }
+                //                     // Log::debug('time_calc_from = '.$time_calc_from);
+                //                     // Log::debug('time_calc_to = '.$time_calc_to);
+                //                     if ($time_calc_from < $time_calc_to) {
+                //                         $calc_times = $apicommon->diffTimeSerial($time_calc_from, $time_calc_to);
+                //                         // Log::debug('休憩時間 calc_times = '.$calc_times);
+                //                         $working_times -= $calc_times;
+                //                         // Log::debug('休憩時間 $working_times = '.$working_times);
+                //                     }
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
             }
         }
         // ------------------ DEBUG strat ----------------------------------------
-        Log::DEBUG('            累計労働時間  working_times = '.$working_times."  ".$working_times / 60 / 60);
-        Log::DEBUG('---------------------- calcTimes end ------------------------ ');
+        // Log::debug('            累計労働時間  working_times = '.$working_times."  ".$working_times / 60 / 60);
+        // Log::debug('---------------------- calcTimes end ------------------------ ');
         // ------------------ DEBUG end ----------------------------------------
 
         return $working_times;
@@ -5753,7 +7202,7 @@ class DailyWorkingInformationController extends Controller
      */
     private function calcBreakTimes($timetables, $working_timetable_no, $working_time_kubun, $current_date, $attendance_time, $leaving_time)
     {
-        Log::DEBUG('---------------------- calcBreakTimes in working_time_kubun = '.$working_time_kubun.' ------------------------ ');
+        // Log::debug('---------------------- calcBreakTimes in working_time_kubun = '.$working_time_kubun.' ------------------------ ');
         $apicommon = new ApiCommonController();
         $working_times = 0;             // 休憩時間合計時間
 
@@ -5774,40 +7223,40 @@ class DailyWorkingInformationController extends Controller
                 // to_time日付付与
                 $working_time_calc_to = 
                     $apicommon->convTimeToDateTo($from_time, $to_time, $current_date, $attendance_time, $leaving_time);         
-                Log::DEBUG('from_time = '.$from_time);
-                Log::DEBUG('to_time = '.$to_time);
-                Log::DEBUG('current_date = '.$current_date);
-                Log::DEBUG('attendance_time = '.$attendance_time);
-                Log::DEBUG('leaving_time = '.$leaving_time);
-                Log::DEBUG('working_time_calc_from = '.$working_time_calc_from);
-                Log::DEBUG('working_time_calc_to = '.$working_time_calc_to);
+                // Log::debug('from_time = '.$from_time);
+                // Log::debug('to_time = '.$to_time);
+                // Log::debug('current_date = '.$current_date);
+                // Log::debug('attendance_time = '.$attendance_time);
+                // Log::debug('leaving_time = '.$leaving_time);
+                // Log::debug('working_time_calc_from = '.$working_time_calc_from);
+                // Log::debug('working_time_calc_to = '.$working_time_calc_to);
                 // 出退勤の範囲内であれば計算
                 if (($working_time_calc_from > $attendance_time && $working_time_calc_from < $leaving_time) ||
                     ($working_time_calc_to > $attendance_time && $working_time_calc_to < $leaving_time)) {
                     if ($attendance_time > $working_time_calc_from) {
                         $working_time_calc_from = $attendance_time;
-                        Log::DEBUG('working_time_calc_from if then= '.$working_time_calc_from);
+                        // Log::debug('working_time_calc_from if then= '.$working_time_calc_from);
                     }
                     if ($leaving_time < $working_time_calc_to) {
                         $working_time_calc_to = $leaving_time;
-                        Log::DEBUG('working_time_calc_to if then= '.$working_time_calc_to);
+                        // Log::debug('working_time_calc_to if then= '.$working_time_calc_to);
                     }
-                    Log::DEBUG('working_time_kubun = '.$working_time_kubun);
-                    Log::DEBUG('attendance_time = '.$attendance_time);
-                    Log::DEBUG('leaving_time = '.$leaving_time);
-                    Log::DEBUG('working_time_calc_from = '.$working_time_calc_from);
-                    Log::DEBUG('working_time_calc_to = '.$working_time_calc_to);
+                    // Log::debug('working_time_kubun = '.$working_time_kubun);
+                    // Log::debug('attendance_time = '.$attendance_time);
+                    // Log::debug('leaving_time = '.$leaving_time);
+                    // Log::debug('working_time_calc_from = '.$working_time_calc_from);
+                    // Log::debug('working_time_calc_to = '.$working_time_calc_to);
                     if ($working_time_calc_from < $working_time_calc_to) {
                         $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
-                        Log::DEBUG('calc_times = '.$calc_times);
+                        // Log::debug('calc_times = '.$calc_times);
                         $working_times += $calc_times;
-                        Log::DEBUG('$working_times = '.$working_times);
+                        // Log::debug('$working_times = '.$working_times);
                     }
                 }
             }
         }
-        Log::DEBUG('calcBreakTimes end '.$working_times);
-        Log::DEBUG('---------------------- calcBreakTimes end '.$working_times.'------------------------ ');
+        // Log::debug('calcBreakTimes end '.$working_times);
+        // Log::debug('---------------------- calcBreakTimes end '.$working_times.'------------------------ ');
 
         return $working_times;
     }
@@ -5817,19 +7266,70 @@ class DailyWorkingInformationController extends Controller
      *
      * @return 登録結果
      */
-    private function addTempWorkingTimeDate($target_date, $target_user_code, $target_department_code, $target_result, $note, $working_status,
-        $array_calc_time, $array_missing_middle_time, $array_public_going_out_time,
-        $array_add_attendance_time, $array_add_attendance_time_positions,
-        $array_add_leaving_time, $array_add_leaving_time_positions,
-        $array_add_missing_middle_time, $array_add_missing_middle_time_positions,
-        $array_add_missing_middle_return_time, $array_add_missing_middle_return_time_positions,
-        $array_add_public_going_out_time, $array_add_public_going_out_time_positions,
-        $array_add_public_going_out_return_time, $array_add_public_going_out_return_time_positions)
+    private function addTempWorkingTimeDate($params)
     {
-        Log::DEBUG('---------------------- addTempWorkingTimeDate in ------------------------ ');
-        $temp_working_model = new TempWorkingTimeDate();
-        $apicommon = new ApiCommonController();
+        // Log::debug('---------------------- addTempWorkingTimeDate in ------------------------ ');
+        // パラメータ設定
+        $target_date = $params['target_date'];
+        $target_user_code = $params['target_user_code'];
+        $target_department_code = $params['target_department_code'];
+        $target_result = $params['target_result'];
+        $note = $params['note'];
+        $working_status = $params['working_status'];
+        $timetables = $params['timetables'];
+        $array_calc_time = $params['array_calc_time'];
+        $array_missing_middle_time = $params['array_missing_middle_time'];
+        $array_public_going_out_time = $params['array_public_going_out_time'];
+        $array_add_attendance_time = $params['array_add_attendance_time'];
+        $array_add_attendance_time_id = $params['array_add_attendance_time_id'];
+        $array_add_attendance_editor_department_code = $params['array_add_attendance_editor_department_code'];
+        $array_add_attendance_editor_department_name = $params['array_add_attendance_editor_department_name'];
+        $array_add_attendance_editor_user_code = $params['array_add_attendance_editor_user_code'];
+        $array_add_attendance_editor_user_name = $params['array_add_attendance_editor_user_name'];
+        $array_add_attendance_time_positions = $params['array_add_attendance_time_positions'];
+        $array_add_leaving_time = $params['array_add_leaving_time'];
+        $array_add_leaving_time_id = $params['array_add_leaving_time_id'];
+        $array_add_leaving_editor_department_code = $params['array_add_leaving_editor_department_code'];
+        $array_add_leaving_editor_department_name = $params['array_add_leaving_editor_department_name'];
+        $array_add_leaving_editor_user_code = $params['array_add_leaving_editor_user_code'];
+        $array_add_leaving_editor_user_name = $params['array_add_leaving_editor_user_name'];
+        $array_add_leaving_time_positions = $params['array_add_leaving_time_positions'];
+        $array_add_missing_middle_time = $params['array_add_missing_middle_time'];
+        $array_add_missing_middle_time_id = $params['array_add_missing_middle_time_id'];
+        $array_add_missing_middle_editor_department_code = $params['array_add_missing_middle_editor_department_code'];
+        $array_add_missing_middle_editor_department_name = $params['array_add_missing_middle_editor_department_name'];
+        $array_add_missing_middle_editor_user_code = $params['array_add_missing_middle_editor_user_code'];
+        $array_add_missing_middle_editor_user_name = $params['array_add_missing_middle_editor_user_name'];
+        $array_add_missing_middle_time_positions = $params['array_add_missing_middle_time_positions'];
+        $array_add_missing_return_time = $params['array_add_missing_return_time'];
+        $array_add_missing_return_time_id = $params['array_add_missing_return_time_id'];
+        $array_add_missing_return_editor_department_code = $params['array_add_missing_return_editor_department_code'];
+        $array_add_missing_return_editor_department_name = $params['array_add_missing_return_editor_department_name'];
+        $array_add_missing_return_editor_user_code = $params['array_add_missing_return_editor_user_code'];
+        $array_add_missing_return_editor_user_name = $params['array_add_missing_return_editor_user_name'];
+        $array_add_missing_return_time_positions = $params['array_add_missing_return_time_positions'];
+        $array_add_public_going_out_time = $params['array_add_public_going_out_time'];
+        $array_add_public_going_out_time_id = $params['array_add_public_going_out_time_id'];
+        $array_add_public_going_out_editor_department_code = $params['array_add_public_going_out_editor_department_code'];
+        $array_add_public_going_out_editor_department_name = $params['array_add_public_going_out_editor_department_name'];
+        $array_add_public_going_out_editor_user_code = $params['array_add_public_going_out_editor_user_code'];
+        $array_add_public_going_out_editor_user_name = $params['array_add_public_going_out_editor_user_name'];
+        $array_add_public_going_out_time_positions = $params['array_add_public_going_out_time_positions'];
+        $array_add_public_return_time = $params['array_add_public_return_time'];
+        $array_add_public_return_time_id = $params['array_add_public_return_time_id'];
+        $array_add_public_return_editor_department_code = $params['array_add_public_return_editor_department_code'];
+        $array_add_public_return_editor_department_name = $params['array_add_public_return_editor_department_name'];
+        $array_add_public_return_editor_user_code = $params['array_add_public_return_editor_user_code'];
+        $array_add_public_return_editor_user_name = $params['array_add_public_return_editor_user_name'];
+        $array_add_public_return_time_positions = $params['array_add_public_return_time_positions'];
+        $array_break_worktimetable_result = $params['array_break_worktimetable_result'];
 
+        // 休暇計算用出勤時刻
+        $break_attendance_time = null;
+        // 休暇計算用退勤時刻
+        $break_leaving_time = null;
+        $apicommon = new ApiCommonController();
+        $temp_working_model = new TempWorkingTimeDate();
         $temp_working_model->setWorkingdateAttribute(date_format(new Carbon($target_date), 'Ymd'));
         $temp_working_model->setEmploymentstatusAttribute($target_result->employment_status);
         $temp_working_model->setDepartmentcodeAttribute($target_department_code);
@@ -5842,7 +7342,6 @@ class DailyWorkingInformationController extends Controller
         $temp_working_model->setWorkingtimetablenameAttribute($target_result->working_timetable_name);
         // 出勤打刻５回までチェック
         $attendence_note_set = false;
-        $array_add_attendance_time_cnt = count($array_add_attendance_time);
         if (!$this->chkWorkingTime($array_add_attendance_time, (int)(Config::get('const.ARRAY_MAX_INDEX.attendace_time')) )) {
             $note .= Config::get('const.MEMO_DATA.MEMO_DATA_016').' '; 
             $attendence_note_set = true;
@@ -5851,7 +7350,13 @@ class DailyWorkingInformationController extends Controller
         $array_decide_times = $this->decideWorkingTimeFrom($array_add_attendance_time, count($array_add_attendance_time));
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
+                if ($break_attendance_time == null) {$break_attendance_time = $array_decide_times[$i]; }
                 $temp_working_model->setAttendancetimeAttribute($i, $array_decide_times[$i]);
+                $temp_working_model->setAttendancetimeidAttribute($i, $array_add_attendance_time_id[$i]);
+                $temp_working_model->setAttendanceeditordepartmentcodeAttribute($i, $array_add_attendance_editor_department_code[$i]);
+                $temp_working_model->setAttendanceeditordepartmentnameAttribute($i, $array_add_attendance_editor_department_name[$i]);
+                $temp_working_model->setAttendanceeditorusercodeAttribute($i, $array_add_attendance_editor_user_code[$i]);
+                $temp_working_model->setAttendanceeditorusernameAttribute($i, $array_add_attendance_editor_user_name[$i]);
                 if (isset($array_add_attendance_time_positions[$i])) {
                     $temp_working_model->setAttendancetimepositionsAttribute($i, $array_add_attendance_time_positions[$i]);
                 } else {
@@ -5859,6 +7364,11 @@ class DailyWorkingInformationController extends Controller
                 }
             } else {
                 $temp_working_model->setAttendancetimeAttribute($i, null);
+                $temp_working_model->setAttendancetimeidAttribute($i, null);
+                $temp_working_model->setAttendanceeditordepartmentcodeAttribute($i, null);
+                $temp_working_model->setAttendanceeditordepartmentnameAttribute($i, null);
+                $temp_working_model->setAttendanceeditorusercodeAttribute($i, null);
+                $temp_working_model->setAttendanceeditorusernameAttribute($i, null);
                 $temp_working_model->setAttendancetimepositionsAttribute($i, null);
             }
         }
@@ -5876,7 +7386,13 @@ class DailyWorkingInformationController extends Controller
             count($array_add_attendance_time));
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
+                if ($break_leaving_time == null) {$break_leaving_time = $array_decide_times[$i]; }
                 $temp_working_model->setLeavingtimeAttribute($i, $array_decide_times[$i]);
+                $temp_working_model->setLeavingtimeidAttribute($i, $array_add_leaving_time_id[$i]);
+                $temp_working_model->setLeavingeditordepartmentcodeAttribute($i, $array_add_leaving_editor_department_code[$i]);
+                $temp_working_model->setLeavingeditordepartmentnameAttribute($i, $array_add_leaving_editor_department_name[$i]);
+                $temp_working_model->setLeavingeditorusercodeAttribute($i, $array_add_leaving_editor_user_code[$i]);
+                $temp_working_model->setLeavingeditorusernameAttribute($i, $array_add_leaving_editor_user_name[$i]);
                 if (isset($array_add_leaving_time_positions[$i])) {
                     $temp_working_model->setLeavingtimepositionsAttribute($i, $array_add_leaving_time_positions[$i]);
                 } else {
@@ -5884,10 +7400,14 @@ class DailyWorkingInformationController extends Controller
                 }
             } else {
                 $temp_working_model->setLeavingtimeAttribute($i, null);
+                $temp_working_model->setLeavingtimeidAttribute($i, null);
+                $temp_working_model->setLeavingeditordepartmentcodeAttribute($i, null);
+                $temp_working_model->setLeavingeditordepartmentnameAttribute($i, null);
+                $temp_working_model->setLeavingeditorusercodeAttribute($i, null);
+                $temp_working_model->setLeavingeditorusernameAttribute($i, null);
                 $temp_working_model->setLeavingtimepositionsAttribute($i, null);
             }
         }
-
         // 中抜け打刻５回までチェック
         $missing_middle_note_set = false;
         if (!$this->chkWorkingTime($array_add_missing_middle_time,(int)(Config::get('const.ARRAY_MAX_INDEX.missing_middle_time')) )) {
@@ -5899,6 +7419,11 @@ class DailyWorkingInformationController extends Controller
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
                 $temp_working_model->setMissingmiddletimeAttribute($i, $array_decide_times[$i]);
+                $temp_working_model->setMissingmiddletimeidAttribute($i, $array_add_missing_middle_time_id[$i]);
+                $temp_working_model->setMissingeditordepartmentcodeAttribute($i, $array_add_missing_middle_editor_department_code[$i]);
+                $temp_working_model->setMissingeditordepartmentnameAttribute($i, $array_add_missing_middle_editor_department_name[$i]);
+                $temp_working_model->setMissingeditorusercodeAttribute($i, $array_add_missing_middle_editor_user_code[$i]);
+                $temp_working_model->setMissingeditorusernameAttribute($i, $array_add_missing_middle_editor_user_name[$i]);
                 if (isset($array_add_missing_middle_time_positions[$i])) {
                     $temp_working_model->setMissingmiddletimepositionsAttribute($i, $array_add_missing_middle_time_positions[$i]);
                 } else {
@@ -5906,33 +7431,46 @@ class DailyWorkingInformationController extends Controller
                 }
             } else {
                 $temp_working_model->setMissingmiddletimeAttribute($i, null);
+                $temp_working_model->setMissingmiddletimeidAttribute($i, null);
+                $temp_working_model->setMissingeditordepartmentcodeAttribute($i, null);
+                $temp_working_model->setMissingeditordepartmentnameAttribute($i, null);
+                $temp_working_model->setMissingeditorusercodeAttribute($i, null);
+                $temp_working_model->setMissingeditorusernameAttribute($i, null);
                 $temp_working_model->setMissingmiddletimepositionsAttribute($i, null);
             }
         }
         // 中抜け戻り打刻５回までチェック
-        if (!$this->chkWorkingTime($array_add_missing_middle_return_time,(int)(Config::get('const.ARRAY_MAX_INDEX.missing_middle_return_time')) )) {
+        if (!$this->chkWorkingTime($array_add_missing_return_time,(int)(Config::get('const.ARRAY_MAX_INDEX.missing_return_time')) )) {
             if ($missing_middle_note_set == false) {
                 $note .= Config::get('const.MEMO_DATA.MEMO_DATA_018').' '; 
             }
         }
         // 設定
-        Log::DEBUG('    before count($array_add_missing_middle_return_time) =  '.count($array_add_missing_middle_return_time));
-        Log::DEBUG('    before count($array_add_missing_middle_time) =  '.count($array_add_missing_middle_time));
         $array_decide_times = $this->decideWorkingTimeTo(
-            $array_add_missing_middle_return_time,
-            count($array_add_missing_middle_return_time),
+            $array_add_missing_return_time,
+            count($array_add_missing_return_time),
             $array_add_missing_middle_time,
             count($array_add_missing_middle_time));
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
                 $temp_working_model->setMissingmiddlereturntimeAttribute($i, $array_decide_times[$i]);
-                if (isset($array_add_missing_middle_return_time_positions[$i])) {
-                    $temp_working_model->setMissingmiddlereturntimepositionsAttribute($i, $array_add_missing_middle_return_time_positions[$i]);
+                $temp_working_model->setMissingmiddlereturntimeidAttribute($i, $array_add_missing_return_time_id[$i]);
+                $temp_working_model->setMissingreturneditordepartmentcodeAttribute($i, $array_add_missing_return_editor_department_code[$i]);
+                $temp_working_model->setMissingreturneditordepartmentnameAttribute($i, $array_add_missing_return_editor_department_name[$i]);
+                $temp_working_model->setMissingreturneditorusercodeAttribute($i, $array_add_missing_return_editor_user_code[$i]);
+                $temp_working_model->setMissingreturneditorusernameAttribute($i, $array_add_missing_return_editor_user_name[$i]);
+                if (isset($array_add_missing_return_time_positions[$i])) {
+                    $temp_working_model->setMissingmiddlereturntimepositionsAttribute($i, $array_add_missing_return_time_positions[$i]);
                 } else {
                     $temp_working_model->setMissingmiddlereturntimepositionsAttribute($i, null);
                 }
             } else {
                 $temp_working_model->setMissingmiddlereturntimeAttribute($i, null);
+                $temp_working_model->setMissingmiddlereturntimeidAttribute($i, null);
+                $temp_working_model->setMissingreturneditordepartmentcodeAttribute($i, null);
+                $temp_working_model->setMissingreturneditordepartmentnameAttribute($i, null);
+                $temp_working_model->setMissingreturneditorusercodeAttribute($i, null);
+                $temp_working_model->setMissingreturneditorusernameAttribute($i, null);
                 $temp_working_model->setMissingmiddlereturntimepositionsAttribute($i, null);
             }
         }
@@ -5947,6 +7485,11 @@ class DailyWorkingInformationController extends Controller
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
                 $temp_working_model->setPublicgoingouttimeAttribute($i, $array_decide_times[$i]);
+                $temp_working_model->setPublicgoingouttimeidAttribute($i, $array_add_public_going_out_time_id[$i]);
+                $temp_working_model->setPubliceditordepartmentcodeAttribute($i, $array_add_public_going_out_editor_department_code[$i]);
+                $temp_working_model->setPubliceditordepartmentnameAttribute($i, $array_add_public_going_out_editor_department_name[$i]);
+                $temp_working_model->setPubliceditorusercodeAttribute($i, $array_add_public_going_out_editor_user_code[$i]);
+                $temp_working_model->setPubliceditorusernameAttribute($i, $array_add_public_going_out_editor_user_name[$i]);
                 if (isset($array_add_public_going_out_time_positions[$i])) {
                     $temp_working_model->setPublicgoingouttimepositionsAttribute($i, $array_add_public_going_out_time_positions[$i]);
                 } else {
@@ -5954,325 +7497,226 @@ class DailyWorkingInformationController extends Controller
                 }
             } else {
                 $temp_working_model->setPublicgoingouttimeAttribute($i, null);
+                $temp_working_model->setPublicgoingouttimeidAttribute($i, null);
+                $temp_working_model->setPubliceditordepartmentcodeAttribute($i, null);
+                $temp_working_model->setPubliceditordepartmentnameAttribute($i, null);
+                $temp_working_model->setPubliceditorusercodeAttribute($i, null);
+                $temp_working_model->setPubliceditorusernameAttribute($i, null);
                 $temp_working_model->setPublicgoingouttimepositionsAttribute($i, null);
             }
         }
         // 公用外出戻り打刻５回までチェック
-        if (!$this->chkWorkingTime($array_add_public_going_out_return_time,(int)(Config::get('const.ARRAY_MAX_INDEX.public_going_out_return_time')) )) {
+        if (!$this->chkWorkingTime($array_add_public_return_time,(int)(Config::get('const.ARRAY_MAX_INDEX.public_return_time')) )) {
             if ($public_going_out_note_set == false) {
                 $note .= Config::get('const.MEMO_DATA.MEMO_DATA_017').' '; 
             }
         }
         // 設定
         $array_decide_times = $this->decideWorkingTimeTo(
-            $array_add_public_going_out_return_time,
-            count($array_add_public_going_out_return_time),
+            $array_add_public_return_time,
+            count($array_add_public_return_time),
             $array_add_public_going_out_time,
             count($array_add_public_going_out_time));
         for ($i=0;$i<count($array_decide_times);$i++) {
             if ($i<count($array_decide_times)) {
                 $temp_working_model->setPublicgoingoutreturntimeAttribute($i, $array_decide_times[$i]);
-                if (isset($array_add_public_going_out_return_time_positions[$i])) {
-                    $temp_working_model->setPublicgoingoutreturntimepositionsAttribute($i, $array_add_public_going_out_return_time_positions[$i]);
+                $temp_working_model->setPublicgoingoutreturntimeidAttribute($i, $array_add_public_return_time_id[$i]);
+                $temp_working_model->setPublicreturneditordepartmentcodeAttribute($i, $array_add_public_return_editor_department_code[$i]);
+                $temp_working_model->setPublicreturneditordepartmentnameAttribute($i, $array_add_public_return_editor_department_name[$i]);
+                $temp_working_model->setPublicreturneditorusercodeAttribute($i, $array_add_public_return_editor_user_code[$i]);
+                $temp_working_model->setPublicreturneditorusernameAttribute($i, $array_add_public_return_editor_user_name[$i]);
+                if (isset($array_add_public_return_time_positions[$i])) {
+                    $temp_working_model->setPublicgoingoutreturntimepositionsAttribute($i, $array_add_public_return_time_positions[$i]);
                 } else {
                     $temp_working_model->setPublicgoingoutreturntimepositionsAttribute($i, null);
                 }
             } else {
                 $temp_working_model->setPublicgoingoutreturntimeAttribute($i, null);
+                $temp_working_model->setPublicgoingoutreturntimeidAttribute($i, null);
+                $temp_working_model->setPublicreturneditordepartmentcodeAttribute($i, null);
+                $temp_working_model->setPublicreturneditordepartmentnameAttribute($i, null);
+                $temp_working_model->setPublicreturneditorusercodeAttribute($i, null);
+                $temp_working_model->setPublicreturneditorusernameAttribute($i, null);
                 $temp_working_model->setPublicgoingoutreturntimepositionsAttribute($i, null);
             }
         }
-        // 合計勤務時間
-        $total_time = 0;
-        // 残業時間
-        $overtime_hours = 0;
-        $index = (int)(Config::get('const.C004.regular_working_time'))-1;
-        // -------------  debug ---------------------- start --------------
-        Log::DEBUG('    <<< ユーザー労働時間計算 >>> '.$target_user_code);
-        Log::DEBUG('        所定労働時間の計算 ');
-        Log::DEBUG('        所定労働時間 10進数　$array_calc_time[$index]           = '.$array_calc_time[$index]);
-        Log::DEBUG('        未就労時間   10進数 $array_missing_middle_time[$index]  = '.$array_missing_middle_time[$index]);
-        // -------------  debug ---------------------- end --------------
-        $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
-        $regular_calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-        // -------------  debug ---------------------- start --------------
-        Log::DEBUG('        所定労働時間　- 未就労時間　10進数　$w_time　　　　　　　　= '.$w_time);
-        Log::DEBUG('        所定労働時間　- 未就労時間　60進数　$regular_calc_time    = '.$regular_calc_time);
-        // -------------  debug ---------------------- end --------------
-        // 時間外労働時間
-        $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
-        // -------------  debug ---------------------- start --------------
-        Log::DEBUG('        時間外労働時間の計算 ');
-        Log::DEBUG('        時間外労働時間 10進数　$array_calc_time[$index]           = '.$array_calc_time[$index]);
-        Log::DEBUG('        未就労時間   10進数 $array_missing_middle_time[$index]  = '.$array_missing_middle_time[$index]);
-        // -------------  debug ---------------------- end --------------
-        $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
-        $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-        // -------------  debug ---------------------- start --------------
-        Log::DEBUG('        時間外労働時間- 未就労時間　10進数　$w_time　　　　　　　　= '.$w_time);
-        Log::DEBUG('        時間外労働時間- 未就労時間　60進数　$calc_time            = '.$calc_time);
-        // -------------  debug ---------------------- end --------------
-        // 平日は時間外労働時間＝残業時間
-        // ---- 取り消し--休日は所定労働時間+時間外労働時間>8の場合、所定労働時間+時間外労働時間-8=残業時間
-        // 休日は残業時間は単価は1.25で休日の労働時間同じなので休日の労働時間に加算
-        $out_of_legal_working_holiday_hours = 0;        // 法定外休日労働時間
-        $legal_working_holiday_hours = 0;               // 法定休日労働時間
+        // 所定労働時間の計算
+        // calcRegulartime implement
+        $array_impl_calcRegulartime = array (
+            'target_date' => $target_date,
+            'target_result' => $target_result,
+            'array_break_worktimetable_result' => $array_break_worktimetable_result,
+            'array_calc_time' => $array_calc_time,
+            'array_missing_middle_time' => $array_missing_middle_time,
+            'timetables' => $timetables,
+            'break_attendance_time' => $break_attendance_time,
+            'break_leaving_time' => $break_leaving_time
+        );
+        $regular_calc_time_stamp = $this->calcRegulartime($array_impl_calcRegulartime);
+        $regular_calc_time = $apicommon->cnvToDecFromStamp($regular_calc_time_stamp);
+        $holiday_calc_time_stamp = 0;
+        $holiday_calc_time = 0;
+        // Log::debug('  target_result->business_kubun = '.$target_result->business_kubun);
+        // Log::debug('  regular_calc_time = '.$regular_calc_time);
         if ($target_result->business_kubun == Config::get('const.C007.basic')) {
-            $temp_working_model->setOffhoursworkinghoursAttribute($calc_time);
-            // -------------  debug ---------------------- start --------------
-            Log::DEBUG('        出勤日 時間外労働時間　$calc_time       = '.$calc_time);
-            // -------------  debug ---------------------- end --------------
-        } else {
-            $temp_calc = $regular_calc_time + $calc_time;       // 所定労働時間+時間外労働時間
-            $calc_time = $temp_calc;
+            $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);               // 所定労働時間（出勤日）
+        } else if ($target_result->business_kubun == Config::get('const.C007.legal_out_holoday')) {
+            $holiday_calc_time_stamp = $regular_calc_time_stamp;
+            $regular_calc_time_stamp = 0;
             $regular_calc_time = 0;
-            /*if ($temp_calc > Config::get('const.C002.legal_working_hours_day')) {
-                $regular_calc_time = Config::get('const.C002.legal_working_hours_day');
-                $calc_time = $temp_calc - Config::get('const.C002.legal_working_hours_day');
-            } else {
-                $regular_calc_time = $temp_calc;
-                $calc_time = 0;
-            } */
-            $temp_working_model->setOffhoursworkinghoursAttribute($temp_calc);
-            // -------------  debug ---------------------- start --------------
-            Log::DEBUG('        休日 時間外労働時間　$calc_time       = '.$temp_calc);
-            // -------------  debug ---------------------- end --------------
-            if ($target_result->business_kubun == Config::get('const.C007.legal_holoday')) {
-                $legal_working_holiday_hours = $temp_calc;
-                $temp_working_model->setLegalworkingholidayhoursAttribute($legal_working_holiday_hours);
-                // -------------  debug ---------------------- start --------------
-                Log::DEBUG('        法定休日労働時間 時間外労働時間　$legal_working_holiday_hours       = '.$legal_working_holiday_hours);
-                // -------------  debug ---------------------- end --------------
-            } elseif($target_result->business_kubun == Config::get('const.C007.legal_out_holoday')) {
-                $out_of_legal_working_holiday_hours = $temp_calc;
-                $temp_working_model->setOutoflegalworkingholidayhoursAttribute($out_of_legal_working_holiday_hours);
-                // -------------  debug ---------------------- start --------------
-                Log::DEBUG('        法定外休日労働時間 時間外労働時間　$out_of_legal_working_holiday_hours       = '.$out_of_legal_working_holiday_hours);
-                // -------------  debug ---------------------- end --------------
-            }
+            $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);               // 所定労働時間（法定外休日）
+        } else {
+            $holiday_calc_time_stamp = $regular_calc_time_stamp;
+            $regular_calc_time_stamp = 0;
+            $regular_calc_time = 0;
+            $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);               // 所定労働時間（法定休日）
         }
-        $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);   // 所定労働時間
-        // -------------  debug ---------------------- start --------------
-        Log::DEBUG('        所定労働時間 $regular_calc_time       = '.$regular_calc_time);
-        // -------------  debug ---------------------- end --------------
-        $total_time = $total_time + $regular_calc_time;
-        $total_time = $total_time + $calc_time;
-        $overtime_hours = $overtime_hours + $calc_time;
-        // -------------  debug ---------------------- start --------------
-        Log::DEBUG('        時間外労働時間 = $overtime_hours + $calc_time '.$overtime_hours.' '.$calc_time);
-        Log::DEBUG('        法定外休日労働時間 $out_of_legal_working_holiday_hours       = '.$out_of_legal_working_holiday_hours);
-        Log::DEBUG('        法定休日労働時間   $legal_working_holiday_hours              = '.$legal_working_holiday_hours);
-        Log::DEBUG('        トータル労働時間   $total_time              = '.$total_time);
-        // -------------  debug ---------------------- end --------------
-        // 深夜労働残業時間
-        $index = (int)(Config::get('const.C004.out_of_regular_night_working_time'))-1;
-        // -------------  debug ---------------------- start --------------
-        Log::DEBUG('        深夜労働残業時間の計算 ');
-        Log::DEBUG('        深夜労働残業時間 $array_calc_time[$index]           = '.$array_calc_time[$index]);
-        Log::DEBUG('        未就労時間       $array_missing_middle_time[$index]  = '.$array_missing_middle_time[$index]);
-        // -------------  debug ---------------------- end --------------
-        $w_time = $array_calc_time[$index] - $array_missing_middle_time[$index];
-        $calc_time = round($apicommon->roundTime($w_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-        // -------------  debug ---------------------- start --------------
-        Log::DEBUG('        深夜労働残業時間 10進数 $w_time           = '.$w_time);
-        Log::DEBUG('        深夜労働残業時間 60進数 $calc_time        = '.$calc_time);
-        // -------------  debug ---------------------- end --------------
-        $temp_working_model->setLatenightovertimehoursAttribute($calc_time);
-        $total_time = $total_time + $calc_time;
-        // -------------  debug ---------------------- start --------------
-        Log::DEBUG('        トータル労働時間   $total_time              = '.$total_time);
-        // -------------  debug ---------------------- end --------------
+        // Log::debug('  $holiday_calc_time_stamp = '.$holiday_calc_time_stamp);
         // 残業時間
-        $temp_working_model->setOvertimehoursAttribute($overtime_hours);
-        // 所定外労働時間
-        // -------------  debug ---------------------- start --------------
-        Log::DEBUG('        所定外労働時間計算の計算 ');
-        // -------------  debug ---------------------- end --------------
-        $outside_calc_time = 0;
-        $default_time = (int)(Config::get('const.C002.legal_working_hours_day'));
-        if ($regular_calc_time < $default_time && $total_time > $default_time) {    // 所定労働時間 < 8 and 合計勤務時間 > 8 の場合
-            $outside_calc_time = $default_time - $regular_calc_time;
-            // -------------  debug ---------------------- start --------------
-            Log::DEBUG('        所定労働時間 < 8 and 合計勤務時間 > 8 の場合 ');
-            // -------------  debug ---------------------- end --------------
-        } elseif ($regular_calc_time < $total_time) { 
-            // -------------  debug ---------------------- start --------------
-            Log::DEBUG('        所定労働時間 < 合計勤務時間 の場合 ');
-            // -------------  debug ---------------------- end --------------
-            $outside_calc_time = $total_time- $regular_calc_time;
-        } 
-        // -------------  debug ---------------------- start --------------
-        Log::DEBUG('        所定外労働時間計算の計算 ');
-        Log::DEBUG('        所定外労働時間計算 $default_time = '.$default_time);
-        Log::DEBUG('        所定外労働時間計算 $outside_calc_time        = '.$outside_calc_time);
-        // -------------  debug ---------------------- end --------------
+        // calcOvertime implement
+        $array_impl_calcOvertime = array (
+            'target_result' => $target_result,
+            'array_calc_time' => $array_calc_time,
+            'array_missing_middle_time' => $array_missing_middle_time
+        );
+        $overtime_hours_stamp = $this->calcOvertime($array_impl_calcOvertime);
+        $overtime_hours = $apicommon->cnvToDecFromStamp($overtime_hours_stamp);
+        // Log::debug('  $overtime_hours_stamp = '.$overtime_hours_stamp);
+        if ($target_result->business_kubun == Config::get('const.C007.basic')) {
+            $temp_working_model->setOvertimehoursAttribute($overtime_hours);                        // 普通残業時間（出勤日）
+        } else if ($target_result->business_kubun == Config::get('const.C007.legal_out_holoday')) {
+            $holiday_calc_time_stamp += $overtime_hours_stamp;
+            $overtime_hours_stamp = 0;
+            $overtime_hours = 0;
+            $temp_working_model->setOvertimehoursAttribute($overtime_hours);                        // 普通残業時間（法定外休日）
+        } else {
+            $holiday_calc_time_stamp += $overtime_hours_stamp;
+            $overtime_hours_stamp = 0;
+            $overtime_hours = 0;
+            $temp_working_model->setOvertimehoursAttribute($overtime_hours);                        // 普通残業時間（法定休日）
+        }
+        // 時間外労働時間
+        $off_hours_working_hours = $overtime_hours;
+        $temp_working_model->setOffhoursworkinghoursAttribute($off_hours_working_hours);
+        // 深夜残業時間
+        // calcLatenightovertime implement
+        $array_impl_calcLatenightovertime = array (
+            'array_calc_time' => $array_calc_time,
+            'array_missing_middle_time' => $array_missing_middle_time
+        );
+        $lastnight_overtime_hours_stamp = $this->calcLatenightovertime($array_impl_calcLatenightovertime);
+        $lastnight_overtime_hours = $apicommon->cnvToDecFromStamp($lastnight_overtime_hours_stamp);
+        // Log::debug('  $lastnight_overtime_hours_stamp = '.$lastnight_overtime_hours_stamp);
+        // Log::debug('  $lastnight_overtime_hours = '.$lastnight_overtime_hours);
+        if ($target_result->business_kubun == Config::get('const.C007.basic')) {
+            $temp_working_model->setLatenightovertimehoursAttribute($lastnight_overtime_hours);                         // 深夜残業時間
+            $temp_working_model->setOutoflegalworkingholidayhoursAttribute($holiday_calc_time);                         // 法定外休日労働時間
+            $temp_working_model->setLegalworkingholidayhoursAttribute($holiday_calc_time);                              // 法定休日労働時間
+            // 合計勤務時間
+            $total_time_stamp = $regular_calc_time_stamp + $overtime_hours_stamp + $lastnight_overtime_hours_stamp;
+            $total_time = $apicommon->cnvToDecFromStamp($total_time_stamp);
+            $temp_working_model->setTotalworkingtimesAttribute($total_time);
+        } else if ($target_result->business_kubun == Config::get('const.C007.legal_out_holoday')) {
+            $holiday_calc_time_stamp += $lastnight_overtime_hours_stamp;
+            // Log::debug('  $holiday_calc_time_stamp = '.$holiday_calc_time_stamp);
+            $holiday_calc_time = $apicommon->cnvToDecFromStamp($holiday_calc_time_stamp);
+            $lastnight_overtime_hours = 0;
+            $temp_working_model->setLatenightovertimehoursAttribute($lastnight_overtime_hours);                         // 深夜残業時間
+            $temp_working_model->setOutoflegalworkingholidayhoursAttribute($holiday_calc_time);                         // 法定外休日労働時間
+            $temp_working_model->setLegalworkingholidayhoursAttribute($lastnight_overtime_hours);                       // 法定休日労働時間
+            $lastnight_overtime_hours_stamp = 0;
+            $lastnight_overtime_hours = 0;
+            // 深夜手当はあるが深夜残業はない
+            $temp_working_model->setLatenightovertimehoursAttribute($lastnight_overtime_hours);                         // 深夜残業時間
+            $temp_working_model->setOutoflegalworkingholidaynightovertimehoursAttribute($lastnight_overtime_hours);     // 法定外休日深夜残業時間
+            $temp_working_model->setLegalworkingholidaynightovertimehoursAttribute($lastnight_overtime_hours);          // 法定休日深夜残業時間
+            // 合計勤務時間
+            $total_time_stamp = $holiday_calc_time_stamp;
+            $total_time = $apicommon->cnvToDecFromStamp($total_time_stamp);
+            $temp_working_model->setTotalworkingtimesAttribute($total_time);
+        } else {
+            $holiday_calc_time_stamp += $lastnight_overtime_hours_stamp;
+            // Log::debug('  $holiday_calc_time_stamp = '.$holiday_calc_time_stamp);
+            $holiday_calc_time = $apicommon->cnvToDecFromStamp($holiday_calc_time_stamp);
+            $lastnight_overtime_hours = 0;
+            $temp_working_model->setLatenightovertimehoursAttribute($lastnight_overtime_hours);                         // 深夜残業時間
+            $temp_working_model->setOutoflegalworkingholidayhoursAttribute($lastnight_overtime_hours);                  // 法定外休日労働時間
+            $temp_working_model->setLegalworkingholidayhoursAttribute($holiday_calc_time);                              // 法定休日労働時間
+            $lastnight_overtime_hours_stamp = 0;
+            $lastnight_overtime_hours = 0;
+            // 深夜手当はあるが深夜残業はない
+            $temp_working_model->setLatenightovertimehoursAttribute($lastnight_overtime_hours);                         // 深夜残業時間
+            $temp_working_model->setOutoflegalworkingholidaynightovertimehoursAttribute($lastnight_overtime_hours);     // 法定外休日深夜残業時間
+            $temp_working_model->setLegalworkingholidaynightovertimehoursAttribute($lastnight_overtime_hours);          // 法定休日深夜残業時間
+            // 合計勤務時間
+            $total_time_stamp = $holiday_calc_time_stamp;
+            $total_time = $apicommon->cnvToDecFromStamp($total_time_stamp);
+            $temp_working_model->setTotalworkingtimesAttribute($total_time);
+        }
+        // 深夜労働時間
+        $w_time = $apicommon->cnvToDecFromStamp($this->calc_late_night_working_hours);
+        $temp_working_model->setLatenightworkinghoursAttribute($w_time);
 
-        $temp_working_model->setOutofregularworkingtimesAttribute($outside_calc_time);
-        // 法定労働時間 法定外労働時間
-        if ($total_time > $default_time) {      // 合計勤務時間 > 8 の場合
-            // 法定労働時間
-            $temp_working_model->setLegalworkingtimesAttribute($default_time);
-            // 法定外労働時間
-            $temp_working_model->setOutoflegalworkingtimesAttribute($total_time - $default_time);
-            Log::DEBUG('        $target_user_code = '.$target_user_code.' 法定労働時間 = $default_time '.$default_time);
-            Log::DEBUG('        $target_user_code = '.$target_user_code.' 法定外労働時間 = $total_time - $default_time '.$total_time.' '.$default_time);
+        // 所定外労働時間
+        $outside_calc_time = 0;
+        if ($target_result->business_kubun == Config::get('const.C007.basic')) {
+            $default_time = (int)(Config::get('const.C002.legal_working_hours_day'));
+            if ($regular_calc_time < $default_time && $total_time > $default_time) {    // 所定労働時間 < 8 and 合計勤務時間 > 8 の場合
+                $outside_calc_time = $default_time - $regular_calc_time;
+            } elseif ($regular_calc_time < $total_time) { 
+                $outside_calc_time = $total_time- $regular_calc_time;
+            } 
+            // Log::debug('  $outside_calc_time = '.$outside_calc_time);
+            // 法定労働時間 法定外労働時間
+            if ($total_time > $default_time) {      // 合計勤務時間 > 8 の場合
+                // 法定労働時間
+                $temp_working_model->setLegalworkingtimesAttribute($default_time);
+                // 法定外労働時間
+                $temp_working_model->setOutoflegalworkingtimesAttribute($total_time - $default_time);
+            } else {
+                // 法定労働時間
+                $temp_working_model->setLegalworkingtimesAttribute($total_time);
+                // 法定外労働時間
+                $temp_working_model->setOutoflegalworkingtimesAttribute(0);
+            }
         } else {
             // 法定労働時間
-            $temp_working_model->setLegalworkingtimesAttribute($total_time);
+            $temp_working_model->setLegalworkingtimesAttribute(0);
             // 法定外労働時間
             $temp_working_model->setOutoflegalworkingtimesAttribute(0);
-            Log::DEBUG('        $target_user_code = '.$target_user_code.' 法定労働時間 = $total_time '.$total_time);
-            Log::DEBUG('        $target_user_code = '.$target_user_code.' 法定外労働時間 =0 ');
         }
-        // 不就労時間（規則所定労働時間-実所定労働時間）
-        // 規則所定労働時間を求める
-        $timetable_model = new WorkingTimeTable();
-        $timetable_model->setParamdatefromAttribute($target_date);
-        $timetable_model->setParamdatetoAttribute($target_date);
-        $timetable_model->setParamemploymentstatusAttribute($target_result->employment_status);
-        $timetable_model->setParamDepartmentcodeAttribute($target_department_code);
-        $timetable_model->setParamUsercodeAttribute($target_user_code);
-        // 平日は設定している所定労働時間を求める
-        // 休日は所定労働時間=8時間であるが、（所定という概念ではない）
-        if ($target_result->business_kubun == Config::get('const.C007.basic')) {
-            $timetables = $timetable_model->getWorkingTimeTableJoin();
-            Log::DEBUG('        $getWorkingTimeTableJoin  count = '.count($timetables));
-            $calc_time = 0;
-            if (count($timetables) > 0) {
-                $w_time = 0;
-                $w_break_time = 0;
-                $w_from_time1 = "";
-                $w_from_time2 = "";
-                $w_to_time1 = "";
-                $w_to_time2 = "";
-                $target_dt = new Carbon($target_date);
-                Log::DEBUG('        $target_dt = '.$target_dt);
-                foreach($timetables as $item) {
-                    if ($item->working_time_kubun == Config::get('const.C004.regular_working_time')) {
-                        Log::DEBUG('        $working_time_kubun = '.$item->working_time_kubun);
-                        if (isset($item->from_time) && isset($item->to_time)) {
-                            if ($item->from_time < $item->to_time) {
-                                $from_time = date_format($target_dt, 'Y-m-d').' '.$item->from_time;
-                                $to_time = date_format($target_dt, 'Y-m-d').' '.$item->to_time;
-                                Log::DEBUG('        規則所定労働時間を求める 1 from_time = '.$from_time);
-                                Log::DEBUG('        規則所定労働時間を求める 2 to_time = '.$to_time);
-                                $w_time += $apicommon->diffTimeSerial($from_time, $to_time);
-                                $w_from_time1 = $item->from_time;
-                                $w_to_time1 = $item->to_time;
-                                $w_from_time2 = $item->from_time;
-                                $w_to_time2 = $item->to_time;
-                            } else {
-                                $from_time = date_format($target_dt, 'Y-m-d').' '.$item->from_time;
-                                $to_time = date_format($target_dt, 'Y-m-d').' '.$item->to_time;
-                                $nextdt =$apicommon->getNextDay(new Carbon($to_time), 'Y/m/d');
-                                $to_time = date_format(new Carbon($nextdt), 'Y-m-d').' 00:00:00';
-                                Log::DEBUG('        規則所定労働時間を求める 3 from_time = '.$from_time);
-                                Log::DEBUG('        規則所定労働時間を求める 4 to_time = '.$to_time);
-                                $w_time += $apicommon->diffTimeSerial($from_time, $to_time);
-                                $w_from_time1 = $item->from_time;
-                                $w_to_time1 = '00:00:00';
-                                $from_time = $to_time;
-                                $to_time = date_format(new Carbon($nextdt), 'Y-m-d').' '.$item->to_time;
-                                Log::DEBUG('        規則所定労働時間を求める 5 from_time = '.$from_time);
-                                Log::DEBUG('        規則所定労働時間を求める 6 to_time = '.$to_time);
-                                $w_time += $apicommon->diffTimeSerial($from_time, $to_time);
-                                $w_from_time2 = '00:00:00';
-                                $w_to_time2 = $item->to_time;
-                            }
-                        }
-                        Log::DEBUG('        規則所定労働時間 w_time = '.$w_time);
-                        Log::DEBUG('        規則所定労働時間 w_time(H) = '.($w_time / 60 / 60));
-                        Log::DEBUG('        規則所定労働時間 w_from_time1 = '.$w_from_time1);
-                        Log::DEBUG('        規則所定労働時間 w_to_time1 = '.$w_to_time1);
-                        Log::DEBUG('        規則所定労働時間 w_from_time2 = '.$w_from_time2);
-                        Log::DEBUG('        規則所定労働時間 w_to_time2 = '.$w_to_time2);
-                    }
-                    // 所定労働時間内の休憩の場合はその分を減算する
-                    if ($item->working_time_kubun == Config::get('const.C004.regular_working_breaks_time')) {
-                        if (isset($item->from_time) && isset($item->to_time)) {
-                            Log::DEBUG('        規則休憩時間 $item->from_time = '.$item->from_time);
-                            Log::DEBUG('        規則休憩時間 $item->to_time = '.$item->to_time);
-                            Log::DEBUG('        規則休憩時間 w_from_time1 = '.$w_from_time1);
-                            Log::DEBUG('        規則休憩時間 w_to_time1 = '.$w_to_time1);
-                            Log::DEBUG('        規則休憩時間 w_from_time2 = '.$w_from_time2);
-                            Log::DEBUG('        規則休憩時間 w_to_time2 = '.$w_to_time2);
-                            if (($item->from_time > $w_from_time1 && $item->from_time < $w_to_time1) ||
-                                ($item->from_time > $w_from_time2 && $item->from_time < $w_to_time2)) {
-                                if ($item->from_time < $item->to_time) {
-                                    $from_time = date_format($target_dt, 'Y-m-d').' '.$item->from_time;
-                                    $to_time = date_format($target_dt, 'Y-m-d').' '.$item->to_time;
-                                    Log::DEBUG('        規則休憩時間を求める 1 from_time = '.$from_time);
-                                    Log::DEBUG('        規則休憩時間を求める 2 to_time = '.$to_time);
-                                    $w_break_time += $apicommon->diffTimeSerial($from_time, $to_time);
-                                } else {
-                                    $from_time = date_format($target_dt, 'Y-m-d').' '.$item->from_time;
-                                    $to_time = date_format($target_dt, 'Y-m-d').' '.$item->to_time;
-                                    $nextdt =$apicommon->getNextDay(new Carbon($to_time), 'Y/m/d');
-                                    $to_time = date_format($nextdt, 'Y-m-d').' 00:00:00';
-                                    Log::DEBUG('        規則休憩時間を求める 3 from_time = '.$from_time);
-                                    Log::DEBUG('        規則休憩時間を求める 4 to_time = '.$to_time);
-                                    $w_break_time += $apicommon->diffTimeSerial($from_time, $to_time);
-                                    $from_time = $to_time;
-                                    $to_time = date_format(new Carbon($nextdt), 'Y-m-d').' '.$item->to_time;
-                                    Log::DEBUG('        規則所定労働時間を求める 5 from_time = '.$from_time);
-                                    Log::DEBUG('        規則所定労働時間を求める 6 to_time = '.$to_time);
-                                    $w_break_time += $apicommon->diffTimeSerial($from_time, $to_time);
-                                }
-                            }
-                        }
-                        Log::DEBUG('        規則所定労働時間 w_break_time = '.$w_break_time);
-                    }
-                }
-            }
-
-            if ($regular_calc_time > 0) {
-                $w_calc_time = ($w_time / 60 / 60) - ($w_break_time / 60 / 60) - $regular_calc_time;
-                $temp_working_model->setNotemploymentworkinghoursAttribute($w_calc_time);
-                Log::DEBUG('        不就労時間  w_time = '.$w_time.' '.($w_time / 60 / 60));
-                Log::DEBUG('        不就労時間  w_break_time = '.$w_break_time.' '.($w_break_time / 60 / 60));
-                Log::DEBUG('        不就労時間  regular_calc_time = '.$regular_calc_time);
-            } else {
-                // 欠勤の場合は規則所定労働時間を不就労に設定
-                if ($target_result->holiday_kubun == Config::get('const.C013.absence_work')) {
-                    $w_calc_time = ($w_time / 60 / 60) - ($w_break_time / 60 / 60);
-                    $temp_working_model->setNotemploymentworkinghoursAttribute($w_calc_time);
-                } else {
-                    Log::DEBUG('        不就労時間  = 0');
-                    $temp_working_model->setNotemploymentworkinghoursAttribute(0);
-                }
-            }
-        } else {
-            Log::DEBUG('        不就労時間  = 0');
-            $temp_working_model->setNotemploymentworkinghoursAttribute(0);
-        }
-
-        // 休憩時間
-        $calc_time = 0;
-        if ($regular_calc_time > 0) {
-            $calc_time +=  $this->not_employment_working;
-            Log::DEBUG('        不就労時間 休憩時間 = '.$this->not_employment_working);
-        }
+        $temp_working_model->setOutofregularworkingtimesAttribute($outside_calc_time);          // 所定外労働時間
         // 私用外出時間
-        $calc_missing_time = 0;
+        $w_time = 0;
         for ($i=0;$i<count($array_missing_middle_time);$i++) {
-            $calc_missing_time += $array_missing_middle_time[$i];
-            Log::DEBUG('        不就労時間 私用外出時間 = '.$array_missing_middle_time[$i]);
+            $w_time += $array_missing_middle_time[$i];
         }
-        $calc_time = round($apicommon->roundTime($calc_time + $calc_missing_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-        $calc_missing_time = round($apicommon->roundTime($calc_missing_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-        Log::DEBUG('$target_user_code = '.$target_user_code.'        不就労時間（休憩時間＋私用外出時間） =  '. $calc_time.' + '.$calc_missing_time);
-        $temp_working_model->setMissingmiddlehoursAttribute($calc_missing_time);
+        $missing_middle_time = $apicommon->cnvToDecFromStamp($w_time);
+        $temp_working_model->setMissingmiddlehoursAttribute($missing_middle_time);
         // 公用外出時間
-        $calc_time = 0;
+        $w_time = 0;
         for ($i=0;$i<count($array_public_going_out_time);$i++) {
-            $calc_time += $array_public_going_out_time[$i];
-            Log::DEBUG('        公用外出時間 = '.$array_public_going_out_time[$i]);
+            $w_time += $array_public_going_out_time[$i];
         }
-        // 合計勤務時間
-        $temp_working_model->setTotalworkingtimesAttribute($total_time);
+        $public_going_out_time = $apicommon->cnvToDecFromStamp($w_time);
+        $temp_working_model->setPublicgoingouthoursAttribute($public_going_out_time);
 
-        $calc_time = round($apicommon->roundTime($calc_time, $target_result->time_unit, $target_result->time_rounding) / 60,2);
-        $temp_working_model->setPublicgoingouthoursAttribute($calc_time);
+        // 不就労時間
+        // calcNotemploymentworkinghours implement
+        $array_impl_calcNotemploymentworkinghours = array (
+            'target_user_code' => $target_user_code,
+            'target_department_code' => $target_department_code,
+            'target_date' => $target_date,
+            'target_result' => $target_result,
+            'array_break_worktimetable_result' => $array_break_worktimetable_result,
+            'array_calc_time' => $array_calc_time,
+            'array_missing_middle_time' => $array_missing_middle_time,
+            'regular_calc_time' => $regular_calc_time_stamp
+        );
+        $w_time = $this->calcNotemploymentworkinghours($array_impl_calcNotemploymentworkinghours);
+        $not_employment_working_hours = $apicommon->cnvToDecFromStamp($w_time);
+        $temp_working_model->setNotemploymentworkinghoursAttribute($not_employment_working_hours + $missing_middle_time);
+
         $temp_working_model->setWorkingtimetablenoAttribute($target_result->working_timetable_no);
         $temp_working_model->setWorkingstatusAttribute($working_status);
         $temp_working_model->setNoteAttribute($note);
@@ -6311,7 +7755,9 @@ class DailyWorkingInformationController extends Controller
             $temp_working_model->setParamDepartmentcodeAttribute($target_department_code);
             $temp_working_model->setParamUsercodeAttribute($target_user_code);
             // insert
+            // Log::debug('insertTempWorkingTimeDate start');
             $temp_working_model->insertTempWorkingTimeDate();
+            // Log::debug('insertTempWorkingTimeDate end');
         }catch(\PDOException $pe){
             Log::ERROR('insertTempWorkingTimeDate PDOException '.$pe->getMessage());
             throw $pe;
@@ -6319,12 +7765,432 @@ class DailyWorkingInformationController extends Controller
             Log::ERROR('insertTempWorkingTimeDate Exception '.$e->getMessage());
             throw $e;
         }
-        Log::DEBUG('---------------------- addTempWorkingTimeDate end ------------------------ ');
+        // Log::debug('---------------------- addTempWorkingTimeDate end ------------------------ ');
 
         return true;
 
     }
  
+    /**
+     * 所定労働時間計算
+     * 
+     *
+     * @return 
+     */
+    private function calcRegulartime($params)
+    {
+        // Log::debug('---------------------- 所定労働時間計算 calcRegulartime in ------------------------ ');
+        // パラメータ設定
+        $param_target_date = $params['target_date'];
+        $param_target_result = $params['target_result'];
+        $param_rray_break_worktimetable_result = $params['array_break_worktimetable_result'];
+        $param_array_calc_time = $params['array_calc_time'];
+        $param_array_missing_middle_time = $params['array_missing_middle_time'];
+        $param_timetables = $params['timetables'];
+        $param_break_attendance_time = $params['break_attendance_time'];
+        $param_break_leaving_time = $params['break_leaving_time'];
+
+        $regular_calc_time = 0;
+        if ($param_target_result->holiday_description != "" && $param_target_result->holiday_description != null) {
+            // calcHolidayRegulartime implement
+            $array_impl_calcHolidayRegulartime = array (
+                'target_date' => $param_target_date,
+                'target_result' => $param_target_result,
+                'array_break_worktimetable_result' => $param_rray_break_worktimetable_result,
+                'array_calc_time' => $param_array_calc_time,
+                'array_missing_middle_time' => $param_array_missing_middle_time,
+                'timetables' => $param_timetables,
+                'break_attendance_time' => $param_break_attendance_time,
+                'break_leaving_time' => $param_break_leaving_time
+            );
+            $regular_calc_time = $this->calcHolidayRegulartime($array_impl_calcHolidayRegulartime);
+            // Log::debug('休暇労働時間 regular_calc_time = '.$regular_calc_time);
+        } else {
+            $index = (int)(Config::get('const.C004.regular_working_time'))-1;
+            if ($param_array_calc_time[$index] > 0) {
+                $regular_calc_time = $param_array_calc_time[$index] - $param_array_missing_middle_time[$index];
+            }
+        }
+        if ($regular_calc_time > 0) {
+            $apicommon = new ApiCommonController();
+        }
+
+        // Log::debug('---------------------- 所定労働時間計算 calcRegulartime end ------------------------ ');
+        // Log::debug('$regular_calc_time ='.$regular_calc_time);
+        return $regular_calc_time;
+    }
+ 
+    /**
+     * 休暇集計労働時間計算
+     * 
+     *
+     * @return 
+     */
+    private function calcHolidayRegulartime($params)
+    {
+        // Log::debug('---------------------- 休暇集計労働時間計算 calcHolidayRegulartime in ------------------------ ');
+        // パラメータ設定
+        $param_target_date = $params['target_date'];
+        $param_target_result = $params['target_result'];
+        $param_array_break_worktimetable_result = $params['array_break_worktimetable_result'];
+        $param_array_calc_time = $params['array_calc_time'];
+        $param_array_missing_middle_time = $params['array_missing_middle_time'];
+        $param_timetables = $params['timetables'];
+        $param_break_attendance_time = $params['break_attendance_time'];
+        $param_break_leaving_time = $params['break_leaving_time'];
+        //  1日集計対象休暇　　午前半休　　午後半休
+        $result_getHolydayTempStartEndTime = array();
+        $break_workingtime = 0;
+        $braek_time = 0;
+        // getHolydayTempStartEndTime implement
+        $array_impl_getHolydayTempStartEndTime = array (
+            'array_break_worktimetable_result' => $param_array_break_worktimetable_result,
+            'target_date' => $param_target_date,
+            'working_timetable_no' => $param_target_result->working_timetable_no,
+            'user_holiday_description' => $param_target_result->holiday_description
+        );
+        // タイムテーブルから所定時間を取得
+        $result_getHolydayTempStartEndTime = $this->getHolydayTempStartEndTime($array_impl_getHolydayTempStartEndTime);
+        $break_start_time = null;
+        $break_end_time = null;
+        if ($param_target_result->holiday_description == Config::get('const.C013_DESC_VALUE.target_calc_time')) {
+            $break_start_time = $result_getHolydayTempStartEndTime['start_record_datetime'];
+            $break_end_time = $result_getHolydayTempStartEndTime['end_record_datetime'];
+        } elseif ($param_target_result->holiday_description == Config::get('const.C013_DESC_VALUE.half_am')) {
+            // Log::debug('休暇労働時間 $result_getHolydayTempStartEndTime[start_record_datetime] = '.$result_getHolydayTempStartEndTime['start_record_datetime']);
+            $break_start_time = $result_getHolydayTempStartEndTime['start_record_datetime'];
+            $break_end_time = $result_getHolydayTempStartEndTime['end_record_datetime'];
+            // $break_end_time = $param_break_leaving_time;
+        } elseif ($param_target_result->holiday_description == Config::get('const.C013_DESC_VALUE.half_pm')) {
+            $break_start_time = $param_break_attendance_time;
+            $break_end_time = $result_getHolydayTempStartEndTime['end_record_datetime'];
+        } else {
+            $index = (int)(Config::get('const.C004.regular_working_time'))-1;
+            if ($param_array_calc_time[$index] > 0) {
+                $break_workingtime = $param_array_calc_time[$index] - $param_array_missing_middle_time[$index];
+            }
+            // Log::debug('---------------------- 休暇集計以外労働時間計算 calcHolidayRegulartime end ------------------------ ');
+            return $break_workingtime;
+        }
+        // Log::debug('休暇労働時間 $break_start_time = '.$break_start_time);
+        // Log::debug('休暇労働時間 $break_end_time = '.$break_end_time);
+        // 労働時間の計算
+        if (($break_start_time != "" && $break_start_time != null)
+            && ($break_end_time != "" && $break_end_time != null)) {
+            if ($break_start_time > $break_end_time) {
+                $dt = new Carbon($break_end_time);
+                $break_end_time = date_format($dt->copy()->addDay(), 'Y-m-d H:i:s');
+                // Log::debug('休暇労働時間 next   $break_end_time = '.$break_end_time);
+            }
+            $apicommon = new ApiCommonController();
+            $break_workingtime = $apicommon->diffTimeSerial($break_start_time, $break_end_time);
+            // Log::debug('休暇労働時間 $break_workingtime = '.$break_workingtime);
+            // 休憩時間があれば減算
+            $braek_time = $apicommon->calcBetweenBreakTime(
+                $break_start_time,
+                $break_end_time,
+                $param_target_date,
+                $param_timetables,
+                $param_target_result->working_timetable_no,
+                null,
+                null);
+        }
+        // Log::debug('休暇労働時間 $break_workingtime = '.$break_workingtime);
+        // Log::debug('休暇労働時間 $braek_time = '.$braek_time);
+        $break_workingtime = $break_workingtime - $braek_time;
+
+        // Log::debug('---------------------- 休暇集計労働時間計算 calcHolidayRegulartime end ------------------------ ');
+        // Log::debug('$break_workingtime ='.$break_workingtime);
+        return $break_workingtime;
+    }
+
+    /**
+     * 休暇集計打刻仮時刻設定
+     * 
+     *      有給休暇などの休暇字の集計のため、仮の打刻時刻を設定する
+     *      出勤・退勤はタイムテーブルの所定時刻の時刻を返却
+     *
+     * @return 
+     */
+    private function getHolydayTempStartEndTime($params)
+    {
+        // Log::debug('---------------------- getHolydayTempStartEndTime in ------------------------ ');
+        $param_array_break_worktimetable_result = $params['array_break_worktimetable_result'];
+        $param_target_date = $params['target_date'];
+        $param_working_timetable_no = $params['working_timetable_no'];
+        $param_user_holiday_description = $params['user_holiday_description'];
+        $result_start_record_datetime = null;
+        $result_end_record_datetime = null;
+
+        $collect_array_break_worktimetable_result = collect($param_array_break_worktimetable_result);
+        // 1日集計対象休暇
+        if ($param_user_holiday_description == Config::get('const.C013_DESC_VALUE.target_calc_time')) {
+            $dt = date_format(new Carbon($param_target_date), 'Y-m-d');
+            $filtered = $collect_array_break_worktimetable_result
+                ->where('no', '=', $param_working_timetable_no)
+                ->where('working_time_kubun', Config::get('const.C004.regular_working_time'));
+            foreach ($filtered as $item) {
+                $result_start_record_datetime = $dt.' '.$item->from_time;
+                $result_end_record_datetime = $dt.' '.$item->to_time;
+                break;
+            }
+        }elseif ($param_user_holiday_description == Config::get('const.C013_DESC_VALUE.half_am')) {
+            $dt = date_format(new Carbon($param_target_date), 'Y-m-d');
+            $filtered = $collect_array_break_worktimetable_result
+                ->where('no', '=', $param_working_timetable_no)
+                ->where('working_time_kubun', '=', Config::get('const.C004.regular_working_time'));
+            foreach ($filtered as $item) {
+                $result_start_record_datetime = $dt.' '.$item->from_time;
+                $result_end_record_datetime = $dt.' '.$item->to_time;
+                break;
+            }
+        }elseif ($param_user_holiday_description == Config::get('const.C013_DESC_VALUE.half_pm')) {
+            $dt = date_format(new Carbon($param_target_date), 'Y-m-d');
+            $filtered = $collect_array_break_worktimetable_result
+                ->where('no', '=', $param_working_timetable_no)
+                ->where('working_time_kubun', '=', Config::get('const.C004.regular_working_time'));
+            // 出勤は打刻時刻とするため未設定
+            foreach ($filtered as $item) {
+                $result_end_record_datetime = $dt.' '.$item->to_time;
+                break;
+            }
+        }
+        // Log::debug('---------------------- setNoteLateEtc end ------------------------ ');
+
+        return array(
+            'start_record_datetime' => $result_start_record_datetime,
+            'end_record_datetime' =>$result_end_record_datetime);
+    }
+ 
+    /**
+     * 普通残業時間計算
+     * 
+     *
+     * @return 
+     */
+    private function calcOvertime($params)
+    {
+        // Log::debug('---------------------- 普通残業時間計算 calcOvertime in ------------------------ ');
+        // パラメータ設定
+        $param_target_result = $params['target_result'];
+        $param_array_calc_time = $params['array_calc_time'];
+        $param_array_missing_middle_time = $params['array_missing_middle_time'];
+
+        $index = (int)(Config::get('const.C004.out_of_regular_working_time'))-1;
+        $w_time = 0;
+        $overtime_hours = 0;
+        // $array_calc_time[$index]=0はまだ退勤していないということ
+        if ($param_array_calc_time[$index] > 0) {
+            $overtime_hours = $param_array_calc_time[$index] - $param_array_missing_middle_time[$index];
+        }
+
+        // Log::debug('---------------------- 普通残業時間計算 calcOvertime ed ------------------------ ');
+        // Log::debug('$overtime_hours ='.$overtime_hours);
+        return $overtime_hours;
+    }
+ 
+    /**
+     * 深夜残業時間計算
+     * 
+     *
+     * @return 
+     */
+    private function calcLatenightovertime($params)
+    {
+        // Log::debug('---------------------- 深夜残業時間計算 calcLatenightovertime in ------------------------ ');
+        // パラメータ設定
+        $param_array_calc_time = $params['array_calc_time'];
+        $param_array_missing_middle_time = $params['array_missing_middle_time'];
+
+        $index = (int)(Config::get('const.C004.out_of_regular_night_working_time'))-1;
+        $lastnight_overtime_hours = 0;
+        // $array_calc_time[$index]=0はまだ退勤していないということ
+        if ($param_array_calc_time[$index] > 0) {
+            $lastnight_overtime_hours = $param_array_calc_time[$index] - $param_array_missing_middle_time[$index];
+        }
+
+        // Log::debug('---------------------- 深夜残業時間計算 calcLatenightovertime end ------------------------ ');
+        // Log::debug('$lastnight_overtime_hours ='.$lastnight_overtime_hours);
+        return $lastnight_overtime_hours;
+    }
+ 
+    /**
+     * 不就労時間計算
+     * 
+     *
+     * @return 
+     */
+    private function calcNotemploymentworkinghours($params)
+    {
+        // Log::debug('---------------------- 不就労時間計算 calcNotemploymentworkinghours in ------------------------ ');
+        // パラメータ設定
+        $param_target_user_code = $params['target_user_code'];
+        $param_target_department_code = $params['target_department_code'];
+        $param_target_date = $params['target_date'];
+        $param_target_result = $params['target_result'];
+        $array_break_worktimetable_result = $params['array_break_worktimetable_result'];
+        $param_array_calc_time = $params['array_calc_time'];
+        $param_array_missing_middle_time = $params['array_missing_middle_time'];
+        $param_regular_calc_time = $params['regular_calc_time'];
+
+        // // 規則所定労働時間を求める
+        // $timetable_model = new WorkingTimeTable();
+        // $timetable_model->setParamdatefromAttribute($param_target_date);
+        // $timetable_model->setParamdatetoAttribute($param_target_date);
+        // $timetable_model->setParamemploymentstatusAttribute($param_target_result->employment_status);
+        // $timetable_model->setParamDepartmentcodeAttribute($param_target_department_code);
+        // $timetable_model->setParamUsercodeAttribute($param_target_user_code);
+        // // 平日は設定している所定労働時間を求める
+        // // 休日は所定労働時間=8時間であるが、（所定という概念ではない）
+        // $w_not_employment_time = 0;
+        // if ($param_target_result->business_kubun == Config::get('const.C007.basic')) {
+        //     $apicommon = new ApiCommonController();
+        //     // 引数のtimetablesとは条件がちがうので取得しなおし
+        //     $w_timetables = $timetable_model->getWorkingTimeTableJoin();
+        //     $calc_time = 0;
+        //     if (count($w_timetables) > 0) {
+        //         $w_time = 0;
+        //         $w_break_time = 0;
+        //         $w_from_time1 = "";
+        //         $w_from_time2 = "";
+        //         $w_to_time1 = "";
+        //         $w_to_time2 = "";
+        //         $target_dt = new Carbon($param_target_date);
+        //         foreach($w_timetables as $item) {
+        //             if ($item->working_time_kubun == Config::get('const.C004.regular_working_time')) {
+        //                 if (isset($item->from_time) && isset($item->to_time)) {
+        //                     if ($item->from_time < $item->to_time) {
+        //                         $from_time = date_format($target_dt, 'Y-m-d').' '.$item->from_time;
+        //                         $to_time = date_format($target_dt, 'Y-m-d').' '.$item->to_time;
+        //                         $w_time += $apicommon->diffTimeSerial($from_time, $to_time);
+        //                         $w_from_time1 = $item->from_time;
+        //                         $w_to_time1 = $item->to_time;
+        //                         $w_from_time2 = $item->from_time;
+        //                         $w_to_time2 = $item->to_time;
+        //                     } else {
+        //                         $from_time = date_format($target_dt, 'Y-m-d').' '.$item->from_time;
+        //                         $to_time = date_format($target_dt, 'Y-m-d').' '.$item->to_time;
+        //                         Log::ERROR('不就労2 $from_time '.$from_time);
+        //                         Log::ERROR('不就労2 $to_time '.$to_time);
+        //                         $nextdt =$apicommon->getNextDay(new Carbon($to_time), 'Y/m/d');
+        //                         $to_time = date_format(new Carbon($nextdt), 'Y-m-d').' 00:00:00';
+        //                         $w_time += $apicommon->diffTimeSerial($from_time, $to_time);
+        //                         $w_from_time1 = $item->from_time;
+        //                         $w_to_time1 = '00:00:00';
+        //                         $from_time = $to_time;
+        //                         $to_time = date_format(new Carbon($nextdt), 'Y-m-d').' '.$item->to_time;
+        //                         $w_time += $apicommon->diffTimeSerial($from_time, $to_time);
+        //                         $w_from_time2 = '00:00:00';
+        //                         $w_to_time2 = $item->to_time;
+        //                     }
+        //                 }
+        //             }
+        //             // 所定労働時間内の休憩の場合はその分を減算する
+        //             if ($item->working_time_kubun == Config::get('const.C004.regular_working_breaks_time')) {
+        //                 if (isset($item->from_time) && isset($item->to_time)) {
+        //                     if (($item->from_time > $w_from_time1 && $item->from_time < $w_to_time1) ||
+        //                         ($item->from_time > $w_from_time2 && $item->from_time < $w_to_time2)) {
+        //                         if ($item->from_time < $item->to_time) {
+        //                             $from_time = date_format($target_dt, 'Y-m-d').' '.$item->from_time;
+        //                             $to_time = date_format($target_dt, 'Y-m-d').' '.$item->to_time;
+        //                             $w_break_time += $apicommon->diffTimeSerial($from_time, $to_time);
+        //                         } else {
+        //                             $from_time = date_format($target_dt, 'Y-m-d').' '.$item->from_time;
+        //                             $to_time = date_format($target_dt, 'Y-m-d').' '.$item->to_time;
+        //                             $nextdt =$apicommon->getNextDay(new Carbon($to_time), 'Y/m/d');
+        //                             $to_time = date_format($nextdt, 'Y-m-d').' 00:00:00';
+        //                             $w_break_time += $apicommon->diffTimeSerial($from_time, $to_time);
+        //                             $from_time = $to_time;
+        //                             $to_time = date_format(new Carbon($nextdt), 'Y-m-d').' '.$item->to_time;
+        //                             $w_break_time += $apicommon->diffTimeSerial($from_time, $to_time);
+        //                         }
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     if ($param_regular_calc_time > 0) {
+        //         $w_not_employment_time = $w_time - $w_break_time - $param_regular_calc_time;
+        //         if ($w_not_employment_time < 0) { $w_not_employment_time = 0; }
+        //     } else {
+        //         // 欠勤の場合は規則所定労働時間を不就労に設定
+        //         if ($param_target_result->holiday_kubun == Config::get('const.C013.absence_work')) {
+        //             $w_not_employment_time = $w_time - $w_break_time;
+        //             if ($w_not_employment_time < 0) { $w_not_employment_time = 0; }
+        //         }
+        //     }
+        // }
+        // 平日は設定している所定労働時間を求める
+        // 休日は所定労働時間=8時間であるが、（所定という概念ではない）
+        $w_not_employment_time = 0;
+        if ($param_target_result->business_kubun == Config::get('const.C007.basic')) {
+            $collect_break_worktimetable_result = Collect($array_break_worktimetable_result);
+            $filtered = $collect_break_worktimetable_result
+            ->where('no', $param_target_result->working_timetable_no)
+            ->where('working_time_kubun', Config::get('const.C004.regular_working_time'));
+            $calc_retimes = 0;
+            $apicommon = new ApiCommonController();
+            $from_time = null;
+            $to_time = null;
+            foreach($filtered as $item) {
+                // 所定労働時間開始と終了
+                $target_result_from_time = $item->from_time;
+                $target_result_to_time = $item->to_time;
+                // Log::debug('不就労1 $target_result_from_time '.$target_result_from_time);
+                // Log::debug('不就労1 $target_result_to_time '.$target_result_to_time);
+                $target_dt = new Carbon($param_target_date);
+                if (isset($target_result_from_time) && isset($target_result_to_time)) {
+                    if ($target_result_from_time < $target_result_to_time) {
+                        $from_time = date_format($target_dt, 'Y-m-d').' '.$target_result_from_time;
+                        $to_time = date_format($target_dt, 'Y-m-d').' '.$target_result_to_time;
+                    } else {
+                        $from_time = date_format($target_dt, 'Y-m-d').' '.$target_result_from_time;
+                        $to_time = date_format($target_dt, 'Y-m-d').' '.$target_result_to_time;
+                        $nextdt =$apicommon->getNextDay(new Carbon($to_time), 'Y/m/d');
+                        $to_time = date_format(new Carbon($nextdt), 'Y-m-d').' 00:00:00';
+                    }
+                    // Log::debug('不就労2 $from_time '.$from_time);
+                    // Log::debug('不就労2 $to_time '.$to_time);
+                    break;
+                }
+            }
+            $w_regular_time = 0;        // 所定時間数
+            $braek_time = 0;
+            // Log::debug('不就労3 $from_time ='.$from_time);
+            // Log::debug('不就労3 $to_time ='.$to_time);
+            if (isset($from_time) && isset($to_time)) {
+                $w_regular_time += $apicommon->diffTimeSerial($from_time, $to_time);
+                // 所定労働時間内の休憩の場合はその分を減算する
+                $braek_time = $apicommon->calcBetweenBreakTime(
+                    $from_time,
+                    $to_time,
+                    $param_target_date,
+                    $collect_break_worktimetable_result,
+                    $param_target_result->working_timetable_no,
+                    null, null);
+            }
+            $w_not_employment_time = 0;
+            if ($param_regular_calc_time > 0) {
+                // 所定時間数 - 休憩時間数 - 所定労働時間数
+                // Log::debug('不就労4 $w_regular_time ='.$w_regular_time);
+                // Log::debug('不就労4 $braek_time ='.$braek_time);
+                // Log::debug('不就労4 $param_regular_calc_time ='.$param_regular_calc_time);
+                $w_not_employment_time = $w_regular_time - $braek_time - $param_regular_calc_time;
+                if ($w_not_employment_time < 0) { $w_not_employment_time = 0; }
+            } else {
+                // 欠勤の場合は規則所定労働時間を不就労に設定
+                if ($param_target_result->holiday_kubun == Config::get('const.C013.absence_work')) {
+                    $w_not_employment_time = $w_regular_time - $braek_time;
+                    if ($w_not_employment_time < 0) { $w_not_employment_time = 0; }
+                }
+            }
+        }
+
+        // Log::debug('---------------------- 不就労時間計算 calcNotemploymentworkinghours end ------------------------ ');
+        // Log::debug('$w_not_employment_time ='.$w_not_employment_time);
+        return $w_not_employment_time;
+    }
+
     /**
      * 打刻時刻状況の判定
      * 
@@ -6334,14 +8200,12 @@ class DailyWorkingInformationController extends Controller
      */
     private function setNoteLateEtc($target_result)
     {
-        Log::DEBUG('---------------------- setNoteLateEtc in ------------------------ ');
+        // Log::debug('---------------------- setNoteLateEtc in ------------------------ ');
         $note = '';
         $late = '';
         $leave_early = '';
         $to_be_confirmed = '';
-        Log::DEBUG('        before $target_result->note = '.$target_result->note);
         if (isset($target_result->note)) { $note .= $target_result->note.' '; }
-        Log::DEBUG('        after $target_result->note = '.$note);
         if (isset($target_result->working_interval)) {
             if ($target_result->mode == Config::get('const.C005.attendance_time')) {
                 if ($target_result->working_interval == '1') {
@@ -6364,7 +8228,7 @@ class DailyWorkingInformationController extends Controller
                 $to_be_confirmed = '1';
             }
         }
-        Log::DEBUG('---------------------- setNoteLateEtc end ------------------------ ');
+        // Log::debug('---------------------- setNoteLateEtc end ------------------------ ');
 
         return array($note, $late, $leave_early, $to_be_confirmed);
     }
@@ -6377,12 +8241,12 @@ class DailyWorkingInformationController extends Controller
      */
     private function chkWorkingTime($target_array_time, $max_cnt)
     {
-        Log::DEBUG('---------------------- chkWorkingTime in ------------------------ ');
+        // Log::debug('---------------------- chkWorkingTime in ------------------------ ');
         // 打刻５回までチェック
         if (count($target_array_time) > $max_cnt) {
             return false;
         }
-        Log::DEBUG('---------------------- chkWorkingTime end ------------------------ ');
+        // Log::debug('---------------------- chkWorkingTime end ------------------------ ');
 
         return true;
     }
@@ -6395,7 +8259,7 @@ class DailyWorkingInformationController extends Controller
      */
     private function decideWorkingTimeFrom($target_array_time, $index)
     {
-        Log::DEBUG('---------------------- decideWorkingTimeFrom in ------------------------ ');
+        // Log::debug('---------------------- decideWorkingTimeFrom in ------------------------ ');
         $arrray_decide_times = array();
         for ($i=0;$i<$index;$i++) {
             if (count($target_array_time) > 0 && $i < count($target_array_time)){
@@ -6404,7 +8268,7 @@ class DailyWorkingInformationController extends Controller
                 $arrray_decide_times[$i] = null;
             }
         }
-        Log::DEBUG('---------------------- decideWorkingTimeFrom end ------------------------ ');
+        // Log::debug('---------------------- decideWorkingTimeFrom end ------------------------ ');
 
         return $arrray_decide_times;
     }
@@ -6417,38 +8281,688 @@ class DailyWorkingInformationController extends Controller
      */
     private function decideWorkingTimeTo($target_array_time, $index, $from_array_time, $from_array_cnt)
     {
-        Log::DEBUG('---------------------- decideWorkingTimeTo in ------------------------ ');
+        // Log::debug('---------------------- decideWorkingTimeTo in ------------------------ ');
+        $arrray_decide_times = array();
+        for ($i=0;$i<$index;$i++) {
+            if (count($target_array_time) > 0 && $i < count($target_array_time)){
+                $arrray_decide_times[$i] = $target_array_time[$i];
+            } else {
+                $arrray_decide_times[$i] = null;
+            }
+        }
+        // Log::debug('---------------------- decideWorkingTimeTo end ------------------------ ');
+
+        return $arrray_decide_times;
+    }
+ 
+    /**
+     * 終了打刻時刻設定値を決める
+     * 
+     *
+     * @return 
+     */
+    private function decideWorkingTimeTo20200215($target_array_time, $index, $from_array_time, $from_array_cnt)
+    {
+        // Log::debug('---------------------- decideWorkingTimeTo in ------------------------ ');
         $arrray_decide_times = array();
         // 開始時刻より過去は設定しないため設定するindexも調整するためindexを別途準備
         $set_index = 0;
+        $set_j = 0;
+        $set_strat_j = 0;
         $set_flg = false;
         for ($i=0;$i<$from_array_cnt;$i++) {
             $set_flg = false;
-            for ($j=0;$j<$index;$j++) {
+            for ($j=$set_strat_j;$j<$index;$j++) {
                 if (count($target_array_time) > 0 && $i < count($target_array_time)){
                     // 開始時刻<target_array_timeを設定
                     if ($target_array_time[$j] > $from_array_time[$i]) {
                         $set_index++;
                         $arrray_decide_times[$set_index-1] = $target_array_time[$j];
                         $set_flg = true;
+                        $set_j = $j;
+                        $set_strat_j = $j+1;
                         break;
                     }
                 }
             }
             if (!$set_flg) {
                 $set_index++;
-                $arrray_decide_times[$set_index-1] = null;
+                $arrray_decide_times[$set_index-1] = $target_array_time[$set_j];
+                $set_strat_j = $set_j+1;
             }
         }
 
         if ($from_array_cnt == 0) {
             $arrray_decide_times = $target_array_time;
         }
-        Log::DEBUG('---------------------- decideWorkingTimeTo end ------------------------ ');
+        // Log::debug('---------------------- decideWorkingTimeTo end ------------------------ ');
 
         return $arrray_decide_times;
     }
+ 
+    /**
+     * calcTempWorkingTimeDateの次データ計算のための準備
+     * 
+     */
+    private function calcTempWorkingTimeDateNextData(
+        $array_working_time_kubun,
+        $result
+        )
+    {
+        $array_result_set0 = $this->setArrayTimeSet0(
+            $array_working_time_kubun
+        );
+        $array_calc_time = $array_result_set0['array_calc_time'];
+        $array_missing_middle_time = $array_result_set0['array_missing_middle_time'];
+        $array_public_going_out_time = $array_result_set0['array_public_going_out_time'];
+        $array_add_attendance_time = array();
+        $array_add_leaving_time = array();
+        $array_add_missing_middle_time = array();
+        $array_add_missing_return_time = array();
+        $array_add_public_going_out_time = array();
+        $array_add_public_return_time = array();
+        $array_add_attendance_time_positions = array();
+        $array_add_leaving_time_positions = array();
+        $array_add_missing_middle_time_positions = array();
+        $array_add_missing_return_time_positions = array();
+        $array_add_public_going_out_time_positions = array();
+        $array_add_public_return_time_positions = array();
+        $array_add_attendance_time_id = array();
+        $array_add_attendance_editor_department_code = array();
+        $array_add_attendance_editor_department_name = array();
+        $array_add_attendance_editor_user_code = array();
+        $array_add_attendance_editor_user_name = array();
+        $array_add_leaving_time_id = array();
+        $array_add_leaving_editor_department_code = array();
+        $array_add_leaving_editor_department_name = array();
+        $array_add_leaving_editor_user_code = array();
+        $array_add_leaving_editor_user_name = array();
+        $array_add_missing_middle_time_id = array();
+        $array_add_missing_middle_editor_department_code = array();
+        $array_add_missing_middle_editor_department_name = array();
+        $array_add_missing_middle_editor_user_code = array();
+        $array_add_missing_middle_editor_user_name = array();
+        $array_add_missing_return_time_id = array();
+        $array_add_missing_return_editor_department_code = array();
+        $array_add_missing_return_editor_department_name = array();
+        $array_add_missing_return_editor_user_code = array();
+        $array_add_missing_return_editor_user_name = array();
+        $array_add_public_going_out_time_id = array();
+        $array_add_public_going_out_editor_department_code = array();
+        $array_add_public_going_out_editor_department_name = array();
+        $array_add_public_going_out_editor_user_code = array();
+        $array_add_public_going_out_editor_user_name = array();
+        $array_add_public_return_time_id = array();
+        $array_add_public_return_editor_department_code = array();
+        $array_add_public_return_editor_department_name = array();
+        $array_add_public_return_editor_user_code = array();
+        $array_add_public_return_editor_user_name = array();
+        $attendance_time = "";
+        $leaving_time = "";
+        $missing_middle_time = "";
+        $missing_middle_return_time = "";
+        $public_going_out_time = "";
+        $public_going_out_return_time = "";
+        $attendance_time_positions = "";
+        $leaving_time_positions = "";
+        $missing_middle_time_positions = "";
+        $missing_return_time_positions = "";
+        $public_going_out_time_positions = "";
+        $public_return_time_positions = "";
+        $attendance_time_id = "";
+        $attendance_editor_department_code = "";
+        $attendance_editor_department_name = "";
+        $attendance_editor_user_code = "";
+        $attendance_editor_user_name = "";
+        $leaving_time_id = "";
+        $leaving_editor_department_code = "";
+        $leaving_editor_department_name = "";
+        $leaving_editor_user_code = "";
+        $leaving_editor_user_name = "";
+        $missing_middle_time_id = "";
+        $missing_middle_editor_department_code = "";
+        $missing_middle_editor_department_name = "";
+        $missing_middle_editor_user_code = "";
+        $missing_middle_editor_user_name = "";
+        $missing_middle_return_time_id = "";
+        $missing_return_editor_department_code = "";
+        $missing_return_editor_department_name = "";
+        $missing_return_editor_user_code = "";
+        $missing_return_editor_user_name = "";
+        $public_going_out_time_id = "";
+        $public_going_out_editor_department_code = "";
+        $public_going_out_editor_department_name = "";
+        $public_going_out_editor_user_code = "";
+        $public_going_out_editor_user_name = "";
+        $public_going_out_return_time_id = "";
+        $public_return_editor_department_code = "";
+        $public_return_editor_department_name = "";
+        $public_return_editor_user_code = "";
+        $public_return_editor_user_name = "";
 
+        $array_time_position = array();
+        if ($result->mode == Config::get('const.C005.attendance_time')) {
+            $array_time_position = $this->setTimePosition($result);
+            $attendance_time = $array_time_position['result_time'];
+            $attendance_time_id = $array_time_position['result_time_id'];
+            $attendance_editor_department_code = $array_time_position['result_editor_department_code'];
+            $attendance_editor_department_name = $array_time_position['result_editor_department_name'];
+            $attendance_editor_user_code = $array_time_position['result_editor_user_code'];
+            $attendance_editor_user_name = $array_time_position['result_editor_user_name'];
+            $attendance_time_positions =  $array_time_position['result_time_positions'];
+            if ($attendance_time <> ''){
+                $array_add_attendance_time[] = $attendance_time;
+                $array_add_attendance_time_id[] = $attendance_time_id;
+                $array_add_attendance_editor_department_code[] = $attendance_editor_department_code;
+                $array_add_attendance_editor_department_name[] = $attendance_editor_department_name;
+                $array_add_attendance_editor_user_code[] = $attendance_editor_user_code;
+                $array_add_attendance_editor_user_name[] = $attendance_editor_user_name;
+                $array_add_attendance_time_positions[] = $attendance_time_positions;
+            }
+        }
+        if ($result->mode == Config::get('const.C005.leaving_time')) {
+            $array_time_position = $this->setTimePosition($result);
+            $leaving_time = $array_time_position['result_time'];
+            $leaving_time_id = $array_time_position['result_time_id'];
+            $leaving_editor_department_code = $array_time_position['result_editor_department_code'];
+            $leaving_editor_department_name = $array_time_position['result_editor_department_name'];
+            $leaving_editor_user_code = $array_time_position['result_editor_user_code'];
+            $leaving_editor_user_name = $array_time_position['result_editor_user_name'];
+            $leaving_time_positions =  $array_time_position['result_time_positions'];
+            if ($leaving_time <> ''){
+                $array_add_leaving_time[] = $leaving_time;
+                $array_add_leaving_time_id[] = $leaving_time_id;
+                $array_add_leaving_editor_department_code[] = $leaving_editor_department_code;
+                $array_add_leaving_editor_department_name[] = $leaving_editor_department_name;
+                $array_add_leaving_editor_user_code[] = $leaving_editor_user_code;
+                $array_add_leaving_editor_user_name[] = $leaving_editor_user_name;
+                $array_add_leaving_time_positions[] = $leaving_time_positions;
+            }
+        }
+        if ($result->mode == Config::get('const.C005.missing_middle_time')) {
+            $array_time_position = $this->setTimePosition($result);
+            $missing_middle_time = $array_time_position['result_time'];
+            $missing_middle_time_id = $array_time_position['result_time_id'];
+            $missing_middle_editor_department_code = $array_time_position['result_editor_department_code'];
+            $missing_middle_editor_department_name = $array_time_position['result_editor_department_name'];
+            $missing_middle_editor_user_code = $array_time_position['result_editor_user_code'];
+            $missing_middle_editor_user_name = $array_time_position['result_editor_user_name'];
+            $missing_middle_time_positions =  $array_time_position['result_time_positions'];
+            if ($missing_middle_time <> ''){
+                $array_add_missing_middle_time[] = $missing_middle_time;
+                $array_add_missing_middle_time_id[] = $missing_middle_time_id;
+                $array_add_missing_middle_editor_department_code[] = $missing_middle_editor_department_code;
+                $array_add_missing_middle_editor_department_name[] = $missing_middle_editor_department_name;
+                $array_add_missing_middle_editor_user_code[] = $missing_middle_editor_user_code;
+                $array_add_missing_middle_editor_user_name[] = $missing_middle_editor_user_name;
+                $array_add_missing_middle_time_positions[] = $missing_middle_time_positions;
+            }
+        }
+        if ($result->mode == Config::get('const.C005.missing_middle_return_time')) {
+            $array_time_position = $this->setTimePosition($result);
+            $missing_middle_return_time = $array_time_position['result_time'];
+            $missing_middle_return_time_id = $array_time_position['result_time_id'];
+            $missing_return_editor_department_code = $array_time_position['result_editor_department_code'];
+            $missing_return_editor_department_name = $array_time_position['result_editor_department_name'];
+            $missing_return_editor_user_code = $array_time_position['result_editor_user_code'];
+            $missing_return_editor_user_name = $array_time_position['result_editor_user_name'];
+            $missing_return_time_positions =  $array_time_position['result_time_positions'];
+            if ($missing_middle_return_time <> ''){
+                $array_add_missing_return_time[] = $missing_middle_return_time;
+                $array_add_missing_return_time_id[] = $missing_middle_return_time_id;
+                $array_add_missing_return_editor_department_code[] = $missing_return_editor_department_code;
+                $array_add_missing_return_editor_department_name[] = $missing_return_editor_department_name;
+                $array_add_missing_return_editor_user_code[] = $missing_return_editor_user_code;
+                $array_add_missing_return_editor_user_name[] = $missing_return_editor_user_name;
+                $array_add_missing_return_time_positions[] = $missing_return_time_positions;
+            }
+        }
+        if ($result->mode == Config::get('const.C005.public_going_out_time')) {
+            $array_time_position = $this->setTimePosition($result);
+            $public_going_out_time = $array_time_position['result_time'];
+            $public_going_out_time_id = $array_time_position['result_time_id'];
+            $public_going_out_editor_department_code = $array_time_position['result_editor_department_code'];
+            $public_going_out_editor_department_name = $array_time_position['result_editor_department_name'];
+            $public_going_out_editor_user_code = $array_time_position['result_editor_user_code'];
+            $public_going_out_editor_user_name = $array_time_position['result_editor_user_name'];
+            $public_going_out_time_positions =  $array_time_position['result_time_positions'];
+            if ($public_going_out_time <> ''){
+                $array_add_public_going_out_time[] = $public_going_out_time;
+                $array_add_public_going_out_time_id[] = $public_going_out_time_id;
+                $array_add_public_going_out_editor_department_code[] = $public_going_out_editor_department_code;
+                $array_add_public_going_out_editor_department_name[] = $public_going_out_editor_department_name;
+                $array_add_public_going_out_editor_user_code[] = $public_going_out_editor_user_code;
+                $array_add_public_going_out_editor_user_name[] = $public_going_out_editor_user_name;
+                $array_add_public_going_out_time_positions[] = $public_going_out_time_positions;
+            }
+        }
+        if ($result->mode == Config::get('const.C005.public_going_out_return_time')) {
+            $array_time_position = $this->setTimePosition($result);
+            $public_going_out_return_time = $array_time_position['result_time'];
+            $public_going_out_return_time_id = $array_time_position['result_time_id'];
+            $public_return_editor_department_code = $array_time_position['result_editor_department_code'];
+            $public_return_editor_department_name = $array_time_position['result_editor_department_name'];
+            $public_return_editor_user_code = $array_time_position['result_editor_user_code'];
+            $public_return_editor_user_name = $array_time_position['result_editor_user_name'];
+            $public_return_time_positions =  $array_time_position['result_time_positions'];
+            if ($public_going_out_return_time <> ''){
+                $array_add_public_return_time[] = $public_going_out_return_time;
+                $array_add_public_return_time_id[] = $public_going_out_return_time_id;
+                $array_add_going_out_return_editor_department_code[] = $going_out_return_editor_department_code;
+                $array_add_going_out_return_editor_department_name[] = $going_out_return_editor_department_name;
+                $array_add_going_out_return_editor_user_code[] = $going_out_return_editor_user_code;
+                $array_add_going_out_return_editor_user_name[] = $going_out_return_editor_user_name;
+                $array_add_public_return_time_positions[] = $public_return_time_positions;
+            }
+        }
+
+        $this->calc_late_night_working_hours = 0;
+        return array(
+            'array_calc_time' => $array_calc_time,
+            'array_missing_middle_time' => $array_missing_middle_time,
+            'array_public_going_out_time' => $array_public_going_out_time,
+            'array_add_attendance_time' => $array_add_attendance_time,
+            'array_add_leaving_time' => $array_add_leaving_time,
+            'array_add_missing_middle_time' => $array_add_missing_middle_time,
+            'array_add_missing_return_time' => $array_add_missing_return_time,
+            'array_add_public_going_out_time' => $array_add_public_going_out_time,
+            'array_add_public_return_time' => $array_add_public_return_time,
+            'array_add_attendance_time_positions' => $array_add_attendance_time_positions,
+            'array_add_leaving_time_positions' => $array_add_leaving_time_positions,
+            'array_add_missing_middle_time_positions' => $array_add_missing_middle_time_positions,
+            'array_add_missing_return_time_positions' => $array_add_missing_return_time_positions,
+            'array_add_public_going_out_time_positions' => $array_add_public_going_out_time_positions,
+            'array_add_public_return_time_positions' => $array_add_public_return_time_positions,
+            'array_add_attendance_time_id' => $array_add_attendance_time_id,
+            'array_add_attendance_editor_department_code' => $array_add_attendance_editor_department_code,
+            'array_add_attendance_editor_department_name' => $array_add_attendance_editor_department_name,
+            'array_add_attendance_editor_user_code' => $array_add_attendance_editor_user_code,
+            'array_add_attendance_editor_user_name' => $array_add_attendance_editor_user_name,
+            'array_add_leaving_time_id' => $array_add_leaving_time_id,
+            'array_add_leaving_editor_department_code' => $array_add_leaving_editor_department_code,
+            'array_add_leaving_editor_department_name' => $array_add_leaving_editor_department_name,
+            'array_add_leaving_editor_user_code' => $array_add_leaving_editor_user_code,
+            'array_add_leaving_editor_user_name' => $array_add_leaving_editor_user_name,
+            'array_add_missing_middle_time_id' => $array_add_missing_middle_time_id,
+            'array_add_missing_middle_editor_department_code' => $array_add_missing_middle_editor_department_code,
+            'array_add_missing_middle_editor_department_name' => $array_add_missing_middle_editor_department_name,
+            'array_add_missing_middle_editor_user_code' => $array_add_missing_middle_editor_user_code,
+            'array_add_missing_middle_editor_user_name' => $array_add_missing_middle_editor_user_name,
+            'array_add_missing_return_time_id' => $array_add_missing_return_time_id,
+            'array_add_missing_return_editor_department_code' => $array_add_missing_return_editor_department_code,
+            'array_add_missing_return_editor_department_name' => $array_add_missing_return_editor_department_name,
+            'array_add_missing_return_editor_user_code' => $array_add_missing_return_editor_user_code,
+            'array_add_missing_return_editor_user_name' => $array_add_missing_return_editor_user_name,
+            'array_add_public_going_out_time_id' => $array_add_public_going_out_time_id,
+            'array_add_public_going_out_editor_department_code' => $array_add_public_going_out_editor_department_code,
+            'array_add_public_going_out_editor_department_name' => $array_add_public_going_out_editor_department_name,
+            'array_add_public_going_out_editor_user_code' => $array_add_public_going_out_editor_user_code,
+            'array_add_public_going_out_editor_user_name' => $array_add_public_going_out_editor_user_name,
+            'array_add_public_return_time_id' => $array_add_public_return_time_id,
+            'array_add_public_return_editor_department_code' => $array_add_public_return_editor_department_code,
+            'array_add_public_return_editor_department_name' => $array_add_public_return_editor_department_name,
+            'array_add_public_return_editor_user_code' => $array_add_public_return_editor_user_code,
+            'array_add_public_return_editor_user_name' => $array_add_public_return_editor_user_name,
+            'attendance_time' => $attendance_time,
+            'leaving_time' => $leaving_time,
+            'missing_middle_time' => $missing_middle_time,
+            'missing_middle_return_time' => $missing_middle_return_time,
+            'public_going_out_time' => $public_going_out_time,
+            'public_going_out_return_time' => $public_going_out_return_time,
+            'attendance_time_positions' => $attendance_time_positions,
+            'leaving_time_positions' => $leaving_time_positions,
+            'missing_middle_time_positions' => $missing_middle_time_positions,
+            'missing_return_time_positions' => $missing_return_time_positions,
+            'public_going_out_time_positions' => $public_going_out_time_positions,
+            'public_return_time_positions' => $public_return_time_positions,
+            'attendance_time_id' => $attendance_time_id,
+            'attendance_editor_department_code' => $attendance_editor_department_code,
+            'attendance_editor_department_name' => $attendance_editor_department_name,
+            'attendance_editor_user_code' => $attendance_editor_user_code,
+            'attendance_editor_user_name' => $attendance_editor_user_name,
+            'leaving_time_id' => $leaving_time_id,
+            'leaving_editor_department_code' => $leaving_editor_department_code,
+            'leaving_editor_department_name' => $leaving_editor_department_name,
+            'leaving_editor_user_code' => $leaving_editor_user_code,
+            'leaving_editor_user_name' => $leaving_editor_user_name,
+            'missing_middle_time_id' => $missing_middle_time_id,
+            'missing_middle_editor_department_code' => $missing_middle_editor_department_code,
+            'missing_middle_editor_department_name' => $missing_middle_editor_department_name,
+            'missing_middle_editor_user_code' => $missing_middle_editor_user_code,
+            'missing_middle_editor_user_name' => $missing_middle_editor_user_name,
+            'missing_middle_return_time_id' => $missing_middle_return_time_id,
+            'missing_return_editor_department_code' => $missing_return_editor_department_code,
+            'missing_return_editor_department_name' => $missing_return_editor_department_name,
+            'missing_return_editor_user_code' => $missing_return_editor_user_code,
+            'missing_return_editor_user_name' => $missing_return_editor_user_name,
+            'public_going_out_time_id' => $public_going_out_time_id,
+            'public_going_out_editor_department_code' => $public_going_out_editor_department_code,
+            'public_going_out_editor_department_name' => $public_going_out_editor_department_name,
+            'public_going_out_editor_user_code' => $public_going_out_editor_user_code,
+            'public_going_out_editor_user_name' => $public_going_out_editor_user_name,
+            'public_going_out_return_time_id' => $public_going_out_return_time_id,
+            'public_return_editor_department_code' => $public_return_editor_department_code,
+            'public_return_editor_department_name' => $public_return_editor_department_name,
+            'public_return_editor_user_code' => $public_return_editor_user_code,
+            'public_return_editor_user_name' => $public_return_editor_user_name
+        );
+    }
+
+    /**
+     * 労働時間数配列初期化
+     * 
+     */
+    private function setArrayTimeSet0($array_working_time_kubun)
+    {
+        $array_calc_time = array(); 
+        $array_missing_middle_time = array(); 
+        $array_public_going_out_time = array(); 
+        for ($i=0;$i<count($array_working_time_kubun);$i++) {
+            $array_calc_time[$i] = 0; 
+            $array_missing_middle_time[$i] = 0; 
+            $array_public_going_out_time[$i] = 0; 
+        }
+
+        return array(
+            'array_calc_time' => $array_calc_time,
+            'array_missing_middle_time' => $array_missing_middle_time,
+            'array_public_going_out_time' => $array_public_going_out_time
+        );
+    }
+
+    /**
+     * 休暇集計の場合仮出勤
+     * 
+     */
+    private function setUserHolidayStartEndTime($array_working_time_kubun)
+    {
+        $array_calc_time = array(); 
+        $array_missing_middle_time = array(); 
+        $array_public_going_out_time = array(); 
+        for ($i=0;$i<count($array_working_time_kubun);$i++) {
+            $array_calc_time[$i] = 0; 
+            $array_missing_middle_time[$i] = 0; 
+            $array_public_going_out_time[$i] = 0; 
+        }
+
+        return array(
+            'array_calc_time' => $array_calc_time,
+            'array_missing_middle_time' => $array_missing_middle_time,
+            'array_public_going_out_time' => $array_public_going_out_time
+        );
+    }
+ 
+    /**
+     * 時刻と位置情報の設定
+     * 
+     */
+    private function setTimePosition($result)
+    {
+        $result_time = $result->record_datetime;
+        $result_time_id = $result->work_times_id;
+        $result_editor_department_code = $result->editor_department_code;
+        $result_editor_department_name = $result->editor_department_name;
+        $result_editor_user_code = $result->editor_user_code;
+        $result_editor_user_name = $result->editor_user_name;
+        if (isset($result->x_positions) && isset($result->y_positions)) {
+            $result_time_positions = $result->x_positions.' '.$result->y_positions;
+        } else {
+            $result_time_positions = null;
+        }
+
+        return array(
+            'result_time' => $result_time,
+            'result_time_id' => $result_time_id,
+            'result_editor_department_code' => $result_editor_department_code,
+            'result_editor_department_name' => $result_editor_department_name,
+            'result_editor_user_code' => $result_editor_user_code,
+            'result_editor_user_name' => $result_editor_user_name,
+            'result_time_positions' => $result_time_positions);
+    }
+
+    /**
+     * 勤怠集計結果コレクション設定
+     * 
+     *
+     * @return 
+     */
+    private function setCollect_Working_time($array_setting_time, $time_cnt, $issetspace)
+    {
+
+        // 勤怠集計結果コレクション設定
+        $array_working_time_attendances = array();
+        if (isset($array_setting_time['attendance_time_'.$time_cnt]) ||
+            isset($array_setting_time['leaving_time_'.$time_cnt]) ||
+            isset($array_setting_time['missing_middle_time_'.$time_cnt]) ||
+            isset($array_setting_time['missing_middle_return_time_'.$time_cnt]) ||
+            isset($array_setting_time['public_going_out_time_'.$time_cnt]) ||
+            isset($array_setting_time['public_going_out_return_time_'.$time_cnt]) ) {
+            $array_working_time_attendances[] = array(
+                'attendance_time' => $array_setting_time['attendance_time_'.$time_cnt],
+                'attendance_time_id' => $array_setting_time['attendance_time_id_'.$time_cnt],
+                'attendance_editor_department_code' => $array_setting_time['attendance_editor_department_code_'.$time_cnt],
+                'attendance_editor_department_name' => $array_setting_time['attendance_editor_department_name_'.$time_cnt],
+                'attendance_editor_user_code' => $array_setting_time['attendance_editor_user_code_'.$time_cnt],
+                'attendance_editor_user_name' => $array_setting_time['attendance_editor_user_name_'.$time_cnt],
+                'x_attendance_time_positions' => $array_setting_time['x_attendance_time_positions_'.$time_cnt],
+                'y_attendance_time_positions' => $array_setting_time['y_attendance_time_positions_'.$time_cnt],
+                'leaving_time' => $array_setting_time['leaving_time_'.$time_cnt],
+                'leaving_time_id' => $array_setting_time['leaving_time_id_'.$time_cnt],
+                'leaving_editor_department_code' => $array_setting_time['leaving_editor_department_code_'.$time_cnt],
+                'leaving_editor_department_name' => $array_setting_time['leaving_editor_department_name_'.$time_cnt],
+                'leaving_editor_user_code' => $array_setting_time['leaving_editor_user_code_'.$time_cnt],
+                'leaving_editor_user_name' => $array_setting_time['leaving_editor_user_name_'.$time_cnt],
+                'x_leaving_time_positions' => $array_setting_time['x_leaving_time_positions_'.$time_cnt],
+                'y_leaving_time_positions' => $array_setting_time['y_leaving_time_positions_'.$time_cnt],
+                'missing_middle_time' => $array_setting_time['missing_middle_time_'.$time_cnt],
+                'missing_middle_time_id' => $array_setting_time['missing_middle_time_id_'.$time_cnt],
+                'missing_editor_department_code' => $array_setting_time['missing_editor_department_code_'.$time_cnt],
+                'missing_editor_department_name' => $array_setting_time['missing_editor_department_name_'.$time_cnt],
+                'missing_editor_user_code' => $array_setting_time['missing_editor_user_code_'.$time_cnt],
+                'missing_editor_user_name' => $array_setting_time['missing_editor_user_name_'.$time_cnt],
+                'x_missing_middle_time_positions' => $array_setting_time['x_missing_middle_time_positions_'.$time_cnt],
+                'y_missing_middle_time_positions' => $array_setting_time['y_missing_middle_time_positions_'.$time_cnt],
+                'missing_middle_return_time' => $array_setting_time['missing_middle_return_time_'.$time_cnt],
+                'missing_middle_return_time_id' => $array_setting_time['missing_middle_return_time_id_'.$time_cnt],
+                'missing_return_editor_department_code' => $array_setting_time['missing_return_editor_department_code_'.$time_cnt],
+                'missing_return_editor_department_name' => $array_setting_time['missing_return_editor_department_name_'.$time_cnt],
+                'missing_return_editor_user_code' => $array_setting_time['missing_return_editor_user_code_'.$time_cnt],
+                'missing_return_editor_user_name' => $array_setting_time['missing_return_editor_user_name_'.$time_cnt],
+                'x_missing_middle_return_time_positions' => $array_setting_time['x_missing_middle_return_time_positions_'.$time_cnt],
+                'y_missing_middle_return_time_positions' => $array_setting_time['y_missing_middle_return_time_positions_'.$time_cnt],
+                'public_going_out_time' => $array_setting_time['public_going_out_time_'.$time_cnt],
+                'public_going_out_time_id' => $array_setting_time['public_going_out_time_id_'.$time_cnt],
+                'public_editor_department_code' => $array_setting_time['public_editor_department_code_'.$time_cnt],
+                'public_editor_department_name' => $array_setting_time['public_editor_department_name_'.$time_cnt],
+                'public_editor_user_code' => $array_setting_time['public_editor_user_code_'.$time_cnt],
+                'public_editor_user_name' => $array_setting_time['public_editor_user_name_'.$time_cnt],
+                'x_public_going_out_time_positions' => $array_setting_time['x_public_going_out_time_positions_'.$time_cnt],
+                'y_public_going_out_time_positions' => $array_setting_time['y_public_going_out_time_positions_'.$time_cnt],
+                'public_going_out_return_time' => $array_setting_time['public_going_out_return_time_'.$time_cnt],
+                'public_going_out_return_time_id' => $array_setting_time['public_going_out_return_time_id_'.$time_cnt],
+                'public_return_editor_department_code' => $array_setting_time['public_return_editor_department_code_'.$time_cnt],
+                'public_return_editor_department_name' => $array_setting_time['public_return_editor_department_name_'.$time_cnt],
+                'public_return_editor_user_code' => $array_setting_time['public_return_editor_user_code_'.$time_cnt],
+                'public_return_editor_user_name' => $array_setting_time['public_return_editor_user_name_'.$time_cnt],
+                'x_public_going_out_return_time_positions' => $array_setting_time['x_public_going_out_return_time_positions_'.$time_cnt],
+                'y_public_going_out_return_time_positions' => $array_setting_time['y_public_going_out_return_time_positions_'.$time_cnt]
+            );
+        } else {
+            if ($issetspace) {
+                $array_working_time_attendances[] = array(
+                    'attendance_time' => '',
+                    'attendance_time_id' => '',
+                    'attendance_editor_department_code' => '',
+                    'attendance_editor_department_name' => '',
+                    'attendance_editor_user_code' => '',
+                    'attendance_editor_user_name' => '',
+                    'x_attendance_time_positions' => '',
+                    'y_attendance_time_positions' => '',
+                    'leaving_time' => '',
+                    'leaving_time_id' => '',
+                    'leaving_editor_department_code' => '',
+                    'leaving_editor_department_name' => '',
+                    'leaving_editor_user_code' => '',
+                    'leaving_editor_user_name' => '',
+                    'x_leaving_time_positions' => '',
+                    'y_leaving_time_positions' => '',
+                    'missing_middle_time' => '',
+                    'missing_middle_time_id' => '',
+                    'missing_editor_department_code' => '',
+                    'missing_editor_department_name' => '',
+                    'missing_editor_user_code' => '',
+                    'missing_editor_user_name' => '',
+                    'x_missing_middle_time_positions' => '',
+                    'y_missing_middle_time_positions' => '',
+                    'missing_middle_return_time' => '',
+                    'missing_middle_return_time_id' => '',
+                    'missing_return_editor_department_code' => '',
+                    'missing_return_editor_department_name' => '',
+                    'missing_return_editor_user_code' => '',
+                    'missing_return_editor_user_name' => '',
+                    'x_missing_middle_return_time_positions' => '',
+                    'y_missing_middle_return_time_positions' => '',
+                    'public_going_out_time' => '',
+                    'public_going_out_time_id' => '',
+                    'public_editor_department_code' => '',
+                    'public_editor_department_name' => '',
+                    'public_editor_user_code' => '',
+                    'public_editor_user_name' => '',
+                    'x_public_going_out_time_positions' => '',
+                    'y_public_going_out_time_positions' => '',
+                    'public_going_out_return_time' => '',
+                    'public_going_out_return_time_id' => '',
+                    'public_return_editor_department_code' => '',
+                    'public_return_editor_department_name' => '',
+                    'public_return_editor_user_code' => '',
+                    'public_return_editor_user_name' => '',
+                    'x_public_going_out_return_time_positions' => '',
+                    'y_public_going_out_return_time_positions' => ''
+                );
+            }
+        }
+        return $array_working_time_attendances;
+    }
+
+    /**
+     * 勤怠集計結果コレクション設定
+     * 
+     *
+     * @return 
+     */
+    private function setCollect_Working_time_public($array_setting_time, $time_cnt, $issetspace)
+    {
+
+        // 勤怠集計結果コレクション設定
+        $array_working_time_attendances = array();
+        if (isset($array_setting_time['public_going_out_time_'.$time_cnt]) ||
+            isset($array_setting_time['public_going_out_return_time_'.$time_cnt]) ) {
+            $array_working_time_attendances[] = array(
+                'attendance_time' => '',
+                'attendance_time_id' => '',
+                'attendance_editor_department_code' => '',
+                'attendance_editor_department_name' => '',
+                'attendance_editor_user_code' => '',
+                'attendance_editor_user_name' => '',
+                'x_attendance_time_positions' => '',
+                'y_attendance_time_positions' => '',
+                'leaving_time' => '',
+                'leaving_time_id' => '',
+                'leaving_editor_department_code' => '',
+                'leaving_editor_department_name' => '',
+                'leaving_editor_user_code' => '',
+                'leaving_editor_user_name' => '',
+                'x_leaving_time_positions' => '',
+                'y_leaving_time_positions' => '',
+                'missing_middle_time' => '',
+                'missing_middle_time_id' => '',
+                'missing_editor_department_code' => '',
+                'missing_editor_department_name' => '',
+                'missing_editor_user_code' => '',
+                'missing_editor_user_name' => '',
+                'x_missing_middle_time_positions' => '',
+                'y_missing_middle_time_positions' => '',
+                'missing_middle_return_time' => '',
+                'missing_middle_return_time_id' => '',
+                'missing_return_editor_department_code' => '',
+                'missing_return_editor_department_name' => '',
+                'missing_return_editor_user_code' => '',
+                'missing_return_editor_user_name' => '',
+                'x_missing_middle_return_time_positions' => '',
+                'y_missing_middle_return_time_positions' => '',
+                'public_going_out_time' => $array_setting_time['public_going_out_time_'.$time_cnt],
+                'public_going_out_time_id' => $array_setting_time['public_going_out_time_id_'.$time_cnt],
+                'public_editor_department_code' => $array_setting_time['public_editor_department_code_'.$time_cnt],
+                'public_editor_department_name' => $array_setting_time['public_editor_department_name_'.$time_cnt],
+                'public_editor_user_code' => $array_setting_time['public_editor_user_code_'.$time_cnt],
+                'public_editor_user_name' => $array_setting_time['public_editor_user_name_'.$time_cnt],
+                'x_public_going_out_time_positions' => $array_setting_time['x_public_going_out_time_positions_'.$time_cnt],
+                'y_public_going_out_time_positions' => $array_setting_time['y_public_going_out_time_positions_'.$time_cnt],
+                'public_going_out_return_time' => $array_setting_time['public_going_out_return_time_'.$time_cnt],
+                'public_going_out_return_time_id' => $array_setting_time['public_going_out_return_time_id_'.$time_cnt],
+                'public_return_editor_department_code' => $array_setting_time['public_return_editor_department_code_'.$time_cnt],
+                'public_return_editor_department_name' => $array_setting_time['public_return_editor_department_name_'.$time_cnt],
+                'public_return_editor_user_code' => $array_setting_time['public_return_editor_user_code_'.$time_cnt],
+                'public_return_editor_user_name' => $array_setting_time['public_return_editor_user_name_'.$time_cnt],
+                'x_public_going_out_return_time_positions' => $array_setting_time['x_public_going_out_return_time_positions_'.$time_cnt],
+                'y_public_going_out_return_time_positions' => $array_setting_time['y_public_going_out_return_time_positions_'.$time_cnt]
+            );
+        } else {
+            if ($issetspace) {
+                $array_working_time_attendances[] = array(
+                    'attendance_time' => '',
+                    'attendance_time_id' => '',
+                    'attendance_editor_department_code' => '',
+                    'attendance_editor_department_name' => '',
+                    'attendance_editor_user_code' => '',
+                    'attendance_editor_user_name' => '',
+                    'x_attendance_time_positions' => '',
+                    'y_attendance_time_positions' => '',
+                    'leaving_time' => '',
+                    'leaving_time_id' => '',
+                    'leaving_editor_department_code' => '',
+                    'leaving_editor_department_name' => '',
+                    'leaving_editor_user_code' => '',
+                    'leaving_editor_user_name' => '',
+                    'x_leaving_time_positions' => '',
+                    'y_leaving_time_positions' => '',
+                    'missing_middle_time' => '',
+                    'missing_middle_time_id' => '',
+                    'missing_editor_department_code' => '',
+                    'missing_editor_department_name' => '',
+                    'missing_editor_user_code' => '',
+                    'missing_editor_user_name' => '',
+                    'x_missing_middle_time_positions' => '',
+                    'y_missing_middle_time_positions' => '',
+                    'missing_middle_return_time' => '',
+                    'missing_middle_return_time_id' => '',
+                    'missing_return_editor_department_code' => '',
+                    'missing_return_editor_department_name' => '',
+                    'missing_return_editor_user_code' => '',
+                    'missing_return_editor_user_name' => '',
+                    'x_missing_middle_return_time_positions' => '',
+                    'y_missing_middle_return_time_positions' => '',
+                    'public_going_out_time' => '',
+                    'public_going_out_time_id' => '',
+                    'public_editor_department_code' => '',
+                    'public_editor_department_name' => '',
+                    'public_editor_user_code' => '',
+                    'public_editor_user_name' => '',
+                    'x_public_going_out_time_positions' => '',
+                    'y_public_going_out_time_positions' => '',
+                    'public_going_out_return_time' => '',
+                    'public_going_out_return_time_id' => '',
+                    'public_return_editor_department_code' => '',
+                    'public_return_editor_department_name' => '',
+                    'public_return_editor_user_code' => '',
+                    'public_return_editor_user_name' => '',
+                    'x_public_going_out_return_time_positions' => '',
+                    'y_public_going_out_return_time_positions' => ''
+                );
+            }
+        }
+        return $array_working_time_attendances;
+    }
  
     /**
      * 集計結果配列設定
@@ -6463,84 +8977,120 @@ class DailyWorkingInformationController extends Controller
             if ($i == 0)
             {
                 $array_working_time_dates[] = array(
-                    'working_date' => $working_time->working_date,
-                    'employment_status' => $working_time->employment_status,
-                    'department_code' => $working_time->department_code,
-                    'user_code' => $working_time->user_code,
-                    'employment_status_name' => $working_time->employment_status_name,
-                    'department_name' => $working_time->department_name,
-                    'user_name' => $working_time->user_name,
-                    'working_timetable_no' => $working_time->working_timetable_no,
-                    'working_timetable_name' => $working_time->working_timetable_name,
+                    'working_date' => $working_time["working_date"],
+                    'employment_status' => $working_time["employment_status"],
+                    'department_code' => $working_time["department_code"],
+                    'user_code' => $working_time["user_code"],
+                    'employment_status_name' => $working_time["employment_status_name"],
+                    'department_name' => $working_time["department_name"],
+                    'user_name' => $working_time["user_name"],
+                    'working_timetable_no' => $working_time["working_timetable_no"],
+                    'working_timetable_name' => $working_time["working_timetable_name"],
                     'attendance_time' => $array_attendance_time[$i]["attendance_time"],
+                    'attendance_time_id' => $array_attendance_time[$i]["attendance_time_id"],
+                    'attendance_editor_department_code' => $array_attendance_time[$i]["attendance_editor_department_code"],
+                    'attendance_editor_department_name' => $array_attendance_time[$i]["attendance_editor_department_name"],
+                    'attendance_editor_user_code' => $array_attendance_time[$i]["attendance_editor_user_code"],
+                    'attendance_editor_user_name' => $array_attendance_time[$i]["attendance_editor_user_name"],
                     'x_attendance_time_positions' => $array_attendance_time[$i]["x_attendance_time_positions"],
                     'y_attendance_time_positions' => $array_attendance_time[$i]["y_attendance_time_positions"],
                     'leaving_time' => $array_attendance_time[$i]["leaving_time"],
+                    'leaving_time_id' => $array_attendance_time[$i]["leaving_time_id"],
+                    'leaving_editor_department_code' => $array_attendance_time[$i]["leaving_editor_department_code"],
+                    'leaving_editor_department_name' => $array_attendance_time[$i]["leaving_editor_department_name"],
+                    'leaving_editor_user_code' => $array_attendance_time[$i]["leaving_editor_user_code"],
+                    'leaving_editor_user_name' => $array_attendance_time[$i]["leaving_editor_user_name"],
                     'x_leaving_time_positions' => $array_attendance_time[$i]["x_leaving_time_positions"],
                     'y_leaving_time_positions' => $array_attendance_time[$i]["y_leaving_time_positions"],
                     'missing_middle_time' => $array_attendance_time[$i]["missing_middle_time"],
+                    'missing_middle_time_id' => $array_attendance_time[$i]["missing_middle_time_id"],
+                    'missing_editor_department_code' => $array_attendance_time[$i]["missing_editor_department_code"],
+                    'missing_editor_department_name' => $array_attendance_time[$i]["missing_editor_department_name"],
+                    'missing_editor_user_code' => $array_attendance_time[$i]["missing_editor_user_code"],
+                    'missing_editor_user_name' => $array_attendance_time[$i]["missing_editor_user_name"],
                     'x_missing_middle_time_positions' => $array_attendance_time[$i]["x_missing_middle_time_positions"],
                     'y_missing_middle_time_positions' => $array_attendance_time[$i]["y_missing_middle_time_positions"],
                     'missing_middle_return_time' => $array_attendance_time[$i]["missing_middle_return_time"],
+                    'missing_middle_return_time_id' => $array_attendance_time[$i]["missing_middle_return_time_id"],
+                    'missing_return_editor_department_code' => $array_attendance_time[$i]["missing_return_editor_department_code"],
+                    'missing_return_editor_department_name' => $array_attendance_time[$i]["missing_return_editor_department_name"],
+                    'missing_return_editor_user_code' => $array_attendance_time[$i]["missing_return_editor_user_code"],
+                    'missing_return_editor_user_name' => $array_attendance_time[$i]["missing_return_editor_user_name"],
                     'x_missing_middle_return_time_positions' => $array_attendance_time[$i]["x_missing_middle_return_time_positions"],
                     'y_missing_middle_return_time_positions' => $array_attendance_time[$i]["y_missing_middle_return_time_positions"],
                     'public_going_out_time' => $array_attendance_time[$i]["public_going_out_time"],
+                    'public_going_out_time_id' => $array_attendance_time[$i]["public_going_out_time_id"],
+                    'public_editor_department_code' => $array_attendance_time[$i]["public_editor_department_code"],
+                    'public_editor_department_name' => $array_attendance_time[$i]["public_editor_department_name"],
+                    'public_editor_user_code' => $array_attendance_time[$i]["public_editor_user_code"],
+                    'public_editor_user_name' => $array_attendance_time[$i]["public_editor_user_name"],
                     'x_public_going_out_time_positions' => $array_attendance_time[$i]["x_public_going_out_time_positions"],
                     'y_public_going_out_time_positions' => $array_attendance_time[$i]["y_public_going_out_time_positions"],
                     'public_going_out_return_time' => $array_attendance_time[$i]["public_going_out_return_time"],
+                    'public_going_out_return_time_id' => $array_attendance_time[$i]["public_going_out_return_time_id"],
+                    'public_return_editor_department_code' => $array_attendance_time[$i]["public_return_editor_department_code"],
+                    'public_return_editor_department_name' => $array_attendance_time[$i]["public_return_editor_department_name"],
+                    'public_return_editor_user_code' => $array_attendance_time[$i]["public_return_editor_user_code"],
+                    'public_return_editor_user_name' => $array_attendance_time[$i]["public_return_editor_user_name"],
                     'x_public_going_out_return_time_positions' => $array_attendance_time[$i]["x_public_going_out_return_time_positions"],
                     'y_public_going_out_return_time_positions' => $array_attendance_time[$i]["y_public_going_out_return_time_positions"],
-                    'total_working_times' => $working_time->total_working_times,
-                    'regular_working_times' => $working_time->regular_working_times,
-                    'out_of_regular_working_times' => $working_time->out_of_regular_working_times,
-                    'overtime_hours' => $working_time->overtime_hours,
-                    'late_night_overtime_hours' => $working_time->late_night_overtime_hours,
-                    'legal_working_times' => $working_time->legal_working_times,
-                    'out_of_legal_working_times' => $working_time->out_of_legal_working_times,
-                    'not_employment_working_hours' => $working_time->not_employment_working_hours,
-                    'off_hours_working_hours' => $working_time->off_hours_working_hours,
-                    'public_going_out_hours' => $working_time->public_going_out_hours,
-                    'missing_middle_hours' => $working_time->missing_middle_hours,
-                    'out_of_legal_working_holiday_hours' => $working_time->out_of_legal_working_holiday_hours,
-                    'legal_working_holiday_hours' => $working_time->legal_working_holiday_hours,
-                    'working_status' => $working_time->working_status,
-                    'working_status_name' => $working_time->working_status_name,
-                    'remark_holiday_name' => $working_time->remark_holiday_name,
-                    'remark_check_result' => $working_time->remark_check_result,
-                    'remark_check_max_times' => $working_time->remark_check_max_times,
-                    'remark_check_interval' => $working_time->remark_check_interval,
-                    'note' => $working_time->note,
-                    'late' => $working_time->late,
-                    'leave_early' => $working_time->leave_early,
-                    'current_calc' => $working_time->current_calc,
-                    'to_be_confirmed' => $working_time->to_be_confirmed,
-                    'weekday_kubun' => $working_time->weekday_kubun,
-                    'weekday_name' => $working_time->weekday_name,
-                    'business_kubun' => $working_time->business_kubun,
-                    'business_name' => $working_time->business_name,
-                    'unused_holiday_kubun' => $working_time->unused_holiday_kubun,
-                    'unused_holiday_name' => $working_time->unused_holiday_name,
-                    'closing' => $working_time->closing,
-                    'uplimit_time' => $working_time->uplimit_time,
-                    'statutory_uplimit_time' => $working_time->statutory_uplimit_time,
-                    'time_unit' => $working_time->time_unit,
-                    'time_rounding' => $working_time->time_rounding,
-                    'max_3month_total' => $working_time->max_3month_total,
-                    'max_6month_total' => $working_time->max_6month_total,
-                    'max_12month_total' => $working_time->max_12month_total,
-                    'beginning_month' => $working_time->beginning_month,
-                    'year' => $working_time->year,
-                    'pattern' => $working_time->pattern,
-                    'check_result' => $working_time->check_result,
-                    'check_max_times' => $working_time->check_max_times,
-                    'check_interval' => $working_time->check_interval,
-                    'fixedtime' => $working_time->fixedtime,
-                    'holiday_kubun' => $working_time->holiday_kubun,
-                    'holiday_name' => $working_time->holiday_name,
-                    'calendars_business_kubun' => $working_time->calendars_business_kubun,
-                    'working_time_name' => $working_time->working_time_name,
-                    'predeter_time_name' => $working_time->predeter_time_name,
-                    'predeter_night_time_name' => $working_time->predeter_night_time_name
+                    'total_working_times' => $working_time["total_working_times"],
+                    'regular_working_times' => $working_time["regular_working_times"],
+                    'out_of_regular_working_times' => $working_time["out_of_regular_working_times"],
+                    'overtime_hours' => $working_time["overtime_hours"],
+                    'late_night_overtime_hours' => $working_time["late_night_overtime_hours"],
+                    'late_night_working_hours' => $working_time["late_night_working_hours"],
+                    'legal_working_times' => $working_time["legal_working_times"],
+                    'out_of_legal_working_times' => $working_time["out_of_legal_working_times"],
+                    'not_employment_working_hours' => $working_time["not_employment_working_hours"],
+                    'off_hours_working_hours' => $working_time["off_hours_working_hours"],
+                    'public_going_out_hours' => $working_time["public_going_out_hours"],
+                    'missing_middle_hours' => $working_time["missing_middle_hours"],
+                    'out_of_legal_working_holiday_hours' => $working_time["out_of_legal_working_holiday_hours"],
+                    'out_of_legal_working_holiday_night_overtime_hours' => $working_time["out_of_legal_working_holiday_night_overtime_hours"],
+                    'legal_working_holiday_hours' => $working_time["legal_working_holiday_hours"],
+                    'legal_working_holiday_night_overtime_hours' => $working_time["legal_working_holiday_night_overtime_hours"],
+                    'working_status' => $working_time["working_status"],
+                    'working_status_name' => $working_time["working_status_name"],
+                    'remark_holiday_name' => $working_time["remark_holiday_name"],
+                    'remark_check_result' => $working_time["remark_check_result"],
+                    'remark_check_max_times' => $working_time["remark_check_max_times"],
+                    'remark_check_interval' => $working_time["remark_check_interval"],
+                    'note' => $working_time["note"],
+                    'late' => $working_time["late"],
+                    'leave_early' => $working_time["leave_early"],
+                    'current_calc' => $working_time["current_calc"],
+                    'to_be_confirmed' => $working_time["to_be_confirmed"],
+                    'weekday_kubun' => $working_time["weekday_kubun"],
+                    'weekday_name' => $working_time["weekday_name"],
+                    'business_kubun' => $working_time["business_kubun"],
+                    'business_name' => $working_time["business_name"],
+                    'unused_holiday_kubun' => $working_time["unused_holiday_kubun"],
+                    'unused_holiday_name' => $working_time["unused_holiday_name"],
+                    'closing' => $working_time["closing"],
+                    'uplimit_time' => $working_time["uplimit_time"],
+                    'statutory_uplimit_time' => $working_time["statutory_uplimit_time"],
+                    'time_unit' => $working_time["time_unit"],
+                    'time_rounding' => $working_time["time_rounding"],
+                    'max_3month_total' => $working_time["max_3month_total"],
+                    'max_6month_total' => $working_time["max_6month_total"],
+                    'max_12month_total' => $working_time["max_12month_total"],
+                    'beginning_month' => $working_time["beginning_month"],
+                    'year' => $working_time["year"],
+                    'pattern' => $working_time["pattern"],
+                    'check_result' => $working_time["check_result"],
+                    'check_max_times' => $working_time["check_max_times"],
+                    'check_interval' => $working_time["check_interval"],
+                    'fixedtime' => $working_time["fixedtime"],
+                    'holiday_kubun' => $working_time["holiday_kubun"],
+                    'holiday_name' => $working_time["holiday_name"],
+                    'holiday_description' => $working_time["holiday_description"],
+                    'calendars_business_kubun' => $working_time["calendars_business_kubun"],
+                    'working_time_name' => $working_time["working_time_name"],
+                    'predeter_time_name' => $working_time["predeter_time_name"],
+                    'predeter_time_secondname' => $working_time["predeter_time_secondname"],
+                    'predeter_night_time_name' => $working_time["predeter_night_time_name"],
+                    'predeter_night_time_secondname' => $working_time["predeter_night_time_secondname"]
                 );
             } else {
                 $array_working_time_dates[] = array(
@@ -6554,21 +9104,51 @@ class DailyWorkingInformationController extends Controller
                     'working_timetable_no' => '',
                     'working_timetable_name' => '',
                     'attendance_time' => $array_attendance_time[$i]["attendance_time"],
+                    'attendance_time_id' => $array_attendance_time[$i]["attendance_time_id"],
+                    'attendance_editor_department_code' => $array_attendance_time[$i]["attendance_editor_department_code"],
+                    'attendance_editor_department_name' => $array_attendance_time[$i]["attendance_editor_department_name"],
+                    'attendance_editor_user_code' => $array_attendance_time[$i]["attendance_editor_user_code"],
+                    'attendance_editor_user_name' => $array_attendance_time[$i]["attendance_editor_user_name"],
                     'x_attendance_time_positions' => $array_attendance_time[$i]["x_attendance_time_positions"],
                     'y_attendance_time_positions' => $array_attendance_time[$i]["y_attendance_time_positions"],
                     'leaving_time' => $array_attendance_time[$i]["leaving_time"],
+                    'leaving_time_id' => $array_attendance_time[$i]["leaving_time_id"],
+                    'leaving_editor_department_code' => $array_attendance_time[$i]["leaving_editor_department_code"],
+                    'leaving_editor_department_name' => $array_attendance_time[$i]["leaving_editor_department_name"],
+                    'leaving_editor_user_code' => $array_attendance_time[$i]["leaving_editor_user_code"],
+                    'leaving_editor_user_name' => $array_attendance_time[$i]["leaving_editor_user_name"],
                     'x_leaving_time_positions' => $array_attendance_time[$i]["x_leaving_time_positions"],
                     'y_leaving_time_positions' => $array_attendance_time[$i]["y_leaving_time_positions"],
                     'missing_middle_time' => $array_attendance_time[$i]["missing_middle_time"],
+                    'missing_middle_time_id' => $array_attendance_time[$i]["missing_middle_time_id"],
+                    'missing_editor_department_code' => $array_attendance_time[$i]["missing_editor_department_code"],
+                    'missing_editor_department_name' => $array_attendance_time[$i]["missing_editor_department_name"],
+                    'missing_editor_user_code' => $array_attendance_time[$i]["missing_editor_user_code"],
+                    'missing_editor_user_name' => $array_attendance_time[$i]["missing_editor_user_name"],
                     'x_missing_middle_time_positions' => $array_attendance_time[$i]["x_missing_middle_time_positions"],
                     'y_missing_middle_time_positions' => $array_attendance_time[$i]["y_missing_middle_time_positions"],
                     'missing_middle_return_time' => $array_attendance_time[$i]["missing_middle_return_time"],
+                    'missing_middle_return_time_id' => $array_attendance_time[$i]["missing_middle_return_time_id"],
+                    'missing_return_editor_department_code' => $array_attendance_time[$i]["missing_return_editor_department_code"],
+                    'missing_return_editor_department_name' => $array_attendance_time[$i]["missing_return_editor_department_name"],
+                    'missing_return_editor_user_code' => $array_attendance_time[$i]["missing_return_editor_user_code"],
+                    'missing_return_editor_user_name' => $array_attendance_time[$i]["missing_return_editor_user_name"],
                     'x_missing_middle_return_time_positions' => $array_attendance_time[$i]["x_missing_middle_return_time_positions"],
                     'y_missing_middle_return_time_positions' => $array_attendance_time[$i]["y_missing_middle_return_time_positions"],
                     'public_going_out_time' => $array_attendance_time[$i]["public_going_out_time"],
+                    'public_going_out_time_id' => $array_attendance_time[$i]["public_going_out_time_id"],
+                    'public_editor_department_code' => $array_attendance_time[$i]["public_editor_department_code"],
+                    'public_editor_department_name' => $array_attendance_time[$i]["public_editor_department_name"],
+                    'public_editor_user_code' => $array_attendance_time[$i]["public_editor_user_code"],
+                    'public_editor_user_name' => $array_attendance_time[$i]["public_editor_user_name"],
                     'x_public_going_out_time_positions' => $array_attendance_time[$i]["x_public_going_out_time_positions"],
                     'y_public_going_out_time_positions' => $array_attendance_time[$i]["y_public_going_out_time_positions"],
                     'public_going_out_return_time' => $array_attendance_time[$i]["public_going_out_return_time"],
+                    'public_going_out_return_time_id' => $array_attendance_time[$i]["public_going_out_return_time_id"],
+                    'public_return_editor_department_code' => $array_attendance_time[$i]["public_return_editor_department_code"],
+                    'public_return_editor_department_name' => $array_attendance_time[$i]["public_return_editor_department_name"],
+                    'public_return_editor_user_code' => $array_attendance_time[$i]["public_return_editor_user_code"],
+                    'public_return_editor_user_name' => $array_attendance_time[$i]["public_return_editor_user_name"],
                     'x_public_going_out_return_time_positions' => $array_attendance_time[$i]["x_public_going_out_return_time_positions"],
                     'y_public_going_out_return_time_positions' => $array_attendance_time[$i]["y_public_going_out_return_time_positions"],
                     'total_working_times' => '',
@@ -6576,6 +9156,7 @@ class DailyWorkingInformationController extends Controller
                     'out_of_regular_working_times' => '',
                     'overtime_hours' => '',
                     'late_night_overtime_hours' => '',
+                    'late_night_working_hours' => '',
                     'legal_working_times' => '',
                     'out_of_legal_working_times' => '',
                     'not_employment_working_hours' => '',
@@ -6583,7 +9164,9 @@ class DailyWorkingInformationController extends Controller
                     'public_going_out_hours' => '',
                     'missing_middle_hours' => '',
                     'out_of_legal_working_holiday_hours' => '',
+                    'out_of_legal_working_holiday_night_overtime_hours' => '',
                     'legal_working_holiday_hours' => '',
+                    'legal_working_holiday_night_overtime_hours' => '',
                     'working_status' => '',
                     'working_status_name' => '',
                     'remark_holiday_name' => '',
@@ -6618,10 +9201,13 @@ class DailyWorkingInformationController extends Controller
                     'fixedtime' => '',
                     'holiday_kubun' => '',
                     'holiday_name' => '',
+                    'holiday_description' => '',
                     'calendars_business_kubun' => '',
                     'working_time_name' => '',
                     'predeter_time_name' => '',
-                    'predeter_night_time_name' => ''
+                    'predeter_time_secondname' => '',
+                    'predeter_night_time_name' => '',
+                    'predeter_night_time_secondname' => ''
                 );
             }
         }

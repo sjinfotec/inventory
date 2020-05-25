@@ -15,6 +15,10 @@ use App\Setting;
 use App\Http\Controllers\ApiCommonController;
 
 
+/*
+ * 未使用
+ * 
+*/
 
 class CreateCalendarController extends Controller
 {
@@ -136,8 +140,6 @@ class CreateCalendarController extends Controller
      */
     public function initCalendar($datefrom, $displaykbn){
 
-        Log::debug('datefrom = '.$datefrom);
-        Log::debug('displaykbn = '.$displaykbn);
         $calendar_model = new Calendar();
         DB::beginTransaction();
         try{

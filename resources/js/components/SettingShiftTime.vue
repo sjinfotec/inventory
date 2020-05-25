@@ -35,7 +35,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      class="input-group-text font-size-sm line-height-xs label-width-200"
                       id="basic-addon1"
                     >開始日付<span class="color-red">[必須]</span></span>
                   </div>
@@ -54,7 +54,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      class="input-group-text font-size-sm line-height-xs label-width-200"
                       id="basic-addon1"
                     >終了日付<span class="color-red">[必須]</span></span>
                   </div>
@@ -73,7 +73,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                    class="input-group-text font-size-sm line-height-xs label-width-150"
+                    class="input-group-text font-size-sm line-height-xs label-width-200"
                     id="basic-addon1"
                     >所属部署<font color="blue">[登録時必須]</font></span>
                   </div>
@@ -96,7 +96,7 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
-                    class="input-group-text font-size-sm line-height-xs label-width-150"
+                    class="input-group-text font-size-sm line-height-xs label-width-200"
                     for="target_users"
                     >氏名<span class="color-red">[必須]</span></label>
                   </div>
@@ -122,9 +122,9 @@
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <span
-                    class="input-group-text font-size-sm line-height-xs label-width-150"
+                    class="input-group-text font-size-sm line-height-xs label-width-200"
                     id="basic-addon1"
-                    >タイムテーブル選択</span>
+                    >タイムテーブル<font color="blue">[登録時必須]</font></span>
                   </div>
                   <select-timetablelist v-if="showtimetablelist"
                     ref="selecttimetablelist"
@@ -135,6 +135,7 @@
                     v-bind:date-value="''"
                     v-bind:kill-value="valueTimetablekillcheck"
                     v-bind:row-index=0
+                    v-bind:set-shift="false"
                     v-on:change-event="timetableChanges"
                   ></select-timetablelist>
                 </div>
@@ -149,8 +150,8 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
-                  v-on:condstoreclick-event="condstoreClick"
-                  v-bind:btn-mode="'condstore'"
+                  v-on:searchclick-event="searchClick"
+                  v-bind:btn-mode="'search'"
                   v-bind:is-push="false"
                 ></btn-work-time>
               </div>
@@ -162,8 +163,8 @@
               <!-- col -->
               <div class="col-md-12 pb-2">
                 <btn-work-time
-                  v-on:searchclick-event="searchClick"
-                  v-bind:btn-mode="'search'"
+                  v-on:condstoreclick-event="condstoreClick"
+                  v-bind:btn-mode="'condstore'"
                   v-bind:is-push="false"
                 ></btn-work-time>
               </div>
@@ -484,7 +485,7 @@ export default {
     store_confirm: function() {
       var messages = [];
       messages.push("このデータで登録しますか？");
-      this.messageswal("確認", messages, "info", true, true, true)
+      this.htmlMessageSwal("確認", messages, "info", true, true)
         .then(result  => {
           if (result) {
             this.store("追加");
@@ -494,11 +495,11 @@ export default {
     // 締日登録確認
     store_warniong_confirm: function(state) {
       var messages = [];
-      messages.push("前月の締日" + moment(this.closingYmd).format('YYYY年MM月DD日') + "以前のデータが含まれますが");
-      messages.push("前月締日以前のデータは自動集計されません");
-      messages.push("月次集計での手動集計が必要となります");
+      messages.push("前月の締日" + moment(this.closingYmd).format('YYYY年MM月DD日') + "以前のデータが含まれますが、");
+      messages.push("前月締日以前のデータは自動集計されません。");
+      messages.push("月次集計での手動集計が必要となります。");
       messages.push("このデータで登録しますか？");
-      this.messageswal("確認", messages, "info", true, true, true)
+      this.htmlMessageSwal("確認", messages, "info", true, true)
         .then(result  => {
           if (result) {
             this.store("追加");
@@ -516,14 +517,32 @@ export default {
       if (this.valuetodate) {
         this.todate = moment(this.valuetodate).format("YYYYMMDD");
       }
-      var arrayParams = { code : this.selectedUserValue, no : this.selectedTimetableValue, from: this.fromdate, to: this.todate };
-      this.postRequest("/get_user_shift", arrayParams)
-        .then(response  => {
-          this.getThen(response);
-        })
-        .catch(reason => {
-          this.serverCatch("シフト", "取得");
-        });
+      // 処理中メッセージ表示
+      this.$swal({
+        title: "処　理　中...",
+        html: "",
+        allowOutsideClick: false, //枠外をクリックしても画面を閉じない
+        showConfirmButton: false,
+        showCancelButton: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+          var arrayParams = {
+            departmentcode : this.selectedDepartmentValue,
+            usercode : this.selectedUserValue,
+            no : this.selectedTimetableValue,
+            from: this.fromdate,
+            to: this.todate };
+          this.postRequest("/get_user_shift", arrayParams)
+            .then(response  => {
+              this.$swal.close();
+              this.getThen(response);
+            })
+            .catch(reason => {
+              this.$swal.close();
+              this.serverCatch("シフト", "取得");
+          });
+        }
+      });
     },
     // 締日取得処理
     getclosingItem() {
@@ -582,11 +601,11 @@ export default {
         if (this.details.length == 0) {
           var messages = [];
           messages.push("該当期間に登録されている期間はありません");
-          this.messageswal("エラー", messages, "error", true, false, true);
+          this.htmlMessageSwal("エラー", messages, "error", true, false);
         }
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("シフト", "取得");
         }
@@ -606,7 +625,7 @@ export default {
         }
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("締日", "取得");
         }
@@ -617,11 +636,10 @@ export default {
       var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("シフトを" + eventtext + "しました");
-        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+        this.$toasted.show("シフトを" + eventtext + "しました");
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch("シフト",eventtext);
         }
@@ -631,7 +649,7 @@ export default {
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     }
   }
 };

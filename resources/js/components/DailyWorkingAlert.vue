@@ -134,20 +134,43 @@
       <div class="col-md pt-3 align-self-stretch">
         <div class="card shadow-pl">
           <!-- panel body -->
+          <!-- ----------- 項目部 START ---------------- -->
           <daily-working-alert-table
+            v-if="showdailyworkingalerttable"
+            ref="refdailyworkingalerttable"
             v-bind:alert-lists="details"
+            v-bind:tablebody-height="'height: 400px !important;'"
+            v-bind:is-edit="isEdit"
+            v-on:detaileditclick-event="detailEdtClick"
           ></daily-working-alert-table>
+          <!-- ----------- 項目部 END ---------------- -->
           <!-- /panel body -->
         </div>
       </div>
       <!-- /.panel -->
+      <!-- ========================== 編集部 START ========================== -->
+      <!-- .panel -->
+      <div class="col-md-12 pt-3" v-if="selectMode=='EDT'">
+        <edit-work-times-table
+          v-if="showeditworktimestable"
+          ref="refeditworktimestable"
+          v-bind:authusers="authusers"
+          v-bind:generaluser="generaluser"
+          v-bind:generalapproveruser="generalapproveruser"
+          v-bind:adminuser="adminuser"
+          v-bind:heads="detailsEdt"
+          v-on:cancelclick-event="cancelClick"
+        >
+        </edit-work-times-table>
+      </div>
+      <!-- /.panel -->
+      <!-- ========================== 編集部 END =========================== -->
     </div>
     <!-- /main contentns row -->
   </div>
 </template>
 
 <script>
-import toasted from "vue-toasted";
 import moment from "moment";
 import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
@@ -156,11 +179,32 @@ import {requestable} from '../mixins/requestable.js';
 export default {
   name: "dailyworkingtime",
   mixins: [ dialogable, checkable, requestable ],
- data: function() {
+  props: {
+    authusers: {
+        type: Array,
+        default: []
+    },
+    generaluser: {
+        type: Number,
+        default: 0
+    },
+    generalapproveruser: {
+        type: Number,
+        default: 0
+    },
+    adminuser: {
+        type: Number,
+        default: 0
+    },
+    indexorhome: {
+        type: Number,
+        default: 0
+    },
+  },
+  data: function() {
     return {
       selectedDepartmentValue : "",
       valueDepartmentkillcheck : false,
-      showdepartmentlist: true,
       selectedUserValue : "",
       showuserlist: true,
       valueUserkillcheck : false,
@@ -168,7 +212,6 @@ export default {
       getDo: 1,
       applytermdate: "",
       valuefromdate: "",
-      userrole: "",
       DatePickerFormat: "yyyy年MM月dd日",
       defaultDate: new Date(),
       dateName: "",
@@ -178,20 +221,46 @@ export default {
       messagedatadepartment: [],
       messagedatauser: [],
       validate: false,
-      initialized: false
+      selectMode: "",
+      isEdit: false,
+      detailsEdt: [],
+      login_user_code: "",
+      login_user_role: "",
+      login_generaluser_role: "",
+      login_generalapproveruser_role: "",
+      login_adminuser_role: "",
+      index_or_home: "",
+      showeditworktimestable: true,
+      showdailyworkingalerttable: true
     };
   },
   // マウント時
   mounted() {
+    this.login_user_code = this.authusers['code'];
+    this.login_user_role = this.authusers['role'];
+    this.login_generaluser_role = this.generaluser;
+    this.login_generalapproveruser_role = this.generalapproveruser;
+    this.login_adminuser_role = this.adminuser;
+    if (this.login_user_role == this.login_adminuser_role) {
+      this.isEdit = true;
+    }
+    this.login_adminuser_role = this.adminuser;
+    this.index_or_home = this.indexorhome;
     this.valuefromdate = this.defaultDate;
     moment.locale("ja");
-    this.getUserRole();
     this.applytermdate = ""
     if (this.valuefromdate) {
       this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
     }
     this.$refs.selectdepartmentlist.getList(this.applytermdate);
     this.getUserSelected();
+    // 1:index 2:homeindex
+    if (this.index_or_home == 2) {
+      this.selectMode = '';
+      this.itemClear();
+      this.getItem();
+      this.refreshDailyWorkingAlertTable();
+    }
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -219,7 +288,7 @@ export default {
         this.validate = false;
       }
       // 所属部署
-      if (this.userrole < "8") {
+      if (this.login_user_role < "8") {
         required = true;
         equalength = 0;
         maxlength = 0;
@@ -293,39 +362,55 @@ export default {
     },
     // 集計開始ボタンがクリックされた場合の処理
     searchclick: function(e) {
+      this.selectMode = '';
       this.validate = this.checkForm(e);
       if (this.validate) {
         this.itemClear();
         this.getItem();
       }
+      this.refreshDailyWorkingAlertTable();
+    },
+    // 明細編集ボタンクリックされた場合の処理
+    detailEdtClick: function(e, arrayitem) {
+      var index = arrayitem['rowIndex'];
+      this.selectMode = 'EDT';
+      this.detailsEdt = this.details[index];
+      this.refreshEdtWorkingTimesTable();
+    },
+    // キャンセルボタンクリックされた場合の処理
+    cancelClick: function(e, arrayitem) {
+      this.selectMode = '';
+      this.refreshDailyWorkingAlertTable();
     },
     // ------------------------ サーバー処理 ----------------------------
     // 日次警告取得処理
     getItem() {
-      var arrayParams = {
-        alert_form_date : moment(this.valuefromdate).format("YYYYMMDD"),
-        employmentstatus : this.selectedEmploymentValue,
-        departmentcode : this.selectedDepartmentValue,
-        usercode : this.selectedUserValue
-      };
-      this.postRequest("/daily_alert/show", arrayParams)
-        .then(response  => {
-          this.getThen(response);
-        })
-        .catch(reason => {
-          this.serverCatch("日次警告", "取得");
-        });
-    },
-    // ログインユーザーの権限を取得
-    getUserRole: function() {
-      var arrayParams = [];
-      this.postRequest("/get_login_user_role", arrayParams)
-        .then(response  => {
-          this.getThenrole(response);
-        })
-        .catch(reason => {
-          this.serverCatch("ユーザー権限", "取得");
-        });
+      // 処理中メッセージ表示
+      this.$swal({
+        title: "処　理　中...",
+        html: "",
+        allowOutsideClick: false, //枠外をクリックしても画面を閉じない
+        showConfirmButton: false,
+        showCancelButton: true,
+        onBeforeOpen: () => {
+          this.$swal.showLoading();
+          var arrayParams = {
+            alert_form_date : moment(this.valuefromdate).format("YYYYMMDD"),
+            employmentstatus : this.selectedEmploymentValue,
+            departmentcode : this.selectedDepartmentValue,
+            usercode : this.selectedUserValue
+          };
+          this.postRequest("/daily_alert/show", arrayParams)
+            .then(response  => {
+              this.$swal.close();
+              this.getThen(response);
+            })
+            .catch(reason => {
+              this.$swal.close();
+              this.serverCatch("日次警告", "取得");
+            });
+        }
+      });
     },
 
     // ----------------- 共通メソッド ----------------------------------
@@ -352,22 +437,9 @@ export default {
         this.dateName = res.datename;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("日次警告", "取得");
-        }
-      }
-    },
-    // 取得正常処理（ユーザー権限）
-    getThenrole(response) {
-      var res = response.data;
-      if (res.result) {
-        this.userrole = res.role;
-      } else {
-        if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
-        } else {
-          this.serverCatch("ユーザー権限", "取得");
         }
       }
     },
@@ -375,7 +447,7 @@ export default {
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     // クリアメソッド
     itemClear: function() {
@@ -384,7 +456,17 @@ export default {
       this.messagedatasfromdate = [];
       this.messagedatadepartment = [];
       this.messagedatauser = [];
-    }
+    },
+    refreshEdtWorkingTimesTable() {
+      // 最新リストの表示
+      this.showeditworktimestable = false;
+      this.$nextTick(() => (this.showeditworktimestable = true));
+    },
+    refreshDailyWorkingAlertTable() {
+      // 最新リストの表示
+      this.showdailyworkingalerttable = false;
+      this.$nextTick(() => (this.showdailyworkingalerttable = true));
+    },
   }
 };
 </script>

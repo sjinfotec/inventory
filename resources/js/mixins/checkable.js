@@ -68,7 +68,24 @@ export const checkable =  {
         }
       }
       return this.checkmessagedata;
+    },
+    // 入力不可チェック（ヘッダ）
+    checkHeaderNotEnter(value, itemname, casename) {
+      this.checkmessagedata = [];
+      if (value != null && value != "") {
+        this.checkmessagedata.push(itemname + "は" + casename + "入力できません。");
+      }
+      return this.checkmessagedata;
+    },
+    // 入力不可チェック（明細No）
+    checkDetailNotEnter(value, itemname, casename, rowindex) {
+      this.checkmessagedata = [];
+      if (value != null && value != "") {
+        this.checkmessagedata.push("No." + rowindex + "の" + itemname + "は" + casename + "入力できません。");
+      }
+      return this.checkmessagedata;
     }
+
     // -------------------------- private メソッド ------------------------
   }
 }

@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\WorkTime;
-use App\Calendar;
+use App\Http\Controllers\ApiCommonController;
 
 class DailyWorkingAlertController extends Controller
 {
@@ -23,7 +24,52 @@ class DailyWorkingAlertController extends Controller
      */
     public function index()
     {
-        return view('daily_working_alert');
+        $authusers = Auth::user();
+        $generaluser = Config::get('const.C025.general_user');
+        $generalapproveruser = Config::get('const.C025.general_approver__user');
+        $adminuser = Config::get('const.C025.admin_user');
+        $indexorhome = 1;
+        return view('daily_working_alert',
+            compact(
+                'authusers',
+                'generaluser',
+                'generalapproveruser',
+                'adminuser',
+                'indexorhome'
+            ));
+    }
+    
+    /**
+     * ホームページからの初期処理
+     *
+     * @return void
+     */
+    public function homeindex()
+    {
+        // 日次警告アラートリダイレクト
+        return redirect()->route('daily_alert.alerthome');
+    }
+
+    /**
+     * 初期処理
+     *
+     * @return void
+     */
+    public function alerthome()
+    {
+        $authusers = Auth::user();
+        $generaluser = Config::get('const.C025.general_user');
+        $generalapproveruser = Config::get('const.C025.general_approver__user');
+        $adminuser = Config::get('const.C025.admin_user');
+        $indexorhome = 2;
+        return view('daily_working_alert',
+            compact(
+                'authusers',
+                'generaluser',
+                'generalapproveruser',
+                'adminuser',
+                'indexorhome'
+            ));
     }
 
     /**
@@ -91,9 +137,8 @@ class DailyWorkingAlertController extends Controller
             $work_time_model->setParamEndDateAttribute($alert_to_date);
             $chk_work_time = $work_time_model->chkWorkingTimeData();
             if ($chk_work_time) {
-                $details = $work_time_model->getdailyAlertData($alert_to_date);
+                $details = $work_time_model->getdailyAlertData();
                 if (count($details) == 0) {
-                    Log::debug('count($details) = '.count($details));
                     $this->array_messagedata[] = Config::get('const.MSG_INFO.no_alert_data');
                     return response()->json(
                         ['result' => false, 'details' => $result_working, 'datename' => $date_name,
@@ -101,7 +146,6 @@ class DailyWorkingAlertController extends Controller
                     );
                 }
             } else {
-                Log::debug('chk_work_time error ');
                 $this->array_messagedata[] = $work_time->getMassegedataAttribute();
                 return response()->json(
                     ['result' => false, 'details' => $result_working, 'datename' => $date_name,
@@ -109,20 +153,13 @@ class DailyWorkingAlertController extends Controller
                 );
             }
             // 日付編集
-            $calender_model = new Calendar();
-            $calender_model->setDateAttribute(date_format(new Carbon($alert_form_date), 'Ymd'));
-            $calendars = $calender_model->getCalenderDate();
-            if (count($calendars) > 0) {
-                foreach ($calendars as $result) {
-                    if (isset($result->date_name)) {
-                        $date_name = $result->date_name;
-                    }
-                    break;
-                }
-            }
-            $result_working = $details->where('business_kubun', Config::get('const.C007.basic'));
+            // 開始日付のフォーマット 2019年10月01日(火)
+            $apicommon = new ApiCommonController();
+            $date_name = $apicommon->getYMDWeek($alert_form_date);
+            
+            $result_working = $details;
+            // $result_working = $details->where('business_kubun', Config::get('const.C007.basic'));
             if (count($result_working) == 0) {
-                Log::debug('count($result_working) = '.count($result_working));
                 $this->array_messagedata[] = Config::get('const.MSG_INFO.no_alert_data');
                 return response()->json(
                     ['result' => false, 'details' => $result_working, 'datename' => $date_name,

@@ -130,7 +130,6 @@
 </div>
 </template>
 <script>
-import toasted from "vue-toasted";
 
 export default {
   name: "EditCalendar",
@@ -217,11 +216,9 @@ export default {
         });
     },
     businessDayChanges: function(value) {
-      console.log("businessDayChanges = " + value);
       this.valueBusinessDay = value;
     },
     holiDayChanges: function(value) {
-      console.log("holiDayChanges = " + value);
       this.valueholiDay = value;
     },
     store() {

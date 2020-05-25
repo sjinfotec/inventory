@@ -29,16 +29,20 @@ class WorkTime extends Model
     private $department_code;               // 部署コード
     private $record_time;                   // 打刻時間
     private $mode;                          // 打刻モード
+    private $user_holiday_kubuns_id;        // ユーザー休暇区分ID
     private $check_result;                  // 打刻チェック結果
     private $check_max_time;                // 打刻回数最大チェック結果
     private $check_interval;                // インターバルチェック結果
+    private $is_editor;                     // 編集フラグ
+    private $editor_department_code;        // 編集部署コード
+    private $editor_user_code;              // 編集ユーザーコード
     private $created_user;                  // 作成ユーザー
     private $updated_user;                  // 修正ユーザー
     private $is_deleted;                    // 削除フラグ
     private $systemdate;
     private $positions;                     // 緯度経度
 
-    // ユーザーコード
+    // ID
     public function getIdAttribute()
     {
         return $this->id;
@@ -95,6 +99,17 @@ class WorkTime extends Model
         $this->mode = $value;
     }
 
+    // ユーザー休暇区分ID
+    public function getUserholidaykubunsidAttribute()
+    {
+        return $this->user_holiday_kubuns_id;
+    }
+
+    public function setUserholidaykubunsidAttribute($value)
+    {
+        $this->user_holiday_kubuns_id = $value;
+    }
+
 
     // 打刻チェック結果
     public function getCheckresultAttribute()
@@ -129,6 +144,39 @@ class WorkTime extends Model
     public function setCheckintervalAttribute($value)
     {
         $this->check_interval = $value;
+    }
+
+    // 編集フラグ
+    public function getIseditorAttribute()
+    {
+        return $this->is_editor;
+    }
+
+    public function setIseditorAttribute($value)
+    {
+        $this->is_editor = $value;
+    }
+
+    // 編集部署コード
+    public function getEditordepartmentcodeAttribute()
+    {
+        return $this->editor_department_code;
+    }
+
+    public function setEditordepartmentcodeAttribute($value)
+    {
+        $this->editor_department_code = $value;
+    }
+
+    // 編集ユーザーコード
+    public function getEditorusercodeAttribute()
+    {
+        return $this->editor_user_code;
+    }
+
+    public function setEditorusercodeAttribute($value)
+    {
+        $this->editor_user_code = $value;
     }
 
 
@@ -357,6 +405,9 @@ class WorkTime extends Model
      */
     public function insertWorkTime(){
         try {
+            if ($this->check_result == "" || $this->check_result == null) { $this->check_result = 0; }
+            if ($this->check_max_time == "" || $this->check_max_time == null) { $this->check_max_time = 0; }
+            if ($this->check_interval == "" || $this->check_interval == null) { $this->check_interval = 0; }
             if(isset($this->positions)){
                 DB::table($this->table)->insert(
                     [
@@ -364,9 +415,13 @@ class WorkTime extends Model
                         'department_code' => $this->department_code,
                         'record_time' => $this->record_time,
                         'mode' => $this->mode,
+                        'user_holiday_kubuns_id' => $this->user_holiday_kubuns_id,
                         'check_result' => $this->check_result,
                         'check_max_time' => $this->check_max_time,
                         'check_interval' => $this->check_interval,
+                        'is_editor' => $this->is_editor,
+                        'editor_department_code' => $this->editor_department_code,
+                        'editor_user_code' => $this->editor_user_code,
                         'created_user' => $this->created_user,
                         'created_at'=>$this->systemdate,
                         'positions' => DB::raw("(GeomFromText('POINT(".$this->positions.")'))")
@@ -379,9 +434,13 @@ class WorkTime extends Model
                         'department_code' => $this->department_code,
                         'record_time' => $this->record_time,
                         'mode' => $this->mode,
+                        'user_holiday_kubuns_id' => $this->user_holiday_kubuns_id,
                         'check_result' => $this->check_result,
                         'check_max_time' => $this->check_max_time,
                         'check_interval' => $this->check_interval,
+                        'is_editor' => $this->is_editor,
+                        'editor_department_code' => $this->editor_department_code,
+                        'editor_user_code' => $this->editor_user_code,
                         'created_user' => $this->created_user,
                         'created_at'=>$this->systemdate
                     ]
@@ -413,7 +472,6 @@ class WorkTime extends Model
                         'work_times.',
                         'work_times.end_date'
                         )
-                // ->where('tasks.department_code',$department_code)
                 ->limit(1)
                 ->get();
         }catch(\PDOException $pe){
@@ -498,13 +556,18 @@ class WorkTime extends Model
             // subquery1    work_times
             $subquery1 = DB::table($this->table)
                 ->select(
+                    $this->table.'.id as record_datetime_id',
                     $this->table.'.user_code as user_code',
                     $this->table.'.department_code as department_code',
                     $this->table.'.record_time as record_datetime',
                     $this->table.'.mode as mode',
+                    $this->table.'.user_holiday_kubuns_id',
                     $this->table.'.check_result as check_result',
                     $this->table.'.check_max_time as check_max_time',
                     $this->table.'.check_interval as check_interval',
+                    $this->table.'.is_editor as is_editor',
+                    $this->table.'.editor_department_code as editor_department_code',
+                    $this->table.'.editor_user_code as editor_user_code',
                     $this->table.'.is_deleted as is_deleted'
                 )
                 ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%Y') as record_year")
@@ -547,6 +610,7 @@ class WorkTime extends Model
             // subquery2    shift_informations
             $mainquery = DB::table($this->table_users.' AS t1')
                 ->select(
+                    't2.record_datetime_id as record_datetime_id',
                     't1.code as user_code',
                     't1.name as user_name',
                     't1.department_code as department_code',
@@ -559,9 +623,11 @@ class WorkTime extends Model
                     't1.employment_status as employment_status',
                     't8.code_name as employment_status_name',
                     't2.mode as mode',
+                    't2.user_holiday_kubuns_id',
                     't2.check_result as check_result',
                     't2.check_max_time as check_max_time',
                     't2.check_interval as check_interval',
+                    't2.is_deleted as is_deleted',
                     't2.x_positions as x_positions',
                     't2.y_positions as y_positions',
                     't3.weekday_kubun as weekday_kubun',
@@ -569,6 +635,7 @@ class WorkTime extends Model
                     't3.business_kubun as business_kubun',
                     't12.code_name as business_name',
                     't3.holiday_kubun as holiday_kubun',
+                    't13.use_free_item as use_free_item',
                     't13.code_name as holiday_name',
                     't4.closing as closing',
                     't4.uplimit_time as uplimit_time',
@@ -583,7 +650,13 @@ class WorkTime extends Model
                     't4.year as year',
                     't14.holiday_kubun as user_holiday_kubun',
                     't14.working_date as user_working_date',
-                    't15.code_name as user_holiday_name'
+                    't15.code_name as user_holiday_name',
+                    't15.description as user_holiday_description',
+                    't2.is_editor as is_editor',
+                    't2.editor_department_code as editor_department_code',
+                    't2.editor_user_code as editor_user_code',
+                    't16.name as editor_department_name',
+                    't17.name as editor_user_code_name'
                 );
             $mainquery
                 ->selectRaw('ifnull(t9.shift_no, t6.no) as working_timetable_no ')
@@ -611,8 +684,11 @@ class WorkTime extends Model
                     $join->on('t5.code', '=', 't1.department_code')
                     ->where('t1.is_deleted', '=', 0);
                 })
-                ->leftJoin($this->table_calendars.' as t3', function ($join) { 
-                    $join->on('t3.date', '=', 't2.record_date')
+                ->leftJoin($this->table_calendars.' as t3', function ($join) use($targetdateto) { 
+                    $join->on('t3.department_code', '=', 't1.department_code');
+                    $join->on('t3.user_code', '=', 't1.code')
+                    // $join->on('t3.date', '=', 't2.record_date')
+                    ->where('t3.date', '=', $targetdateto)
                     ->where('t3.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_settings.' as t4', function ($join) { 
@@ -654,7 +730,7 @@ class WorkTime extends Model
                 })
                 ->leftJoin($this->table_generalcodes.' as t13', function ($join) { 
                     $join->on('t13.code', '=', 't3.holiday_kubun')
-                    ->where('t13.identification_id', '=', Config::get('const.C008.value'))
+                    ->where('t13.identification_id', '=', Config::get('const.C013.value'))
                     ->where('t3.is_deleted', '=', 0)
                     ->where('t13.is_deleted', '=', 0);
                 })
@@ -670,6 +746,21 @@ class WorkTime extends Model
                     ->where('t15.identification_id', '=', Config::get('const.C013.value'))
                     ->where('t14.is_deleted', '=', 0)
                     ->where('t15.is_deleted', '=', 0);
+                })
+                ->leftJoinSub($subquery4, 't16', function ($join) { 
+                    $join->on('t16.code', '=', 't2.editor_department_code');
+                })
+                ->leftJoin($this->table_users.' as t17', function ($join) { 
+                    $join->on('t17.code', '=', 't2.editor_user_code')
+                    ->where('t17.is_deleted', '=', 0);
+                })
+                ->leftJoinSub($subquery3, 't18', function ($join) { 
+                    $join->on('t18.code', '=', 't17.code');
+                    $join->on('t18.max_apply_term_from', '=', 't17.apply_term_from');
+                })
+                ->JoinSub($subquery3, 't19', function ($join) { 
+                    $join->on('t19.code', '=', 't1.code');
+                    $join->on('t19.max_apply_term_from', '=', 't1.apply_term_from');
                 });
 
             if(!empty($this->param_employment_status)){
@@ -683,16 +774,12 @@ class WorkTime extends Model
             } else {
                 $mainquery->where('t1.management','<',Config::get('const.C017.admin_user'));
             }
-            $mainquery
-                ->JoinSub($subquery3, 't14', function ($join) { 
-                    $join->on('t14.code', '=', 't1.code');
-                    $join->on('t14.max_apply_term_from', '=', 't1.apply_term_from');
-                });
             /*if ($business_kubun != Config::get('const.C007.basic')) {
                 $mainquery->whereNotNull('t2.record_datetime');
             }*/
             $result = $mainquery
                 ->where('t1.is_deleted', '=', 0)
+                ->distinct()
                 ->orderBy('t1.department_code', 'asc')
                 ->orderBy('t1.employment_status', 'asc')
                 ->orderBy('t1.code', 'asc')
@@ -721,9 +808,6 @@ class WorkTime extends Model
     public function getBeforeDailyMaxData(){
         // 開始日付直前の打刻時刻を取得
         // sunquery1    work_times
-        Log::debug('getBeforeDailyMaxData $this->param_user_code '.$this->param_user_code);
-        Log::debug('getBeforeDailyMaxData $this->param_department_code '.$this->param_department_code);
-        Log::debug('getBeforeDailyMaxData $this->param_start_date '.$this->param_start_date);
 
         try{
             $subquery1 = DB::table($this->table)
@@ -756,8 +840,8 @@ class WorkTime extends Model
                     $join->on('t2.user_code', '=', 't1.user_code');
                     $join->on('t2.department_code', '=', 't1.department_code')
                     ->where('t2.holiday_kubun', '>', 0);
-                })
-                ->whereNull('t2.working_date');
+                });
+                // ->whereNull('t2.working_date');      休日出勤の場合はあるためコメントアウト
 
             $subquery = $subquery12->toSql();
 
@@ -782,6 +866,7 @@ class WorkTime extends Model
             $mainquery  = DB::table($this->table)
                 ->select(
                     $this->table.'.mode as mode',
+                    $this->table.'.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     $this->table.'.record_time as record_datetime')
                 ->JoinSub($subquery_max, 't3', function ($join) { 
                     $join->on('t3.user_code', '=', $this->table.'.user_code');
@@ -848,8 +933,8 @@ class WorkTime extends Model
                     $join->on('t2.user_code', '=', 't1.user_code');
                     $join->on('t2.department_code', '=', 't1.department_code')
                     ->where('t2.holiday_kubun', '>', 0);
-                })
-                ->whereNull('t2.working_date');
+                });
+                // ->whereNull('t2.working_date');      休日出勤の場合はあるためコメントアウト
 
             $subquery = $subquery12->toSql();
 
@@ -874,6 +959,7 @@ class WorkTime extends Model
             $mainquery  = DB::table($this->table)
                 ->select(
                     $this->table.'.mode as mode',
+                    $this->table.'.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     $this->table.'.record_time as record_datetime')
                 ->JoinSub($subquery_max, 't3', function ($join) { 
                     $join->on('t3.user_code', '=', $this->table.'.user_code');
@@ -927,6 +1013,7 @@ class WorkTime extends Model
             $mainquery = DB::table($this->table.' AS t1')
                 ->select(
                     't1.mode as mode',
+                    't1.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     't1.record_time as record_datetime'
                     )
                 ->JoinSub($sunquery1, 't2', function ($join) { 
@@ -985,19 +1072,29 @@ class WorkTime extends Model
                     $join->on('t5.code', '=','t1.mode')
                     ->where('t5.identification_id', '=', Config::get('const.C005.value'));
                 })
+                ->leftJoin($this->table_user_holiday_kubuns.' as t6', function ($join) { 
+                    $join->on('t6.id', '=','t1.user_holiday_kubuns_id')
+                    ->where('t6.is_deleted', '=', 0);
+                })
                 ->select(
                     't1.id',
                     't1.user_code',
                     't1.department_code',
                     't1.record_time',
                     't1.mode',
+                    't1.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     't2.name as user_name',
                     't4.name as department_name',
-                    't5.code_name'
+                    't5.code_name',
+                    't6.holiday_kubun as user_holiday_kbn'
                 )
-                ->selectRaw("DATE_FORMAT(t1.record_time,'%Y/%m/%d') as record_date")
+                ->selectRaw("DATE_FORMAT(t1.record_time,'%Y%m%d') as record_ymd")
+                ->selectRaw("DATE_FORMAT(t1.record_time,'%Y年%m月%d日') as record_date")
+                ->selectRaw("DATE_FORMAT(t1.record_time,'%Y/%m/%d') as date")
+                ->selectRaw("DATE_FORMAT(t1.record_time,'%H:%i') as time")
                 ->selectRaw('X(t1.positions) as x_positions')
                 ->selectRaw('Y(t1.positions) as y_positions')
+                ->selectRaw("case ifnull(t6.holiday_kubun,0) when 0 then 0 else 1 end as kbn_flag")
                 ->where('t1.user_code', $this->user_code)
                 ->whereBetween('t1.record_time', [$this->param_start_date,$this->param_end_date])
                 ->where('t1.is_deleted', 0)
@@ -1027,7 +1124,11 @@ class WorkTime extends Model
                 ->where('id', $this->id)
                 ->where('is_deleted', 0)
                 ->update([
+                    'is_editor' => 1,
+                    'editor_department_code' => $this->editor_department_code,
+                    'editor_user_code' => $this->editor_user_code,
                     'is_deleted' => 1,
+                    'updated_user' => $this->updated_user,
                     'updated_at' => $this->systemdate
                     ]);
         }catch(\PDOException $pe){
@@ -1077,10 +1178,7 @@ class WorkTime extends Model
      * @return void
      */
     public function getAlertData($targetdate){
-        if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
-        Log::debug('getBeforeDailyMaxData $this->param_date_from '.$this->param_date_from);
-        Log::debug('getBeforeDailyMaxData $this->param_date_to '.$this->param_date_to);
-        Log::debug('getBeforeDailyMaxData $targetdate '.$targetdate);
+        // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
 
         try {
             // 日次労働時間取得SQL作成
@@ -1092,7 +1190,8 @@ class WorkTime extends Model
                 ->addselect($this->table.'.user_code as user_code')
                 ->addselect($this->table.'.department_code as department_code')
                 ->addselect($this->table.'.record_time as record_time')
-                ->addselect($this->table.'.mode as mode');
+                ->addselect($this->table.'.mode as mode')
+                ->addselect($this->table.'.user_holiday_kubuns_id as user_holiday_kubuns_id');
             $subquery1
                 ->selectRaw('case check_result when null then 0 else check_result end as check_result')
                 ->selectRaw('case check_max_time when null then 0 else check_max_time end as check_max_time')
@@ -1124,6 +1223,7 @@ class WorkTime extends Model
                     't2.record_time as record_time',
                     't2.mode as mode',
                     't6.code_name as mode_name',
+                    't2.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     't2.check_result as check_result',
                     't2.check_max_time as check_max_time',
                     't2.check_interval as unused_check_interval',
@@ -1190,6 +1290,8 @@ class WorkTime extends Model
                     ->where('t10.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_calendars.' as t11', function ($join) { 
+                    $join->on('t11.department_code', '=', 't1.department_code');
+                    $join->on('t11.user_code', '=', 't1.code');
                     $join->on('t11.date', '=', 't2.record_date')
                     ->where('t11.is_deleted', '=', 0);
                 });
@@ -1234,10 +1336,10 @@ class WorkTime extends Model
                 ->orderBy('t1.code', 'asc');
 
             $result = $mainquery->get();
-            if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
-                \Log::debug('sql_debug_log', ['getAlertData' => \DB::getQueryLog()]);
-                \DB::disableQueryLog();
-            }
+            // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
+            //     \Log::debug('sql_debug_log', ['getAlertData' => \DB::getQueryLog()]);
+            //     \DB::disableQueryLog();
+            // }
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
@@ -1258,455 +1360,446 @@ class WorkTime extends Model
      *
      * @return void
      */
-    public function getdailyAlertData($targetdate){
-        if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
-        Log::debug('getdailyAlertData $this->param_date_from '.$this->param_date_from);
-        Log::debug('getdailyAlertData $this->param_date_to '.$this->param_date_to);
-        Log::debug('getdailyAlertData $targetdate '.$targetdate);
-        Log::debug('getdailyAlertData $this->param_date_from '.$this->param_start_date);
-        Log::debug('getdailyAlertData $this->param_date_to '.$this->param_end_date);
+    public function getdailyAlertData(){
+        // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
 
         try {
-            // 日次労働時間取得SQL作成
-            // 適用期間日付の取得
-            $apicommon = new ApiCommonController();
-            // usersの最大適用開始日付subquery
-            $subquery5 = $apicommon->getUserApplyTermSubquery($targetdate);
-            // departmentsの最大適用開始日付subquery
-            $subquery6 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
-            // ---------------- unionquery1 打刻ミス ----------------------------
-            // subquery1    work_times
-            $subquery1 = DB::table($this->table.' AS t1')
-                ->select(
-                    't1.user_code as user_code',
-                    't1.department_code as department_code');
-            $subquery1
-                ->selectRaw(
-                    'MAX(t1.record_time) as max_record_time');
-            $subquery1
-                ->addselect('t2.record_time as record_time');
-            // subquery2    work_times
-            $subquery2 = DB::table($this->table.' AS t1')
-                ->select(
-                    't1.user_code as user_code',
-                    't1.department_code as department_code',
-                    't1.record_time as record_time');
-            if(!empty($this->param_date_from) && !empty($this->param_date_to)){
-                $subquery2->where('t1.record_time', '>=', $this->param_date_from);             // 日付範囲指定
-                $subquery2->where('t1.record_time', '<=', $this->param_date_to);               // 日付範囲指定
+            $sqlString = "";
+            $sqlString .= "
+            select
+                t1.user_code as user_code
+                , t1.user_name as user_name
+                , t1.user_management as user_management
+                , t1.employment_status as employment_status
+                , t1.employment_status_name as employment_status_name
+                , t1.department_code as department_code
+                , t1.department_name as department_name
+                , t1.current_record_date as current_record_date
+                , DATE_FORMAT(t1.current_record_time, '%m月%d日 %H:%i')as current_record_time
+                , CONCAT(
+                    DATE_FORMAT(t1.current_record_date, '%Y年%m月%d日'), '(', SUBSTRING('月火水木金土日', CONVERT(t2.weekday_kubun + 1, char), 1), ')'
+                    ) as record_date_name
+                , t1.current_mode as current_mode
+                , t1.current_mode_name as current_mode_name
+                , t1.before_record_date as before_record_date
+                , DATE_FORMAT(t1.before_record_time, '%m月%d日 %H:%i')as before_record_time
+                , t1.before_mode as before_mode
+                , t1.before_mode_name as before_mode_name
+                , t1.hit_alert as hit_alert
+                , t1.interval_alaert as interval_alaert
+                , t1.holiday_alert as holiday_alert
+                , t2.business_kubun as business_kubun
+            from
+            (
+                (
+                select
+                    t3.user_code as user_code
+                    , t8.name as user_name
+                    , t8.management as user_management
+                    , t8.employment_status as employment_status
+                    , t10.code_name as employment_status_name
+                    , t3.department_code as department_code
+                    , t9.name as department_name
+                    , DATE_FORMAT(t6.record_time, '%Y%m%d') as current_record_date
+                    , t6.record_time as current_record_time
+                    , t6.mode as current_mode
+                    , t12.code_name as current_mode_name
+                    , CASE IFNULL(t6.mode, 0) 
+                        WHEN 0 THEN 0 
+                        WHEN 1 THEN CASE IFNULL(t5.mode, 0) 
+                        WHEN 0 THEN 0 
+                        WHEN 2 THEN 0 
+                        ELSE 1 
+                        END 
+                        WHEN 2 THEN CASE IFNULL(t5.mode, 0) 
+                        WHEN 0 THEN 0 
+                        WHEN 1 THEN 0 
+                        WHEN 22 THEN 0 
+                        WHEN 12 THEN 0 
+                        ELSE 1 
+                        END 
+                        WHEN 21 THEN CASE IFNULL(t5.mode, 0) 
+                        WHEN 0 THEN 0 
+                        WHEN 1 THEN 0 
+                        WHEN 22 THEN 0 
+                        WHEN 12 THEN 0 
+                        ELSE 1 
+                        END 
+                        WHEN 22 THEN CASE IFNULL(t5.mode, 0) 
+                        WHEN 0 THEN 0 
+                        WHEN 21 THEN 0 
+                        ELSE 1 
+                        END 
+                        WHEN 11 THEN CASE IFNULL(t5.mode, 0) 
+                        WHEN 0 THEN 0 
+                        WHEN 1 THEN 0 
+                        WHEN 22 THEN 0 
+                        WHEN 12 THEN 0 
+                        ELSE 1 
+                        END 
+                        WHEN 12 THEN CASE IFNULL(t5.mode, 0) 
+                        WHEN 0 THEN 0 
+                        WHEN 11 THEN 0 
+                        ELSE 1 
+                        END 
+                        END as hit_alert
+                    , DATE_FORMAT(t5.record_time, '%Y%m%d') as before_record_date
+                    , t5.record_time as before_record_time
+                    , t5.mode as before_mode
+                    , t11.code_name as before_mode_name
+                    , TIMEDIFF(t6.record_time, t5.record_time) as diff_time
+                    , CASE IFNULL(t6.mode, 0) 
+                        WHEN 1 THEN CASE IFNULL(t5.mode, 0) 
+                        WHEN 2 THEN CASE 
+                            WHEN IFNULL(TIMEDIFF(t6.record_time, t5.record_time), 0) < ? 
+                            THEN 1 
+                            ELSE 0 
+                            END 
+                        ELSE 0 
+                        END 
+                        ELSE 0 
+                        END as interval_alaert
+                    , 0 as holiday_alert 
+                from
+                    work_times as t3 
+                    left join ( 
+                        select
+                            t1.user_code as user_code
+                            , t1.department_code as department_code
+                            , MAX(t1.record_time) as max_record_time
+                            , t2.record_time as record_time 
+                        from
+                            work_times as t1 
+                            inner join ( 
+                            select
+                                t1.user_code as user_code
+                                , t1.department_code as department_code
+                                , t1.record_time as record_time 
+                            from
+                                work_times as t1 
+                            where
+                                t1.record_time between ? and ? 
+                                and t1.is_deleted = ?
+                            ) as t2 
+                            on t2.user_code = t1.user_code 
+                                and t2.department_code = t1.department_code 
+                                and t2.record_time > t1.record_time 
+                                and t1.is_deleted = ? 
+                        group by
+                            t1.user_code
+                            , t1.department_code
+                            , t2.record_time
+                    ) as t4 
+                    on t4.user_code = t3.user_code 
+                        and t4.department_code = t3.department_code 
+                    inner join ( 
+                        select
+                            t1.user_code as user_code
+                            , t1.department_code as department_code
+                            , t1.record_time as record_time
+                            , t1.mode as mode 
+                        from
+                            work_times as t1 
+                        where
+                            t1.record_time between ? and ? 
+                            and t1.is_deleted = ?
+                        ) as t5 
+                    on t5.user_code = t4.user_code 
+                        and t5.department_code = t4.department_code 
+                        and t5.record_time = t4.max_record_time 
+                    inner join ( 
+                        select
+                            t1.user_code as user_code
+                            , t1.department_code as department_code
+                            , t1.record_time as record_time
+                            , t1.mode as mode 
+                        from
+                            work_times as t1 
+                        where
+                            t1.record_time between ? and ? 
+                            and t1.is_deleted = ?
+                    ) as t6 
+                    on t6.user_code = t4.user_code 
+                        and t6.department_code = t4.department_code 
+                        and t6.record_time = t4.record_time 
+                    inner join ( 
+                        select
+                            code as code
+                            , MAX(apply_term_from) as max_apply_term_from 
+                        from
+                            users 
+                        where
+                            apply_term_from <= ?
+                            and role < ?
+                            and is_deleted = ?
+                        group by
+                            code
+                    ) as t7 
+                    on t7.code = t3.user_code 
+                    inner join users as t8 
+                    on t8.code = t7.code 
+                        and t8.apply_term_from = t7.max_apply_term_from 
+                        and t8.kill_from_date > ?
+                        and t8.is_deleted = ?
+                    left join ( 
+                        select
+                            t1.code as code
+                            , t1.name as name 
+                        from
+                            departments as t1 
+                            inner join ( 
+                                select
+                                    code as code
+                                    , MAX(apply_term_from) as max_apply_term_from 
+                                from
+                                    departments 
+                                where
+                                    apply_term_from <= ?
+                                    and is_deleted = ?
+                                group by
+                                    code
+                            ) as t2 
+                            on t1.code = t2.code 
+                                and t1.apply_term_from = t2.max_apply_term_from 
+                        where
+                            t1.kill_from_date > ?
+                            and t1.is_deleted = ?
+                    ) as t9 
+                    on t9.code = t3.department_code 
+                    left join generalcodes as t10 
+                    on t10.code = t8.employment_status 
+                        and t10.identification_id = ?
+                        and t10.is_deleted = ?
+                    left join generalcodes as t11 
+                    on t11.code = t5.mode 
+                        and t11.identification_id = ?
+                        and t11.is_deleted = ?
+                    left join generalcodes as t12 
+                    on t12.code = t6.mode 
+                        and t12.identification_id = ?
+                        and t12.is_deleted = ? 
+                where
+                  t3.record_time between ? and ? 
+                  and t3.is_deleted = ?
+                ) 
+                union ( 
+                    select
+                      t1.user_code as user_code
+                      , t1.user_name as user_name
+                      , t1.user_management as user_management
+                      , t1.employment_status as employment_status
+                      , t10.code_name as employment_status_name
+                      , t1.department_code as department_code
+                      , t9.name as department_name
+                      , t2.calendars_date as current_record_date
+                      , null as current_record_time
+                      , null as current_mode
+                      , null as current_mode_name
+                      , 0 as hit_alert
+                      , t3.record_date as before_record_date
+                      , null as before_record_time
+                      , null as before_mode
+                      , null as before_mode_name
+                      , null as diff_time
+                      , 0 as interval_alaert
+                      , 1 as holiday_alert 
+                    from
+                    ( 
+                        select
+                            t1.code as user_code
+                            , t1.name as user_name
+                            , t1.management as user_management
+                            , t1.employment_status as employment_status
+                            , t1.department_code as department_code
+                            , t1.kill_from_date as kill_from_date
+                        from
+                            users as t1 
+                            inner join ( 
+                            select
+                                code as code
+                                , MAX(apply_term_from) as max_apply_term_from 
+                            from
+                                users 
+                            where
+                                apply_term_from <= ?
+                                and role < ?
+                                and is_deleted = ?
+                            group by
+                                code
+                            ) as t3 
+                            on t3.code = t1.code 
+                            and t3.max_apply_term_from = t1.apply_term_from 
+                        where
+                            t1.kill_from_date > ?
+                    ) AS t1 
+                    inner join ( 
+                        select
+                            t1.department_code as department_code
+                            , t1.user_code as user_code
+                            , DATE_FORMAT(t1.date, '%Y%m%d') as calendars_date 
+                        from
+                            calendars as t1
+                        where
+                            t1.date between ? and ?
+                            and  t1.business_kubun = ?
+                            and  holiday_kubun = ?
+                            and  is_deleted = ?
+                   ) as t2 
+                    on t2.department_code = t1.department_code
+                        and t2.user_code = t1.user_code 
+                    left join ( 
+                        select
+                            t1.user_code as user_code
+                            , t1.department_code as department_code
+                            , DATE_FORMAT(t1.record_time, '%Y%m%d') as record_date 
+                        from
+                            work_times as t1
+                        where
+                            t1.record_time between ? and ?
+                    ) as t3 
+                    on t3.user_code = t1.user_code 
+                        and t3.department_code = t1.department_code 
+                        and t3.record_date = t2.calendars_date 
+                    left join ( 
+                        select
+                            t1.code as code
+                            , t1.name as name 
+                        from
+                            departments as t1 
+                            inner join ( 
+                                select
+                                    code as code
+                                    , MAX(apply_term_from) as max_apply_term_from 
+                                from
+                                    departments 
+                                where
+                                    apply_term_from <= ?
+                                    and is_deleted = ?
+                                group by
+                                    code
+                            ) as t2 
+                            on t2.code = t1.code 
+                            and t2.max_apply_term_from =  t1.apply_term_from
+                        where
+                            t1.kill_from_date > ?
+                            and t1.is_deleted = ?
+                    ) as t9 
+                    on t9.code = t1.department_code 
+                    left join generalcodes as t10 
+                    on t10.code = t1.employment_status 
+                        and t10.identification_id = ?
+                        and t10.is_deleted = ?
+                    where
+                        t2.calendars_date between ? and ? 
+                        and t3.record_date is null
+                )
+            ) as t1 
+            inner join calendars as t2 
+            on t2.department_code = t1.department_code 
+                and t2.user_code = t1.user_code 
+                and t2.date = t1.current_record_date ";
+            // 条件
+            $sqlString .= "where 1 = 1 ";
+            if(!empty($this->param_employment_status)){
+                $sqlString .= "and t1.employment_status = ? ";          //　雇用形態指定
             }
-            $subquery2
-                ->where('t1.is_deleted', '=', 0);
-            $subquery1
-                ->JoinSub($subquery2, 't2', function ($join) { 
-                    $join->on('t2.user_code', '=', 't1.user_code');
-                    $join->on('t2.department_code', '=', 't1.department_code');
-                    $join->on('t2.record_time', '>', 't1.record_time')
-                    ->where('t1.is_deleted', '=', 0);
-                })
-                ->groupBy('t1.user_code', 't1.department_code', 't2.record_time');
-            // subquery3    work_times
-            $subquery3 = DB::table($this->table.' AS t1')
-                ->select(
-                    't1.user_code as user_code',
-                    't1.department_code as department_code',
-                    't1.record_time as record_time',
-                    't1.mode as mode')
-                ->where('t1.is_deleted', '=', 0);
-            // subquery4    work_times
-            $subquery4 = DB::table($this->table.' AS t1')
-                ->select(
-                    't1.user_code as user_code',
-                    't1.department_code as department_code',
-                    't1.record_time as record_time',
-                    't1.mode as mode')
-                ->where('t1.is_deleted', '=', 0);
-        
-            // ---------------- unionquery2 打刻忘れ ----------------------------
-            // subquery7    users
-            $subquery7 = DB::table($this->table_users.' AS t1')
-                ->select(
-                    't1.code as user_code',
-                    't1.name as user_name',
-                    't1.management as user_management',
-                    't1.employment_status as employment_status',
-                    't1.department_code as department_code');
-            $subquery7
-                ->selectRaw(
-                    "DATE_FORMAT(".$this->table_calendars.".date,'%Y%m%d') as date");
-            $subquery7
-                ->JoinSub($subquery5, 't3', function ($join) { 
-                    $join->on('t3.code', '=', 't1.code');
-                    $join->on('t3.max_apply_term_from', '=', 't1.apply_term_from');
-                });
-            $subquery7->crossJoin($this->table_calendars); 
-            $subquery8 = $subquery7->toSql();
-            // subquery9    work_times
-            $subquery9 = DB::table($this->table.' AS t1')
-                ->select(
-                    't1.user_code as user_code',
-                    't1.department_code as department_code');
-            $subquery9
-                ->selectRaw(
-                    "DATE_FORMAT(t1.record_time,'%Y%m%d') as record_date");
-
-            $unionquery2 = DB::table(DB::raw('('.$subquery8.') AS t1'))
-                ->select(
-                    't1.user_code as user_code',
-                    't1.user_name as user_name',
-                    't1.user_management as user_management',
-                    't1.employment_status as employment_status',
-                    't10.code_name as employment_status_name',
-                    't1.department_code as department_code',
-                    't9.name as department_name',
-                    't1.date as current_record_date');
-            $unionquery2
-                ->selectRaw('null as current_record_time')
-                ->selectRaw('null as current_mode')
-                ->selectRaw('null as current_mode_name')
-                ->selectRaw('0 as hit_alert');
-            $unionquery2
-                ->addselect('t2.record_date as before_record_date');
-            $unionquery2
-                ->selectRaw('null as before_record_time')
-                ->selectRaw('null as before_mode')
-                ->selectRaw('null as before_mode_name')
-                ->selectRaw('null as diff_time')
-                ->selectRaw('0 as interval_alaert')
-                ->selectRaw('1 as holiday_alert');
-            $unionquery2
-                ->leftJoinSub($subquery9, 't2', function ($join) { 
-                    $join->on('t2.user_code', '=', 't1.user_code');
-                    $join->on('t2.department_code', '=', 't1.department_code');
-                    $join->on('t2.record_date', '=', 't1.date');
-                })
-                ->leftJoinSub($subquery6, 't9', function ($join) { 
-                    $join->on('t9.code', '=', 't1.department_code');
-                })
-                ->leftJoin($this->table_generalcodes.' as t10', function ($join) { 
-                    $join->on('t10.code', '=', 't1.employment_status')
-                    ->where('t10.identification_id', '=', Config::get('const.C001.value'))
-                    ->where('t10.is_deleted', '=', 0);
-                });
-        
-            if(!empty($this->param_start_date) && !empty($this->param_end_date)){
-                $unionquery2->where('t1.date', '>=', $this->param_start_date);             // 日付範囲指定
-                $unionquery2->where('t1.date', '<=', $this->param_end_date);               // 日付範囲指定
+            if(!empty($this->param_department_code)){
+                $sqlString .= "and t1.department_code = ? ";            //department_code指定
             }
-            $unionquery2
-                ->whereNull('t2.record_date');
-
-            // ---------------- unionquery ----------------------------
-            $unionquery1 = DB::table($this->table.' AS t3')
-                ->select(
-                    't3.user_code as user_code',
-                    't8.name as user_name',
-                    't8.management as user_management',
-                    't8.employment_status as employment_status',
-                    't10.code_name as employment_status_name',
-                    't3.department_code as department_code',
-                    't9.name as department_name'
-                );
-            $unionquery1
-                ->selectRaw(
-                    "DATE_FORMAT(t6.record_time,'%Y%m%d') as current_record_date");
-            $unionquery1
-                ->addselect(
-                    "t6.record_time as current_record_time",
-                    "t6.mode as current_mode",
-                    "t12.code_name as current_mode_name"
-                );
-            $case_sql1 = "CASE IFNULL(t6.mode, 0) ";
-            $case_sql1 .= "WHEN 0 THEN 0 ";
-            $case_sql1 .= "WHEN 1 THEN ";
-            $case_sql1 .= "  CASE IFNULL(t5.mode, 0) ";
-            $case_sql1 .= "    WHEN 0 THEN 0 ";
-            $case_sql1 .= "    WHEN 2 THEN 0 ";
-            $case_sql1 .= "    ELSE 1 ";
-            $case_sql1 .= "  END ";
-            $case_sql1 .= "WHEN 2 THEN ";
-            $case_sql1 .= "  CASE IFNULL(t5.mode, 0) ";
-            $case_sql1 .= "    WHEN 0 THEN 0 ";
-            $case_sql1 .= "    WHEN 1 THEN 0 ";
-            $case_sql1 .= "    WHEN 22 THEN 0 ";
-            $case_sql1 .= "    WHEN 12 THEN 0 ";
-            $case_sql1 .= "    ELSE 1 ";
-            $case_sql1 .= "  END ";
-            $case_sql1 .= "WHEN 21 THEN ";
-            $case_sql1 .= "  CASE IFNULL(t5.mode, 0) ";
-            $case_sql1 .= "    WHEN 0 THEN 0 ";
-            $case_sql1 .= "    WHEN 1 THEN 0 ";
-            $case_sql1 .= "    WHEN 22 THEN 0 ";
-            $case_sql1 .= "    WHEN 12 THEN 0 ";
-            $case_sql1 .= "    ELSE 1 ";
-            $case_sql1 .= "  END ";
-            $case_sql1 .= "WHEN 22 THEN ";
-            $case_sql1 .= "  CASE IFNULL(t5.mode, 0) ";
-            $case_sql1 .= "    WHEN 0 THEN 0 ";
-            $case_sql1 .= "    WHEN 21 THEN 0 ";
-            $case_sql1 .= "    ELSE 1 ";
-            $case_sql1 .= "  END ";
-            $case_sql1 .= "WHEN 11 THEN ";
-            $case_sql1 .= "  CASE IFNULL(t5.mode, 0) ";
-            $case_sql1 .= "    WHEN 0 THEN 0 ";
-            $case_sql1 .= "    WHEN 1 THEN 0 ";
-            $case_sql1 .= "    WHEN 22 THEN 0 ";
-            $case_sql1 .= "    WHEN 12 THEN 0 ";
-            $case_sql1 .= "    ELSE 1 ";
-            $case_sql1 .= "  END ";
-            $case_sql1 .= "WHEN 12 THEN ";
-            $case_sql1 .= "  CASE IFNULL(t5.mode, 0) ";
-            $case_sql1 .= "    WHEN 0 THEN 0 ";
-            $case_sql1 .= "    WHEN 11 THEN 0 ";
-            $case_sql1 .= "    ELSE 1 ";
-            $case_sql1 .= "  END ";
-            $case_sql1 .= "END as hit_alert ";
-            $unionquery1
-                ->selectRaw($case_sql1)
-                ->selectRaw("DATE_FORMAT(t5.record_time, '%Y%m%d') as before_record_date");
-            $unionquery1
-                ->addselect('t5.record_time as before_record_time')
-                ->addselect('t5.mode as before_mode')
-                ->addselect('t11.code_name as before_mode_name');
+            if(!empty($this->param_user_code)){
+                $sqlString .= "and t1.user_code = ? ";                  //user_code指定
+            } else {
+                $sqlString .= "and t1.user_management < ? ";
+            }
+            // $sqlString .= "and t2.business_kubun = ? ";
+            $sqlString .= "and t2.is_deleted = ? ";
+            $sqlString .= "and (
+                                t1.hit_alert > ?
+                                or t1.interval_alaert > ?
+                                or t1.holiday_alert > ?
+                            )";
+            $sqlString .= "order by
+                                t1.current_record_date desc
+                                , t1.user_code asc
+                                , t1.department_code asc";
+            // バインド
             // インターバル時間取得
-            $interval_time = $apicommon->getIntevalMinute($targetdate);
-            $case_sql2 = "CASE IFNULL(t6.mode, 0) ";
-            $case_sql2 .= "WHEN 1 THEN ";
-            $case_sql2 .= "  CASE IFNULL(t5.mode, 0) ";
-            $case_sql2 .= "  WHEN 2 THEN ";
-            $case_sql2 .= "    CASE ";
-            $case_sql2 .= "    WHEN IFNULL(TIMEDIFF(t6.record_time, t5.record_time), 0) < '".$interval_time."' THEN 1 ";
-            $case_sql2 .= "    ELSE 0 ";
-            $case_sql2 .= "    END ";
-            $case_sql2 .= "  ELSE 0 ";
-            $case_sql2 .= "  END ";
-            $case_sql2 .= "ELSE 0 ";
-            $case_sql2 .= "END as interval_alaert ";
-            $unionquery1
-                ->selectRaw('TIMEDIFF(t6.record_time, t5.record_time) as diff_time')
-                ->selectRaw($case_sql2)
-                ->selectRaw('0 as holiday_alert ');
-            $unionquery1
-                ->leftJoinSub($subquery1, 't4', function ($join) { 
-                    $join->on('t4.user_code', '=', 't3.user_code');
-                    $join->on('t4.department_code', '=', 't3.department_code');
-                })
-                ->JoinSub($subquery3, 't5', function ($join) { 
-                    $join->on('t5.user_code', '=', 't4.user_code');
-                    $join->on('t5.department_code', '=', 't4.department_code');
-                    $join->on('t5.record_time', '=', 't4.max_record_time');
-                })
-                ->JoinSub($subquery4, 't6', function ($join) { 
-                    $join->on('t6.user_code', '=', 't4.user_code');
-                    $join->on('t6.department_code', '=', 't4.department_code');
-                    $join->on('t6.record_time', '=', 't4.record_time');
-                })
-                ->JoinSub($subquery5, 't7', function ($join) { 
-                    $join->on('t7.code', '=', 't3.user_code');
-                })
-                ->Join($this->table_users.' as t8', function ($join) { 
-                    $join->on('t8.code', '=', 't7.code');
-                    $join->on('t8.apply_term_from', '=', 't7.max_apply_term_from')
-                    ->where('t8.is_deleted', '=', 0);
-                })
-                ->leftJoinSub($subquery6, 't9', function ($join) { 
-                    $join->on('t9.code', '=', 't3.department_code');
-                })
-                ->leftJoin($this->table_generalcodes.' as t10', function ($join) { 
-                    $join->on('t10.code', '=', 't8.employment_status')
-                    ->where('t10.identification_id', '=', Config::get('const.C001.value'))
-                    ->where('t10.is_deleted', '=', 0);
-                })
-                ->leftJoin($this->table_generalcodes.' as t11', function ($join) { 
-                    $join->on('t11.code', '=', 't5.mode')
-                    ->where('t11.identification_id', '=', Config::get('const.C005.value'))
-                    ->where('t11.is_deleted', '=', 0);
-                })
-                ->leftJoin($this->table_generalcodes.' as t12', function ($join) { 
-                    $join->on('t12.code', '=', 't6.mode')
-                    ->where('t12.identification_id', '=', Config::get('const.C005.value'))
-                    ->where('t12.is_deleted', '=', 0);
-                });
-            if(!empty($this->param_date_from) && !empty($this->param_date_to)){
-                $unionquery1->where('t3.record_time', '>=', $this->param_date_from);             // 日付範囲指定
-                $unionquery1->where('t3.record_time', '<=', $this->param_date_to);               // 日付範囲指定
-            }
-            $unionquery1
-                ->where('t3.is_deleted', '=', 0)
-                ->union($unionquery2);
-
-            $unionquery1_sql= $unionquery1->toSql();
-
-            // ---------------- mainquery ----------------------------
-            $mainquery = DB::table(DB::raw('('.$unionquery1_sql.') as t1'))
-                ->select(
-                    't1.user_code as user_code',
-                    't1.user_name as user_name',
-                    't1.user_management as user_management',
-                    't1.employment_status as employment_status',
-                    't1.employment_status_name as employment_status_name',
-                    't1.department_code as department_code',
-                    't1.department_name as department_name',
-                    't1.current_record_date as current_record_date',
-                    't1.current_record_time as current_record_time'
-                );
-            $mainquery
-                ->selectRaw(
-                    "CONCAT(DATE_FORMAT(t1.current_record_date, '%Y年%m月%d日'), '(', SUBSTRING('月火水木金土日', CONVERT(t2.weekday_kubun + 1, char), 1), ')') as record_date_name"
-                );
-            $mainquery
-                ->addselect(
-                    't1.current_mode as current_mode',
-                    't1.current_mode_name as current_mode_name',
-                    't1.before_record_date as before_record_date',
-                    't1.before_record_time as before_record_time',
-                    't1.before_mode as before_mode',
-                    't1.before_mode_name as before_mode_name',
-                    't1.hit_alert as hit_alert',
-                    't1.interval_alaert as interval_alaert',
-                    't1.holiday_alert as holiday_alert',
-                    't2.business_kubun as business_kubun');
-            // ここのjoinで->where('t2.business_kubun', '=', 1)としたいがバインド変数にうまくバインドされないため、予備もとで判断する
-            $mainquery
-                ->leftJoin($this->table_calendars.' as t2', function ($join) { 
-                    $join->on('t2.date', '=', 't1.current_record_date');
-                });
-            if(!empty($this->param_employment_status)){
-                $mainquery->where('t1.employment_status', $this->param_employment_status);      //　雇用形態指定
-            }
-            if(!empty($this->param_department_code)){
-                $mainquery->where('t1.department_code', $this->param_department_code);          //department_code指定
-            }
-            if(!empty($this->param_user_code)){
-                $mainquery->where('t1.user_code', $this->param_user_code);                           //user_code指定
-            } else {
-                $mainquery->where('t1.user_management','<',Config::get('const.C017.out_of_user'));
-            }
-            $mainquery
-                ->Where('t2.business_kubun', '=', Config::get('const.C007.basic'))
-                ->Where('t2.is_deleted', '=', 0)
-                ->where(function ($query) {
-                    $query->where('t1.hit_alert', '>', 0)
-                        ->orWhere('t1.interval_alaert', '>', 0)
-                        ->orWhere('t1.holiday_alert', '>', '0');
-                })
-                ->orderBy('t1.current_record_date', 'asc')
-                ->orderBy('t1.user_code', 'asc')
-                ->orderBy('t1.department_code', 'asc');
-                
+            $apicommon = new ApiCommonController();
+            $interval_time = $apicommon->getIntevalMinute($this->param_end_date);
             $array_setBindingsStr = array();
-            $cnt = 0;
-            if(!empty($this->param_date_from) && !empty($this->param_date_to)){
-                $cnt += 1;
-                $array_setBindingsStr[] = array($cnt=>$this->param_date_from);
-                $cnt += 1;
-                $array_setBindingsStr[] = array($cnt=>$this->param_date_to);
+            $array_setBindingsStr[] = $interval_time;
+            $array_setBindingsStr[] = $this->param_date_from;
+            $array_setBindingsStr[] = $this->param_date_to;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $this->param_date_from;
+            $array_setBindingsStr[] = $this->param_date_to;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $this->param_date_from;
+            $array_setBindingsStr[] = $this->param_date_to;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $this->param_end_date;
+            $array_setBindingsStr[] = Config::get('const.C017.admin_user');;
+            $array_setBindingsStr[] = 0;
+            // 月末
+            $dt = new Carbon($this->param_end_date);
+            $lastOfMonth = date_format($dt->endOfMonth(), 'Ymd');
+            $array_setBindingsStr[] = $lastOfMonth;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $this->param_end_date;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $lastOfMonth;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = Config::get('const.C001.value');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = Config::get('const.C005.value');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = Config::get('const.C005.value');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $this->param_date_from;
+            $array_setBindingsStr[] = $this->param_date_to;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $this->param_end_date;
+            $array_setBindingsStr[] = Config::get('const.C017.admin_user');;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $lastOfMonth;
+            $array_setBindingsStr[] = $this->param_start_date;
+            $array_setBindingsStr[] = $this->param_end_date;
+            $array_setBindingsStr[] = Config::get('const.C007.basic');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $this->param_date_from;
+            $array_setBindingsStr[] = $this->param_date_to;
+            $array_setBindingsStr[] = $this->param_end_date;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $lastOfMonth;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = Config::get('const.C001.value');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $this->param_start_date;
+            $array_setBindingsStr[] = $this->param_end_date;
+            if(!empty($this->param_employment_status)) {
+                $array_setBindingsStr[] = $this->param_employment_status;
             }
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>$targetdate);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>10);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>$targetdate);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>$targetdate);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>Config::get('const.C001.value'));
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>Config::get('const.C005.value'));
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>Config::get('const.C005.value'));
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            if(!empty($this->param_date_from) && !empty($this->param_date_to)){
-                $cnt += 1;
-                $array_setBindingsStr[] = array($cnt=>$this->param_date_from);
-                $cnt += 1;
-                $array_setBindingsStr[] = array($cnt=>$this->param_date_to);
+            if(!empty($this->param_department_code)) {
+                $array_setBindingsStr[] = $this->param_department_code;
             }
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>$targetdate);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>Config::get('const.C017.admin_user'));
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>$targetdate);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>$targetdate);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>Config::get('const.C001.value'));
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            if(!empty($this->param_start_date) && !empty($this->param_end_date)){
-                $cnt += 1;
-                $array_setBindingsStr[] = array($cnt=>$this->param_start_date);
-                $cnt += 1;
-                $array_setBindingsStr[] = array($cnt=>$this->param_end_date);
-            }
-            if(!empty($this->param_employment_status)){
-                $cnt += 1;
-                $array_setBindingsStr[] = array($cnt=>$this->param_employment_status);
-            }
-            if(!empty($this->param_department_code)){
-                $cnt += 1;
-                $array_setBindingsStr[] = array($cnt=>$this->param_department_code);
-            }
-            if(!empty($this->param_user_code)){
-                $cnt += 1;
-                $array_setBindingsStr[] = array($cnt=>$this->param_user_code);
+            if(!empty($this->param_user_code)) {
+                $array_setBindingsStr[] = $this->param_user_code;
             } else {
-                $cnt += 1;
-                $array_setBindingsStr[] = array($cnt=>Config::get('const.C017.out_of_user'));
+                $array_setBindingsStr[] = Config::get('const.C017.out_of_user');
             }
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>Config::get('const.C007.basic'));
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
-            $cnt += 1;
-            $array_setBindingsStr[] = array($cnt=>0);
+            // $array_setBindingsStr[] = Config::get('const.C007.basic');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+            $result = DB::select($sqlString, $array_setBindingsStr);
 
-            if (count($array_setBindingsStr) > 0) {
-                $mainquery->setBindings($array_setBindingsStr);
-            }
-
-            $result = $mainquery->get();
-
-
-            if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
-                \Log::debug('sql_debug_log', ['getdailyAlertData' => \DB::getQueryLog()]);
-                \DB::disableQueryLog();
-            }
+            // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
+            //     \Log::debug('sql_debug_log', ['getdailyAlertData' => \DB::getQueryLog()]);
+            //     \DB::disableQueryLog();
+            // }
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
@@ -1720,5 +1813,471 @@ class WorkTime extends Model
         return $result;
     }
 
+
+    /**
+     * 日次警告打刻取得
+     * 
+     *  $targetdateは適用期間
+     *
+     * @return void
+     */
+    // public function getdailyAlertData($targetdate){
+    //     // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
+
+    //     try {
+    //         // 日次労働時間取得SQL作成
+    //         // 適用期間日付の取得
+    //         $apicommon = new ApiCommonController();
+    //         // usersの最大適用開始日付subquery
+    //         $subquery5 = $apicommon->getUserApplyTermSubquery($targetdate);
+    //         // departmentsの最大適用開始日付subquery
+    //         $subquery6 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
+    //         // ---------------- unionquery1 打刻ミス ----------------------------
+    //         // subquery1    work_times
+    //         $subquery1 = DB::table($this->table.' AS t1')
+    //             ->select(
+    //                 't1.user_code as user_code',
+    //                 't1.department_code as department_code');
+    //         $subquery1
+    //             ->selectRaw(
+    //                 'MAX(t1.record_time) as max_record_time');
+    //         $subquery1
+    //             ->addselect('t2.record_time as record_time');
+    //         // subquery2    work_times
+    //         $subquery2 = DB::table($this->table.' AS t1')
+    //             ->select(
+    //                 't1.user_code as user_code',
+    //                 't1.department_code as department_code',
+    //                 't1.record_time as record_time');
+    //         if(!empty($this->param_date_from) && !empty($this->param_date_to)){
+    //             $subquery2->where('t1.record_time', '>=', $this->param_date_from);             // 日付範囲指定
+    //             $subquery2->where('t1.record_time', '<=', $this->param_date_to);               // 日付範囲指定
+    //         }
+    //         $subquery2
+    //             ->where('t1.is_deleted', '=', 0);
+    //         $subquery1
+    //             ->JoinSub($subquery2, 't2', function ($join) { 
+    //                 $join->on('t2.user_code', '=', 't1.user_code');
+    //                 $join->on('t2.department_code', '=', 't1.department_code');
+    //                 $join->on('t2.record_time', '>', 't1.record_time')
+    //                 ->where('t1.is_deleted', '=', 0);
+    //             })
+    //             ->groupBy('t1.user_code', 't1.department_code', 't2.record_time');
+    //         // subquery3    work_times
+    //         $subquery3 = DB::table($this->table.' AS t1')
+    //             ->select(
+    //                 't1.user_code as user_code',
+    //                 't1.department_code as department_code',
+    //                 't1.record_time as record_time',
+    //                 't1.mode as mode')
+    //             ->where('t1.is_deleted', '=', 0);
+    //         // subquery4    work_times
+    //         $subquery4 = DB::table($this->table.' AS t1')
+    //             ->select(
+    //                 't1.user_code as user_code',
+    //                 't1.department_code as department_code',
+    //                 't1.record_time as record_time',
+    //                 't1.mode as mode')
+    //             ->where('t1.is_deleted', '=', 0);
+        
+    //         // ---------------- unionquery2 打刻忘れ ----------------------------
+    //         // subquery7    users
+    //         $subquery7 = DB::table($this->table_users.' AS t1')
+    //             ->select(
+    //                 't1.code as user_code',
+    //                 't1.name as user_name',
+    //                 't1.management as user_management',
+    //                 't1.employment_status as employment_status',
+    //                 't1.department_code as department_code');
+    //         $subquery7
+    //             ->selectRaw(
+    //                 "DATE_FORMAT(".$this->table_calendars.".date,'%Y%m%d') as date");
+    //         $subquery7
+    //             ->JoinSub($subquery5, 't3', function ($join) { 
+    //                 $join->on('t3.code', '=', 't1.code');
+    //                 $join->on('t3.max_apply_term_from', '=', 't1.apply_term_from');
+    //             });
+    //         $subquery7->crossJoin($this->table_calendars); 
+    //         $subquery8 = $subquery7->toSql();
+    //         // subquery9    work_times
+    //         $subquery9 = DB::table($this->table.' AS t1')
+    //             ->select(
+    //                 't1.user_code as user_code',
+    //                 't1.department_code as department_code');
+    //         $subquery9
+    //             ->selectRaw(
+    //                 "DATE_FORMAT(t1.record_time,'%Y%m%d') as record_date");
+
+    //         $unionquery2 = DB::table(DB::raw('('.$subquery8.') AS t1'))
+    //             ->select(
+    //                 't1.user_code as user_code',
+    //                 't1.user_name as user_name',
+    //                 't1.user_management as user_management',
+    //                 't1.employment_status as employment_status',
+    //                 't10.code_name as employment_status_name',
+    //                 't1.department_code as department_code',
+    //                 't9.name as department_name',
+    //                 't1.date as current_record_date');
+    //         $unionquery2
+    //             ->selectRaw('null as current_record_time')
+    //             ->selectRaw('null as current_mode')
+    //             ->selectRaw('null as current_mode_name')
+    //             ->selectRaw('0 as hit_alert');
+    //         $unionquery2
+    //             ->addselect('t2.record_date as before_record_date');
+    //         $unionquery2
+    //             ->selectRaw('null as before_record_time')
+    //             ->selectRaw('null as before_mode')
+    //             ->selectRaw('null as before_mode_name')
+    //             ->selectRaw('null as diff_time')
+    //             ->selectRaw('0 as interval_alaert')
+    //             ->selectRaw('1 as holiday_alert');
+    //         $unionquery2
+    //             ->leftJoinSub($subquery9, 't2', function ($join) { 
+    //                 $join->on('t2.user_code', '=', 't1.user_code');
+    //                 $join->on('t2.department_code', '=', 't1.department_code');
+    //                 $join->on('t2.record_date', '=', 't1.date');
+    //             })
+    //             ->leftJoinSub($subquery6, 't9', function ($join) { 
+    //                 $join->on('t9.code', '=', 't1.department_code');
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t10', function ($join) { 
+    //                 $join->on('t10.code', '=', 't1.employment_status')
+    //                 ->where('t10.identification_id', '=', Config::get('const.C001.value'))
+    //                 ->where('t10.is_deleted', '=', 0);
+    //             });
+        
+    //         if(!empty($this->param_start_date) && !empty($this->param_end_date)){
+    //             $unionquery2->where('t1.date', '>=', $this->param_start_date);             // 日付範囲指定
+    //             $unionquery2->where('t1.date', '<=', $this->param_end_date);               // 日付範囲指定
+    //         }
+    //         $unionquery2
+    //             ->whereNull('t2.record_date');
+
+    //         // ---------------- unionquery ----------------------------
+    //         $unionquery1 = DB::table($this->table.' AS t3')
+    //             ->select(
+    //                 't3.user_code as user_code',
+    //                 't8.name as user_name',
+    //                 't8.management as user_management',
+    //                 't8.employment_status as employment_status',
+    //                 't10.code_name as employment_status_name',
+    //                 't3.department_code as department_code',
+    //                 't9.name as department_name'
+    //             );
+    //         $unionquery1
+    //             ->selectRaw(
+    //                 "DATE_FORMAT(t6.record_time,'%Y%m%d') as current_record_date");
+    //         $unionquery1
+    //             ->addselect(
+    //                 "t6.record_time as current_record_time",
+    //                 "t6.mode as current_mode",
+    //                 "t12.code_name as current_mode_name"
+    //             );
+    //         $case_sql1 = "CASE IFNULL(t6.mode, 0) ";
+    //         $case_sql1 .= "WHEN 0 THEN 0 ";
+    //         $case_sql1 .= "WHEN 1 THEN ";
+    //         $case_sql1 .= "  CASE IFNULL(t5.mode, 0) ";
+    //         $case_sql1 .= "    WHEN 0 THEN 0 ";
+    //         $case_sql1 .= "    WHEN 2 THEN 0 ";
+    //         $case_sql1 .= "    ELSE 1 ";
+    //         $case_sql1 .= "  END ";
+    //         $case_sql1 .= "WHEN 2 THEN ";
+    //         $case_sql1 .= "  CASE IFNULL(t5.mode, 0) ";
+    //         $case_sql1 .= "    WHEN 0 THEN 0 ";
+    //         $case_sql1 .= "    WHEN 1 THEN 0 ";
+    //         $case_sql1 .= "    WHEN 22 THEN 0 ";
+    //         $case_sql1 .= "    WHEN 12 THEN 0 ";
+    //         $case_sql1 .= "    ELSE 1 ";
+    //         $case_sql1 .= "  END ";
+    //         $case_sql1 .= "WHEN 21 THEN ";
+    //         $case_sql1 .= "  CASE IFNULL(t5.mode, 0) ";
+    //         $case_sql1 .= "    WHEN 0 THEN 0 ";
+    //         $case_sql1 .= "    WHEN 1 THEN 0 ";
+    //         $case_sql1 .= "    WHEN 22 THEN 0 ";
+    //         $case_sql1 .= "    WHEN 12 THEN 0 ";
+    //         $case_sql1 .= "    ELSE 1 ";
+    //         $case_sql1 .= "  END ";
+    //         $case_sql1 .= "WHEN 22 THEN ";
+    //         $case_sql1 .= "  CASE IFNULL(t5.mode, 0) ";
+    //         $case_sql1 .= "    WHEN 0 THEN 0 ";
+    //         $case_sql1 .= "    WHEN 21 THEN 0 ";
+    //         $case_sql1 .= "    ELSE 1 ";
+    //         $case_sql1 .= "  END ";
+    //         $case_sql1 .= "WHEN 11 THEN ";
+    //         $case_sql1 .= "  CASE IFNULL(t5.mode, 0) ";
+    //         $case_sql1 .= "    WHEN 0 THEN 0 ";
+    //         $case_sql1 .= "    WHEN 1 THEN 0 ";
+    //         $case_sql1 .= "    WHEN 22 THEN 0 ";
+    //         $case_sql1 .= "    WHEN 12 THEN 0 ";
+    //         $case_sql1 .= "    ELSE 1 ";
+    //         $case_sql1 .= "  END ";
+    //         $case_sql1 .= "WHEN 12 THEN ";
+    //         $case_sql1 .= "  CASE IFNULL(t5.mode, 0) ";
+    //         $case_sql1 .= "    WHEN 0 THEN 0 ";
+    //         $case_sql1 .= "    WHEN 11 THEN 0 ";
+    //         $case_sql1 .= "    ELSE 1 ";
+    //         $case_sql1 .= "  END ";
+    //         $case_sql1 .= "END as hit_alert ";
+    //         $unionquery1
+    //             ->selectRaw($case_sql1)
+    //             ->selectRaw("DATE_FORMAT(t5.record_time, '%Y%m%d') as before_record_date");
+    //         $unionquery1
+    //             ->addselect('t5.record_time as before_record_time')
+    //             ->addselect('t5.mode as before_mode')
+    //             ->addselect('t11.code_name as before_mode_name');
+    //         // インターバル時間取得
+    //         $interval_time = $apicommon->getIntevalMinute($targetdate);
+    //         $case_sql2 = "CASE IFNULL(t6.mode, 0) ";
+    //         $case_sql2 .= "WHEN 1 THEN ";
+    //         $case_sql2 .= "  CASE IFNULL(t5.mode, 0) ";
+    //         $case_sql2 .= "  WHEN 2 THEN ";
+    //         $case_sql2 .= "    CASE ";
+    //         $case_sql2 .= "    WHEN IFNULL(TIMEDIFF(t6.record_time, t5.record_time), 0) < '".$interval_time."' THEN 1 ";
+    //         $case_sql2 .= "    ELSE 0 ";
+    //         $case_sql2 .= "    END ";
+    //         $case_sql2 .= "  ELSE 0 ";
+    //         $case_sql2 .= "  END ";
+    //         $case_sql2 .= "ELSE 0 ";
+    //         $case_sql2 .= "END as interval_alaert ";
+    //         $unionquery1
+    //             ->selectRaw('TIMEDIFF(t6.record_time, t5.record_time) as diff_time')
+    //             ->selectRaw($case_sql2)
+    //             ->selectRaw('0 as holiday_alert ');
+    //         $unionquery1
+    //             ->leftJoinSub($subquery1, 't4', function ($join) { 
+    //                 $join->on('t4.user_code', '=', 't3.user_code');
+    //                 $join->on('t4.department_code', '=', 't3.department_code');
+    //             })
+    //             ->JoinSub($subquery3, 't5', function ($join) { 
+    //                 $join->on('t5.user_code', '=', 't4.user_code');
+    //                 $join->on('t5.department_code', '=', 't4.department_code');
+    //                 $join->on('t5.record_time', '=', 't4.max_record_time');
+    //             })
+    //             ->JoinSub($subquery4, 't6', function ($join) { 
+    //                 $join->on('t6.user_code', '=', 't4.user_code');
+    //                 $join->on('t6.department_code', '=', 't4.department_code');
+    //                 $join->on('t6.record_time', '=', 't4.record_time');
+    //             })
+    //             ->JoinSub($subquery5, 't7', function ($join) { 
+    //                 $join->on('t7.code', '=', 't3.user_code');
+    //             })
+    //             ->Join($this->table_users.' as t8', function ($join) { 
+    //                 $join->on('t8.code', '=', 't7.code');
+    //                 $join->on('t8.apply_term_from', '=', 't7.max_apply_term_from')
+    //                 ->where('t8.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoinSub($subquery6, 't9', function ($join) { 
+    //                 $join->on('t9.code', '=', 't3.department_code');
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t10', function ($join) { 
+    //                 $join->on('t10.code', '=', 't8.employment_status')
+    //                 ->where('t10.identification_id', '=', Config::get('const.C001.value'))
+    //                 ->where('t10.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t11', function ($join) { 
+    //                 $join->on('t11.code', '=', 't5.mode')
+    //                 ->where('t11.identification_id', '=', Config::get('const.C005.value'))
+    //                 ->where('t11.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t12', function ($join) { 
+    //                 $join->on('t12.code', '=', 't6.mode')
+    //                 ->where('t12.identification_id', '=', Config::get('const.C005.value'))
+    //                 ->where('t12.is_deleted', '=', 0);
+    //             });
+    //         if(!empty($this->param_date_from) && !empty($this->param_date_to)){
+    //             $unionquery1->where('t3.record_time', '>=', $this->param_date_from);             // 日付範囲指定
+    //             $unionquery1->where('t3.record_time', '<=', $this->param_date_to);               // 日付範囲指定
+    //         }
+    //         $unionquery1
+    //             ->where('t3.is_deleted', '=', 0)
+    //             ->union($unionquery2);
+
+    //         $unionquery1_sql= $unionquery1->toSql();
+
+    //         // ---------------- mainquery ----------------------------
+    //         $mainquery = DB::table(DB::raw('('.$unionquery1_sql.') as t1'))
+    //             ->select(
+    //                 't1.user_code as user_code',
+    //                 't1.user_name as user_name',
+    //                 't1.user_management as user_management',
+    //                 't1.employment_status as employment_status',
+    //                 't1.employment_status_name as employment_status_name',
+    //                 't1.department_code as department_code',
+    //                 't1.department_name as department_name',
+    //                 't1.current_record_date as current_record_date',
+    //                 't1.current_record_time as current_record_time'
+    //             );
+    //         $mainquery
+    //             ->selectRaw(
+    //                 "CONCAT(DATE_FORMAT(t1.current_record_date, '%Y年%m月%d日'), '(', SUBSTRING('月火水木金土日', CONVERT(t2.weekday_kubun + 1, char), 1), ')') as record_date_name"
+    //             );
+    //         $mainquery
+    //             ->addselect(
+    //                 't1.current_mode as current_mode',
+    //                 't1.current_mode_name as current_mode_name',
+    //                 't1.before_record_date as before_record_date',
+    //                 't1.before_record_time as before_record_time',
+    //                 't1.before_mode as before_mode',
+    //                 't1.before_mode_name as before_mode_name',
+    //                 't1.hit_alert as hit_alert',
+    //                 't1.interval_alaert as interval_alaert',
+    //                 't1.holiday_alert as holiday_alert',
+    //                 't2.business_kubun as business_kubun');
+    //         // ここのjoinで->where('t2.business_kubun', '=', 1)としたいがバインド変数にうまくバインドされないため、予備もとで判断する
+    //         $mainquery
+    //             ->leftJoin($this->table_calendars.' as t2', function ($join) { 
+    //                 $join->on('t2.department_code', '=', 't1.department_code');
+    //                 $join->on('t2.user_code', '=', 't1.user_code');
+    //                 $join->on('t2.date', '=', 't1.current_record_date');
+    //             });
+    //         if(!empty($this->param_employment_status)){
+    //             $mainquery->where('t1.employment_status', $this->param_employment_status);      //　雇用形態指定
+    //         }
+    //         if(!empty($this->param_department_code)){
+    //             $mainquery->where('t1.department_code', $this->param_department_code);          //department_code指定
+    //         }
+    //         if(!empty($this->param_user_code)){
+    //             $mainquery->where('t1.user_code', $this->param_user_code);                           //user_code指定
+    //         } else {
+    //             $mainquery->where('t1.user_management','<',Config::get('const.C017.out_of_user'));
+    //         }
+    //         $mainquery
+    //             ->Where('t2.business_kubun', '=', Config::get('const.C007.basic'))
+    //             ->Where('t2.is_deleted', '=', 0)
+    //             ->where(function ($query) {
+    //                 $query->where('t1.hit_alert', '>', 0)
+    //                     ->orWhere('t1.interval_alaert', '>', 0)
+    //                     ->orWhere('t1.holiday_alert', '>', '0');
+    //             })
+    //             ->orderBy('t1.current_record_date', 'asc')
+    //             ->orderBy('t1.user_code', 'asc')
+    //             ->orderBy('t1.department_code_', 'asc');
+                
+    //         $array_setBindingsStr = array();
+    //         $cnt = 0;
+    //         if(!empty($this->param_date_from) && !empty($this->param_date_to)){
+    //             $cnt += 1;
+    //             $array_setBindingsStr[] = array($cnt=>$this->param_date_from);
+    //             $cnt += 1;
+    //             $array_setBindingsStr[] = array($cnt=>$this->param_date_to);
+    //         }
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>$targetdate);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>10);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>$targetdate);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>$targetdate);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>Config::get('const.C001.value'));
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>Config::get('const.C005.value'));
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>Config::get('const.C005.value'));
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         if(!empty($this->param_date_from) && !empty($this->param_date_to)){
+    //             $cnt += 1;
+    //             $array_setBindingsStr[] = array($cnt=>$this->param_date_from);
+    //             $cnt += 1;
+    //             $array_setBindingsStr[] = array($cnt=>$this->param_date_to);
+    //         }
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>$targetdate);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>Config::get('const.C017.admin_user'));
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>$targetdate);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>$targetdate);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>Config::get('const.C001.value'));
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         if(!empty($this->param_start_date) && !empty($this->param_end_date)){
+    //             $cnt += 1;
+    //             $array_setBindingsStr[] = array($cnt=>$this->param_start_date);
+    //             $cnt += 1;
+    //             $array_setBindingsStr[] = array($cnt=>$this->param_end_date);
+    //         }
+    //         if(!empty($this->param_employment_status)){
+    //             $cnt += 1;
+    //             $array_setBindingsStr[] = array($cnt=>$this->param_employment_status);
+    //         }
+    //         if(!empty($this->param_department_code)){
+    //             $cnt += 1;
+    //             $array_setBindingsStr[] = array($cnt=>$this->param_department_code);
+    //         }
+    //         if(!empty($this->param_user_code)){
+    //             $cnt += 1;
+    //             $array_setBindingsStr[] = array($cnt=>$this->param_user_code);
+    //         } else {
+    //             $cnt += 1;
+    //             $array_setBindingsStr[] = array($cnt=>Config::get('const.C017.out_of_user'));
+    //         }
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>Config::get('const.C007.basic'));
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+    //         $cnt += 1;
+    //         $array_setBindingsStr[] = array($cnt=>0);
+
+    //         if (count($array_setBindingsStr) > 0) {
+    //             $mainquery->setBindings($array_setBindingsStr);
+    //         }
+
+    //         $result = $mainquery->get();
+
+
+    //         // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
+    //         //     \Log::debug('sql_debug_log', ['getdailyAlertData' => \DB::getQueryLog()]);
+    //         //     \DB::disableQueryLog();
+    //         // }
+    //     }catch(\PDOException $pe){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+    //         Log::error($pe->getMessage());
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+
+    //     return $result;
+    // }
     
 }

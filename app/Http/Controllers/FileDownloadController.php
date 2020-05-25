@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 
@@ -22,7 +23,11 @@ class FileDownloadController extends Controller
         if (isset($request->filekbn)) {
             return $this->getfileDownload($request);
         } else {
-            return view('file_download');
+            $authusers = Auth::user();
+            return view('file_download',
+                compact(
+                    'authusers'
+                ));
         }
     }
 
@@ -82,7 +87,6 @@ class FileDownloadController extends Controller
             // パラメータチェック
             $filekbn = $request->filekbn;
             if ($filekbn > 0) {
-                // 操作マニュアル（導入編）
                 $filePath = Config::get('const.FILE_DOWNLOAD_PATH.STORAGE').$array_file[$filekbn-1];
                 $fileName = $array_file[$filekbn-1];
                 $mimeType = Storage::mimeType($filePath);

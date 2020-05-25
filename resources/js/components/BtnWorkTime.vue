@@ -6,12 +6,12 @@
         この条件で表示する</button>
     </div>
     <div v-if="btnMode === 'basicswitch'" class="btn-group d-flex" v-on:click="switchclickBtn()">
-      <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
         <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-outlined-flag-b.svg" alt="">詳細を表示する</button> -->
         詳細を表示する</button>
     </div>
     <div v-if="btnMode === 'detailswitch'" class="btn-group d-flex" v-on:click="switchclickBtn()">
-      <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
         <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-outlined-flag-b.svg" alt="">詳細を非表示にする</button> -->
         詳細を非表示にする</button>
     </div>
@@ -19,6 +19,14 @@
       <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
         <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt="">申請一覧を表示する（直近10件）</button> -->
         申請一覧を表示する（直近10件）</button>
+    </div>
+    <div v-if="btnMode === 'gosubdate' && isDisplay === true" class="btn-group d-flex" v-on:click="gosubdateclickBtn()">
+      <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
+        &lt;&lt; 前日</button>
+    </div>
+    <div v-if="btnMode === 'goadddate' && isDisplay === true" class="btn-group d-flex" v-on:click="goadddateclickBtn()">
+      <button type="button" class="btn btn-outline-primary btn-lg font-size-rg w-100" :disabled="isPush">
+        翌日 &gt;&gt;</button>
     </div>
 
     <div v-if="btnMode === 'update'" class="btn-group d-flex" v-on:click="updateclickBtn()">
@@ -31,15 +39,21 @@
         @mouseover="edttooltips('update')"
       >
         <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-search-w.svg" alt=""> -->
-        指定年月締め一括集計</button>
+        指定年月締め一括集計（指定範囲により数分程度時間要する場合があります）</button>
     </div>
     <div v-if="btnMode === 'init'" class="btn-group d-flex" v-on:click="initclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
-        <!-- <img class="icon-size-sm mr-2 pb-1" src="/images/round-restore-b.svg" alt="">初期設定をする</button> -->
-        初期設定をする</button>
+        この条件でカレンダーを一括設定する</button>
+    </div>
+    <div v-if="btnMode === 'copyinit'" class="btn-group d-flex" v-on:click="copyinitclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+        この条件での前月分を複写設定する</button>
     </div>
     <div v-if="btnMode === 'store'" class="btn-group d-flex" v-on:click="storeclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">この内容で登録する</button>
+    </div>
+    <div v-if="btnMode === 'initstore'" class="btn-group d-flex" v-on:click="initstoreclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">この内容で設定する</button>
     </div>
     <div v-if="btnMode === 'makedemand'" class="btn-group d-flex" v-on:click="makedemandclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
@@ -87,6 +101,10 @@
       <button type="button" class="btn btn-warning btn-lg font-size-rg w-100" :disabled="isPush">
         申請を差し戻し</button>
     </div>
+    <div v-if="btnMode === 'reasonstore'" class="btn-group d-flex" v-on:click="reasonstoreclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+        この内容で差異理由を登録する</button>
+    </div>
     <div v-if="btnMode === 'back'" class="btn-group d-flex" v-on:click="backclickBtn()">
       <button type="button" class="btn btn-outline-secondary btn-lg font-size-rg w-100" :disabled="isPush">
         戻る</button>
@@ -105,6 +123,11 @@
       <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
       給与計算用CSVファイルを出力する</button>
     </div>
+    <div v-if="btnMode === 'csvlog'" class="btn-group d-flex" v-on:click="csvlogclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+      <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
+      勤怠ログCSVファイルを出力する</button>
+    </div>
     <div v-if="btnMode === 'filedownload'" class="btn-group d-flex" v-on:click="filedownloadclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
       <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
@@ -118,7 +141,20 @@
       <button type="button" class="btn btn-danger btn-lg font-size-rg w-100" :disabled="isPush">
         削除する</button>
     </div>
-  </button>
+    <div v-if="btnMode === 'usersupload'" class="btn-group d-flex" v-on:click="usersuploadclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+      <img class="icon-size-sm mr-2 pb-1" src="/images/file-upload-icon-vector-01.svg" alt="">
+        CSVから作成する</button>
+    </div>
+    <div v-if="btnMode === 'usersdownload'" class="btn-group d-flex" v-on:click="usersdownloadclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+      <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
+      ユーザー情報ダウンロード</button>
+    </div>
+    <div v-if="btnMode ==='timetableedit'" class="btn-group d-flex" v-on:click="timetableeditclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
+        登録しているユーザーのタイムテーブルを一括設定する</button>
+    </div>
   </div>
 </template>
 <script>
@@ -134,14 +170,14 @@ export default {
           default: false,
           type: Boolean
       },
+      isDisplay: {
+          default: true,
+          type: Boolean
+      },
       btnName: {
           default: false,
           type: Boolean
       }
-  },
-  // マウント時
-  mounted() {
-    console.log("WorkTimeSearchButton Component mounted.");
   },
   data: function() {
     return {
@@ -161,8 +197,14 @@ export default {
     initclickBtn : function() {
       this.$emit('initclick-event',event);
     },
+    copyinitclickBtn : function() {
+      this.$emit('copyinitclick-event',event);
+    },
     storeclickBtn : function() {
       this.$emit('storeclick-event',event);
+    },
+    initstoreclickBtn : function() {
+      this.$emit('initstoreclick-event',event);
     },
     makedemandclickBtn : function() {
       this.$emit('makedemandclick-event',event);
@@ -197,6 +239,9 @@ export default {
     sendbackclickBtn : function() {
       this.$emit('sendbackclick-event',event);
     },
+    reasonstoreclickBtn : function() {
+      this.$emit('reasonstoreclick-event',event);
+    },
     backclickBtn : function() {
       this.$emit('backclick-event',event);
     },
@@ -206,11 +251,20 @@ export default {
     listdemandclickBtn : function() {
       this.$emit('listdemandclick-event',event);
     },
+    gosubdateclickBtn : function() {
+      this.$emit('gosubateclick-event',event);
+    },
+    goadddateclickBtn : function() {
+      this.$emit('goaddateclick-event',event);
+    },
     csvcalcclickBtn : function() {
-      this.$emit('csvcalc-event',event);
+      this.$emit('csv-event',event);
     },
     csvsalaryclickBtn : function() {
-      this.$emit('csvsalary-event',event);
+      this.$emit('csv-event',event);
+    },
+    csvlogclickBtn : function() {
+      this.$emit('csv-event',event);
     },
     filedownloadclickBtn : function() {
       this.$emit('filedownload-event',event);
@@ -220,6 +274,15 @@ export default {
     },
     deleteclickBtn : function() {
       this.$emit('deleteclick-event',event);
+    },
+    usersuploadclickBtn : function() {
+      this.$emit('usersupload-event',event);
+    },
+    usersdownloadclickBtn : function() {
+      this.$emit('csv-event',event);
+    },
+    timetableeditclickBtn : function() {
+      this.$emit('timetableedit-event',event);
     },
     // tooltips
     edttooltips: function(value1) {

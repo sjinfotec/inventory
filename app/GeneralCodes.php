@@ -93,6 +93,32 @@ class GeneralCodes extends Model
         $this->code_name = $value;
     }
 
+    private $secound_code_name;             // 項目名略称
+
+    // 項目名
+    public function getSecoundcodenameAttribute()
+    {
+        return $this->secound_code_name;
+    }
+
+    public function setSecoundcodenameAttribute($value)
+    {
+        $this->secound_code_name = $value;
+    }
+
+    private $use_free_item;                 // 用途フリー項目
+
+    // 項目名
+    public function getUsefreeitemAttribute()
+    {
+        return $this->use_free_item;
+    }
+
+    public function setUsefreeitemAttribute($value)
+    {
+        $this->use_free_item = $value;
+    }
+
     private $created_user;                  // 作成ユーザー
 
     // 作成ユーザー
@@ -135,6 +161,7 @@ class GeneralCodes extends Model
     //--------------- パラメータ項目属性 -----------------------------------
 
     private $param_identification_id;           // 識別
+    private $param_array_identification_id;     // 識別（array）
     private $param_code;                        // コード
 
 
@@ -147,6 +174,17 @@ class GeneralCodes extends Model
     public function setParamidentificationidAttribute($value)
     {
         $this->param_identification_id = $value;
+    }
+
+    // 識別（array）
+    public function getParamarrayidentificationidAttribute()
+    {
+        return $this->param_array_identification_id;
+    }
+
+    public function setParamarrayidentificationidAttribute($value)
+    {
+        $this->param_array_identification_id = $value;
     }
 
     // コード
@@ -187,9 +225,9 @@ class GeneralCodes extends Model
         try {
             $this->codes = $this->getGeneralcode();
         }catch(\PDOException $pe){
-            $this->codes = new Collection()
+            $this->codes = new Collection();
         }catch(\Exception $e){
-            $this->codes = new Collection()
+            $this->codes = new Collection();
         }
 
     }
@@ -209,10 +247,16 @@ class GeneralCodes extends Model
                     $this->table.'.identification_name as identification_name',
                     $this->table.'.description as description',
                     $this->table.'.code_name as code_name',
+                    $this->table.'.secound_code_name as secound_code_name',
+                    $this->table.'.use_free_item as use_free_item',
                     $this->table.'.is_deleted as is_deleted'
                 );
             if (isset($this->param_identification_id)) {
                 $data->where($this->table.'.identification_id',$this->param_identification_id);
+            } else {
+                if (isset($this->param_array_identification_id)) {
+                    $data->whereIn($this->table.'.identification_id',$this->param_array_identification_id);
+                }
             }
             if (isset($this->param_code)) {
                 $data->where($this->table.'.code',$this->param_code);

@@ -38,6 +38,11 @@
 		</div>
 		<!-- /main contentns row -->
 		@endif
-		<file-download></file-download>
+		<file-download
+			v-bind:authusers="{{ $authusers }}"
+			v-bind:accountdatas="{{ $account_datas }}"
+			v-bind:menudatas="{{ $menu_selections }}"
+			v-bind:const_generaldatas="{{ $const_general_datas }}"
+		></file-download>
 		<!-- /main contentns row -->
 @endsection

@@ -6,71 +6,78 @@
           <table class="table table-striped border-bottom font-size-sm text-nowrap">
             <thead>
               <tr>
-                <td class="text-center align-middle w-15">日付</td>
-                <td class="text-center align-middle w-15">雇用形態</td>
-                <td class="text-center align-middle w-15">部署</td>
-                <td class="text-center align-middle w-15">氏名</td>
-                <td class="text-center align-middle w-15">打刻時刻</td>
-                <td class="text-center align-middle w-15">打刻モード</td>
-                <td class="text-center align-middle w-15">直前打刻時刻</td>
-                <td class="text-center align-middle w-15">直前打刻モード</td>
+                <td class="text-center align-middle mw-rem-8">日付</td>
+                <td class="text-center align-middle mw-rem-8">雇用形態</td>
+                <td class="text-center align-middle mw-rem-8">部署</td>
+                <td class="text-center align-middle mw-rem-12">氏名</td>
+                <td class="text-center align-middle mw-rem-5" v-if="isEdit">操作</td>
+                <td class="text-center align-middle mw-rem-8">打刻時刻</td>
+                <td class="text-center align-middle mw-rem-8">打刻モード</td>
+                <td class="text-center align-middle mw-rem-8">直前打刻時刻</td>
+                <td class="text-center align-middle mw-rem-8">直前打刻モード</td>
                 <td
-                  class="text-center align-middle w-15"
+                  class="text-center align-middle mw-rem-15"
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="'出退勤間インターバル時間警告の法定警告'"
                 >法定警告内容</td>
                 <td
-                  class="text-center align-middle w-15"
+                  class="text-center align-middle mw-rem-15"
                   data-toggle="tooltip"
                   data-placement="top"
                   v-bind:title="'カード打刻内容の確認'"
                 >打刻内容確認</td>
               </tr>
             </thead>
-            <tbody>
+              <!-- class="card-body mb-3 py-0 pt-4 border-top" -->
+                  <!-- <input type="image" class="fa fa-edit" alt="編集" v-on:click="detailEdtClick(index)"> -->
+            <tbody :style="tableheight">
               <tr
                 v-for="(alertList,index) in alertLists"
-                class="card-body mb-3 py-0 pt-4 border-top"
               >
-                <td class="text-center align-middle">{{ alertList.record_date_name }}</td>
-                <td class="text-center align-middle">{{ alertList.employment_status_name }}</td>
-                <td class="text-center align-middle">{{ alertList.department_name }}</td>
-                <td class="text-center align-middle">{{ alertList.user_name }}</td>
-                <td class="text-center align-middle">{{ alertList.current_record_time }}</td>
-                <td class="text-center align-middle">{{ alertList.current_mode_name }}</td>
-                <td class="text-center align-middle">{{ alertList.before_record_time }}</td>
-                <td class="text-center align-middle">{{ alertList.before_mode_name }}</td>
+                <td class="text-center align-middle mw-rem-8">{{ alertList.record_date_name }}</td>
+                <td class="text-left align-middle mw-rem-8">{{ alertList.employment_status_name }}</td>
+                <td class="text-left align-middle mw-rem-8">{{ alertList.department_name }}</td>
+                <td class="text-left align-middle mw-rem-12">{{ alertList.user_name }}</td>
+                <td class="text-center align-middle mw-rem-5" v-if="isEdit">
+                  <i class="fa fa-edit" style="color: red;ccursor: hand; cursor:pointer;" v-on:click="detailEdtClick(index)">
+                    <span style="color: #0000FF;cursor: hand; cursor:pointer;">編集</span>
+                  </i>
+                </td>
+                <td class="text-left align-middle mw-rem-8">{{ alertList.current_record_time }}</td>
+                <td class="text-left align-middle mw-rem-8">{{ alertList.current_mode_name }}</td>
+                <td class="text-left align-middle mw-rem-8">{{ alertList.before_record_time }}</td>
+                <td class="text-left align-middle mw-rem-8">{{ alertList.before_mode_name }}</td>
                 <td
-                  class="text-center align-middle"
+                  class="text-left align-middle mw-rem-15"
                   data-toggle="tooltip"
                   data-placement="top"
                   v-if="alertList.interval_alaert === 1"
                   v-bind:title="'退勤してから出勤までの時間が規定時間以内であること'"
                 >出退勤間インターバル時間警告</td>
                 <td
-                  class="text-center align-middle"
+                  class="text-left align-middle mw-rem-15"
                   data-toggle="tooltip"
                   data-placement="top"
                   v-if="alertList.interval_alaert !== 1"
                   v-bind:title="'退勤してから出勤までの時間が規定時間以内であること'"
                 ></td>
                 <td
-                  class="text-center align-middle"
+                  class="text-left align-middle mw-rem-15"
                   data-toggle="tooltip"
                   data-placement="top"
                   v-if="alertList.hit_alert === 1"
                   v-bind:title="'カード打刻内容の確認'"
                 >打刻ミス</td>
                 <td
-                  class="text-center align-middle"
+                  class="text-left align-middle mw-rem-15"
                   data-toggle="tooltip"
                   data-placement="top"
                   v-if="alertList.holiday_alert === 1"
                   v-bind:title="'出勤日にカード打刻なし'"
                 >打刻なし（出勤日）</td>
                 <td
-                  class="text-center align-middle"
+                  class="text-left align-middle mw-rem-15"
                   data-toggle="tooltip"
                   data-placement="top"
                   v-if="alertList.hit_alert !== 1 && alertList.holiday_alert !== 1"
@@ -91,11 +98,57 @@ export default {
   props: {
     alertLists: {
       type: Array
+    },
+    tablebodyHeight: {
+      type: String,
+      default: "height: 400px !important;"
+    },
+    isEdit: {
+      type: Boolean,
+      default: false
     }
   },
-  // マウント時
-  mounted() {
-    console.log(this.name + "マウント");
+  data: function() {
+    return {
+      tableheight: this.tablebodyHeight
+    };
+  },
+  methods: {
+    // ------------------------ イベント処理 ------------------------------------
+    
+    // 明細編集ボタンクリックされた場合の処理
+    detailEdtClick: function(index) {
+      this.tableheight = "height: 100px !important;";
+      var arrayData = {'rowIndex' : index};
+      this.$emit('detaileditclick-event',event, arrayData);
+    }
   }
 };
 </script>
+<style scoped>
+
+thead, tbody {
+  display: block !important;
+}
+
+tbody {
+  overflow-x: hidden !important;
+  overflow-y: scroll !important;
+}
+
+.table th, .table td {
+    padding: 0rem !important;
+    border-style: solid dashed !important;
+    border-width: 1px !important;
+    border-color: #95c5ed #dee2e6 !important;
+}
+
+.mw-rem-8 {
+  min-width: 8rem;
+}
+
+.mw-rem-12 {
+  min-width: 12rem;
+}
+
+</style>

@@ -116,7 +116,48 @@ return [
         'absence_work' => 15,
         'late_work' => 16,
         'leave_early_work' => 17,
-        'max_break_value' => 14
+        'deemed_business_trip' => 18,
+        'deemed_direct_go' => 19,
+        'deemed_direct_return' => 20,
+        'public_damage' => 21
+    ],
+
+    'C013_DESC_VALUE' => [
+        'value' => 'C013',
+        'non_set' => "",
+        'target_calc_time' => "1日集計対象休暇",
+        'half_am' => "午前半休",
+        'half_pm' => "午後半休",
+        'non_calc_time' => "1日休暇",
+        'late_work' => "遅刻",
+        'early_work' => "早退",
+        'deemed' => "みなし"
+    ],
+
+    'C013_DESC' => [
+        'value' => 'C013',
+        'non_set' => "",
+        'paid_holiday' => "1日集計対象休暇",
+        'morning_off' => "午前半休",
+        'afternoon_off' => "午後半休",
+        'substitute_holiday' => "1日休暇",
+        'compensation_holiday' => "1日休暇",
+        'summer_leave' => "1日休暇",
+        'year_end_and_new_year_leave' => "1日休暇",
+        'organization_anniversary' => "1日休暇",
+        'prenatal_postnatal' => "1日休暇",
+        'physiology_days_leave' => "1日休暇",
+        'childcare_care_leave' => "1日休暇",
+        'nursing_care_leave' => "1日休暇",
+        'congratulatory_or_consolatory_leave' => "1日休暇",
+        'refresh_leave' => "1日休暇",
+        'absence_work' => "1日休暇",
+        'late_work' => "遅刻",
+        'leave_early_work' => "早退",
+        'deemed_business_trip' => "みなし",
+        'deemed_direct_go' => "みなし",
+        'deemed_direct_return' => "みなし",
+        'public_damage' => "1日集計対象休暇"
     ],
 
     'C014' => [
@@ -199,11 +240,17 @@ return [
         'manthly_alert_warning_9' => 45
     ],
  
+    'C024' => [
+        'value' => 'C024',
+        'closing' => 1,
+        'first' => 2
+    ],
+ 
     'C025' => [
         'value' => 'C025',
         'general_user' => 1,
         'general_approver__user' => 5,
-        'admin_user' => 10
+        'admin_user' => 9
     ],
  
     'C026' => [
@@ -269,10 +316,117 @@ return [
         'approvaled' => 2
     ],
  
+    'C033' => [
+        'value' => 'C033',
+        'pcstart' => 6005,
+        'pcend' => 6006,
+        'logon' => 7001,
+        'logout' => 7002
+    ],
+ 
+    'C034' => [
+        'value' => 'C034',
+        'closing' => 1,
+        'first' => 2
+    ],
+
+    'C036' => [
+        'value' => 'C036'
+    ],
+ 
+    'C035' => [
+        'value' => 'C035',
+        'attendance_time' => 1,
+        'leaving_time' => 2,
+        'missing_middle_time' => 11,
+        'missing_middle_return_time' => 12,
+        'public_going_out_time' => 21,
+        'public_going_out_return_time' => 22
+    ],
+ 
+    'C036' => [
+        'value' => 'C036',
+        'date' => 1,
+        'hour' => 2
+    ],
+ 
+    'C037' => [
+        'value' => 'C037',
+        'csvcalc' => 1,
+        'csvsalary' => 2,
+        'csvlog' => 3,
+        'usersdownload' => 4
+    ],
+ 
+    'C037_DESC_VALUE' => [
+        'array' => array('C037', 'csvcalc', 'csvsalary', 'csvlog', 'usersdownload')
+    ],
+
+    'C038' => [
+        'value' => 'C038',
+        'calc_block' => 1,
+        'daily' => 2,
+        'monthly' => 3,
+        'alert_block' => 4,
+        'daily_alert' => 5,
+        'monthly_alert' => 6,
+        'attendancelog_block' => 7,
+        'store_attendancelog' => 8,
+        'edit_attendancelog' => 9,
+        'edit_block' => 10,
+        'create_shift_time' => 11,
+        'edit_work_times' => 12,
+        'demand_block' => 13,
+        'demand' => 14,
+        'approval' => 15,
+        'confirm' => 16,
+        'setting_block' => 17,
+        'create_company_information' => 18,
+        'create_department' => 19,
+        'setting_calc' => 20,
+        'create_time_table' => 21,
+        'setting_calendar' => 22,
+        'edit_user' => 23,
+        'operation_block' => 24,
+        'user_pass' => 25,
+        'file_download' => 26,
+        'edit_worktime_user' => 27,
+        'edit_worktime_user_conditional' => 28,
+        'TeamViewer' => 29,
+        'account_admin' => 30,
+        'clientServer' => 31
+    ],
+ 
+    'C039' => [
+        'value' => 'C039',
+        'basic' => 1,
+        'week' => 2
+    ],
+ 
+    'C040' => [
+        'value' => 'C040',
+        'holiday_noupdate' => 1,
+        'holiday_update' => 2
+    ],
+ 
+    'C041' => [
+        'value' => 'C041',
+        'timetable_batch' => 1,
+        'timetable_week' => 2
+    ],
+ 
     'C999' => [
         'value' => 'C999',
         'main' => 1,
-        'sub' => 2
+        'sub' => 2,
+        'timetable_no' => 3
+    ],
+ 
+    'C999_NAME' => [
+        'value' => 'C999',
+        'main' => 9999,
+        'sub' => 'systemuser',
+        'timetable_no' => 9999
     ],
 
     'WEEK_KANJI' => [
@@ -297,10 +451,22 @@ return [
         'legal_out_holoday' => '法定外休日労働時間'
     ],
 
+    'PREDETER_TIME_SECONDNAME' => [
+        'basic' => '残業',
+        'legal_holoday' => '法定休',
+        'legal_out_holoday' => '法外休'
+    ],
+
     'PREDETER_NIGHT_TIME_NAME' => [
         'basic' => '深夜残業時間',
         'legal_holoday' => '法定休日深夜時間',
         'legal_out_holoday' => '法定外休日深夜時間'
+    ],
+
+    'PREDETER_NIGHT_TIME_SECONDNAME' => [
+        'basic' => '深夜残業',
+        'legal_holoday' => '法休深夜',
+        'legal_out_holoday' => '法外休深夜'
     ],
 
     'ARRAY_MAX_INDEX' => [
@@ -308,8 +474,18 @@ return [
         'leaving_time' => 5,
         'missing_middle_time' => 5,
         'missing_middle_return_time' => 5,
-        'public_going_out_time' => 5,
-        'public_going_out_return_time' => 5
+        'public_going_out_time' => 7,
+        'public_going_out_return_time' => 7
+    ],
+
+    'SHOW_OR_UPDATE' => [
+        'show' => 'show',
+        'update' => 'update'
+    ],
+
+    'USER_PART' => [
+        'alldepartment' => 'ALLDEP99',
+        'alluser' => 'ALLUSER999'
     ],
 
     'TIME_TABLE_NO' => [
@@ -347,6 +523,11 @@ return [
     'INIT_DATE' => [
         'initdate' => '20190101',
         'maxdate' => '20991231'
+    ],
+
+    'CALENDAR_PTN' => [
+        'ptn1' => 1,
+        'ptn2' => 2
     ],
 
 
@@ -429,6 +610,11 @@ return [
         'items_12' => '特別条項の上限規制：年720時間（休日労働含めない）'
     ],
  
+    'LUNCH_BREAK' => [
+        'STARTAFTERTIME' => 2,
+        'HOURS' => 0.5
+    ],
+ 
     'ALERT_INFO_RESULT' => [
         'OK' => 'OK',
         'WA' => 'WA',
@@ -447,37 +633,37 @@ return [
  
     'FILE_DOWNLOAD_NAME' => [
         'file1' => 'croud_install.zip',
-        'file2' => '',
-        'file3' => '',
-        'file4' => '',
+        'file2' => 'pceventlog.zip',
+        'file3' => 'TeamViewer_Setup.exe',
+        'file4' => 'users_template_org.xlsx',
         'file5' => '',
         'file6' => '',
         'file7' => '',
         'file8' => '',
         'file9' => '',
         'file10' => '',
-        'file11' => '',
-        'file12' => '',
-        'file13' => '',
-        'file14' => '',
+        'file11' => 'csd1000l_admin.xlsx',
+        'file12' => 'csd1000l_admin.pdf',
+        'file13' => 'Operationmanual(clientServer).docx',
+        'file14' => 'Operationmanual(clientServer).pdf',
         'file15' => '',
         'file16' => '',
         'file17' => '',
         'file18' => '',
         'file19' => '',
         'file20' => '',
-        'file21' => 'Installmanual.pdf',
-        'file22' => 'Installmanual.xlsx',
-        'file23' => 'Operationmanual(card_reader).pdf',
-        'file24' => 'Operationmanual(card_reader).xlsx',
-        'file25' => 'Operationmanual(setting).pdf',
-        'file26' => 'Operationmanual(setting).xlsx',
-        'file27' => 'Operationmanual(yayoi).pdf',
-        'file28' => 'Operationmanual(yayoi).xlsx',
-        'file29' => '',
-        'file30' => '',
-        'file31' => '',
-        'file32' => '',
+        'file21' => 'Installmanual.xlsx',
+        'file22' => 'Installmanual.pdf',
+        'file23' => 'Operationmanual(card_reader).xlsx',
+        'file24' => 'Operationmanual(card_reader).pdf',
+        'file25' => 'Operationmanual(setting).xlsx',
+        'file26' => 'Operationmanual(setting).pdf',
+        'file27' => 'Operationmanual(yayoi).xlsx',
+        'file28' => 'Operationmanual(yayoi).pdf',
+        'file29' => 'pceventlogmanual.xlsx',
+        'file30' => 'pceventlogmanual.pdf',
+        'file31' => 'Operationmanual(TeamViewer).xlsx',
+        'file32' => 'Operationmanual(TeamViewer).pdf',
         'file33' => '',
         'file34' => '',
         'file35' => '',
@@ -493,7 +679,8 @@ return [
         'past_closing_already' => '締日を過ぎていて集計済みですが、再集計しますか？',
         'no_alert_data' => '警告に該当する打刻内容はありませんでした。',
         'no_monthly_alert_data' => '警告に該当する内容はありませんでした。',
-        'no_confirm_data' => '登録している承認者はありませんでした。新規に登録してください。'
+        'no_confirm_data' => '登録している承認者はありませんでした。新規に登録してください。',
+        'no_data' => '該当する表示情報はありませんでした。'
     ],
 
     'MSG_ERROR' => [
@@ -538,6 +725,7 @@ return [
         'data_exists_erorr' => 'データexistsエラー table = [{0}]',
         'data_maxget_erorr' => 'データmaxgetエラー table = [{0}]',
         'data_count_erorr' => 'データcountエラー table = [{0}]',
+        'data_access_erorr' => 'データaccessエラー table = [{0}]',
         'unknown_error' => '不明なエラー',
         'mismatch_data' => 'データ不整合',
         'not_set_time_rounding ' => '時間の端数処理が設定されていない',
@@ -558,16 +746,75 @@ return [
         'DEBUG' => 'DEBUG'
     ],
 
-    'EDITION' => [
-        'EDITION' => 3
+    // 未使用
+    'DISTRIBUTION' => [
+        'DISTRIBUTION' => 3
     ],
 
-    'EDITION_NAME' => [
+    // 未使用
+    'DISTRIBUTION_VALUE' => [
+        '43z' => 1,
+        'SSJJOO' => 2,
+        'MARUTAKA' => 3
+    ],
+
+    'EDITION' => [
+        'EDITION' => 5
+    ],
+
+    'EDITION_VALUE' => [
         'DEMO' => 1,
         'TRIAL' => 2,
         'CROUD' => 3,
         'SSJJOO' => 4,
         'CLIENT' => 5
+    ],
+
+    'ACCOUNTID' => [
+        'account_id' => 'CSD1000L'
+    ],
+
+    // メニュー項目数   未使用
+    'MENUITEMCOUNT' => [
+        'count' => 26
+    ],
+
+    // 用途フリー項目
+    'USEFREEITEM' => [
+        'out_legal' => 0,           // 出勤日か法定外休日かの判定文字位置（0始まり）
+        'day_holiday' => 1          // 1日休日かの判定文字位置（0始まり）
+    ],
+    
+    //
+    'MENUITEM' => [
+        'calc_block' => 1,
+        'daily' => 2,
+        'monthly' => 3,
+        'alert_block' => 4,
+        'daily_alert' => 5,
+        'monthly_alert' => 6,
+        'attendancelog_block' => 7,
+        'store_attendancelog' => 8,
+        'edit_attendancelog' => 9,
+        'edit_block' => 10,
+        'create_shift_time' => 11,
+        'edit_work_times' => 12,
+        'demand_block' => 13,
+        'demand' => 14,
+        'approval' => 15,
+        'confirm' => 16,
+        'setting_block' => 17,
+        'create_company_information' => 18,
+        'create_department' => 19,
+        'setting_calc' => 20,
+        'create_time_table' => 21,
+        'setting_calendar' => 22,
+        'edit_user' => 23,
+        'operation_block' => 24,
+        'user_pass' => 25,
+        'file_download' => 26,
+        'edit_worktime_user' => 101,
+        'edit_worktime_user_conditional' => 102
     ]
 
 ];

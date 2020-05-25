@@ -15,6 +15,7 @@
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet" type="text/css">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" >
     <!-- Styles -->
     <link href="{{ mix('css/app.css') }}" rel="stylesheet">
 </head>
@@ -32,6 +33,7 @@
                 <!-- /offcanvas-left toggle button -->
                 <!-- editable title -->
                 <a class="navbar-brand mr-auto mr-lg-0" href="{{ url('/') }}">
+                    <img class="logo-height" src="{{ asset('images/home-solid.svg') }}" alt=>
                     <img class="logo-height" src="{{ asset('images/onedawn-logo-long.svg') }}" alt="One Dawn">
                 </a>
                 <!-- /editable title -->
@@ -108,7 +110,7 @@
                 @yield('content')
                 @if(Auth::check())
                 <!-- main contentns row -->
-                <div class="row justify-content-between">
+                <div class="row justify-content-between print-none">
                     <!-- .panel -->
                     <div class="col-md p-3">
                         <div class="text-center">

@@ -391,7 +391,7 @@ export default {
       if (flag) {
         var messages = [];
         messages.push("この内容で登録しますか？");
-        this.messageswal("確認", messages, "info", true, true, true)
+        this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
               this.store();
@@ -410,7 +410,7 @@ export default {
           messages.push("廃止開始日が入力されているため入力日より廃止されます。");
           messages.push("更新してよろしいですか？");
         }
-        this.messageswal("確認", messages, "info", true, true, true)
+        this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
               this.FixDetail("更新", index);
@@ -429,7 +429,7 @@ export default {
           messages.push("廃止開始日が入力されているため入力日より廃止されます。");
           messages.push("追加してよろしいですか？");
         }
-        this.messageswal("確認", messages, "info", true, true, true)
+        this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
               this.FixDetail("追加", index);
@@ -441,7 +441,7 @@ export default {
     delClick(index) {
       var messages = [];
       messages.push("この行内容を削除しますか？");
-      this.messageswal("確認", messages, "info", true, true, true)
+      this.htmlMessageSwal("確認", messages, "info", true, true)
         .then(result  => {
           if (result) {
             this.DelDetail(index);
@@ -453,7 +453,7 @@ export default {
       if (this.before_count < this.count) {
         var messages = [];
         messages.push("１度に追加できる情報は１個です。追加してから再実行してください");
-        this.messageswal("エラー", messages, "error", true, false, true);
+        this.htmlMessageSwal("エラー", messages, "error", true, false);
       } else {
         this.object = { id: "", code: this.details[this.details.length-1].code, name: "", apply_term_from: "", kill_from_date: "", result: "" };
         this.details.unshift(this.object);
@@ -465,7 +465,7 @@ export default {
       if (this.checkRowData(index)) {
         var messages = [];
         messages.push("行削除してよろしいですか？");
-        this.messageswal("確認", messages, "info", true, true, true)
+        this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
               this.details.splice(index, 1);
@@ -538,7 +538,7 @@ export default {
         this.before_count = this.count;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("エラー", res.messagedata, "error", true, false, true);
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
         } else {
           this.serverCatch("取得");
         }
@@ -549,12 +549,11 @@ export default {
       var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("部署を" + eventtext + "しました");
-        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+        this.$toasted.show("部署を" + eventtext + "しました");
         this.refreshtDepartmentList();
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch(eventtext);
         }
@@ -565,15 +564,14 @@ export default {
       var messages = [];
       var res = response.data;
       if (res.result) {
-        messages.push("部署を" + eventtext + "しました");
-        this.messageswal(eventtext + "完了", messages, "success", true, false, true);
+        this.$toasted.show("部署を" + eventtext + "しました");
         this.refreshtDepartmentList();
         this.getDepartment();
         this.count = this.details.length;
         this.before_count = this.count;
       } else {
         if (res.messagedata.length > 0) {
-          this.messageswal("警告", res.messagedata, "warning", true, false, true);
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch(eventtext);
         }
@@ -581,8 +579,9 @@ export default {
     },
     // 異常処理
     serverCatch(eventtext) {
+      var messages = [];
       messages.push("部署情報" + eventtext + "に失敗しました");
-      this.messageswal("エラー", messages, "error", true, false, true);
+      this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
     inputClear() {
       this.details = [];

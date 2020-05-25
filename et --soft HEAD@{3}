@@ -1,0 +1,1011 @@
+81930e4 HEAD@{0}: checkout: moving from develop to shindo002
+81930e4 HEAD@{1}: checkout: moving from shindo002 to develop
+81930e4 HEAD@{2}: reset: moving to HEAD^
+f1a0b57 HEAD@{3}: commit: 主退勤複数回対応
+81930e4 HEAD@{4}: merge develop: Fast-forward
+8e0f32b HEAD@{5}: checkout: moving from develop to shindo002
+81930e4 HEAD@{6}: pull origin develop: Fast-forward
+5db8832 HEAD@{7}: checkout: moving from shindo002 to develop
+8e0f32b HEAD@{8}: checkout: moving from develop to shindo002
+5db8832 HEAD@{9}: checkout: moving from shindo002 to develop
+8e0f32b HEAD@{10}: commit: 丸高納品準備
+6021dab HEAD@{11}: merge develop: Merge made by the 'recursive' strategy.
+85ff887 HEAD@{12}: checkout: moving from develop to shindo002
+5db8832 HEAD@{13}: pull origin develop: Fast-forward
+62b5285 HEAD@{14}: checkout: moving from shindo002 to develop
+85ff887 HEAD@{15}: commit: ユーザー情報丸高修正
+a33d858 HEAD@{16}: merge develop: Merge made by the 'recursive' strategy.
+21063e2 HEAD@{17}: checkout: moving from develop to shindo002
+62b5285 HEAD@{18}: pull origin develop: Fast-forward
+0cbe8aa HEAD@{19}: checkout: moving from shindo002 to develop
+21063e2 HEAD@{20}: commit: 公用外出７回障害
+70036f9 HEAD@{21}: merge develop: Merge made by the 'recursive' strategy.
+368b01b HEAD@{22}: checkout: moving from develop to shindo002
+0cbe8aa HEAD@{23}: pull origin develop: Fast-forward
+720a654 HEAD@{24}: checkout: moving from shindo002 to develop
+368b01b HEAD@{25}: commit: 丸高カレンダー設定
+d425180 HEAD@{26}: merge develop: Merge made by the 'recursive' strategy.
+3ee5515 HEAD@{27}: checkout: moving from develop to shindo002
+720a654 HEAD@{28}: pull origin develop: Fast-forward
+49977c7 HEAD@{29}: checkout: moving from shindo002 to develop
+3ee5515 HEAD@{30}: commit: カレンダー設定に休暇登録を可能とする対応
+28332a7 HEAD@{31}: merge develop: Merge made by the 'recursive' strategy.
+665efec HEAD@{32}: checkout: moving from develop to shindo002
+49977c7 HEAD@{33}: pull origin develop: Fast-forward
+fc227be HEAD@{34}: checkout: moving from shindo002 to develop
+665efec HEAD@{35}: commit: 会社（アカウント）別に処理制限（権限）する対応5
+c4d1490 HEAD@{36}: merge develop: Merge made by the 'recursive' strategy.
+a1c0bcf HEAD@{37}: checkout: moving from develop to shindo002
+fc227be HEAD@{38}: pull origin develop: Fast-forward
+553efa0 HEAD@{39}: checkout: moving from shindo002 to develop
+a1c0bcf HEAD@{40}: commit: 会社（アカウント）別に処理制限（権限）する対応4
+bd53a73 HEAD@{41}: merge develop: Merge made by the 'recursive' strategy.
+f93bd1b HEAD@{42}: checkout: moving from develop to shindo002
+553efa0 HEAD@{43}: pull origin develop: Fast-forward
+660c2f0 HEAD@{44}: checkout: moving from shindo002 to develop
+f93bd1b HEAD@{45}: commit: 会社（アカウント）別に処理制限（権限）する対応3
+ec5fb9e HEAD@{46}: merge develop: Merge made by the 'recursive' strategy.
+0ceb671 HEAD@{47}: checkout: moving from develop to shindo002
+660c2f0 HEAD@{48}: pull origin develop: Fast-forward
+0660299 HEAD@{49}: checkout: moving from shindo002 to develop
+0ceb671 HEAD@{50}: commit: 会社（アカウント）別に処理制限（権限）する対応2
+e4aa18b HEAD@{51}: checkout: moving from develop to shindo002
+0660299 HEAD@{52}: checkout: moving from shindo002 to develop
+e4aa18b HEAD@{53}: commit: 会社（アカウント）別に処理制限（権限）する対応
+0660299 HEAD@{54}: merge develop: Fast-forward
+03cc239 HEAD@{55}: checkout: moving from develop to shindo002
+0660299 HEAD@{56}: pull origin develop: Fast-forward
+9ea3688 HEAD@{57}: checkout: moving from shindo002 to develop
+03cc239 HEAD@{58}: merge develop: Merge made by the 'recursive' strategy.
+7ba6eae HEAD@{59}: checkout: moving from develop to shindo002
+9ea3688 HEAD@{60}: pull origin develop: Fast-forward
+70cce1d HEAD@{61}: checkout: moving from shindo002 to develop
+7ba6eae HEAD@{62}: commit: 日次集計詳細ボタン修正
+50ea758 HEAD@{63}: merge develop: Merge made by the 'recursive' strategy.
+e586264 HEAD@{64}: checkout: moving from develop to shindo002
+70cce1d HEAD@{65}: pull origin develop: Fast-forward
+8d094d7 HEAD@{66}: checkout: moving from shindo002 to develop
+e586264 HEAD@{67}: commit: 月次集計修正
+7b98eaf HEAD@{68}: merge develop: Merge made by the 'recursive' strategy.
+3a3f212 HEAD@{69}: checkout: moving from develop to shindo002
+8d094d7 HEAD@{70}: pull origin develop: Fast-forward
+04b8420 HEAD@{71}: checkout: moving from shindo002 to develop
+3a3f212 HEAD@{72}: commit: 月次集計最新更新修正
+4910982 HEAD@{73}: merge develop: Merge made by the 'recursive' strategy.
+1d622c0 HEAD@{74}: checkout: moving from develop to shindo002
+04b8420 HEAD@{75}: pull origin develop: Fast-forward
+a04c4a6 HEAD@{76}: checkout: moving from shindo002 to develop
+1d622c0 HEAD@{77}: commit: ホーム画面修正3
+0c24e02 HEAD@{78}: merge develop: Merge made by the 'recursive' strategy.
+7c44c07 HEAD@{79}: checkout: moving from develop to shindo002
+a04c4a6 HEAD@{80}: pull origin develop: Fast-forward
+2fc3b4a HEAD@{81}: checkout: moving from shindo002 to develop
+7c44c07 HEAD@{82}: commit: ホーム画面日次警告修正2
+d0d2d06 HEAD@{83}: checkout: moving from develop to shindo002
+2fc3b4a HEAD@{84}: pull origin develop: Fast-forward
+e92a9d3 HEAD@{85}: checkout: moving from shindo002 to develop
+d0d2d06 HEAD@{86}: commit: ホームページ日次警告修正
+e1767dd HEAD@{87}: merge develop: Merge made by the 'recursive' strategy.
+ddecdc4 HEAD@{88}: checkout: moving from develop to shindo002
+e92a9d3 HEAD@{89}: pull origin develop: Fast-forward
+8490911 HEAD@{90}: checkout: moving from shindo002 to develop
+ddecdc4 HEAD@{91}: commit: 日次集計休暇時間集計修正6
+639441c HEAD@{92}: merge develop: Merge made by the 'recursive' strategy.
+68f12ad HEAD@{93}: checkout: moving from develop to shindo002
+8490911 HEAD@{94}: checkout: moving from shindo002 to develop
+68f12ad HEAD@{95}: checkout: moving from develop to shindo002
+8490911 HEAD@{96}: pull origin develop: Fast-forward
+318efa0 HEAD@{97}: checkout: moving from shindo002 to develop
+68f12ad HEAD@{98}: commit: 日次集計休暇時間集計修正5
+be14ad2 HEAD@{99}: merge develop: Merge made by the 'recursive' strategy.
+2eeba8c HEAD@{100}: checkout: moving from develop to shindo002
+318efa0 HEAD@{101}: pull origin develop: Fast-forward
+a83f09f HEAD@{102}: checkout: moving from shindo002 to develop
+2eeba8c HEAD@{103}: commit: 日次集計休暇時間集計修正4
+c599647 HEAD@{104}: merge develop: Merge made by the 'recursive' strategy.
+40c8766 HEAD@{105}: checkout: moving from develop to shindo002
+a83f09f HEAD@{106}: pull origin develop: Fast-forward
+796f663 HEAD@{107}: checkout: moving from shindo002 to develop
+40c8766 HEAD@{108}: commit: 日次集計休暇時間集計修正3
+78e87da HEAD@{109}: merge develop: Merge made by the 'recursive' strategy.
+23a64a8 HEAD@{110}: checkout: moving from develop to shindo002
+796f663 HEAD@{111}: pull origin develop: Fast-forward
+e218757 HEAD@{112}: checkout: moving from shindo002 to develop
+23a64a8 HEAD@{113}: commit: 日次集計休暇時間集計修正2
+d49fa9e HEAD@{114}: merge develop: Merge made by the 'recursive' strategy.
+678052b HEAD@{115}: checkout: moving from develop to shindo002
+e218757 HEAD@{116}: pull origin develop: Fast-forward
+2369588 HEAD@{117}: checkout: moving from shindo002 to develop
+678052b HEAD@{118}: commit: 日次集計休暇時間集計修正
+658f37b HEAD@{119}: merge develop: Merge made by the 'recursive' strategy.
+29c5086 HEAD@{120}: checkout: moving from develop to shindo002
+2369588 HEAD@{121}: pull origin develop: Fast-forward
+67ab3fe HEAD@{122}: checkout: moving from shindo002 to develop
+29c5086 HEAD@{123}: commit: 有給の勤怠編集修正2
+9d1a883 HEAD@{124}: merge develop: Merge made by the 'recursive' strategy.
+7ce80f5 HEAD@{125}: checkout: moving from develop to shindo002
+67ab3fe HEAD@{126}: pull origin develop: Fast-forward
+5229dc8 HEAD@{127}: checkout: moving from shindo002 to develop
+7ce80f5 HEAD@{128}: commit: 有給の勤怠編集修正
+d1c52bf HEAD@{129}: merge develop: Merge made by the 'recursive' strategy.
+0717c29 HEAD@{130}: checkout: moving from develop to shindo002
+5229dc8 HEAD@{131}: pull origin develop: Fast-forward
+81da297 HEAD@{132}: checkout: moving from shindo002 to develop
+0717c29 HEAD@{133}: commit: ダウンロード修正2
+3ebaefe HEAD@{134}: merge develop: Merge made by the 'recursive' strategy.
+59f89ba HEAD@{135}: checkout: moving from develop to shindo002
+81da297 HEAD@{136}: pull origin develop: Fast-forward
+a3e7cc4 HEAD@{137}: checkout: moving from shindo002 to develop
+59f89ba HEAD@{138}: commit: ダウンロード修正
+a3e7cc4 HEAD@{139}: merge develop: Fast-forward
+e5679bc HEAD@{140}: checkout: moving from develop to shindo002
+a3e7cc4 HEAD@{141}: pull origin develop: Merge made by the 'recursive' strategy.
+96a5c79 HEAD@{142}: checkout: moving from shindo002 to develop
+e5679bc HEAD@{143}: checkout: moving from develop to shindo002
+96a5c79 HEAD@{144}: checkout: moving from develop to develop
+96a5c79 HEAD@{145}: commit: ユーザー一括登録テンプレ
+caefca3 HEAD@{146}: checkout: moving from shindo002 to develop
+e5679bc HEAD@{147}: merge develop: Merge made by the 'recursive' strategy.
+1f1e936 HEAD@{148}: checkout: moving from develop to shindo002
+caefca3 HEAD@{149}: pull origin develop: Fast-forward
+75c992b HEAD@{150}: checkout: moving from shindo002 to develop
+1f1e936 HEAD@{151}: commit: ホーム画面調整
+6e69423 HEAD@{152}: merge develop: Merge made by the 'recursive' strategy.
+086bfe9 HEAD@{153}: checkout: moving from develop to shindo002
+75c992b HEAD@{154}: pull origin develop: Fast-forward
+0e4e129 HEAD@{155}: checkout: moving from shindo002 to develop
+086bfe9 HEAD@{156}: commit: 丸高勤怠編集
+5605a7c HEAD@{157}: merge develop: Merge made by the 'recursive' strategy.
+0ce04db HEAD@{158}: checkout: moving from develop to shindo002
+0e4e129 HEAD@{159}: pull origin develop: Fast-forward
+c892b33 HEAD@{160}: checkout: moving from shindo002 to develop
+0ce04db HEAD@{161}: commit: ホーム画面機能追加
+c74a4d6 HEAD@{162}: merge develop: Merge made by the 'recursive' strategy.
+590e34c HEAD@{163}: checkout: moving from develop to shindo002
+c892b33 HEAD@{164}: pull origin develop: Fast-forward
+605f858 HEAD@{165}: checkout: moving from shindo002 to develop
+590e34c HEAD@{166}: commit: ホームデバッグ
+214eba6 HEAD@{167}: merge develop: Merge made by the 'recursive' strategy.
+53a5df8 HEAD@{168}: checkout: moving from develop to shindo002
+605f858 HEAD@{169}: pull origin develop: Fast-forward
+92ffef7 HEAD@{170}: checkout: moving from shindo002 to develop
+53a5df8 HEAD@{171}: commit: ホームデバッグ
+fc7a620 HEAD@{172}: merge develop: Merge made by the 'recursive' strategy.
+c2a3af2 HEAD@{173}: checkout: moving from develop to shindo002
+92ffef7 HEAD@{174}: pull origin develop: Fast-forward
+bc3b52c HEAD@{175}: checkout: moving from shindo002 to develop
+c2a3af2 HEAD@{176}: commit: 時刻桁あふれ対策
+2526e0d HEAD@{177}: merge develop: Merge made by the 'recursive' strategy.
+ea2958b HEAD@{178}: checkout: moving from develop to shindo002
+bc3b52c HEAD@{179}: pull origin develop: Fast-forward
+bcbb76c HEAD@{180}: checkout: moving from shindo002 to develop
+ea2958b HEAD@{181}: commit: ユーザーアップロード
+f8acb77 HEAD@{182}: merge develop: Merge made by the 'recursive' strategy.
+d2cbdd3 HEAD@{183}: checkout: moving from develop to shindo002
+bcbb76c HEAD@{184}: pull origin develop: Fast-forward
+255b2cf HEAD@{185}: checkout: moving from shindo002 to develop
+d2cbdd3 HEAD@{186}: commit: 集計時間丸め修正2
+1e3fe0f HEAD@{187}: merge develop: Merge made by the 'recursive' strategy.
+2c6ff64 HEAD@{188}: checkout: moving from develop to shindo002
+255b2cf HEAD@{189}: pull origin develop: Fast-forward
+f9a1c51 HEAD@{190}: checkout: moving from shindo002 to develop
+2c6ff64 HEAD@{191}: commit: 集計時間丸め修正
+629636a HEAD@{192}: merge develop: Merge made by the 'recursive' strategy.
+b5e60b7 HEAD@{193}: checkout: moving from develop to shindo002
+f9a1c51 HEAD@{194}: pull origin develop: Fast-forward
+f4b356b HEAD@{195}: checkout: moving from shindo002 to develop
+b5e60b7 HEAD@{196}: commit: 時間丸め修正
+88f09f1 HEAD@{197}: merge develop: Merge made by the 'recursive' strategy.
+6d2dd83 HEAD@{198}: checkout: moving from develop to shindo002
+f4b356b HEAD@{199}: pull origin develop: Fast-forward
+2441b96 HEAD@{200}: checkout: moving from shindo002 to develop
+6d2dd83 HEAD@{201}: commit: カレンダー設定一括更新追加
+81c9d98 HEAD@{202}: merge develop: Merge made by the 'recursive' strategy.
+da57ab2 HEAD@{203}: checkout: moving from develop to shindo002
+2441b96 HEAD@{204}: pull origin develop: Fast-forward
+89b6e66 HEAD@{205}: checkout: moving from shindo002 to develop
+da57ab2 HEAD@{206}: commit: worktime-distinct
+b5b1f97 HEAD@{207}: merge develop: Merge made by the 'recursive' strategy.
+9bb640a HEAD@{208}: checkout: moving from develop to shindo002
+89b6e66 HEAD@{209}: pull origin develop: Fast-forward
+c646060 HEAD@{210}: checkout: moving from shindo002 to develop
+9bb640a HEAD@{211}: commit: 勤怠ログ修正3
+68984d5 HEAD@{212}: merge develop: Merge made by the 'recursive' strategy.
+1d976f3 HEAD@{213}: checkout: moving from develop to shindo002
+c646060 HEAD@{214}: pull origin develop: Fast-forward
+7f43b59 HEAD@{215}: checkout: moving from shindo002 to develop
+1d976f3 HEAD@{216}: commit: 勤怠ログ修正2
+688b2e4 HEAD@{217}: merge develop: Merge made by the 'recursive' strategy.
+f20df6a HEAD@{218}: checkout: moving from develop to shindo002
+7f43b59 HEAD@{219}: pull origin develop: Fast-forward
+f0ba1ee HEAD@{220}: checkout: moving from shindo002 to develop
+f20df6a HEAD@{221}: commit: 勤怠ログ修正
+7e8ac2f HEAD@{222}: merge develop: Merge made by the 'recursive' strategy.
+4300b7a HEAD@{223}: checkout: moving from develop to shindo002
+f0ba1ee HEAD@{224}: pull origin develop: Fast-forward
+36ef71a HEAD@{225}: checkout: moving from shindo002 to develop
+4300b7a HEAD@{226}: commit: 清水勧業みなし
+7544c54 HEAD@{227}: merge develop: Merge made by the 'recursive' strategy.
+2e57f33 HEAD@{228}: checkout: moving from develop to shindo002
+36ef71a HEAD@{229}: pull origin develop: Fast-forward
+af1ce3c HEAD@{230}: checkout: moving from shindo002 to develop
+2e57f33 HEAD@{231}: commit: 日次集計編集者表示3
+0540697 HEAD@{232}: commit: 日次集計編集者表示2
+1e72b33 HEAD@{233}: merge develop: Merge made by the 'recursive' strategy.
+fec3c62 HEAD@{234}: checkout: moving from develop to shindo002
+af1ce3c HEAD@{235}: pull origin develop: Fast-forward
+9b2df87 HEAD@{236}: checkout: moving from shindo002 to develop
+fec3c62 HEAD@{237}: commit: 日次集計編集者表示
+c7e3f4a HEAD@{238}: merge develop: Merge made by the 'recursive' strategy.
+70ee018 HEAD@{239}: checkout: moving from develop to shindo002
+9b2df87 HEAD@{240}: pull origin develop: Fast-forward
+3068b11 HEAD@{241}: checkout: moving from shindo002 to develop
+70ee018 HEAD@{242}: commit: カレンダー初期設定修正
+8892156 HEAD@{243}: merge develop: Merge made by the 'recursive' strategy.
+e94cbf8 HEAD@{244}: checkout: moving from develop to shindo002
+3068b11 HEAD@{245}: pull origin develop: Fast-forward
+4584901 HEAD@{246}: checkout: moving from shindo002 to develop
+e94cbf8 HEAD@{247}: commit: カレンダー修正に伴う大幅修正2
+515922e HEAD@{248}: merge develop: Merge made by the 'recursive' strategy.
+14dc685 HEAD@{249}: checkout: moving from develop to shindo002
+4584901 HEAD@{250}: pull origin develop: Fast-forward
+3d0e177 HEAD@{251}: checkout: moving from shindo002 to develop
+14dc685 HEAD@{252}: commit: カレンダー修正に伴う大幅修正
+4b83193 HEAD@{253}: merge develop: Merge made by the 'recursive' strategy.
+abfdbe8 HEAD@{254}: checkout: moving from develop to shindo002
+3d0e177 HEAD@{255}: pull origin develop: Fast-forward
+cd6b8c2 HEAD@{256}: checkout: moving from shindo002 to develop
+abfdbe8 HEAD@{257}: commit: 時間端数処理修正
+0ed27d3 HEAD@{258}: merge develop: Merge made by the 'recursive' strategy.
+70de0d4 HEAD@{259}: checkout: moving from develop to shindo002
+cd6b8c2 HEAD@{260}: pull origin develop: Fast-forward
+3553ae5 HEAD@{261}: checkout: moving from shindo002 to develop
+70de0d4 HEAD@{262}: commit: 深夜労働時間計算およびCSV修正
+48c4f83 HEAD@{263}: merge develop: Merge made by the 'recursive' strategy.
+00a550d HEAD@{264}: checkout: moving from develop to shindo002
+3553ae5 HEAD@{265}: pull origin develop: Fast-forward
+bc7ac1b HEAD@{266}: checkout: moving from shindo002 to develop
+00a550d HEAD@{267}: commit: 当日計算対象判定修正
+7ce21d4 HEAD@{268}: merge develop: Merge made by the 'recursive' strategy.
+4ec6c83 HEAD@{269}: checkout: moving from develop to shindo002
+bc7ac1b HEAD@{270}: pull origin develop: Fast-forward
+e1bf5d0 HEAD@{271}: checkout: moving from shindo002 to develop
+4ec6c83 HEAD@{272}: commit: 退勤ない場合外出していると実働時間がマイナス
+69426d9 HEAD@{273}: merge develop: Merge made by the 'recursive' strategy.
+a8dbaab HEAD@{274}: checkout: moving from develop to shindo002
+e1bf5d0 HEAD@{275}: pull origin develop: Fast-forward
+ef11dca HEAD@{276}: checkout: moving from shindo002 to develop
+a8dbaab HEAD@{277}: commit: イベントログダウンロード
+91d5165 HEAD@{278}: merge develop: Merge made by the 'recursive' strategy.
+bef79ad HEAD@{279}: checkout: moving from develop to shindo002
+ef11dca HEAD@{280}: pull origin develop: Fast-forward
+bbd7631 HEAD@{281}: checkout: moving from shindo002 to develop
+bef79ad HEAD@{282}: commit: メニューの勤怠ログ集計削除
+d867f03 HEAD@{283}: merge develop: Merge made by the 'recursive' strategy.
+036b739 HEAD@{284}: checkout: moving from develop to shindo002
+bbd7631 HEAD@{285}: pull origin develop: Fast-forward
+9d2acfb HEAD@{286}: checkout: moving from shindo002 to develop
+036b739 HEAD@{287}: commit: 清水勧業勤怠ログ
+d63d2d1 HEAD@{288}: merge develop: Merge made by the 'recursive' strategy.
+69bbeb9 HEAD@{289}: checkout: moving from develop to shindo002
+9d2acfb HEAD@{290}: pull origin develop: Fast-forward
+a5b217f HEAD@{291}: checkout: moving from shindo002 to develop
+69bbeb9 HEAD@{292}: commit: 不規則な打刻の日次集計表示修正
+a5b217f HEAD@{293}: merge develop: Fast-forward
+2e361da HEAD@{294}: checkout: moving from develop to shindo002
+a5b217f HEAD@{295}: pull origin develop: Fast-forward
+1ccf40d HEAD@{296}: checkout: moving from shindo002 to develop
+2e361da HEAD@{297}: merge develop: Merge made by the 'recursive' strategy.
+70518ad HEAD@{298}: checkout: moving from develop to shindo002
+1ccf40d HEAD@{299}: pull origin develop: Fast-forward
+5421fd7 HEAD@{300}: checkout: moving from shindo002 to develop
+70518ad HEAD@{301}: commit: シフト編集リスト選択修正2
+623f437 HEAD@{302}: checkout: moving from develop to shindo002
+5421fd7 HEAD@{303}: checkout: moving from shindo002 to develop
+623f437 HEAD@{304}: commit: シフト編集リスト選択修正
+5421fd7 HEAD@{305}: checkout: moving from f-cloud to shindo002
+5421fd7 HEAD@{306}: merge develop: Fast-forward
+f2817e3 HEAD@{307}: checkout: moving from shindo002 to f-cloud
+5421fd7 HEAD@{308}: merge develop: Fast-forward
+f2817e3 HEAD@{309}: checkout: moving from develop to shindo002
+5421fd7 HEAD@{310}: pull origin develop: Fast-forward
+e204d3a HEAD@{311}: checkout: moving from develop to develop
+e204d3a HEAD@{312}: checkout: moving from f-cloud to develop
+f2817e3 HEAD@{313}: checkout: moving from shindo002 to f-cloud
+f2817e3 HEAD@{314}: checkout: moving from master to shindo002
+58f9fe3 HEAD@{315}: checkout: moving from develop to master
+e204d3a HEAD@{316}: checkout: moving from shindo002 to develop
+f2817e3 HEAD@{317}: merge develop: Merge made by the 'recursive' strategy.
+eacc46f HEAD@{318}: checkout: moving from develop to shindo002
+e204d3a HEAD@{319}: pull origin develop: Fast-forward
+31778d6 HEAD@{320}: checkout: moving from shindo002 to develop
+eacc46f HEAD@{321}: commit: #1003勤怠編集修正
+ec5e1da HEAD@{322}: merge develop: Merge made by the 'recursive' strategy.
+77aabc0 HEAD@{323}: checkout: moving from develop to shindo002
+31778d6 HEAD@{324}: pull origin develop: Fast-forward
+cabd888 HEAD@{325}: checkout: moving from shindo002 to develop
+77aabc0 HEAD@{326}: commit: #1003日次集計位置情報追加勤怠編集修正＆日次集計不具合対応
+c8035bc HEAD@{327}: merge develop: Merge made by the 'recursive' strategy.
+90c1928 HEAD@{328}: checkout: moving from develop to shindo002
+cabd888 HEAD@{329}: pull origin develop: Fast-forward
+8ff161b HEAD@{330}: checkout: moving from shindo002 to develop
+90c1928 HEAD@{331}: commit: #1003日次集計位置情報追加
+b8b62e5 HEAD@{332}: merge develop: Merge made by the 'recursive' strategy.
+81f38de HEAD@{333}: checkout: moving from develop to shindo002
+8ff161b HEAD@{334}: pull origin develop: Fast-forward
+16ef686 HEAD@{335}: checkout: moving from shindo002 to develop
+81f38de HEAD@{336}: commit: #承認ルート設定
+eaf3f80 HEAD@{337}: merge develop: Merge made by the 'recursive' strategy.
+39812b2 HEAD@{338}: checkout: moving from develop to shindo002
+16ef686 HEAD@{339}: pull origin develop: Fast-forward
+f16c0f1 HEAD@{340}: checkout: moving from shindo002 to develop
+39812b2 HEAD@{341}: commit: 弥生給与ダウンロード追加
+9847812 HEAD@{342}: merge develop: Merge made by the 'recursive' strategy.
+2fe9068 HEAD@{343}: checkout: moving from develop to shindo002
+f16c0f1 HEAD@{344}: pull origin develop: Fast-forward
+c0bf184 HEAD@{345}: checkout: moving from shindo002 to develop
+2fe9068 HEAD@{346}: commit: #755月次更新削除修正
+81af9f9 HEAD@{347}: merge develop: Merge made by the 'recursive' strategy.
+fd797fb HEAD@{348}: checkout: moving from develop to shindo002
+c0bf184 HEAD@{349}: pull origin develop: Fast-forward
+2a7348a HEAD@{350}: checkout: moving from shindo002 to develop
+fd797fb HEAD@{351}: commit: #755重複打刻対応
+8d3e1fd HEAD@{352}: merge develop: Merge made by the 'recursive' strategy.
+f8bee60 HEAD@{353}: checkout: moving from develop to shindo002
+2a7348a HEAD@{354}: pull origin develop: Fast-forward
+06f8672 HEAD@{355}: checkout: moving from shindo002 to develop
+f8bee60 HEAD@{356}: commit: #パスワード修正ユーザー情報削除
+84ce5c7 HEAD@{357}: merge develop: Merge made by the 'recursive' strategy.
+0a388e2 HEAD@{358}: checkout: moving from develop to shindo002
+06f8672 HEAD@{359}: pull origin develop: Fast-forward
+c974f9d HEAD@{360}: checkout: moving from shindo002 to develop
+0a388e2 HEAD@{361}: commit: #755個人権限部署リスト障害修正2
+17b6637 HEAD@{362}: merge develop: Merge made by the 'recursive' strategy.
+8dc1ba8 HEAD@{363}: checkout: moving from develop to shindo002
+c974f9d HEAD@{364}: pull origin develop: Fast-forward
+3f899c4 HEAD@{365}: checkout: moving from shindo002 to develop
+8dc1ba8 HEAD@{366}: commit: #755個人権限部署リスト障害修正
+e63647a HEAD@{367}: merge develop: Merge made by the 'recursive' strategy.
+8472e76 HEAD@{368}: checkout: moving from develop to shindo002
+3f899c4 HEAD@{369}: pull origin develop: Fast-forward
+ab20dee HEAD@{370}: checkout: moving from shindo002 to develop
+8472e76 HEAD@{371}: commit: #755ユーザーリスト修正2
+05ce9fd HEAD@{372}: merge develop: Merge made by the 'recursive' strategy.
+a495ec0 HEAD@{373}: checkout: moving from develop to shindo002
+ab20dee HEAD@{374}: pull origin develop: Fast-forward
+eae174b HEAD@{375}: checkout: moving from shindo002 to develop
+a495ec0 HEAD@{376}: commit: #755ユーザーリスト修正
+747e8d5 HEAD@{377}: merge develop: Merge made by the 'recursive' strategy.
+24159cb HEAD@{378}: checkout: moving from develop to shindo002
+eae174b HEAD@{379}: pull origin develop: Fast-forward
+0ab5ac0 HEAD@{380}: checkout: moving from shindo002 to develop
+24159cb HEAD@{381}: commit: #755ユーザー勤怠管理権限修正
+58f4f50 HEAD@{382}: merge develop: Merge made by the 'recursive' strategy.
+ae9a645 HEAD@{383}: checkout: moving from develop to shindo002
+0ab5ac0 HEAD@{384}: pull origin develop: Fast-forward
+8ba96f2 HEAD@{385}: checkout: moving from shindo002 to develop
+ae9a645 HEAD@{386}: commit: #755設定修正2
+2740528 HEAD@{387}: merge develop: Merge made by the 'recursive' strategy.
+4bed914 HEAD@{388}: checkout: moving from develop to shindo002
+8ba96f2 HEAD@{389}: pull origin develop: Fast-forward
+696f7ca HEAD@{390}: checkout: moving from shindo002 to develop
+4bed914 HEAD@{391}: commit: #755設定修正
+a572344 HEAD@{392}: merge develop: Merge made by the 'recursive' strategy.
+854fe1c HEAD@{393}: checkout: moving from develop to shindo002
+696f7ca HEAD@{394}: pull origin develop: Fast-forward
+5fe485a HEAD@{395}: checkout: moving from shindo002 to develop
+854fe1c HEAD@{396}: commit: #755深夜残業時間修正2
+1263ea0 HEAD@{397}: merge develop: Merge made by the 'recursive' strategy.
+8295fd2 HEAD@{398}: checkout: moving from develop to shindo002
+5fe485a HEAD@{399}: pull origin develop: Fast-forward
+d57fa56 HEAD@{400}: checkout: moving from shindo002 to develop
+8295fd2 HEAD@{401}: commit: #755深夜残業時間修正
+03abd9b HEAD@{402}: merge develop: Merge made by the 'recursive' strategy.
+a4df67f HEAD@{403}: checkout: moving from develop to shindo002
+d57fa56 HEAD@{404}: pull origin develop: Fast-forward
+eb500ac HEAD@{405}: checkout: moving from shindo002 to develop
+a4df67f HEAD@{406}: commit: #755ファイルダウンロード作成
+b42c39c HEAD@{407}: merge develop: Merge made by the 'recursive' strategy.
+dc3859c HEAD@{408}: checkout: moving from develop to shindo002
+eb500ac HEAD@{409}: pull origin develop: Fast-forward
+3d99cec HEAD@{410}: checkout: moving from shindo002 to develop
+dc3859c HEAD@{411}: commit: #755ユーザー選択リスト適用期間修正2
+40813bc HEAD@{412}: merge develop: Merge made by the 'recursive' strategy.
+35f3da5 HEAD@{413}: checkout: moving from develop to shindo002
+3d99cec HEAD@{414}: pull origin develop: Fast-forward
+36e5318 HEAD@{415}: checkout: moving from shindo002 to develop
+35f3da5 HEAD@{416}: commit: #755ユーザー選択リスト適用期間修正
+6ce3282 HEAD@{417}: merge develop: Merge made by the 'recursive' strategy.
+e7c73f7 HEAD@{418}: checkout: moving from develop to shindo002
+36e5318 HEAD@{419}: pull origin develop: Fast-forward
+5ad6f87 HEAD@{420}: checkout: moving from develop to develop
+5ad6f87 HEAD@{421}: checkout: moving from shindo002 to develop
+e7c73f7 HEAD@{422}: commit: #755日次集計退職者表示修正2
+d2dda3f HEAD@{423}: merge develop: Merge made by the 'recursive' strategy.
+b360071 HEAD@{424}: checkout: moving from develop to shindo002
+5ad6f87 HEAD@{425}: pull origin develop: Fast-forward
+e7dcf90 HEAD@{426}: checkout: moving from shindo002 to develop
+b360071 HEAD@{427}: commit: #755日次集計退職者表示修正
+eb65003 HEAD@{428}: merge develop: Merge made by the 'recursive' strategy.
+82338f0 HEAD@{429}: checkout: moving from develop to shindo002
+e7dcf90 HEAD@{430}: pull origin develop: Fast-forward
+7455935 HEAD@{431}: checkout: moving from shindo002 to develop
+82338f0 HEAD@{432}: commit: #755勤務状態権限修正
+64edd52 HEAD@{433}: merge develop: Merge made by the 'recursive' strategy.
+dd6b9d6 HEAD@{434}: checkout: moving from develop to shindo002
+7455935 HEAD@{435}: pull origin develop: Fast-forward
+491853f HEAD@{436}: checkout: moving from shindo002 to develop
+dd6b9d6 HEAD@{437}: commit: #755CSV出力修正
+0a3d664 HEAD@{438}: merge develop: Merge made by the 'recursive' strategy.
+07ec7f0 HEAD@{439}: checkout: moving from develop to shindo002
+491853f HEAD@{440}: pull origin develop: Fast-forward
+4301044 HEAD@{441}: checkout: moving from shindo002 to develop
+07ec7f0 HEAD@{442}: commit: #755カード打刻サーバー処理修正
+fb5e7b4 HEAD@{443}: merge develop: Merge made by the 'recursive' strategy.
+5addf3f HEAD@{444}: checkout: moving from develop to shindo002
+4301044 HEAD@{445}: pull origin develop: Fast-forward
+4eea826 HEAD@{446}: checkout: moving from shindo002 to develop
+5addf3f HEAD@{447}: commit: #755リロード対策準備
+fe842da HEAD@{448}: merge develop: Merge made by the 'recursive' strategy.
+b9fa7c6 HEAD@{449}: checkout: moving from develop to shindo002
+4eea826 HEAD@{450}: pull origin develop: Fast-forward
+300b708 HEAD@{451}: checkout: moving from shindo002 to develop
+b9fa7c6 HEAD@{452}: commit: #755勤怠編集修正
+78f3975 HEAD@{453}: merge develop: Merge made by the 'recursive' strategy.
+1c845d1 HEAD@{454}: checkout: moving from develop to shindo002
+300b708 HEAD@{455}: pull origin develop: Fast-forward
+beea86d HEAD@{456}: checkout: moving from shindo002 to develop
+1c845d1 HEAD@{457}: commit: #755カード登録修正３
+c587416 HEAD@{458}: merge develop: Merge made by the 'recursive' strategy.
+8aa1164 HEAD@{459}: checkout: moving from develop to shindo002
+beea86d HEAD@{460}: pull origin develop: Fast-forward
+2b432de HEAD@{461}: checkout: moving from shindo002 to develop
+8aa1164 HEAD@{462}: commit: #755カード登録修正2
+a083fe3 HEAD@{463}: merge develop: Merge made by the 'recursive' strategy.
+70d7d4b HEAD@{464}: checkout: moving from develop to shindo002
+2b432de HEAD@{465}: pull origin develop: Fast-forward
+270eb9c HEAD@{466}: checkout: moving from shindo002 to develop
+70d7d4b HEAD@{467}: commit: #755カード登録修正
+48ec820 HEAD@{468}: merge develop: Merge made by the 'recursive' strategy.
+aac6cef HEAD@{469}: checkout: moving from develop to shindo002
+270eb9c HEAD@{470}: pull: Fast-forward
+abd39a7 HEAD@{471}: checkout: moving from shindo002 to develop
+aac6cef HEAD@{472}: commit: #755ユーザーemail必須
+20d7268 HEAD@{473}: merge develop: Merge made by the 'recursive' strategy.
+8a1ab17 HEAD@{474}: checkout: moving from develop to shindo002
+abd39a7 HEAD@{475}: pull origin develop: Fast-forward
+ca9b4a8 HEAD@{476}: checkout: moving from shindo002 to develop
+8a1ab17 HEAD@{477}: commit: #755部署ユーザー登録データ０件修正
+d4997a4 HEAD@{478}: checkout: moving from develop to shindo002
+ca9b4a8 HEAD@{479}: checkout: moving from shindo002 to develop
+d4997a4 HEAD@{480}: commit: #755三条印刷
+647b932 HEAD@{481}: merge develop: Merge made by the 'recursive' strategy.
+8d15bc6 HEAD@{482}: checkout: moving from develop to shindo002
+ca9b4a8 HEAD@{483}: pull: Fast-forward
+2ea3d75 HEAD@{484}: checkout: moving from shindo002 to develop
+8d15bc6 HEAD@{485}: commit: #755部署登録修正
+a7eaa68 HEAD@{486}: merge develop: Merge made by the 'recursive' strategy.
+4fc8516 HEAD@{487}: checkout: moving from develop to shindo002
+2ea3d75 HEAD@{488}: pull origin develop: Fast-forward
+0e87720 HEAD@{489}: checkout: moving from shindo002 to develop
+4fc8516 HEAD@{490}: commit: #755バグ修正
+6642347 HEAD@{491}: merge develop: Merge made by the 'recursive' strategy.
+6402ee7 HEAD@{492}: checkout: moving from develop to shindo002
+0e87720 HEAD@{493}: pull: Fast-forward
+b5ade30 HEAD@{494}: checkout: moving from shindo002 to develop
+6402ee7 HEAD@{495}: commit: #755日次集計groupby修正
+17e9ac4 HEAD@{496}: merge develop: Merge made by the 'recursive' strategy.
+4e1d17a HEAD@{497}: checkout: moving from develop to shindo002
+b5ade30 HEAD@{498}: pull: Fast-forward
+4b7c1be HEAD@{499}: checkout: moving from shindo002 to develop
+4e1d17a HEAD@{500}: commit: #755日次集計datetime->null修正
+362ede1 HEAD@{501}: merge develop: Merge made by the 'recursive' strategy.
+45039dd HEAD@{502}: checkout: moving from develop to shindo002
+4b7c1be HEAD@{503}: pull: Fast-forward
+6f4775d HEAD@{504}: checkout: moving from shindo002 to develop
+45039dd HEAD@{505}: commit: #755勤務時間設定vue修正
+7e8b253 HEAD@{506}: merge develop: Merge made by the 'recursive' strategy.
+f225e95 HEAD@{507}: checkout: moving from develop to shindo002
+6f4775d HEAD@{508}: pull: Fast-forward
+bf9aff9 HEAD@{509}: checkout: moving from shindo002 to develop
+f225e95 HEAD@{510}: commit: #755タイムテーブル修正
+de4c868 HEAD@{511}: merge develop: Merge made by the 'recursive' strategy.
+f168c9f HEAD@{512}: checkout: moving from develop to shindo002
+bf9aff9 HEAD@{513}: pull origin develop: Fast-forward
+8ba8fa9 HEAD@{514}: checkout: moving from shindo002 to develop
+f168c9f HEAD@{515}: commit: #755 expo後修正1
+63dffa8 HEAD@{516}: commit: 月次警告修正2
+df85405 HEAD@{517}: merge develop: Merge made by the 'recursive' strategy.
+d33d979 HEAD@{518}: checkout: moving from develop to shindo002
+8ba8fa9 HEAD@{519}: pull origin develop: Fast-forward
+88e1e5e HEAD@{520}: checkout: moving from shindo002 to develop
+d33d979 HEAD@{521}: commit: 月次警告修正
+2f20428 HEAD@{522}: merge develop: Merge made by the 'recursive' strategy.
+373cac2 HEAD@{523}: checkout: moving from develop to shindo002
+88e1e5e HEAD@{524}: pull origin develop: Fast-forward
+3e349bb HEAD@{525}: checkout: moving from shindo002 to develop
+373cac2 HEAD@{526}: commit: 日次警告と時間計算設定修正
+36b3785 HEAD@{527}: merge develop: Merge made by the 'recursive' strategy.
+7a12a9f HEAD@{528}: checkout: moving from develop to shindo002
+3e349bb HEAD@{529}: pull: Fast-forward
+37caa12 HEAD@{530}: checkout: moving from shindo002 to develop
+7a12a9f HEAD@{531}: commit: 月次警告表示修正
+d35f6a0 HEAD@{532}: merge develop: Merge made by the 'recursive' strategy.
+77d824e HEAD@{533}: checkout: moving from develop to shindo002
+37caa12 HEAD@{534}: pull: Fast-forward
+c96301d HEAD@{535}: checkout: moving from shindo002 to develop
+77d824e HEAD@{536}: commit: タイムカード形式修正
+00859af HEAD@{537}: merge develop: Merge made by the 'recursive' strategy.
+3a0ebf2 HEAD@{538}: checkout: moving from develop to shindo002
+c96301d HEAD@{539}: pull: Fast-forward
+001ed86 HEAD@{540}: checkout: moving from shindo002 to develop
+3a0ebf2 HEAD@{541}: commit: expo準備2
+3850898 HEAD@{542}: merge develop: Merge made by the 'recursive' strategy.
+f2daa1e HEAD@{543}: checkout: moving from develop to shindo002
+001ed86 HEAD@{544}: pull: Fast-forward
+6b49cde HEAD@{545}: checkout: moving from shindo002 to develop
+f2daa1e HEAD@{546}: commit: expo準備
+a878735 HEAD@{547}: checkout: moving from develop to shindo002
+6b49cde HEAD@{548}: checkout: moving from shindo002 to develop
+a878735 HEAD@{549}: merge develop: Merge made by the 'recursive' strategy.
+4de261c HEAD@{550}: checkout: moving from develop to shindo002
+6b49cde HEAD@{551}: pull: Fast-forward
+26370f0 HEAD@{552}: checkout: moving from shindo002 to develop
+4de261c HEAD@{553}: commit: #755申請機能追加
+b0b664e HEAD@{554}: merge develop: Merge made by the 'recursive' strategy.
+ba9acbd HEAD@{555}: checkout: moving from develop to shindo002
+26370f0 HEAD@{556}: pull: Fast-forward
+5b7caa0 HEAD@{557}: checkout: moving from shindo002 to develop
+ba9acbd HEAD@{558}: commit: #857申請機能追加
+99eed4b HEAD@{559}: merge develop: Merge made by the 'recursive' strategy.
+1771b6e HEAD@{560}: checkout: moving from develop to shindo002
+5b7caa0 HEAD@{561}: pull: Fast-forward
+8afe4c5 HEAD@{562}: checkout: moving from shindo002 to develop
+1771b6e HEAD@{563}: commit: #755デモ版修正
+d9e0063 HEAD@{564}: merge develop: Merge made by the 'recursive' strategy.
+c3e7d5b HEAD@{565}: checkout: moving from develop to shindo002
+8afe4c5 HEAD@{566}: pull: Fast-forward
+dafe4bf HEAD@{567}: checkout: moving from shindo002 to develop
+c3e7d5b HEAD@{568}: commit: #857集計修正
+a1dafa8 HEAD@{569}: merge develop: Merge made by the 'recursive' strategy.
+2395469 HEAD@{570}: checkout: moving from develop to shindo002
+dafe4bf HEAD@{571}: pull: Fast-forward
+35bf43a HEAD@{572}: checkout: moving from shindo002 to develop
+2395469 HEAD@{573}: commit: #857申請機能
+0e9862c HEAD@{574}: merge develop: Merge made by the 'recursive' strategy.
+ae62787 HEAD@{575}: checkout: moving from develop to shindo002
+35bf43a HEAD@{576}: pull: Fast-forward
+6272767 HEAD@{577}: checkout: moving from shindo002 to develop
+ae62787 HEAD@{578}: commit: #857申請処理作成
+23c6640 HEAD@{579}: merge develop: Merge made by the 'recursive' strategy.
+b83185e HEAD@{580}: checkout: moving from develop to shindo002
+6272767 HEAD@{581}: pull: Fast-forward
+1e0661c HEAD@{582}: checkout: moving from shindo002 to develop
+b83185e HEAD@{583}: commit: #857ユーザー情報修正
+7acb8be HEAD@{584}: merge develop: Merge made by the 'recursive' strategy.
+255416e HEAD@{585}: checkout: moving from develop to shindo002
+1e0661c HEAD@{586}: pull: Fast-forward
+5a18c23 HEAD@{587}: checkout: moving from shindo002 to develop
+255416e HEAD@{588}: commit: issues855ヘルプcsv作成修正
+217b0cc HEAD@{589}: merge develop: Merge made by the 'recursive' strategy.
+1b40271 HEAD@{590}: checkout: moving from develop to shindo002
+5a18c23 HEAD@{591}: pull: Fast-forward
+3582364 HEAD@{592}: checkout: moving from shindo002 to develop
+1b40271 HEAD@{593}: commit: issues:755不就労時間修正
+de3cbd0 HEAD@{594}: merge develop: Merge made by the 'recursive' strategy.
+a45d41a HEAD@{595}: checkout: moving from develop to shindo002
+3582364 HEAD@{596}: pull: Fast-forward
+27a75aa HEAD@{597}: checkout: moving from shindo002 to develop
+a45d41a HEAD@{598}: commit: issues:オプション表示追加
+4949815 HEAD@{599}: merge develop: Merge made by the 'recursive' strategy.
+cea0c9c HEAD@{600}: checkout: moving from develop to shindo002
+27a75aa HEAD@{601}: pull: Fast-forward
+ffa447c HEAD@{602}: checkout: moving from shindo002 to develop
+cea0c9c HEAD@{603}: commit: issues755:ヘルプ
+aa82262 HEAD@{604}: merge develop: Merge made by the 'recursive' strategy.
+2715794 HEAD@{605}: checkout: moving from develop to shindo002
+ffa447c HEAD@{606}: pull: Fast-forward
+80f81d2 HEAD@{607}: checkout: moving from shindo002 to develop
+2715794 HEAD@{608}: commit: issues:755カレンダー設定修正3
+63bb832 HEAD@{609}: merge develop: Merge made by the 'recursive' strategy.
+07d362d HEAD@{610}: checkout: moving from develop to shindo002
+80f81d2 HEAD@{611}: pull: Fast-forward
+d92b5d3 HEAD@{612}: checkout: moving from shindo002 to develop
+07d362d HEAD@{613}: commit: issues:755カレンダー設定修正2
+c81463b HEAD@{614}: checkout: moving from develop to shindo002
+d92b5d3 HEAD@{615}: checkout: moving from shindo002 to develop
+c81463b HEAD@{616}: commit: issues:755カレンダー設定修正
+6c882b9 HEAD@{617}: merge develop: Merge made by the 'recursive' strategy.
+5eab2ba HEAD@{618}: checkout: moving from develop to shindo002
+d92b5d3 HEAD@{619}: pull: Fast-forward
+b081942 HEAD@{620}: checkout: moving from shindo002 to develop
+5eab2ba HEAD@{621}: reset: moving to HEAD@{6}
+f8a9e05 HEAD@{622}: reset: moving to HEAD@{1}
+0afda76 HEAD@{623}: reset: moving to HEAD@{5}
+f8a9e05 HEAD@{624}: reset: moving to HEAD@{5}
+0afda76 HEAD@{625}: reset: moving to HEAD@{3}
+5eab2ba HEAD@{626}: reset: moving to HEAD@{1}
+0afda76 HEAD@{627}: reset: moving to HEAD@{1}
+5eab2ba HEAD@{628}: commit: isues:755課題一覧Noカレンダー設定編集修正再
+0afda76 HEAD@{629}: reset: moving to HEAD^
+f8a9e05 HEAD@{630}: merge develop: Merge made by the 'recursive' strategy.
+0afda76 HEAD@{631}: checkout: moving from develop to shindo002
+b081942 HEAD@{632}: pull: Fast-forward
+ea9938a HEAD@{633}: checkout: moving from shindo002 to develop
+0afda76 HEAD@{634}: commit: issues755:課題一覧No82 2
+6125840 HEAD@{635}: merge develop: Merge made by the 'recursive' strategy.
+b7c9269 HEAD@{636}: checkout: moving from develop to shindo002
+ea9938a HEAD@{637}: pull: Fast-forward
+45979fe HEAD@{638}: checkout: moving from shindo002 to develop
+b7c9269 HEAD@{639}: commit: issues755:課題一覧No79,80,81,82
+e43d8e3 HEAD@{640}: merge develop: Merge made by the 'recursive' strategy.
+d5927cf HEAD@{641}: checkout: moving from develop to shindo002
+45979fe HEAD@{642}: pull: Fast-forward
+23518b1 HEAD@{643}: checkout: moving from shindo002 to develop
+d5927cf HEAD@{644}: commit: issues755課題一覧NO38,39修正4
+ffa9012 HEAD@{645}: merge develop: Merge made by the 'recursive' strategy.
+03736d6 HEAD@{646}: checkout: moving from develop to shindo002
+23518b1 HEAD@{647}: pull: Fast-forward
+9cad816 HEAD@{648}: checkout: moving from shindo002 to develop
+03736d6 HEAD@{649}: commit: issues755課題一覧NO38,39修正3
+13ece75 HEAD@{650}: checkout: moving from shindo002 to shindo002
+13ece75 HEAD@{651}: merge develop: Merge made by the 'recursive' strategy.
+218c312 HEAD@{652}: checkout: moving from develop to shindo002
+9cad816 HEAD@{653}: pull: Fast-forward
+880c89f HEAD@{654}: checkout: moving from shindo002 to develop
+218c312 HEAD@{655}: commit: issues755課題一覧NO38,39修正2
+b408940 HEAD@{656}: merge develop: Merge made by the 'recursive' strategy.
+f9a13d1 HEAD@{657}: checkout: moving from develop to shindo002
+880c89f HEAD@{658}: pull: Fast-forward
+eacf25a HEAD@{659}: checkout: moving from shindo002 to develop
+f9a13d1 HEAD@{660}: commit: issues755課題一覧NO38,39修正
+c0ea95e HEAD@{661}: merge develop: Merge made by the 'recursive' strategy.
+53a4a33 HEAD@{662}: checkout: moving from develop to shindo002
+eacf25a HEAD@{663}: pull: Fast-forward
+38d7eba HEAD@{664}: checkout: moving from shindo002 to develop
+53a4a33 HEAD@{665}: commit: issues755課題一覧NO38,39
+03dbc1f HEAD@{666}: merge develop: Merge made by the 'recursive' strategy.
+0ad7731 HEAD@{667}: checkout: moving from develop to shindo002
+38d7eba HEAD@{668}: pull: Fast-forward
+00ddf90 HEAD@{669}: checkout: moving from shindo002 to develop
+0ad7731 HEAD@{670}: commit: issue755月次修正
+cf6f3a9 HEAD@{671}: merge develop: Merge made by the 'recursive' strategy.
+6859697 HEAD@{672}: checkout: moving from develop to shindo002
+00ddf90 HEAD@{673}: pull: Fast-forward
+cf1964f HEAD@{674}: checkout: moving from shindo002 to develop
+6859697 HEAD@{675}: commit: issue:755課題No48,54,58
+06a1b73 HEAD@{676}: merge develop: Merge made by the 'recursive' strategy.
+75e9256 HEAD@{677}: checkout: moving from develop to shindo002
+cf1964f HEAD@{678}: pull: Fast-forward
+d0db827 HEAD@{679}: checkout: moving from shindo002 to develop
+75e9256 HEAD@{680}: commit: issue:755課題NO47修正2
+c81d43b HEAD@{681}: merge develop: Merge made by the 'recursive' strategy.
+81bf19f HEAD@{682}: checkout: moving from develop to shindo002
+d0db827 HEAD@{683}: pull: Fast-forward
+d96f229 HEAD@{684}: checkout: moving from shindo002 to develop
+81bf19f HEAD@{685}: commit: issue:755課題NO47修正
+99a254f HEAD@{686}: merge develop: Merge made by the 'recursive' strategy.
+ece95c1 HEAD@{687}: checkout: moving from shindo002 to shindo002
+ece95c1 HEAD@{688}: checkout: moving from develop to shindo002
+d96f229 HEAD@{689}: pull: Fast-forward
+debd317 HEAD@{690}: checkout: moving from shindo002 to develop
+ece95c1 HEAD@{691}: commit: issues:課題no47修正
+2108718 HEAD@{692}: merge develop: Merge made by the 'recursive' strategy.
+67259c5 HEAD@{693}: checkout: moving from develop to shindo002
+debd317 HEAD@{694}: pull: Fast-forward
+3b1f3ff HEAD@{695}: checkout: moving from shindo002 to develop
+67259c5 HEAD@{696}: commit: issue:755 日次集計テーブル修正
+16243a9 HEAD@{697}: merge develop: Merge made by the 'recursive' strategy.
+2469ce9 HEAD@{698}: checkout: moving from develop to shindo002
+3b1f3ff HEAD@{699}: pull: Fast-forward
+60c4561 HEAD@{700}: checkout: moving from shindo002 to develop
+2469ce9 HEAD@{701}: commit: issues:755休暇時の備考修正
+8c56ba2 HEAD@{702}: reset: moving to HEAD^
+c01984c HEAD@{703}: commit: issues:755休暇時の備考修正
+8c56ba2 HEAD@{704}: checkout: moving from shindo002 to shindo002
+8c56ba2 HEAD@{705}: merge develop: Merge made by the 'recursive' strategy.
+b0679f7 HEAD@{706}: checkout: moving from develop to shindo002
+60c4561 HEAD@{707}: pull: Fast-forward
+c2352e3 HEAD@{708}: checkout: moving from shindo002 to develop
+b0679f7 HEAD@{709}: commit: issues:755課題No72
+bf4ef8e HEAD@{710}: checkout: moving from develop to shindo002
+c2352e3 HEAD@{711}: checkout: moving from shindo002 to develop
+bf4ef8e HEAD@{712}: commit: issues:755 休暇表示修正２
+15c9ebd HEAD@{713}: checkout: moving from develop to shindo002
+c2352e3 HEAD@{714}: checkout: moving from shindo002 to develop
+15c9ebd HEAD@{715}: commit: issues:755日次集計休暇表示修正
+0305e00 HEAD@{716}: merge develop: Merge made by the 'recursive' strategy.
+241fb46 HEAD@{717}: checkout: moving from develop to shindo002
+c2352e3 HEAD@{718}: pull: Fast-forward
+10fbce1 HEAD@{719}: checkout: moving from shindo002 to develop
+241fb46 HEAD@{720}: commit: issue:755勤怠編集結合試験修正
+0d46999 HEAD@{721}: merge develop: Merge made by the 'recursive' strategy.
+35d1f29 HEAD@{722}: checkout: moving from develop to shindo002
+10fbce1 HEAD@{723}: pull: Fast-forward
+823491b HEAD@{724}: checkout: moving from shindo002 to develop
+35d1f29 HEAD@{725}: commit: issue:755 欠勤者表示追加
+abc3ac5 HEAD@{726}: merge develop: Merge made by the 'recursive' strategy.
+a2198a1 HEAD@{727}: checkout: moving from develop to shindo002
+823491b HEAD@{728}: pull: Fast-forward
+23a7003 HEAD@{729}: checkout: moving from shindo002 to develop
+a2198a1 HEAD@{730}: commit: issue:755 admin表示しない修正2
+31b3caf HEAD@{731}: merge develop: Merge made by the 'recursive' strategy.
+0c4a97f HEAD@{732}: checkout: moving from develop to shindo002
+23a7003 HEAD@{733}: pull: Fast-forward
+b72e6b2 HEAD@{734}: checkout: moving from shindo002 to develop
+0c4a97f HEAD@{735}: commit: issue:755 admin表示しない修正
+6becc47 HEAD@{736}: merge develop: Merge made by the 'recursive' strategy.
+c8a573f HEAD@{737}: checkout: moving from shindo002 to shindo002
+c8a573f HEAD@{738}: checkout: moving from develop to shindo002
+b72e6b2 HEAD@{739}: pull: Fast-forward
+55b780a HEAD@{740}: checkout: moving from shindo002 to develop
+c8a573f HEAD@{741}: commit: issue:755 OneDoor->OneDawn
+acd4af0 HEAD@{742}: merge develop: Merge made by the 'recursive' strategy.
+9de24ba HEAD@{743}: checkout: moving from develop to shindo002
+55b780a HEAD@{744}: pull: Fast-forward
+b6ad210 HEAD@{745}: checkout: moving from shindo002 to develop
+9de24ba HEAD@{746}: commit: issue:755課題一覧No59
+1c8d085 HEAD@{747}: merge develop: Merge made by the 'recursive' strategy.
+700dbdf HEAD@{748}: checkout: moving from develop to shindo002
+b6ad210 HEAD@{749}: pull: Fast-forward
+3ff3c01 HEAD@{750}: checkout: moving from shindo002 to develop
+700dbdf HEAD@{751}: commit: issue:775課題一覧No58
+65861c3 HEAD@{752}: merge develop: Merge made by the 'recursive' strategy.
+54019c8 HEAD@{753}: checkout: moving from develop to shindo002
+3ff3c01 HEAD@{754}: pull: Fast-forward
+bd41ed8 HEAD@{755}: checkout: moving from shindo002 to develop
+54019c8 HEAD@{756}: commit: issue:課題一覧No4,6,10
+c33dc0d HEAD@{757}: merge develop: Merge made by the 'recursive' strategy.
+e0d7216 HEAD@{758}: checkout: moving from develop to shindo002
+bd41ed8 HEAD@{759}: pull: Fast-forward
+2da3f78 HEAD@{760}: checkout: moving from shindo002 to develop
+e0d7216 HEAD@{761}: commit: issue:755日次月次集計処理中機能追加
+4ad5370 HEAD@{762}: merge develop: Merge made by the 'recursive' strategy.
+8d0e30b HEAD@{763}: checkout: moving from develop to shindo002
+2da3f78 HEAD@{764}: pull: Fast-forward
+6195baa HEAD@{765}: checkout: moving from shindo002 to develop
+8d0e30b HEAD@{766}: commit: issue:775 休日日次集計表示修正
+e72ae6c HEAD@{767}: merge develop: Merge made by the 'recursive' strategy.
+0677675 HEAD@{768}: checkout: moving from develop to shindo002
+6195baa HEAD@{769}: pull: Fast-forward
+6ce695c HEAD@{770}: checkout: moving from shindo002 to develop
+0677675 HEAD@{771}: merge develop: Merge made by the 'recursive' strategy.
+b88b4e0 HEAD@{772}: checkout: moving from develop to shindo002
+6ce695c HEAD@{773}: pull: Fast-forward
+b91fe01 HEAD@{774}: checkout: moving from shindo002 to develop
+b88b4e0 HEAD@{775}: commit: issue:755インターバルのアラートが出ない
+18e5b76 HEAD@{776}: commit: issue:755issetをemptyに修正3
+10e61d1 HEAD@{777}: commit: issue:755issetをemptyに修正2
+737a9f5 HEAD@{778}: merge develop: Merge made by the 'recursive' strategy.
+0b1f58f HEAD@{779}: checkout: moving from develop to shindo002
+b91fe01 HEAD@{780}: pull: Fast-forward
+e483a17 HEAD@{781}: checkout: moving from shindo002 to develop
+0b1f58f HEAD@{782}: commit: issue:755issetをemptyに修正
+5a26b31 HEAD@{783}: checkout: moving from develop to shindo002
+e483a17 HEAD@{784}: checkout: moving from shindo002 to develop
+5a26b31 HEAD@{785}: commit: issue:項目洗い出しによる修正
+e483a17 HEAD@{786}: merge develop: Fast-forward
+2e01395 HEAD@{787}: checkout: moving from develop to shindo002
+e483a17 HEAD@{788}: pull: Fast-forward
+2e01395 HEAD@{789}: checkout: moving from shindo002 to develop
+2e01395 HEAD@{790}: checkout: moving from shindo to shindo002
+36c6479 HEAD@{791}: checkout: moving from shindo to shindo
+36c6479 HEAD@{792}: checkout: moving from feature-shindo to shindo
+36c6479 HEAD@{793}: checkout: moving from develop to feature-shindo
+2e01395 HEAD@{794}: checkout: moving from feature-shindo to develop
+36c6479 HEAD@{795}: commit: issue:755勤務時間修正
+0b15bc1 HEAD@{796}: merge develop: Merge made by the 'recursive' strategy.
+09b0b01 HEAD@{797}: checkout: moving from develop to feature-shindo
+2e01395 HEAD@{798}: checkout: moving from feature-shindo to develop
+09b0b01 HEAD@{799}: commit: issue:775残業計算修正0826
+4626e39 HEAD@{800}: reset: moving to HEAD^
+3967798 HEAD@{801}: merge develop: Merge made by the 'recursive' strategy.
+4626e39 HEAD@{802}: checkout: moving from develop to feature-shindo
+2e01395 HEAD@{803}: pull: Fast-forward
+9125808 HEAD@{804}: checkout: moving from feature-shindo to develop
+4626e39 HEAD@{805}: commit: issue755:残業時間計算修正
+9fc5865 HEAD@{806}: checkout: moving from develop to feature-shindo
+9125808 HEAD@{807}: checkout: moving from feature-shindo to develop
+9fc5865 HEAD@{808}: commit (merge): issue:775 日次集計時間計算修正2
+23d8522 HEAD@{809}: commit: issue:775 日次集計時間計算修正
+e52f9ce HEAD@{810}: reset: moving to HEAD^
+4ec6520 HEAD@{811}: checkout: moving from develop to feature-shindo
+9125808 HEAD@{812}: checkout: moving from feature-shindo to develop
+4ec6520 HEAD@{813}: commit (merge): issue:775 日次集計時間計算修正
+e52f9ce HEAD@{814}: checkout: moving from develop to feature-shindo
+9125808 HEAD@{815}: pull: Fast-forward
+228c1af HEAD@{816}: checkout: moving from feature-shindo to develop
+e52f9ce HEAD@{817}: filter-branch: rewrite
+9d1a70b HEAD@{818}: commit: issue:775 日次集計時間計算修正
+de9c56c HEAD@{819}: merge develop: Merge made by the 'recursive' strategy.
+245ce2e HEAD@{820}: checkout: moving from develop to feature-shindo
+228c1af HEAD@{821}: pull: Fast-forward
+2782dda HEAD@{822}: checkout: moving from feature-shindo to develop
+245ce2e HEAD@{823}: commit: issue:755公用外出機能追加
+eaf0af7 HEAD@{824}: merge develop: Merge made by the 'recursive' strategy.
+d0ca344 HEAD@{825}: checkout: moving from develop to feature-shindo
+2782dda HEAD@{826}: pull: Fast-forward
+0f22b5a HEAD@{827}: checkout: moving from feature-shindo to develop
+d0ca344 HEAD@{828}: commit: issue:755:月次集計!
+7bc14b4 HEAD@{829}: merge develop: Merge made by the 'recursive' strategy.
+651074e HEAD@{830}: checkout: moving from develop to feature-shindo
+0f22b5a HEAD@{831}: pull: Fast-forward
+ae0be11 HEAD@{832}: checkout: moving from feature-shindo to develop
+651074e HEAD@{833}: commit: issue:755 テーブル修正に伴うリスト取得の修正
+eceae6a HEAD@{834}: merge develop: Merge made by the 'recursive' strategy.
+53c5ed6 HEAD@{835}: checkout: moving from develop to feature-shindo
+ae0be11 HEAD@{836}: pull: Fast-forward
+33c075e HEAD@{837}: checkout: moving from feature-shindo to develop
+53c5ed6 HEAD@{838}: commit: issue:755 テーブル修正に伴う修正
+12bd4db HEAD@{839}: checkout: moving from feature-shindo to feature-shindo
+12bd4db HEAD@{840}: merge develop: Merge made by the 'recursive' strategy.
+22bcc82 HEAD@{841}: checkout: moving from develop to feature-shindo
+33c075e HEAD@{842}: pull: Fast-forward
+779b848 HEAD@{843}: checkout: moving from feature-shindo to develop
+22bcc82 HEAD@{844}: commit: issue:755 テーブル修正対応
+8ef12e6 HEAD@{845}: merge develop: Merge made by the 'recursive' strategy.
+a4d3c57 HEAD@{846}: checkout: moving from develop to feature-shindo
+779b848 HEAD@{847}: pull: Fast-forward
+ea9df8c HEAD@{848}: checkout: moving from feature-shindo to develop
+a4d3c57 HEAD@{849}: commit: issue:755 日次集計適用期間対応
+a4d7854 HEAD@{850}: merge develop: Merge made by the 'recursive' strategy.
+09528bb HEAD@{851}: commit: issue:755 テーブルに適用期間追加
+7ca81ed HEAD@{852}: checkout: moving from develop to feature-shindo
+ea9df8c HEAD@{853}: pull: Fast-forward
+414f139 HEAD@{854}: checkout: moving from feature-shindo to develop
+7ca81ed HEAD@{855}: merge develop: Merge made by the 'recursive' strategy.
+77bf027 HEAD@{856}: checkout: moving from develop to feature-shindo
+414f139 HEAD@{857}: pull: Fast-forward
+b6b63a0 HEAD@{858}: checkout: moving from feature-shindo to develop
+77bf027 HEAD@{859}: commit: issue:755 card登録メッセージ表示修正
+e0ab8da HEAD@{860}: merge develop: Merge made by the 'recursive' strategy.
+9b4b62e HEAD@{861}: checkout: moving from develop to feature-shindo
+b6b63a0 HEAD@{862}: pull: Fast-forward
+1ba377c HEAD@{863}: checkout: moving from feature-shindo to develop
+9b4b62e HEAD@{864}: commit: issue:755 users検索条件role修正
+d7b2efd HEAD@{865}: merge develop: Merge made by the 'recursive' strategy.
+929ccfd HEAD@{866}: checkout: moving from develop to feature-shindo
+1ba377c HEAD@{867}: pull: Fast-forward
+fabf25a HEAD@{868}: checkout: moving from feature-shindo to develop
+929ccfd HEAD@{869}: commit: issue:755 users検索条件role追加
+e30c5c9 HEAD@{870}: merge develop: Merge made by the 'recursive' strategy.
+dd45156 HEAD@{871}: checkout: moving from develop to feature-shindo
+fabf25a HEAD@{872}: pull: Fast-forward
+0beee16 HEAD@{873}: checkout: moving from feature-shindo to develop
+dd45156 HEAD@{874}: commit: issu:755 API修正
+6f35a3b HEAD@{875}: commit (merge): issue:755 日次集計0801
+f50b01c HEAD@{876}: checkout: moving from develop to feature-shindo
+0beee16 HEAD@{877}: pull: Fast-forward
+fd3343a HEAD@{878}: checkout: moving from feature-shindo to develop
+f50b01c HEAD@{879}: commit: issue:755 日次集計0801
+88d9043 HEAD@{880}: merge develop: Merge made by the 'recursive' strategy.
+728ea73 HEAD@{881}: checkout: moving from develop to feature-shindo
+fd3343a HEAD@{882}: pull: Fast-forward
+5d6568e HEAD@{883}: checkout: moving from feature-shindo to develop
+728ea73 HEAD@{884}: commit: issue:755 日次集計修正0730
+1889da7 HEAD@{885}: checkout: moving from develop to feature-shindo
+5d6568e HEAD@{886}: checkout: moving from feature-shindo to develop
+1889da7 HEAD@{887}: commit: issue:755 個人休暇テーブル追加
+e132dda HEAD@{888}: merge develop: Merge made by the 'recursive' strategy.
+3fcda97 HEAD@{889}: checkout: moving from develop to feature-shindo
+5d6568e HEAD@{890}: pull: Fast-forward
+c047d2e HEAD@{891}: checkout: moving from feature-shindo to develop
+3fcda97 HEAD@{892}: commit: issue:755 日次集計　画面修正0730
+20fb5f0 HEAD@{893}: merge develop: Merge made by the 'recursive' strategy.
+6210a5e HEAD@{894}: checkout: moving from develop to feature-shindo
+c047d2e HEAD@{895}: pull: Fast-forward
+4ce7bdd HEAD@{896}: checkout: moving from feature-shindo to develop
+6210a5e HEAD@{897}: commit: issue:755 日次集計修正0852
+789278a HEAD@{898}: commit (merge): issue:755 テーブル修正
+6e2ac1a HEAD@{899}: checkout: moving from develop to feature-shindo
+4ce7bdd HEAD@{900}: pull: Merge made by the 'recursive' strategy.
+f338168 HEAD@{901}: commit: issue:755 テーブル修正
+68881d3 HEAD@{902}: checkout: moving from develop to develop
+68881d3 HEAD@{903}: checkout: moving from feature-shindo to develop
+6e2ac1a HEAD@{904}: commit: issue:755 テーブル修正
+e27a590 HEAD@{905}: checkout: moving from develop to feature-shindo
+68881d3 HEAD@{906}: checkout: moving from feature-shindo to develop
+e27a590 HEAD@{907}: commit (merge): issue:755 日次集計修正0729
+7af348a HEAD@{908}: checkout: moving from develop to feature-shindo
+68881d3 HEAD@{909}: commit: issue:755 日次集計修正0729
+2cb6e02 HEAD@{910}: commit: issue:755 日次集計修正0729
+8139831 HEAD@{911}: checkout: moving from feature-shindo to develop
+7af348a HEAD@{912}: commit: issue:755 日次集計修正0729
+e42b4c8 HEAD@{913}: checkout: moving from develop to feature-shindo
+8139831 HEAD@{914}: pull: Fast-forward
+a696059 HEAD@{915}: checkout: moving from feature-shindo to develop
+e42b4c8 HEAD@{916}: commit: issue:755 日次集計修正0729
+bc9aab6 HEAD@{917}: merge develop: Merge made by the 'recursive' strategy.
+fa932a0 HEAD@{918}: checkout: moving from develop to feature-shindo
+a696059 HEAD@{919}: checkout: moving from feature-shindo to develop
+fa932a0 HEAD@{920}: commit: issue:775 日次集計画面実装
+26ae99c HEAD@{921}: checkout: moving from develop to feature-shindo
+a696059 HEAD@{922}: checkout: moving from feature-shindo to develop
+26ae99c HEAD@{923}: checkout: moving from develop to feature-shindo
+a696059 HEAD@{924}: reset: moving to HEAD@{2}
+2068a7a HEAD@{925}: checkout: moving from develop to develop
+2068a7a HEAD@{926}: reset: moving to HEAD@{4}
+a696059 HEAD@{927}: checkout: moving from feature-shindo to develop
+26ae99c HEAD@{928}: pull origin feature-shindo: Fast-forward
+ee2dafa HEAD@{929}: checkout: moving from develop to feature-shindo
+a696059 HEAD@{930}: pull: Merge made by the 'recursive' strategy.
+2068a7a HEAD@{931}: commit: issue790 単体テスト途中
+9bbf4e9 HEAD@{932}: commit: merge
+d4cde94 HEAD@{933}: pull: Merge made by the 'recursive' strategy.
+ccbf0c1 HEAD@{934}: commit: issue792 設定画面　完了
+0199722 HEAD@{935}: commit: issue778 シフト編集画面
+b053cb0 HEAD@{936}: pull: Fast-forward
+6d86686 HEAD@{937}: commit: issue791 会社情報マスタ　完了
+00a2edc HEAD@{938}: commit: issue788 カレンダー登録　編集　完了
+2658b78 HEAD@{939}: commit: issue789 会社マスタテーブル作り直し
+b629e29 HEAD@{940}: commit: issue790 タイムテーブル　マスタ画面　完了
+fee5439 HEAD@{941}: commit: issue787 ユーザー編集　部署編集　修正
+474485e HEAD@{942}: merge feature-shindo: Merge made by the 'recursive' strategy.
+0b5cb32 HEAD@{943}: checkout: moving from feature-shindo to develop
+ee2dafa HEAD@{944}: commit (merge): merge
+0b5cb32 HEAD@{945}: checkout: moving from develop to feature-shindo
+0b5cb32 HEAD@{946}: checkout: moving from feature-shindo to develop
+0b5cb32 HEAD@{947}: merge develop: Fast-forward
+1d7a1b8 HEAD@{948}: checkout: moving from develop to feature-shindo
+0b5cb32 HEAD@{949}: commit: issue787 ignore検証
+14f8f6b HEAD@{950}: commit: issue787 department_id big int
+fdd364b HEAD@{951}: commit: issue787 department_id 作成
+90bb633 HEAD@{952}: commit: issue777 ユーザー編集・削除　完成
+183d0da HEAD@{953}: commit (merge): merge shindo
+8c76002 HEAD@{954}: commit: issue777 ユーザー論理削除
+adefc47 HEAD@{955}: pull: Merge made by the 'recursive' strategy.
+3ef893e HEAD@{956}: commit: issue777 UserModel追加
+793174f HEAD@{957}: commit: issue777 Userモデルにget set追加
+0500118 HEAD@{958}: commit (merge): issue777 merge
+ef5d7b8 HEAD@{959}: commit: issue777
+00a6b28 HEAD@{960}: commit: issue777 ユーザー追加　
+ac314fd HEAD@{961}: commit: issue777 Usersに雇用形態追加
+2339716 HEAD@{962}: merge feature-shindo: Merge made by the 'recursive' strategy.
+fda26a2 HEAD@{963}: checkout: moving from feature-shindo to develop
+1d7a1b8 HEAD@{964}: commit (merge): issue 777 merge shindo develop
+f912c6a HEAD@{965}: checkout: moving from develop to feature-shindo
+fda26a2 HEAD@{966}: commit: issue777 ユーザー追加　途中
+08b6c94 HEAD@{967}: commit: issue778 バリデーション追加
+e17f441 HEAD@{968}: commit (merge): issue778 merge
+2ab6eb8 HEAD@{969}: commit: issue778 シフト作成　バリデート以外完成
+2f0c1fc HEAD@{970}: checkout: moving from master to develop
+58f9fe3 HEAD@{971}: commit: merge
+3b47890 HEAD@{972}: pull: Fast-forward
+24f8418 HEAD@{973}: checkout: moving from develop to master
+2f0c1fc HEAD@{974}: commit: issue778 datepicker install
+742f99e HEAD@{975}: pull: Merge made by the 'recursive' strategy.
+3b3c95f HEAD@{976}: commit: issue778 シフト割り当て画面　
+fde91c2 HEAD@{977}: commit: issue778 シフト時間作成　画面　新規　論理削除
+81390d3 HEAD@{978}: commit (merge): issue778 手動マージ feature-takeda
+041003f HEAD@{979}: pull: Fast-forward
+cf45129 HEAD@{980}: checkout: moving from feature-takeda to develop
+a55c7ed HEAD@{981}: commit: issue778 シフト時間作成画面　完了
+cf45129 HEAD@{982}: checkout: moving from develop to feature-takeda
+cf45129 HEAD@{983}: checkout: moving from feature-takeda to develop
+cf45129 HEAD@{984}: checkout: moving from master to feature-takeda
+24f8418 HEAD@{985}: commit: issue775 merge feature-takeda
+c8af762 HEAD@{986}: checkout: moving from feature-takeda to master
+cf45129 HEAD@{987}: commit: issue775 merge
+5f3fcd6 HEAD@{988}: checkout: moving from master to feature-takeda
+c8af762 HEAD@{989}: pull origin master: Merge made by the 'recursive' strategy.
+ccd2222 HEAD@{990}: commit (merge): merge feature-takeda
+e43e2e3 HEAD@{991}: checkout: moving from feature-takeda to master
+5f3fcd6 HEAD@{992}: commit: issue775
+6653e60 HEAD@{993}: commit: issue773 ログインーTOP
+119767f HEAD@{994}: commit: issue773 merge
+919a298 HEAD@{995}: commit: issue773 ログイン機能　新規登録ユーザーIDはローマ字のみ
+46bb1ff HEAD@{996}: commit: issue773 ログイン機能　vue導入
+558ec03 HEAD@{997}: commit: issue717 新規カード登録API完成
+0b4ad24 HEAD@{998}: commit: issue717 レスポンスのstatus　３パターン追加
+3a1d1a0 HEAD@{999}: commit: issue717 response 修正
+30e16f1 HEAD@{1000}: commit: issue717 登録成功時jsonでレスポンスを返す
+471db1f HEAD@{1001}: commit: issue717 users work_times unique削除
+67b1dff HEAD@{1002}: commit: issue717 WorkTime作成
+2369d37 HEAD@{1003}: commit: issue717 usersにis_deleted 追加
+4b06673 HEAD@{1004}: commit: issue717
+ba77501 HEAD@{1005}: commit: issue717 add user_code card_informations
+502dc74 HEAD@{1006}: commit: issue717 drop user_id card_informations
+381025c HEAD@{1007}: commit: issue717
+b04b35a HEAD@{1008}: commit: issue717 API
+2c281b6 HEAD@{1009}: checkout: moving from master to feature-takeda
+e43e2e3 HEAD@{1010}: commit (initial): init commit
