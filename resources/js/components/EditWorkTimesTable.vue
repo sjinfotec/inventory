@@ -14,11 +14,11 @@
         <h1 class="float-sm-left font-size-rg">
           <span>
             <button class="btn btn-success btn-lg font-size-rg"
-            v-if="login_user_role === login_adminuser_role" v-on:click="appendRowClick">+</button>
+            v-if="login_user_role === const_c025[get_AdminUserIndex]['code']" v-on:click="appendRowClick">+</button>
           </span>
           {{ selectedName }}
         </h1>
-        <span class="float-sm-right font-size-sm" v-if="login_user_role === login_adminuser_role">
+        <span class="float-sm-right font-size-sm" v-if="login_user_role === const_c025[get_AdminUserIndex]['code']">
           「＋」アイコンで新規に追加することができます</span>
       </div>
       <!-- /.panel header -->
@@ -107,7 +107,7 @@
                               >
                                 <option value></option>
                                 <option
-                                  v-for="mlist in generalList_c005"
+                                  v-for="mlist in get_C005"
                                   :value="mlist.code"
                                   v-bind:key="mlist.code"
                                 >{{ mlist.code_name }}</option>
@@ -133,14 +133,14 @@
                               >
                                 <option value></option>
                                 <option
-                                  v-for="list in generalList_c013"
+                                  v-for="list in get_C013"
                                   :value="list.code"
                                 >{{ list.code_name }}</option>
                               </select>
                             </div>
                           </td>
                           <td class="text-center align-middle mw-rem-20" v-else></td>
-                          <td class="text-center align-middle mw-rem-5" v-if="login_user_role === login_adminuser_role">
+                          <td class="text-center align-middle mw-rem-5" v-if="login_user_role === const_c025[get_AdminUserIndex]['code']">
                             <i class="fa fa-trash" style="color: #808080;ccursor: hand; cursor:pointer;" v-on:click="rowDelClick(index)">
                            </i>
                           </td>
@@ -169,7 +169,7 @@
         <!-- .row -->
         <div class="row justify-content-between">
           <!-- col -->
-          <div class="col-md-12 pb-2" v-if="login_user_role === login_adminuser_role">
+          <div class="col-md-12 pb-2" v-if="login_user_role === const_c025[get_AdminUserIndex]['code']">
             <btn-work-time
               v-on:editfixclick-event="editfixclick"
               v-bind:btn-mode="'editfix'"
@@ -203,6 +203,11 @@ import encoding from 'encoding-japanese';
 import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
+
+// CONST
+const CONST_C005 = 'C005';
+const CONST_C013 = 'C013';
+const CONST_C025_ADMINUSER_INDEX = 2;   // index
 
 // 打刻モード
 const ATTENDANCE = 1;
@@ -238,21 +243,52 @@ export default {
         type: Array,
         default: []
     },
-    generaluser: {
-        type: Number,
-        default: 0
+    const_c025: {
+        type: Array,
+        default: []
     },
-    generalapproveruser: {
-        type: Number,
-        default: 0
-    },
-    adminuser: {
-        type: Number,
-        default: 0
+    const_generaldatas: {
+        type: Array,
+        default: []
     },
     heads: {
         type: Array,
         default: []
+    },
+    accountdatas: {
+        type: Array,
+        default: []
+    },
+    halfautoset: {
+        type: Boolean,
+        default: true
+    }
+  },
+  computed: {
+    get_C005: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C005) {
+          $this.const_C005_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C005_data;
+    },
+    get_C013: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C013) {
+          $this.const_C013_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C013_data;
+    },
+    get_AdminUserIndex: function() {
+      return CONST_C025_ADMINUSER_INDEX;
     }
   },
   data() {
@@ -265,9 +301,6 @@ export default {
       edtdepartmentname: "",
       login_user_code: "",
       login_user_role: "",
-      login_generaluser_role: "",
-      login_generalapproveruser_role: "",
-      login_adminuser_role: "",
       messagevalidatesEdt: [],
       details: [],
       before_details: [],
@@ -277,8 +310,8 @@ export default {
       count: 0,
       before_count: 0,
       value_user_holiday_kbn: "",
-      generalList_c005: [],
-      generalList_c013: [],
+      const_C005_data: [],
+      const_C013_data: [],
       selectedName: "",
       issearchbutton: false,
       isgosubdatebutton: false,
@@ -295,9 +328,6 @@ export default {
   mounted() {
     this.login_user_code = this.authusers['code'];
     this.login_user_role = this.authusers['role'];
-    this.login_generaluser_role = this.generaluser;
-    this.login_generalapproveruser_role = this.generalapproveruser;
-    this.login_adminuser_role = this.adminuser;
     this.headsedt = this.heads;
     this.edtUsercode = this.headsedt['user_code'];
     this.edtUsername = this.headsedt['user_name'];
@@ -308,8 +338,6 @@ export default {
     this.valuesubadddate = moment(this.valuesubadddate).format("YYYYMMDD");
     this.selectedName = this.edtUsername + "さん　" + moment(this.valuesubadddate).format("YYYY年MM月DD日") + "分勤怠編集" ;
     this.getWorkTime(this.valuesubadddate);
-    this.getGeneralList("C005");
-    this.getGeneralList("C013");
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -379,6 +407,7 @@ export default {
                   this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
                 }
               }
+            // 半休と遅刻と早退は打刻時刻を優先にするためチェックは勤怠モードと時刻のみ
             } else if (result == HALFDAY_AM || result == HALFDAY_PM || result == LATE || result == EARLY) {
               // 勤怠モードと時刻
               if (this.details[index].mode != "" && this.details[index].mode != null) {
@@ -395,20 +424,20 @@ export default {
                     this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
                   }
                 }
-              } else {
-                required = true;
-                equalength = 0;
-                maxlength = 0;
-                itemname = '勤怠モード';
-                chkArray =
-                  this.checkDetail(this.details[index].mode, required, equalength, maxlength, itemname, index+1);
-                if (chkArray.length > 0) {
-                  if (this.messagevalidatesEdt.length == 0) {
-                    this.messagevalidatesEdt = chkArray;
-                  } else {
-                    this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
-                  }
-                }
+              // } else {
+              //   required = true;
+              //   equalength = 0;
+              //   maxlength = 0;
+              //   itemname = '勤怠モード';
+              //   chkArray =
+              //     this.checkDetail(this.details[index].mode, required, equalength, maxlength, itemname, index+1);
+              //   if (chkArray.length > 0) {
+              //     if (this.messagevalidatesEdt.length == 0) {
+              //       this.messagevalidatesEdt = chkArray;
+              //     } else {
+              //       this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
+              //     }
+              //   }
               }
             } else if (result == DEEMED) {
               // 勤怠モードと時刻
@@ -491,10 +520,14 @@ export default {
             this.count = this.details.length
             this.before_user_holiday_kbn = this.value_user_holiday_kbn;
           } else if (result == HALFDAY_AM) {
-            this.getWorkinghour();
+            if (this.halfautoset) {
+              this.getWorkinghour();
+            }
             this.before_user_holiday_kbn = this.value_user_holiday_kbn;
           } else if (result == HALFDAY_PM) {
-            this.getWorkinghour();
+            if (this.halfautoset) {
+              this.getWorkinghour();
+            }
             this.before_user_holiday_kbn = this.value_user_holiday_kbn;
           } else if (result == DEEMED) {
             // 該当日付の所定時刻を取得する（みなし）
@@ -618,27 +651,6 @@ export default {
           this.serverCatch("勤怠時間","取得");
         });
     },
-    // コード選択リスト取得処理
-    getGeneralList(value) {
-      var arrayParams = { identificationid : value };
-      this.postRequest("/get_general_list", arrayParams)
-        .then(response  => {
-          if (value == "C005") {
-            this.getThenc005(response, "勤怠モード");
-          }
-          if (value == "C013") {
-            this.getThenc013(response, "休暇区分");
-          }
-        })
-        .catch(reason => {
-          if (value == "C005") {
-            this.serverCatch("勤怠モード", "取得");
-          }
-          if (value == "C013") {
-            this.serverCatch("休暇区分", "取得");
-          }
-        });
-    },
     // 勤怠更新確定処理（明細）
     FixData(kbnname) {
       var messages = [];
@@ -672,32 +684,6 @@ export default {
     
 
     // -------------------- 共通 ----------------------------
-    // 取得正常処理（勤怠モード選択リスト）
-    getThenc005(response, value) {
-      var res = response.data;
-      if (res.result) {
-        this.generalList_c005 = res.details;
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
-        } else {
-          this.serverCatch("勤怠モード選択リスト", "取得");
-        }
-      }
-    },
-    // 取得正常処理（休暇区分選択リスト）
-    getThenc013(response, value) {
-      var res = response.data;
-      if (res.result) {
-        this.generalList_c013 = res.details;
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
-        } else {
-          this.serverCatch("明細勤怠休暇区分選択リスト管理", "取得");
-        }
-      }
-    },
     // 更新系正常処理（明細）
     putThenDetail(response, eventtext) {
       var res = response.data;
@@ -788,21 +774,21 @@ export default {
     },
     // 休暇区分判定 みなしは休暇ではないのでfalse
     jdgeHolidayKbn: function(holiday_kbn) {
-      for (var i=0;i<this.generalList_c013.length;i++) {
-        if (holiday_kbn == this.generalList_c013[i].code) {
-          if (this.generalList_c013[i].description == ALLDAY_NAME) {
+      for (var i=0;i<this.const_C013_data.length;i++) {
+        if (holiday_kbn == this.const_C013_data[i].code) {
+          if (this.const_C013_data[i].description == ALLDAY_NAME) {
             return ALLDAY;
-          } else if (this.generalList_c013[i].description == HALFDAY_AM_NAME) {
+          } else if (this.const_C013_data[i].description == HALFDAY_AM_NAME) {
             return HALFDAY_AM;
-          } else if (this.generalList_c013[i].description == HALFDAY_PM_NAME) {
+          } else if (this.const_C013_data[i].description == HALFDAY_PM_NAME) {
             return HALFDAY_PM;
-          } else if (this.generalList_c013[i].description == DEEMED_NAME) {
+          } else if (this.const_C013_data[i].description == DEEMED_NAME) {
             return DEEMED;
-          } else if (this.generalList_c013[i].description == ALLDAY_CALC_NAME) {
+          } else if (this.const_C013_data[i].description == ALLDAY_CALC_NAME) {
             return ALLDAYCALC;
-          } else if (this.generalList_c013[i].description == LATE_NAME) {
+          } else if (this.const_C013_data[i].description == LATE_NAME) {
             return LATE;
-          } else if (this.generalList_c013[i].description == EARLY_NAME) {
+          } else if (this.const_C013_data[i].description == EARLY_NAME) {
             return EARLY;
           }
         }
@@ -811,7 +797,7 @@ export default {
     },
     // 明細テーブル編集
     edtDetailes: function(edtdetail) {
-      this.generalList_c013.forEach(item => {
+      this.const_C013_data.forEach(item => {
         if (this.value_user_holiday_kbn == item.code) {
           var old_details = this.before_details;
           this.details = [];
@@ -821,7 +807,9 @@ export default {
           // 午前半休
           } else if (item.description == HALFDAY_AM_NAME) {
             // 出勤自動設定
-            this.details.push(this.edtDetailesBreakAttendance(edtdetail));
+            if (this.halfautoset) {
+              this.details.push(this.edtDetailesBreakAttendance(edtdetail));
+            }
             // if (this.before_count > 0) {
             //   // 旧detailsから出勤以外を設定
             //   old_details.forEach(detail => {
@@ -841,7 +829,9 @@ export default {
             //   });
             // }
             // 退勤自動設定
-            this.details.push(this.edtDetailesBreakLeaving(edtdetail));
+            if (this.halfautoset) {
+              this.details.push(this.edtDetailesBreakLeaving(edtdetail));
+            }
           // みなし
           } else if (item.code_name == DEEMED_BUSINESS_TRIP) {
             // 出勤自動設定

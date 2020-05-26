@@ -39,10 +39,10 @@
 	@endif
 	@can('admin-higher')
 		<edit-work-times
+			v-bind:account_datas="{{ $account_datas }}"
 			v-bind:authusers="{{ $authusers }}"
-			v-bind:generaluser="{{ $generaluser }}"
-			v-bind:generalapproveruser="{{ $generalapproveruser }}"
-			v-bind:adminuser="{{ $adminuser }}"
+			v-bind:feature_item_selections="{{ $feature_item_selections }}"
+			v-bind:const_generaldatas="{{ $const_general_datas }}"
 		></edit-work-times>
 	@endcan
 @endsection

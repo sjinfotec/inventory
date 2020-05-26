@@ -146,10 +146,12 @@
           v-if="showeditworktimestable"
           ref="refeditworktimestable"
           v-bind:authusers="authusers"
-          v-bind:generaluser="generaluser"
-          v-bind:generalapproveruser="generalapproveruser"
-          v-bind:adminuser="adminuser"
+          v-bind:const_c025="get_C025"
+          v-bind:const_generaldatas="const_generaldatas"
           v-bind:heads="heads"
+          v-bind:accountdatas="accountdatas"
+          v-bind:halfautoset="get_AutoHalfSet"
+          
         >
         </edit-work-times-table>
       </div>
@@ -167,26 +169,32 @@ import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
+// CONST
+const CONST_C025 = 'C025';
+const CONST_C025_GENERALUSER_INDEX = 0;   // index
+const CONST_C025_ADMINUSER_INDEX = 2;   // index
+const CONST_HALF_HOLIDAY_SET_CODE = 2;
+
 export default {
   name: "EditWorkTimes",
   mixins: [ dialogable, checkable, requestable ],
   props: {
+    accountdatas: {
+        type: Array,
+        default: []
+    },
     authusers: {
         type: Array,
         default: []
     },
-    generaluser: {
-        type: Number,
-        default: 0
+    feature_item_selections: {
+        type: Array,
+        default: []
     },
-    generalapproveruser: {
-        type: Number,
-        default: 0
-    },
-    adminuser: {
-        type: Number,
-        default: 0
-    },
+    const_generaldatas: {
+        type: Array,
+        default: []
+    }
   },
   data() {
     return {
@@ -216,23 +224,58 @@ export default {
       heads: [],
       login_user_code: "",
       login_user_role: "",
-      login_generaluser_role: "",
-      login_generalapproveruser_role: "",
-      login_adminuser_role: "",
-      showeditworktimestable: true
+      showeditworktimestable: true,
+      accountdata_data: [],
+      const_C025_data: [],
+      isAutoHalfSet: true
     };
   },
   components: {
     Datepicker
   },
+  computed: {
+    get_AutoHalfSet: function() {
+      this.isAutoHalfSet = false;
+      let $this = this;
+      this.feature_item_selections.forEach( function( item ) {
+        if (item.item_code == CONST_HALF_HOLIDAY_SET_CODE) {
+          if (item.value_select == 1) {
+            $this.isAutoHalfSet = true;
+          } else {
+            $this.isAutoHalfSet = false;
+          }
+          return $this.isAutoHalfSet;
+        }
+      });
+
+      return this.isAutoHalfSet;
+    },
+    get_Account: function() {
+      let $this = this;
+      this.accountdata_data = [];
+      this.accountdatas.forEach( function( item ) {
+        $this.accountdata_data.push($this.accountdatas[i]);
+        return this.accountdata_data;
+      });    
+      return this.accountdata_data;
+    },
+    get_C025: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C025) {
+          $this.const_C025_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C025_data;
+    }
+  },
   // マウント時
   mounted() {
     this.login_user_code = this.authusers['code'];
     this.login_user_role = this.authusers['role'];
-    this.login_generaluser_role = this.generaluser;
-    this.login_generalapproveruser_role = this.generalapproveruser;
-    this.login_adminuser_role = this.adminuser;
-    if (this.login_user_role == this.login_adminuser_role) {
+    if (this.login_user_role == this.const_C025_data[CONST_C025_ADMINUSER_INDEX]) {
       this.isEdit = true;
     }
     this.valuedate = this.defaultDate;

@@ -43,13 +43,13 @@ return [
 
     'C006' => [
         'value' => 'C006',
-        'sun' => 0,
-        'mon' => 1,
-        'tue' => 2,
-        'wed' => 3,
-        'thu' => 4,
-        'fri' => 5,
-        'sat' => 6
+        'sun' => 6,
+        'mon' => 0,
+        'tue' => 1,
+        'wed' => 2,
+        'thu' => 3,
+        'fri' => 4,
+        'sat' => 5
     ],
 
     'C007' => [
@@ -60,7 +60,10 @@ return [
     ],
 
     'C008' => [
-        'value' => 'C008'
+        'value' => 'C008',
+        'summer_holiday' => '1',
+        'newyear_holidqy' => '2',
+        'special_holiday' => '3'
     ],
 
     'C009' => [
@@ -206,6 +209,11 @@ return [
         'value' => 'C019',
         'max_times' => 5
     ],
+ 
+    'C020' => [
+        'value' => 'C020',
+        'minimum_times' => 5
+    ],
   
     'C021' => [
         'value' => 'C021',
@@ -316,6 +324,28 @@ return [
         'approvaled' => 2
     ],
  
+    'C032' => [
+        'value' => 'C032',
+        'holidaytransfer_demand' => 3,
+        'submission_demand' => 4,
+        'paidholiday_demand' => 6,
+        'late_demand' => 7,
+        'earlyleave_demand' => 8,
+        'goingout_demand' => 9,
+        'absence_demand' => 10
+    ],
+ 
+    'C032_NAME' => [
+        'value' => 'C032_NAME',
+        'holidaytransfer_demand' => "休日振替申請",
+        'submission_demand' => "代休申請",
+        'paidholiday_demand' => "有給休暇申請",
+        'late_demand' => "遅刻申請",
+        'earlyleave_demand' => "早退申請",
+        'goingout_demand' => "外出申請書",
+        'absence_demand' => "欠勤申請"
+    ],
+ 
     'C033' => [
         'value' => 'C033',
         'pcstart' => 6005,
@@ -328,10 +358,6 @@ return [
         'value' => 'C034',
         'closing' => 1,
         'first' => 2
-    ],
-
-    'C036' => [
-        'value' => 'C036'
     ],
  
     'C035' => [
@@ -358,9 +384,9 @@ return [
         'usersdownload' => 4
     ],
  
-    'C037_DESC_VALUE' => [
-        'array' => array('C037', 'csvcalc', 'csvsalary', 'csvlog', 'usersdownload')
-    ],
+    // 'C037_DESC_VALUE' => [
+    //     'array' => array('C037', 'csvcalc', 'csvsalary', 'csvlog', 'usersdownload')
+    // ],
 
     'C038' => [
         'value' => 'C038',
@@ -417,7 +443,9 @@ return [
  
     'C042' => [
         'value' => 'C042',
-        'attendance_count' => 1
+        'attendance_count' => 1,
+        'half_holiday' => 2,
+        'rest_count' => 3
     ],
  
     'C999' => [
@@ -775,7 +803,6 @@ return [
         'CLIENT' => 5
     ],
 
-    // SSJJOO00:三条 SD03TA00:清水勧業 CSD1000L:丸高水産
     'ACCOUNTID' => [
         'account_id' => 'S02DTA00'
     ],
