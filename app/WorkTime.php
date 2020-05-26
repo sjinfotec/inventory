@@ -1709,7 +1709,7 @@ class WorkTime extends Model
             if(!empty($this->param_user_code)){
                 $sqlString .= "and t1.user_code = ? ";                  //user_code指定
             } else {
-                $sqlString .= "and t1.user_management < ? ";
+                $sqlString .= "and t1.user_management <= ? ";
             }
             // $sqlString .= "and t2.business_kubun = ? ";
             $sqlString .= "and t2.is_deleted = ? ";

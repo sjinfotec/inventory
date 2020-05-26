@@ -34,7 +34,8 @@ class CommonServiceProvider extends ServiceProvider
 
         //account
         $account_data = collect([
-            'account_id' => Config::get('const.ACCOUNTID.account_id')
+            'account_id' => Config::get('const.ACCOUNTID.account_id'),
+            'edition' => Config::get('const.EDITION.EDITION')
         ]);
         View::share('account_datas', $account_data);
 

@@ -27,15 +27,9 @@ class EditWorkTimesController extends Controller
     public function index()
     {
         $authusers = Auth::user();
-        $generaluser = Config::get('const.C025.general_user');
-        $generalapproveruser = Config::get('const.C025.general_approver__user');
-        $adminuser = Config::get('const.C025.admin_user');
         return view('edit_work_times',
             compact(
-                'authusers',
-                'generaluser',
-                'generalapproveruser',
-                'adminuser'
+                'authusers'
             ));
     }
 
