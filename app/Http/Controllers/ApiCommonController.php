@@ -283,6 +283,7 @@ class ApiCommonController extends Controller
                     $join->on('t1.no', '=', 't2.no');
                     $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
                 })
+                ->whereNotNull('t1.from_time')
                 ->where('t1.is_deleted', '=', 0);
                 return $subquery2;
         }catch(\PDOException $pe){

@@ -151,7 +151,6 @@
           v-bind:heads="heads"
           v-bind:accountdatas="accountdatas"
           v-bind:halfautoset="get_AutoHalfSet"
-          
         >
         </edit-work-times-table>
       </div>
@@ -275,9 +274,6 @@ export default {
   mounted() {
     this.login_user_code = this.authusers['code'];
     this.login_user_role = this.authusers['role'];
-    if (this.login_user_role == this.const_C025_data[CONST_C025_ADMINUSER_INDEX]) {
-      this.isEdit = true;
-    }
     this.valuedate = this.defaultDate;
     this.valuefromdate = moment(this.defaultDate).format("YYYYMMDD");
     this.valuesubadddate = this.valuefromdate;
