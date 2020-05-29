@@ -22,7 +22,8 @@ use App\WorkTimeLog;
 use App\WorkTime;
 use App\UserModel;
 use App\CsvItemSelection;
-
+use App\CalendarSettingInformation;
+use App\FeatureItemSelection;
 
 
 /**
@@ -56,7 +57,8 @@ use App\CsvItemSelection;
  *          ユーザーの部署と雇用形態と権限取得          : getUserDepartmentEmploymentRole      : users
  *          ユーザーメールアドレス取得                  : getUserMailAddress                : users      
  *          ユーザー休暇区分取得                        : getUserHolidaykbn                 : UserHolidayKubun              
- *          ユーザー所定時刻取得                        : getWorkingHours                   : WorkingTimeTable             
+ *          ユーザー所定時刻半休時刻取得                : getWorkingHours                   : WorkingTimeTable             
+ *          ユーザー打刻時刻から所定時刻取得             : getWorkingHoursByStamp            : WorkingTimeTable             
  *      4.その他情報取得
  *          会社情報取得                                : getCompanyInfoApply       : Company
  *          指定月締日取得（画面から）                  : getClosingDay              : Setting   
@@ -911,12 +913,22 @@ class ApiCommonController extends Controller
         $details = new Collection();
         $result = true;
         try {
-            $details =
-                DB::table($this->table_generalcodes)
-                    ->where('identification_id', 'C005')
-                    ->where('is_deleted', 0)
-                    ->orderby('sort_seq','asc')
-                    ->get();
+            $feature_model = new FeatureItemSelection();
+            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+            $feature_model->setParamitemcodeAttribute(Config::get('const.C042.mode_list'));
+            $feature_data = $feature_model->getItem();
+            $value_select = "0";
+            foreach($feature_data as $item) {
+                $value_select = $item->value_select;
+                break;
+            }
+            $details = DB::table($this->table_generalcodes)
+                ->where('identification_id', 'C005')
+                ->where('use_free_item', '<=', $value_select)
+                ->where('is_deleted', 0)
+                ->orderby('sort_seq','asc')
+                ->get();
 
             return response()->json(
                 ['result' => $result, 'details' => $details,
@@ -1477,7 +1489,7 @@ class ApiCommonController extends Controller
     }
 
     /**
-     * ユーザー所定時刻取得
+     * ユーザー所定時刻半休時刻取得
      *
      * @param Request
      * @return list
@@ -1540,13 +1552,16 @@ class ApiCommonController extends Controller
             $workingHours = $time_tables->getWorkingTimeTable();
             $regular_start_time = null;
             $regular_start_recordtime = null;
+            $regular_start_record_date = null;
             $regular_end_time = null;
             $regular_end_recordtime = null;
+            $regular_end_record_date = null;
             $lunch_start_time = null;
             $lunch_start_recordtime = null;
             $lunch_end_time = null;
             $lunch_end_recordtime = null;
             $regular_2after_recordtime = null;
+            $after_legal_working_hours_day = null;
             /*  AM10:00からの休憩とかPM3:00からの休憩とかありうるので
             *  所定時間の開始時刻＋2時間後 <= 休憩開始 and 休憩時間が30分以上
             *  を昼休みの定義とする */
@@ -1554,19 +1569,26 @@ class ApiCommonController extends Controller
             $min_from_datetime = null;
             foreach($workingHours as $item) {
                 if ($item->working_time_kubun == Config::get('const.C004.regular_working_time')) {
-                    $regular_start_time = $item->working_timetable_from_time;
-                    $regular_start_recordtime = $item->working_timetable_from_record_time;
-                    $regular_start_record_date = date_format(new Carbon($regular_start_recordtime), 'Y-m-d');
-                    $regular_end_time = $item->working_timetable_to_time;
-                    $regular_end_recordtime = $item->working_timetable_to_record_time;
-                    $regular_end_record_date = date_format(new Carbon($regular_end_recordtime), 'Y-m-d');
+                    // 出退勤が複数回ある場合も最初のみ設定
+                    if ($regular_start_time == null) { $regular_start_time = $item->working_timetable_from_time; }
+                    if ($regular_start_recordtime == null) {
+                        $regular_start_recordtime = $item->working_timetable_from_record_time;
+                        $regular_start_record_date = date_format(new Carbon($regular_start_recordtime), 'Y-m-d');
+                    }
+                    if ($regular_end_time == null) { $regular_end_time = $item->working_timetable_to_time; }
+                    if ($regular_end_recordtime == null) {
+                        $regular_end_recordtime = $item->working_timetable_to_record_time;
+                        $regular_end_record_date = date_format(new Carbon($regular_end_recordtime), 'Y-m-d');
+                    }
                     // 所定時間の開始時刻から2時間後を求める
-                    $after_legal_working_hours_day = 7200;
-                    $regular_2after_recordtime = $this->getAfterDayTime(
-                        $regular_start_recordtime,
-                        $after_legal_working_hours_day,
-                        'Y-m-d H:i:s');
-                    $regular_2after_record_date = date_format(new Carbon($regular_2after_recordtime), 'Y-m-d');
+                    if ($regular_2after_recordtime == null) {
+                        $after_legal_working_hours_day = 7200;
+                        $regular_2after_recordtime = $this->getAfterDayTime(
+                            $regular_start_recordtime,
+                            $after_legal_working_hours_day,
+                            'Y-m-d H:i:s');
+                        $regular_2after_record_date = date_format(new Carbon($regular_2after_recordtime), 'Y-m-d');
+                    }
                 } elseif ($item->working_time_kubun == Config::get('const.C004.regular_working_breaks_time')) {
                     if ($regular_2after_recordtime != null) {
                         // 所定時刻内の休憩時間であるか判断する $regular_start_recordtime - $regular_end_recordtime
@@ -1651,6 +1673,87 @@ class ApiCommonController extends Controller
             throw $e;
         }
     }
+
+    /**
+     * ユーザー打刻時刻から所定時刻取得
+     *
+     * @return list
+     */
+    public function getWorkingHoursByStamp($params){
+        $this->array_messagedata = array();
+        try{
+            $target_date = $params['target_date'];
+            $user_code = $params['user_code'];
+            $department_code = "";
+            if (isset($params['department_code'])) {
+                $department_code = $params['department_code'];
+            } else {
+                // department_code取得する
+                $datas = $this->getUserDepartmentEmploymentRole($user_code, $target_date);
+                foreach ($datas as $item) {
+                    if (isset($item->department_code)) {
+                        $department_code = $item->department_code;
+                    }
+                    break;
+                }
+            }
+            $record_datetime = $params['record_datetime'];
+            Log::debug('         apicommon getWorkingHoursByStamp = '.date_format(new Carbon($record_datetime), 'H:i:s'));
+            $record_datetime_date = date_format(new Carbon($target_date), 'Y-m-d')." ".date_format(new Carbon($record_datetime), 'H:i:s');
+            Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
+            // usersのカレンダーからタイムテーブルの所定時刻を取得する
+            $time_tables = new WorkingTimeTable();
+            $target_dateYmd = date_format(new Carbon($target_date), 'Ymd');
+            $time_tables->setParamdatefromAttribute($target_dateYmd);
+            $time_tables->setParamdatetoAttribute($target_dateYmd);
+            $time_tables->setParamDepartmentcodeAttribute($department_code);
+            $time_tables->setParamUsercodeAttribute($user_code);
+            Log::debug('         apicommon getWorkingHoursByStamp $target_dateYmd = '.$target_dateYmd);
+            Log::debug('         apicommon getWorkingHoursByStamp $department_code = '.$department_code);
+            Log::debug('         apicommon getWorkingHoursByStamp $user_code = '.$user_code);
+            $workingHours = $time_tables->getWorkingTimeTable();
+            $working_from_time = null;
+            $working_to_time = null;
+            $working_to_time_date = null;
+            Log::debug('         apicommon getWorkingHoursByStamp $workingHours = '.count($workingHours));
+            foreach($workingHours as $item) {
+                Log::debug('         apicommon getWorkingHoursByStamp $item->working_time_kubun = '.$item->working_time_kubun);
+                if ($item->working_time_kubun == Config::get('const.C004.regular_working_time')) {
+                    Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
+                    Log::debug('         apicommon getWorkingHoursByStamp $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
+                    if ($record_datetime_date < $item->working_timetable_to_record_time) {
+                        Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
+                        if ($working_from_time == null) {
+                            $working_from_time = $item->working_timetable_from_time;
+                            $working_to_time = $item->working_timetable_to_time;
+                            $working_to_time_date = $item->working_timetable_to_record_time;
+                        } elseif ($working_to_time_date > $item->working_timetable_to_record_time) {
+                            $working_from_time = $item->working_timetable_from_time;
+                            $working_to_time = $item->working_timetable_to_time;
+                        }
+                    }
+                    Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
+                    Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
+                }
+            }
+            Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
+            Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
+            // 設定
+            $array_workingHours = array(
+                'working_from_time' => $working_from_time,
+                'working_to_time' => $working_to_time
+            );
+            return $array_workingHours;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
     // -------------  3.ユーザ情報取得  end -------------------------------------------------------- //
         
     
@@ -1876,11 +1979,13 @@ class ApiCommonController extends Controller
             $ondetails = $result_details->whereIn('mode', [
                 Config::get('const.C005.attendance_time'),
                 Config::get('const.C005.missing_middle_return_time'),
-                Config::get('const.C005.public_going_out_return_time')]);
+                Config::get('const.C005.public_going_out_return_time'),
+                Config::get('const.C005.emergency_time')]);
             $offdetails = $result_details->whereIn('mode', [
                 Config::get('const.C005.leaving_time'),
                 Config::get('const.C005.missing_middle_time'),
                 Config::get('const.C005.public_going_out_time'),
+                Config::get('const.C005.emergency_return_time'),
                 null]);
             return response()->json(
                 ['result' => true, 'ondetails' => $ondetails, 'offdetails' => $offdetails,
@@ -2745,6 +2850,14 @@ class ApiCommonController extends Controller
             }
         } elseif ($target_mode == Config::get('const.C005.public_going_out_return_time')) {
             if ($source_mode == Config::get('const.C005.public_going_out_time')) {
+                return Config::get('const.RESULT_CODE.normal');
+            }
+        } elseif ($target_mode == Config::get('const.C005.emergency_time')) {
+            if ($source_mode == Config::get('const.C005.emergency_return_time')) {
+                return Config::get('const.RESULT_CODE.normal');
+            }
+        } elseif ($target_mode == Config::get('const.C005.emergency_return_time')) {
+            if ($source_mode == Config::get('const.C005.emergency_time')) {
                 return Config::get('const.RESULT_CODE.normal');
             }
         } else {

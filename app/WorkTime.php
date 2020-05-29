@@ -18,6 +18,7 @@ class WorkTime extends Model
     protected $table_user_holiday_kubuns = 'user_holiday_kubuns';
     protected $table_working_time_dates = 'working_time_dates';
     protected $table_calendars = 'calendars';
+    protected $table_calendar_setting_informations = 'calendar_setting_informations';
     protected $table_generalcodes = 'generalcodes';
     protected $table_settings = 'settings';
     // protected $guarded = array('id');
@@ -531,7 +532,7 @@ class WorkTime extends Model
     }
 
     /**
-     * 日次労働時間取得
+     * 日次労働時間取得3
      *
      *      指定したユーザー、日付範囲内の労働時間計算のもとデータを取得するSQL
      *
@@ -584,16 +585,6 @@ class WorkTime extends Model
             }
             $subquery1->where($this->table.'.is_deleted', '=', 0);
 
-            // subquery2    shift_informations
-            $subquery2 = DB::table($this->table_shift_informations)
-                ->select(
-                    $this->table_shift_informations.'.user_code as user_code',
-                    $this->table_shift_informations.'.department_code as department_code',
-                    $this->table_shift_informations.'.working_timetable_no as shift_no',
-                    $this->table_shift_informations.'.target_date as target_date',
-                    $this->table_shift_informations.'.is_deleted as is_deleted'
-                );
-            $subquery2->where($this->table_shift_informations.'.is_deleted', '=', 0);
 
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
@@ -630,11 +621,11 @@ class WorkTime extends Model
                     't2.is_deleted as is_deleted',
                     't2.x_positions as x_positions',
                     't2.y_positions as y_positions',
-                    't3.weekday_kubun as weekday_kubun',
+                    't9.weekday_kubun as weekday_kubun',
                     't11.code_name as weekday_name',
-                    't3.business_kubun as business_kubun',
+                    't9.business_kubun as business_kubun',
                     't12.code_name as business_name',
-                    't3.holiday_kubun as holiday_kubun',
+                    't9.holiday_kubun as holiday_kubun',
                     't13.use_free_item as use_free_item',
                     't13.code_name as holiday_name',
                     't4.closing as closing',
@@ -646,10 +637,9 @@ class WorkTime extends Model
                     't4.max_6month_total as max_6month_total',
                     't4.max_12month_total as max_12month_total',
                     't4.beginning_month as beginning_month',
-                    't4.interval as interval',
+                    't4.interval as interval1',
                     't4.year as year',
-                    't14.holiday_kubun as user_holiday_kubun',
-                    't14.working_date as user_working_date',
+                    't9.date as user_working_date',
                     't15.code_name as user_holiday_name',
                     't15.description as user_holiday_description',
                     't2.is_editor as is_editor',
@@ -659,11 +649,12 @@ class WorkTime extends Model
                     't17.name as editor_user_code_name'
                 );
             $mainquery
-                ->selectRaw('ifnull(t9.shift_no, t6.no) as working_timetable_no ')
-                ->selectRaw('CASE ifnull(t9.shift_no, 0) WHEN 0 THEN t6.name else t10.name end as working_timetable_name ')
-                ->selectRaw('CASE ifnull(t9.shift_no, 0) WHEN 0 THEN t6.from_time else t10.from_time end as working_timetable_from_time ')
-                ->selectRaw('CASE ifnull(t9.shift_no, 0) WHEN 0 THEN t6.to_time else t10.to_time end as working_timetable_to_time ')
-                ->selectRaw("ifnull(t9.shift_no, 0) as shift_no ")
+                ->selectRaw('ifnull(t9.holiday_kubun, 0) as user_holiday_kubun ')
+                ->selectRaw('ifnull(t9.working_timetable_no, 0) as working_timetable_no ')
+                ->selectRaw("ifnull(t10.name, '') as working_timetable_name ")
+                ->selectRaw("ifnull(t10.from_time, '') as working_timetable_from_time ")
+                ->selectRaw("ifnull(t10.to_time, '') as working_timetable_to_time ")
+                ->selectRaw("ifnull(t9.working_timetable_no, 0) as shift_no ")
                 ->selectRaw("ifnull(t10.name, '') as shift_name ")
                 ->selectRaw("ifnull(t10.from_time, '') as shift_from_time ")
                 ->selectRaw("ifnull(t10.to_time, '') as shift_to_time ")
@@ -673,10 +664,10 @@ class WorkTime extends Model
                     ->where('t1.is_deleted', '=', 0)
                     ->where('t2.is_deleted', '=', 0);
                 })
-                ->leftJoinSub($subquery2, 't9', function ($join) { 
+                ->leftJoin($this->table_calendar_setting_informations.' as t9', function ($join) { 
                     $join->on('t9.user_code', '=', 't1.code');
                     $join->on('t9.department_code', '=', 't1.department_code');
-                    $join->on('t9.target_date', '=', 't2.record_date')
+                    $join->on('t9.date', '=', 't2.record_date')
                     ->where('t1.is_deleted', '=', 0)
                     ->where('t9.is_deleted', '=', 0);
                 })
@@ -684,27 +675,10 @@ class WorkTime extends Model
                     $join->on('t5.code', '=', 't1.department_code')
                     ->where('t1.is_deleted', '=', 0);
                 })
-                ->leftJoin($this->table_calendars.' as t3', function ($join) use($targetdateto) { 
-                    $join->on('t3.department_code', '=', 't1.department_code');
-                    $join->on('t3.user_code', '=', 't1.code')
-                    // $join->on('t3.date', '=', 't2.record_date')
-                    ->where('t3.date', '=', $targetdateto)
-                    ->where('t3.is_deleted', '=', 0);
-                })
                 ->leftJoin($this->table_settings.' as t4', function ($join) { 
                     $join->on('t4.year', '=', 't2.record_year');
                     $join->on('t4.fiscal_month', '=', 't2.record_month')
                     ->where('t4.is_deleted', '=', 0);
-                })
-                ->leftJoinSub($subquery5, 't6', function ($join) { 
-                    $join->on('t6.no', '=', 't1.working_timetable_no')
-                    ->where('t6.working_time_kubun', '=', Config::get('const.C004.regular_working_time'))
-                    ->where('t1.is_deleted', '=', 0);
-                })
-                ->leftJoin($this->table_generalcodes.' as t7', function ($join) { 
-                    $join->on('t7.code', '=', 't6.working_time_kubun')
-                    ->where('t7.identification_id', '=', Config::get('const.C004.value'))
-                    ->where('t7.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_generalcodes.' as t8', function ($join) { 
                     $join->on('t8.code', '=', 't1.employment_status')
@@ -713,38 +687,31 @@ class WorkTime extends Model
                     ->where('t8.is_deleted', '=', 0);
                 })
                 ->leftJoinSub($subquery5, 't10', function ($join) { 
-                    $join->on('t10.no', '=', 't9.shift_no')
+                    $join->on('t10.no', '=', 't9.working_timetable_no')
                     ->where('t10.working_time_kubun', '=', Config::get('const.C004.regular_working_time'));
                 })
                 ->leftJoin($this->table_generalcodes.' as t11', function ($join) { 
-                    $join->on('t11.code', '=', 't3.weekday_kubun')
+                    $join->on('t11.code', '=', 't9.weekday_kubun')
                     ->where('t11.identification_id', '=', Config::get('const.C006.value'))
-                    ->where('t3.is_deleted', '=', 0)
+                    ->where('t9.is_deleted', '=', 0)
                     ->where('t11.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_generalcodes.' as t12', function ($join) { 
-                    $join->on('t12.code', '=', 't3.business_kubun')
+                    $join->on('t12.code', '=', 't9.business_kubun')
                     ->where('t12.identification_id', '=', Config::get('const.C007.value'))
-                    ->where('t3.is_deleted', '=', 0)
+                    ->where('t9.is_deleted', '=', 0)
                     ->where('t12.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_generalcodes.' as t13', function ($join) { 
-                    $join->on('t13.code', '=', 't3.holiday_kubun')
+                    $join->on('t13.code', '=', 't9.holiday_kubun')
                     ->where('t13.identification_id', '=', Config::get('const.C013.value'))
-                    ->where('t3.is_deleted', '=', 0)
+                    ->where('t9.is_deleted', '=', 0)
                     ->where('t13.is_deleted', '=', 0);
                 })
-                ->leftJoin($this->table_user_holiday_kubuns.' as t14', function ($join) { 
-                    $join->on('t14.working_date', '=', 't2.record_date');
-                    $join->on('t14.user_code', '=', 't1.code');
-                    $join->on('t14.department_code', '=', 't1.department_code')
-                    ->where('t1.is_deleted', '=', 0)
-                    ->where('t14.is_deleted', '=', 0);
-                })
                 ->leftJoin($this->table_generalcodes.' as t15', function ($join) { 
-                    $join->on('t15.code', '=', 't14.holiday_kubun')
+                    $join->on('t15.code', '=', 't9.holiday_kubun')
                     ->where('t15.identification_id', '=', Config::get('const.C013.value'))
-                    ->where('t14.is_deleted', '=', 0)
+                    ->where('t9.is_deleted', '=', 0)
                     ->where('t15.is_deleted', '=', 0);
                 })
                 ->leftJoinSub($subquery4, 't16', function ($join) { 
@@ -798,6 +765,520 @@ class WorkTime extends Model
 
         return $result;
     }
+
+    /**
+     * 日次労働時間取得2
+     *
+     *      指定したユーザー、日付範囲内の労働時間計算のもとデータを取得するSQL
+     *
+     *      INPUT：
+     *          ①テーブル：departments　部署範囲内 and 削除=0
+     *          ②テーブル：users　      ユーザー範囲内 and 削除=0
+     *          ③テーブル：work_times　 ユーザーand日付範囲内 and 削除=0
+     *          ④①と②と③の結合          ①.ユーザー = ②.ユーザー and ②.ユーザー = ③.ユーザー
+     *
+     *      使用方法：
+     *          ①department_code指定プロパティを事前設定（未設定有効）
+     *          ②user_code指定プロパティを事前設定（未設定有効）
+     *          ③日付範囲指定プロパティを事前設定（未設定無効）
+     *          ④メソッド：calcWorkingTimeDateを実行
+     *
+     * @return sql取得結果
+     */
+    // public function getWorkTimes($targetdatefrom, $targetdateto, $business_kubun){
+
+    //     try {
+    //         // 日次労働時間取得SQL作成
+    //         // subquery1    work_times
+    //         $subquery1 = DB::table($this->table)
+    //             ->select(
+    //                 $this->table.'.id as record_datetime_id',
+    //                 $this->table.'.user_code as user_code',
+    //                 $this->table.'.department_code as department_code',
+    //                 $this->table.'.record_time as record_datetime',
+    //                 $this->table.'.mode as mode',
+    //                 $this->table.'.user_holiday_kubuns_id',
+    //                 $this->table.'.check_result as check_result',
+    //                 $this->table.'.check_max_time as check_max_time',
+    //                 $this->table.'.check_interval as check_interval',
+    //                 $this->table.'.is_editor as is_editor',
+    //                 $this->table.'.editor_department_code as editor_department_code',
+    //                 $this->table.'.editor_user_code as editor_user_code',
+    //                 $this->table.'.is_deleted as is_deleted'
+    //             )
+    //             ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%Y') as record_year")
+    //             ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%m') as record_month")
+    //             ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%Y%m%d') as record_date")
+    //             ->selectRaw('DATE_FORMAT('.$this->table.'.record_time'.",'%H%i%s') as record_time")
+    //             ->selectRaw('X(positions) as x_positions')
+    //             ->selectRaw('Y(positions) as y_positions');
+
+    //         $record_time = $this->getArrayrecordtimeAttribute();
+    //         if(!empty($record_time)){
+    //             $subquery1->where($this->table.'.record_time', '>=', $this->param_date_from);       //record_time範囲指定
+    //             $subquery1->where($this->table.'.record_time', '<=', $this->param_date_to);         //record_time範囲指定
+    //         }
+    //         $subquery1->where($this->table.'.is_deleted', '=', 0);
+
+
+    //         // 適用期間日付の取得
+    //         $apicommon = new ApiCommonController();
+    //         // usersの最大適用開始日付subquery
+    //         $subquery3 = $apicommon->getUserApplyTermSubquery($targetdateto);
+    //         // departmentsの最大適用開始日付subquery
+    //         $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdateto);
+    //         // working_timetablesの最大適用開始日付subquery
+    //         $subquery5 = $apicommon->getTimetableApplyTermSubquery($targetdateto);
+
+    //         // mainqueryにsunqueryを組み込む
+    //         // mainquery    users
+    //         // subquery1    work_times
+    //         // subquery2    shift_informations
+    //         $mainquery = DB::table($this->table_users.' AS t1')
+    //             ->select(
+    //                 't2.record_datetime_id as record_datetime_id',
+    //                 't1.code as user_code',
+    //                 't1.name as user_name',
+    //                 't1.department_code as department_code',
+    //                 't5.name as department_name',
+    //                 't2.record_datetime as record_datetime',
+    //                 't2.record_year as record_year',
+    //                 't2.record_month as record_month',
+    //                 't2.record_date as record_date',
+    //                 't2.record_time as record_time',
+    //                 't1.employment_status as employment_status',
+    //                 't8.code_name as employment_status_name',
+    //                 't2.mode as mode',
+    //                 't2.user_holiday_kubuns_id',
+    //                 't2.check_result as check_result',
+    //                 't2.check_max_time as check_max_time',
+    //                 't2.check_interval as check_interval',
+    //                 't2.is_deleted as is_deleted',
+    //                 't2.x_positions as x_positions',
+    //                 't2.y_positions as y_positions',
+    //                 't9.weekday_kubun as weekday_kubun',
+    //                 't11.code_name as weekday_name',
+    //                 't9.business_kubun as business_kubun',
+    //                 't12.code_name as business_name',
+    //                 't9.holiday_kubun as holiday_kubun',
+    //                 't13.use_free_item as use_free_item',
+    //                 't13.code_name as holiday_name',
+    //                 't4.closing as closing',
+    //                 't4.uplimit_time as uplimit_time',
+    //                 't4.statutory_uplimit_time as statutory_uplimit_time',
+    //                 't4.time_unit as time_unit',
+    //                 't4.time_rounding as time_rounding',
+    //                 't4.max_3month_total as max_3month_total',
+    //                 't4.max_6month_total as max_6month_total',
+    //                 't4.max_12month_total as max_12month_total',
+    //                 't4.beginning_month as beginning_month',
+    //                 't4.interval as interval1',
+    //                 't4.year as year',
+    //                 't9.date as user_working_date',
+    //                 't15.code_name as user_holiday_name',
+    //                 't15.description as user_holiday_description',
+    //                 't2.is_editor as is_editor',
+    //                 't2.editor_department_code as editor_department_code',
+    //                 't2.editor_user_code as editor_user_code',
+    //                 't16.name as editor_department_name',
+    //                 't17.name as editor_user_code_name'
+    //             );
+    //         $mainquery
+    //             ->selectRaw('ifnull(t9.holiday_kubun, 0) as user_holiday_kubun ')
+    //             ->selectRaw('ifnull(t9.working_timetable_no, t6.no) as working_timetable_no ')
+    //             ->selectRaw('CASE ifnull(t9.working_timetable_no, 0) WHEN 0 THEN t6.name else t10.name end as working_timetable_name ')
+    //             ->selectRaw('CASE ifnull(t9.working_timetable_no, 0) WHEN 0 THEN t6.from_time else t10.from_time end as working_timetable_from_time ')
+    //             ->selectRaw('CASE ifnull(t9.working_timetable_no, 0) WHEN 0 THEN t6.to_time else t10.to_time end as working_timetable_to_time ')
+    //             ->selectRaw("ifnull(t9.working_timetable_no, 0) as shift_no ")
+    //             ->selectRaw("ifnull(t10.name, '') as shift_name ")
+    //             ->selectRaw("ifnull(t10.from_time, '') as shift_from_time ")
+    //             ->selectRaw("ifnull(t10.to_time, '') as shift_to_time ")
+    //             ->leftJoinSub($subquery1, 't2', function ($join) { 
+    //                 $join->on('t2.user_code', '=', 't1.code');
+    //                 $join->on('t2.department_code', '=', 't1.department_code')
+    //                 ->where('t1.is_deleted', '=', 0)
+    //                 ->where('t2.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_calendar_setting_informations.' as t9', function ($join) { 
+    //                 $join->on('t9.user_code', '=', 't1.code');
+    //                 $join->on('t9.department_code', '=', 't1.department_code');
+    //                 $join->on('t9.date', '=', 't2.record_date')
+    //                 ->where('t1.is_deleted', '=', 0)
+    //                 ->where('t9.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoinSub($subquery4, 't5', function ($join) { 
+    //                 $join->on('t5.code', '=', 't1.department_code')
+    //                 ->where('t1.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_settings.' as t4', function ($join) { 
+    //                 $join->on('t4.year', '=', 't2.record_year');
+    //                 $join->on('t4.fiscal_month', '=', 't2.record_month')
+    //                 ->where('t4.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoinSub($subquery5, 't6', function ($join) { 
+    //                 $join->on('t6.no', '=', 't1.working_timetable_no')
+    //                 ->where('t6.working_time_kubun', '=', Config::get('const.C004.regular_working_time'))
+    //                 ->where('t1.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t7', function ($join) { 
+    //                 $join->on('t7.code', '=', 't6.working_time_kubun')
+    //                 ->where('t7.identification_id', '=', Config::get('const.C004.value'))
+    //                 ->where('t7.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t8', function ($join) { 
+    //                 $join->on('t8.code', '=', 't1.employment_status')
+    //                 ->where('t8.identification_id', '=', Config::get('const.C001.value'))
+    //                 ->where('t1.is_deleted', '=', 0)
+    //                 ->where('t8.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoinSub($subquery5, 't10', function ($join) { 
+    //                 $join->on('t10.no', '=', 't9.working_timetable_no')
+    //                 ->where('t10.working_time_kubun', '=', Config::get('const.C004.regular_working_time'));
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t11', function ($join) { 
+    //                 $join->on('t11.code', '=', 't9.weekday_kubun')
+    //                 ->where('t11.identification_id', '=', Config::get('const.C006.value'))
+    //                 ->where('t9.is_deleted', '=', 0)
+    //                 ->where('t11.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t12', function ($join) { 
+    //                 $join->on('t12.code', '=', 't9.business_kubun')
+    //                 ->where('t12.identification_id', '=', Config::get('const.C007.value'))
+    //                 ->where('t9.is_deleted', '=', 0)
+    //                 ->where('t12.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t13', function ($join) { 
+    //                 $join->on('t13.code', '=', 't9.holiday_kubun')
+    //                 ->where('t13.identification_id', '=', Config::get('const.C013.value'))
+    //                 ->where('t9.is_deleted', '=', 0)
+    //                 ->where('t13.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t15', function ($join) { 
+    //                 $join->on('t15.code', '=', 't9.holiday_kubun')
+    //                 ->where('t15.identification_id', '=', Config::get('const.C013.value'))
+    //                 ->where('t9.is_deleted', '=', 0)
+    //                 ->where('t15.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoinSub($subquery4, 't16', function ($join) { 
+    //                 $join->on('t16.code', '=', 't2.editor_department_code');
+    //             })
+    //             ->leftJoin($this->table_users.' as t17', function ($join) { 
+    //                 $join->on('t17.code', '=', 't2.editor_user_code')
+    //                 ->where('t17.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoinSub($subquery3, 't18', function ($join) { 
+    //                 $join->on('t18.code', '=', 't17.code');
+    //                 $join->on('t18.max_apply_term_from', '=', 't17.apply_term_from');
+    //             })
+    //             ->JoinSub($subquery3, 't19', function ($join) { 
+    //                 $join->on('t19.code', '=', 't1.code');
+    //                 $join->on('t19.max_apply_term_from', '=', 't1.apply_term_from');
+    //             });
+
+    //         if(!empty($this->param_employment_status)){
+    //             $mainquery->where('t1.employment_status', $this->param_employment_status);  //　雇用形態指定
+    //         }
+    //         if(!empty($this->param_department_code)){
+    //             $mainquery->where('t1.department_code', $this->param_department_code);      //department_code指定
+    //         }
+    //         if(!empty($this->param_user_code)){
+    //             $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
+    //         } else {
+    //             $mainquery->where('t1.management','<',Config::get('const.C017.admin_user'));
+    //         }
+    //         /*if ($business_kubun != Config::get('const.C007.basic')) {
+    //             $mainquery->whereNotNull('t2.record_datetime');
+    //         }*/
+    //         $result = $mainquery
+    //             ->where('t1.is_deleted', '=', 0)
+    //             ->distinct()
+    //             ->orderBy('t1.department_code', 'asc')
+    //             ->orderBy('t1.employment_status', 'asc')
+    //             ->orderBy('t1.code', 'asc')
+    //             ->orderBy('t2.record_date', 'asc')
+    //             ->orderBy('t2.record_datetime', 'asc')
+    //             ->get();
+    //     }catch(\PDOException $pe){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+    //         Log::error($pe->getMessage());
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+
+    //     return $result;
+    // }
+
+    /**
+     * 日次労働時間取得1
+     *
+     *      指定したユーザー、日付範囲内の労働時間計算のもとデータを取得するSQL
+     *
+     *      INPUT：
+     *          ①テーブル：departments　部署範囲内 and 削除=0
+     *          ②テーブル：users　      ユーザー範囲内 and 削除=0
+     *          ③テーブル：work_times　 ユーザーand日付範囲内 and 削除=0
+     *          ④①と②と③の結合          ①.ユーザー = ②.ユーザー and ②.ユーザー = ③.ユーザー
+     *
+     *      使用方法：
+     *          ①department_code指定プロパティを事前設定（未設定有効）
+     *          ②user_code指定プロパティを事前設定（未設定有効）
+     *          ③日付範囲指定プロパティを事前設定（未設定無効）
+     *          ④メソッド：calcWorkingTimeDateを実行
+     *
+     * @return sql取得結果
+     */
+    // public function getWorkTimes($targetdatefrom, $targetdateto, $business_kubun){
+
+    //     try {
+    //         // 日次労働時間取得SQL作成
+    //         // subquery1    work_times
+    //         $subquery1 = DB::table($this->table)
+    //             ->select(
+    //                 $this->table.'.id as record_datetime_id',
+    //                 $this->table.'.user_code as user_code',
+    //                 $this->table.'.department_code as department_code',
+    //                 $this->table.'.record_time as record_datetime',
+    //                 $this->table.'.mode as mode',
+    //                 $this->table.'.user_holiday_kubuns_id',
+    //                 $this->table.'.check_result as check_result',
+    //                 $this->table.'.check_max_time as check_max_time',
+    //                 $this->table.'.check_interval as check_interval',
+    //                 $this->table.'.is_editor as is_editor',
+    //                 $this->table.'.editor_department_code as editor_department_code',
+    //                 $this->table.'.editor_user_code as editor_user_code',
+    //                 $this->table.'.is_deleted as is_deleted'
+    //             )
+    //             ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%Y') as record_year")
+    //             ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%m') as record_month")
+    //             ->selectRaw('DATE_FORMAT(ifnull('.$this->table.".record_time,'".$targetdatefrom."'), '%Y%m%d') as record_date")
+    //             ->selectRaw('DATE_FORMAT('.$this->table.'.record_time'.",'%H%i%s') as record_time")
+    //             ->selectRaw('X(positions) as x_positions')
+    //             ->selectRaw('Y(positions) as y_positions');
+
+    //         $record_time = $this->getArrayrecordtimeAttribute();
+    //         if(!empty($record_time)){
+    //             $subquery1->where($this->table.'.record_time', '>=', $this->param_date_from);       //record_time範囲指定
+    //             $subquery1->where($this->table.'.record_time', '<=', $this->param_date_to);         //record_time範囲指定
+    //         }
+    //         $subquery1->where($this->table.'.is_deleted', '=', 0);
+
+    //         // subquery2    shift_informations
+    //         $subquery2 = DB::table($this->table_shift_informations)
+    //             ->select(
+    //                 $this->table_shift_informations.'.user_code as user_code',
+    //                 $this->table_shift_informations.'.department_code as department_code',
+    //                 $this->table_shift_informations.'.working_timetable_no as shift_no',
+    //                 $this->table_shift_informations.'.target_date as target_date',
+    //                 $this->table_shift_informations.'.is_deleted as is_deleted'
+    //             );
+    //         $subquery2->where($this->table_shift_informations.'.is_deleted', '=', 0);
+
+    //         // 適用期間日付の取得
+    //         $apicommon = new ApiCommonController();
+    //         // usersの最大適用開始日付subquery
+    //         $subquery3 = $apicommon->getUserApplyTermSubquery($targetdateto);
+    //         // departmentsの最大適用開始日付subquery
+    //         $subquery4 = $apicommon->getDepartmentApplyTermSubquery($targetdateto);
+    //         // working_timetablesの最大適用開始日付subquery
+    //         $subquery5 = $apicommon->getTimetableApplyTermSubquery($targetdateto);
+
+    //         // mainqueryにsunqueryを組み込む
+    //         // mainquery    users
+    //         // subquery1    work_times
+    //         // subquery2    shift_informations
+    //         $mainquery = DB::table($this->table_users.' AS t1')
+    //             ->select(
+    //                 't2.record_datetime_id as record_datetime_id',
+    //                 't1.code as user_code',
+    //                 't1.name as user_name',
+    //                 't1.department_code as department_code',
+    //                 't5.name as department_name',
+    //                 't2.record_datetime as record_datetime',
+    //                 't2.record_year as record_year',
+    //                 't2.record_month as record_month',
+    //                 't2.record_date as record_date',
+    //                 't2.record_time as record_time',
+    //                 't1.employment_status as employment_status',
+    //                 't8.code_name as employment_status_name',
+    //                 't2.mode as mode',
+    //                 't2.user_holiday_kubuns_id',
+    //                 't2.check_result as check_result',
+    //                 't2.check_max_time as check_max_time',
+    //                 't2.check_interval as check_interval',
+    //                 't2.is_deleted as is_deleted',
+    //                 't2.x_positions as x_positions',
+    //                 't2.y_positions as y_positions',
+    //                 't3.weekday_kubun as weekday_kubun',
+    //                 't11.code_name as weekday_name',
+    //                 't3.business_kubun as business_kubun',
+    //                 't12.code_name as business_name',
+    //                 't3.holiday_kubun as holiday_kubun',
+    //                 't13.use_free_item as use_free_item',
+    //                 't13.code_name as holiday_name',
+    //                 't4.closing as closing',
+    //                 't4.uplimit_time as uplimit_time',
+    //                 't4.statutory_uplimit_time as statutory_uplimit_time',
+    //                 't4.time_unit as time_unit',
+    //                 't4.time_rounding as time_rounding',
+    //                 't4.max_3month_total as max_3month_total',
+    //                 't4.max_6month_total as max_6month_total',
+    //                 't4.max_12month_total as max_12month_total',
+    //                 't4.beginning_month as beginning_month',
+    //                 't4.interval as interval',
+    //                 't4.year as year',
+    //                 't14.holiday_kubun as user_holiday_kubun',
+    //                 't14.working_date as user_working_date',
+    //                 't15.code_name as user_holiday_name',
+    //                 't15.description as user_holiday_description',
+    //                 't2.is_editor as is_editor',
+    //                 't2.editor_department_code as editor_department_code',
+    //                 't2.editor_user_code as editor_user_code',
+    //                 't16.name as editor_department_name',
+    //                 't17.name as editor_user_code_name'
+    //             );
+    //         $mainquery
+    //             ->selectRaw('ifnull(t9.shift_no, t6.no) as working_timetable_no ')
+    //             ->selectRaw('CASE ifnull(t9.shift_no, 0) WHEN 0 THEN t6.name else t10.name end as working_timetable_name ')
+    //             ->selectRaw('CASE ifnull(t9.shift_no, 0) WHEN 0 THEN t6.from_time else t10.from_time end as working_timetable_from_time ')
+    //             ->selectRaw('CASE ifnull(t9.shift_no, 0) WHEN 0 THEN t6.to_time else t10.to_time end as working_timetable_to_time ')
+    //             ->selectRaw("ifnull(t9.shift_no, 0) as shift_no ")
+    //             ->selectRaw("ifnull(t10.name, '') as shift_name ")
+    //             ->selectRaw("ifnull(t10.from_time, '') as shift_from_time ")
+    //             ->selectRaw("ifnull(t10.to_time, '') as shift_to_time ")
+    //             ->leftJoinSub($subquery1, 't2', function ($join) { 
+    //                 $join->on('t2.user_code', '=', 't1.code');
+    //                 $join->on('t2.department_code', '=', 't1.department_code')
+    //                 ->where('t1.is_deleted', '=', 0)
+    //                 ->where('t2.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoinSub($subquery2, 't9', function ($join) { 
+    //                 $join->on('t9.user_code', '=', 't1.code');
+    //                 $join->on('t9.department_code', '=', 't1.department_code');
+    //                 $join->on('t9.target_date', '=', 't2.record_date')
+    //                 ->where('t1.is_deleted', '=', 0)
+    //                 ->where('t9.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoinSub($subquery4, 't5', function ($join) { 
+    //                 $join->on('t5.code', '=', 't1.department_code')
+    //                 ->where('t1.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_calendars.' as t3', function ($join) use($targetdateto) { 
+    //                 $join->on('t3.department_code', '=', 't1.department_code');
+    //                 $join->on('t3.user_code', '=', 't1.code')
+    //                 // $join->on('t3.date', '=', 't2.record_date')
+    //                 ->where('t3.date', '=', $targetdateto)
+    //                 ->where('t3.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_settings.' as t4', function ($join) { 
+    //                 $join->on('t4.year', '=', 't2.record_year');
+    //                 $join->on('t4.fiscal_month', '=', 't2.record_month')
+    //                 ->where('t4.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoinSub($subquery5, 't6', function ($join) { 
+    //                 $join->on('t6.no', '=', 't1.working_timetable_no')
+    //                 ->where('t6.working_time_kubun', '=', Config::get('const.C004.regular_working_time'))
+    //                 ->where('t1.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t7', function ($join) { 
+    //                 $join->on('t7.code', '=', 't6.working_time_kubun')
+    //                 ->where('t7.identification_id', '=', Config::get('const.C004.value'))
+    //                 ->where('t7.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t8', function ($join) { 
+    //                 $join->on('t8.code', '=', 't1.employment_status')
+    //                 ->where('t8.identification_id', '=', Config::get('const.C001.value'))
+    //                 ->where('t1.is_deleted', '=', 0)
+    //                 ->where('t8.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoinSub($subquery5, 't10', function ($join) { 
+    //                 $join->on('t10.no', '=', 't9.shift_no')
+    //                 ->where('t10.working_time_kubun', '=', Config::get('const.C004.regular_working_time'));
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t11', function ($join) { 
+    //                 $join->on('t11.code', '=', 't3.weekday_kubun')
+    //                 ->where('t11.identification_id', '=', Config::get('const.C006.value'))
+    //                 ->where('t3.is_deleted', '=', 0)
+    //                 ->where('t11.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t12', function ($join) { 
+    //                 $join->on('t12.code', '=', 't3.business_kubun')
+    //                 ->where('t12.identification_id', '=', Config::get('const.C007.value'))
+    //                 ->where('t3.is_deleted', '=', 0)
+    //                 ->where('t12.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t13', function ($join) { 
+    //                 $join->on('t13.code', '=', 't3.holiday_kubun')
+    //                 ->where('t13.identification_id', '=', Config::get('const.C013.value'))
+    //                 ->where('t3.is_deleted', '=', 0)
+    //                 ->where('t13.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_user_holiday_kubuns.' as t14', function ($join) { 
+    //                 $join->on('t14.working_date', '=', 't2.record_date');
+    //                 $join->on('t14.user_code', '=', 't1.code');
+    //                 $join->on('t14.department_code', '=', 't1.department_code')
+    //                 ->where('t1.is_deleted', '=', 0)
+    //                 ->where('t14.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t15', function ($join) { 
+    //                 $join->on('t15.code', '=', 't14.holiday_kubun')
+    //                 ->where('t15.identification_id', '=', Config::get('const.C013.value'))
+    //                 ->where('t14.is_deleted', '=', 0)
+    //                 ->where('t15.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoinSub($subquery4, 't16', function ($join) { 
+    //                 $join->on('t16.code', '=', 't2.editor_department_code');
+    //             })
+    //             ->leftJoin($this->table_users.' as t17', function ($join) { 
+    //                 $join->on('t17.code', '=', 't2.editor_user_code')
+    //                 ->where('t17.is_deleted', '=', 0);
+    //             })
+    //             ->leftJoinSub($subquery3, 't18', function ($join) { 
+    //                 $join->on('t18.code', '=', 't17.code');
+    //                 $join->on('t18.max_apply_term_from', '=', 't17.apply_term_from');
+    //             })
+    //             ->JoinSub($subquery3, 't19', function ($join) { 
+    //                 $join->on('t19.code', '=', 't1.code');
+    //                 $join->on('t19.max_apply_term_from', '=', 't1.apply_term_from');
+    //             });
+
+    //         if(!empty($this->param_employment_status)){
+    //             $mainquery->where('t1.employment_status', $this->param_employment_status);  //　雇用形態指定
+    //         }
+    //         if(!empty($this->param_department_code)){
+    //             $mainquery->where('t1.department_code', $this->param_department_code);      //department_code指定
+    //         }
+    //         if(!empty($this->param_user_code)){
+    //             $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
+    //         } else {
+    //             $mainquery->where('t1.management','<',Config::get('const.C017.admin_user'));
+    //         }
+    //         /*if ($business_kubun != Config::get('const.C007.basic')) {
+    //             $mainquery->whereNotNull('t2.record_datetime');
+    //         }*/
+    //         $result = $mainquery
+    //             ->where('t1.is_deleted', '=', 0)
+    //             ->distinct()
+    //             ->orderBy('t1.department_code', 'asc')
+    //             ->orderBy('t1.employment_status', 'asc')
+    //             ->orderBy('t1.code', 'asc')
+    //             ->orderBy('t2.record_date', 'asc')
+    //             ->orderBy('t2.record_datetime', 'asc')
+    //             ->get();
+    //     }catch(\PDOException $pe){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+    //         Log::error($pe->getMessage());
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+
+    //     return $result;
+    // }
 
     /**
      * 前日の勤務状態取得
@@ -1313,6 +1794,7 @@ class WorkTime extends Model
                     $join->on('t4.max_apply_term_from', '=', 't1.apply_term_from');
                 });
 
+            // 緊急はチェックなし
             $mainquery
                 ->where(function ($query) {
                     $query->where('t2.check_result', '>', 0)

@@ -384,7 +384,8 @@ class EditCalendarController extends Controller
                                             $work_time_model->setEditorusercodeAttribute($login_user_code);
                                             $work_time_model->setUpdateduserAttribute($login_user_code);
                                             $work_time_model->setSystemDateAttribute($systemdate);
-                                            $work_time_model->delWorkTime();
+                                            // 削除せずエラーリスト（出勤時刻＋休暇）でわかるようにする
+                                            // $work_time_model->delWorkTime();
                                         }
                                         if ($item->mode = Config::get('const.C005.leaving_time')) {
                                             $chk_attendance = false;

@@ -15,6 +15,7 @@ use App\TempWorkingTimeDate;
 use App\TempCalcWorkingTime;
 use App\WorkingTimeTable;
 use App\Calendar;
+use App\FeatureItemSelection;
 use App\Http\Controllers\ApiCommonController;
 
 
@@ -316,6 +317,37 @@ class DailyWorkingInformationController extends Controller
                 $working_model->delWorkingTimeDate();
             }
             // 日次集計表示
+            //feature selection
+            $feature_model = new FeatureItemSelection();
+            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+            $feature_data = $feature_model->getItem();
+            $feature_attendance_count = 0;          // 出勤回数
+            $feature_rest_count = 0;                // 休憩回数
+            $mode_list = 0;                         // 2なら緊急取集使用
+            $em_details = array();
+            foreach($feature_data as $item) {
+                if ($item->item_code == Config::get('const.C042.attendance_count')) {
+                    $feature_attendance_count = intval($item->value_select);
+                }
+                if ($item->item_code == Config::get('const.C042.rest_count')) {
+                    $feature_rest_count = intval($item->value_select);
+                }
+                if ($item->item_code == Config::get('const.C042.mode_list')) {
+                    $mode_list = intval($item->value_select);
+                    // 2なら緊急取集使用
+                    if ($mode_list == 2) {
+                        // 緊急収集のタイムテーブルを取得する
+                        $time_table = new WorkingTimeTable();
+                        $time_table->setNoAttribute(Config::get('const.C999_NAME.emergency_timetable_no'));
+                        $time_table->setParamapplytermfromAttribute($datefrom);
+                        $em_details = $time_table->getDetail();
+                    }
+                }
+                if ($feature_attendance_count > 0 && $feature_rest_count > 0 && $mode_list > 0) {
+                    break;
+                }
+            }
             // addDailyCalc implement
             $array_impl_addDailyCalc = array (
                 'work_time' => $work_time,
@@ -324,7 +356,10 @@ class DailyWorkingInformationController extends Controller
                 'employmentstatus' => $employmentstatus,
                 'departmentcode' => $departmentcode,
                 'usercode' => $usercode,
-                'business_kubun' => $business_kubun
+                'business_kubun' => $business_kubun,
+                'feature_attendance_count' => $feature_attendance_count,
+                'feature_rest_count' => $feature_rest_count,
+                'em_details' => $em_details
             );
             $addCalc = $this->addDailyCalc($array_impl_addDailyCalc);
             if ($addCalc) {
@@ -407,7 +442,10 @@ class DailyWorkingInformationController extends Controller
         $departmentcode = $params['departmentcode'];
         $usercode = $params['usercode'];
         $business_kubun = $params['business_kubun'];
-
+        $feature_attendance_count = $params['feature_attendance_count'];
+        $feature_rest_count = $params['feature_rest_count'];
+        $em_details = $params['em_details'];
+        
         $calc_result = true;
         $add_result = true;
 
@@ -432,7 +470,10 @@ class DailyWorkingInformationController extends Controller
                     $array_impl_calcWorkingTimeDate = array (
                         'worktimes' => $work_time_results,
                         'target_date' => $work_time->getParamDatefromAttribute(),
-                        'business_kubun' => $business_kubun
+                        'business_kubun' => $business_kubun,
+                        'feature_attendance_count' => $feature_attendance_count,
+                        'feature_rest_count' => $feature_rest_count,
+                        'em_details' => $em_details
                     );
                     $calc_result = $this->calcWorkingTimeDate($array_impl_calcWorkingTimeDate);
                     if ($calc_result) {
@@ -528,7 +569,7 @@ class DailyWorkingInformationController extends Controller
             }catch(\PDOException $pe){
                 $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
                 Log::error(Config::get('const.LOG_MSG.data_error_dailycalc'));
-                Log::error($e->getMessage());
+                Log::error($pe->getMessage());
                 $add_result = false;
                 throw $pe;
             }catch(\Exception $e){
@@ -566,6 +607,9 @@ class DailyWorkingInformationController extends Controller
         $worktimes = $params['worktimes'];
         $target_date = $params['target_date'];
         $business_kubun = $params['business_kubun'];
+        $feature_attendance_count = $params['feature_attendance_count'];
+        $feature_rest_count = $params['feature_rest_count'];
+        $em_details = $params['em_details'];
 
         $current_date = null;
         $current_department_code = null;
@@ -591,6 +635,7 @@ class DailyWorkingInformationController extends Controller
         $attendance_target_flg = false;         // 出勤打刻があるか
         $this->user_temp_seq = 0;               // ユーザー単位のtemp出力時のseq
         $before_out_flg = false;
+        $attendance_work_time = null;
         // ユーザー単位処理
         foreach ($worktimes as $result) {
             // 打刻データありの場合
@@ -608,246 +653,365 @@ class DailyWorkingInformationController extends Controller
             Log::debug('         タイムテーブル  name = '.$result->working_timetable_name);
             Log::debug('         タイムテーブル　開始時刻　$result->working_timetable_from_time = '.$result->working_timetable_from_time);
             Log::debug('         タイムテーブル　終了時刻　result->working_timetable_to_time    = '.$result->working_timetable_to_time);
-            if ($result->record_datetime != null && $result->mode != null) {
-                // 設定値確認
-                $chk_setting = $this->chkSettingData($result);
-                // 設定が正常である場合
-                if ($chk_setting == 0)  {
-                    // 翌日退勤した場合を考慮し、同日処理を行うようにするため、$current_dateは$target_date_ymdとする
-                    // よって日付ブレーク処理は無意味となるけど
-                    $current_date = $target_date_ymd;
-                    $current_department_code = $result->department_code;
-                    $current_user_code = $result->user_code;
-                    $current_result = $result;
-                    if ($current_date != $before_date ||
-                        $current_department_code != $before_department_code ||
-                        $current_user_code != $before_user_code) {
-                        $attendance_target_flg = false;
-                    }
-                    // 指定日付<=であれば集計対象、>であれば打刻なしとして登録
-                    if ($result->mode == Config::get('const.C012.attendance')) {
-                        $dt = new Carbon($target_date_ymd);
-                        $w_minus1_ymd = date_format($dt->copy()->subDay(), 'Y-m-d');
-                        $w_today_ymd = date_format($dt->copy(), 'Y-m-d');
-                        $w_plus1_ymd = date_format($dt->copy()->addDay(), 'Y-m-d');
-                        $w_plus2_ymd = date_format($dt->copy()->addDay(2), 'Y-m-d');
-                        // 所定時間内であれば対象
-                        Log::debug('         $w_minus1_ymd = '.$w_minus1_ymd);
-                        Log::debug('         $w_today_ymd = '.$w_today_ymd);
-                        Log::debug('         $w_plus1_ymd = '.$w_plus1_ymd);
-                        Log::debug('         $w_plus2_ymd = '.$w_plus2_ymd);
-                        //  タイムテーブル　開始時刻
-                        $w_minus1_from_datetime = $w_minus1_ymd.' '.$result->working_timetable_from_time;
-                        $w_today_from_datetime = $w_today_ymd.' '.$result->working_timetable_from_time;
-                        $w_plus1_from_datetime = $w_plus1_ymd.' '.$result->working_timetable_from_time;
-                        $w_minus1_to_datetime = null;
-                        $w_today_to_datetime = null;
-                        $w_plus1_to_datetime = null;
-                        if ($result->working_timetable_from_time <= $result->working_timetable_to_time) {
-                            $w_minus1_to_datetime = $w_minus1_ymd.' '.$result->working_timetable_to_time;
-                            $w_today_to_datetime = $w_today_ymd.' '.$result->working_timetable_to_time;
-                            $w_plus1_to_datetime = $w_plus1_ymd.' '.$result->working_timetable_to_time;
-                        } else {
-                            $w_minus1_to_datetime = $w_today_ymd.' '.$result->working_timetable_to_time;
-                            $w_today_to_datetime = $w_plus1_ymd.' '.$result->working_timetable_to_time;
-                            $w_plus1_to_datetime = $w_plus2_ymd.' '.$result->working_timetable_to_time;
+            // 出勤回数が複数回の場合は同じデータを取得している場合があるので、その分skipさせる
+            //     出勤1回  10:00 11:30  対象
+            //     出勤2回  10:00 11:30　skip
+            //     出勤3回  10:00 11:30  skip
+            $is_dup = $this->isDupTime($result, $before_result);        // false:skip
+            if ($is_dup) {
+                if ($result->record_datetime != null && $result->mode != null) {
+                    // 設定値確認（エラー内容はログに出力している）
+                    $chk_setting = $this->chkSettingData($result);
+                    // 設定が正常である場合
+                    if ($chk_setting == 0)  {
+                        // 翌日退勤した場合を考慮し、同日処理を行うようにするため、$current_dateは$target_date_ymdとする
+                        // よって日付ブレーク処理は無意味となるけど
+                        $current_date = $target_date_ymd;
+                        $current_department_code = $result->department_code;
+                        $current_user_code = $result->user_code;
+                        $current_result = $result;
+                        // 日付or部署orユーザーが１件前と異なれば
+                        // 出勤打刻flgをfalseに初期設定
+                        if ($current_date != $before_date ||
+                            $current_department_code != $before_department_code ||
+                            $current_user_code != $before_user_code) {
+                            $attendance_target_flg = false;
+                            $attendance_work_time = null;
                         }
-                        Log::debug('         w_minus1_from_datetime = '.$w_minus1_from_datetime);
-                        Log::debug('         w_minus1_to_datetime = '.$w_minus1_to_datetime);
-                        Log::debug('         w_today_from_datetime = '.$w_today_from_datetime);
-                        Log::debug('         w_today_to_datetime = '.$w_today_to_datetime);
-                        Log::debug('         w_plus1_from_datetime = '.$w_plus1_from_datetime);
-                        Log::debug('         w_plus1_to_datetime = '.$w_plus1_to_datetime);
-                        if ($result->record_datetime >= $w_today_from_datetime &&
-                            $result->record_datetime <= $w_today_to_datetime) {
-                            $target_flg = true;
-                        } else {
-                            if ($result->record_datetime >= $w_minus1_to_datetime &&
-                                $result->record_datetime < $w_today_from_datetime) {
-                                $target_flg = true;
-                            } else {
-                                $target_flg = false;
+                        // 出勤回数が複数回の場合はタイムテーブルの開始終了時刻が正しく対応順に取得されない場合があるので
+                        // 対応するタイムテーブルの開始終了時刻を新たに設定する
+                        //     出勤1回  10:00 11:30  対象    タイムテーブル開始終了  15:30  16:30   ×
+                        //     出勤2回  12:30 14:00　対象    タイムテーブル開始終了  10:00  11:30   ×
+                        //     出勤3回  15:30 16:30  対象    タイムテーブル開始終了  12:30  14:00   ×
+                        if ($result->mode == Config::get('const.C005.attendance_time') ||
+                            $result->mode == Config::get('const.C005.emergency_time')) {
+                            $attendance_work_time = $result->record_datetime;
+                        }
+                        $array_impl_setWorkingtimetabletime = array (
+                            'target_date' => $target_date_ymd,
+                            'feature_attendance_count' => $feature_attendance_count,
+                            'attendance_work_time' => $attendance_work_time,
+                            'em_details' => $em_details,
+                            'result' => $result
+                        );
+                        $array_result = array();
+                        $array_result = $this->setWorkingtimetabletime($array_impl_setWorkingtimetabletime);
+                        // TODO $resultを変更したくない
+                        $result->working_timetable_from_time = $array_result['working_from_time'];
+                        $result->working_timetable_to_time = $array_result['working_to_time'];
+                        Log::debug('         タイムテーブル　変更後　開始時刻　$result->working_timetable_from_time = '.$result->working_timetable_from_time);
+                        Log::debug('         タイムテーブル　変更後　終了時刻　result->working_timetable_to_time    = '.$result->working_timetable_to_time);
+                        if ($result->mode == Config::get('const.C005.emergency_time') ||
+                            $result->mode == Config::get('const.C005.emergency_return_time')) {
+                            foreach($em_details as $item) {
+                                $result->working_timetable_no = $item->no;
+                                $result->working_timetable_name = $item->name;
+                                break;
                             }
                         }
-                        $attendance_target_flg = $target_flg;
-                    } else {
-                        // 出勤ではない場合は前の出勤モードの集計対象
-                        // 出勤ではない場合、
-                        // 出勤打刻があった場合は集計対象
-                        // 出勤打刻がなかった場合は
-                        // タイムテーブル開始時刻>タイムテーブル終了時刻の場合は前日計算とするため集計対象外とする
-                        if ($attendance_target_flg) {
-                            $target_flg = true;
-                        } else {
-                            if ($result->working_timetable_from_time <= $result->working_timetable_to_time) {
-                                $target_flg = false;
-                            } else {
-                                if ($result->record_date > $target_date_ymd) {
-                                    $target_flg = true;
-                                } else {
-                                    $target_flg = false;
-                                }
-                            }
+                        Log::debug('         タイムテーブル　変更後　　$result->working_timetable_no = '.$result->working_timetable_no);
+                        Log::debug('         タイムテーブル　変更後　　$result->working_timetable_name    = '.$result->working_timetable_name);
+                        $array_impl_isCurrentDateCalc = array (
+                            'target_date_ymd' => $target_date_ymd,
+                            'attendance_flg' => $attendance_target_flg,
+                            'result' => $result
+                        );
+                        $target_flg = $this->isCurrentDateCalc($array_impl_isCurrentDateCalc);
+                        if ($result->mode == Config::get('const.C005.attendance_time') ||
+                            $result->mode == Config::get('const.C005.emergency_time')) {
+                            $attendance_target_flg = $target_flg;
                         }
-                        // -----------------------　20200321コメント化 start --------------------- 
-                        // if ($current_department_code != $before_department_code ||
-                        //     $current_user_code != $before_user_code) {
-                        //     $attendance_target_flg = false;
-                        // }
-                        // $target_flg = $attendance_target_flg;
-                        // -----------------------　20200321コメント化 end --------------------- 
-                        // -----------------------　20200215コメント化 start --------------------- 
-                        // if ($result->mode == Config::get('const.C012.leaving')) {
-                        //     $attendance_target_flg = false;
-                        // }
-                        // -----------------------　20200215コメント化 end --------------------- 
-                    }
-                    // 20191012 end
-                    Log::debug('        出勤打刻があるか $attendance_target_flg ='.$attendance_target_flg);
-                    Log::debug('        出勤打刻があるか $target_flg ='.$target_flg);
-                    if ($before_date == null) {$before_date = $current_date;}
-                    if ($before_department_code == null) {$before_department_code = $current_department_code;}
-                    if ($before_user_code == null) {$before_user_code = $current_user_code;}
-                    if ($before_result == null) {$before_result = $result;}
-                    if ($target_flg == true) {
-                        Log::debug('        当日の打刻あり、当日計算対象データ');
-                        // ユーザー休暇区分判定用
-                        $before_holiday_date = null;
-                        $before_holiday_user_code = null;
-                        $before_holiday_department_code = null;
-                        $before_holiday_kubun = null;
-                        $before_business_kubun = null;
-                        $before_out_flg = true;
-                        // 同じキーの場合
-                        if ($current_date == $before_date &&
-                            $current_department_code == $before_department_code &&
-                            $current_user_code == $before_user_code) {
-                            // 打刻データ配列の設定
-                            $this->pushArrayWorkingTime($result);
-                        } elseif ($current_date == $before_date &&
-                            $current_department_code == $before_department_code) {
-                            // ユーザーが変わった場合
-                            Log::debug('    ユーザーが変わった場合 ');
-                            // ユーザー労働時間計算(１個前のユーザーを計算する)
-                            Log::debug('        temp_calc_workingtimesの登録開始');
-                            Log::debug('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
-                            Log::debug('            部署     = '.$before_result->department_name);
-                            Log::debug('            打刻時刻 = '.$before_result->record_datetime);
-                            Log::debug('            モード   = '.$before_result->mode);
-                            Log::debug('            打刻日   = '.$before_result->record_date);
-                            // ユーザー労働時間計算
-                            // calcWorkingTimeDate implement
-                            $array_impl_calcWorkingTime = array (
-                                'target_date' => $before_date,
-                                'target_user_code' => $before_user_code,
-                                'target_department_code' => $before_department_code,
-                                'target_business_kubun' => $business_kubun,
-                                'target_result' => $before_result
-                            );
-                            $this->calcWorkingTime($array_impl_calcWorkingTime);
-                            try{
-                                // temporaryに登録する
-                                // calcWorkingTimeDate implement
-                                $array_impl_insTempCalcItem = array (
-                                    'target_date' => $before_date,
-                                    'target_result' => $before_result
-                                );
-                                $this->insTempCalcItem($array_impl_insTempCalcItem);
-                            }catch(\PDOException $pe){
-                                $add_results = false;
-                                throw $pe;
-                            }
-                            Log::debug('        temp_calc_workingtimesの登録終了');
-                            // 次データ計算事前処理
-                            // beforeArrayWorkingTimeは現データが有効の場合の事前処理
-                            $this->beforeArrayWorkingTime($result);
-                            // ユーザーを同じく設定
-                            $before_user_code = $current_user_code;
+                        Log::debug('        出勤打刻があるか $attendance_target_flg ='.$attendance_target_flg);
+                        Log::debug('        出勤打刻があるか $target_flg ='.$target_flg);
+                        if ($before_date == null) {$before_date = $current_date;}
+                        if ($before_department_code == null) {$before_department_code = $current_department_code;}
+                        if ($before_user_code == null) {$before_user_code = $current_user_code;}
+                        if ($before_result == null) {$before_result = $result;}
+                        if ($target_flg == true) {
+                            Log::debug('        当日の打刻あり、当日計算対象データ');
+                            // ユーザー休暇区分判定用
+                            $before_holiday_date = null;
+                            $before_holiday_user_code = null;
+                            $before_holiday_department_code = null;
+                            $before_holiday_kubun = null;
+                            $before_business_kubun = null;
                             $before_out_flg = true;
-                            $this->user_temp_seq = 0;
-                        } elseif ($current_date == $before_date) {
-                            // 部署が変わった場合
-                            Log::debug('    部署が変わった場合 ');
-                            // ユーザー労働時間計算(１個前のユーザーを計算する)
-                            Log::debug('    temp_calc_workingtimesの登録開始');
-                            Log::debug('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
-                            Log::debug('            部署     = '.$before_result->department_name);
-                            Log::debug('            打刻時刻 = '.$before_result->record_datetime);
-                            Log::debug('            モード   = '.$before_result->mode);
-                            Log::debug('            打刻日   = '.$before_result->record_date);
-                            // ユーザー労働時間計算
-                            // calcWorkingTimeDate implement
-                            $array_impl_calcWorkingTime = array (
-                                'target_date' => $before_date,
-                                'target_user_code' => $before_user_code,
-                                'target_department_code' => $before_department_code,
-                                'target_business_kubun' => $business_kubun,
-                                'target_result' => $before_result
-                            );
-                            $this->calcWorkingTime($array_impl_calcWorkingTime);
-                            try{
-                                // temporaryに登録する
-                                // calcWorkingTimeDate implement
-                                $array_impl_insTempCalcItem = array (
-                                    'target_date' => $before_date,
-                                    'target_result' => $before_result
-                                );
-                                $this->insTempCalcItem($array_impl_insTempCalcItem);
-                            }catch(\PDOException $pe){
-                                $add_results = false;
-                                throw $pe;
-                            }
-                            Log::debug('    temp_calc_workingtimesの登録終了');
-                            // 次データ計算事前処理
-                            // beforeArrayWorkingTimeは現データが有効の場合の事前処理
-                            $this->beforeArrayWorkingTime($result);
-                            // 部署を同じく設定
-                            $before_department_code = $current_department_code;
-                            // ユーザーを同じく設定
-                            $before_user_code = $current_user_code;
-                            $before_out_flg = true;
-                            $this->user_temp_seq = 0;
-                        } else {
-                            // 日付が変わった場合
-                            Log::debug('    日付が変わった ');
-                            try{
-                                // ユーザー労働時間登録(１個前のユーザーを登録する)
+                            // 同じキーの場合
+                            if ($current_date == $before_date &&
+                                $current_department_code == $before_department_code &&
+                                $current_user_code == $before_user_code) {
+                                // 打刻データ配列の設定
+                                $this->pushArrayWorkingTime($result);
+                            } elseif ($current_date == $before_date &&
+                                $current_department_code == $before_department_code) {
+                                // ユーザーが変わった場合
+                                Log::debug('    ユーザーが変わった場合 ');
+                                // ユーザー労働時間計算(１個前のユーザーを計算する)
+                                Log::debug('        temp_calc_workingtimesの登録開始');
                                 Log::debug('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
                                 Log::debug('            部署     = '.$before_result->department_name);
                                 Log::debug('            打刻時刻 = '.$before_result->record_datetime);
                                 Log::debug('            モード   = '.$before_result->mode);
                                 Log::debug('            打刻日   = '.$before_result->record_date);
-                                // ユーザー労働時間登録
-                                // array_impl_addWorkingTime implement
-                                $array_impl_addWorkingTime = array (
+                                // ユーザー労働時間計算
+                                // calcWorkingTimeDate implement
+                                $array_impl_calcWorkingTime = array (
                                     'target_date' => $before_date,
                                     'target_user_code' => $before_user_code,
                                     'target_department_code' => $before_department_code,
                                     'target_business_kubun' => $business_kubun,
                                     'target_result' => $before_result
                                 );
-                                $add_results = $this->addWorkingTime($array_impl_addWorkingTime);
-                                Log::debug('    １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
+                                $this->calcWorkingTime($array_impl_calcWorkingTime);
+                                try{
+                                    // temporaryに登録する
+                                    // calcWorkingTimeDate implement
+                                    $array_impl_insTempCalcItem = array (
+                                        'target_date' => $before_date,
+                                        'target_result' => $before_result
+                                    );
+                                    $this->insTempCalcItem($array_impl_insTempCalcItem);
+                                }catch(\PDOException $pe){
+                                    $add_results = false;
+                                    throw $pe;
+                                }
+                                Log::debug('        temp_calc_workingtimesの登録終了');
                                 // 次データ計算事前処理
                                 // beforeArrayWorkingTimeは現データが有効の場合の事前処理
                                 $this->beforeArrayWorkingTime($result);
-                                // 日付を同じく設定
-                                $before_date = $current_date;
+                                // ユーザーを同じく設定
+                                $before_user_code = $current_user_code;
+                                $before_out_flg = true;
+                                $this->user_temp_seq = 0;
+                            } elseif ($current_date == $before_date) {
+                                // 部署が変わった場合
+                                Log::debug('    部署が変わった場合 ');
+                                // ユーザー労働時間計算(１個前のユーザーを計算する)
+                                Log::debug('    temp_calc_workingtimesの登録開始');
+                                Log::debug('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
+                                Log::debug('            部署     = '.$before_result->department_name);
+                                Log::debug('            打刻時刻 = '.$before_result->record_datetime);
+                                Log::debug('            モード   = '.$before_result->mode);
+                                Log::debug('            打刻日   = '.$before_result->record_date);
+                                // ユーザー労働時間計算
+                                // calcWorkingTimeDate implement
+                                $array_impl_calcWorkingTime = array (
+                                    'target_date' => $before_date,
+                                    'target_user_code' => $before_user_code,
+                                    'target_department_code' => $before_department_code,
+                                    'target_business_kubun' => $business_kubun,
+                                    'target_result' => $before_result
+                                );
+                                $this->calcWorkingTime($array_impl_calcWorkingTime);
+                                try{
+                                    // temporaryに登録する
+                                    // calcWorkingTimeDate implement
+                                    $array_impl_insTempCalcItem = array (
+                                        'target_date' => $before_date,
+                                        'target_result' => $before_result
+                                    );
+                                    $this->insTempCalcItem($array_impl_insTempCalcItem);
+                                }catch(\PDOException $pe){
+                                    $add_results = false;
+                                    throw $pe;
+                                }
+                                Log::debug('    temp_calc_workingtimesの登録終了');
+                                // 次データ計算事前処理
+                                // beforeArrayWorkingTimeは現データが有効の場合の事前処理
+                                $this->beforeArrayWorkingTime($result);
                                 // 部署を同じく設定
                                 $before_department_code = $current_department_code;
                                 // ユーザーを同じく設定
                                 $before_user_code = $current_user_code;
                                 $before_out_flg = true;
-                            }catch(\PDOException $pe){
-                                $add_results = false;
-                                throw $pe;
-                            }catch(\Exception $e){
-                                $add_results = false;
-                                throw $e;
+                                $this->user_temp_seq = 0;
+                            } else {
+                                // 日付が変わった場合
+                                Log::debug('    日付が変わった ');
+                                try{
+                                    // ユーザー労働時間登録(１個前のユーザーを登録する)
+                                    Log::debug('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
+                                    Log::debug('            部署     = '.$before_result->department_name);
+                                    Log::debug('            打刻時刻 = '.$before_result->record_datetime);
+                                    Log::debug('            モード   = '.$before_result->mode);
+                                    Log::debug('            打刻日   = '.$before_result->record_date);
+                                    // ユーザー労働時間登録
+                                    // array_impl_addWorkingTime implement
+                                    $array_impl_addWorkingTime = array (
+                                        'target_date' => $before_date,
+                                        'target_user_code' => $before_user_code,
+                                        'target_department_code' => $before_department_code,
+                                        'target_business_kubun' => $business_kubun,
+                                        'target_result' => $before_result
+                                    );
+                                    $add_results = $this->addWorkingTime($array_impl_addWorkingTime);
+                                    Log::debug('    １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
+                                    // 次データ計算事前処理
+                                    // beforeArrayWorkingTimeは現データが有効の場合の事前処理
+                                    $this->beforeArrayWorkingTime($result);
+                                    // 日付を同じく設定
+                                    $before_date = $current_date;
+                                    // 部署を同じく設定
+                                    $before_department_code = $current_department_code;
+                                    // ユーザーを同じく設定
+                                    $before_user_code = $current_user_code;
+                                    $before_out_flg = true;
+                                }catch(\PDOException $pe){
+                                    $add_results = false;
+                                    throw $pe;
+                                }catch(\Exception $e){
+                                    $add_results = false;
+                                    throw $e;
+                                }
                             }
+                        } else {
+                            Log::debug('        当日の打刻なし、当日計算対象データ');
+                            // 前のデータが打刻ありであれば計算する
+                            $user_holiday_kubun = null;
+                            $user_holiday_name = null;
+                            $user_working_date = null;
+                            if (count($this->array_working_mode) > 0) {
+                                try{
+                                    Log::debug('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
+                                    Log::debug('            部署     = '.$before_result->department_name);
+                                    Log::debug('            打刻時刻 = '.$before_result->record_datetime);
+                                    Log::debug('            モード   = '.$before_result->mode);
+                                    Log::debug('            打刻日   = '.$before_result->record_date);
+                                    // ユーザー労働時間登録
+                                    // array_impl_addWorkingTime implement
+                                    $array_impl_addWorkingTime = array (
+                                        'target_date' => $before_date,
+                                        'target_user_code' => $before_user_code,
+                                        'target_department_code' => $before_department_code,
+                                        'target_business_kubun' => $business_kubun,
+                                        'target_result' => $before_result
+                                    );
+                                    $add_results = $this->addWorkingTime($array_impl_addWorkingTime);
+                                    // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
+                                    Log::debug('        １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
+                                    $before_date = null;
+                                    $before_user_code = null;
+                                    $before_department_code = null;
+                                    $before_result = null;
+                                    // 打刻データ配列の初期化
+                                    $this->iniArrayWorkingTime();
+                                    // 計算用配列の初期化
+                                    $this->iniArrayCalc();
+                                    $before_out_flg = true;
+                                }catch(\PDOException $pe){
+                                    $add_results = false;
+                                    throw $pe;
+                                }catch(\Exception $e){
+                                    $add_results = false;
+                                    throw $e;
+                                }
+                            }
+                            // 打刻ないデータはtempに出力
+                            // Log::debug('        打刻ないデータはtempに出力するか判定 $current_date = '.$current_date);
+                            // Log::debug('            $before_date = '.$before_date);
+                            // Log::debug('            打刻時刻      = '.$result->record_datetime);
+                            // Log::debug('            打刻日付      = '.$result->record_date);
+                            // Log::debug('            タイムテーブルNO      = '.$result->working_timetable_no);
+                            // Log::debug('            ターゲット日付   = '.$target_date_ymd);
+                            // Log::debug('            ユーザー休暇   = '.$user_holiday_kubun);
+                            // Log::debug('            1件前出力      = '.$before_out_flg);
+                            // 1件前の日付がnullである場合、いきなり対象日付がないということなので出力
+                            //if (!isset($result->record_datetime) || isset($user_holiday_kubun)) {
+                            //if (!$before_out_flg || isset($user_holiday_kubun)) {
+                            // 1件前出力していず、休暇扱いか出勤日である場合は空の情報として出力する
+                            // if (!isset($result->record_datetime) &&
+                            //      (!$before_out_flg || isset($user_holiday_kubun)))
+                            // {
+                            // 有効打刻データがなくて、休暇扱いか出勤日である場合はtempに出力
+                            // 打刻されていれば出勤以外は出力対象外
+                            // $temp_out_flg1 = false;
+                            // $temp_out_flg2 = false;
+                            // $temp_out_flg3 = false;
+                            // if (isset($user_holiday_kubun) && $user_holiday_kubun >= (int)Config::get('const.C013.paid_holiday')) {
+                            //     $temp_out_flg1 = true;
+                            // }
+                            // if ($result->business_kubun == Config::get('const.C007.basic')) {
+                            //     $temp_out_flg2 = true;
+                            // }
+                            // if (!$attendance_target_flg)
+                            // {
+                            //     $temp_out_flg3 = true;
+                            // }
+                            // if ($temp_out_flg3 && ($temp_out_flg1 || $temp_out_flg2))
+                            // {
+                            // //if ($temp_out_flg ) {   // 20191012
+                            //     try{
+                            //         Log::debug('        打刻ないデータはtempに出力 $current_date = ');
+                            //         // 同じキーの場合
+                            //         if ($current_date == $before_date &&
+                            //             $current_department_code == $before_department_code &&
+                            //             $current_user_code == $before_user_code) {
+                            //             $noinput_user_cnt++;
+                            //         } else {
+                            //             $noinput_user_cnt = 1;
+                            //         }
+                            //         if ($noinput_user_cnt == 1) {
+                            //             $ptn = 0;
+                            //         } else {
+                            //             $ptn = 6;
+                            //         }
+                            //         if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
+                            //         if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
+                            //         if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
+                            //         if ($before_holiday_department_code != $result->department_code ||
+                            //             $before_holiday_user_code != $result->user_code ||
+                            //             $before_holiday_date != $result->user_working_date ||
+                            //             $before_holiday_kubun != $user_holiday_kubun) {
+                            //             $dt = date_format(new Carbon($target_date), 'Ymd');
+                            //             Log::debug('            ターゲット日付 = '.$dt);
+                            //             Log::debug('            ユーザー休暇   = '.$user_holiday_name);
+                            //             Log::debug('            　　　　日付   = '.$user_working_date);
+                            //             // setNoInputTimePtn implement
+                            //             $array_impl_setNoInputTimePtn = array (
+                            //                 'ptn' => $ptn,
+                            //                 'user_holiday_name' => $user_holiday_name,
+                            //                 'target_date' => $dt,
+                            //                 'hpliday_date' => $user_working_date,
+                            //                 'value_working_timetable_no' => $result->working_timetable_no
+                            //             );
+                            //             $this->pushArrayCalc($this->setNoInputTimePtn($array_impl_setNoInputTimePtn));
+                            //             // temporaryに登録する
+                            //             Log::debug('    temp_calc_workingtimesの登録開始');
+                            //             Log::debug('        現ユーザー = '.$current_user_code.' record_time = '.$result->record_datetime);
+                            //             // calcWorkingTimeDate implement
+                            //             $array_impl_insTempCalcItem = array (
+                            //                 'target_date' => $target_date,
+                            //                 'target_result' => $result
+                            //             );
+                            //             $this->insTempCalcItem($array_impl_insTempCalcItem);
+                            //             Log::debug('    temp_calc_workingtimesの登録終了');
+                            //         }
+                            //         // 日付とユーザー休暇区分を保存
+                            //         $before_holiday_date = $result->user_working_date;
+                            //         $before_holiday_user_code = $result->user_code;
+                            //         $before_holiday_department_code = $result->department_code;
+                            //         $before_holiday_kubun = $user_holiday_kubun;
+                            //     }catch(\PDOException $pe){
+                            //         $add_results = false;
+                            //         throw $pe;
+                            //     }
+                            //     // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
+                            //     $before_date = null;
+                            //     $before_user_code = null;
+                            //     $before_department_code = null;
+                            //     $before_result = null;
+                            //     $before_out_flg = true;
+                            //     // 次データ計算事前処理
+                            //     // 打刻データ配列の初期化
+                            //     $this->iniArrayWorkingTime();
+                            //     // 計算用配列の初期化
+                            //     $this->iniArrayCalc();
+                            // } else {
+                            //     $before_out_flg = true;
+                            //     Log::debug('        打刻ないデータはtempに出力しない '.$result->record_datetime);
+                            // }
                         }
                     } else {
-                        Log::debug('        当日の打刻なし、当日計算対象データ');
                         // 前のデータが打刻ありであれば計算する
                         $user_holiday_kubun = null;
                         $user_holiday_name = null;
@@ -870,16 +1034,16 @@ class DailyWorkingInformationController extends Controller
                                 );
                                 $add_results = $this->addWorkingTime($array_impl_addWorkingTime);
                                 // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
-                                Log::debug('        １個前のユーザーを登録終了 $before_user_code = '.$before_user_code);
                                 $before_date = null;
                                 $before_user_code = null;
                                 $before_department_code = null;
                                 $before_result = null;
+                                $before_out_flg = true;
+                                // 次データ計算事前処理
                                 // 打刻データ配列の初期化
                                 $this->iniArrayWorkingTime();
                                 // 計算用配列の初期化
                                 $this->iniArrayCalc();
-                                $before_out_flg = true;
                             }catch(\PDOException $pe){
                                 $add_results = false;
                                 throw $pe;
@@ -888,118 +1052,65 @@ class DailyWorkingInformationController extends Controller
                                 throw $e;
                             }
                         }
-                        // 打刻ないデータはtempに出力
-                        // Log::debug('        打刻ないデータはtempに出力するか判定 $current_date = '.$current_date);
-                        // Log::debug('            $before_date = '.$before_date);
-                        // Log::debug('            打刻時刻      = '.$result->record_datetime);
-                        // Log::debug('            打刻日付      = '.$result->record_date);
-                        // Log::debug('            タイムテーブルNO      = '.$result->working_timetable_no);
-                        // Log::debug('            ターゲット日付   = '.$target_date_ymd);
-                        // Log::debug('            ユーザー休暇   = '.$user_holiday_kubun);
-                        // Log::debug('            1件前出力      = '.$before_out_flg);
-                        // 1件前の日付がnullである場合、いきなり対象日付がないということなので出力
-                        //if (!isset($result->record_datetime) || isset($user_holiday_kubun)) {
-                        //if (!$before_out_flg || isset($user_holiday_kubun)) {
-                        // 1件前出力していず、休暇扱いか出勤日である場合は空の情報として出力する
-                        // if (!isset($result->record_datetime) &&
-                        //      (!$before_out_flg || isset($user_holiday_kubun)))
-                        // {
-                        // 有効打刻データがなくて、休暇扱いか出勤日である場合はtempに出力
-                        // 打刻されていれば出勤以外は出力対象外
-                        // $temp_out_flg1 = false;
-                        // $temp_out_flg2 = false;
-                        // $temp_out_flg3 = false;
-                        // if (isset($user_holiday_kubun) && $user_holiday_kubun >= (int)Config::get('const.C013.paid_holiday')) {
-                        //     $temp_out_flg1 = true;
-                        // }
-                        // if ($result->business_kubun == Config::get('const.C007.basic')) {
-                        //     $temp_out_flg2 = true;
-                        // }
-                        // if (!$attendance_target_flg)
-                        // {
-                        //     $temp_out_flg3 = true;
-                        // }
-                        // if ($temp_out_flg3 && ($temp_out_flg1 || $temp_out_flg2))
-                        // {
-                        // //if ($temp_out_flg ) {   // 20191012
-                        //     try{
-                        //         Log::debug('        打刻ないデータはtempに出力 $current_date = ');
-                        //         // 同じキーの場合
-                        //         if ($current_date == $before_date &&
-                        //             $current_department_code == $before_department_code &&
-                        //             $current_user_code == $before_user_code) {
-                        //             $noinput_user_cnt++;
-                        //         } else {
-                        //             $noinput_user_cnt = 1;
-                        //         }
-                        //         if ($noinput_user_cnt == 1) {
-                        //             $ptn = 0;
-                        //         } else {
-                        //             $ptn = 6;
-                        //         }
-                        //         if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
-                        //         if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
-                        //         if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
-                        //         if ($before_holiday_department_code != $result->department_code ||
-                        //             $before_holiday_user_code != $result->user_code ||
-                        //             $before_holiday_date != $result->user_working_date ||
-                        //             $before_holiday_kubun != $user_holiday_kubun) {
-                        //             $dt = date_format(new Carbon($target_date), 'Ymd');
-                        //             Log::debug('            ターゲット日付 = '.$dt);
-                        //             Log::debug('            ユーザー休暇   = '.$user_holiday_name);
-                        //             Log::debug('            　　　　日付   = '.$user_working_date);
-                        //             // setNoInputTimePtn implement
-                        //             $array_impl_setNoInputTimePtn = array (
-                        //                 'ptn' => $ptn,
-                        //                 'user_holiday_name' => $user_holiday_name,
-                        //                 'target_date' => $dt,
-                        //                 'hpliday_date' => $user_working_date,
-                        //                 'value_working_timetable_no' => $result->working_timetable_no
-                        //             );
-                        //             $this->pushArrayCalc($this->setNoInputTimePtn($array_impl_setNoInputTimePtn));
-                        //             // temporaryに登録する
-                        //             Log::debug('    temp_calc_workingtimesの登録開始');
-                        //             Log::debug('        現ユーザー = '.$current_user_code.' record_time = '.$result->record_datetime);
-                        //             // calcWorkingTimeDate implement
-                        //             $array_impl_insTempCalcItem = array (
-                        //                 'target_date' => $target_date,
-                        //                 'target_result' => $result
-                        //             );
-                        //             $this->insTempCalcItem($array_impl_insTempCalcItem);
-                        //             Log::debug('    temp_calc_workingtimesの登録終了');
-                        //         }
-                        //         // 日付とユーザー休暇区分を保存
-                        //         $before_holiday_date = $result->user_working_date;
-                        //         $before_holiday_user_code = $result->user_code;
-                        //         $before_holiday_department_code = $result->department_code;
-                        //         $before_holiday_kubun = $user_holiday_kubun;
-                        //     }catch(\PDOException $pe){
-                        //         $add_results = false;
-                        //         throw $pe;
-                        //     }
-                        //     // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
-                        //     $before_date = null;
-                        //     $before_user_code = null;
-                        //     $before_department_code = null;
-                        //     $before_result = null;
-                        //     $before_out_flg = true;
-                        //     // 次データ計算事前処理
-                        //     // 打刻データ配列の初期化
-                        //     $this->iniArrayWorkingTime();
-                        //     // 計算用配列の初期化
-                        //     $this->iniArrayCalc();
-                        // } else {
-                        //     $before_out_flg = true;
-                        //     Log::debug('        打刻ないデータはtempに出力しない '.$result->record_datetime);
-                        // }
+                        try{
+                            Log::debug('    temp_calc_workingtimesの登録開始');
+                            Log::debug('        現ユーザー = '.$result->user_code.' record_time = '.$result->record_datetime);
+                            // temporaryに登録する
+                            if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
+                            if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
+                            if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
+                            if ($before_holiday_department_code != $result->department_code ||
+                                $before_holiday_user_code != $result->user_code ||
+                                $before_holiday_date != $result->user_working_date ||
+                                $before_holiday_kubun != $user_holiday_kubun) {
+                                Log::debug('    temp_calc_workingtimesの登録開始');
+                                $dt = date_format(new Carbon($target_date), 'Ymd');
+                                Log::debug('            ターゲット日付 = '.$target_date);
+                                Log::debug('            ユーザー休暇  ='.$user_holiday_name);
+                                Log::debug('        　　　　    日付  = '.$user_working_date);
+                                $ptn = $chk_setting;
+                                // setNoInputTimePtn implement
+                                $array_impl_setNoInputTimePtn = array (
+                                    'ptn' => $ptn,
+                                    'user_holiday_name' => $user_holiday_name,
+                                    'target_date' => $dt,
+                                    'hpliday_date' => $user_working_date,
+                                    'value_working_timetable_no' => $result->working_timetable_no
+                                );
+                                $this->pushArrayCalc($this->setNoInputTimePtn($array_impl_setNoInputTimePtn));
+                                // calcWorkingTimeDate implement
+                                $array_impl_insTempCalcItem = array (
+                                    'target_date' => $result->record_date,
+                                    'target_result' => $result
+                                );
+                                $this->insTempCalcItem($array_impl_insTempCalcItem);
+                                Log::debug('    temp_calc_workingtimesの登録終了');
+                            }
+                            // 日付とユーザー休暇区分を保存
+                            $before_holiday_date = $result->user_working_date;
+                            $before_holiday_user_code = $result->user_code;
+                            $before_holiday_department_code = $result->department_code;
+                            $before_holiday_kubun = $user_holiday_kubun;
+                            $before_business_kubun = $result->business_kubun;
+                        }catch(\PDOException $pe){
+                            $add_results = false;
+                            throw $pe;
+                        }
+                        // 次データ計算事前処理
+                        // 打刻データ配列の初期化
+                        $this->iniArrayWorkingTime();
+                        // 計算用配列の初期化
+                        $this->iniArrayCalc();
                     }
                 } else {
+                    Log::debug('        $result->record_datetime = null 打刻データなし count($this->array_working_mode) = '.count($this->array_working_mode));
                     // 前のデータが打刻ありであれば計算する
                     $user_holiday_kubun = null;
                     $user_holiday_name = null;
                     $user_working_date = null;
                     if (count($this->array_working_mode) > 0) {
                         try{
+                            // ユーザー労働時間登録(１個前のユーザーを登録する)
                             Log::debug('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
                             Log::debug('            部署     = '.$before_result->department_name);
                             Log::debug('            打刻時刻 = '.$before_result->record_datetime);
@@ -1016,13 +1127,12 @@ class DailyWorkingInformationController extends Controller
                             );
                             $add_results = $this->addWorkingTime($array_impl_addWorkingTime);
                             // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
-                            $before_date = null;
+                            /*$before_date = null;
                             $before_user_code = null;
                             $before_department_code = null;
-                            $before_result = null;
+                            $before_result = null;*/
                             $before_out_flg = true;
-                            // 次データ計算事前処理
-                            // 打刻データ配列の初期化
+                        // 打刻データ配列の初期化
                             $this->iniArrayWorkingTime();
                             // 計算用配列の初期化
                             $this->iniArrayCalc();
@@ -1034,221 +1144,130 @@ class DailyWorkingInformationController extends Controller
                             throw $e;
                         }
                     }
-                    try{
-                        Log::debug('    temp_calc_workingtimesの登録開始');
-                        Log::debug('        現ユーザー = '.$result->user_code.' record_time = '.$result->record_datetime);
-                        // temporaryに登録する
-                        if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
-                        if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
-                        if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
-                        if ($before_holiday_department_code != $result->department_code ||
-                            $before_holiday_user_code != $result->user_code ||
-                            $before_holiday_date != $result->user_working_date ||
-                            $before_holiday_kubun != $user_holiday_kubun) {
-                            Log::debug('    temp_calc_workingtimesの登録開始');
-                            $dt = date_format(new Carbon($target_date), 'Ymd');
-                            Log::debug('            ターゲット日付 = '.$target_date);
-                            Log::debug('            ユーザー休暇  ='.$user_holiday_name);
-                            Log::debug('        　　　　    日付  = '.$user_working_date);
-                            $ptn = $chk_setting;
-                            // setNoInputTimePtn implement
-                            $array_impl_setNoInputTimePtn = array (
-                                'ptn' => $ptn,
-                                'user_holiday_name' => $user_holiday_name,
-                                'target_date' => $dt,
-                                'hpliday_date' => $user_working_date,
-                                'value_working_timetable_no' => $result->working_timetable_no
-                            );
-                            $this->pushArrayCalc($this->setNoInputTimePtn($array_impl_setNoInputTimePtn));
-                            // calcWorkingTimeDate implement
-                            $array_impl_insTempCalcItem = array (
-                                'target_date' => $result->record_date,
-                                'target_result' => $result
-                            );
-                            $this->insTempCalcItem($array_impl_insTempCalcItem);
-                            Log::debug('    temp_calc_workingtimesの登録終了');
+                    // 打刻ないデータはtempに出力
+                    // 20200414 add start
+                    Log::debug('        打刻ないデータ');
+                    if ($before_department_code != $result->department_code ||
+                        $before_user_code != $result->user_code ||
+                        $before_holiday_date != $result->user_working_date) {
+                        Log::debug('        データ break $result->user_holiday_kubun= '.$result->user_holiday_kubun);
+                        Log::debug('        データ break $result->business_kubun= '.$result->business_kubun);
+                        // 有効打刻データがなくて、休暇扱いか出勤日である場合はtempに出力
+                        // 打刻されていれば出勤以外は出力対象外
+                        $temp_out_flg1 = false;
+                        $temp_out_flg2 = false;
+                        $temp_out_flg3 = false;
+                        if (isset($result->user_holiday_kubun) && $result->user_holiday_kubun >= (int)Config::get('const.C013.paid_holiday')) {
+                            $temp_out_flg1 = true;
                         }
+                        if ($result->business_kubun == Config::get('const.C007.basic')) {
+                            $temp_out_flg2 = true;
+                        }
+                        if (!$attendance_target_flg)
+                        {
+                            $temp_out_flg3 = true;
+                        }
+                        Log::debug('        データ $temp_out_flg1 '.$temp_out_flg1);
+                        Log::debug('        データ $temp_out_flg2 '.$temp_out_flg2);
+                        Log::debug('        データ $temp_out_flg3 '.$temp_out_flg3);
+                        if ($temp_out_flg3 && ($temp_out_flg1 || $temp_out_flg2))
+                        {
+                            $array_impl_addHolidayTemp = array (
+                            'current_date' => $target_date_ymd,
+                            'current_result' => $result
+                            );
+                            $this->addHolidayTemp($array_impl_addHolidayTemp);
+                        }
+                        // } else {
+                        //     // if (!$before_out_flg) {
+                        //     //     $temp_non_date_flg = true;
+                        //     // }
+                        //     Log::debug('        打刻ないデータ 日付とユーザー休暇区分が１件前と同じ');
+                        //     $temp_non_date_flg = $before_out_flg;       // 20200303修正
+                        // }
+                    }
+                    // 20200414 add end
+    
+                    // ただし、日付とユーザー休暇区分が１件前と同じ場合は出力しない
+                    // Log::debug('        打刻ないデータ = '.$result->user_code.' record_time = '.$result->record_datetime.' before_out_flg = '.$before_out_flg);
+                    // $temp_non_date_flg = false;
+                    // if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
+                    // if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
+                    // if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
+                    // if (isset($before_result)) {
+                    //     Log::debug('        打刻ないデータ before_result あり');
+                    //     if ($before_result->department_code != $result->department_code ||
+                    //         $before_result->user_code != $result->user_code ||
+                    //         $before_result->user_working_date != $result->user_working_date ||
+                    //         $before_holiday_kubun != $user_holiday_kubun) {
+                    //         // if (!$before_out_flg) {
+                    //         //     $temp_non_date_flg = true;
+                    //         // }
+                    //         Log::debug('        打刻ないデータ 日付とユーザー休暇区分が１件前と同じでない');
+                    //         $temp_non_date_flg = $before_out_flg;       // 20200303修正
+                    //     } else {
+                    //         // if (!$before_out_flg) {
+                    //         //     $temp_non_date_flg = true;
+                    //         // }
+                    //         Log::debug('        打刻ないデータ 日付とユーザー休暇区分が１件前と同じ');
+                    //         $temp_non_date_flg = $before_out_flg;       // 20200303修正
+                    //     }
+                    // }
+                    // 1件前の日付がnullである場合、いきなり対象日付がないということなので出力
+                    // if (!$before_out_flg) {
+                    //     Log::debug('        打刻ないデータ いきなり対象日付がない');
+                    //     $temp_non_date_flg = true;
+                    // }
+                    // try{
+                    //     if($temp_non_date_flg) {
+                    //         Log::debug('    temp_calc_workingtimesの登録開始');
+                    //         $ptn = 0;
+                    //         $dt = date_format(new Carbon($target_date), 'Ymd');
+                    //         Log::debug('            ターゲット日付 = '.$dt);
+                    //         Log::debug('            ユーザー休暇  = '.$user_holiday_name);
+                    //         Log::debug('            　　　　日付  = '.$user_working_date);
+                    //         // setNoInputTimePtn implement
+                    //         $array_impl_setNoInputTimePtn = array (
+                    //             'ptn' => $ptn,
+                    //             'user_holiday_name' => $user_holiday_name,
+                    //             'target_date' => $dt,
+                    //             'hpliday_date' => $user_working_date,
+                    //             'value_working_timetable_no' => $result->working_timetable_no
+                    //         );
+                    //         $this->pushArrayCalc($this->setNoInputTimePtn($array_impl_setNoInputTimePtn));
+                    //         // temporaryに登録する
+                    //         // calcWorkingTimeDate implement
+                    //         $array_impl_insTempCalcItem = array (
+                    //             'target_date' => $target_date,
+                    //             'target_result' => $result
+                    //         );
+                    //         $this->insTempCalcItem($array_impl_insTempCalcItem);
+                    //         Log::debug('    temp_calc_workingtimesの登録終了');
+                    //     }
                         // 日付とユーザー休暇区分を保存
                         $before_holiday_date = $result->user_working_date;
                         $before_holiday_user_code = $result->user_code;
                         $before_holiday_department_code = $result->department_code;
                         $before_holiday_kubun = $user_holiday_kubun;
                         $before_business_kubun = $result->business_kubun;
-                    }catch(\PDOException $pe){
-                        $add_results = false;
-                        throw $pe;
-                    }
+                        // }catch(\PDOException $pe){
+                    //     $add_results = false;
+                    //     throw $pe;
+                    // }
+                    // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
+                    $before_date = null;
+                    $before_user_code = null;
+                    $before_department_code = null;
+                    $before_result = null;
+                    $before_out_flg = true;
                     // 次データ計算事前処理
                     // 打刻データ配列の初期化
                     $this->iniArrayWorkingTime();
                     // 計算用配列の初期化
                     $this->iniArrayCalc();
                 }
-            } else {
-                Log::debug('        $result->record_datetime = null 打刻データなし count($this->array_working_mode) = '.count($this->array_working_mode));
-                // 前のデータが打刻ありであれば計算する
-                $user_holiday_kubun = null;
-                $user_holiday_name = null;
-                $user_working_date = null;
-                if (count($this->array_working_mode) > 0) {
-                    try{
-                        // ユーザー労働時間登録(１個前のユーザーを登録する)
-                        Log::debug('        １個前のユーザーを登録開始 $before_user_code = '.$before_user_code);
-                        Log::debug('            部署     = '.$before_result->department_name);
-                        Log::debug('            打刻時刻 = '.$before_result->record_datetime);
-                        Log::debug('            モード   = '.$before_result->mode);
-                        Log::debug('            打刻日   = '.$before_result->record_date);
-                        // ユーザー労働時間登録
-                        // array_impl_addWorkingTime implement
-                        $array_impl_addWorkingTime = array (
-                            'target_date' => $before_date,
-                            'target_user_code' => $before_user_code,
-                            'target_department_code' => $before_department_code,
-                            'target_business_kubun' => $business_kubun,
-                            'target_result' => $before_result
-                        );
-                        $add_results = $this->addWorkingTime($array_impl_addWorkingTime);
-                        // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
-                        /*$before_date = null;
-                        $before_user_code = null;
-                        $before_department_code = null;
-                        $before_result = null;*/
-                        $before_out_flg = true;
-                    // 打刻データ配列の初期化
-                        $this->iniArrayWorkingTime();
-                        // 計算用配列の初期化
-                        $this->iniArrayCalc();
-                    }catch(\PDOException $pe){
-                        $add_results = false;
-                        throw $pe;
-                    }catch(\Exception $e){
-                        $add_results = false;
-                        throw $e;
-                    }
-                }
-                // 打刻ないデータはtempに出力
-                // 20200414 add start
-                Log::debug('        打刻ないデータ');
-                if ($before_department_code != $result->department_code ||
-                    $before_user_code != $result->user_code ||
-                    $before_holiday_date != $result->user_working_date) {
-                    Log::debug('        データ break $result->user_holiday_kubun= '.$result->user_holiday_kubun);
-                    Log::debug('        データ break $result->business_kubun= '.$result->business_kubun);
-                    // 有効打刻データがなくて、休暇扱いか出勤日である場合はtempに出力
-                    // 打刻されていれば出勤以外は出力対象外
-                    $temp_out_flg1 = false;
-                    $temp_out_flg2 = false;
-                    $temp_out_flg3 = false;
-                    if (isset($result->user_holiday_kubun) && $result->user_holiday_kubun >= (int)Config::get('const.C013.paid_holiday')) {
-                        $temp_out_flg1 = true;
-                    }
-                    if ($result->business_kubun == Config::get('const.C007.basic')) {
-                        $temp_out_flg2 = true;
-                    }
-                    if (!$attendance_target_flg)
-                    {
-                        $temp_out_flg3 = true;
-                    }
-                    Log::debug('        データ $temp_out_flg1 '.$temp_out_flg1);
-                    Log::debug('        データ $temp_out_flg2 '.$temp_out_flg2);
-                    Log::debug('        データ $temp_out_flg3 '.$temp_out_flg3);
-                    if ($temp_out_flg3 && ($temp_out_flg1 || $temp_out_flg2))
-                    {
-                        $array_impl_addHolidayTemp = array (
-                        'current_date' => $target_date_ymd,
-                        'current_result' => $result
-                        );
-                        $this->addHolidayTemp($array_impl_addHolidayTemp);
-                    }
-                    // } else {
-                    //     // if (!$before_out_flg) {
-                    //     //     $temp_non_date_flg = true;
-                    //     // }
-                    //     Log::debug('        打刻ないデータ 日付とユーザー休暇区分が１件前と同じ');
-                    //     $temp_non_date_flg = $before_out_flg;       // 20200303修正
-                    // }
-                }
-                // 20200414 add end
-
-                // ただし、日付とユーザー休暇区分が１件前と同じ場合は出力しない
-                // Log::debug('        打刻ないデータ = '.$result->user_code.' record_time = '.$result->record_datetime.' before_out_flg = '.$before_out_flg);
-                // $temp_non_date_flg = false;
-                // if(isset($result->user_holiday_kubun)) { $user_holiday_kubun = $result->user_holiday_kubun; }
-                // if(isset($result->user_holiday_name)) { $user_holiday_name = $result->user_holiday_name; }
-                // if(isset($result->user_working_date)) { $user_working_date = $result->user_working_date; }
-                // if (isset($before_result)) {
-                //     Log::debug('        打刻ないデータ before_result あり');
-                //     if ($before_result->department_code != $result->department_code ||
-                //         $before_result->user_code != $result->user_code ||
-                //         $before_result->user_working_date != $result->user_working_date ||
-                //         $before_holiday_kubun != $user_holiday_kubun) {
-                //         // if (!$before_out_flg) {
-                //         //     $temp_non_date_flg = true;
-                //         // }
-                //         Log::debug('        打刻ないデータ 日付とユーザー休暇区分が１件前と同じでない');
-                //         $temp_non_date_flg = $before_out_flg;       // 20200303修正
-                //     } else {
-                //         // if (!$before_out_flg) {
-                //         //     $temp_non_date_flg = true;
-                //         // }
-                //         Log::debug('        打刻ないデータ 日付とユーザー休暇区分が１件前と同じ');
-                //         $temp_non_date_flg = $before_out_flg;       // 20200303修正
-                //     }
-                // }
-                // 1件前の日付がnullである場合、いきなり対象日付がないということなので出力
-                // if (!$before_out_flg) {
-                //     Log::debug('        打刻ないデータ いきなり対象日付がない');
-                //     $temp_non_date_flg = true;
-                // }
-                // try{
-                //     if($temp_non_date_flg) {
-                //         Log::debug('    temp_calc_workingtimesの登録開始');
-                //         $ptn = 0;
-                //         $dt = date_format(new Carbon($target_date), 'Ymd');
-                //         Log::debug('            ターゲット日付 = '.$dt);
-                //         Log::debug('            ユーザー休暇  = '.$user_holiday_name);
-                //         Log::debug('            　　　　日付  = '.$user_working_date);
-                //         // setNoInputTimePtn implement
-                //         $array_impl_setNoInputTimePtn = array (
-                //             'ptn' => $ptn,
-                //             'user_holiday_name' => $user_holiday_name,
-                //             'target_date' => $dt,
-                //             'hpliday_date' => $user_working_date,
-                //             'value_working_timetable_no' => $result->working_timetable_no
-                //         );
-                //         $this->pushArrayCalc($this->setNoInputTimePtn($array_impl_setNoInputTimePtn));
-                //         // temporaryに登録する
-                //         // calcWorkingTimeDate implement
-                //         $array_impl_insTempCalcItem = array (
-                //             'target_date' => $target_date,
-                //             'target_result' => $result
-                //         );
-                //         $this->insTempCalcItem($array_impl_insTempCalcItem);
-                //         Log::debug('    temp_calc_workingtimesの登録終了');
-                //     }
-                    // 日付とユーザー休暇区分を保存
-                    $before_holiday_date = $result->user_working_date;
-                    $before_holiday_user_code = $result->user_code;
-                    $before_holiday_department_code = $result->department_code;
-                    $before_holiday_kubun = $user_holiday_kubun;
-                    $before_business_kubun = $result->business_kubun;
-                    // }catch(\PDOException $pe){
-                //     $add_results = false;
-                //     throw $pe;
-                // }
-                // 次データ計算事前処理(打刻ないデータはbeforeArrayWorkingTimeは使用しない)
-                $before_date = null;
-                $before_user_code = null;
-                $before_department_code = null;
-                $before_result = null;
-                $before_out_flg = true;
-                // 次データ計算事前処理
-                // 打刻データ配列の初期化
-                $this->iniArrayWorkingTime();
-                // 計算用配列の初期化
-                $this->iniArrayCalc();
+                $before_result = $result;
             }
-            $before_result = $result;
         }
 
         Log::debug('            count($this->array_working_mode) = '.count($this->array_working_mode));
@@ -1418,7 +1437,7 @@ class DailyWorkingInformationController extends Controller
         $target_department_code = $params['target_department_code'];
         $business_kubun = $params['target_business_kubun'];
         $target_result = $params['target_result'];
-        $interval = $target_result->interval;
+        $interval = $target_result->interval1;
         $user_holiday_kubun = $target_result->user_holiday_kubun;
         $target_record_time = $target_result->record_datetime;
 
@@ -1655,6 +1674,66 @@ class DailyWorkingInformationController extends Controller
                     'attendance_time_index' => $attendance_time_index
                 );
                 $this->setPublicGoingOutReturnTime($array_impl_setPublicGoingOutReturnTime);
+            } elseif ($value_mode == Config::get('const.C005.emergency_time')) {            // 緊急収集開始
+                $value_working_timetable_no = $this->array_working_timetable_no[$i];
+                $working_timetable_no_set = true;
+                // 出勤状態設定
+                // setAttendancetime implement
+                $array_impl_setEmergencytime = array (
+                    'cnt' => $cnt,
+                    'work_time' => $work_time,
+                    'value_record_datetime' => $value_record_datetime,
+                    'value_timetable_from_time' => $value_timetable_from_time,
+                    'value_timetable_to_time' => $value_timetable_to_time,
+                    'value_check_result' => $value_check_result,
+                    'value_check_max_times' => $value_check_max_times,
+                    'value_check_interval' => $value_check_interval,
+                    'value_record_datetime_id' => $value_record_datetime_id,
+                    'value_editor_department_code' => $value_editor_department_code,
+                    'value_editor_department_name' => $value_editor_department_name,
+                    'value_editor_user_code' => $value_editor_user_code,
+                    'value_editor_user_name' => $value_editor_user_name,
+                    'value_mobile_positions' => $value_mobile_positions,
+                    'before_value_mode' => $before_value_mode,
+                    'before_value_datetime' => $before_value_datetime,
+                    'business_kubun' => $business_kubun,
+                    'interval' => $interval,
+                    'user_holiday_kubun' => $user_holiday_kubun,
+                    'value_working_timetable_no' => $value_working_timetable_no
+                );
+                $this->setAttendancetime($array_impl_setEmergencytime);
+                if ($target_date == $record_date) {
+                    $attendance_time_index = $i;
+                }
+            } elseif ($value_mode == Config::get('const.C005.emergency_return_time')) {         // 緊急収集終了の場合
+                if (!$working_timetable_no_set) {
+                    $value_working_timetable_no = $this->array_working_timetable_no[$i];
+                }
+                // 退勤状態設定
+                // setAttendancetime implement
+                $array_impl_setEmergencyreturntime = array (
+                    'cnt' => $cnt,
+                    'work_time' => $work_time,
+                    'value_record_datetime' => $value_record_datetime,
+                    'value_record_datetime_id' => $value_record_datetime_id,
+                    'value_editor_department_code' => $value_editor_department_code,
+                    'value_editor_department_name' => $value_editor_department_name,
+                    'value_editor_user_code' => $value_editor_user_code,
+                    'value_editor_user_name' => $value_editor_user_name,
+                    'value_timetable_from_time' => $value_timetable_from_time,
+                    'value_timetable_to_time' => $value_timetable_to_time,
+                    'value_check_result' => $value_check_result,
+                    'value_check_max_times' => $value_check_max_times,
+                    'value_mobile_positions' => $value_mobile_positions,
+                    'before_value_mode' => $before_value_mode,
+                    'before_value_datetime' => $before_value_datetime,
+                    'business_kubun' => $business_kubun,
+                    'user_holiday_kubun' => $user_holiday_kubun,
+                    'value_working_timetable_no' => $value_working_timetable_no,
+                    'attendance_time_index' => $attendance_time_index
+                );
+                $this->setLeavingtime($array_impl_setEmergencyreturntime);
+                $working_timetable_no_set = false;
             }
             $before_value_mode = $value_mode;
             $before_value_datetime = $value_record_datetime;
@@ -9241,5 +9320,239 @@ class DailyWorkingInformationController extends Controller
 
         return $array_working_time_dates;
     }
+ 
+    /**
+     * 打刻データSKIP判定
+     * 
+     *
+     * @return 
+     */
+    private function isDupTime($result, $before_result)
+    {
+        if ($result == null || $before_result == null) {
+            return true;
+        }
+        if (($result->record_datetime == null || $result->record_datetime == "") ||
+            ($before_result->record_datetime == null || $before_result->record_datetime == "")) {
+            return true;
+        }
+        // 直前のデータと同じか？
+        if ($result->user_code != $before_result->user_code ||
+            $result->department_code != $before_result->department_code ||
+            $result->record_date != $before_result->record_date ||
+            $result->record_datetime != $before_result->record_datetime ||
+            $result->mode != $before_result->mode) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+ 
+    /**
+     * モードや出勤打刻回数によるタイムテーブル所定時刻の設定
+     * 
+     *
+     * @return 
+     */
+    private function setWorkingtimetabletime($params)
+    {
+        try {
+            $target_date = $params['target_date'];
+            $feature_attendance_count = $params['feature_attendance_count'];
+            $attendance_work_time = $params['attendance_work_time'];
+            $result = $params['result'];
+            $working_from_time = null;
+            $working_to_time = null;
+            // 緊急
+            if ($result->mode == Config::get('const.C005.emergency_time')) {
+                $dt = new Carbon($result->record_datetime);
+                $w_dt = date_format($dt, 'H:i:s');
+                $working_from_time = $w_dt;
+                // 退勤時刻はまだ取得されていないことになるので
+                // 仮に同じ時刻（=24時間後）に設定する
+                $working_to_time = $w_dt;
+                $array_workingHours = array(
+                    'working_from_time' => $working_from_time,
+                    'working_to_time' => $working_to_time
+                );
+                return $array_workingHours;
+            } else if ($result->mode == Config::get('const.C005.emergency_return_time')) {
+                $dt_start = new Carbon($attendance_work_time);
+                $w_dt_start = date_format($dt_start, 'H:i:s');
+                $dt = new Carbon($result->record_datetime);
+                $w_dt = date_format($dt, 'H:i:s');
+                $working_from_time = $w_dt_start;
+                $working_to_time = $w_dt;
+                $array_workingHours = array(
+                    'working_from_time' => $working_from_time,
+                    'working_to_time' => $working_to_time
+                );
+                return $array_workingHours;
+            }
 
+            // 出退勤打刻回数 feature_attendance_count
+            if ($feature_attendance_count == 1) {
+                // そのまま返却
+                $working_from_time = $result->working_timetable_from_time;
+                $working_to_time = $result->working_timetable_to_time;
+                $array_workingHours = array(
+                    'working_from_time' => $working_from_time,
+                    'working_to_time' => $working_to_time
+                );
+                return $array_workingHours;
+            }
+            // 外出
+            if ($result->mode == Config::get('const.C005.missing_middle_time') ||
+                $result->mode == Config::get('const.C005.missing_middle_return_time') ||
+                $result->mode == Config::get('const.C005.public_going_out_time') ||
+                $result->mode == Config::get('const.C005.public_going_out_return_time')) {
+                // そのまま返却
+                $working_from_time = $result->working_timetable_from_time;
+                $working_to_time = $result->working_timetable_to_time;
+                $array_workingHours = array(
+                    'working_from_time' => $working_from_time,
+                    'working_to_time' => $working_to_time
+                );
+                return $array_workingHours;
+            }
+
+            // 出退勤
+            if ($result->mode == Config::get('const.C005.attendance_time') || $result->mode == Config::get('const.C005.leaving_time')) {
+                // タイムテーブル　開始終了時刻が対応されていないため、打刻時刻より開始終了時刻を特定する
+                $apicommon = new ApiCommonController();
+                // calcWorkingTimeDate implement
+                $array_impl_getWorkingHoursByStamp = array (
+                    'target_date' => $target_date,
+                    'department_code' => $result->department_code,
+                    'user_code' => $result->user_code,
+                    'mode' => $result->mode,
+                    'record_datetime' => $result->record_datetime
+                );
+                $array_result = array();
+                $array_result = $apicommon->getWorkingHoursByStamp($array_impl_getWorkingHoursByStamp);
+                $working_from_time = $array_result['working_from_time'];
+                $working_to_time = $array_result['working_to_time'];
+            }
+
+            if ($working_from_time == null) { $working_from_time = $result->working_timetable_from_time; }
+            if ($working_to_time == null) { $working_to_time = $result->working_timetable_to_time; }
+            // 設定
+            $array_workingHours = array(
+                'working_from_time' => $working_from_time,
+                'working_to_time' => $working_to_time
+            );
+            return $array_workingHours;
+        }catch(\PDOException $pe){
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
+            throw $pe;
+        }catch(\Exception $e){
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+  
+    /**
+     * 当日の計算対象となるか
+     * 
+     *
+     * @return 
+     */
+    private function isCurrentDateCalc($params)
+    {
+        $target_date = $params['target_date_ymd'];
+        $result = $params['result'];
+        $attendance_flg = $params['attendance_flg'];        // 対応する出勤モードの集計対象flg
+        
+        $target_flg = false;                    // 当日の計算対象
+        $dt = new Carbon($target_date);
+        $w_minus1_ymd = date_format($dt->copy()->subDay(), 'Y-m-d');        // 前日
+        $w_today_ymd = date_format($dt->copy(), 'Y-m-d');                   // 当日
+        $w_plus1_ymd = date_format($dt->copy()->addDay(), 'Y-m-d');         // 翌日
+        $w_plus2_ymd = date_format($dt->copy()->addDay(2), 'Y-m-d');        // 翌日+1
+        Log::debug('         isCurrentDateCalc $w_minus1_ymd = '.$w_minus1_ymd);
+        Log::debug('         isCurrentDateCalc $w_today_ymd = '.$w_today_ymd);
+        Log::debug('         isCurrentDateCalc $w_plus1_ymd = '.$w_plus1_ymd);
+        Log::debug('         isCurrentDateCalc $w_plus2_ymd = '.$w_plus2_ymd);
+        //  タイムテーブル開始時刻
+        $w_minus1_from_datetime = $w_minus1_ymd.' '.$result->working_timetable_from_time;       // 前日のタイムテーブル開始時刻
+        $w_today_from_datetime = $w_today_ymd.' '.$result->working_timetable_from_time;         // 当日のタイムテーブル開始時刻
+        $w_plus1_from_datetime = $w_plus1_ymd.' '.$result->working_timetable_from_time;         // 翌日のタイムテーブル開始時刻
+        //  タイムテーブル終了時刻
+        if ($result->working_timetable_from_time <= $result->working_timetable_to_time) {
+            $w_minus1_to_datetime = $w_minus1_ymd.' '.$result->working_timetable_to_time;       // 前日のタイムテーブル終了時刻
+            $w_today_to_datetime = $w_today_ymd.' '.$result->working_timetable_to_time;         // 当日のタイムテーブル終了時刻
+            $w_plus1_to_datetime = $w_plus1_ymd.' '.$result->working_timetable_to_time;         // 翌日のタイムテーブル終了時刻
+        } else {
+            $w_minus1_to_datetime = $w_today_ymd.' '.$result->working_timetable_to_time;        // 前日のタイムテーブル終了時刻
+            $w_today_to_datetime = $w_plus1_ymd.' '.$result->working_timetable_to_time;         // 当日のタイムテーブル終了時刻
+            $w_plus1_to_datetime = $w_plus2_ymd.' '.$result->working_timetable_to_time;         // 翌日のタイムテーブル終了時刻
+        }
+        Log::debug('         isCurrentDateCalc w_minus1_from_datetime = '.$w_minus1_from_datetime);
+        Log::debug('         isCurrentDateCalc w_minus1_to_datetime = '.$w_minus1_to_datetime);
+        Log::debug('         isCurrentDateCalc w_today_from_datetime = '.$w_today_from_datetime);
+        Log::debug('         isCurrentDateCalc w_today_to_datetime = '.$w_today_to_datetime);
+        Log::debug('         isCurrentDateCalc w_plus1_from_datetime = '.$w_plus1_from_datetime);
+        Log::debug('         isCurrentDateCalc w_plus1_to_datetime = '.$w_plus1_to_datetime);
+
+        // 出勤または緊急取集開始
+        if ($result->mode == Config::get('const.C005.attendance_time') ||
+            $result->mode == Config::get('const.C005.emergency_time')) {
+            // 出勤打刻時刻 >= 当日のタイムテーブル開始時刻  and 出勤打刻時刻 <= 当日のタイムテーブル終了時刻
+            // の場合、当日の計算対象とする
+            if ($result->record_datetime >= $w_today_from_datetime &&
+                $result->record_datetime <= $w_today_to_datetime) {
+                $target_flg = true;
+            } else {
+                // 出勤打刻時刻 >= 前日のタイムテーブル終了時刻  and 出勤打刻時刻 < 当日のタイムテーブル開始時刻
+                // の場合、当日の計算対象とする
+                if ($result->record_datetime >= $w_minus1_to_datetime &&
+                    $result->record_datetime < $w_today_from_datetime) {
+                    $target_flg = true;
+                } else {
+                    $target_flg = false;
+                }
+            }
+        } else {
+            // 出勤または緊急取集開始ではない場合は対応する出勤モードの集計対象flgより設定
+            // 出対応する出勤モードの集計対象flgがtrue（出勤打刻があった）の場合は対象
+            if ($attendance_flg) {
+                $target_flg = true;
+            } else {
+                // if ($result->working_timetable_from_time <= $result->working_timetable_to_time) {
+                //     $target_flg = false;
+                // } else {
+                //     if ($result->record_date > $target_date) {
+                //         $target_flg = true;
+                //     } else {
+                //         $target_flg = false;
+                //     }
+                // }
+                // 出対応する出勤モードの集計対象flgがfalse（出勤打刻がなかった）の場合は
+                // タイムテーブル開始時刻>タイムテーブル終了時刻の場合は前日の夜勤と考えられるので
+                // 集計対象外とする
+                // 打刻時刻 < 当日のタイムテーブル開始時刻
+                // の場合、当日の計算対象とする
+                if ($result->record_datetime < $w_today_from_datetime) {
+                    $target_flg = true;
+                } else {
+                    $target_flg = false;
+                }
+                // -----------------------　20200321コメント化 start --------------------- 
+                // if ($current_department_code != $before_department_code ||
+                //     $current_user_code != $before_user_code) {
+                //     $attendance_target_flg = false;
+                // }
+                // $target_flg = $attendance_target_flg;
+                // -----------------------　20200321コメント化 end --------------------- 
+                // -----------------------　20200215コメント化 start --------------------- 
+                // if ($result->mode == Config::get('const.C005.leaving_time')) {
+                //     $attendance_target_flg = false;
+                // }
+                // -----------------------　20200215コメント化 end --------------------- 
+            }
+        }
+
+        return $target_flg;
+    }
 }

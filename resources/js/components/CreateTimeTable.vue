@@ -286,11 +286,13 @@
           <div class="card-header bg-transparent pt-3 border-0">
             <h1 class="float-sm-left font-size-rg">
               <span>
-                <button class="btn btn-success btn-lg font-size-rg" v-on:click="appendRowClick">+</button>
+                <button
+                  class="btn btn-success btn-lg font-size-rg" v-on:click="appendRowClick"
+                >＋履歴追加</button>
               </span>
               {{ this.selectedName }}
             </h1>
-            <span class="float-sm-right font-size-sm">「＋」アイコンで新規に追加することができます</span>
+            <span class="float-sm-right font-size-sm">「＋」アイコンで新規に履歴追加することができます</span>
           </div>
           <!-- /.panel header -->
           <!-- ----------- 「＋」アイコン部 END ---------------- -->
@@ -783,13 +785,18 @@ import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
 // CONST
-const CONST_ATTENDANCE_COUNT_CODE = '1';
+const CONST_C042 = 'C042';
+const CONST_ATTENDANCE_COUNT_PHYSICAL_NAME = 'attendance_count';
 
 export default {
   name: "CreateTimeTable",
   mixins: [ dialogable, checkable, requestable ],
   props: {
     feature_item_selections: {
+        type: Array,
+        default: []
+    },
+    const_generaldatas: {
         type: Array,
         default: []
     }
@@ -822,16 +829,18 @@ export default {
       timeRow_count: 0,
       regularTime_count: 0,
       regularRestTime_count: 5,
-      midnightTime_count: 1
+      midnightTime_count: 1,
+      attendance_code: ""
     };
   },
   computed: {
     get_RegularTime: function() {
       var array_set = [{}];
+      var attendance = this.get_AttendanceCountCode;
       this.regularTime = [];
       let $this = this;
       this.feature_item_selections.forEach( function( item ) {
-        if (item.item_code == CONST_ATTENDANCE_COUNT_CODE) {
+        if (item.item_code == attendance) {
           $this.regularTime_count = Number(item.value_select);
           for(var i=0;i<$this.regularTime_count;i++) {
               array_set = {
@@ -869,6 +878,20 @@ export default {
           this.midnightTime.push(array_set);
       }
       return this.midnightTime;
+    },
+    get_AttendanceCountCode: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C042) {
+          if (item.physical_name == CONST_ATTENDANCE_COUNT_PHYSICAL_NAME) {
+            $this.attendance_code = item.code;
+            return $this.attendance_code;
+          }
+        }
+        i++;
+      });    
+      return this.attendance_code;
     },
     get_TimeRowCount: function() {
       if (this.regularTime_count == 0) {
@@ -1046,10 +1069,10 @@ export default {
         var chkdt = moment(this.details[(index-1) * this.timeRow_count].apply_term_from).format('YYYYMMDD');
         var chksourcedt = "";
         if (this.details[(index-1) * this.timeRow_count].result == '2') {
-          for (var i=index;i<=this.before_count;i++) {
+          for (var i=index;i<this.before_count;i++) {
             chksourcedt = moment(this.details[(i) * this.timeRow_count].apply_term_from).format('YYYYMMDD');
             if (chkdt <= chksourcedt) {
-              this.messagevalidatesEdt.push("現在適用中の適用開始日付以前の日付は登録できません");
+              this.messagevalidatesEdt.push("現在適用中の適用開始日付（" + chksourcedt + "）以前の適用開始日付は登録できません");
             }
           }
         }
@@ -1287,32 +1310,42 @@ export default {
         messages.push("１度に追加できる情報は１個です。追加してから再実行してください");
         this.htmlMessageSwal("エラー", messages, "error", true, false);
       } else {
-        var no = this.details[0].no;
-        var name = this.details[0].name;
-        var j=this.timeRow_count - 1;
-        var working_time_kubun_val = null;
-        for( var i=0;i<this.timeRow_count;i++ ) {
-          // if (i < 1) {
-          //   working_time_kubun_val = 4;
-          // } else if (i < this.regularRestTime_count + 1) {
-          //     working_time_kubun_val = 2;
-          // } else {
-          //     working_time_kubun_val = 1;
-          // }
-          this.details.unshift({
-            id: "",
-            no: no,
-            name: name,
-            working_time_kubun: this.details[j].working_time_kubun,
-            apply_term_from: "",
-            from_time: this.details[j].from_time,
-            to_time: this.details[j].to_time,
-            result: 2,
-            created_user: "",
-            updated_user: ""
-          });
+        // 入力した内容が残っている場合があるのでチェックを行う
+        var flag = true;
+        for (var i=1;i<=this.before_count;i++) {
+          flag = this.checkFormFix(i);
+          if (!flag) {
+            i = this.before_count + 1;
+          }
         }
-        this.count = this.details.length / this.timeRow_count;
+        if (flag) {
+          var no = this.details[0].no;
+          var name = this.details[0].name;
+          var j=this.timeRow_count - 1;
+          var working_time_kubun_val = null;
+          for( var i=0;i<this.timeRow_count;i++ ) {
+            // if (i < 1) {
+            //   working_time_kubun_val = 4;
+            // } else if (i < this.regularRestTime_count + 1) {
+            //     working_time_kubun_val = 2;
+            // } else {
+            //     working_time_kubun_val = 1;
+            // }
+            this.details.unshift({
+              id: "",
+              no: no,
+              name: name,
+              working_time_kubun: this.details[j].working_time_kubun,
+              apply_term_from: "",
+              from_time: this.details[j].from_time,
+              to_time: this.details[j].to_time,
+              result: 2,
+              created_user: "",
+              updated_user: ""
+            });
+          }
+          this.count = this.details.length / this.timeRow_count;
+        }
       }
     },
     // 行削除ボタンクリック処理
@@ -1482,7 +1515,6 @@ export default {
         this.refreshItemList();
         this.getItem();
         this.count = this.details.length / this.timeRow_count;
-        console.log('count = ' + this.count);
         this.before_count = this.count;
       } else {
         if (res.messagedata.length > 0) {

@@ -208,14 +208,12 @@ import {requestable} from '../mixins/requestable.js';
 const CONST_C005 = 'C005';
 const CONST_C013 = 'C013';
 const CONST_C025_ADMINUSER_INDEX = 2;   // index
+const CONST_C042 = 'C042';
+const CONST_MODE_LIST_PHYSICAL_NAME = 'mode_list';
 
 // 打刻モード
 const ATTENDANCE = 1;
 const LEAVING = 2;
-const OFFICIAL_OUT_START = 11;
-const OFFICIAL_OUT_END = 12;
-const PRIVATE_OUT_START = 21;
-const PRIVATE_OUT_END = 22;
 // 休暇区別
 const ALLDAY = 1;
 const HALFDAY_AM = 2;
@@ -240,37 +238,44 @@ export default {
   mixins: [ dialogable, checkable, requestable ],
   props: {
     authusers: {
-        type: Array,
-        default: []
+      type: Array,
+      default: []
     },
     const_c025: {
-        type: Array,
-        default: []
+      type: Array,
+      default: []
     },
     const_generaldatas: {
-        type: Array,
-        default: []
+      type: Array,
+      default: []
     },
     heads: {
-        type: Array,
-        default: []
+      type: Array,
+      default: []
     },
     accountdatas: {
-        type: Array,
-        default: []
+      type: Array,
+      default: []
     },
     halfautoset: {
-        type: Boolean,
-        default: true
+      type: Boolean,
+      default: true
+    },
+    featureItemSelections: {
+      type: Array,
+      default: []
     }
   },
   computed: {
     get_C005: function() {
       let $this = this;
+      var mode_list_value_select = this.get_ModelistValue;
       var i = 0;
       this.const_generaldatas.forEach( function( item ) {
         if (item.identification_id == CONST_C005) {
-          $this.const_C005_data.push($this.const_generaldatas[i]);
+          if (item.use_free_item <= mode_list_value_select) {
+            $this.const_C005_data.push($this.const_generaldatas[i]);
+          }
         }
         i++;
       });    
@@ -286,6 +291,35 @@ export default {
         i++;
       });    
       return this.const_C013_data;
+    },
+    get_ModeListCode: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C042) {
+          if (item.physical_name == CONST_MODE_LIST_PHYSICAL_NAME) {
+            $this.mode_list_code = item.code;
+            return $this.mode_list_code;
+          }
+        }
+        i++;
+      });    
+      return this.mode_list_code;
+    },
+    get_ModelistValue: function() {
+      var modecode = this.get_ModeListCode;
+      if (this.mode_list_value_select != null && this.mode_list_value_select != "") {
+          return $this.mode_list_value_select;
+      }
+      let $this = this;
+      this.featureItemSelections.forEach( function( item ) {
+        if (item.item_code == modecode) {
+          $this.mode_list_value_select = item.value_select;
+          return $this.mode_list_value_select;
+        }
+      });
+
+      return this.mode_list_value_select;
     },
     get_AdminUserIndex: function() {
       return CONST_C025_ADMINUSER_INDEX;
@@ -318,7 +352,9 @@ export default {
       isgoadddatebutton: false,
       ja: ja,
       validate: false,
-      dspdates: []
+      dspdates: [],
+      mode_list_code: "",
+      mode_list_value_select: ""
     };
   },
   components: {

@@ -419,14 +419,26 @@ class EditAttendanceLogController extends Controller
                     }
                 }
                 if (isset($item->mode)) {
-                    if ($item->mode ==  Config::get('const.C012.attendance')) {
+                    if ($item->mode ==  Config::get('const.C005.attendance_time')) {
                         if ($attendance_time == "") {
                             $attendance_time = $item->scan_time;
                             $attendance_record_time = $item->record_time;
                             $attendance_id = $item->id;
                         }
                     }
-                    if ($item->mode ==  Config::get('const.C012.leaving')) {
+                    if ($item->mode ==  Config::get('const.C005.emergency_time')) {
+                        if ($attendance_time == "") {
+                            $attendance_time = $item->scan_time;
+                            $attendance_record_time = $item->record_time;
+                            $attendance_id = $item->id;
+                        }
+                    }
+                    if ($item->mode ==  Config::get('const.C005.leaving_time')) {
+                        $leaving_time = $item->scan_time;
+                        $leaving_record_time = $item->record_time;
+                        $leaving_id = $item->id;
+                    }
+                    if ($item->mode ==  Config::get('const.C005.emergency_return_time')) {
                         $leaving_time = $item->scan_time;
                         $leaving_record_time = $item->record_time;
                         $leaving_id = $item->id;

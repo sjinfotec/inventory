@@ -185,7 +185,7 @@ class ApiGetAttendanceResultController extends Controller
                     if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
                         $chk_result = $apicommon->chkMode($mode, $this->source_mode);
                         if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
-                            // 出勤インターバルチェック
+                            // 出勤インターバルチェック（緊急はやらない）
                             if ($mode == Config::get('const.C005.attendance_time')) {
                                 if ($this->source_mode == Config::get('const.C005.leaving_time')) {
                                     $check_interval = $apicommon->chkInteval($systemdate, $result->record_datetime);

@@ -2630,7 +2630,9 @@ class WorkingTimedate extends Model
             $str_replace_working_status5 =str_replace('{5}', Config::get('const.C012.missing_middle_return'), $str_replace_working_status4);
             $str_replace_working_status6 =str_replace('{6}', Config::get('const.C012.public_going_out'), $str_replace_working_status5);
             $str_replace_working_status7 =str_replace('{7}', Config::get('const.C012.public_going_out_return'), $str_replace_working_status6);
-            $str_replace_working_status8 =str_replace('{8}', Config::get('const.C012.continue_work'), $str_replace_working_status7);
+            $str_replace_working_status8 =str_replace('{8}', Config::get('const.C012.emergency'), $str_replace_working_status7);
+            $str_replace_working_status9 =str_replace('{9}', Config::get('const.C012.emergency_return'), $str_replace_working_status8);
+            $str_replace_working_status10 =str_replace('{10}', Config::get('const.C012.continue_work'), $str_replace_working_status9);
 
             $str_replace_go_out0 =str_replace('{0}', $this->table.'.working_status', $case_go_out);
             $str_replace_go_out1 =str_replace('{1}', Config::get('const.C012.missing_middle'), $str_replace_go_out0);
@@ -2680,7 +2682,7 @@ class WorkingTimedate extends Model
                 ->selectRaw('sum(ifnull('.$this->table.'.out_of_legal_working_holiday_night_overtime_hours, 0)) as out_of_legal_working_holiday_night_overtime_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.legal_working_holiday_hours, 0)) as legal_working_holiday_hours')
                 ->selectRaw('sum(ifnull('.$this->table.'.legal_working_holiday_night_overtime_hours, 0)) as legal_working_holiday_night_overtime_hours')
-                ->selectRaw('sum('.$str_replace_working_status8.') as total_working_status')
+                ->selectRaw('sum('.$str_replace_working_status10.') as total_working_status')
                 ->selectRaw('sum('.$str_replace_go_out2.') as total_go_out')
                 ->selectRaw('sum('.$str_replace_paid_holidays3.') as total_paid_holidays')
                 ->selectRaw('sum('.$str_replace_holiday_kubun11.') as total_holiday_kubun')

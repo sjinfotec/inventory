@@ -17,7 +17,6 @@ class WorkTimeLog extends Model
     protected $table_departments = 'departments';
     protected $table_generalcodes = 'generalcodes';
     protected $table_user_holiday_kubuns = 'user_holiday_kubuns';
-    protected $table_working_timetables = 'working_timetables';
     //--------------- メンバー属性 -----------------------------------
 
     private $id;
@@ -223,21 +222,13 @@ class WorkTimeLog extends Model
             $sqlString .= "    , t1.department_code as department_code ";
             $sqlString .= "    , t5.name as department_name ";
             $sqlString .= "    , t3.mode as mode ";
-            $sqlString .= "    , case ifnull(t3.record_time,'') ";
-            $sqlString .= "      when '' then '-' ";
-            $sqlString .= "      else ";
-            $sqlString .= "        case DATE_FORMAT(t3.record_time, '%H:%i') ";
-            $sqlString .= "        when '00:00' then '-' ";
-            $sqlString .= "        else ";
-            $sqlString .= "          DATE_FORMAT(t3.record_time, '%m/%d %H:%i') ";
-            $sqlString .= "        end ";
-            $sqlString .= "      end as record_time_name ";
+            $sqlString .= "    , DATE_FORMAT(t3.record_time, '%m/%d %H:%i')as record_time_name ";
             $sqlString .= "    , t3.record_time as record_time ";
             $sqlString .= "    , t3.x_positions as x_positions ";
             $sqlString .= "    , t3.y_positions as y_positions ";
             $sqlString .= "    , t4.holiday_kubun as holiday_kubun ";
             $sqlString .= "    , case ifnull(t3.mode,'') ";
-            $sqlString .= "      when '' then '-' ";
+            $sqlString .= "      when '' then '未出勤' ";
             $sqlString .= "      else ";
             $sqlString .= "        (select code_name from ".$this->table_generalcodes." where identification_id = ? and code = t3.mode and is_deleted = ?) ";
             $sqlString .= "      end as mode_name  ";
@@ -265,7 +256,7 @@ class WorkTimeLog extends Model
             $sqlString .= "        ? = ? ";
             $sqlString .= "        and apply_term_from <= ? ";
             $sqlString .= "        and kill_from_date >  ? ";
-            $sqlString .= "        and role < ? ";
+            $sqlString .= "        and role <= ? ";
             $sqlString .= "        and is_deleted = ? ";
             $sqlString .= "      group by ";
             $sqlString .= "        code ";
