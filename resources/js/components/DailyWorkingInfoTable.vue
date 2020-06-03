@@ -32,7 +32,7 @@
                 </td>-->
                 <td class="text-center align-middle mw-rem-3">所定</td>
                 <!-- <td class="text-center align-middle mw-rem-5">{{ predeterTimeSecondName }}</td>
-                <td class="text-center align-middle mw-rem-5">{{ predeterNightTimeSecondName }}</td> -->
+                <td class="text-center align-middle mw-rem-5">{{ predeterNightTimeSecondName }}</td>-->
                 <td class="text-center align-middle mw-rem-5">残業時間</td>
                 <td class="text-center align-middle mw-rem-5">深夜残業</td>
                 <td class="text-center align-middle mw-rem-5">法定休日</td>
@@ -77,7 +77,7 @@
                 <td class="text-center align-middle mw-rem-3">所定</td>
                 <td class="text-center align-middle mw-rem-3">所定外</td>
                 <!-- <td class="text-center align-middle mw-rem-5">{{ predeterTimeSecondName }}</td>
-                <td class="text-center align-middle mw-rem-5">{{ predeterNightTimeSecondName }}</td> -->
+                <td class="text-center align-middle mw-rem-5">{{ predeterNightTimeSecondName }}</td>-->
                 <td class="text-center align-middle mw-rem-5">残業時間</td>
                 <td class="text-center align-middle mw-rem-5">深夜残業</td>
                 <td class="text-center align-middle mw-rem-5">法定休日</td>
@@ -131,8 +131,7 @@
                       calcList.y_attendance_time_positions,
                       index,
                       mode_attendance)"
-                >
-                </daily-working-info-time-table>
+                ></daily-working-info-time-table>
                 <!-- /出勤 -->
                 <!-- 退勤 -->
                 <daily-working-info-time-table
@@ -160,8 +159,7 @@
                       calcList.y_leaving_time_positions,
                       index,
                       mode_leaving)"
-                >
-                </daily-working-info-time-table>
+                ></daily-working-info-time-table>
                 <!-- /退勤 -->
                 <!-- 公用外出　開始 -->
                 <daily-working-info-time-table
@@ -189,8 +187,7 @@
                       calcList.y_public_going_out_time_positions,
                       index,
                       mode_official_out_start)"
-                >
-                </daily-working-info-time-table>
+                ></daily-working-info-time-table>
                 <!-- /公用外出　終了 -->
                 <!-- 公用外出戻り　開始 -->
                 <daily-working-info-time-table
@@ -218,8 +215,7 @@
                       calcList.y_public_going_out_return_time_positions,
                       index,
                       mode_official_out_end)"
-                >
-                </daily-working-info-time-table>
+                ></daily-working-info-time-table>
                 <!-- /公用外出戻り　終了 -->
                 <!-- 私用外出　開始 -->
                 <daily-working-info-time-table
@@ -247,8 +243,7 @@
                       calcList.y_missing_middle_time_positions,
                       index,
                       mode_private_out_start)"
-                >
-                </daily-working-info-time-table>
+                ></daily-working-info-time-table>
                 <!-- /私用外出　終了 -->
                 <!-- 私用外出戻り　開始 -->
                 <daily-working-info-time-table
@@ -276,10 +271,9 @@
                       calcList.y_missing_middle_return_time_positions,
                       index,
                       mode_private_out_end)"
-                >
-                </daily-working-info-time-table>
-                <!-- /私用外出戻り　終了 -->    
-                <!-- 勤務状態 -->    
+                ></daily-working-info-time-table>
+                <!-- /私用外出戻り　終了 -->
+                <!-- 勤務状態 -->
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-if="calcList.holiday_description === '1日集計対象休暇'"
@@ -288,7 +282,7 @@
                   class="text-center align-middle mw-rem-5"
                   v-else
                 >{{ calcList.working_status_name }}</td>
-                <!-- /勤務状態 -->    
+                <!-- /勤務状態 -->
                 <!-- タイムテーブル名 -->
                 <td class="text-center align-middle mw-rem-10">{{ calcList.working_timetable_name }}</td>
                 <!-- /タイムテーブル名 -->
@@ -309,20 +303,14 @@
                   class="text-center align-middle mw-rem-5"
                   v-if="calcList.business_kubun !== '2' && calcList.business_kubun !== '3'"
                 >{{ calcList.off_hours_working_hours }}</td>
-                <td
-                  class="text-center align-middle mw-rem-5"
-                  v-else
-                >00:00</td>
+                <td class="text-center align-middle mw-rem-5" v-else>00:00</td>
                 <!-- /時間外労働時間 -->
                 <!-- 深夜残業時間 -->
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-if="calcList.business_kubun !== '2' && calcList.business_kubun !== '3'"
                 >{{ calcList.late_night_overtime_hours }}</td>
-                <td
-                  class="text-center align-middle mw-rem-5"
-                  v-else
-                >00:00</td>
+                <td class="text-center align-middle mw-rem-5" v-else>00:00</td>
                 <!-- /深夜残業時間 -->
                 <!-- 法定休日労働時間 -->
                 <td
@@ -333,10 +321,7 @@
                   class="text-center align-middle mw-rem-5"
                   v-else-if="calcList.business_kubun === ''"
                 ></td>
-                <td
-                  class="text-center align-middle mw-rem-5"
-                  v-else
-                >00:00</td>
+                <td class="text-center align-middle mw-rem-5" v-else>00:00</td>
                 <!-- /法定休日労働時間 -->
                 <!-- 法定休日深夜残業時間 -->
                 <!-- <td
@@ -350,7 +335,7 @@
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-else
-                >00:00</td> -->
+                >00:00</td>-->
                 <!-- /法定休日深夜残業時間 -->
                 <!-- 法定外（所定休日）休日労働時間 -->
                 <td
@@ -361,12 +346,9 @@
                   class="text-center align-middle mw-rem-5"
                   v-else-if="calcList.business_kubun === ''"
                 ></td>
-                <td
-                  class="text-center align-middle mw-rem-5"
-                  v-else
-                >00:00</td>
+                <td class="text-center align-middle mw-rem-5" v-else>00:00</td>
                 <!-- /法定外（所定休日）休日労働時間
-                <!-- 法定外（所定休日）休日深夜残業時間 -->
+                <!-- 法定外（所定休日）休日深夜残業時間-->
                 <!-- <td
                   class="text-center align-middle mw-rem-5"
                   v-if="calcList.business_kubun === '3'"
@@ -378,10 +360,12 @@
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-else
-                >00:00</td> -->
+                >00:00</td>-->
                 <!-- /法定外（所定休日）休日深夜残業時間 -->
                 <!-- 深夜労働時間 -->
-                <td class="text-center align-middle mw-rem-3">{{ calcList.late_night_working_hours }}</td>
+                <td
+                  class="text-center align-middle mw-rem-3"
+                >{{ calcList.late_night_working_hours }}</td>
                 <!-- /深夜労働時間 -->
                 <!-- 未就労労働時間 -->
                 <td
@@ -431,25 +415,16 @@
                       calcList.y_attendance_time_positions,
                       index,
                       mode_attendance)"
-                >
-                </daily-working-info-time-table>
+                ></daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
                   v-if="menuData[userindex]['is_select'] === 1 && calcList.attendance_editor_department_name"
-                >
-                  {{ calcList.attendance_editor_department_name }}：{{ calcList.attendance_editor_user_name }}
-                </td>
+                >{{ calcList.attendance_editor_department_name }}：{{ calcList.attendance_editor_user_name }}</td>
                 <td
                   class="text-left text-align-left mw-rem-10"
                   v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.attendance_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
-                >
-                  {{ calcList.attendance_editor_department_name }}：{{ calcList.attendance_editor_user_name }}
-                </td>
-                <td
-                  class="text-left text-align-left mw-rem-10"
-                  v-else
-                >
-                </td>
+                >{{ calcList.attendance_editor_department_name }}：{{ calcList.attendance_editor_user_name }}</td>
+                <td class="text-left text-align-left mw-rem-10" v-else></td>
                 <!-- /出勤 -->
                 <!-- 退勤 -->
                 <daily-working-info-time-table
@@ -477,25 +452,16 @@
                       calcList.y_leaving_time_positions,
                       index,
                       mode_leaving)"
-                >
-                </daily-working-info-time-table>
+                ></daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
                   v-if="menuData[userindex]['is_select'] === 1 && calcList.leaving_editor_department_name"
-                >
-                  {{ calcList.leaving_editor_department_name }}：{{ calcList.leaving_editor_user_name }}
-                </td>
+                >{{ calcList.leaving_editor_department_name }}：{{ calcList.leaving_editor_user_name }}</td>
                 <td
                   class="text-left text-align-left mw-rem-10"
                   v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.leaving_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
-                >
-                  {{ calcList.leaving_editor_department_name }}：{{ calcList.leaving_editor_user_name }}
-                </td>
-                <td
-                  class="text-left text-align-left mw-rem-10"
-                  v-else
-                >
-                </td>
+                >{{ calcList.leaving_editor_department_name }}：{{ calcList.leaving_editor_user_name }}</td>
+                <td class="text-left text-align-left mw-rem-10" v-else></td>
                 <!-- /退勤 -->
                 <!-- 公用外出　開始 -->
                 <daily-working-info-time-table
@@ -523,25 +489,16 @@
                       calcList.y_public_going_out_time_positions,
                       index,
                       mode_official_out_start)"
-                >
-                </daily-working-info-time-table>
+                ></daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
                   v-if="menuData[userindex]['is_select'] === 1 && calcList.public_editor_department_name"
-                >
-                  {{ calcList.public_editor_department_name }}：{{ calcList.public_editor_user_name }}
-                </td>
+                >{{ calcList.public_editor_department_name }}：{{ calcList.public_editor_user_name }}</td>
                 <td
                   class="text-left text-align-left mw-rem-10"
                   v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.public_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
-                >
-                  {{ calcList.public_editor_department_name }}：{{ calcList.public_editor_user_name }}
-                </td>
-                <td
-                  class="text-left text-align-left mw-rem-10"
-                  v-else
-                >
-                </td>
+                >{{ calcList.public_editor_department_name }}：{{ calcList.public_editor_user_name }}</td>
+                <td class="text-left text-align-left mw-rem-10" v-else></td>
                 <!-- /公用外出　終了 -->
                 <!-- 公用外出戻り　開始 -->
                 <daily-working-info-time-table
@@ -569,25 +526,16 @@
                       calcList.y_public_going_out_return_time_positions,
                       index,
                       mode_official_out_end)"
-                >
-                </daily-working-info-time-table>
+                ></daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
                   v-if="menuData[userindex]['is_select'] === 1 && calcList.public_return_editor_department_name"
-                >
-                  {{ calcList.public_return_editor_department_name }}：{{ calcList.public_return_editor_user_name }}
-                </td>
+                >{{ calcList.public_return_editor_department_name }}：{{ calcList.public_return_editor_user_name }}</td>
                 <td
                   class="text-left text-align-left mw-rem-10"
                   v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.public_return_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
-                >
-                  {{ calcList.public_return_editor_department_name }}：{{ calcList.public_return_editor_user_name }}
-                </td>
-                <td
-                  class="text-left text-align-left mw-rem-10"
-                  v-else
-                >
-                </td>
+                >{{ calcList.public_return_editor_department_name }}：{{ calcList.public_return_editor_user_name }}</td>
+                <td class="text-left text-align-left mw-rem-10" v-else></td>
                 <!-- /公用外出戻り　終了 -->
                 <!-- 私用外出　開始 -->
                 <daily-working-info-time-table
@@ -615,25 +563,16 @@
                       calcList.y_missing_middle_time_positions,
                       index,
                       mode_private_out_start)"
-                >
-                </daily-working-info-time-table>
+                ></daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
                   v-if="menuData[userindex]['is_select'] === 1 && calcList.missing_editor_department_name"
-                >
-                  {{ calcList.missing_editor_department_name }}：{{ calcList.missing_editor_user_name }}
-                </td>
+                >{{ calcList.missing_editor_department_name }}：{{ calcList.missing_editor_user_name }}</td>
                 <td
                   class="text-left text-align-left mw-rem-10"
                   v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.missing_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
-                >
-                  {{ calcList.missing_editor_department_name }}：{{ calcList.missing_editor_user_name }}
-                </td>
-                <td
-                  class="text-left text-align-left mw-rem-10"
-                  v-else
-                >
-                </td>
+                >{{ calcList.missing_editor_department_name }}：{{ calcList.missing_editor_user_name }}</td>
+                <td class="text-left text-align-left mw-rem-10" v-else></td>
                 <!-- /私用外出　終了 -->
                 <!-- 私用外出戻り　開始 -->
                 <daily-working-info-time-table
@@ -661,27 +600,18 @@
                       calcList.y_missing_middle_return_time_positions,
                       index,
                       mode_private_out_end)"
-                >
-                </daily-working-info-time-table>
+                ></daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
                   v-if="menuData[userindex]['is_select'] === 1 && calcList.missing_return_editor_department_name"
-                >
-                  {{ calcList.missing_return_editor_department_name }}：{{ calcList.missing_return_editor_user_name }}
-                </td>
+                >{{ calcList.missing_return_editor_department_name }}：{{ calcList.missing_return_editor_user_name }}</td>
                 <td
                   class="text-left text-align-left mw-rem-10"
                   v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.missing_return_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
-                >
-                  {{ calcList.missing_return_editor_department_name }}：{{ calcList.missing_return_editor_user_name }}
-                </td>
-                <td
-                  class="text-left text-align-left mw-rem-10"
-                  v-else
-                >
-                </td>
+                >{{ calcList.missing_return_editor_department_name }}：{{ calcList.missing_return_editor_user_name }}</td>
+                <td class="text-left text-align-left mw-rem-10" v-else></td>
                 <!-- /私用外出戻り　終了 -->
-                <!-- 勤務状態 -->    
+                <!-- 勤務状態 -->
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-if="calcList.holiday_description === '1日集計対象休暇'"
@@ -690,7 +620,7 @@
                   class="text-center align-middle mw-rem-5"
                   v-else
                 >{{ calcList.working_status_name }}</td>
-                <!-- /勤務状態 -->    
+                <!-- /勤務状態 -->
                 <!-- タイムテーブル名 -->
                 <td class="text-center align-middle mw-rem-10">{{ calcList.working_timetable_name }}</td>
                 <!-- /タイムテーブル名 -->
@@ -707,27 +637,23 @@
                 <td class="text-center align-middle mw-rem-3">{{ calcList.regular_working_times }}</td>
                 <!-- /所定労働時間 -->
                 <!-- 所定外労働時間 -->
-                <td class="text-center align-middle mw-rem-3">{{ calcList.out_of_regular_working_times }}</td>
+                <td
+                  class="text-center align-middle mw-rem-3"
+                >{{ calcList.out_of_regular_working_times }}</td>
                 <!-- /所定外労働時間 -->
                 <!-- 時間外労働時間 -->
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-if="calcList.business_kubun !== '2' && calcList.business_kubun !== '3'"
                 >{{ calcList.off_hours_working_hours }}</td>
-                <td
-                  class="text-center align-middle mw-rem-5"
-                  v-else
-                >00:00</td>
+                <td class="text-center align-middle mw-rem-5" v-else>00:00</td>
                 <!-- /時間外労働時間 -->
                 <!-- 深夜残業時間 -->
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-if="calcList.business_kubun !== '2' && calcList.business_kubun !== '3'"
                 >{{ calcList.late_night_overtime_hours }}</td>
-                <td
-                  class="text-center align-middle mw-rem-5"
-                  v-else
-                >00:00</td>
+                <td class="text-center align-middle mw-rem-5" v-else>00:00</td>
                 <!-- /深夜残業時間 -->
                 <!-- 法定休日労働時間 -->
                 <td
@@ -738,10 +664,7 @@
                   class="text-center align-middle mw-rem-5"
                   v-else-if="calcList.business_kubun === ''"
                 ></td>
-                <td
-                  class="text-center align-middle mw-rem-5"
-                  v-else
-                >00:00</td>
+                <td class="text-center align-middle mw-rem-5" v-else>00:00</td>
                 <!-- /法定休日労働時間 -->
                 <!-- 法定休日深夜残業時間 -->
                 <!-- <td
@@ -751,11 +674,11 @@
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-else-if="calcList.business_kubun === ''"
-                ></td>
+                ></td>q
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-else
-                >00:00</td> -->
+                >00:00</td>-->
                 <!-- /法定休日深夜残業時間 -->
                 <!-- 法定外（所定休日）休日労働時間 -->
                 <td
@@ -766,10 +689,7 @@
                   class="text-center align-middle mw-rem-5"
                   v-else-if="calcList.business_kubun === ''"
                 ></td>
-                <td
-                  class="text-center align-middle mw-rem-5"
-                  v-else
-                >00:00</td>
+                <td class="text-center align-middle mw-rem-5" v-else>00:00</td>
                 <!-- /法定外（所定休日）休日労働時間 -->
                 <!-- 法定外（所定休日）休日深夜残業時間 -->
                 <!-- <td
@@ -783,16 +703,20 @@
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-else
-                >00:00</td> -->
+                >00:00</td>-->
                 <!-- /法定外（所定休日）休日深夜残業時間 -->
                 <!-- 深夜労働時間 -->
-                <td class="text-center align-middle mw-rem-3">{{ calcList.late_night_working_hours }}</td>
+                <td
+                  class="text-center align-middle mw-rem-3"
+                >{{ calcList.late_night_working_hours }}</td>
                 <!-- /深夜労働時間 -->
                 <!-- 法定労働時間 -->
                 <td class="text-center align-middle mw-rem-3">{{ calcList.legal_working_times }}</td>
                 <!-- /法定労働時間 -->
                 <!-- 法定外労働時間 -->
-                <td class="text-center align-middle mw-rem-3">{{ calcList.out_of_legal_working_times }}</td>
+                <td
+                  class="text-center align-middle mw-rem-3"
+                >{{ calcList.out_of_legal_working_times }}</td>
                 <!-- /法定外労働時間 -->
                 <!-- 未就労労働時間 -->
                 <td
@@ -824,12 +748,10 @@
       v-bind:record_time="record_time"
       v-bind:user_name="user_name"
       v-bind:mode_name="mode_name"
-    >
-    </show-map-dialog>
+    ></show-map-dialog>
   </div>
 </template>
 <script>
-
 // CONST
 // 打刻モード
 const ATTENDANCE = 1;
@@ -838,10 +760,10 @@ const OFFICIAL_OUT_START = 11;
 const OFFICIAL_OUT_END = 12;
 const PRIVATE_OUT_START = 21;
 const PRIVATE_OUT_END = 22;
-const C_USER_INDEX = 26;              // 編集者表示
-const C_USER_CON_INDEX = 27;          // 条件付き編集者表示
-const C_SSJJOO_ID = 'SSJJOO00';       // 三条ID
-const C_EDIT_USER = '23';             // 三条編集者ID
+const C_USER_INDEX = 26; // 編集者表示
+const C_USER_CON_INDEX = 27; // 条件付き編集者表示
+const C_SSJJOO_ID = "SSJJOO00"; // 三条ID
+const C_EDIT_USER = "23"; // 三条編集者ID
 
 export default {
   name: "dailyworkinginfotable",
@@ -1057,7 +979,8 @@ export default {
   color: chartreuse;
 }
 
-thead, tbody {
+thead,
+tbody {
   display: block !important;
 }
 
@@ -1067,16 +990,17 @@ tbody {
   height: 300px !important;
 }
 
-.table th, .table td {
-    padding: 0rem !important;
-    border-style: solid dashed !important;
-    border-width: 1px !important;
-    border-color: #95c5ed #dee2e6 !important;
+.table th,
+.table td {
+  padding: 0rem !important;
+  border-style: solid dashed !important;
+  border-width: 1px !important;
+  border-color: #95c5ed #dee2e6 !important;
 }
 
 table {
-   border-collapse: collapse !important;
-   border: 1px solid #95c5ed !important;
+  border-collapse: collapse !important;
+  border: 1px solid #95c5ed !important;
 }
 
 .mw-rem-3 {
