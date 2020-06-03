@@ -98,29 +98,30 @@ export default {
     },
     // ファイル選択が変更された場合の処理
     onFileChange: function(e) {
-      this.handleFileSelect(e);
+      // 勤怠ログファイルアップロード storage/private
+      this.fileUpload(e);
     },
     // ファイルアップロード
-    fileUpload(file) {
+    fileUpload(e) {
       const formData = new FormData();
-      formData.append("file", file);
+      var file_data = e.target.files[0];
+      formData.append("file", file_data);
       axios
         .post("/api/attendanceLogUpload", formData)
-        .then(response => {})
+        .then(response => {
+          this.handleFileSelect(file_data);
+        })
         .catch(reason => {
           this.serverCatch("ログ", "アップロード");
         });
     },
     // ----------------- privateメソッド ----------------------------------
     // イベントログファイル操作
-    handleFileSelect: function(e) {
-      var file_data = e.target.files[0];
+    handleFileSelect: function(file_data) {
       // 読み込み
       var reader = new FileReader();
       // 読み込んだファイルの中身を取得する
       reader.readAsText(file_data);
-      // 勤怠ログファイルアップロード storage/private
-      this.fileUpload(file_data);
       let $this = this;
       //ファイルの中身を取得後に処理を行う
       reader.addEventListener("load", function() {
