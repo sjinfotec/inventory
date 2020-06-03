@@ -747,6 +747,7 @@ return [
         'not_found_data' => '該当するデータは見つかりませんでした。',
         'parameter_illegal' => '不正なパラメータです。',
         'file_download_error' => 'ファイルダウンロード失敗しました。'
+        'file_upload_error' => 'ファイルアップロード失敗しました。'
     ],
 
     'LOG_MSG' => [
@@ -804,7 +805,7 @@ return [
     ],
 
     'ACCOUNTID' => [
-        'account_id' => 'S02DTA00'
+        'account_id' => 'SSJJOO00'
     ],
 
     // メニュー項目数   未使用
