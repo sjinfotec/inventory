@@ -112,7 +112,7 @@ class ApiGetAttendanceResultController extends Controller
         }catch(\PDOException $pe){
             throw $pe;
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', 'work_times', Config::get('const.LOG_MSG.data_insert_erorr')));
+            Log::error(str_replace('{0}', 'work_times', Config::get('const.LOG_MSG.data_insert_error')));
             Log::error($e->getMessage());
             throw $e;
         }

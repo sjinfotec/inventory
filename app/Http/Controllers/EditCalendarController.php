@@ -16,6 +16,8 @@ use App\Setting;
 use App\UserModel;
 use App\WorkTime;
 use App\UserHolidayKubun;
+use App\CalendarSettingInformation;
+
 class EditCalendarController extends Controller
 {
     // メッセージ
@@ -30,13 +32,6 @@ class EditCalendarController extends Controller
     {
         return view('setting_calendar');
     }
-
-    /**
-     * データ取得
-     *
-     * @param Request $request
-     * @return array
-     */
     public function getDetail(Request $request){
         $this->array_messagedata = array();
         $details = array();
@@ -101,13 +96,13 @@ class EditCalendarController extends Controller
             $make_fromdate = $dt1->startOfMonth();
             $dt2 = new Carbon($search_y_m.'15');
             $make_todate = $dt2->endOfMonth();
-            $calendar_model = new Calendar();
-            $calendar_model->setParamdepartmentcodeAttribute($departmentcode);
-            $calendar_model->setParamemploymentstatusAttribute($employmentstatus);
-            $calendar_model->setParamusercodeAttribute($usercode);
-            $calendar_model->setParamfromdateAttribute($make_fromdate->format('Ymd'));
-            $calendar_model->setParamtodateAttribute($make_todate->format('Ymd'));
-            $results = $calendar_model->getDetail();
+            $calendar_setting_model = new CalendarSettingInformation();
+            $calendar_setting_model->setParamdepartmentcodeAttribute($departmentcode);
+            $calendar_setting_model->setParamemploymentstatusAttribute($employmentstatus);
+            $calendar_setting_model->setParamusercodeAttribute($usercode);
+            $calendar_setting_model->setParamfromdateAttribute($make_fromdate->format('Ymd'));
+            $calendar_setting_model->setParamtodateAttribute($make_todate->format('Ymd'));
+            $results = $calendar_setting_model->getDetail();
             $current_user_code = null;
             $current_item = null;
             $array_user_data = array();
@@ -127,12 +122,14 @@ class EditCalendarController extends Controller
                         'date' => $item->date,
                         'weekday_kubun' => $item->weekday_kubun,
                         'business_kubun' => $item->business_kubun,
+                        'working_timetable_no' => $item->working_timetable_no,
                         'holiday_kubun' => $item->holiday_kubun,
                         'date_name' => $item->date_name,
                         'md_name' => $item->md_name,
                         'public_holidays_name' => $item->public_holidays_name,
                         'business_kubun_name' => $item->business_kubun_name,
                         'use_free_item' => $item->use_free_item,
+                        'working_timetable_name' => $item->working_timetable_name,
                         'holiday_kubun_name' => $item->holiday_kubun_name
                     );
                 } else {
@@ -155,12 +152,14 @@ class EditCalendarController extends Controller
                         'date' => $item->date,
                         'weekday_kubun' => $item->weekday_kubun,
                         'business_kubun' => $item->business_kubun,
+                        'working_timetable_no' => $item->working_timetable_no,
                         'holiday_kubun' => $item->holiday_kubun,
                         'date_name' => $item->date_name,
                         'md_name' => $item->md_name,
                         'public_holidays_name' => $item->public_holidays_name,
                         'business_kubun_name' => $item->business_kubun_name,
                         'use_free_item' => $item->use_free_item,
+                        'working_timetable_name' => $item->working_timetable_name,
                         'holiday_kubun_name' => $item->holiday_kubun_name
                     );
                 }
@@ -194,6 +193,170 @@ class EditCalendarController extends Controller
             throw $e;
         }
     }
+
+    /**
+     * データ取得
+     *
+     * @param Request $request
+     * @return array
+     */
+    // public function getDetail(Request $request){
+    //     $this->array_messagedata = array();
+    //     $details = array();
+    //     $detail_dates = array();
+    //     $result = true;
+    //     $year = null;
+    //     $month = null;
+    //     $employmentstatus = null;
+    //     $departmentcode = null;
+    //     $usercode = null;
+    //     try {
+    //         // パラメータチェック
+    //         $params = array();
+    //         // 設定されていない場合
+    //         if (!isset($request->keyparams)) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false, 'details' => $details, 'detail_dates' => $detail_dates,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         $params = $request->keyparams;
+    //         // 設定されていない場合
+    //         if (!isset($params['dateyear'])) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "dateyear", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false, 'details' => $details, 'detail_dates' => $detail_dates,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         // 設定されていない場合
+    //         if (!isset($params['datemonth'])) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "datemonth", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false, 'details' => $details, 'detail_dates' => $detail_dates,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         if (isset($params['employmentstatus'])) {
+    //             if ($params['employmentstatus'] != "") {
+    //                 $employmentstatus = $params['employmentstatus'];
+    //             }
+    //         }
+    //         if (isset($params['departmentcode'])) {
+    //             if ($params['departmentcode'] != "") {
+    //                 $departmentcode = $params['departmentcode'];
+    //             }
+    //         }
+    //         if (isset($params['usercode'])) {
+    //             if ($params['usercode'] != "") {
+    //                 $usercode = $params['usercode'];
+    //             }
+    //         }
+    //         $year = $params['dateyear'];
+    //         $month = $params['datemonth'];
+    //         // 検索日付期間設定
+    //         $search_y_m = $year."".$month;
+    //         $dt1 = new Carbon($search_y_m.'15');
+    //         $make_fromdate = $dt1->startOfMonth();
+    //         $dt2 = new Carbon($search_y_m.'15');
+    //         $make_todate = $dt2->endOfMonth();
+    //         $calendar_model = new Calendar();
+    //         $calendar_model->setParamdepartmentcodeAttribute($departmentcode);
+    //         $calendar_model->setParamemploymentstatusAttribute($employmentstatus);
+    //         $calendar_model->setParamusercodeAttribute($usercode);
+    //         $calendar_model->setParamfromdateAttribute($make_fromdate->format('Ymd'));
+    //         $calendar_model->setParamtodateAttribute($make_todate->format('Ymd'));
+    //         $results = $calendar_model->getDetail();
+    //         $current_user_code = null;
+    //         $current_item = null;
+    //         $array_user_data = array();
+    //         $array_user_date_data = array();
+    //         $set_detail_dates = false;
+    //         foreach($results as $item) {
+    //             if($current_user_code == null) {$current_user_code = $item->user_code;}
+    //             if($current_item == null) {$current_item = $item;}
+    //             if($current_user_code == $item->user_code) {
+    //                 if (!$set_detail_dates) {
+    //                     $detail_dates[] = array(
+    //                         'date' => $item->date,
+    //                         'date_name' => $item->date_name
+    //                     );
+    //                 }
+    //                 $array_user_date_data[] = array(
+    //                     'date' => $item->date,
+    //                     'weekday_kubun' => $item->weekday_kubun,
+    //                     'business_kubun' => $item->business_kubun,
+    //                     'holiday_kubun' => $item->holiday_kubun,
+    //                     'date_name' => $item->date_name,
+    //                     'md_name' => $item->md_name,
+    //                     'public_holidays_name' => $item->public_holidays_name,
+    //                     'business_kubun_name' => $item->business_kubun_name,
+    //                     'use_free_item' => $item->use_free_item,
+    //                     'holiday_kubun_name' => $item->holiday_kubun_name
+    //                 );
+    //             } else {
+    //                 if (count($detail_dates) > 0 && !$set_detail_dates) {
+    //                     $set_detail_dates = true;
+    //                 }
+    //                 $array_user_data[] = array(
+    //                     'department_code' => $current_item->department_code,
+    //                     'employment_status' => $current_item->employment_status,
+    //                     'user_code' => $current_item->user_code,
+    //                     'department_name' => $current_item->department_name,
+    //                     'employment_name' => $current_item->employment_name,
+    //                     'user_name' => $current_item->user_name,
+    //                     'array_user_date_data' => $array_user_date_data
+    //                 );
+    //                 $current_user_code = $item->user_code;
+    //                 $current_item = $item;
+    //                 $array_user_date_data = array();
+    //                 $array_user_date_data[] = array(
+    //                     'date' => $item->date,
+    //                     'weekday_kubun' => $item->weekday_kubun,
+    //                     'business_kubun' => $item->business_kubun,
+    //                     'holiday_kubun' => $item->holiday_kubun,
+    //                     'date_name' => $item->date_name,
+    //                     'md_name' => $item->md_name,
+    //                     'public_holidays_name' => $item->public_holidays_name,
+    //                     'business_kubun_name' => $item->business_kubun_name,
+    //                     'use_free_item' => $item->use_free_item,
+    //                     'holiday_kubun_name' => $item->holiday_kubun_name
+    //                 );
+    //             }
+    //         }
+    //         // 残り
+    //         if (count($array_user_date_data) > 0) {
+    //             $array_user_data[] = array(
+    //                 'department_code' => $current_item->department_code,
+    //                 'employment_status' => $current_item->employment_status,
+    //                 'user_code' => $current_item->user_code,
+    //                 'department_name' => $current_item->department_name,
+    //                 'employment_name' => $current_item->employment_name,
+    //                 'user_name' => $current_item->user_name,
+    //                 'array_user_date_data' => $array_user_date_data
+    //             );
+    //         }
+    //         $details = $array_user_data;
+    //         if (count($details) == 0) {
+    //             $this->array_messagedata[] = Config::get('const.MSG_INFO.no_data');
+    //             $result = true;
+    //         }
+    //         return response()->json(
+    //             ['result' => $result, 'details' => $details, 'detail_dates' => $detail_dates,
+    //             Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //         );
+    //     }catch(\PDOException $pe){
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+    // }
 
     /**
      * UPDATE
@@ -292,9 +455,8 @@ class EditCalendarController extends Controller
         $user = Auth::user();
         $login_department_code = $user->department_code;
         $login_user_code = $user->code;
-        $calendar_model = new Calendar();
+        $calendar_setting_model = new CalendarSettingInformation();
         $apicommon_model = new ApiCommonController();
-        $user_holiday_model = new UserHolidayKubun();
         $work_time_model =  new WorkTime();
 
         DB::beginTransaction();
@@ -307,11 +469,12 @@ class EditCalendarController extends Controller
                     $isupdate = true;
                     // 一括更新の場合は、元データがあった場合休日であれば更新しない
                     if ($isbatch && $initptn == Config::get('const.C040.holiday_noupdate')) {
-                        $calendar_model->setParamdepartmentcodeAttribute($usersitem->department_code);
-                        $calendar_model->setParamemploymentstatusAttribute($usersitem->employment_status);
-                        $calendar_model->setParamusercodeAttribute($usersitem->code);
-                        $calendar_model->setParamfromdateAttribute($data['date']);
-                        $resule_datas = $calendar_model->getCalenderDate();
+                        $calendar_setting_model->setParamdepartmentcodeAttribute($usersitem->department_code);
+                        $calendar_setting_model->setParamemploymentstatusAttribute($usersitem->employment_status);
+                        $calendar_setting_model->setParamusercodeAttribute($usersitem->code);
+                        $calendar_setting_model->setParamfromdateAttribute($data['date']);
+                        $calendar_setting_model->setParamlimitAttribute(1);
+                        $resule_datas = $calendar_setting_model->getCalenderInfo();
                         foreach ($resule_datas as $item) {
                             if ($item->business_kubun == Config::get('const.C007.legal_holoday') ||
                                 $item->business_kubun == Config::get('const.C007.legal_out_holoday')) {
@@ -322,93 +485,27 @@ class EditCalendarController extends Controller
                     }
                     if ($isupdate) {
                         // カレンダー更新
-                        $calendar_model->setParamdepartmentcodeAttribute($usersitem->department_code);
-                        $calendar_model->setParamemploymentstatusAttribute($usersitem->employment_status);
-                        $calendar_model->setParamusercodeAttribute($usersitem->code);
-                        $calendar_model->setParamfromdateAttribute($data['date']);
-                        $calendar_model->setBusinesskubunAttribute($data['businessdays']);
-                        $calendar_model->setHolidaykubunAttribute($data['holidays']);
-                        $calendar_model->setParamusercodeAttribute($user_code);
-                        $calendar_model->setUpdateduserAttribute($login_user_code);
-                        $calendar_model->setUpdatedatAttribute($systemdate);
-                        $calendar_model->updateCalendar();
+                        $calendar_setting_model->setParamdepartmentcodeAttribute($usersitem->department_code);
+                        $calendar_setting_model->setParamemploymentstatusAttribute($usersitem->employment_status);
+                        $calendar_setting_model->setParamusercodeAttribute($usersitem->code);
+                        $calendar_setting_model->setParamfromdateAttribute($data['date']);
+                        $calendar_setting_model->setBusinesskubunAttribute($data['businessdays']);
+                        $calendar_setting_model->setHolidaykubunAttribute($data['holidays']);
+                        $calendar_setting_model->setUpdateduserAttribute($login_user_code);
+                        $calendar_setting_model->setUpdatedatAttribute($systemdate);
                         // 休暇区分更新
+                        $user_holiday_kubun = null;
                         Log::debug("data['holidays'] = ".$data['holidays']);
                         if ($data['holidays'] != null && $data['holidays'] != "" && $data['holidays'] != "0") {
                             if (strlen($data['use_free_items']) > 0) {
                                 Log::debug("data['use_free_items'] = ".$data['use_free_items']);
                                 if (substr($data['use_free_items'], Config::get('const.USEFREEITEM.day_holiday'), 1) == "1") {
-                                    $working_date = $data['date'];
-                                    $user_holiday_model->setParamUsercodeAttribute($usersitem->code);
-                                    $user_holiday_model->setParamDepartmentcodeAttribute($usersitem->department_code);
-                                    $user_holiday_model->setParamdatefromAttribute($working_date);
-                                    $user_holiday_model->setSystemDateAttribute($systemdate);
-                                    // 既に存在する場合は論理削除する
-                                    $is_exists = $user_holiday_model->isExistsKbn();
-                                    if($is_exists){
-                                        $user_holiday_model->delKbn();
-                                    }
-                                    $user_holiday_model->setWorkingdateAttribute($working_date);
-                                    $user_holiday_model->setDepartmentcodeAttribute($usersitem->department_code);
-                                    $user_holiday_model->setUsercodeAttribute($usersitem->code);
-                                    $user_holiday_model->setHolidaykubunAttribute($data['holidays']);
-                                    $user_holiday_model->setCreateduserAttribute($login_user_code);
-                                    $user_holiday_model->insertKbn();
-                                    // 勤怠時刻にIDを登録するのでSELECTする
-                                    $user_holiday_kubuns_id = null;
-                                    $id_results = $user_holiday_model->getDetail();
-                                    foreach($id_results as $item_id) {
-                                        $user_holiday_kubuns_id = $item_id->id;
-                                        break;
-                                    }
-                                    // ユーザーリストのユーザーに勤務時間が登録されている場合は論理削除する
-                                    $target_ymd =  new Carbon($data['date']);
-                                    $year = $target_ymd->format('Y');
-                                    $month = $target_ymd->format('m');
-                                    $dd = $target_ymd->format('d');
-                                    $ymd_start = $year."/".$month."/".$dd." 00:00:00";
-                                    $ymd_end = $year."/".$month."/".$dd." 23:59:59";
-                                    $work_time_model->setParamStartDateAttribute($ymd_start);
-                                    $work_time_model->setParamEndDateAttribute($ymd_end);
-                                    $work_time_model->setUsercodeAttribute($usersitem->code);
-                                    $users_results = $work_time_model->getUserDetails();
-                                    $chk_attendance = false;
-                                    // 論理削除する
-                                    foreach($users_results as $item) {
-                                        if ($item->mode = Config::get('const.C005.attendance_time')) {
-                                            $chk_attendance = true;
-                                        }
-                                        if ($chk_attendance) {
-                                            $work_time_model->setIdAttribute($item->id);
-                                            $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
-                                            $work_time_model->setEditorusercodeAttribute($login_user_code);
-                                            $work_time_model->setUpdateduserAttribute($login_user_code);
-                                            $work_time_model->setSystemDateAttribute($systemdate);
-                                            // 削除せずエラーリスト（出勤時刻＋休暇）でわかるようにする
-                                            // $work_time_model->delWorkTime();
-                                        }
-                                        if ($item->mode = Config::get('const.C005.leaving_time')) {
-                                            $chk_attendance = false;
-                                            break;
-                                        }
-                                    }
-                                    $record_time = $year."/".$month."/".$dd." 00:00:01";
-                                    $work_time_model->setUsercodeAttribute($usersitem->code);
-                                    $work_time_model->setDepartmentcodeAttribute($usersitem->department_code);
-                                    $work_time_model->setRecordtimeAttribute($record_time);
-                                    $work_time_model->setModeAttribute(null);
-                                    $work_time_model->setUserholidaykubunsidAttribute($user_holiday_kubuns_id);
-                                    $work_time_model->setCreateduserAttribute($login_user_code);
-                                    $work_time_model->setSystemDateAttribute($systemdate);
-                                    $positions_data = null; 
-                                    $work_time_model->setPositionsAttribute($positions_data);
-                                    $work_time_model->setIseditorAttribute(true);
-                                    $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
-                                    $work_time_model->setEditorusercodeAttribute($login_user_code);
-                                    $work_time_model->insertWorkTime();
+                                    $user_holiday_kubun = $data['holidays'];
                                 }
                             }
                         }
+                        $user_holiday_model->setHolidaykubunAttribute($data['holidays']);
+                        $calendar_setting_model->updateCalendar();
                     }
                 }
             }
@@ -424,6 +521,156 @@ class EditCalendarController extends Controller
             throw $e;
         }
     }
+
+    /**
+     * 更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    // private function fixData($params){
+    //     $department_code = $params['department_code'];
+    //     $employment_status = $params['employment_status'];
+    //     $user_code = $params['user_code'];
+    //     $isbatch = $params['isbatch'];
+    //     $initptn = $params['initptn'];
+    //     $converts = $params['converts'];
+    //     $systemdate = Carbon::now();
+    //     $user = Auth::user();
+    //     $login_department_code = $user->department_code;
+    //     $login_user_code = $user->code;
+    //     $calendar_model = new Calendar();
+    //     $apicommon_model = new ApiCommonController();
+    //     $user_holiday_model = new UserHolidayKubun();
+    //     $work_time_model =  new WorkTime();
+
+    //     DB::beginTransaction();
+    //     try{
+    //         $isupdate = true;
+    //         foreach ($params['converts'] as $data) {
+    //             // パラメータから更新対象のユーザーリストを作成する
+    //             $userslist = $apicommon_model->getUserInfo($data['date'], $user_code, $department_code, $employment_status);
+    //             foreach ($userslist as $usersitem) {
+    //                 $isupdate = true;
+    //                 // 一括更新の場合は、元データがあった場合休日であれば更新しない
+    //                 if ($isbatch && $initptn == Config::get('const.C040.holiday_noupdate')) {
+    //                     $calendar_model->setParamdepartmentcodeAttribute($usersitem->department_code);
+    //                     $calendar_model->setParamemploymentstatusAttribute($usersitem->employment_status);
+    //                     $calendar_model->setParamusercodeAttribute($usersitem->code);
+    //                     $calendar_model->setParamfromdateAttribute($data['date']);
+    //                     $resule_datas = $calendar_model->getCalenderDate();
+    //                     foreach ($resule_datas as $item) {
+    //                         if ($item->business_kubun == Config::get('const.C007.legal_holoday') ||
+    //                             $item->business_kubun == Config::get('const.C007.legal_out_holoday')) {
+    //                             $isupdate = false;
+    //                             break;
+    //                         }
+    //                     }
+    //                 }
+    //                 if ($isupdate) {
+    //                     // カレンダー更新
+    //                     $calendar_model->setParamdepartmentcodeAttribute($usersitem->department_code);
+    //                     $calendar_model->setParamemploymentstatusAttribute($usersitem->employment_status);
+    //                     $calendar_model->setParamusercodeAttribute($usersitem->code);
+    //                     $calendar_model->setParamfromdateAttribute($data['date']);
+    //                     $calendar_model->setBusinesskubunAttribute($data['businessdays']);
+    //                     $calendar_model->setHolidaykubunAttribute($data['holidays']);
+    //                     $calendar_model->setParamusercodeAttribute($user_code);
+    //                     $calendar_model->setUpdateduserAttribute($login_user_code);
+    //                     $calendar_model->setUpdatedatAttribute($systemdate);
+    //                     $calendar_model->updateCalendar();
+    //                     // 休暇区分更新
+    //                     Log::debug("data['holidays'] = ".$data['holidays']);
+    //                     if ($data['holidays'] != null && $data['holidays'] != "" && $data['holidays'] != "0") {
+    //                         if (strlen($data['use_free_items']) > 0) {
+    //                             Log::debug("data['use_free_items'] = ".$data['use_free_items']);
+    //                             if (substr($data['use_free_items'], Config::get('const.USEFREEITEM.day_holiday'), 1) == "1") {
+    //                                 $working_date = $data['date'];
+    //                                 $user_holiday_model->setParamUsercodeAttribute($usersitem->code);
+    //                                 $user_holiday_model->setParamDepartmentcodeAttribute($usersitem->department_code);
+    //                                 $user_holiday_model->setParamdatefromAttribute($working_date);
+    //                                 $user_holiday_model->setSystemDateAttribute($systemdate);
+    //                                 // 既に存在する場合は論理削除する
+    //                                 $is_exists = $user_holiday_model->isExistsKbn();
+    //                                 if($is_exists){
+    //                                     $user_holiday_model->delKbn();
+    //                                 }
+    //                                 $user_holiday_model->setWorkingdateAttribute($working_date);
+    //                                 $user_holiday_model->setDepartmentcodeAttribute($usersitem->department_code);
+    //                                 $user_holiday_model->setUsercodeAttribute($usersitem->code);
+    //                                 $user_holiday_model->setHolidaykubunAttribute($data['holidays']);
+    //                                 $user_holiday_model->setCreateduserAttribute($login_user_code);
+    //                                 $user_holiday_model->insertKbn();
+    //                                 // 勤怠時刻にIDを登録するのでSELECTする
+    //                                 $user_holiday_kubuns_id = null;
+    //                                 $id_results = $user_holiday_model->getDetail();
+    //                                 foreach($id_results as $item_id) {
+    //                                     $user_holiday_kubuns_id = $item_id->id;
+    //                                     break;
+    //                                 }
+    //                                 // ユーザーリストのユーザーに勤務時間が登録されている場合は論理削除する
+    //                                 $target_ymd =  new Carbon($data['date']);
+    //                                 $year = $target_ymd->format('Y');
+    //                                 $month = $target_ymd->format('m');
+    //                                 $dd = $target_ymd->format('d');
+    //                                 $ymd_start = $year."/".$month."/".$dd." 00:00:00";
+    //                                 $ymd_end = $year."/".$month."/".$dd." 23:59:59";
+    //                                 $work_time_model->setParamStartDateAttribute($ymd_start);
+    //                                 $work_time_model->setParamEndDateAttribute($ymd_end);
+    //                                 $work_time_model->setUsercodeAttribute($usersitem->code);
+    //                                 $users_results = $work_time_model->getUserDetails();
+    //                                 $chk_attendance = false;
+    //                                 // 論理削除する
+    //                                 foreach($users_results as $item) {
+    //                                     if ($item->mode = Config::get('const.C005.attendance_time')) {
+    //                                         $chk_attendance = true;
+    //                                     }
+    //                                     if ($chk_attendance) {
+    //                                         $work_time_model->setIdAttribute($item->id);
+    //                                         $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
+    //                                         $work_time_model->setEditorusercodeAttribute($login_user_code);
+    //                                         $work_time_model->setUpdateduserAttribute($login_user_code);
+    //                                         $work_time_model->setSystemDateAttribute($systemdate);
+    //                                         // 削除せずエラーリスト（出勤時刻＋休暇）でわかるようにする
+    //                                         // $work_time_model->delWorkTime();
+    //                                     }
+    //                                     if ($item->mode = Config::get('const.C005.leaving_time')) {
+    //                                         $chk_attendance = false;
+    //                                         break;
+    //                                     }
+    //                                 }
+    //                                 $record_time = $year."/".$month."/".$dd." 00:00:01";
+    //                                 $work_time_model->setUsercodeAttribute($usersitem->code);
+    //                                 $work_time_model->setDepartmentcodeAttribute($usersitem->department_code);
+    //                                 $work_time_model->setRecordtimeAttribute($record_time);
+    //                                 $work_time_model->setModeAttribute(null);
+    //                                 $work_time_model->setUserholidaykubunsidAttribute($user_holiday_kubuns_id);
+    //                                 $work_time_model->setCreateduserAttribute($login_user_code);
+    //                                 $work_time_model->setSystemDateAttribute($systemdate);
+    //                                 $positions_data = null; 
+    //                                 $work_time_model->setPositionsAttribute($positions_data);
+    //                                 $work_time_model->setIseditorAttribute(true);
+    //                                 $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
+    //                                 $work_time_model->setEditorusercodeAttribute($login_user_code);
+    //                                 $work_time_model->insertWorkTime();
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         DB::commit();
+
+    //     }catch(\PDOException $pe){
+    //         DB::rollBack();
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         DB::rollBack();
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+    // }
     
     /**
      * 一括更新（日付）
@@ -828,47 +1075,15 @@ class EditCalendarController extends Controller
         $todate = "";
         DB::beginTransaction();
         try{
-            $calendar_model = new Calendar();
+            $calendar_setting_model = new CalendarSettingInformation();
             $setting_model = new Setting();
             if (isset($datemonth)) {
-                // if ($displaykbn == Config::get('const.C034.closing')) {
-                //     // 締日基準
-                //     // 前月締日取得
-                //     $setting_model->setParamYearAttribute($dateyear);
-                //     $dt = new Carbon($dateyear.$datemonth."15");
-                //     $beforedate = $dt->subMonth();
-                //     Log::debug('$beforedate = '.$beforedate);
-                //     $setting_model->setParamFiscalmonthAttribute(date_format($beforedate, 'm'));
-                //     $begining = $setting_model->getMonthClosing();
-                //     if (isset($begining)) {
-                //         Log::debug($dateyear.$datemonth.str_pad($begining, 2, "0", STR_PAD_LEFT));
-                //         $dt = new Carbon($dateyear.$datemonth.str_pad($begining, 2, "0", STR_PAD_LEFT));
-                //         $fromdate = $dt->addDay();
-                //     } else {
-                //         $this->array_messagedata[] =  array(Config::get('const.RESPONCE_ITEM.message') =>Config::get('const.MSG_ERROR.not_setting_closing'));
-                //         return false;
-                //     }
-                //     // 当月締日取得
-                //     $setting_model->setParamYearAttribute($dateyear);
-                //     $dt = new Carbon($dateyear.$datemonth."15");
-                //     $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
-                //     $begining = $setting_model->getMonthClosing();
-                //     if (isset($begining)) {
-                //         Log::debug($dateyear.$datemonth.str_pad($begining, 2, "0", STR_PAD_LEFT));
-                //         $dt = new Carbon($dateyear.$datemonth.str_pad($begining, 2, "0", STR_PAD_LEFT));
-                //         $todate = $dt->addDay();
-                //     } else {
-                //         $this->array_messagedata[] =  array(Config::get('const.RESPONCE_ITEM.message') =>Config::get('const.MSG_ERROR.not_setting_closing'));
-                //         return false;
-                //     }
-                // } else {
-                    // 1日基準
-                    $setting_model->setParamYearAttribute($dateyear);
-                    $dt = new Carbon($dateyear.$datemonth."01");
-                    $fromdate = $dt;
-                    $dt = new Carbon($dateyear.$datemonth."01");
-                    $todate = $dt->addMonth()->subDay();
-                // }
+                // 1日基準
+                $setting_model->setParamYearAttribute($dateyear);
+                $dt = new Carbon($dateyear.$datemonth."01");
+                $fromdate = $dt;
+                $dt = new Carbon($dateyear.$datemonth."01");
+                $todate = $dt->addMonth()->subDay();
             } else {
                 if ($displaykbn == Config::get('const.C024.closing')) {
                     // 期首月取得
@@ -902,7 +1117,7 @@ class EditCalendarController extends Controller
             $dt = $fromdate->copy()->subDay();
             $user = Auth::user();
             $login_user_code = $user->code;
-            $calendar_model->setCreateduserAttribute($login_user_code);
+            $calendar_setting_model->setCreateduserAttribute($login_user_code);
             foreach($users_datas as $users_data) {
                 $isins = true;
                 if (isset($employmentstatus)) {
@@ -921,26 +1136,26 @@ class EditCalendarController extends Controller
                     }
                 }
                 if ($isins) {
-                    $calendar_model->getParamemploymentstatusAttribute($users_data->employment_status);
-                    $calendar_model->getParamdepartmentcodeAttribute($users_data->department_code);
-                    $calendar_model->setParamusercodeAttribute($users_data->code);
-                    $calendar_model->setParamfromdateAttribute(date_format($dtfrom, 'Ymd'));
-                    $calendar_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
+                    $calendar_setting_model->getParamemploymentstatusAttribute($users_data->employment_status);
+                    $calendar_setting_model->getParamdepartmentcodeAttribute($users_data->department_code);
+                    $calendar_setting_model->setParamusercodeAttribute($users_data->code);
+                    $calendar_setting_model->setParamfromdateAttribute(date_format($dtfrom, 'Ymd'));
+                    $calendar_setting_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
                     // 削除
-                    $calendar_model->delDate();
+                    $calendar_setting_model->delDate();
                     // 作成
-                    $calendar_model->setParamfromdateAttribute(date_format($dt, 'Ymd'));
-                    $calendar_model->setEmploymentstatusAttribute($users_data->employment_status);
-                    $calendar_model->setDepartmentcodeAttribute($users_data->department_code);
-                    $calendar_model->setUsercodeAttribute($users_data->code);
-                    $results = $calendar_model->getCalenderDateYear($ptn, $formdata);
+                    $calendar_setting_model->setParamfromdateAttribute(date_format($dt, 'Ymd'));
+                    $calendar_setting_model->setEmploymentstatusAttribute($users_data->employment_status);
+                    $calendar_setting_model->setDepartmentcodeAttribute($users_data->department_code);
+                    $calendar_setting_model->setUsercodeAttribute($users_data->code);
+                    $results = $calendar_setting_model->getCalenderDateYear($ptn, $formdata);
                     $temp_array = array();
                     foreach($results as $result) {
                         $temp_collect = collect($result);
                         $temp_array[] = $temp_collect->toArray();
                     }
                     if (count($temp_array) > 0) {
-                        $results = $calendar_model->insCalenderDateYear($temp_array);
+                        $results = $calendar_setting_model->insCalenderDateYear($temp_array);
                     }
                 }
             } 
@@ -956,6 +1171,153 @@ class EditCalendarController extends Controller
             throw $e;
         }
     }
+
+    /**
+     * 初期設定実行
+     *
+     */
+    // public function initCalendar($params){
+
+    //     $ptn = $params['ptn'];
+    //     $employmentstatus = $params['employmentstatus'];
+    //     $departmentcode = $params['departmentcode'];
+    //     $usercode = $params['usercode'];
+    //     $dateyear = $params['dateyear'];
+    //     $datemonth = $params['datemonth'];
+    //     $displaykbn = $params['displaykbn'];
+    //     $formdata = $params['formdata'];
+    //     $fromdate = "";
+    //     $todate = "";
+    //     DB::beginTransaction();
+    //     try{
+    //         $calendar_model = new Calendar();
+    //         $setting_model = new Setting();
+    //         if (isset($datemonth)) {
+    //             // if ($displaykbn == Config::get('const.C034.closing')) {
+    //             //     // 締日基準
+    //             //     // 前月締日取得
+    //             //     $setting_model->setParamYearAttribute($dateyear);
+    //             //     $dt = new Carbon($dateyear.$datemonth."15");
+    //             //     $beforedate = $dt->subMonth();
+    //             //     Log::debug('$beforedate = '.$beforedate);
+    //             //     $setting_model->setParamFiscalmonthAttribute(date_format($beforedate, 'm'));
+    //             //     $begining = $setting_model->getMonthClosing();
+    //             //     if (isset($begining)) {
+    //             //         Log::debug($dateyear.$datemonth.str_pad($begining, 2, "0", STR_PAD_LEFT));
+    //             //         $dt = new Carbon($dateyear.$datemonth.str_pad($begining, 2, "0", STR_PAD_LEFT));
+    //             //         $fromdate = $dt->addDay();
+    //             //     } else {
+    //             //         $this->array_messagedata[] =  array(Config::get('const.RESPONCE_ITEM.message') =>Config::get('const.MSG_ERROR.not_setting_closing'));
+    //             //         return false;
+    //             //     }
+    //             //     // 当月締日取得
+    //             //     $setting_model->setParamYearAttribute($dateyear);
+    //             //     $dt = new Carbon($dateyear.$datemonth."15");
+    //             //     $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
+    //             //     $begining = $setting_model->getMonthClosing();
+    //             //     if (isset($begining)) {
+    //             //         Log::debug($dateyear.$datemonth.str_pad($begining, 2, "0", STR_PAD_LEFT));
+    //             //         $dt = new Carbon($dateyear.$datemonth.str_pad($begining, 2, "0", STR_PAD_LEFT));
+    //             //         $todate = $dt->addDay();
+    //             //     } else {
+    //             //         $this->array_messagedata[] =  array(Config::get('const.RESPONCE_ITEM.message') =>Config::get('const.MSG_ERROR.not_setting_closing'));
+    //             //         return false;
+    //             //     }
+    //             // } else {
+    //                 // 1日基準
+    //                 $setting_model->setParamYearAttribute($dateyear);
+    //                 $dt = new Carbon($dateyear.$datemonth."01");
+    //                 $fromdate = $dt;
+    //                 $dt = new Carbon($dateyear.$datemonth."01");
+    //                 $todate = $dt->addMonth()->subDay();
+    //             // }
+    //         } else {
+    //             if ($displaykbn == Config::get('const.C024.closing')) {
+    //                 // 期首月取得
+    //                 $setting_model = new Setting();
+    //                 $setting_model->setParamYearAttribute($dateyear);
+    //                 $begining = $setting_model->getBeginingMonth();
+    //                 if (isset($begining)) {
+    //                     $fromdate = new Carbon($dateyear.str_pad($begining, 2, "0", STR_PAD_LEFT).'01');
+    //                     $dt1 = new Carbon($dateyear.str_pad($begining, 2, "0", STR_PAD_LEFT).'01');
+    //                     $todate = $dt1;
+    //                     $todate->addYear()->subDay();
+    //                 } else {
+    //                     $this->array_messagedata[] =  array(Config::get('const.RESPONCE_ITEM.message') =>Config::get('const.MSG_ERROR.not_setting_beginning_month'));
+    //                     return false;
+    //                 }
+    //             } else {
+    //                 $dt = new Carbon($dateyear.'0101');
+    //                 $fromdate = new Carbon($dateyear.'0101');
+    //                 $todate = $fromdate;
+    //                 $todate->addYear()->subDay();
+    //                 $fromdate = new Carbon($dateyear.'0101');
+    //             }
+    //         }
+    //         $dtfrom = $fromdate;
+    //         if ($employmentstatus == "") { $employmentstatus = null; }
+    //         if ($departmentcode == "") { $departmentcode = null; }
+    //         if ($usercode == "") { $usercode = null; }
+    //         // 作成
+    //         $apicommon = new ApiCommonController();
+    //         $users_datas = $apicommon->getUserDepartmentEmploymentRole($usercode, date_format($todate, 'Ymd'));
+    //         $dt = $fromdate->copy()->subDay();
+    //         $user = Auth::user();
+    //         $login_user_code = $user->code;
+    //         $calendar_model->setCreateduserAttribute($login_user_code);
+    //         foreach($users_datas as $users_data) {
+    //             $isins = true;
+    //             if (isset($employmentstatus)) {
+    //                 if ($employmentstatus != $users_data->employment_status) {
+    //                     $isins = false;
+    //                 }
+    //             }
+    //             if (isset($departmentcode)) {
+    //                 if ($departmentcode != $users_data->department_code) {
+    //                     $isins = false;
+    //                 }
+    //             }
+    //             if (isset($usercode)) {
+    //                 if ($usercode != $users_data->code) {
+    //                     $isins = false;
+    //                 }
+    //             }
+    //             if ($isins) {
+    //                 $calendar_model->getParamemploymentstatusAttribute($users_data->employment_status);
+    //                 $calendar_model->getParamdepartmentcodeAttribute($users_data->department_code);
+    //                 $calendar_model->setParamusercodeAttribute($users_data->code);
+    //                 $calendar_model->setParamfromdateAttribute(date_format($dtfrom, 'Ymd'));
+    //                 $calendar_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
+    //                 // 削除
+    //                 $calendar_model->delDate();
+    //                 // 作成
+    //                 $calendar_model->setParamfromdateAttribute(date_format($dt, 'Ymd'));
+    //                 $calendar_model->setEmploymentstatusAttribute($users_data->employment_status);
+    //                 $calendar_model->setDepartmentcodeAttribute($users_data->department_code);
+    //                 $calendar_model->setUsercodeAttribute($users_data->code);
+    //                 $results = $calendar_model->getCalenderDateYear($ptn, $formdata);
+    //                 $temp_array = array();
+    //                 foreach($results as $result) {
+    //                     $temp_collect = collect($result);
+    //                     $temp_array[] = $temp_collect->toArray();
+    //                 }
+    //                 if (count($temp_array) > 0) {
+    //                     $results = $calendar_model->insCalenderDateYear($temp_array);
+    //                 }
+    //             }
+    //         } 
+
+    //         DB::commit();
+
+    //     }catch(\PDOException $pe){
+    //         DB::rollBack();
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         DB::rollBack();
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+    // }
 
     /**
      * 複写設定（未使用）
@@ -1041,7 +1403,7 @@ class EditCalendarController extends Controller
         $todate = "";
         DB::beginTransaction();
         try{
-            $calendar_model = new Calendar();
+            $calendar_setting_model = new CalendarSettingInformation();
             $setting_model = new Setting();
             // 当月1日基準
             $setting_model->setParamYearAttribute($dateyear);
@@ -1054,34 +1416,34 @@ class EditCalendarController extends Controller
             if ($employmentstatus == "") { $employmentstatus = null; }
             if ($departmentcode == "") { $departmentcode = null; }
             if ($usercode == "") { $usercode = null; }
-            $calendar_model->getParamdepartmentcodeAttribute($employmentstatus);
-            $calendar_model->getParamemploymentstatusAttribute($departmentcode);
-            $calendar_model->setParamusercodeAttribute($usercode);
-            $calendar_model->setParamfromdateAttribute(date_format($fromdate, 'Ymd'));
-            $calendar_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
-            $calendar_model->delDate();
+            $calendar_setting_model->getParamdepartmentcodeAttribute($employmentstatus);
+            $calendar_setting_model->getParamemploymentstatusAttribute($departmentcode);
+            $calendar_setting_model->setParamusercodeAttribute($usercode);
+            $calendar_setting_model->setParamfromdateAttribute(date_format($fromdate, 'Ymd'));
+            $calendar_setting_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
+            $calendar_setting_model->delDate();
             // 作成
             $apicommon = new ApiCommonController();
             $users_datas = $apicommon->getUserDepartmentEmploymentRole($usercode, date_format($todate, 'Ymd'));
             $dt = $fromdate;
             $dt->subDay();
-            $calendar_model->setParamfromdateAttribute(date_format($dt, 'Ymd'));
-            $calendar_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
+            $calendar_setting_model->setParamfromdateAttribute(date_format($dt, 'Ymd'));
+            $calendar_setting_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
             $user = Auth::user();
             $login_user_code = $user->code;
-            $calendar_model->setCreateduserAttribute($login_user_code);
+            $calendar_setting_model->setCreateduserAttribute($login_user_code);
             foreach($users_datas as $users_data) {
-                $calendar_model->setDepartmentcodeAttribute($users_data->department_code);
-                $calendar_model->setEmploymentstatusAttribute($users_data->employment_status);
-                $calendar_model->setUsercodeAttribute($users_data->code);
-                $results = $calendar_model->getCalenderDateYear($ptn, $formdata);
+                $calendar_setting_model->setDepartmentcodeAttribute($users_data->department_code);
+                $calendar_setting_model->setEmploymentstatusAttribute($users_data->employment_status);
+                $calendar_setting_model->setUsercodeAttribute($users_data->code);
+                $results = $calendar_setting_model->getCalenderDateYear($ptn, $formdata);
                 $temp_array = array();
                 foreach($results as $result) {
                     $temp_collect = collect($result);
                     $temp_array[] = $temp_collect->toArray();
                 }
                 if (count($temp_array) > 0) {
-                    $results = $calendar_model->insCalenderDateYear($temp_array);
+                    $results = $calendar_setting_model->insCalenderDateYear($temp_array);
                 }
             } 
 
@@ -1096,4 +1458,75 @@ class EditCalendarController extends Controller
             throw $e;
         }
     }
+
+    /**
+     * 初期設定実行
+     *
+     */
+    // public function copyinitCalendar($params){
+
+    //     $employmentstatus = $params['employmentstatus'];
+    //     $departmentcode = $params['departmentcode'];
+    //     $usercode = $params['usercode'];
+    //     $dateyear = $params['dateyear'];
+    //     $datemonth = $params['datemonth'];
+    //     $fromdate = "";
+    //     $todate = "";
+    //     DB::beginTransaction();
+    //     try{
+    //         $calendar_model = new Calendar();
+    //         $setting_model = new Setting();
+    //         // 当月1日基準
+    //         $setting_model->setParamYearAttribute($dateyear);
+    //         $dt = new Carbon($dateyear.$datemonth."01");
+    //         $fromdate = $dt;
+    //         $dt = new Carbon($dateyear.$datemonth."01");
+    //         $todate = $dt->addMonth()->subDay();
+    //         Log::debug('$todate = '.$todate);
+    //         // 削除
+    //         if ($employmentstatus == "") { $employmentstatus = null; }
+    //         if ($departmentcode == "") { $departmentcode = null; }
+    //         if ($usercode == "") { $usercode = null; }
+    //         $calendar_model->getParamdepartmentcodeAttribute($employmentstatus);
+    //         $calendar_model->getParamemploymentstatusAttribute($departmentcode);
+    //         $calendar_model->setParamusercodeAttribute($usercode);
+    //         $calendar_model->setParamfromdateAttribute(date_format($fromdate, 'Ymd'));
+    //         $calendar_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
+    //         $calendar_model->delDate();
+    //         // 作成
+    //         $apicommon = new ApiCommonController();
+    //         $users_datas = $apicommon->getUserDepartmentEmploymentRole($usercode, date_format($todate, 'Ymd'));
+    //         $dt = $fromdate;
+    //         $dt->subDay();
+    //         $calendar_model->setParamfromdateAttribute(date_format($dt, 'Ymd'));
+    //         $calendar_model->setParamtodateAttribute(date_format($todate, 'Ymd'));
+    //         $user = Auth::user();
+    //         $login_user_code = $user->code;
+    //         $calendar_model->setCreateduserAttribute($login_user_code);
+    //         foreach($users_datas as $users_data) {
+    //             $calendar_model->setDepartmentcodeAttribute($users_data->department_code);
+    //             $calendar_model->setEmploymentstatusAttribute($users_data->employment_status);
+    //             $calendar_model->setUsercodeAttribute($users_data->code);
+    //             $results = $calendar_model->getCalenderDateYear($ptn, $formdata);
+    //             $temp_array = array();
+    //             foreach($results as $result) {
+    //                 $temp_collect = collect($result);
+    //                 $temp_array[] = $temp_collect->toArray();
+    //             }
+    //             if (count($temp_array) > 0) {
+    //                 $results = $calendar_model->insCalenderDateYear($temp_array);
+    //             }
+    //         } 
+
+    //         DB::commit();
+
+    //     }catch(\PDOException $pe){
+    //         DB::rollBack();
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         DB::rollBack();
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+    // }
 }

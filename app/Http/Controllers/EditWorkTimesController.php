@@ -12,6 +12,7 @@ use App\Http\Requests\StoreUserPost;
 use App\Http\Controllers\ApiCommonController;
 use App\WorkTime;
 use App\UserHolidayKubun;
+use App\CalendarSettingInformation;
 use Carbon\Carbon;
 
 
@@ -86,7 +87,7 @@ class EditWorkTimesController extends Controller
             $code =  $params['code'];
     
             $work_times = new WorkTime();
-            $work_times->setUsercodeAttribute($code);
+            $work_times->setParamUsercodeAttribute($code);
             $work_times->setParamStartDateAttribute($ymd_start);
             $work_times->setParamEndDateAttribute($ymd_end);
     
@@ -200,9 +201,13 @@ class EditWorkTimesController extends Controller
             );
             // $this->fixTimeData($array_impl_fixData);
             $apicommon_model = new ApiCommonController();
-            $apicommon_model->addAttendanceWork($array_impl_addAttendanceWork);
+            $results = $apicommon_model->addAttendanceWork($array_impl_addAttendanceWork);
+            for ($i=0;$i<count($results[Config::get('const.RESPONCE_ITEM.messagedata')]);$i++) {
+                $this->array_messagedata[] = $results[Config::get('const.RESPONCE_ITEM.messagedata')][$i];
+            }
+            $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
             return response()->json(
-                ['result' => $result,
+                ['result' => $results['result'],
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
@@ -359,45 +364,50 @@ class EditWorkTimesController extends Controller
      * @param Request $request
      * @return void
      */
-    public function store(Request $request){
-        $this->array_messagedata = array();
-        $code = '';
-        $result = true;
-        try {
-            // パラメータチェック
-            $params = array();
-            if (!isset($request->keyparams)) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $params = $request->keyparams;
-            if (!isset($params['details'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $details = $params['details'];
-            $this->insertData($details);
-    
-            return response()->json(
-                ['result' => $result,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
+    // public function store(Request $request){
+    //     $this->array_messagedata = array();
+    //     $code = '';
+    //     $result = true;
+    //     try {
+    //         // パラメータチェック
+    //         $params = array();
+    //         if (!isset($request->keyparams)) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         $params = $request->keyparams;
+    //         if (!isset($params['details'])) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+
+    //         $details = $params['details'];
+    //         $results = $this->insertData($details);
+
+    //         for ($i=0;$i<count($results[Config::get('const.RESPONCE_ITEM.messagedata')]);$i++) {
+    //             $this->array_messagedata[] = $results[Config::get('const.RESPONCE_ITEM.messagedata')][$i];
+    //         }
+    //         $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //         return response()->json(
+    //             ['result' => $results['result'],
+    //             Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //         );
+    //     }catch(\PDOException $pe){
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+    // }
 
     /**
      * INSERT
@@ -405,90 +415,100 @@ class EditWorkTimesController extends Controller
      * @param [type] $name
      * @return void
      */
-    private function insertData($details){
-        DB::beginTransaction();
-        try{
-            $systemdate = Carbon::now();
-            $work_time_model = new WorkTime();
-            $user = Auth::user();
-            $login_user_code = $user->code;
-            $apicommon_model = new ApiCommonController();
-            $dt = new Carbon($details['date']);
-            $target_date = $dt->format('Ymd');
+    // private function insertData($details){
+    //     DB::beginTransaction();
+    //     try{
+    //         $systemdate = Carbon::now();
+    //         $work_time_model = new WorkTime();
+    //         $user = Auth::user();
+    //         $login_user_code = $user->code;
+    //         $apicommon_model = new ApiCommonController();
+    //         $dt = new Carbon($details['date']);
+    //         $target_date = $dt->format('Ymd');
 
-            //追加の場合部署選択されていない場合は部署コードないためApiCommonControllerで取得
-            $department_code = $details['department_code'];
-            if ($details['department_code'] == "" || $details['department_code'] == null) {
-                $dep_results = $apicommon_model->getUserDepartment($details['user_code'], $target_date);
-                foreach($dep_results as $item) {
-                    $department_code = $item->department_code;
-                    break;
-                }
-            }
-            // ログインユーザー部署ApiCommonControllerで取得
-            $login_department_code = null;
-            $dep_results = $apicommon_model->getUserDepartment($login_user_code, $target_date);
-            foreach($dep_results as $item) {
-                $login_department_code = $item->department_code;
-                break;
-            }
-            // 勤怠時刻登録
-            if ($details['time'] != "" && $details['time'] != null) {
-                $record_time = $details['date']." ".$details['time'];     // DB用
-            } else {
-                $record_time = $details['date']." 00:00:01";
-            }
-            $work_time_model->setUsercodeAttribute($details['user_code']);
-            $work_time_model->setDepartmentcodeAttribute($department_code);
-            $work_time_model->setRecordtimeAttribute($record_time);
-            $work_time_model->setModeAttribute($details['mode']);
-            $work_time_model->setCreateduserAttribute($login_user_code);
-            $work_time_model->setSystemDateAttribute($systemdate);
-            if($details['id'] != "" && $details['id'] != null) {
-                // 既に存在する場合は論理削除する
-                $work_time_model->setIdAttribute($details[$details_index]['id']);
-                $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
-                $work_time_model->setEditorusercodeAttribute($login_user_code);
-                $work_time_model->setUpdateduserAttribute($login_user_code);
-                $work_time_model->setSystemDateAttribute($systemdate);
-                $work_time_model->delWorkTime();
-            }
-            $work_time_model->setPositionsAttribute(null);
-            $work_time_model->setIseditorAttribute(true);
-            $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
-            $work_time_model->setEditorusercodeAttribute($login_user_code);
-            $work_time_model->insertWorkTime();
+    //         //追加の場合部署選択されていない場合は部署コードないためApiCommonControllerで取得
+    //         $department_code = $details['department_code'];
+    //         if ($details['department_code'] == "" || $details['department_code'] == null) {
+    //             $dep_results = $apicommon_model->getUserDepartment($details['user_code'], $target_date);
+    //             foreach($dep_results as $item) {
+    //                 $department_code = $item->department_code;
+    //                 break;
+    //             }
+    //         }
+    //         // ログインユーザー部署ApiCommonControllerで取得
+    //         $login_department_code = null;
+    //         $dep_results = $apicommon_model->getUserDepartment($login_user_code, $target_date);
+    //         foreach($dep_results as $item) {
+    //             $login_department_code = $item->department_code;
+    //             break;
+    //         }
+    //         // 勤怠時刻登録
+    //         if ($details['time'] != "" && $details['time'] != null) {
+    //             $record_time = $details['date']." ".$details['time'];     // DB用
+    //         } else {
+    //             $record_time = $details['date']." 00:00:01";
+    //         }
+    //         $work_time_model->setUsercodeAttribute($details['user_code']);
+    //         $work_time_model->setDepartmentcodeAttribute($department_code);
+    //         $work_time_model->setRecordtimeAttribute($record_time);
+    //         $work_time_model->setModeAttribute($details['mode']);
+    //         $work_time_model->setCreateduserAttribute($login_user_code);
+    //         $work_time_model->setSystemDateAttribute($systemdate);
+    //         if($details['id'] != "" && $details['id'] != null) {
+    //             // 既に存在する場合は論理削除する
+    //             $work_time_model->setIdAttribute($details[$details_index]['id']);
+    //             $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
+    //             $work_time_model->setEditorusercodeAttribute($login_user_code);
+    //             $work_time_model->setUpdateduserAttribute($login_user_code);
+    //             $work_time_model->setSystemDateAttribute($systemdate);
+    //             $work_time_model->delWorkTime();
+    //         }
+    //         $work_time_model->setPositionsAttribute(null);
+    //         $work_time_model->setIseditorAttribute(true);
+    //         $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
+    //         $work_time_model->setEditorusercodeAttribute($login_user_code);
+    //         $work_time_model->insertWorkTime();
         
-            // 休暇登録
-            if($details['kbn_flag'] == 1){     // 休暇区分のみ登録
-                $ymd = new Carbon($details['date']);
-                $working_date = $ymd->copy()->format('Ymd');
-                $user_holiday = new UserHolidayKubun();
-                $user_holiday->setUsercodeAttribute($details['user_code']);
-                $user_holiday->setWorkingdateAttribute($working_date);
-                $user_holiday->setSystemDateAttribute($systemdate);
-                // 既に存在する場合は論理削除する
-                $is_exists = $user_holiday->isExistsKbn();
-                if($is_exists){
-                    $user_holiday->delKbn();
-                }
-                $user_holiday->setDepartmentcodeAttribute($department_code);
-                $user_holiday->setHolidaykubunAttribute($details['user_holiday_kbn']);
-                $user_holiday->setCreateduserAttribute($login_user_code);
-                $user_holiday->insertKbn();
-            }
-            DB::commit();
+    //         // 休暇登録
+    //         $ymd = new Carbon($details['date']);
+    //         $working_date = $ymd->copy()->format('Ymd');
+    //         $calendar_setting_model = new CalendarSettingInformation();
+    //         $calendar_setting_model->setParamUsercodeAttribute($details['user_code']);
+    //         $calendar_setting_model->setParamDepartmentcodeAttribute($department_code);
+    //         $calendar_setting_model->setParamdatefromAttribute($working_date);
+    //         // 存在しない場合はエラーで返す
+    //         $is_exists = $calendar_setting_model->isExists();
+    //         if(!$is_exists){
+    //             DB::rollBack();
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $user_name."さん", Config::get('const.MSG_ERROR.not_setting_calendar')));
+    //             $this->array_messagedata[] = str_replace('{0}', $user_name."さん", Config::get('const.MSG_ERROR.not_setting_calendar'));
+    //             return array(
+    //                 'result' => false, 
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
+    //             );
+    //         }
+    //         if($details['kbn_flag'] == 1){     // 休暇区分のみ登録
+    //             $calendar_setting_model->setHolidaykubunAttribute($details['user_holiday_kbn']);
+    //         } else {
+    //             $calendar_setting_model->setHolidaykubunAttribute(0);
+    //         }
+    //         $calendar_setting_model->updateCalendar();
+    //         DB::commit();
+    //         return array(
+    //             'result' => true, 
+    //             Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
+    //         );
 
-        }catch(\PDOException $pe){
-            DB::rollBack();
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
-            Log::error($e->getMessage());
-            DB::rollBack();
-            throw $e;
-        }
-    }
+    //     }catch(\PDOException $pe){
+    //         DB::rollBack();
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+    //         Log::error($e->getMessage());
+    //         DB::rollBack();
+    //         throw $e;
+    //     }
+    // }
 
     /**
      * 更新
@@ -496,53 +516,58 @@ class EditWorkTimesController extends Controller
      * @param Request $request
      * @return response
      */
-    public function fix(Request $request){
-        $this->array_messagedata = array();
-        $details = array();
-        $result = true;
-        try {
-            // パラメータチェック
-            $params = array();
-            if (!isset($request->keyparams)) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $params = $request->keyparams;
-            if (!isset($params['details'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            if (!isset($params['index'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "index", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $details = $params['details'];
-            $details_index = $params['index'];
-            $this->fixData($details, $details_index);
-            return response()->json(
-                ['result' => $result,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
+    // public function fix(Request $request){
+    //     $this->array_messagedata = array();
+    //     $details = array();
+    //     $result = true;
+    //     try {
+    //         // パラメータチェック
+    //         $params = array();
+    //         if (!isset($request->keyparams)) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         $params = $request->keyparams;
+    //         if (!isset($params['details'])) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         if (!isset($params['index'])) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "index", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         $details = $params['details'];
+    //         $details_index = $params['index'];
+    //         $results = $this->fixData($details, $details_index);
+
+    //         for ($i=0;$i<count($results[Config::get('const.RESPONCE_ITEM.messagedata')]);$i++) {
+    //             $this->array_messagedata[] = $results[Config::get('const.RESPONCE_ITEM.messagedata')][$i];
+    //         }
+    //         $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //         return response()->json(
+    //             ['result' => $results['result'],
+    //             Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //         );
+    //     }catch(\PDOException $pe){
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+    // }
 
     /**
      * 更新
@@ -550,86 +575,96 @@ class EditWorkTimesController extends Controller
      * @param [type] $details
      * @return boolean
      */
-    private function fixData($details, $details_index){
-        $systemdate = Carbon::now();
-        $work_time_model = new WorkTime();
-        $apicommon_model = new ApiCommonController();
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        $login_department_code = null;
-        $dt = new Carbon($details[$details_index]['date']);
-        $target_date = $dt->format('Ymd');
+    // private function fixData($details, $details_index){
+    //     $systemdate = Carbon::now();
+    //     $work_time_model = new WorkTime();
+    //     $apicommon_model = new ApiCommonController();
+    //     $user = Auth::user();
+    //     $login_user_code = $user->code;
+    //     $login_department_code = null;
+    //     $dt = new Carbon($details[$details_index]['date']);
+    //     $target_date = $dt->format('Ymd');
 
-        DB::beginTransaction();
-        try{
-            // ログインユーザー部署ApiCommonControllerで取得
-            $login_department_code = null;
-            $dep_results = $apicommon_model->getUserDepartment($login_user_code, $target_date);
-            foreach($dep_results as $item) {
-                $login_department_code = $item->department_code;
-                break;
-            }
-            // 勤怠時刻登録
-            if ($details['time'] != "" && $details['time'] != null) {
-                $record_time = $details['date']." ".$details['time'];     // DB用
-            } else {
-                $record_time = $details['date']." 00:00:01";
-            }
-            $work_time_model->setUsercodeAttribute($details['user_code']);
-            $work_time_model->setDepartmentcodeAttribute($details['department_code']);
-            $work_time_model->setRecordtimeAttribute($record_time);
-            $work_time_model->setModeAttribute($details['mode']);
-            $work_time_model->setCreateduserAttribute($login_user_code);
-            $work_time_model->setSystemDateAttribute($systemdate);
-            // 既に存在するので論理削除する
-            $work_time_model->setIdAttribute($details[$details_index]['id']);
-            $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
-            $work_time_model->setEditorusercodeAttribute($login_user_code);
-            $work_time_model->setUpdateduserAttribute($login_user_code);
-            $work_time_model->setSystemDateAttribute($systemdate);
-            $work_time_model->delWorkTime();
-            $positions_data = null; 
-            if ((isset($details['x_positions']) && isset(details['y_positions']))) {
-                if (($details['x_positions'] != "") && ($details['y_positions'] != "")) {
-                    $positions_data = $details['x_positions'].' '.$details['y_positions'];
-                }
-            }
-            // $work_time_model->setPositionsAttribute($positions_data);
-            // $work_time_model->setIseditorAttribute(true);
-            // $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
-            // $work_time_model->setEditorusercodeAttribute($login_user_code);
-            // $work_time_model->insertWorkTime();
-            $this->insertWorkTime($details);
-            // 休暇登録
-            if($details[$details_index]['kbn_flag'] == 1){     // 休暇区分のみ登録
-                $ymd = new Carbon($details[$details_index]['date']);
-                $working_date = $ymd->copy()->format('Ymd');
-                $user_holiday = new UserHolidayKubun();
-                $user_holiday->setUsercodeAttribute($details[$details_index]['user_code']);
-                $user_holiday->setWorkingdateAttribute($working_date);
-                $user_holiday->setSystemDateAttribute($systemdate);
-                // 既に存在する場合は論理削除する
-                $is_exists = $user_holiday->isExistsKbn();
-                if($is_exists){
-                    $user_holiday->delKbn();
-                }
-                $user_holiday->setDepartmentcodeAttribute($details[$details_index]['department_code']);
-                $user_holiday->setHolidaykubunAttribute($details[$details_index]['user_holiday_kbn']);
-                $user_holiday->setCreateduserAttribute($login_user_code);
-                $user_holiday->insertKbn();
-            }
-            DB::commit();
+    //     DB::beginTransaction();
+    //     try{
+    //         // ログインユーザー部署ApiCommonControllerで取得
+    //         $login_department_code = null;
+    //         $dep_results = $apicommon_model->getUserDepartment($login_user_code, $target_date);
+    //         foreach($dep_results as $item) {
+    //             $login_department_code = $item->department_code;
+    //             break;
+    //         }
+    //         // 勤怠時刻登録
+    //         if ($details['time'] != "" && $details['time'] != null) {
+    //             $record_time = $details['date']." ".$details['time'];     // DB用
+    //         } else {
+    //             $record_time = $details['date']." 00:00:01";
+    //         }
+    //         $work_time_model->setUsercodeAttribute($details['user_code']);
+    //         $work_time_model->setDepartmentcodeAttribute($details['department_code']);
+    //         $work_time_model->setRecordtimeAttribute($record_time);
+    //         $work_time_model->setModeAttribute($details['mode']);
+    //         $work_time_model->setCreateduserAttribute($login_user_code);
+    //         $work_time_model->setSystemDateAttribute($systemdate);
+    //         // 既に存在するので論理削除する
+    //         $work_time_model->setIdAttribute($details[$details_index]['id']);
+    //         $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
+    //         $work_time_model->setEditorusercodeAttribute($login_user_code);
+    //         $work_time_model->setUpdateduserAttribute($login_user_code);
+    //         $work_time_model->setSystemDateAttribute($systemdate);
+    //         $work_time_model->delWorkTime();
+    //         $positions_data = null; 
+    //         if ((isset($details['x_positions']) && isset(details['y_positions']))) {
+    //             if (($details['x_positions'] != "") && ($details['y_positions'] != "")) {
+    //                 $positions_data = $details['x_positions'].' '.$details['y_positions'];
+    //             }
+    //         }
+    //         // $work_time_model->setPositionsAttribute($positions_data);
+    //         // $work_time_model->setIseditorAttribute(true);
+    //         // $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
+    //         // $work_time_model->setEditorusercodeAttribute($login_user_code);
+    //         // $work_time_model->insertWorkTime();
+    //         $this->insertWorkTime($details);
+    //         // 休暇登録
+    //         $ymd = new Carbon($details[$details_index]['date']);
+    //         $working_date = $ymd->copy()->format('Ymd');
+    //         $calendar_setting_model = new CalendarSettingInformation();
+    //         $calendar_setting_model->setParamUsercodeAttribute($details[$details_index]['user_code']);
+    //         $calendar_setting_model->setParamDepartmentcodeAttribute($details[$details_index]['department_code']);
+    //         $calendar_setting_model->setParamdatefromAttribute($working_date);
+    //         // 存在しない場合はエラーで返す
+    //         $is_exists = $calendar_setting_model->isExists();
+    //         if(!$is_exists){
+    //             DB::rollBack();
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $user_name."さん", Config::get('const.MSG_ERROR.not_setting_calendar')));
+    //             $this->array_messagedata[] = str_replace('{0}', $user_name."さん", Config::get('const.MSG_ERROR.not_setting_calendar'));
+    //             return array(
+    //                 'result' => false, 
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
+    //             );
+    //         }
+    //         if($details[$details_index]['kbn_flag'] == 1){     // 休暇区分のみ登録
+    //             $calendar_setting_model->setHolidaykubunAttribute($details['user_holiday_kbn']);
+    //         } else {
+    //             $calendar_setting_model->setHolidaykubunAttribute(0);
+    //         }
+    //         $calendar_setting_model->updateCalendar();
+    //         DB::commit();
+    //         return array(
+    //             'result' => true, 
+    //             Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
+    //         );
 
-        }catch(\PDOException $pe){
-            DB::rollBack();
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
-            Log::error($e->getMessage());
-            DB::rollBack();
-            throw $e;
-        }
-    }
+    //     }catch(\PDOException $pe){
+    //         DB::rollBack();
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+    //         Log::error($e->getMessage());
+    //         DB::rollBack();
+    //         throw $e;
+    //     }
+    // }
 
     /**
      * レコード削除
@@ -637,65 +672,65 @@ class EditWorkTimesController extends Controller
      * @param Request $request
      * @return void
      */
-    public function del(Request $request){
-        $this->array_messagedata = array();
-        $details = array();
-        $result = true;
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        $login_department_code = null;
-        try {
-            // パラメータチェック
-            $params = array();
-            if (!isset($request->keyparams)) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $params = $request->keyparams;
-            if (!isset($params['details'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $details = $params['details'];
-            $work_time_model = new WorkTime();
-            $apicommon_model = new ApiCommonController();
-            $systemdate = Carbon::now();
-            // ログインユーザー部署ApiCommonControllerで取得
-            $login_department_code = null;
-            $dt = new Carbon($details['date']);
-            $target_date = $dt->format('Ymd');
-            $dep_results = $apicommon_model->getUserDepartment($login_user_code, $target_date);
-            foreach($dep_results as $item) {
-                $login_department_code = $item->department_code;
-                break;
-            }
-            $work_time_model->setIdAttribute($details['id']);
-            $work_time_model->setSystemDateAttribute($systemdate);
-            $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
-            $work_time_model->setEditorusercodeAttribute($login_user_code);
-            $work_time_model->setUpdateduserAttribute($login_user_code);
-            $work_time_model->delWorkTime();
+    // public function del(Request $request){
+    //     $this->array_messagedata = array();
+    //     $details = array();
+    //     $result = true;
+    //     $user = Auth::user();
+    //     $login_user_code = $user->code;
+    //     $login_department_code = null;
+    //     try {
+    //         // パラメータチェック
+    //         $params = array();
+    //         if (!isset($request->keyparams)) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         $params = $request->keyparams;
+    //         if (!isset($params['details'])) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         $details = $params['details'];
+    //         $work_time_model = new WorkTime();
+    //         $apicommon_model = new ApiCommonController();
+    //         $systemdate = Carbon::now();
+    //         // ログインユーザー部署ApiCommonControllerで取得
+    //         $login_department_code = null;
+    //         $dt = new Carbon($details['date']);
+    //         $target_date = $dt->format('Ymd');
+    //         $dep_results = $apicommon_model->getUserDepartment($login_user_code, $target_date);
+    //         foreach($dep_results as $item) {
+    //             $login_department_code = $item->department_code;
+    //             break;
+    //         }
+    //         $work_time_model->setIdAttribute($details['id']);
+    //         $work_time_model->setSystemDateAttribute($systemdate);
+    //         $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
+    //         $work_time_model->setEditorusercodeAttribute($login_user_code);
+    //         $work_time_model->setUpdateduserAttribute($login_user_code);
+    //         $work_time_model->delWorkTime();
     
-            return response()->json(
-                ['result' => $result,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
+    //         return response()->json(
+    //             ['result' => $result,
+    //             Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //         );
+    //     }catch(\PDOException $pe){
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+    // }
 
     /**
      * 勤怠新規登録
@@ -792,95 +827,95 @@ class EditWorkTimesController extends Controller
      * @param [type] $details
      * @return void
      */
-    private function insertWorkTime($details){
-        $work_time = new WorkTime();
-        $user_holiday = new UserHolidayKubun();
-        $systemdate = Carbon::now();
-        $user = Auth::user();
-        $converts = array();
-        $converts = $details;       // 個人休暇登録用
-        $login_user_code = $user->code;
-        $login_department_code = null;
-        DB::beginTransaction();
-        try{
-            $work_time->setCreateduserAttribute($login_user_code);
-            $work_time->setSystemDateAttribute($systemdate);
-            foreach ($details as $detail) {
-                if ($login_department_code == null) {
-                    // ログインユーザー部署ApiCommonControllerで取得
-                    $dt = new Carbon($detail['date']);
-                    $target_date = $dt->format('Ymd');
-                    $dep_results = $apicommon_model->getUserDepartment($login_user_code, $target_date);
-                    foreach($dep_results as $item) {
-                        $login_department_code = $item->department_code;
-                        break;
-                    }
-                }
-                    // 論理削除新規
-                if(isset($detail['id'])){
-                    if($details['id'] != "" && $details['id'] != null) {
-                        // 既に存在する場合は論理削除する
-                        $work_time->setIdAttribute($detail['id']);
-                        $work_time->setSystemDateAttribute($systemdate);
-                        $work_time->setEditordepartmentcodeAttribute($login_department_code);
-                        $work_time->setEditorusercodeAttribute($login_user_code);
-                        $work_time->setUpdateduserAttribute($login_user_code);
-                        $work_time->delWorkTime();
-                    }
-                }
-                // 新規登録
-                if(!isset($detail['time'])){
-                    $detail['time'] = "00:00:00";
-                }
-                $record_time = $detail['date']." ".$detail['time'];
-                $work_time->setUsercodeAttribute($detail['user_code']);
-                $work_time->setDepartmentcodeAttribute($detail['department_code']);
-                $work_time->setRecordtimeAttribute($record_time);
-                $work_time->setModeAttribute($detail['mode']);
-                if(isset($detail['user_holiday_kbn'])){         // １日休暇が入っているものはmodeはnullにする
-                    if ($detail['user_holiday_kbn'] == Config::get('const.C013.morning_off')) {
-                        $work_time->setModeAttribute($detail['mode']);
-                    } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.afternoon_off')) {
-                        $work_time->setModeAttribute($detail['mode']);
-                    } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.late_work')) {
-                        $work_time->setModeAttribute($detail['mode']);
-                    } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.leave_early_work')) {
-                        $work_time->setModeAttribute($detail['mode']);
-                    } else {
-                        $work_time->setModeAttribute(null);
-                    }
-                } else {
-                    $work_time->setModeAttribute($detail['mode']);
-                }
+    // private function insertWorkTime($details){
+    //     $work_time = new WorkTime();
+    //     $user_holiday = new UserHolidayKubun();
+    //     $systemdate = Carbon::now();
+    //     $user = Auth::user();
+    //     $converts = array();
+    //     $converts = $details;       // 個人休暇登録用
+    //     $login_user_code = $user->code;
+    //     $login_department_code = null;
+    //     DB::beginTransaction();
+    //     try{
+    //         $work_time->setCreateduserAttribute($login_user_code);
+    //         $work_time->setSystemDateAttribute($systemdate);
+    //         foreach ($details as $detail) {
+    //             if ($login_department_code == null) {
+    //                 // ログインユーザー部署ApiCommonControllerで取得
+    //                 $dt = new Carbon($detail['date']);
+    //                 $target_date = $dt->format('Ymd');
+    //                 $dep_results = $apicommon_model->getUserDepartment($login_user_code, $target_date);
+    //                 foreach($dep_results as $item) {
+    //                     $login_department_code = $item->department_code;
+    //                     break;
+    //                 }
+    //             }
+    //                 // 論理削除新規
+    //             if(isset($detail['id'])){
+    //                 if($details['id'] != "" && $details['id'] != null) {
+    //                     // 既に存在する場合は論理削除する
+    //                     $work_time->setIdAttribute($detail['id']);
+    //                     $work_time->setSystemDateAttribute($systemdate);
+    //                     $work_time->setEditordepartmentcodeAttribute($login_department_code);
+    //                     $work_time->setEditorusercodeAttribute($login_user_code);
+    //                     $work_time->setUpdateduserAttribute($login_user_code);
+    //                     $work_time->delWorkTime();
+    //                 }
+    //             }
+    //             // 新規登録
+    //             if(!isset($detail['time'])){
+    //                 $detail['time'] = "00:00:00";
+    //             }
+    //             $record_time = $detail['date']." ".$detail['time'];
+    //             $work_time->setUsercodeAttribute($detail['user_code']);
+    //             $work_time->setDepartmentcodeAttribute($detail['department_code']);
+    //             $work_time->setRecordtimeAttribute($record_time);
+    //             $work_time->setModeAttribute($detail['mode']);
+    //             if(isset($detail['user_holiday_kbn'])){         // １日休暇が入っているものはmodeはnullにする
+    //                 if ($detail['user_holiday_kbn'] == Config::get('const.C013.morning_off')) {
+    //                     $work_time->setModeAttribute($detail['mode']);
+    //                 } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.afternoon_off')) {
+    //                     $work_time->setModeAttribute($detail['mode']);
+    //                 } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.late_work')) {
+    //                     $work_time->setModeAttribute($detail['mode']);
+    //                 } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.leave_early_work')) {
+    //                     $work_time->setModeAttribute($detail['mode']);
+    //                 } else {
+    //                     $work_time->setModeAttribute(null);
+    //                 }
+    //             } else {
+    //                 $work_time->setModeAttribute($detail['mode']);
+    //             }
     
-                $work_time_model->setIseditorAttribute(true);
-                $work_time->insertWorkTime();
-                if($detail['kbn_flag'] == 1){         // 個人休暇が入っているものはuser_holiday_kubunsへ登録
-                    $date = new Carbon($detail['record_time']);
-                    $working_date = $date->copy()->format('Ymd');
-                    $user_holiday->setUsercodeAttribute($detail['user_code']);
-                    $user_holiday->setWorkingdateAttribute($working_date);
-                    $user_holiday->setSystemDateAttribute($systemdate);
-                    // 既に存在する場合は論理削除する
-                    $is_exists = $user_holiday->isExistsKbn();
-                    if($is_exists){
-                        $user_holiday->delKbn();
-                    }
-                    $user_holiday->setDepartmentcodeAttribute($detail['department_code']);
-                    $user_holiday->setHolidaykubunAttribute($detail['user_holiday_kbn']);
-                    $user_holiday->setCreateduserAttribute($login_user_code);
-                    $user_holiday->insertKbn();
-                }
-            }
+    //             $work_time_model->setIseditorAttribute(true);
+    //             $work_time->insertWorkTime();
+    //             if($detail['kbn_flag'] == 1){         // 個人休暇が入っているものはuser_holiday_kubunsへ登録
+    //                 $date = new Carbon($detail['record_time']);
+    //                 $working_date = $date->copy()->format('Ymd');
+    //                 $user_holiday->setUsercodeAttribute($detail['user_code']);
+    //                 $user_holiday->setWorkingdateAttribute($working_date);
+    //                 $user_holiday->setSystemDateAttribute($systemdate);
+    //                 // 既に存在する場合は論理削除する
+    //                 $is_exists = $user_holiday->isExistsKbn();
+    //                 if($is_exists){
+    //                     $user_holiday->delKbn();
+    //                 }
+    //                 $user_holiday->setDepartmentcodeAttribute($detail['department_code']);
+    //                 $user_holiday->setHolidaykubunAttribute($detail['user_holiday_kbn']);
+    //                 $user_holiday->setCreateduserAttribute($login_user_code);
+    //                 $user_holiday->insertKbn();
+    //             }
+    //         }
             
-            DB::commit();
-            return true;
+    //         DB::commit();
+    //         return true;
 
-        }catch(\PDOException $e){
-            DB::rollBack();
-            return false;
-        }
-    }
+    //     }catch(\PDOException $e){
+    //         DB::rollBack();
+    //         return false;
+    //     }
+    // }
 
     /**
      * 休暇判定
@@ -888,20 +923,20 @@ class EditWorkTimesController extends Controller
      * @param [type] $details
      * @return void
      */
-    private function getHoridayinfo($user_holiday_kbn){
-        $atendance_time = null;
-        $leaving_time = null;
-        $mode = null;
-        if ($user_holiday_kbn == Config::get('const.C013.deemed_business_trip')) {
-            $work_time->setModeAttribute($detail['mode']);
-        } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.deemed_direct_go')) {
-            $work_time->setModeAttribute($detail['mode']);
-        } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.deemed_direct_return')) {
-            $work_time->setModeAttribute($detail['mode']);
-        } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.leave_early_work')) {
-            $work_time->setModeAttribute($detail['mode']);
-        } else {
-            $work_time->setModeAttribute(null);
-        }
-    }
+    // private function getHoridayinfo($user_holiday_kbn){
+    //     $atendance_time = null;
+    //     $leaving_time = null;
+    //     $mode = null;
+    //     if ($user_holiday_kbn == Config::get('const.C013.deemed_business_trip')) {
+    //         $work_time->setModeAttribute($detail['mode']);
+    //     } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.deemed_direct_go')) {
+    //         $work_time->setModeAttribute($detail['mode']);
+    //     } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.deemed_direct_return')) {
+    //         $work_time->setModeAttribute($detail['mode']);
+    //     } elseif ($detail['user_holiday_kbn'] == Config::get('const.C013.leave_early_work')) {
+    //         $work_time->setModeAttribute($detail['mode']);
+    //     } else {
+    //         $work_time->setModeAttribute(null);
+    //     }
+    // }
 }

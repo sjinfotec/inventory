@@ -270,6 +270,7 @@ export default {
     get_C005: function() {
       let $this = this;
       var mode_list_value_select = this.get_ModelistValue;
+      console.log('get_C005 mode_list_value_select = ' + mode_list_value_select);
       var i = 0;
       this.const_generaldatas.forEach( function( item ) {
         if (item.identification_id == CONST_C005) {
@@ -297,28 +298,38 @@ export default {
       var i = 0;
       this.const_generaldatas.forEach( function( item ) {
         if (item.identification_id == CONST_C042) {
+          console.log('get_ModeListCode item.physical_name = ' + item.physical_name);
           if (item.physical_name == CONST_MODE_LIST_PHYSICAL_NAME) {
             $this.mode_list_code = item.code;
+            console.log('get_ModeListCode $this.mode_list_code = ' + $this.mode_list_code);
             return $this.mode_list_code;
           }
         }
         i++;
       });    
+      console.log('get_ModeListCode return this.mode_list_code = ' + this.mode_list_code);
       return this.mode_list_code;
     },
     get_ModelistValue: function() {
       var modecode = this.get_ModeListCode;
+      console.log('get_ModelistValue modecode = ' + modecode);
+      console.log('get_ModelistValue mode_list_value_select = ' + this.mode_list_value_select);
       if (this.mode_list_value_select != null && this.mode_list_value_select != "") {
           return $this.mode_list_value_select;
       }
       let $this = this;
       this.featureItemSelections.forEach( function( item ) {
+        console.log('get_ModelistValue item.item_code = ' + item.item_code);
+        console.log('get_ModelistValue modecode = ' + modecode);
         if (item.item_code == modecode) {
+          console.log('get_ModelistValue item.item_code == modecode item.value_select = ' +item.value_select);
           $this.mode_list_value_select = item.value_select;
+          console.log('get_ModelistValue return $this.mode_list_value_select = ' + $this.mode_list_value_select);
           return $this.mode_list_value_select;
         }
       });
 
+      console.log('get_ModelistValue return mode_list_value_select = ' + this.mode_list_value_select);
       return this.mode_list_value_select;
     },
     get_AdminUserIndex: function() {
@@ -660,6 +671,7 @@ export default {
       if (this.checkRowData(index)) {
         var messages = [];
         messages.push("行削除してよろしいですか？");
+        messages.push("データはまだ削除しません。編集確定で削除します。");
         this.htmlMessageSwal("確認", messages, "info", true, true)
           .then(result  => {
             if (result) {
@@ -672,9 +684,9 @@ export default {
         this.count = this.details.length
       }
     },
-    cancelclick : function() {
-      this.$emit('cancelclick-event',event);
-    },
+    // cancelclick : function() {
+    //   this.$emit('cancelclick-event',event);
+    // },
     // -------------------- サーバー処理 ----------------------------
     // 勤怠取得処理
     getWorkTime(datevalue) {

@@ -390,7 +390,7 @@ table {
 }
 
 .mw-rem-4 {
-  min-width: 3rem !important;
+  min-width: 4rem !important;
 }
 
 .mw-rem-5 {

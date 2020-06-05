@@ -27,6 +27,7 @@ class WorkingTimedate extends Model
     protected $table_departments = 'departments';
     protected $table_user_holiday_kubuns = 'user_holiday_kubuns';
     protected $table_calendars = 'calendars';
+    protected $table_calendar_setting_informations = 'calendar_setting_informations';
     protected $table_generalcodes = 'generalcodes';
     protected $guarded = array('id');
 
@@ -1988,11 +1989,11 @@ class WorkingTimedate extends Model
             }
             $result = $mainquery->where('t1.is_deleted', '=', 0)->get();
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -2023,8 +2024,10 @@ class WorkingTimedate extends Model
             $case_where .= "ELSE CONCAT(CONCAT(LPAD(TRUNCATE({0}, 0), 2, '0'),':'),LPAD(TRUNCATE((mod({0} * 100, 100) * 60) / 100, 0) , 2, '0')) ";
             $case_where .= ' END as {1}';
 
+            // $mainquery = DB::table($this->table_users)
+            //     ->selectRaw($this->table_calendars.'.date as working_date');
             $mainquery = DB::table($this->table_users)
-                ->selectRaw($this->table_calendars.'.date as working_date');
+                ->selectRaw($this->table_calendar_setting_informations.'.date as working_date');
             $mainquery
                 ->addselect(
                     $this->table_users.'.employment_status',
@@ -2391,12 +2394,14 @@ class WorkingTimedate extends Model
                 ->addselect($this->table.'.created_user')
                 ->addselect($this->table.'.updated_user')
                 ->addselect($this->table.'.is_deleted')
-                ->addselect($this->table_user_holiday_kubuns.'.holiday_kubun');
+                ->addselect($this->table_calendar_setting_informations.'.holiday_kubun');       // table_user_holiday_kubuns
             $mainquery
                 ->selectRaw('t2.code_name as holiday_name')
                 ->selectRaw('t2.description as holiday_description');
+            // $mainquery
+            //     ->addselect($this->table_calendars.'.business_kubun as calendars_business_kubun');
             $mainquery
-                ->addselect($this->table_calendars.'.business_kubun as calendars_business_kubun');
+                ->addselect($this->table_calendar_setting_informations.'.business_kubun as calendars_business_kubun');
                 
             $case_where = "CASE ifnull({0},{1}) WHEN {1} THEN '{2}' ";
             $case_where .= " WHEN {3} THEN '{4}' ";
@@ -2404,7 +2409,8 @@ class WorkingTimedate extends Model
             $case_where .= " ELSE '{2}' ";
             $case_where .= ' END as {7}';
 
-            $case_where_working_time_name = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where);
+            // $case_where_working_time_name = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where);
+            $case_where_working_time_name = str_replace('{0}',$this->table_calendar_setting_informations.'.business_kubun', $case_where);
             $case_where_working_time_name = str_replace('{1}', Config::get('const.C007.basic'), $case_where_working_time_name);
             $case_where_working_time_name = str_replace('{2}', Config::get('const.WORKING_TIME_NAME.basic'), $case_where_working_time_name);
             $case_where_working_time_name = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_working_time_name);
@@ -2413,7 +2419,8 @@ class WorkingTimedate extends Model
             $case_where_working_time_name = str_replace('{6}', Config::get('const.WORKING_TIME_NAME.legal_out_holoday'), $case_where_working_time_name);
             $case_where_working_time_name = str_replace('{7}', 'working_time_name', $case_where_working_time_name);
 
-            $case_where_predeter_time_name = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where);
+            // $case_where_predeter_time_name = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where);
+            $case_where_predeter_time_name = str_replace('{0}',$this->table_calendar_setting_informations.'.business_kubun', $case_where);
             $case_where_predeter_time_name = str_replace('{1}', Config::get('const.C007.basic'), $case_where_predeter_time_name);
             $case_where_predeter_time_name = str_replace('{2}', Config::get('const.PREDETER_TIME_NAME.basic'), $case_where_predeter_time_name);
             $case_where_predeter_time_name = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_predeter_time_name);
@@ -2422,7 +2429,8 @@ class WorkingTimedate extends Model
             $case_where_predeter_time_name = str_replace('{6}', Config::get('const.PREDETER_TIME_NAME.legal_out_holoday'), $case_where_predeter_time_name);
             $case_where_predeter_time_name = str_replace('{7}', 'predeter_time_name', $case_where_predeter_time_name);
 
-            $case_where_predeter_time_secondname = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where);
+            // $case_where_predeter_time_secondname = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where);
+            $case_where_predeter_time_secondname = str_replace('{0}',$this->table_calendar_setting_informations.'.business_kubun', $case_where);
             $case_where_predeter_time_secondname = str_replace('{1}', Config::get('const.C007.basic'), $case_where_predeter_time_secondname);
             $case_where_predeter_time_secondname = str_replace('{2}', Config::get('const.PREDETER_TIME_SECONDNAME.basic'), $case_where_predeter_time_secondname);
             $case_where_predeter_time_secondname = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_predeter_time_secondname);
@@ -2431,7 +2439,8 @@ class WorkingTimedate extends Model
             $case_where_predeter_time_secondname = str_replace('{6}', Config::get('const.PREDETER_TIME_SECONDNAME.legal_out_holoday'), $case_where_predeter_time_secondname);
             $case_where_predeter_time_secondname = str_replace('{7}', 'predeter_time_secondname', $case_where_predeter_time_secondname);
 
-            $case_where_predeter_night_time_name = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where);
+            // $case_where_predeter_night_time_name = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where);
+            $case_where_predeter_night_time_name = str_replace('{0}',$this->table_calendar_setting_informations.'.business_kubun', $case_where);
             $case_where_predeter_night_time_name = str_replace('{1}', Config::get('const.C007.basic'), $case_where_predeter_night_time_name);
             $case_where_predeter_night_time_name = str_replace('{2}', Config::get('const.PREDETER_NIGHT_TIME_NAME.basic'), $case_where_predeter_night_time_name);
             $case_where_predeter_night_time_name = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_predeter_night_time_name);
@@ -2440,7 +2449,8 @@ class WorkingTimedate extends Model
             $case_where_predeter_night_time_name = str_replace('{6}', Config::get('const.PREDETER_NIGHT_TIME_NAME.legal_out_holoday'), $case_where_predeter_night_time_name);
             $case_where_predeter_night_time_name = str_replace('{7}', 'predeter_night_time_name', $case_where_predeter_night_time_name);
 
-            $case_where_predeter_night_time_secondname = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where);
+            // $case_where_predeter_night_time_secondname = str_replace('{0}',$this->table_calendars.'.business_kubun', $case_where);
+            $case_where_predeter_night_time_secondname = str_replace('{0}',$this->table_calendar_setting_informations.'.business_kubun', $case_where);
             $case_where_predeter_night_time_secondname = str_replace('{1}', Config::get('const.C007.basic'), $case_where_predeter_night_time_secondname);
             $case_where_predeter_night_time_secondname = str_replace('{2}', Config::get('const.PREDETER_NIGHT_TIME_SECONDNAME.basic'), $case_where_predeter_night_time_secondname);
             $case_where_predeter_night_time_secondname = str_replace('{3}', Config::get('const.C007.legal_holoday'), $case_where_predeter_night_time_secondname);
@@ -2464,35 +2474,54 @@ class WorkingTimedate extends Model
             $subquery2 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
 
             $mainquery
-                ->leftJoin($this->table_calendars, function ($join) { 
-                    $join->on($this->table_calendars.'.department_code', '=', $this->table_users.'.department_code');
-                    $join->on($this->table_calendars.'.employment_status', '=', $this->table_users.'.employment_status');
-                    $join->on($this->table_calendars.'.user_code', '=', $this->table_users.'.code')
-                    ->where($this->table_calendars.'.is_deleted', '=', 0);
+                ->leftJoin($this->table_calendar_setting_informations, function ($join) { 
+                    $join->on($this->table_calendar_setting_informations.'.department_code', '=', $this->table_users.'.department_code');
+                    $join->on($this->table_calendar_setting_informations.'.employment_status', '=', $this->table_users.'.employment_status');
+                    $join->on($this->table_calendar_setting_informations.'.user_code', '=', $this->table_users.'.code')
+                    ->where($this->table_users.'.is_deleted', '=', 0)       // $this->table
+                    ->where($this->table_calendar_setting_informations.'.is_deleted', '=', 0);
                 })
+                // ->leftJoin($this->table_calendars, function ($join) { 
+                //     $join->on($this->table_calendars.'.department_code', '=', $this->table_users.'.department_code');
+                //     $join->on($this->table_calendars.'.employment_status', '=', $this->table_users.'.employment_status');
+                //     $join->on($this->table_calendars.'.user_code', '=', $this->table_users.'.code')
+                //     ->where($this->table_calendars.'.is_deleted', '=', 0);
+                // })
+                // ->leftJoin($this->table, function ($join) { 
+                //     $join->on($this->table.'.department_code', '=', $this->table_users.'.department_code');
+                //     $join->on($this->table.'.user_code', '=', $this->table_users.'.code');
+                //     $join->on($this->table.'.working_date', '=', $this->table_calendars.'.date')
+                //     ->where($this->table.'.is_deleted', '=', 0);
+                // })
                 ->leftJoin($this->table, function ($join) { 
                     $join->on($this->table.'.department_code', '=', $this->table_users.'.department_code');
                     $join->on($this->table.'.user_code', '=', $this->table_users.'.code');
-                    $join->on($this->table.'.working_date', '=', $this->table_calendars.'.date')
+                    $join->on($this->table.'.working_date', '=', $this->table_calendar_setting_informations.'.date')
                     ->where($this->table.'.is_deleted', '=', 0);
                 })
-                ->leftJoin($this->table_user_holiday_kubuns, function ($join) { 
-                    $join->on($this->table_user_holiday_kubuns.'.working_date', '=', $this->table_calendars.'.date');
-                    $join->on($this->table_user_holiday_kubuns.'.department_code', '=', $this->table.'.department_code');
-                    $join->on($this->table_user_holiday_kubuns.'.user_code', '=', $this->table.'.user_code')
-                    ->where($this->table.'.is_deleted', '=', 0)
-                    ->where($this->table_user_holiday_kubuns.'.is_deleted', '=', 0);
-                })
+                // ->leftJoin($this->table_user_holiday_kubuns, function ($join) { 
+                //     $join->on($this->table_user_holiday_kubuns.'.working_date', '=', $this->table_calendars.'.date');
+                //     $join->on($this->table_user_holiday_kubuns.'.department_code', '=', $this->table.'.department_code');
+                //     $join->on($this->table_user_holiday_kubuns.'.user_code', '=', $this->table.'.user_code')
+                //     ->where($this->table.'.is_deleted', '=', 0)
+                //     ->where($this->table_user_holiday_kubuns.'.is_deleted', '=', 0);
+                // })
                 ->leftJoin($this->table_generalcodes.' as t1', function ($join) { 
                     $join->on('t1.code', '=', $this->table_users.'.employment_status')
                     ->where('t1.identification_id', '=', Config::get('const.C001.value'))
                     ->where('t1.is_deleted', '=', 0);
                 })
+                // ->leftJoin($this->table_generalcodes.' as t2', function ($join) { 
+                //     $join->on('t2.code', '=', $this->table_user_holiday_kubuns.'.holiday_kubun')
+                //     ->where('t2.identification_id', '=', Config::get('const.C013.value'))
+                //     ->where('t2.is_deleted', '=', 0)
+                //     ->where($this->table_user_holiday_kubuns.'.is_deleted', '=', 0);
+                // });
                 ->leftJoin($this->table_generalcodes.' as t2', function ($join) { 
-                    $join->on('t2.code', '=', $this->table_user_holiday_kubuns.'.holiday_kubun')
+                    $join->on('t2.code', '=', $this->table_calendar_setting_informations.'.holiday_kubun')
                     ->where('t2.identification_id', '=', Config::get('const.C013.value'))
                     ->where('t2.is_deleted', '=', 0)
-                    ->where($this->table_user_holiday_kubuns.'.is_deleted', '=', 0);
+                    ->where($this->table_calendar_setting_informations.'.is_deleted', '=', 0);
                 });
             $mainquery
                 ->leftJoinSub($subquery2, 't21', function ($join) { 
@@ -2512,7 +2541,7 @@ class WorkingTimedate extends Model
                             $join->on($this->table_temp_working_time_dates.'.department_code', '=', $this->table_users.'.department_code');
                             $join->on($this->table_temp_working_time_dates.'.employment_status', '=', $this->table_users.'.employment_status');
                             $join->on($this->table_temp_working_time_dates.'.user_code', '=', $this->table_users.'.code');
-                            $join->on($this->table_temp_working_time_dates.'.working_date', '=', $this->table_calendars.'.date');
+                            $join->on($this->table_temp_working_time_dates.'.working_date', '=', $this->table_calendar_setting_informations.'.date');       // $this->table_calendars
                         })
                         ->WhereNotNull($this->table_temp_working_time_dates.'.attendance_time_1')
                         ->orWhereNotNull($this->table_temp_working_time_dates.'.leaving_time_1')
@@ -2525,7 +2554,7 @@ class WorkingTimedate extends Model
                 $result = $mainquery
                     ->where($this->table.'.is_deleted', 0)
                     ->distinct()
-                    ->orderBy($this->table_calendars.'.date', 'asc')
+                    ->orderBy($this->table_calendar_setting_informations.'.date', 'asc')    // $this->table_calendars
                     ->orderBy($this->table_users.'.department_code', 'asc')
                     ->orderBy($this->table_users.'.employment_status', 'asc')
                     ->orderBy($this->table_users.'.code', 'asc')
@@ -2537,16 +2566,16 @@ class WorkingTimedate extends Model
                     ->orderBy($this->table_users.'.department_code', 'asc')
                     ->orderBy($this->table_users.'.employment_status', 'asc')
                     ->orderBy($this->table_users.'.code', 'asc')
-                    ->orderBy($this->table_calendars.'.date', 'asc')
+                    ->orderBy($this->table_calendar_setting_informations.'.date', 'asc')    // $this->table_calendars
                     ->get();
             }
             
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -2785,11 +2814,11 @@ class WorkingTimedate extends Model
             $result = $mainquery->get();
                 
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -2906,11 +2935,11 @@ class WorkingTimedate extends Model
                 ->get();
                 
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -2928,6 +2957,11 @@ class WorkingTimedate extends Model
             $item_data = '';
             $temp_array = array();
             foreach($temp_working_time_dates as $working_time_date) {
+                // ('insertWorkingTimeDateFromTemp working_date = '.$working_time_date->working_date);
+                // ('insertWorkingTimeDateFromTemp department_code = '.$working_time_date->department_code);
+                // ('insertWorkingTimeDateFromTemp department_name = '.$working_time_date->department_name);
+                // ('insertWorkingTimeDateFromTemp user_code = '.$working_time_date->user_code);
+                // ('insertWorkingTimeDateFromTemp user_name = '.$working_time_date->user_name);
                 $temp_collect = collect($working_time_date);
                 for ($i=1;$i<=5;$i++) {
                     if (isset($temp_collect['attendance_time_positions_'.$i]) && $temp_collect['attendance_time_positions_'.$i] != "") {
@@ -2969,11 +3003,11 @@ class WorkingTimedate extends Model
             } 
             DB::table($this->table)->insert($temp_array);
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -2993,17 +3027,17 @@ class WorkingTimedate extends Model
 
             $result = $mainquery->exists();
             // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
-            //     \Log::debug('sql_debug_log', ['isExistsWorkingTimeDate' => \DB::getQueryLog()]);
+            //     \// ('sql_debug_log', ['isExistsWorkingTimeDate' => \DB::getQueryLog()]);
             //     \DB::disableQueryLog();
             // }
             return $result;
 
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -3024,16 +3058,16 @@ class WorkingTimedate extends Model
             
             $mainquery->delete();
             // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
-            //     \Log::debug('sql_debug_log', ['delWorkingTimeDate' => \DB::getQueryLog()]);
+            //     \// ('sql_debug_log', ['delWorkingTimeDate' => \DB::getQueryLog()]);
             //     \DB::disableQueryLog();
             // }
 
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -3093,8 +3127,8 @@ class WorkingTimedate extends Model
                 $this->param_date_from = $date->format('Ymd');
                 $date = date_create($this->param_date_to);
                 $this->param_date_to = $date->format('Ymd');
-                $query->where($this->table_calendars.'.date', '>=', $this->param_date_from);            // 日付範囲指定
-                $query->where($this->table_calendars.'.date', '<=', $this->param_date_to);              // 日付範囲指定
+                $query->where($this->table_calendar_setting_informations.'.date', '>=', $this->param_date_from);            // 日付範囲指定 $this->table_calendars
+                $query->where($this->table_calendar_setting_informations.'.date', '<=', $this->param_date_to);              // 日付範囲指定 $this->table_calendars
             }
             
             if(!empty($this->param_employment_status)){

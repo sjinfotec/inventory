@@ -391,12 +391,12 @@ class ConfirmController extends Controller
             }
             DB::commit();
         }catch(\PDOException $pe){
-            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror'));
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_access_error'));
             DB::rollBack();
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror'));
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_access_error'));
             DB::rollBack();
             Log::error($e->getMessage());
             throw $e;

@@ -18,6 +18,8 @@ class WorkTimeLog extends Model
     protected $table_generalcodes = 'generalcodes';
     protected $table_user_holiday_kubuns = 'user_holiday_kubuns';
     protected $table_working_timetables = 'working_timetables';
+    protected $table_calendar_setting_informations = 'calendar_setting_informations';
+
     //--------------- メンバー属性 -----------------------------------
 
     private $id;
@@ -181,11 +183,11 @@ class WorkTimeLog extends Model
                 ]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -308,9 +310,12 @@ class WorkTimeLog extends Model
             $sqlString .= "    on ";
             $sqlString .= "      t3.user_code = t1.code ";
             $sqlString .= "      and t3.department_code = t1.department_code ";
-            $sqlString .= "    left join ".$this->table_user_holiday_kubuns." as t4 ";
+            $sqlString .= "    left join ".$this->table_calendar_setting_informations." as t4 ";        // user_holiday_kubuns
             $sqlString .= "    on ";
-            $sqlString .= "      t4.id = t3.user_holiday_kubuns_id ";
+            $sqlString .= "      t4.date = ? ";
+            $sqlString .= "      and t4.user_code = t1.code ";
+            $sqlString .= "      and t4.department_code = t1.department_code ";
+            $sqlString .= "      and t4.is_deleted = ? ";
             $sqlString .= "    inner join ( ";
             $sqlString .= "      select ";
             $sqlString .= "        t1.code as code ";
@@ -370,6 +375,8 @@ class WorkTimeLog extends Model
             $array_setBindingsStr[] = $from_datetime;
             $array_setBindingsStr[] = $to_datetime;
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = $target_date;
+            $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = $target_date;
@@ -382,11 +389,11 @@ class WorkTimeLog extends Model
             $array_setBindingsStr[] = 0;
             $result = DB::select($sqlString, $array_setBindingsStr);
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }

@@ -448,11 +448,11 @@ class WorkTime extends Model
                 );
             }
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -476,11 +476,11 @@ class WorkTime extends Model
                 ->limit(1)
                 ->get();
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -654,22 +654,23 @@ class WorkTime extends Model
                 ->selectRaw("ifnull(t10.name, '') as working_timetable_name ")
                 ->selectRaw("ifnull(t10.from_time, '') as working_timetable_from_time ")
                 ->selectRaw("ifnull(t10.to_time, '') as working_timetable_to_time ")
-                ->selectRaw("ifnull(t9.working_timetable_no, 0) as shift_no ")
-                ->selectRaw("ifnull(t10.name, '') as shift_name ")
-                ->selectRaw("ifnull(t10.from_time, '') as shift_from_time ")
-                ->selectRaw("ifnull(t10.to_time, '') as shift_to_time ")
+                ->selectRaw("ifnull(t10.ago_time_no, 0) as ago_time_no ")
+                ->selectRaw("0 as shift_no ")
+                ->selectRaw("'' as shift_name ")
+                ->selectRaw("'' as shift_from_time ")
+                ->selectRaw("'' as shift_to_time ")
                 ->leftJoinSub($subquery1, 't2', function ($join) { 
                     $join->on('t2.user_code', '=', 't1.code');
                     $join->on('t2.department_code', '=', 't1.department_code')
-                    ->where('t1.is_deleted', '=', 0)
-                    ->where('t2.is_deleted', '=', 0);
+                    ->where('t2.is_deleted', '=', 0)
+                    ->where('t1.is_deleted', '=', 0);
                 })
                 ->leftJoin($this->table_calendar_setting_informations.' as t9', function ($join) { 
-                    $join->on('t9.user_code', '=', 't1.code');
+                    $join->on('t9.date', '=', 't2.record_date');
                     $join->on('t9.department_code', '=', 't1.department_code');
-                    $join->on('t9.date', '=', 't2.record_date')
-                    ->where('t1.is_deleted', '=', 0)
-                    ->where('t9.is_deleted', '=', 0);
+                    $join->on('t9.user_code', '=', 't1.code')
+                    ->where('t9.is_deleted', '=', 0)
+                    ->where('t1.is_deleted', '=', 0);
                 })
                 ->leftJoinSub($subquery4, 't5', function ($join) { 
                     $join->on('t5.code', '=', 't1.department_code')
@@ -754,11 +755,11 @@ class WorkTime extends Model
                 ->orderBy('t2.record_datetime', 'asc')
                 ->get();
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -999,11 +1000,11 @@ class WorkTime extends Model
     //             ->orderBy('t2.record_datetime', 'asc')
     //             ->get();
     //     }catch(\PDOException $pe){
-    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
     //         Log::error($pe->getMessage());
     //         throw $pe;
     //     }catch(\Exception $e){
-    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
     //         Log::error($e->getMessage());
     //         throw $e;
     //     }
@@ -1268,11 +1269,11 @@ class WorkTime extends Model
     //             ->orderBy('t2.record_datetime', 'asc')
     //             ->get();
     //     }catch(\PDOException $pe){
-    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
     //         Log::error($pe->getMessage());
     //         throw $pe;
     //     }catch(\Exception $e){
-    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
     //         Log::error($e->getMessage());
     //         throw $e;
     //     }
@@ -1298,14 +1299,21 @@ class WorkTime extends Model
                     $this->table.'.record_time')
                 ->selectRaw('DATE_FORMAT('.$this->table.".record_time, '%Y%m%d') as record_date")
                 ->where($this->table.'.is_deleted', '=', 0);
-
-            $subquery2 = DB::table($this->table_user_holiday_kubuns)
+                
+            // $subquery2 = DB::table($this->table_user_holiday_kubuns)
+            //     ->select(
+            //         $this->table_user_holiday_kubuns.'.working_date',
+            //         $this->table_user_holiday_kubuns.'.user_code',
+            //         $this->table_user_holiday_kubuns.'.department_code')
+            //     ->selectRaw('ifnull('.$this->table_user_holiday_kubuns.'.holiday_kubun, 0) as holiday_kubun')
+            //     ->where($this->table_user_holiday_kubuns.'.is_deleted', '=', 0);
+            $subquery2 = DB::table($this->table_calendar_setting_informations)
                 ->select(
-                    $this->table_user_holiday_kubuns.'.working_date',
-                    $this->table_user_holiday_kubuns.'.user_code',
-                    $this->table_user_holiday_kubuns.'.department_code')
-                ->selectRaw('ifnull('.$this->table_user_holiday_kubuns.'.holiday_kubun, 0) as holiday_kubun')
-                ->where($this->table_user_holiday_kubuns.'.is_deleted', '=', 0);
+                    $this->table_calendar_setting_informations.'.date',
+                    $this->table_calendar_setting_informations.'.user_code',
+                    $this->table_calendar_setting_informations.'.department_code')
+                ->selectRaw('ifnull('.$this->table_calendar_setting_informations.'.holiday_kubun, 0) as holiday_kubun')
+                ->where($this->table_calendar_setting_informations.'.is_deleted', '=', 0);
 
             $subquery11 = $subquery1->toSql();
 
@@ -1315,9 +1323,9 @@ class WorkTime extends Model
                     't1.department_code',
                     't1.record_date',
                     't1.record_time',
-                    't2.working_date')
+                    't2.date')
                 ->leftJoinSub($subquery2, 't2', function ($join) { 
-                    $join->on('t2.working_date', '=', 't1.record_date');
+                    $join->on('t2.date', '=', 't1.record_date');
                     $join->on('t2.user_code', '=', 't1.user_code');
                     $join->on('t2.department_code', '=', 't1.department_code')
                     ->where('t2.holiday_kubun', '>', 0);
@@ -1362,11 +1370,11 @@ class WorkTime extends Model
             $result = $mainquery->get();
                 
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1392,13 +1400,20 @@ class WorkTime extends Model
                 ->selectRaw('DATE_FORMAT('.$this->table.".record_time, '%Y%m%d') as record_date")
                 ->where($this->table.'.is_deleted', '=', 0);
 
-            $subquery2 = DB::table($this->table_user_holiday_kubuns)
+            // $subquery2 = DB::table($this->table_user_holiday_kubuns)
+            //     ->select(
+            //         $this->table_user_holiday_kubuns.'.working_date',
+            //         $this->table_user_holiday_kubuns.'.user_code',
+            //         $this->table_user_holiday_kubuns.'.department_code')
+            //     ->selectRaw('ifnull('.$this->table_user_holiday_kubuns.'.holiday_kubun, 0) as holiday_kubun')
+            //     ->where($this->table_user_holiday_kubuns.'.is_deleted', '=', 0);
+            $subquery2 = DB::table($this->table_calendar_setting_informations)
                 ->select(
-                    $this->table_user_holiday_kubuns.'.working_date',
-                    $this->table_user_holiday_kubuns.'.user_code',
-                    $this->table_user_holiday_kubuns.'.department_code')
-                ->selectRaw('ifnull('.$this->table_user_holiday_kubuns.'.holiday_kubun, 0) as holiday_kubun')
-                ->where($this->table_user_holiday_kubuns.'.is_deleted', '=', 0);
+                    $this->table_calendar_setting_informations.'.date',
+                    $this->table_calendar_setting_informations.'.user_code',
+                    $this->table_calendar_setting_informations.'.department_code')
+                ->selectRaw('ifnull('.$this->table_calendar_setting_informations.'.holiday_kubun, 0) as holiday_kubun')
+                ->where($this->table_calendar_setting_informations.'.is_deleted', '=', 0);
 
             $subquery11 = $subquery1->toSql();
 
@@ -1408,9 +1423,9 @@ class WorkTime extends Model
                     't1.department_code',
                     't1.record_date',
                     't1.record_time',
-                    't2.working_date')
+                    't2.date')
                 ->leftJoinSub($subquery2, 't2', function ($join) { 
-                    $join->on('t2.working_date', '=', 't1.record_date');
+                    $join->on('t2.date', '=', 't1.record_date');
                     $join->on('t2.user_code', '=', 't1.user_code');
                     $join->on('t2.department_code', '=', 't1.department_code')
                     ->where('t2.holiday_kubun', '>', 0);
@@ -1454,11 +1469,11 @@ class WorkTime extends Model
             $result = $mainquery->get();
                 
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1506,11 +1521,11 @@ class WorkTime extends Model
                 ->where('t1.is_deleted', '=', 0)
                 ->get();
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1526,73 +1541,229 @@ class WorkTime extends Model
      */
     public function getUserDetails(){
         try {
-            // 適用期間日付の取得
             $apicommon = new ApiCommonController();
-            // usersの最大適用開始日付subquery
-            $subquery3 = $apicommon->getUserApplyTermSubquery($this->param_start_date);
-            // departmentsの最大適用開始日付subquery
-            $subquery4 = $apicommon->getDepartmentApplyTermSubquery($this->param_start_date);
-            // working_timetablesの最大適用開始日付subquery
-            $subquery5 = $apicommon->getTimetableApplyTermSubquery($this->param_start_date);
-            // users max(apply_term_from)
-        
-            $data = DB::table($this->table.' as t1')
-                ->leftJoin($this->table_users.' as t2', function ($join) { 
-                    $join->on('t2.code', '=', 't1.user_code');
-                    $join->on('t2.department_code', '=', 't1.department_code')
-                    ->where('t2.is_deleted', '=', 0);
-                })
-                ->JoinSub($subquery3, 't3', function ($join) { 
-                    $join->on('t3.code', '=', 't2.code');
-                    $join->on('t3.max_apply_term_from', '=', 't2.apply_term_from');
-                })
-                ->JoinSub($subquery4, 't4', function ($join) { 
-                    $join->on('t4.code', '=', 't1.department_code');
-                })
-                ->leftJoin($this->table_generalcodes.' as t5', function ($join) { 
-                    $join->on('t5.code', '=','t1.mode')
-                    ->where('t5.identification_id', '=', Config::get('const.C005.value'));
-                })
-                ->leftJoin($this->table_user_holiday_kubuns.' as t6', function ($join) { 
-                    $join->on('t6.id', '=','t1.user_holiday_kubuns_id')
-                    ->where('t6.is_deleted', '=', 0);
-                })
-                ->select(
-                    't1.id',
-                    't1.user_code',
-                    't1.department_code',
-                    't1.record_time',
-                    't1.mode',
-                    't1.user_holiday_kubuns_id as user_holiday_kubuns_id',
-                    't2.name as user_name',
-                    't4.name as department_name',
-                    't5.code_name',
-                    't6.holiday_kubun as user_holiday_kbn'
-                )
-                ->selectRaw("DATE_FORMAT(t1.record_time,'%Y%m%d') as record_ymd")
-                ->selectRaw("DATE_FORMAT(t1.record_time,'%Y年%m月%d日') as record_date")
-                ->selectRaw("DATE_FORMAT(t1.record_time,'%Y/%m/%d') as date")
-                ->selectRaw("DATE_FORMAT(t1.record_time,'%H:%i') as time")
-                ->selectRaw('X(t1.positions) as x_positions')
-                ->selectRaw('Y(t1.positions) as y_positions')
-                ->selectRaw("case ifnull(t6.holiday_kubun,0) when 0 then 0 else 1 end as kbn_flag")
-                ->where('t1.user_code', $this->user_code)
-                ->whereBetween('t1.record_time', [$this->param_start_date,$this->param_end_date])
-                ->where('t1.is_deleted', 0)
-                ->orderBy('t1.record_time', 'asc')
-                ->get();
+            $sqlString = "";
+            $sqlString .= "select ";
+            $sqlString .= "  t1.id as id ";
+            $sqlString .= "  , t1.user_code as user_code ";
+            $sqlString .= "  , t1.department_code as department_code ";
+            $sqlString .= "  , t1.record_time as record_time ";
+            $sqlString .= "  , t1.mode as mode ";
+            $sqlString .= "  , t1.user_holiday_kubuns_id as user_holiday_kubuns_id ";
+            $sqlString .= "  , t1.user_name as user_name ";
+            $sqlString .= "  , t1.department_name as department_name ";
+            $sqlString .= "  , t1.code_name as code_name ";
+            $sqlString .= "  , t2.holiday_kubun as holiday_kubun ";
+            $sqlString .= "  , t1.record_ymd as record_ymd ";
+            $sqlString .= "  , t1.record_date as record_date ";
+            $sqlString .= "  , t1.date as date ";
+            $sqlString .= "  , t1.time as time ";
+            $sqlString .= "  , t1.x_positions as x_positions ";
+            $sqlString .= "  , t1.y_positions as y_positions ";
+            $sqlString .= "  , case ifnull(t2.holiday_kubun, 0) ";
+            $sqlString .= "      when ? then ?  ";
+            $sqlString .= "      else ?  ";
+            $sqlString .= "    end as kbn_flag ";
+            $sqlString .= "from ( ";
+            $sqlString .= "  select ";
+            $sqlString .= "    t10.id as id ";
+            $sqlString .= "    , t10.user_code as user_code ";
+            $sqlString .= "    , t10.department_code as department_code ";
+            $sqlString .= "    , t10.record_time as record_time ";
+            $sqlString .= "    , t10.mode as mode ";
+            $sqlString .= "    , t10.user_holiday_kubuns_id as user_holiday_kubuns_id ";
+            $sqlString .= "    , t11.name as user_name ";
+            $sqlString .= "    , t12.name as department_name ";
+            $sqlString .= "    , t13.code_name as code_name ";
+            $sqlString .= "    , DATE_FORMAT(t10.record_time, '%Y%m%d') as record_ymd ";
+            $sqlString .= "    , DATE_FORMAT(t10.record_time, '%Y年%m月%d日') as record_date ";
+            $sqlString .= "    , DATE_FORMAT(t10.record_time, '%Y/%m/%d') as date ";
+            $sqlString .= "    , DATE_FORMAT(t10.record_time, '%H:%i') as time ";
+            $sqlString .= "    , X(t10.positions) as x_positions ";
+            $sqlString .= "    , Y(t10.positions) as y_positions ";
+            $sqlString .= "  from ";
+            $sqlString .= "  ".$this->table." as t10 ";
+            $sqlString .= "    left join ".$this->table_users." as t11 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t11.code = t10.user_code ";
+            $sqlString .= "      and t11.department_code = t10.department_code ";
+            $sqlString .= "      and t11.is_deleted = ? ";
+            $sqlString .= "    inner join ( ";
+            $sqlString .= "      ".$apicommon->makeUserApplyTermSql($this->param_start_date, Config::get('const.C025.admin_user'))." ";
+            $sqlString .= "    ) as t14 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t14.code = t11.code ";
+            $sqlString .= "      and t14.max_apply_term_from = t11.apply_term_from ";
+            $sqlString .= "    inner join ( ";
+            $sqlString .= "      ".$apicommon->makeDepartmentApplyTermSql($this->param_start_date, $this->param_start_date)." ";
+            $sqlString .= "    ) as t12 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t12.code = t11.department_code ";
+            $sqlString .= "    left join ".$this->table_generalcodes." as t13 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t13.code = t10.mode ";
+            $sqlString .= "      and t13.identification_id = ? ";
+            $sqlString .= "      and t13.is_deleted = ? ";
+            $sqlString .= "  where ";
+            $sqlString .= "    ? = ? ";
+            if (!empty($this->param_user_code)) {
+                $sqlString .= "    and t10.user_code = ? ";
+            }
+            if (!empty($this->param_department_code)) {
+                $sqlString .= "    and t10.department_code = ? ";
+            }
+            $sqlString .= "    and t10.record_time between ? and ? ";
+            $sqlString .= "    and t10.is_deleted = ? ";
+            $sqlString .= "  ) t1 ";
+            $sqlString .= "  inner join ";
+            $sqlString .= "    ".$this->table_calendar_setting_informations." as t2 ";
+            $sqlString .= "    on ";
+            $sqlString .= "      t2.date = t1.record_ymd ";
+            $sqlString .= "      and t2.department_code = t1.department_code ";
+            $sqlString .= "      and t2.user_code = t1.user_code ";
+            $sqlString .= "      and t2.is_deleted = ? ";
+            $sqlString .= "order by ";
+            $sqlString .= "  t1.record_time asc ";
+
+            // バインド
+            $dt = null;
+            if (isset($param_start_date)) {
+                $dt = new Carbon($param_start_date);
+            } else {
+                $dt = new Carbon();
+            }
+            $target_start_date = $dt->format('Ymd');
+            $dt = null;
+            if (isset($param_end_date)) {
+                $dt = new Carbon($param_end_date);
+            } else {
+                $dt = new Carbon();
+            }
+            $target_end_date = $dt->format('Ymd');
+
+            $array_setBindingsStr = array();
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $target_start_date;
+            $array_setBindingsStr[] = Config::get('const.C025.admin_user');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $target_start_date;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $target_start_date;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = Config::get('const.C005.value');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if (!empty($this->param_user_code)) {
+                $array_setBindingsStr[] = $this->param_user_code;
+            }
+            if (!empty($this->param_department_code)) {
+                $array_setBindingsStr[] = $this->param_department_code;
+            }
+            $array_setBindingsStr[] = $this->param_start_date;
+            $array_setBindingsStr[] = $this->param_end_date;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+
+            $result = DB::select($sqlString, $array_setBindingsStr);
+            return $result;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
         
-        return $data;
     }
+
+    /**
+     * ユーザーの勤務時間取得
+     *
+     * @return $data
+     */
+    // public function getUserDetails(){
+    //     try {
+    //         // 適用期間日付の取得
+    //         $apicommon = new ApiCommonController();
+    //         // usersの最大適用開始日付subquery
+    //         $subquery3 = $apicommon->getUserApplyTermSubquery($this->param_start_date);
+    //         // departmentsの最大適用開始日付subquery
+    //         $subquery4 = $apicommon->getDepartmentApplyTermSubquery($this->param_start_date);
+    //         // working_timetablesの最大適用開始日付subquery
+    //         $subquery5 = $apicommon->getTimetableApplyTermSubquery($this->param_start_date);
+    //         // users max(apply_term_from)
+    //         $dt = new Carbon($this->param_start_date);
+    //         $target_date = $dt->format('Ymd');
+        
+    //         $data = DB::table($this->table.' as t1')
+    //             ->leftJoin($this->table_users.' as t2', function ($join) { 
+    //                 $join->on('t2.code', '=', 't1.user_code');
+    //                 $join->on('t2.department_code', '=', 't1.department_code')
+    //                 ->where('t2.is_deleted', '=', 0);
+    //             })
+    //             ->JoinSub($subquery3, 't3', function ($join) { 
+    //                 $join->on('t3.code', '=', 't2.code');
+    //                 $join->on('t3.max_apply_term_from', '=', 't2.apply_term_from');
+    //             })
+    //             ->JoinSub($subquery4, 't4', function ($join) { 
+    //                 $join->on('t4.code', '=', 't1.department_code');
+    //             })
+    //             ->leftJoin($this->table_generalcodes.' as t5', function ($join) { 
+    //                 $join->on('t5.code', '=','t1.mode')
+    //                 ->where('t5.identification_id', '=', Config::get('const.C005.value'));
+    //             })
+    //             ->leftJoin($this->table_user_holiday_kubuns.' as t6', function ($join) { 
+    //                 $join->on('t6.id', '=','t1.user_holiday_kubuns_id')
+    //                 ->where('t6.is_deleted', '=', 0);
+    //             })
+    //             ->select(
+    //                 't1.id',
+    //                 't1.user_code',
+    //                 't1.department_code',
+    //                 't1.record_time',
+    //                 't1.mode',
+    //                 't1.user_holiday_kubuns_id as user_holiday_kubuns_id',
+    //                 't2.name as user_name',
+    //                 't4.name as department_name',
+    //                 't5.code_name',
+    //                 't6.holiday_kubun as user_holiday_kbn'
+    //             )
+    //             ->selectRaw("DATE_FORMAT(t1.record_time,'%Y%m%d') as record_ymd")
+    //             ->selectRaw("DATE_FORMAT(t1.record_time,'%Y年%m月%d日') as record_date")
+    //             ->selectRaw("DATE_FORMAT(t1.record_time,'%Y/%m/%d') as date")
+    //             ->selectRaw("DATE_FORMAT(t1.record_time,'%H:%i') as time")
+    //             ->selectRaw('X(t1.positions) as x_positions')
+    //             ->selectRaw('Y(t1.positions) as y_positions')
+    //             ->selectRaw("case ifnull(t6.holiday_kubun,0) when 0 then 0 else 1 end as kbn_flag")
+    //             ->where('t1.user_code', $this->user_code)
+    //             ->whereBetween('t1.record_time', [$this->param_start_date,$this->param_end_date])
+    //             ->where('t1.is_deleted', 0)
+    //             ->orderBy('t1.record_time_', 'asc')
+    //             ->get();
+    //     }catch(\PDOException $pe){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+    //         Log::error($pe->getMessage());
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+        
+    //     return $data;
+    // }
 
     /**
      * 論理削除
@@ -1613,11 +1784,11 @@ class WorkTime extends Model
                     'updated_at' => $this->systemdate
                     ]);
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1639,11 +1810,11 @@ class WorkTime extends Model
                 ->limit(5)
                 ->count();
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_count_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_count_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_count_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_count_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1770,7 +1941,13 @@ class WorkTime extends Model
                     ->where('t10.identification_id', '=', Config::get('const.C018.value'))
                     ->where('t10.is_deleted', '=', 0);
                 })
-                ->leftJoin($this->table_calendars.' as t11', function ($join) { 
+                // ->leftJoin($this->table_calendars.' as t11', function ($join) { 
+                //     $join->on('t11.department_code', '=', 't1.department_code');
+                //     $join->on('t11.user_code', '=', 't1.code');
+                //     $join->on('t11.date', '=', 't2.record_date')
+                //     ->where('t11.is_deleted', '=', 0);
+                // });
+                ->leftJoin($this->table_calendar_setting_informations.' as t11', function ($join) { 
                     $join->on('t11.department_code', '=', 't1.department_code');
                     $join->on('t11.user_code', '=', 't1.code');
                     $join->on('t11.date', '=', 't2.record_date')
@@ -1823,11 +2000,11 @@ class WorkTime extends Model
             //     \DB::disableQueryLog();
             // }
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1847,343 +2024,371 @@ class WorkTime extends Model
 
         try {
             $sqlString = "";
-            $sqlString .= "
-            select
-                t1.user_code as user_code
-                , t1.user_name as user_name
-                , t1.user_management as user_management
-                , t1.employment_status as employment_status
-                , t1.employment_status_name as employment_status_name
-                , t1.department_code as department_code
-                , t1.department_name as department_name
-                , t1.current_record_date as current_record_date
-                , DATE_FORMAT(t1.current_record_time, '%m月%d日 %H:%i')as current_record_time
-                , CONCAT(
-                    DATE_FORMAT(t1.current_record_date, '%Y年%m月%d日'), '(', SUBSTRING('月火水木金土日', CONVERT(t2.weekday_kubun + 1, char), 1), ')'
-                    ) as record_date_name
-                , t1.current_mode as current_mode
-                , t1.current_mode_name as current_mode_name
-                , t1.before_record_date as before_record_date
-                , DATE_FORMAT(t1.before_record_time, '%m月%d日 %H:%i')as before_record_time
-                , t1.before_mode as before_mode
-                , t1.before_mode_name as before_mode_name
-                , t1.hit_alert as hit_alert
-                , t1.interval_alaert as interval_alaert
-                , t1.holiday_alert as holiday_alert
-                , t2.business_kubun as business_kubun
-            from
-            (
-                (
-                select
-                    t3.user_code as user_code
-                    , t8.name as user_name
-                    , t8.management as user_management
-                    , t8.employment_status as employment_status
-                    , t10.code_name as employment_status_name
-                    , t3.department_code as department_code
-                    , t9.name as department_name
-                    , DATE_FORMAT(t6.record_time, '%Y%m%d') as current_record_date
-                    , t6.record_time as current_record_time
-                    , t6.mode as current_mode
-                    , t12.code_name as current_mode_name
-                    , CASE IFNULL(t6.mode, 0) 
-                        WHEN 0 THEN 0 
-                        WHEN 1 THEN CASE IFNULL(t5.mode, 0) 
-                        WHEN 0 THEN 0 
-                        WHEN 2 THEN 0 
-                        ELSE 1 
-                        END 
-                        WHEN 2 THEN CASE IFNULL(t5.mode, 0) 
-                        WHEN 0 THEN 0 
-                        WHEN 1 THEN 0 
-                        WHEN 22 THEN 0 
-                        WHEN 12 THEN 0 
-                        ELSE 1 
-                        END 
-                        WHEN 21 THEN CASE IFNULL(t5.mode, 0) 
-                        WHEN 0 THEN 0 
-                        WHEN 1 THEN 0 
-                        WHEN 22 THEN 0 
-                        WHEN 12 THEN 0 
-                        ELSE 1 
-                        END 
-                        WHEN 22 THEN CASE IFNULL(t5.mode, 0) 
-                        WHEN 0 THEN 0 
-                        WHEN 21 THEN 0 
-                        ELSE 1 
-                        END 
-                        WHEN 11 THEN CASE IFNULL(t5.mode, 0) 
-                        WHEN 0 THEN 0 
-                        WHEN 1 THEN 0 
-                        WHEN 22 THEN 0 
-                        WHEN 12 THEN 0 
-                        ELSE 1 
-                        END 
-                        WHEN 12 THEN CASE IFNULL(t5.mode, 0) 
-                        WHEN 0 THEN 0 
-                        WHEN 11 THEN 0 
-                        ELSE 1 
-                        END 
-                        END as hit_alert
-                    , DATE_FORMAT(t5.record_time, '%Y%m%d') as before_record_date
-                    , t5.record_time as before_record_time
-                    , t5.mode as before_mode
-                    , t11.code_name as before_mode_name
-                    , TIMEDIFF(t6.record_time, t5.record_time) as diff_time
-                    , CASE IFNULL(t6.mode, 0) 
-                        WHEN 1 THEN CASE IFNULL(t5.mode, 0) 
-                        WHEN 2 THEN CASE 
-                            WHEN IFNULL(TIMEDIFF(t6.record_time, t5.record_time), 0) < ? 
-                            THEN 1 
-                            ELSE 0 
-                            END 
-                        ELSE 0 
-                        END 
-                        ELSE 0 
-                        END as interval_alaert
-                    , 0 as holiday_alert 
-                from
-                    work_times as t3 
-                    left join ( 
-                        select
-                            t1.user_code as user_code
-                            , t1.department_code as department_code
-                            , MAX(t1.record_time) as max_record_time
-                            , t2.record_time as record_time 
-                        from
-                            work_times as t1 
-                            inner join ( 
-                            select
-                                t1.user_code as user_code
-                                , t1.department_code as department_code
-                                , t1.record_time as record_time 
-                            from
-                                work_times as t1 
-                            where
-                                t1.record_time between ? and ? 
-                                and t1.is_deleted = ?
-                            ) as t2 
-                            on t2.user_code = t1.user_code 
-                                and t2.department_code = t1.department_code 
-                                and t2.record_time > t1.record_time 
-                                and t1.is_deleted = ? 
-                        group by
-                            t1.user_code
-                            , t1.department_code
-                            , t2.record_time
-                    ) as t4 
-                    on t4.user_code = t3.user_code 
-                        and t4.department_code = t3.department_code 
-                    inner join ( 
-                        select
-                            t1.user_code as user_code
-                            , t1.department_code as department_code
-                            , t1.record_time as record_time
-                            , t1.mode as mode 
-                        from
-                            work_times as t1 
-                        where
-                            t1.record_time between ? and ? 
-                            and t1.is_deleted = ?
-                        ) as t5 
-                    on t5.user_code = t4.user_code 
-                        and t5.department_code = t4.department_code 
-                        and t5.record_time = t4.max_record_time 
-                    inner join ( 
-                        select
-                            t1.user_code as user_code
-                            , t1.department_code as department_code
-                            , t1.record_time as record_time
-                            , t1.mode as mode 
-                        from
-                            work_times as t1 
-                        where
-                            t1.record_time between ? and ? 
-                            and t1.is_deleted = ?
-                    ) as t6 
-                    on t6.user_code = t4.user_code 
-                        and t6.department_code = t4.department_code 
-                        and t6.record_time = t4.record_time 
-                    inner join ( 
-                        select
-                            code as code
-                            , MAX(apply_term_from) as max_apply_term_from 
-                        from
-                            users 
-                        where
-                            apply_term_from <= ?
-                            and role < ?
-                            and is_deleted = ?
-                        group by
-                            code
-                    ) as t7 
-                    on t7.code = t3.user_code 
-                    inner join users as t8 
-                    on t8.code = t7.code 
-                        and t8.apply_term_from = t7.max_apply_term_from 
-                        and t8.kill_from_date > ?
-                        and t8.is_deleted = ?
-                    left join ( 
-                        select
-                            t1.code as code
-                            , t1.name as name 
-                        from
-                            departments as t1 
-                            inner join ( 
-                                select
-                                    code as code
-                                    , MAX(apply_term_from) as max_apply_term_from 
-                                from
-                                    departments 
-                                where
-                                    apply_term_from <= ?
-                                    and is_deleted = ?
-                                group by
-                                    code
-                            ) as t2 
-                            on t1.code = t2.code 
-                                and t1.apply_term_from = t2.max_apply_term_from 
-                        where
-                            t1.kill_from_date > ?
-                            and t1.is_deleted = ?
-                    ) as t9 
-                    on t9.code = t3.department_code 
-                    left join generalcodes as t10 
-                    on t10.code = t8.employment_status 
-                        and t10.identification_id = ?
-                        and t10.is_deleted = ?
-                    left join generalcodes as t11 
-                    on t11.code = t5.mode 
-                        and t11.identification_id = ?
-                        and t11.is_deleted = ?
-                    left join generalcodes as t12 
-                    on t12.code = t6.mode 
-                        and t12.identification_id = ?
-                        and t12.is_deleted = ? 
-                where
-                  t3.record_time between ? and ? 
-                  and t3.is_deleted = ?
-                ) 
-                union ( 
-                    select
-                      t1.user_code as user_code
-                      , t1.user_name as user_name
-                      , t1.user_management as user_management
-                      , t1.employment_status as employment_status
-                      , t10.code_name as employment_status_name
-                      , t1.department_code as department_code
-                      , t9.name as department_name
-                      , t2.calendars_date as current_record_date
-                      , null as current_record_time
-                      , null as current_mode
-                      , null as current_mode_name
-                      , 0 as hit_alert
-                      , t3.record_date as before_record_date
-                      , null as before_record_time
-                      , null as before_mode
-                      , null as before_mode_name
-                      , null as diff_time
-                      , 0 as interval_alaert
-                      , 1 as holiday_alert 
-                    from
-                    ( 
-                        select
-                            t1.code as user_code
-                            , t1.name as user_name
-                            , t1.management as user_management
-                            , t1.employment_status as employment_status
-                            , t1.department_code as department_code
-                            , t1.kill_from_date as kill_from_date
-                        from
-                            users as t1 
-                            inner join ( 
-                            select
-                                code as code
-                                , MAX(apply_term_from) as max_apply_term_from 
-                            from
-                                users 
-                            where
-                                apply_term_from <= ?
-                                and role < ?
-                                and is_deleted = ?
-                            group by
-                                code
-                            ) as t3 
-                            on t3.code = t1.code 
-                            and t3.max_apply_term_from = t1.apply_term_from 
-                        where
-                            t1.kill_from_date > ?
-                    ) AS t1 
-                    inner join ( 
-                        select
-                            t1.department_code as department_code
-                            , t1.user_code as user_code
-                            , DATE_FORMAT(t1.date, '%Y%m%d') as calendars_date 
-                        from
-                            calendars as t1
-                        where
-                            t1.date between ? and ?
-                            and  t1.business_kubun = ?
-                            and  holiday_kubun = ?
-                            and  is_deleted = ?
-                   ) as t2 
-                    on t2.department_code = t1.department_code
-                        and t2.user_code = t1.user_code 
-                    left join ( 
-                        select
-                            t1.user_code as user_code
-                            , t1.department_code as department_code
-                            , DATE_FORMAT(t1.record_time, '%Y%m%d') as record_date 
-                        from
-                            work_times as t1
-                        where
-                            t1.record_time between ? and ?
-                    ) as t3 
-                    on t3.user_code = t1.user_code 
-                        and t3.department_code = t1.department_code 
-                        and t3.record_date = t2.calendars_date 
-                    left join ( 
-                        select
-                            t1.code as code
-                            , t1.name as name 
-                        from
-                            departments as t1 
-                            inner join ( 
-                                select
-                                    code as code
-                                    , MAX(apply_term_from) as max_apply_term_from 
-                                from
-                                    departments 
-                                where
-                                    apply_term_from <= ?
-                                    and is_deleted = ?
-                                group by
-                                    code
-                            ) as t2 
-                            on t2.code = t1.code 
-                            and t2.max_apply_term_from =  t1.apply_term_from
-                        where
-                            t1.kill_from_date > ?
-                            and t1.is_deleted = ?
-                    ) as t9 
-                    on t9.code = t1.department_code 
-                    left join generalcodes as t10 
-                    on t10.code = t1.employment_status 
-                        and t10.identification_id = ?
-                        and t10.is_deleted = ?
-                    where
-                        t2.calendars_date between ? and ? 
-                        and t3.record_date is null
-                )
-            ) as t1 
-            inner join calendars as t2 
-            on t2.department_code = t1.department_code 
-                and t2.user_code = t1.user_code 
-                and t2.date = t1.current_record_date ";
+            $sqlString .= "select ";
+            $sqlString .= "  t1.user_code as user_code ";
+            $sqlString .= "  , t1.user_name as user_name ";
+            $sqlString .= "  , t1.user_management as user_management ";
+            $sqlString .= "  , t1.employment_status as employment_status ";
+            $sqlString .= "  , t1.employment_status_name as employment_status_name ";
+            $sqlString .= "  , t1.department_code as department_code ";
+            $sqlString .= "  , t1.department_name as department_name ";
+            $sqlString .= "  , t1.current_record_date as current_record_date ";
+            $sqlString .= "  , DATE_FORMAT(t1.current_record_time, '%m月%d日 %H:%i')as current_record_time ";
+            $sqlString .= "  , CONCAT( ";
+            $sqlString .= "      DATE_FORMAT(t1.current_record_date, '%Y年%m月%d日'), '(', SUBSTRING('月火水木金土日', CONVERT(t2.weekday_kubun + 1, char), 1), ')' ";
+            $sqlString .= "      ) as record_date_name ";
+            $sqlString .= "  , t1.current_mode as current_mode ";
+            $sqlString .= "  , t1.current_mode_name as current_mode_name ";
+            $sqlString .= "  , t1.before_record_date as before_record_date ";
+            $sqlString .= "  , DATE_FORMAT(t1.before_record_time, '%m月%d日 %H:%i')as before_record_time ";
+            $sqlString .= "  , t1.before_mode as before_mode ";
+            $sqlString .= "  , t1.before_mode_name as before_mode_name ";
+            $sqlString .= "  , t1.hit_alert as hit_alert ";
+            $sqlString .= "  , t1.interval_alaert as interval_alaert ";
+            $sqlString .= "  , t1.holiday_alert as holiday_alert ";
+            $sqlString .= "  , t2.business_kubun as business_kubun ";
+            $sqlString .= "  from ";
+            $sqlString .= "  ( ";
+            $sqlString .= "    ( ";
+            $sqlString .= "      select ";
+            $sqlString .= "          t3.user_code as user_code ";
+            $sqlString .= "          , t8.name as user_name ";
+            $sqlString .= "          , t8.management as user_management ";
+            $sqlString .= "          , t8.employment_status as employment_status ";
+            $sqlString .= "         , t10.code_name as employment_status_name ";
+            $sqlString .= "         , t3.department_code as department_code ";
+            $sqlString .= "         , t9.name as department_name ";
+            $sqlString .= "         , DATE_FORMAT(t6.record_time, '%Y%m%d') as current_record_date ";
+            $sqlString .= "         , t6.record_time as current_record_time ";
+            $sqlString .= "         , t6.mode as current_mode ";
+            $sqlString .= "         , t12.code_name as current_mode_name ";
+            // モード警告
+            $sqlString .= "          , CASE IFNULL(t6.mode, 0 )  ";
+            $sqlString .= "            WHEN 0 THEN 0  ";             // モードなし
+            $sqlString .= "            WHEN 1 THEN  ";               // 出勤
+            $sqlString .= "              CASE IFNULL(t5.mode, 0 )  ";
+            $sqlString .= "              WHEN 0 THEN 0  ";
+            $sqlString .= "              WHEN 2 THEN 0  ";           // 退勤
+            $sqlString .= "              WHEN 32 THEN 0 ";           // 緊急収集終了
+            $sqlString .= "              ELSE 1  ";
+            $sqlString .= "              END  ";
+            $sqlString .= "            WHEN 2 THEN ";                // 退勤
+            $sqlString .= "              CASE IFNULL(t5.mode, 0)  ";
+            $sqlString .= "              WHEN 0 THEN 0  ";
+            $sqlString .= "              WHEN 1 THEN 0  ";           // 出勤
+            $sqlString .= "              WHEN 12 THEN 0 ";           // 私用外出戻り
+            $sqlString .= "              WHEN 22 THEN 0 ";           // 公用外出戻り
+            $sqlString .= "              ELSE 1  ";
+            $sqlString .= "              END  ";
+            $sqlString .= "            WHEN 21 THEN ";               // 公用外出
+            $sqlString .= "              CASE IFNULL(t5.mode, 0)  ";
+            $sqlString .= "              WHEN 0 THEN 0  ";
+            $sqlString .= "              WHEN 1 THEN 0  ";           // 出勤
+            $sqlString .= "              WHEN 12 THEN 0 ";           // 私用外出戻り
+            $sqlString .= "              WHEN 22 THEN 0 ";           // 公用外出戻り
+            $sqlString .= "              WHEN 31 THEN 0 ";           // 緊急収集開始
+            $sqlString .= "              ELSE 1  ";
+            $sqlString .= "              END  ";
+            $sqlString .= "            WHEN 22 THEN ";               // 公用外出戻り
+            $sqlString .= "              CASE IFNULL(t5.mode, 0)  ";
+            $sqlString .= "              WHEN 0 THEN 0  ";
+            $sqlString .= "              WHEN 21 THEN 0 ";           // 公用外出
+            $sqlString .= "              ELSE 1  ";
+            $sqlString .= "              END  ";
+            $sqlString .= "            WHEN 11 THEN ";               // 私用外出
+            $sqlString .= "              CASE IFNULL(t5.mode, 0)  ";
+            $sqlString .= "              WHEN 0 THEN 0  ";
+            $sqlString .= "              WHEN 1 THEN 0  ";           // 出勤
+            $sqlString .= "              WHEN 12 THEN 0 ";           // 私用外出戻り
+            $sqlString .= "              WHEN 22 THEN 0 ";           // 公用外出戻り
+            $sqlString .= "              WHEN 31 THEN 0 ";           // 緊急収集開始
+            $sqlString .= "              ELSE 1  ";
+            $sqlString .= "              END  ";
+            $sqlString .= "            WHEN 12 THEN ";               // 私用外出戻り
+            $sqlString .= "              CASE IFNULL(t5.mode, 0)  ";
+            $sqlString .= "              WHEN 0 THEN 0  ";
+            $sqlString .= "              WHEN 11 THEN 0 ";           // 私用外出
+            $sqlString .= "              ELSE 1  ";
+            $sqlString .= "              END  ";
+            $sqlString .= "            WHEN 31 THEN ";               // 緊急収集開始
+            $sqlString .= "              CASE IFNULL(t5.mode, 0)  ";
+            $sqlString .= "              WHEN 0 THEN 0  ";
+            $sqlString .= "              WHEN 2 THEN 0  ";           // 退勤
+            $sqlString .= "              WHEN 32 THEN 0 ";           // 緊急収集終了
+            $sqlString .= "              ELSE 1  ";
+            $sqlString .= "              END  ";
+            $sqlString .= "            WHEN 32 THEN ";               // 緊急収集終了
+            $sqlString .= "              CASE IFNULL(t5.mode, 0)  ";
+            $sqlString .= "              WHEN 0 THEN 0  ";
+            $sqlString .= "              WHEN 12 THEN 0 ";           // 私用外出戻り
+            $sqlString .= "              WHEN 22 THEN 0 ";           // 公用外出戻り
+            $sqlString .= "              WHEN 31 THEN 0 ";           // 緊急収集開始
+            $sqlString .= "              ELSE 1  ";
+            $sqlString .= "              END  ";
+            $sqlString .= "            END as hit_alert ";
+            $sqlString .= "        , DATE_FORMAT(t5.record_time, '%Y%m%d') as before_record_date ";
+            $sqlString .= "        , t5.record_time as before_record_time ";
+            $sqlString .= "        , t5.mode as before_mode ";
+            $sqlString .= "        , t11.code_name as before_mode_name ";
+            $sqlString .= "        , TIMEDIFF(t6.record_time, t5.record_time) as diff_time ";
+            // 出退勤interval警告
+            $sqlString .= "        , CASE IFNULL(t6.mode, 0)  ";
+            $sqlString .= "            WHEN 1 THEN ";
+            $sqlString .= "              CASE IFNULL(t5.mode, 0)  ";
+            $sqlString .= "              WHEN 2 THEN ";
+            $sqlString .= "                CASE ";
+            $sqlString .= "                WHEN IFNULL(TIMEDIFF(t6.record_time, t5.record_time), 0) < ?  ";
+            $sqlString .= "                THEN 1  ";
+            $sqlString .= "                ELSE 0  ";
+            $sqlString .= "                END  ";
+            $sqlString .= "            ELSE 0  ";
+            $sqlString .= "            END  ";
+            $sqlString .= "            ELSE 0  ";
+            $sqlString .= "            END as interval_alaert ";
+            // 出勤日警告
+            $sqlString .= "        , 0 as holiday_alert  ";
+            $sqlString .= "      from ";
+            $sqlString .= "        ".$this->table." as t3  ";
+            $sqlString .= "        left join (  ";
+            $sqlString .= "          select ";
+            $sqlString .= "            t1.user_code as user_code ";
+            $sqlString .= "            , t1.department_code as department_code ";
+            $sqlString .= "            , MAX(t1.record_time) as max_record_time ";
+            $sqlString .= "            , t2.record_time as record_time  ";
+            $sqlString .= "          from ";
+            $sqlString .= "            ".$this->table." as t1  ";
+            $sqlString .= "            inner join (  ";
+            $sqlString .= "              select ";
+            $sqlString .= "                t1.user_code as user_code ";
+            $sqlString .= "                , t1.department_code as department_code ";
+            $sqlString .= "                , t1.record_time as record_time  ";
+            $sqlString .= "              from ";
+            $sqlString .= "                ".$this->table." as t1  ";
+            $sqlString .= "              where ";
+            $sqlString .= "                t1.record_time between ? and ?  ";
+            $sqlString .= "                and t1.is_deleted = ? ";
+            $sqlString .= "            ) as t2  ";
+            $sqlString .= "            on t2.user_code = t1.user_code  ";
+            $sqlString .= "              and t2.department_code = t1.department_code  ";
+            $sqlString .= "              and t2.record_time > t1.record_time  ";
+            $sqlString .= "              and t1.is_deleted = ?  ";
+            $sqlString .= "          group by ";
+            $sqlString .= "            t1.user_code ";
+            $sqlString .= "            , t1.department_code ";
+            $sqlString .= "            , t2.record_time ";
+            $sqlString .= "        ) as t4  ";
+            $sqlString .= "        on t4.user_code = t3.user_code  ";
+            $sqlString .= "          and t4.department_code = t3.department_code  ";
+            $sqlString .= "        inner join (  ";
+            $sqlString .= "          select ";
+            $sqlString .= "            t1.user_code as user_code ";
+            $sqlString .= "            , t1.department_code as department_code ";
+            $sqlString .= "            , t1.record_time as record_time ";
+            $sqlString .= "            , t1.mode as mode  ";
+            $sqlString .= "          from ";
+            $sqlString .= "            ".$this->table." as t1  ";
+            $sqlString .= "          where ";
+            $sqlString .= "            t1.record_time between ? and ?  ";
+            $sqlString .= "            and t1.is_deleted = ? ";
+            $sqlString .= "        ) as t5  ";
+            $sqlString .= "        on t5.user_code = t4.user_code  ";
+            $sqlString .= "          and t5.department_code = t4.department_code  ";
+            $sqlString .= "          and t5.record_time = t4.max_record_time  ";
+            $sqlString .= "        inner join (  ";
+            $sqlString .= "          select ";
+            $sqlString .= "            t1.user_code as user_code ";
+            $sqlString .= "            , t1.department_code as department_code ";
+            $sqlString .= "            , t1.record_time as record_time ";
+            $sqlString .= "            , t1.mode as mode  ";
+            $sqlString .= "          from ";
+            $sqlString .= "            ".$this->table." as t1  ";
+            $sqlString .= "          where ";
+            $sqlString .= "            t1.record_time between ? and ?  ";
+            $sqlString .= "            and t1.is_deleted = ? ";
+            $sqlString .= "        ) as t6  ";
+            $sqlString .= "        on t6.user_code = t4.user_code  ";
+            $sqlString .= "          and t6.department_code = t4.department_code  ";
+            $sqlString .= "          and t6.record_time = t4.record_time  ";
+            $sqlString .= "        inner join (  ";
+            $sqlString .= "          select ";
+            $sqlString .= "            code as code ";
+            $sqlString .= "            , MAX(apply_term_from) as max_apply_term_from  ";
+            $sqlString .= "          from ";
+            $sqlString .= "            ".$this->table_users."  ";
+            $sqlString .= "          where ";
+            $sqlString .= "            apply_term_from <= ? ";
+            $sqlString .= "            and role < ? ";
+            $sqlString .= "            and is_deleted = ? ";
+            $sqlString .= "          group by ";
+            $sqlString .= "            code ";
+            $sqlString .= "        ) as t7  ";
+            $sqlString .= "        on t7.code = t3.user_code  ";
+            $sqlString .= "        inner join ".$this->table_users." as t8  ";
+            $sqlString .= "        on t8.code = t7.code  ";
+            $sqlString .= "          and t8.apply_term_from = t7.max_apply_term_from  ";
+            $sqlString .= "          and t8.kill_from_date > ? ";
+            $sqlString .= "          and t8.is_deleted = ? ";
+            $sqlString .= "        left join (  ";
+            $sqlString .= "          select ";
+            $sqlString .= "            t1.code as code ";
+            $sqlString .= "            , t1.name as name  ";
+            $sqlString .= "          from ";
+            $sqlString .= "            ".$this->table_departments." as t1  ";
+            $sqlString .= "            inner join (  ";
+            $sqlString .= "              select ";
+            $sqlString .= "                code as code ";
+            $sqlString .= "                , MAX(apply_term_from) as max_apply_term_from  ";
+            $sqlString .= "              from ";
+            $sqlString .= "                ".$this->table_departments."  ";
+            $sqlString .= "              where ";
+            $sqlString .= "                apply_term_from <= ? ";
+            $sqlString .= "                and is_deleted = ? ";
+            $sqlString .= "              group by ";
+            $sqlString .= "                code ";
+            $sqlString .= "            ) as t2  ";
+            $sqlString .= "              on t1.code = t2.code  ";
+            $sqlString .= "                and t1.apply_term_from = t2.max_apply_term_from  ";
+            $sqlString .= "          where ";
+            $sqlString .= "            t1.kill_from_date > ? ";
+            $sqlString .= "            and t1.is_deleted = ? ";
+            $sqlString .= "        ) as t9  ";
+            $sqlString .= "        on t9.code = t3.department_code  ";
+            $sqlString .= "        left join ".$this->table_generalcodes." as t10  ";
+            $sqlString .= "        on t10.code = t8.employment_status  ";
+            $sqlString .= "          and t10.identification_id = ? ";
+            $sqlString .= "          and t10.is_deleted = ? ";
+            $sqlString .= "        left join ".$this->table_generalcodes." as t11  ";
+            $sqlString .= "        on t11.code = t5.mode  ";
+            $sqlString .= "          and t11.identification_id = ? ";
+            $sqlString .= "          and t11.is_deleted = ? ";
+            $sqlString .= "        left join ".$this->table_generalcodes." as t12  ";
+            $sqlString .= "        on t12.code = t6.mode  ";
+            $sqlString .= "          and t12.identification_id = ? ";
+            $sqlString .= "          and t12.is_deleted = ?  ";
+            $sqlString .= "      where ";
+            $sqlString .= "        t3.record_time between ? and ?  ";
+            $sqlString .= "        and t3.is_deleted = ? ";
+            $sqlString .= "    )  ";
+            $sqlString .= "    union (  ";
+            $sqlString .= "      select ";
+            $sqlString .= "        t1.user_code as user_code ";
+            $sqlString .= "        , t1.user_name as user_name ";
+            $sqlString .= "        , t1.user_management as user_management ";
+            $sqlString .= "        , t1.employment_status as employment_status ";
+            $sqlString .= "        , t10.code_name as employment_status_name ";
+            $sqlString .= "        , t1.department_code as department_code ";
+            $sqlString .= "        , t9.name as department_name ";
+            $sqlString .= "        , t2.calendars_date as current_record_date ";
+            $sqlString .= "        , null as current_record_time ";
+            $sqlString .= "        , null as current_mode ";
+            $sqlString .= "        , null as current_mode_name ";
+            $sqlString .= "        , ? as hit_alert ";
+            $sqlString .= "        , t3.record_date as before_record_date ";
+            $sqlString .= "        , null as before_record_time ";
+            $sqlString .= "        , null as before_mode ";
+            $sqlString .= "        , null as before_mode_name ";
+            $sqlString .= "        , null as diff_time ";
+            $sqlString .= "        , ? as interval_alaert ";
+            $sqlString .= "        , ? as holiday_alert  ";
+            $sqlString .= "      from ";
+            $sqlString .= "        (  ";
+            $sqlString .= "          select ";
+            $sqlString .= "            t1.code as user_code ";
+            $sqlString .= "            , t1.name as user_name ";
+            $sqlString .= "            , t1.management as user_management ";
+            $sqlString .= "            , t1.employment_status as employment_status ";
+            $sqlString .= "            , t1.department_code as department_code ";
+            $sqlString .= "            , t1.kill_from_date as kill_from_date ";
+            $sqlString .= "          from ";
+            $sqlString .= "            ".$this->table_users." as t1  ";
+            $sqlString .= "            inner join (  ";
+            $sqlString .= "              select ";
+            $sqlString .= "                code as code ";
+            $sqlString .= "                , MAX(apply_term_from) as max_apply_term_from  ";
+            $sqlString .= "              from ";
+            $sqlString .= "                ".$this->table_users."  ";
+            $sqlString .= "              where ";
+            $sqlString .= "                apply_term_from <= ? ";
+            $sqlString .= "                and role < ? ";
+            $sqlString .= "                and is_deleted = ? ";
+            $sqlString .= "              group by ";
+            $sqlString .= "                code ";
+            $sqlString .= "            ) as t3  ";
+            $sqlString .= "            on t3.code = t1.code  ";
+            $sqlString .= "              and t3.max_apply_term_from = t1.apply_term_from  ";
+            $sqlString .= "          where ";
+            $sqlString .= "            t1.kill_from_date > ? ";
+            $sqlString .= "        ) as t1  ";
+            $sqlString .= "        inner join (  ";
+            $sqlString .= "          select ";
+            $sqlString .= "            t1.department_code as department_code ";
+            $sqlString .= "            , t1.user_code as user_code ";
+            $sqlString .= "            , DATE_FORMAT(t1.date, '%Y%m%d') as calendars_date  ";
+            $sqlString .= "          from ";
+            $sqlString .= "            ".$this->table_calendar_setting_informations." as t1 ";
+            $sqlString .= "          where ";
+            $sqlString .= "            t1.date between ? and ? ";
+            $sqlString .= "            and  t1.business_kubun = ? ";
+            $sqlString .= "            and  holiday_kubun = ? ";
+            $sqlString .= "            and  is_deleted = ? ";
+            $sqlString .= "        ) as t2  ";
+            $sqlString .= "        on t2.department_code = t1.department_code ";
+            $sqlString .= "          and t2.user_code = t1.user_code  ";
+            $sqlString .= "        left join (  ";
+            $sqlString .= "          select ";
+            $sqlString .= "            t1.user_code as user_code ";
+            $sqlString .= "            , t1.department_code as department_code ";
+            $sqlString .= "            , DATE_FORMAT(t1.record_time, '%Y%m%d') as record_date  ";
+            $sqlString .= "          from ";
+            $sqlString .= "            ".$this->table." as t1 ";
+            $sqlString .= "          where ";
+            $sqlString .= "            t1.record_time between ? and ? ";
+            $sqlString .= "        ) as t3  ";
+            $sqlString .= "        on t3.user_code = t1.user_code  ";
+            $sqlString .= "          and t3.department_code = t1.department_code  ";
+            $sqlString .= "          and t3.record_date = t2.calendars_date  ";
+            $sqlString .= "        left join (  ";
+            $sqlString .= "          select ";
+            $sqlString .= "            t1.code as code ";
+            $sqlString .= "            , t1.name as name  ";
+            $sqlString .= "          from ";
+            $sqlString .= "            ".$this->table_departments." as t1  ";
+            $sqlString .= "            inner join (  ";
+            $sqlString .= "              select ";
+            $sqlString .= "                code as code ";
+            $sqlString .= "                , MAX(apply_term_from) as max_apply_term_from  ";
+            $sqlString .= "              from ";
+            $sqlString .= "                ".$this->table_departments."  ";
+            $sqlString .= "              where ";
+            $sqlString .= "                apply_term_from <= ? ";
+            $sqlString .= "                and is_deleted = ? ";
+            $sqlString .= "              group by ";
+            $sqlString .= "                code ";
+            $sqlString .= "            ) as t2  ";
+            $sqlString .= "            on t2.code = t1.code  ";
+            $sqlString .= "              and t2.max_apply_term_from =  t1.apply_term_from ";
+            $sqlString .= "          where ";
+            $sqlString .= "            t1.kill_from_date > ? ";
+            $sqlString .= "            and t1.is_deleted = ? ";
+            $sqlString .= "        ) as t9  ";
+            $sqlString .= "        on t9.code = t1.department_code  ";
+            $sqlString .= "        left join ".$this->table_generalcodes." as t10  ";
+            $sqlString .= "        on t10.code = t1.employment_status  ";
+            $sqlString .= "          and t10.identification_id = ? ";
+            $sqlString .= "          and t10.is_deleted = ? ";
+            $sqlString .= "      where ";
+            $sqlString .= "        t2.calendars_date between ? and ?  ";
+            $sqlString .= "        and t3.record_date is null ";
+            $sqlString .= "    ) ";
+            $sqlString .= "  ) as t1  ";
+            $sqlString .= "  inner join ".$this->table_calendar_setting_informations." as t2  ";
+            $sqlString .= "  on t2.department_code = t1.department_code  ";
+            $sqlString .= "    and t2.user_code = t1.user_code  ";
+            $sqlString .= "    and t2.date = t1.current_record_date ";
             // 条件
             $sqlString .= "where 1 = 1 ";
             if(!empty($this->param_employment_status)){
-                $sqlString .= "and t1.employment_status = ? ";          //　雇用形態指定
+                $sqlString .= "and t1.employment_status = ? ";          // 雇用形態指定
             }
             if(!empty($this->param_department_code)){
                 $sqlString .= "and t1.department_code = ? ";            //department_code指定
@@ -2203,73 +2408,79 @@ class WorkTime extends Model
             $sqlString .= "order by
                                 t1.current_record_date desc
                                 , t1.user_code asc
-                                , t1.department_code asc";
+                                , t1.department_code asc
+                                , t1.current_record_time asc";
             // バインド
             // インターバル時間取得
             $apicommon = new ApiCommonController();
             $interval_time = $apicommon->getIntevalMinute($this->param_end_date);
             $array_setBindingsStr = array();
-            $array_setBindingsStr[] = $interval_time;
-            $array_setBindingsStr[] = $this->param_date_from;
-            $array_setBindingsStr[] = $this->param_date_to;
+            // 出退勤interval警告
+            $array_setBindingsStr[] = (string)$interval_time;
+            $array_setBindingsStr[] = (string)$this->param_date_from;
+            $array_setBindingsStr[] = (string)$this->param_date_to;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $this->param_date_from;
-            $array_setBindingsStr[] = $this->param_date_to;
+            $array_setBindingsStr[] = (string)$this->param_date_from;
+            $array_setBindingsStr[] = (string)$this->param_date_to;
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $this->param_date_from;
-            $array_setBindingsStr[] = $this->param_date_to;
+            $array_setBindingsStr[] = (string)$this->param_date_from;
+            $array_setBindingsStr[] = (string)$this->param_date_to;
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $this->param_end_date;
-            $array_setBindingsStr[] = Config::get('const.C017.admin_user');;
+            $array_setBindingsStr[] = (string)$this->param_end_date;
+            $array_setBindingsStr[] = (int)Config::get('const.C017.admin_user');
             $array_setBindingsStr[] = 0;
             // 月末
             $dt = new Carbon($this->param_end_date);
             $lastOfMonth = date_format($dt->endOfMonth(), 'Ymd');
-            $array_setBindingsStr[] = $lastOfMonth;
+            $array_setBindingsStr[] = (string)$lastOfMonth;
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $this->param_end_date;
+            $array_setBindingsStr[] = (string)$this->param_end_date;
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $lastOfMonth;
+            $array_setBindingsStr[] = (string)$lastOfMonth;
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = Config::get('const.C001.value');
+            $array_setBindingsStr[] = (string)Config::get('const.C001.value');
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = Config::get('const.C005.value');
+            $array_setBindingsStr[] = (string)Config::get('const.C005.value');
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = Config::get('const.C005.value');
+            $array_setBindingsStr[] = (string)Config::get('const.C005.value');
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $this->param_date_from;
-            $array_setBindingsStr[] = $this->param_date_to;
+            $array_setBindingsStr[] = (string)$this->param_date_from;
+            $array_setBindingsStr[] = (string)$this->param_date_to;
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $this->param_end_date;
-            $array_setBindingsStr[] = Config::get('const.C017.admin_user');;
-            $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $lastOfMonth;
-            $array_setBindingsStr[] = $this->param_start_date;
-            $array_setBindingsStr[] = $this->param_end_date;
-            $array_setBindingsStr[] = Config::get('const.C007.basic');
+            // union
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $this->param_date_from;
-            $array_setBindingsStr[] = $this->param_date_to;
-            $array_setBindingsStr[] = $this->param_end_date;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = (string)$this->param_end_date;
+            $array_setBindingsStr[] = (int)Config::get('const.C017.admin_user');;
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $lastOfMonth;
+            $array_setBindingsStr[] = (string)$lastOfMonth;
+            $array_setBindingsStr[] = (string)$this->param_start_date;
+            $array_setBindingsStr[] = (string)$this->param_end_date;
+            $array_setBindingsStr[] = (int)Config::get('const.C007.basic');
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = Config::get('const.C001.value');
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $this->param_start_date;
-            $array_setBindingsStr[] = $this->param_end_date;
+            $array_setBindingsStr[] = (string)$this->param_date_from;
+            $array_setBindingsStr[] = (string)$this->param_date_to;
+            $array_setBindingsStr[] = (string)$this->param_end_date;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = (string)$lastOfMonth;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = (string)Config::get('const.C001.value');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = (string)$this->param_start_date;
+            $array_setBindingsStr[] = (string)$this->param_end_date;
             if(!empty($this->param_employment_status)) {
-                $array_setBindingsStr[] = $this->param_employment_status;
+                $array_setBindingsStr[] = (int)$this->param_employment_status;
             }
             if(!empty($this->param_department_code)) {
-                $array_setBindingsStr[] = $this->param_department_code;
+                $array_setBindingsStr[] = (string)$this->param_department_code;
             }
             if(!empty($this->param_user_code)) {
-                $array_setBindingsStr[] = $this->param_user_code;
+                $array_setBindingsStr[] = (string)$this->param_user_code;
             } else {
-                $array_setBindingsStr[] = Config::get('const.C017.out_of_user');
+                $array_setBindingsStr[] = (int)Config::get('const.C017.out_of_user');
             }
             // $array_setBindingsStr[] = Config::get('const.C007.basic');
             $array_setBindingsStr[] = 0;
@@ -2278,22 +2489,1114 @@ class WorkTime extends Model
             $array_setBindingsStr[] = 0;
             $result = DB::select($sqlString, $array_setBindingsStr);
 
+            Log::debug(' $result count = '.count($result));
             // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
             //     \Log::debug('sql_debug_log', ['getdailyAlertData' => \DB::getQueryLog()]);
             //     \DB::disableQueryLog();
             // }
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
 
         return $result;
     }
+
+    /**
+     * 日次警告打刻取得
+     * 
+     *  $targetdateは適用期間
+     *
+     * @return void
+     */
+    // public function getdailyAlertData(){
+    //     // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
+
+    //     try {
+    //         $sqlString = "";
+    //         $sqlString .= "select ";
+    //         $sqlString .= "  t1.user_code as user_code ";
+    //         $sqlString .= "  , t1.user_name as user_name ";
+    //         $sqlString .= "  , t1.user_management as user_management ";
+    //         $sqlString .= "  , t1.employment_status as employment_status ";
+    //         $sqlString .= "  , t1.employment_status_name as employment_status_name ";
+    //         $sqlString .= "  , t1.department_code as department_code ";
+    //         $sqlString .= "  , t1.department_name as department_name ";
+    //         $sqlString .= "  , t1.current_record_date as current_record_date ";
+    //         $sqlString .= "  , DATE_FORMAT(t1.current_record_time, '%m月%d日 %H:%i')as current_record_time ";
+    //         $sqlString .= "  , CONCAT( ";
+    //         $sqlString .= "      DATE_FORMAT(t1.current_record_date, '%Y年%m月%d日'), '(', SUBSTRING('月火水木金土日', CONVERT(t2.weekday_kubun + 1, char), 1), ')' ";
+    //         $sqlString .= "      ) as record_date_name ";
+    //         $sqlString .= "  , t1.current_mode as current_mode ";
+    //         $sqlString .= "  , t1.current_mode_name as current_mode_name ";
+    //         $sqlString .= "  , t1.before_record_date as before_record_date ";
+    //         $sqlString .= "  , DATE_FORMAT(t1.before_record_time, '%m月%d日 %H:%i')as before_record_time ";
+    //         $sqlString .= "  , t1.before_mode as before_mode ";
+    //         $sqlString .= "  , t1.before_mode_name as before_mode_name ";
+    //         $sqlString .= "  , t1.hit_alert as hit_alert ";
+    //         $sqlString .= "  , t1.interval_alaert as interval_alaert ";
+    //         $sqlString .= "  , t1.holiday_alert as holiday_alert ";
+    //         $sqlString .= "  , t2.business_kubun as business_kubun ";
+    //         $sqlString .= "  from ";
+    //         $sqlString .= "  ( ";
+    //         $sqlString .= "    ( ";
+    //         $sqlString .= "      select ";
+    //         $sqlString .= "          t3.user_code as user_code ";
+    //         $sqlString .= "          , t8.name as user_name ";
+    //         $sqlString .= "          , t8.management as user_management ";
+    //         $sqlString .= "          , t8.employment_status as employment_status ";
+    //         $sqlString .= "         , t10.code_name as employment_status_name ";
+    //         $sqlString .= "         , t3.department_code as department_code ";
+    //         $sqlString .= "         , t9.name as department_name ";
+    //         $sqlString .= "         , DATE_FORMAT(t6.record_time, '%Y%m%d') as current_record_date ";
+    //         $sqlString .= "         , t6.record_time as current_record_time ";
+    //         $sqlString .= "         , t6.mode as current_mode ";
+    //         $sqlString .= "         , t12.code_name as current_mode_name ";
+    //         // モード
+    //         $sqlString .= "          , CASE IFNULL(t6.mode, ?)  ";
+    //         $sqlString .= "            WHEN ? THEN ?  ";             // モードなし
+    //         $sqlString .= "            WHEN ? THEN  ";               // 出勤
+    //         $sqlString .= "              CASE IFNULL(t5.mode, ?)  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 退勤
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 緊急収集終了
+    //         $sqlString .= "              ELSE ?  ";
+    //         $sqlString .= "              END  ";
+    //         $sqlString .= "            WHEN ? THEN ";                // 退勤
+    //         $sqlString .= "              CASE IFNULL(t5.mode, ?)  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 出勤
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 私用外出戻り
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 公用外出戻り
+    //         $sqlString .= "              ELSE ?  ";
+    //         $sqlString .= "              END  ";
+    //         $sqlString .= "            WHEN ? THEN ";                // 公用外出
+    //         $sqlString .= "              CASE IFNULL(t5.mode, ?)  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 出勤
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 私用外出戻り
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 公用外出戻り
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 緊急収集開始
+    //         $sqlString .= "              ELSE ?  ";
+    //         $sqlString .= "              END  ";
+    //         $sqlString .= "            WHEN ? THEN ";                // 公用外出戻り
+    //         $sqlString .= "              CASE IFNULL(t5.mode, ?)  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 公用外出
+    //         $sqlString .= "              ELSE ?  ";
+    //         $sqlString .= "              END  ";
+    //         $sqlString .= "            WHEN ? THEN ";                // 私用外出
+    //         $sqlString .= "              CASE IFNULL(t5.mode, ?)  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 出勤
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 私用外出戻り
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 公用外出戻り
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 緊急収集開始
+    //         $sqlString .= "              ELSE ?  ";
+    //         $sqlString .= "              END  ";
+    //         $sqlString .= "            WHEN ? THEN ";                // 私用外出戻り
+    //         $sqlString .= "              CASE IFNULL(t5.mode, ?)  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 私用外出
+    //         $sqlString .= "              ELSE ?  ";
+    //         $sqlString .= "              END  ";
+    //         $sqlString .= "            WHEN ? THEN ";                // 緊急収集開始
+    //         $sqlString .= "              CASE IFNULL(t5.mode, ?)  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 退勤
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 緊急収集終了
+    //         $sqlString .= "              ELSE ?  ";
+    //         $sqlString .= "              END  ";
+    //         $sqlString .= "            WHEN ? THEN ";                // 緊急収集終了
+    //         $sqlString .= "              CASE IFNULL(t5.mode, ?)  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 私用外出戻り
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 公用外出戻り
+    //         $sqlString .= "              WHEN ? THEN ?  ";           // 緊急収集開始
+    //         $sqlString .= "              ELSE ?  ";
+    //         $sqlString .= "              END  ";
+    //         $sqlString .= "            END as hit_alert ";
+    //         $sqlString .= "        , DATE_FORMAT(t5.record_time, '%Y%m%d') as before_record_date ";
+    //         $sqlString .= "        , t5.record_time as before_record_time ";
+    //         $sqlString .= "        , t5.mode as before_mode ";
+    //         $sqlString .= "        , t11.code_name as before_mode_name ";
+    //         $sqlString .= "        , TIMEDIFF(t6.record_time, t5.record_time) as diff_time ";
+    //         $sqlString .= "        , CASE IFNULL(t6.mode, ?)  ";
+    //         $sqlString .= "            WHEN ? THEN ";
+    //         $sqlString .= "              CASE IFNULL(t5.mode, ?)  ";
+    //         $sqlString .= "              WHEN ? THEN ";
+    //         $sqlString .= "                CASE ";
+    //         $sqlString .= "                WHEN IFNULL(TIMEDIFF(t6.record_time, t5.record_time), ?) < ?  ";
+    //         $sqlString .= "                THEN ?  ";
+    //         $sqlString .= "                ELSE ?  ";
+    //         $sqlString .= "                END  ";
+    //         $sqlString .= "            ELSE ?  ";
+    //         $sqlString .= "            END  ";
+    //         $sqlString .= "            ELSE ?  ";
+    //         $sqlString .= "            END as interval_alaert ";
+    //         $sqlString .= "        , ? as holiday_alert  ";
+    //         $sqlString .= "      from ";
+    //         $sqlString .= "        ".$this->table." as t3  ";
+    //         $sqlString .= "        left join (  ";
+    //         $sqlString .= "          select ";
+    //         $sqlString .= "            t1.user_code as user_code ";
+    //         $sqlString .= "            , t1.department_code as department_code ";
+    //         $sqlString .= "            , MAX(t1.record_time) as max_record_time ";
+    //         $sqlString .= "            , t2.record_time as record_time  ";
+    //         $sqlString .= "          from ";
+    //         $sqlString .= "            ".$this->table." as t1  ";
+    //         $sqlString .= "            inner join (  ";
+    //         $sqlString .= "              select ";
+    //         $sqlString .= "                t1.user_code as user_code ";
+    //         $sqlString .= "                , t1.department_code as department_code ";
+    //         $sqlString .= "                , t1.record_time as record_time  ";
+    //         $sqlString .= "              from ";
+    //         $sqlString .= "                ".$this->table." as t1  ";
+    //         $sqlString .= "              where ";
+    //         $sqlString .= "                t1.record_time between ? and ?  ";
+    //         $sqlString .= "                and t1.is_deleted = ? ";
+    //         $sqlString .= "            ) as t2  ";
+    //         $sqlString .= "            on t2.user_code = t1.user_code  ";
+    //         $sqlString .= "              and t2.department_code = t1.department_code  ";
+    //         $sqlString .= "              and t2.record_time > t1.record_time  ";
+    //         $sqlString .= "              and t1.is_deleted = ?  ";
+    //         $sqlString .= "          group by ";
+    //         $sqlString .= "            t1.user_code ";
+    //         $sqlString .= "            , t1.department_code ";
+    //         $sqlString .= "            , t2.record_time ";
+    //         $sqlString .= "        ) as t4  ";
+    //         $sqlString .= "        on t4.user_code = t3.user_code  ";
+    //         $sqlString .= "          and t4.department_code = t3.department_code  ";
+    //         $sqlString .= "        inner join (  ";
+    //         $sqlString .= "          select ";
+    //         $sqlString .= "            t1.user_code as user_code ";
+    //         $sqlString .= "            , t1.department_code as department_code ";
+    //         $sqlString .= "            , t1.record_time as record_time ";
+    //         $sqlString .= "            , t1.mode as mode  ";
+    //         $sqlString .= "          from ";
+    //         $sqlString .= "            ".$this->table." as t1  ";
+    //         $sqlString .= "          where ";
+    //         $sqlString .= "            t1.record_time between ? and ?  ";
+    //         $sqlString .= "            and t1.is_deleted = ? ";
+    //         $sqlString .= "        ) as t5  ";
+    //         $sqlString .= "        on t5.user_code = t4.user_code  ";
+    //         $sqlString .= "          and t5.department_code = t4.department_code  ";
+    //         $sqlString .= "          and t5.record_time = t4.max_record_time  ";
+    //         $sqlString .= "        inner join (  ";
+    //         $sqlString .= "          select ";
+    //         $sqlString .= "            t1.user_code as user_code ";
+    //         $sqlString .= "            , t1.department_code as department_code ";
+    //         $sqlString .= "            , t1.record_time as record_time ";
+    //         $sqlString .= "            , t1.mode as mode  ";
+    //         $sqlString .= "          from ";
+    //         $sqlString .= "            ".$this->table." as t1  ";
+    //         $sqlString .= "          where ";
+    //         $sqlString .= "            t1.record_time between ? and ?  ";
+    //         $sqlString .= "            and t1.is_deleted = ? ";
+    //         $sqlString .= "        ) as t6  ";
+    //         $sqlString .= "        on t6.user_code = t4.user_code  ";
+    //         $sqlString .= "          and t6.department_code = t4.department_code  ";
+    //         $sqlString .= "          and t6.record_time = t4.record_time  ";
+    //         $sqlString .= "        inner join (  ";
+    //         $sqlString .= "          select ";
+    //         $sqlString .= "            code as code ";
+    //         $sqlString .= "            , MAX(apply_term_from) as max_apply_term_from  ";
+    //         $sqlString .= "          from ";
+    //         $sqlString .= "            ".$this->table_users."  ";
+    //         $sqlString .= "          where ";
+    //         $sqlString .= "            apply_term_from <= ? ";
+    //         $sqlString .= "            and role < ? ";
+    //         $sqlString .= "            and is_deleted = ? ";
+    //         $sqlString .= "          group by ";
+    //         $sqlString .= "            code ";
+    //         $sqlString .= "        ) as t7  ";
+    //         $sqlString .= "        on t7.code = t3.user_code  ";
+    //         $sqlString .= "        inner join ".$this->table_users." as t8  ";
+    //         $sqlString .= "        on t8.code = t7.code  ";
+    //         $sqlString .= "          and t8.apply_term_from = t7.max_apply_term_from  ";
+    //         $sqlString .= "          and t8.kill_from_date > ? ";
+    //         $sqlString .= "          and t8.is_deleted = ? ";
+    //         $sqlString .= "        left join (  ";
+    //         $sqlString .= "          select ";
+    //         $sqlString .= "            t1.code as code ";
+    //         $sqlString .= "            , t1.name as name  ";
+    //         $sqlString .= "          from ";
+    //         $sqlString .= "            ".$this->table_departments." as t1  ";
+    //         $sqlString .= "            inner join (  ";
+    //         $sqlString .= "              select ";
+    //         $sqlString .= "                code as code ";
+    //         $sqlString .= "                , MAX(apply_term_from) as max_apply_term_from  ";
+    //         $sqlString .= "              from ";
+    //         $sqlString .= "                ".$this->table_departments."  ";
+    //         $sqlString .= "              where ";
+    //         $sqlString .= "                apply_term_from <= ? ";
+    //         $sqlString .= "                and is_deleted = ? ";
+    //         $sqlString .= "              group by ";
+    //         $sqlString .= "                code ";
+    //         $sqlString .= "            ) as t2  ";
+    //         $sqlString .= "              on t1.code = t2.code  ";
+    //         $sqlString .= "                and t1.apply_term_from = t2.max_apply_term_from  ";
+    //         $sqlString .= "          where ";
+    //         $sqlString .= "            t1.kill_from_date > ? ";
+    //         $sqlString .= "            and t1.is_deleted = ? ";
+    //         $sqlString .= "        ) as t9  ";
+    //         $sqlString .= "        on t9.code = t3.department_code  ";
+    //         $sqlString .= "        left join ".$this->table_generalcodes." as t10  ";
+    //         $sqlString .= "        on t10.code = t8.employment_status  ";
+    //         $sqlString .= "          and t10.identification_id = ? ";
+    //         $sqlString .= "          and t10.is_deleted = ? ";
+    //         $sqlString .= "        left join ".$this->table_generalcodes." as t11  ";
+    //         $sqlString .= "        on t11.code = t5.mode  ";
+    //         $sqlString .= "          and t11.identification_id = ? ";
+    //         $sqlString .= "          and t11.is_deleted = ? ";
+    //         $sqlString .= "        left join ".$this->table_generalcodes." as t12  ";
+    //         $sqlString .= "        on t12.code = t6.mode  ";
+    //         $sqlString .= "          and t12.identification_id = ? ";
+    //         $sqlString .= "          and t12.is_deleted = ?  ";
+    //         $sqlString .= "      where ";
+    //         $sqlString .= "        t3.record_time between ? and ?  ";
+    //         $sqlString .= "        and t3.is_deleted = ? ";
+    //         $sqlString .= "    )  ";
+    //         $sqlString .= "    union (  ";
+    //         $sqlString .= "      select ";
+    //         $sqlString .= "        t1.user_code as user_code ";
+    //         $sqlString .= "        , t1.user_name as user_name ";
+    //         $sqlString .= "        , t1.user_management as user_management ";
+    //         $sqlString .= "        , t1.employment_status as employment_status ";
+    //         $sqlString .= "        , t10.code_name as employment_status_name ";
+    //         $sqlString .= "        , t1.department_code as department_code ";
+    //         $sqlString .= "        , t9.name as department_name ";
+    //         $sqlString .= "        , t2.calendars_date as current_record_date ";
+    //         $sqlString .= "        , null as current_record_time ";
+    //         $sqlString .= "        , null as current_mode ";
+    //         $sqlString .= "        , null as current_mode_name ";
+    //         $sqlString .= "        , ? as hit_alert ";
+    //         $sqlString .= "        , t3.record_date as before_record_date ";
+    //         $sqlString .= "        , null as before_record_time ";
+    //         $sqlString .= "        , null as before_mode ";
+    //         $sqlString .= "        , null as before_mode_name ";
+    //         $sqlString .= "        , null as diff_time ";
+    //         $sqlString .= "        , ? as interval_alaert ";
+    //         $sqlString .= "        , ? as holiday_alert  ";
+    //         $sqlString .= "      from ";
+    //         $sqlString .= "        (  ";
+    //         $sqlString .= "          select ";
+    //         $sqlString .= "            t1.code as user_code ";
+    //         $sqlString .= "            , t1.name as user_name ";
+    //         $sqlString .= "            , t1.management as user_management ";
+    //         $sqlString .= "            , t1.employment_status as employment_status ";
+    //         $sqlString .= "            , t1.department_code as department_code ";
+    //         $sqlString .= "            , t1.kill_from_date as kill_from_date ";
+    //         $sqlString .= "          from ";
+    //         $sqlString .= "            ".$this->table_users." as t1  ";
+    //         $sqlString .= "            inner join (  ";
+    //         $sqlString .= "              select ";
+    //         $sqlString .= "                code as code ";
+    //         $sqlString .= "                , MAX(apply_term_from) as max_apply_term_from  ";
+    //         $sqlString .= "              from ";
+    //         $sqlString .= "                ".$this->table_users."  ";
+    //         $sqlString .= "              where ";
+    //         $sqlString .= "                apply_term_from <= ? ";
+    //         $sqlString .= "                and role < ? ";
+    //         $sqlString .= "                and is_deleted = ? ";
+    //         $sqlString .= "              group by ";
+    //         $sqlString .= "                code ";
+    //         $sqlString .= "            ) as t3  ";
+    //         $sqlString .= "            on t3.code = t1.code  ";
+    //         $sqlString .= "              and t3.max_apply_term_from = t1.apply_term_from  ";
+    //         $sqlString .= "          where ";
+    //         $sqlString .= "            t1.kill_from_date > ? ";
+    //         $sqlString .= "        ) as t1  ";
+    //         $sqlString .= "        inner join (  ";
+    //         $sqlString .= "          select ";
+    //         $sqlString .= "            t1.department_code as department_code ";
+    //         $sqlString .= "            , t1.user_code as user_code ";
+    //         $sqlString .= "            , DATE_FORMAT(t1.date, '%Y%m%d') as calendars_date  ";
+    //         $sqlString .= "          from ";
+    //         $sqlString .= "            ".$this->table_calendar_setting_informations." as t1 ";
+    //         $sqlString .= "          where ";
+    //         $sqlString .= "            t1.date between ? and ? ";
+    //         $sqlString .= "            and  t1.business_kubun = ? ";
+    //         $sqlString .= "            and  holiday_kubun = ? ";
+    //         $sqlString .= "            and  is_deleted = ? ";
+    //         $sqlString .= "        ) as t2  ";
+    //         $sqlString .= "        on t2.department_code = t1.department_code ";
+    //         $sqlString .= "          and t2.user_code = t1.user_code  ";
+    //         $sqlString .= "        left join (  ";
+    //         $sqlString .= "          select ";
+    //         $sqlString .= "            t1.user_code as user_code ";
+    //         $sqlString .= "            , t1.department_code as department_code ";
+    //         $sqlString .= "            , DATE_FORMAT(t1.record_time, '%Y%m%d') as record_date  ";
+    //         $sqlString .= "          from ";
+    //         $sqlString .= "            ".$this->table." as t1 ";
+    //         $sqlString .= "          where ";
+    //         $sqlString .= "            t1.record_time between ? and ? ";
+    //         $sqlString .= "        ) as t3  ";
+    //         $sqlString .= "        on t3.user_code = t1.user_code  ";
+    //         $sqlString .= "          and t3.department_code = t1.department_code  ";
+    //         $sqlString .= "          and t3.record_date = t2.calendars_date  ";
+    //         $sqlString .= "        left join (  ";
+    //         $sqlString .= "          select ";
+    //         $sqlString .= "            t1.code as code ";
+    //         $sqlString .= "            , t1.name as name  ";
+    //         $sqlString .= "          from ";
+    //         $sqlString .= "            ".$this->table_departments." as t1  ";
+    //         $sqlString .= "            inner join (  ";
+    //         $sqlString .= "              select ";
+    //         $sqlString .= "                code as code ";
+    //         $sqlString .= "                , MAX(apply_term_from) as max_apply_term_from  ";
+    //         $sqlString .= "              from ";
+    //         $sqlString .= "                ".$this->table_departments."  ";
+    //         $sqlString .= "              where ";
+    //         $sqlString .= "                apply_term_from <= ? ";
+    //         $sqlString .= "                and is_deleted = ? ";
+    //         $sqlString .= "              group by ";
+    //         $sqlString .= "                code ";
+    //         $sqlString .= "            ) as t2  ";
+    //         $sqlString .= "            on t2.code = t1.code  ";
+    //         $sqlString .= "              and t2.max_apply_term_from =  t1.apply_term_from ";
+    //         $sqlString .= "          where ";
+    //         $sqlString .= "            t1.kill_from_date > ? ";
+    //         $sqlString .= "            and t1.is_deleted = ? ";
+    //         $sqlString .= "        ) as t9  ";
+    //         $sqlString .= "        on t9.code = t1.department_code  ";
+    //         $sqlString .= "        left join ".$this->table_generalcodes." as t10  ";
+    //         $sqlString .= "        on t10.code = t1.employment_status  ";
+    //         $sqlString .= "          and t10.identification_id = ? ";
+    //         $sqlString .= "          and t10.is_deleted = ? ";
+    //         $sqlString .= "      where ";
+    //         $sqlString .= "        t2.calendars_date between ? and ?  ";
+    //         $sqlString .= "        and t3.record_date is null ";
+    //         $sqlString .= "    ) ";
+    //         $sqlString .= "  ) as t1  ";
+    //         $sqlString .= "  inner join ".$this->table_calendar_setting_informations." as t2  ";
+    //         $sqlString .= "  on t2.department_code = t1.department_code  ";
+    //         $sqlString .= "    and t2.user_code = t1.user_code  ";
+    //         $sqlString .= "    and t2.date = t1.current_record_date ";
+    //         // 条件
+    //         $sqlString .= "where 1 = 1 ";
+    //         if(!empty($this->param_employment_status)){
+    //             $sqlString .= "and t1.employment_status = ? ";          //　雇用形態指定
+    //         }
+    //         if(!empty($this->param_department_code)){
+    //             $sqlString .= "and t1.department_code = ? ";            //department_code指定
+    //         }
+    //         if(!empty($this->param_user_code)){
+    //             $sqlString .= "and t1.user_code = ? ";                  //user_code指定
+    //         } else {
+    //             $sqlString .= "and t1.user_management <= ? ";
+    //         }
+    //         // $sqlString .= "and t2.business_kubun = ? ";
+    //         $sqlString .= "and t2.is_deleted = ? ";
+    //         $sqlString .= "and (
+    //                             t1.hit_alert > ?
+    //                             or t1.interval_alaert > ?
+    //                             or t1.holiday_alert > ?
+    //                         )";
+    //         $sqlString .= "order by
+    //                             t1.current_record_date desc
+    //                             , t1.user_code asc
+    //                             , t1.department_code asc";
+    //         // バインド
+    //         // インターバル時間取得
+    //         $apicommon = new ApiCommonController();
+    //         $interval_time = $apicommon->getIntevalMinute($this->param_end_date);
+    //         $array_setBindingsStr = array();
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.attendance_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.leaving_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.emergency_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = Config::get('const.C005.leaving_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.attendance_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.missing_middle_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.public_going_out_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = Config::get('const.C005.public_going_out_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.attendance_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.missing_middle_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.public_going_out_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.emergency_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = Config::get('const.C005.public_going_out_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.public_going_out_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = Config::get('const.C005.missing_middle_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.attendance_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.missing_middle_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.public_going_out_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.emergency_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = Config::get('const.C005.missing_middle_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.missing_middle_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = Config::get('const.C005.emergency_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.leaving_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.emergency_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = Config::get('const.C005.emergency_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.missing_middle_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.public_going_out_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.emergency_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.attendance_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.leaving_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = $interval_time;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = $this->param_date_from;
+    //         $array_setBindingsStr[] = $this->param_date_to;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = $this->param_date_from;
+    //         $array_setBindingsStr[] = $this->param_date_to;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = $this->param_date_from;
+    //         $array_setBindingsStr[] = $this->param_date_to;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = $this->param_end_date;
+    //         $array_setBindingsStr[] = Config::get('const.C017.admin_user');
+    //         $array_setBindingsStr[] = 0;
+    //         // 月末
+    //         $dt = new Carbon($this->param_end_date);
+    //         $lastOfMonth = date_format($dt->endOfMonth(), 'Ymd');
+    //         $array_setBindingsStr[] = $lastOfMonth;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = $this->param_end_date;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = $lastOfMonth;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C001.value');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.value');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.value');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = $this->param_date_from;
+    //         $array_setBindingsStr[] = $this->param_date_to;
+    //         $array_setBindingsStr[] = 0;
+    //         // union
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = $this->param_end_date;
+    //         $array_setBindingsStr[] = Config::get('const.C017.admin_user');;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = $lastOfMonth;
+    //         $array_setBindingsStr[] = $this->param_start_date;
+    //         $array_setBindingsStr[] = $this->param_end_date;
+    //         $array_setBindingsStr[] = Config::get('const.C007.basic');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = $this->param_date_from;
+    //         $array_setBindingsStr[] = $this->param_date_to;
+    //         $array_setBindingsStr[] = $this->param_end_date;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = $lastOfMonth;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C001.value');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = $this->param_start_date;
+    //         $array_setBindingsStr[] = $this->param_end_date;
+    //         if(!empty($this->param_employment_status)) {
+    //             $array_setBindingsStr[] = $this->param_employment_status;
+    //         }
+    //         if(!empty($this->param_department_code)) {
+    //             $array_setBindingsStr[] = $this->param_department_code;
+    //         }
+    //         if(!empty($this->param_user_code)) {
+    //             $array_setBindingsStr[] = $this->param_user_code;
+    //         } else {
+    //             $array_setBindingsStr[] = Config::get('const.C017.out_of_user');
+    //         }
+    //         // $array_setBindingsStr[] = Config::get('const.C007.basic');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $result = DB::select($sqlString, $array_setBindingsStr);
+
+    //         Log::debug(' $result count = '.count($result));
+    //         // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
+    //         //     \Log::debug('sql_debug_log', ['getdailyAlertData' => \DB::getQueryLog()]);
+    //         //     \DB::disableQueryLog();
+    //         // }
+    //     }catch(\PDOException $pe){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+    //         Log::error($pe->getMessage());
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+
+    //     return $result;
+    // }
+
+    /**
+     * 日次警告打刻取得
+     * 
+     *  $targetdateは適用期間
+     *
+     * @return void
+     */
+    // public function getdailyAlertData(){
+    //     // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
+
+    //     try {
+    //         $sqlString = "";
+    //         $sqlString = "";
+    //         $sqlString .= "select ";
+    //         $sqlString .= "  t1.user_code as user_code ";
+    //         $sqlString .= "  , t1.user_name as user_name ";
+    //         $sqlString .= "  , t1.user_management as user_management ";
+    //         $sqlString .= "  , t1.employment_status as employment_status ";
+    //         $sqlString .= "  , t1.employment_status_name as employment_status_name ";
+    //         $sqlString .= "  , t1.department_code as department_code ";
+    //         $sqlString .= "  , t1.department_name as department_name ";
+    //         $sqlString .= "  , t1.current_record_date as current_record_date ";
+    //         $sqlString .= "  , DATE_FORMAT(t1.current_record_time, '%m月%d日 %H:%i')as current_record_time ";
+    //         $sqlString .= "  , CONCAT( ";
+    //         $sqlString .= "      DATE_FORMAT(t1.current_record_date, '%Y年%m月%d日'), '(', SUBSTRING('月火水木金土日', CONVERT(t2.weekday_kubun + 1, char), ?), ')' ";
+    //         $sqlString .= "      ) as record_date_name ";
+    //         $sqlString .= "  , t1.current_mode as current_mode ";
+    //         $sqlString .= "  , t1.current_mode_name as current_mode_name ";
+    //         $sqlString .= "  , t1.before_record_date as before_record_date ";
+    //         $sqlString .= "  , DATE_FORMAT(t1.before_record_time, '%m月%d日 %H:%i')as before_record_time ";
+    //         $sqlString .= "  , t1.before_mode as before_mode ";
+    //         $sqlString .= "  , t1.before_mode_name as before_mode_name ";
+    //         $sqlString .= "  , t1.hit_alert as hit_alert ";
+    //         $sqlString .= "  , t1.interval_alaert as interval_alaert ";
+    //         $sqlString .= "  , t1.holiday_alert as holiday_alert ";
+    //         $sqlString .= "  , t2.business_kubun as business_kubun ";
+    //         $sqlString .= "  from ";
+    //         $sqlString .= "  ( ";
+    //         $sqlString .= "    ( ";
+    //         $sqlString .= "      select ";
+    //         $sqlString .= "          t3.user_code as user_code ";
+    //         $sqlString .= "          , t8.name as user_name ";
+    //         $sqlString .= "          , t8.management as user_management ";
+    //         $sqlString .= "          , t8.employment_status as employment_status ";
+    //         $sqlString .= "          , t10.code_name as employment_status_name ";
+    //         $sqlString .= "          , t3.department_code as department_code ";
+    //         $sqlString .= "          , t9.name as department_name ";
+    //         $sqlString .= "          , DATE_FORMAT(t6.record_time, '%Y%m%d') as current_record_date ";
+    //         $sqlString .= "          , t6.record_time as current_record_time ";
+    //         $sqlString .= "          , t6.mode as current_mode ";
+    //         $sqlString .= "          , t12.code_name as current_mode_name ";
+    //         // モード
+    //         $sqlString .= "          , CASE IFNULL(t6.mode, 0 ) 
+    //                 WHEN 0 THEN 0 
+    //                 WHEN 1 THEN CASE IFNULL(t5.mode, 0 ) 
+    //                   WHEN 0 THEN 0 
+    //                   WHEN 2 THEN 0 
+    //                   WHEN 32 THEN 0 
+    //                   ELSE 1 
+    //                   END 
+    //                 WHEN 2 THEN CASE IFNULL(t5.mode, 0 ) 
+    //                   WHEN 0 THEN 0 
+    //                   WHEN 1 THEN 0 
+    //                   WHEN 12 THEN 0 
+    //                   WHEN 22 THEN 0 
+    //                   ELSE 1 
+    //                   END 
+    //                 WHEN 21 THEN CASE IFNULL(t5.mode, 0 ) 
+    //                   WHEN 0 THEN 0 
+    //                   WHEN 1 THEN 0 
+    //                   WHEN 12 THEN 0 
+    //                   WHEN 22 THEN 0 
+    //                   WHEN 31 THEN 0 
+    //                   ELSE 1 
+    //                   END 
+    //                 WHEN 22 THEN CASE IFNULL(t5.mode, 0 ) 
+    //                   WHEN 0 THEN 0 
+    //                   WHEN 21 THEN 0 
+    //                   ELSE 1 
+    //                   END 
+    //                 WHEN 11 THEN CASE IFNULL(t5.mode, 0 ) 
+    //                   WHEN 0 THEN 0 
+    //                   WHEN 1 THEN 0 
+    //                   WHEN 12 THEN 0 
+    //                   WHEN 22 THEN 0 
+    //                   WHEN 31 THEN 0 
+    //                   ELSE 1 
+    //                   END 
+    //                 WHEN 12 THEN CASE IFNULL(t5.mode, 0 ) 
+    //                   WHEN 0 THEN 0 
+    //                   WHEN 11 THEN 0 
+    //                   ELSE 1 
+    //                   END 
+    //         $sqlString .= "        WHEN 31 THEN CASE IFNULL(t5.mode,0 ) 
+    //                   WHEN 0 THEN 0 
+    //                   WHEN 2 THEN 0 
+    //                   WHEN 32 THEN 0 
+    //                   ELSE 1 
+    //                   END 
+    //                  WHEN 32 THEN CASE IFNULL(t5.mode, 0 ) 
+    //                    WHEN 0 THEN 0 
+    //                    WHEN 12 THEN 0 
+    //                    WHEN 22 THEN 0 
+    //                    WHEN 31 THEN 0 
+    //                    ELSE 1 
+    //                    END 
+    //                  END as hit_alert ";
+    //         $sqlString .= "                  , DATE_FORMAT(t5.record_time, '%Y%m%d') as before_record_date
+    //               , t5.record_time as before_record_time
+    //               , t5.mode as before_mode
+    //               , t11.code_name as before_mode_name
+    //               , TIMEDIFF(t6.record_time, t5.record_time) as diff_time
+    //               , CASE IFNULL(t6.mode, 0 ) 
+    //                 WHEN 1 THEN CASE IFNULL(t5.mode, 0 ) 
+    //                   WHEN 2 THEN CASE 
+    //                     WHEN IFNULL(TIMEDIFF(t6.record_time, t5.record_time), 0 ) < '00:00:00' 
+    //                       THEN 1 
+    //                     ELSE 0 
+    //                     END 
+    //                   ELSE 0 
+    //                   END 
+    //                 ELSE 0 
+    //                 END as interval_alaert
+    //               , 0 as holiday_alert 
+    //             from
+    //               work_times as t3 
+    //               left join ( 
+    //                 select
+    //                   t1.user_code as user_code
+    //                   , t1.department_code as department_code
+    //                   , MAX(t1.record_time) as max_record_time
+    //                   , t2.record_time as record_time 
+    //                 from
+    //                   work_times as t1 
+    //                   inner join ( 
+    //                     select
+    //                       t1.user_code as user_code
+    //                       , t1.department_code as department_code
+    //                       , t1.record_time as record_time 
+    //                     from
+    //                       work_times as t1 
+    //                     where
+    //                       t1.record_time between '2020/04/24 00:00:00' and '2020/05/01 23:59:59' 
+    //                       and t1.is_deleted = 0
+    //                   ) as t2 
+    //                     on t2.user_code = t1.user_code 
+    //                     and t2.department_code = t1.department_code 
+    //                     and t2.record_time > t1.record_time 
+    //                     and t1.is_deleted = 0 
+    //                 group by
+    //                   t1.user_code
+    //                   , t1.department_code
+    //                   , t2.record_time
+    //               ) as t4 
+    //                 on t4.user_code = t3.user_code 
+    //                 and t4.department_code = t3.department_code 
+    //               inner join ( 
+    //                 select
+    //                   t1.user_code as user_code
+    //                   , t1.department_code as department_code
+    //                   , t1.record_time as record_time
+    //                   , t1.mode as mode 
+    //                 from
+    //                   work_times as t1 
+    //                 where
+    //                   t1.record_time between '2020/04/24 00:00:00' and '2020/05/01 23:59:59' 
+    //                   and t1.is_deleted = 0
+    //               ) as t5 
+    //                 on t5.user_code = t4.user_code 
+    //                 and t5.department_code = t4.department_code 
+    //                 and t5.record_time = t4.max_record_time 
+    //               inner join ( 
+    //                 select
+    //                   t1.user_code as user_code
+    //                   , t1.department_code as department_code
+    //                   , t1.record_time as record_time
+    //                   , t1.mode as mode 
+    //                 from
+    //                   work_times as t1 
+    //                 where
+    //                   t1.record_time between '2020/04/24 00:00:00' and '2020/05/01 23:59:59' 
+    //                   and t1.is_deleted = 0
+    //               ) as t6 
+    //                 on t6.user_code = t4.user_code 
+    //                 and t6.department_code = t4.department_code 
+    //                 and t6.record_time = t4.record_time 
+    //               inner join ( 
+    //                 select
+    //                   code as code
+    //                   , MAX(apply_term_from) as max_apply_term_from 
+    //                 from
+    //                   users 
+    //                 where
+    //                   apply_term_from <= '20200501' 
+    //                   and role < 10
+    //                   and is_deleted = 0 
+    //                 group by
+    //                   code
+    //               ) as t7 
+    //                 on t7.code = t3.user_code 
+    //               inner join users as t8 
+    //                 on t8.code = t7.code 
+    //                 and t8.apply_term_from = t7.max_apply_term_from 
+    //                 and t8.kill_from_date > '20200531' 
+    //                 and t8.is_deleted = 0 
+    //               left join ( 
+    //                 select
+    //                   t1.code as code
+    //                   , t1.name as name 
+    //                 from
+    //                   departments as t1 
+    //                   inner join ( 
+    //                     select
+    //                       code as code
+    //                       , MAX(apply_term_from) as max_apply_term_from 
+    //                     from
+    //                       departments 
+    //                     where
+    //                       apply_term_from <= '20200501' 
+    //                       and is_deleted = 0 
+    //                     group by
+    //                       code
+    //                   ) as t2 
+    //                     on t1.code = t2.code 
+    //                     and t1.apply_term_from = t2.max_apply_term_from 
+    //                 where
+    //                   t1.kill_from_date > '20200531' 
+    //                   and t1.is_deleted = 0
+    //               ) as t9 
+    //                 on t9.code = t3.department_code 
+    //               left join generalcodes as t10 
+    //                 on t10.code = t8.employment_status 
+    //                 and t10.identification_id = 'C001' 
+    //                 and t10.is_deleted = 0
+    //               left join generalcodes as t11 
+    //                 on t11.code = t5.mode 
+    //                 and t11.identification_id = 'C005' 
+    //                 and t11.is_deleted = 0 
+    //               left join generalcodes as t12 
+    //                 on t12.code = t6.mode 
+    //                 and t12.identification_id = 'C005' 
+    //                 and t12.is_deleted = 0 
+    //             where
+    //               t3.record_time between '2020/04/24 00:00:00' and '2020/05/01 23:59:59' 
+    //               and t3.is_deleted = 0
+    //           ) 
+    //           union ( 
+    //             select
+    //               t1.user_code as user_code
+    //               , t1.user_name as user_name
+    //               , t1.user_management as user_management
+    //               , t1.employment_status as employment_status
+    //               , t10.code_name as employment_status_name
+    //               , t1.department_code as department_code
+    //               , t9.name as department_name
+    //               , t2.calendars_date as current_record_date
+    //               , null as current_record_time
+    //               , null as current_mode
+    //               , null as current_mode_name
+    //               , 0 as hit_alert
+    //               , t3.record_date as before_record_date
+    //               , null as before_record_time
+    //               , null as before_mode
+    //               , null as before_mode_name
+    //               , null as diff_time
+    //               , 0 as interval_alaert
+    //               , 1 as holiday_alert 
+    //             from
+    //               ( 
+    //                 select
+    //                   t1.code as user_code
+    //                   , t1.name as user_name
+    //                   , t1.management as user_management
+    //                   , t1.employment_status as employment_status
+    //                   , t1.department_code as department_code
+    //                   , t1.kill_from_date as kill_from_date 
+    //                 from
+    //                   users as t1 
+    //                   inner join ( 
+    //                     select
+    //                       code as code
+    //                       , MAX(apply_term_from) as max_apply_term_from 
+    //                     from
+    //                       users 
+    //                     where
+    //                       apply_term_from <= '20200501' 
+    //                       and role <10 
+    //                       and is_deleted = 0
+    //                     group by
+    //                       code
+    //                   ) as t3 
+    //                     on t3.code = t1.code 
+    //                     and t3.max_apply_term_from = t1.apply_term_from 
+    //                 where
+    //                   t1.kill_from_date > '20200531'
+    //               ) as t1 
+    //               inner join ( 
+    //                 select
+    //                   t1.department_code as department_code
+    //                   , t1.user_code as user_code
+    //                   , DATE_FORMAT(t1.date, '%Y%m%d') as calendars_date 
+    //                 from
+    //                   calendar_setting_informations as t1 
+    //                 where
+    //                   t1.date between '20200424' and '20200501' 
+    //                   and t1.business_kubun = '1' 
+    //                   and holiday_kubun = 0 
+    //                   and is_deleted = 0
+    //               ) as t2 
+    //                 on t2.department_code = t1.department_code 
+    //                 and t2.user_code = t1.user_code 
+    //               left join ( 
+    //                 select
+    //                   t1.user_code as user_code
+    //                   , t1.department_code as department_code
+    //                   , DATE_FORMAT(t1.record_time, '%Y%m%d') as record_date 
+    //                 from
+    //                   work_times as t1 
+    //                 where
+    //                   t1.record_time between '2020/04/24 00:00:00' and '2020/05/01 23:59:59'
+    //               ) as t3 
+    //                 on t3.user_code = t1.user_code 
+    //                 and t3.department_code = t1.department_code 
+    //                 and t3.record_date = t2.calendars_date 
+    //               left join ( 
+    //                 select
+    //                   t1.code as code
+    //                   , t1.name as name 
+    //                 from
+    //                   departments as t1 
+    //                   inner join ( 
+    //                     select
+    //                       code as code
+    //                       , MAX(apply_term_from) as max_apply_term_from 
+    //                     from
+    //                       departments 
+    //                     where
+    //                       apply_term_from <= '20200501' 
+    //                       and is_deleted = 0 
+    //                     group by
+    //                       code
+    //                   ) as t2 
+    //                     on t2.code = t1.code 
+    //                     and t2.max_apply_term_from = t1.apply_term_from 
+    //                 where
+    //                   t1.kill_from_date > '20200531' 
+    //                   and t1.is_deleted = 0
+    //               ) as t9 
+    //                 on t9.code = t1.department_code 
+    //               left join generalcodes as t10 
+    //                 on t10.code = t1.employment_status 
+    //                 and t10.identification_id = 'C001' 
+    //                 and t10.is_deleted = 0 
+    //             where
+    //               t2.calendars_date between '20200424' and '20200501' 
+    //               and t3.record_date is null
+    //           )
+    //         ) as t1 
+    //         inner join calendar_setting_informations as t2 
+    //           on t2.department_code = t1.department_code 
+    //           and t2.user_code = t1.user_code 
+    //           and t2.date = t1.current_record_date 
+    //       where
+    //         1 = 1 
+    //         and t1.user_management <= 9 
+    //         and t2.is_deleted = 0 
+    //         and ( 
+    //           t1.hit_alert > 0 
+    //           or t1.interval_alaert > 0 
+    //           or t1.holiday_alert > 0
+    //         ) 
+    //       order by
+    //         t1.current_record_date desc
+    //         , t1.user_code asc
+    //         , t1.department_code asc";
+    //         // バインド
+    //         // インターバル時間取得
+    //         $apicommon = new ApiCommonController();
+    //         $interval_time = $apicommon->getIntevalMinute($this->param_end_date);
+    //         $array_setBindingsStr = array();
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.attendance_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.leaving_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.emergency_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = Config::get('const.C005.leaving_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.attendance_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.missing_middle_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.public_going_out_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = Config::get('const.C005.public_going_out_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.attendance_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.missing_middle_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.public_going_out_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.emergency_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = Config::get('const.C005.public_going_out_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.public_going_out_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = Config::get('const.C005.missing_middle_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.attendance_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.missing_middle_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.public_going_out_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.emergency_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = Config::get('const.C005.missing_middle_return_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = Config::get('const.C005.missing_middle_time');
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         // $array_setBindingsStr[] = Config::get('const.C005.emergency_time');
+    //         // $array_setBindingsStr[] = 0;
+    //         // $array_setBindingsStr[] = 0;
+    //         // $array_setBindingsStr[] = 0;
+    //         // $array_setBindingsStr[] = Config::get('const.C005.leaving_time');
+    //         // $array_setBindingsStr[] = 0;
+    //         // $array_setBindingsStr[] = Config::get('const.C005.emergency_return_time');
+    //         // $array_setBindingsStr[] = 0;
+    //         // $array_setBindingsStr[] = 1;
+    //         // $array_setBindingsStr[] = Config::get('const.C005.emergency_return_time');
+    //         // $array_setBindingsStr[] = 0;
+    //         // $array_setBindingsStr[] = 0;
+    //         // $array_setBindingsStr[] = 0;
+    //         // $array_setBindingsStr[] = Config::get('const.C005.missing_middle_return_time');
+    //         // $array_setBindingsStr[] = 0;
+    //         // $array_setBindingsStr[] = Config::get('const.C005.public_going_out_return_time');
+    //         // $array_setBindingsStr[] = 0;
+    //         // $array_setBindingsStr[] = Config::get('const.C005.emergency_time');
+    //         // $array_setBindingsStr[] = 0;
+    //         // $array_setBindingsStr[] = 1;
+    // //         $array_setBindingsStr[] = 0;
+    // //         $array_setBindingsStr[] = Config::get('const.C005.attendance_time');
+    // //         $array_setBindingsStr[] = 0;
+    // //         $array_setBindingsStr[] = Config::get('const.C005.leaving_time');
+    // //         $array_setBindingsStr[] = 0;
+    // //         $array_setBindingsStr[] = $interval_time;
+    // //         $array_setBindingsStr[] = 1;
+    // //         $array_setBindingsStr[] = 0;
+    // //         $array_setBindingsStr[] = 0;
+    // //         $array_setBindingsStr[] = 0;
+    // //         $array_setBindingsStr[] = 0;
+    // //         $array_setBindingsStr[] = $this->param_date_from;
+    // //         $array_setBindingsStr[] = $this->param_date_to;
+    // //         $array_setBindingsStr[] = 0;
+    // //         $array_setBindingsStr[] = 0;
+    // //         $array_setBindingsStr[] = $this->param_date_from;
+    // //         $array_setBindingsStr[] = $this->param_date_to;
+    // //         $array_setBindingsStr[] = 0;
+    // //         $array_setBindingsStr[] = $this->param_date_from;
+    // //         $array_setBindingsStr[] = $this->param_date_to;
+    // //         $array_setBindingsStr[] = 0;
+    // //         $array_setBindingsStr[] = $this->param_end_date;
+    // //         $array_setBindingsStr[] = Config::get('const.C017.admin_user');
+    // //         $array_setBindingsStr[] = 0;
+    // $result = DB::select($sqlString, $array_setBindingsStr);
+    //         Log::debug(' $result count = '.count($result));
+    //         // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
+    //         //     \Log::debug('sql_debug_log', ['getdailyAlertData' => \DB::getQueryLog()]);
+    //         //     \DB::disableQueryLog();
+    //         // }
+    //     }catch(\PDOException $pe){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+    //         Log::error($pe->getMessage());
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+
+    //     return $result;
+    // }
 
 
     /**
@@ -2750,11 +4053,11 @@ class WorkTime extends Model
     //         //     \DB::disableQueryLog();
     //         // }
     //     }catch(\PDOException $pe){
-    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
     //         Log::error($pe->getMessage());
     //         throw $pe;
     //     }catch(\Exception $e){
-    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
     //         Log::error($e->getMessage());
     //         throw $e;
     //     }

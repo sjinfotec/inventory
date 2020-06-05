@@ -16,6 +16,8 @@ use App\Company;
 use App\Http\Controllers\DailyWorkingInformationController;
 use App\Http\Controllers\ApiCommonController;
 use App\GeneralCodes;
+use App\FeatureItemSelection;
+use App\WorkingTimeTable;
 
 class MonthlyWorkingInformationController extends Controller
 {
@@ -392,12 +394,45 @@ class MonthlyWorkingInformationController extends Controller
         DB::beginTransaction();
         try{
             // パラメータの内容でworking_time_datesを削除
+            // パラメータの内容でworking_time_datesを削除
+            // 日付の範囲はcalcメソッドでworkingtimedate_modelに設定済み
             $workingtimedate_model->setParamEmploymentStatusAttribute($employmentstatus);
             $workingtimedate_model->setParamDepartmentcodeAttribute($departmentcode);
             $workingtimedate_model->setParamUsercodeAttribute($usercode);
             if ($workingtimedate_model->isExistsWorkingTimeDate()) {
                 $workingtimedate_model->delWorkingTimeDate();
             };
+            //feature selection
+            $feature_model = new FeatureItemSelection();
+            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+            $feature_data = $feature_model->getItem();
+            $feature_attendance_count = 0;          // 出勤回数
+            $feature_rest_count = 0;                // 休憩回数
+            $mode_list = 0;                         // 2なら緊急取集使用
+            $em_details = array();
+            foreach($feature_data as $item) {
+                if ($item->item_code == Config::get('const.C042.attendance_count')) {
+                    $feature_attendance_count = intval($item->value_select);
+                }
+                if ($item->item_code == Config::get('const.C042.rest_count')) {
+                    $feature_rest_count = intval($item->value_select);
+                }
+                if ($item->item_code == Config::get('const.C042.mode_list')) {
+                    $mode_list = intval($item->value_select);
+                    // 2なら緊急取集使用
+                    if ($mode_list == 2) {
+                        // 緊急収集のタイムテーブルを取得する
+                        $time_table = new WorkingTimeTable();
+                        $time_table->setNoAttribute(Config::get('const.C999_NAME.emergency_timetable_no'));
+                        $time_table->setParamapplytermfromAttribute($datefrom);
+                        $em_details = $time_table->getDetail();
+                    }
+                }
+                if ($feature_attendance_count > 0 && $feature_rest_count > 0 && $mode_list > 0) {
+                    break;
+                }
+            }
             while (true) {
                 // Log::debug(' ●● 最新更新集計 対象日付 ●● $calc_date = '.$calc_date);
                 $dt1 = new Carbon($calc_date);
@@ -422,12 +457,16 @@ class MonthlyWorkingInformationController extends Controller
                 // addDailyCalc implement
                 $array_impl_addDailyCalc = array (
                     'work_time' => $work_time,
-                    'datefrom' => $calc_date,
-                    'dateto' => $calc_date,
+                    'datefrom' => $datefrom,
+                    'dateto' => $dateto,
                     'employmentstatus' => $employmentstatus,
                     'departmentcode' => $departmentcode,
                     'usercode' => $usercode,
-                    'business_kubun' => $business_kubun
+                    'business_kubun' => $business_kubun,
+                    'feature_attendance_count' => $feature_attendance_count,
+                    'feature_rest_count' => $feature_rest_count,
+                    'em_details' => $em_details,
+                    'calc_date' => $calc_date
                 );
                 $calc_result = $daily_controller->addDailyCalc($array_impl_addDailyCalc);
                 $calc_date = date_format($dt1->addDay(1), 'Ymd');
@@ -439,7 +478,7 @@ class MonthlyWorkingInformationController extends Controller
             $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
         }catch(\Exception $e){
             DB::rollBack();
-            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_access_error_dailycalc'));
         }
     }
 

@@ -262,7 +262,8 @@ return [
         'value' => 'C025',
         'general_user' => 1,
         'general_approver__user' => 5,
-        'admin_user' => 9
+        'admin_user' => 9,
+        'high_user' => 10
     ],
  
     'C026' => [
@@ -452,7 +453,8 @@ return [
         'attendance_count' => 1,
         'half_holiday' => 2,
         'rest_count' => 3,
-        'mode_list' => 4
+        'mode_list' => 4,
+        'early_time' => 5
     ],
  
     'C043' => [
@@ -476,17 +478,18 @@ return [
         'sub' => 'systemuser',
         'legal_timetable_no' => 9999,
         'from_timetable_no' => 9000,
-        'emergency_timetable_no' => 9000
+        'emergency_timetable_no' => 9000,
+        'link_end_timetable_no' => 9900
     ],
 
     'WEEK_KANJI' => [
-        'sun' => '(日)',
-        'mon' => '(月)',
-        'tue' => '(火)',
-        'wed' => '(水)',
-        'thu' => '(木)',
-        'fri' => '(金)',
-        'sat' => '(土)'
+        'sun' => '日',
+        'mon' => '月',
+        'tue' => '火',
+        'wed' => '水',
+        'thu' => '木',
+        'fri' => '金',
+        'sat' => '土'
     ],
 
     'WORKING_TIME_NAME' => [
@@ -545,7 +548,8 @@ return [
     'INC_NO' => [
         'attendace_leaving' => 1,
         'missing_return' => 2,
-        'public_going_out_return' => 3
+        'public_going_out_return' => 3,
+        'emergency_return' => 4
     ],
 
     'REMARKS_DATA' => [
@@ -748,10 +752,10 @@ return [
         'not_setting_time_rounding' => '時間計算の端数処理が設定されていません。',
         'not_setting_beginning_month' => '期首月が設定されていません。',
         'not_setting_timetable' => '期間内に該当する勤務時間がないかまたはタイムテーブルが設定されていません。',
-        'data_eror_dailycalc' => '労働時間計算処理にてエラーのため計算できませんでした。',
+        'data_error_dailycalc' => '労働時間計算処理にてエラーのため計算できませんでした。',
         'not_setting_calendar' => '{0}のカレンダー設定がされていません。',
-        'data_accesee_eror_dailycalc' => '労働時間計算処理にてデータアクセスエラーのため計算できませんでした。',
-        'data_accesee_eror' => 'データアクセスエラーのため取得できませんでした。',
+        'data_access_error_dailycalc' => '労働時間計算処理にてデータアクセスエラーのため計算できませんでした。',
+        'data_access_error' => 'データアクセスエラーのため取得できませんでした。',
         'data_insert_error' => '登録処理に失敗しました。',
         'mismatch_data' => 'データ不整合',
         'rounding_not_demand' => '承認回覧中のため、申請できません。',
@@ -767,15 +771,15 @@ return [
     ],
 
     'LOG_MSG' => [
-        'data_eror_dailycalc' => 'data_error_dailycalc not calc',
-        'data_select_erorr' => 'データselectエラー table = [{0}]',
-        'data_insert_erorr' => 'データinsertエラー table = [{0}]',
-        'data_update_erorr' => 'データupdateエラー table = [{0}]',
-        'data_delete_erorr' => 'データdeleteエラー table = [{0}]',
-        'data_exists_erorr' => 'データexistsエラー table = [{0}]',
-        'data_maxget_erorr' => 'データmaxgetエラー table = [{0}]',
-        'data_count_erorr' => 'データcountエラー table = [{0}]',
-        'data_access_erorr' => 'データaccessエラー table = [{0}]',
+        'data_error_dailycalc' => 'data_error_dailycalc not calc',
+        'data_select_error' => 'データselectエラー table = [{0}]',
+        'data_insert_error' => 'データinsertエラー table = [{0}]',
+        'data_update_error' => 'データupdateエラー table = [{0}]',
+        'data_delete_error' => 'データdeleteエラー table = [{0}]',
+        'data_exists_error' => 'データexistsエラー table = [{0}]',
+        'data_maxget_error' => 'データmaxgetエラー table = [{0}]',
+        'data_count_error' => 'データcountエラー table = [{0}]',
+        'data_access_error' => 'データaccessエラー table = [{0}]',
         'unknown_error' => '不明なエラー',
         'mismatch_data' => 'データ不整合',
         'not_set_time_rounding ' => '時間の端数処理が設定されていない',

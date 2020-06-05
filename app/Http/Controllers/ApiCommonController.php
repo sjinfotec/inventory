@@ -56,7 +56,7 @@ use App\FeatureItemSelection;
  *          ユーザー部署取得                            : getUserDepartment                 : users 
  *          ユーザーの部署と雇用形態と権限取得          : getUserDepartmentEmploymentRole      : users
  *          ユーザーメールアドレス取得                  : getUserMailAddress                : users      
- *          ユーザー休暇区分取得                        : getUserHolidaykbn                 : UserHolidayKubun              
+ *          ユーザー休暇区分取得                        : getUserHolidaykbn                 : UserHolidayKubun  CalendarSettingInformation            
  *          ユーザー所定時刻半休時刻取得                : getWorkingHours                   : WorkingTimeTable             
  *          ユーザー打刻時刻から所定時刻取得             : getWorkingHoursByStamp            : WorkingTimeTable             
  *      4.その他情報取得
@@ -82,6 +82,7 @@ use App\FeatureItemSelection;
  *          時間範囲内であるか判定          : chkBetweenTime
  *          出勤時間差をチェック            : chkInteval        : Setting
  *          打刻のモードチェック            : chkMode
+ *          緊急かの判定                    : isEmagency
  *      7.変換
  *          時刻日付変換                            : convTimeToDate
  *          時刻日付変換                            : convTimeToDateTarget
@@ -279,6 +280,7 @@ class ApiCommonController extends Controller
                     't1.name as name',
                     't1.from_time as from_time',
                     't1.to_time as to_time',
+                    't1.ago_time_no as ago_time_no',
                     't1.working_time_kubun as working_time_kubun'
                 )
                 ->JoinSub($subquery1, 't2', function ($join) { 
@@ -310,6 +312,7 @@ class ApiCommonController extends Controller
         $makeSql .= "   ,t1.name as name ";
         $makeSql .= "   ,t1.from_time as from_time ";
         $makeSql .= "   ,t1.to_time as to_time ";
+        $makeSql .= "   ,t1.ago_time_no as ago_time_no ";
         $makeSql .= "   ,t1.working_time_kubun as working_time_kubun ";
         $makeSql .= " from ";
         $makeSql .= " ".$this->table_working_timetables." as t1 ";
@@ -330,6 +333,7 @@ class ApiCommonController extends Controller
         $makeSql .= "   and t1.apply_term_from = t2.max_apply_term_from ";
         $makeSql .= " where ? = ? ";
         $makeSql .= "   and t1.no < ? ";
+        $makeSql .= "   and t1.from_time is not null ";
         $makeSql .= "   and t1.is_deleted = ? ";
 
         return $makeSql;
@@ -540,11 +544,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -557,7 +561,7 @@ class ApiCommonController extends Controller
      */
     public function getUserListCsv(Request $request){
 
-        Log::debug('getUserListCsv = ');
+        // Log::debug('getUserListCsv = ');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -610,11 +614,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -715,11 +719,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -743,10 +747,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -771,10 +775,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -798,10 +802,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -829,11 +833,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -861,11 +865,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -893,11 +897,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -935,11 +939,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -980,10 +984,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1005,11 +1009,11 @@ class ApiCommonController extends Controller
                     ->get();
             return $details;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1053,10 +1057,10 @@ class ApiCommonController extends Controller
             $confirm_model->setParamMainsubAttribute($mainorsub);
             $codeList = $confirm_model->selectConfirmList($target_date);
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1115,11 +1119,11 @@ class ApiCommonController extends Controller
                 ->get();
             return $data;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1198,10 +1202,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1224,10 +1228,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1254,10 +1258,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1296,11 +1300,11 @@ class ApiCommonController extends Controller
             if(!isset($userrole)) { return null; }
             return $userrole;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1343,11 +1347,11 @@ class ApiCommonController extends Controller
                 ->get();
                 return $mainquery;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1401,11 +1405,11 @@ class ApiCommonController extends Controller
                 ->get();
             return $data;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1446,11 +1450,11 @@ class ApiCommonController extends Controller
             if(!isset($useremail)) { return null; }
             return $useremail;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1467,10 +1471,10 @@ class ApiCommonController extends Controller
         $holiday_kbn = null;
         try {
             // ユーザー休暇区分取得
-            $user_holiday_model = new UserHolidayKubun();
-            $user_holiday_model->setParamUsercodeAttribute($user_id);
-            $user_holiday_model->setParamdatefromAttribute($target_date);
-            $results = $user_holiday_model->getDetail();
+            $calendar_setting_model = new CalendarSettingInformation();
+            $calendar_setting_model->setParamusercodeAttribute($user_id);
+            $calendar_setting_model->setParamfromdateAttribute($target_date);
+            $results = $calendar_setting_model->getCalenderInfo();
             foreach($results as $item) {
                 if (isset($item->holiday_kubun)) {
                     $holiday_kbn = $item->holiday_kubun;
@@ -1479,14 +1483,45 @@ class ApiCommonController extends Controller
             }
             return $holiday_kbn;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
     }
+
+    /**
+     * ユーザー休暇区分取得
+     *
+     * @param target_date YYYYMMDD
+     * @return list
+     */
+    // public function getUserHolidaykbn($user_id, $target_date){
+    //     $holiday_kbn = null;
+    //     try {
+    //         // ユーザー休暇区分取得
+    //         $user_holiday_model = new UserHolidayKubun();
+    //         $user_holiday_model->setParamUsercodeAttribute($user_id);
+    //         $user_holiday_model->setParamdatefromAttribute($target_date);
+    //         $results = $user_holiday_model->getDetail();
+    //         foreach($results as $item) {
+    //             if (isset($item->holiday_kubun)) {
+    //                 $holiday_kbn = $item->holiday_kubun;
+    //                 break;
+    //             }
+    //         }
+    //         return $holiday_kbn;
+    //     }catch(\PDOException $pe){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+    // }
 
     /**
      * ユーザー所定時刻半休時刻取得
@@ -1606,35 +1641,35 @@ class ApiCommonController extends Controller
                             // 所定時間が日またぎの場合
                             $w_working_timetable_from_record_datetime = $item->working_timetable_from_record_time;
                             $w_working_timetable_to_record_datetime = $item->working_timetable_to_record_time;
-                            Log::debug('getWorkingHours  $item->working_timetable_from_record_time = '.$item->working_timetable_from_record_time);
-                            Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
+                            // Log::debug('getWorkingHours  $item->working_timetable_from_record_time = '.$item->working_timetable_from_record_time);
+                            // Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
                             if ($item->working_timetable_from_record_time < $regular_start_recordtime) {
                                 $w_working_timetable_from_record_datetime = 
                                     date_format(new Carbon($regular_end_record_date.' '.$item->working_timetable_from_time),'Y-m-d H:i:s');
                             }
-                            Log::debug('getWorkingHours  $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
-                            Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
+                            // Log::debug('getWorkingHours  $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
+                            // Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
                             if ($item->working_timetable_to_record_time < $regular_start_recordtime) {
                                 $w_working_timetable_to_record_datetime = 
                                     date_format(new Carbon($regular_end_record_date.' '.$item->working_timetable_to_time),'Y-m-d H:i:s');
                             }
-                            Log::debug('getWorkingHours  $w_working_timetable_from_record_datetime = '.$w_working_timetable_from_record_datetime);
-                            Log::debug('getWorkingHours  $w_working_timetable_to_record_datetime = '.$w_working_timetable_to_record_datetime);
+                            // Log::debug('getWorkingHours  $w_working_timetable_from_record_datetime = '.$w_working_timetable_from_record_datetime);
+                            // Log::debug('getWorkingHours  $w_working_timetable_to_record_datetime = '.$w_working_timetable_to_record_datetime);
                             if (($w_working_timetable_from_record_datetime >= $regular_start_recordtime &&
                                 $w_working_timetable_from_record_datetime <= $regular_end_recordtime) &&
                                 ($w_working_timetable_to_record_datetime >= $regular_start_recordtime &&
                                 $w_working_timetable_to_record_datetime <= $regular_end_recordtime)) {
                                 $working_timetable_from_record_datetime = $w_working_timetable_from_record_datetime;
                                 $working_timetable_to_record_datetime = $w_working_timetable_to_record_datetime;
-                                Log::debug('getWorkingHours  $working_timetable_from_record_datetime = '.$working_timetable_from_record_datetime);
-                                Log::debug('getWorkingHours  $working_timetable_to_record_datetime = '.$working_timetable_to_record_datetime);
+                                // Log::debug('getWorkingHours  $working_timetable_from_record_datetime = '.$working_timetable_from_record_datetime);
+                                // Log::debug('getWorkingHours  $working_timetable_to_record_datetime = '.$working_timetable_to_record_datetime);
                             }
                         }
                         if ($working_timetable_from_record_datetime != null && $working_timetable_to_record_datetime != null) {
                             if ($working_timetable_from_record_datetime >= $regular_2after_recordtime) {
                                 $calc_times = $this->diffTimeSerial($working_timetable_from_record_datetime, $working_timetable_to_record_datetime);
                                 // from-toで30分以上か？
-                                Log::debug('getWorkingHours  $calc_times = '.$calc_times);
+                                // Log::debug('getWorkingHours  $calc_times = '.$calc_times);
                                 if ($calc_times >= 1800) {
                                     $lunch_start_time = $item->working_timetable_from_time;
                                     $lunch_start_recordtime = $working_timetable_from_record_datetime;
@@ -1665,10 +1700,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1684,6 +1719,7 @@ class ApiCommonController extends Controller
         try{
             $target_date = $params['target_date'];
             $user_code = $params['user_code'];
+            $mode = $params['mode'];
             $department_code = "";
             if (isset($params['department_code'])) {
                 $department_code = $params['department_code'];
@@ -1698,9 +1734,9 @@ class ApiCommonController extends Controller
                 }
             }
             $record_datetime = $params['record_datetime'];
-            Log::debug('         apicommon getWorkingHoursByStamp = '.date_format(new Carbon($record_datetime), 'H:i:s'));
+            // Log::debug('         apicommon getWorkingHoursByStamp = '.date_format(new Carbon($record_datetime), 'H:i:s'));
             $record_datetime_date = date_format(new Carbon($target_date), 'Y-m-d')." ".date_format(new Carbon($record_datetime), 'H:i:s');
-            Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
+            // Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
             // usersのカレンダーからタイムテーブルの所定時刻を取得する
             $time_tables = new WorkingTimeTable();
             $target_dateYmd = date_format(new Carbon($target_date), 'Ymd');
@@ -1708,36 +1744,56 @@ class ApiCommonController extends Controller
             $time_tables->setParamdatetoAttribute($target_dateYmd);
             $time_tables->setParamDepartmentcodeAttribute($department_code);
             $time_tables->setParamUsercodeAttribute($user_code);
-            Log::debug('         apicommon getWorkingHoursByStamp $target_dateYmd = '.$target_dateYmd);
-            Log::debug('         apicommon getWorkingHoursByStamp $department_code = '.$department_code);
-            Log::debug('         apicommon getWorkingHoursByStamp $user_code = '.$user_code);
+            // Log::debug('         apicommon getWorkingHoursByStamp $target_dateYmd = '.$target_dateYmd);
+            // Log::debug('         apicommon getWorkingHoursByStamp $department_code = '.$department_code);
+            // Log::debug('         apicommon getWorkingHoursByStamp $user_code = '.$user_code);
             $workingHours = $time_tables->getWorkingTimeTable();
             $working_from_time = null;
             $working_to_time = null;
             $working_to_time_date = null;
-            Log::debug('         apicommon getWorkingHoursByStamp $workingHours = '.count($workingHours));
+            // Log::debug('         apicommon getWorkingHoursByStamp $workingHours = '.count($workingHours));
             foreach($workingHours as $item) {
-                Log::debug('         apicommon getWorkingHoursByStamp $item->working_time_kubun = '.$item->working_time_kubun);
+                // Log::debug('         apicommon getWorkingHoursByStamp $item->working_time_kubun = '.$item->working_time_kubun);
                 if ($item->working_time_kubun == Config::get('const.C004.regular_working_time')) {
-                    Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
-                    Log::debug('         apicommon getWorkingHoursByStamp $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
-                    if ($record_datetime_date < $item->working_timetable_to_record_time) {
-                        Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
-                        if ($working_from_time == null) {
-                            $working_from_time = $item->working_timetable_from_time;
-                            $working_to_time = $item->working_timetable_to_time;
-                            $working_to_time_date = $item->working_timetable_to_record_time;
-                        } elseif ($working_to_time_date > $item->working_timetable_to_record_time) {
-                            $working_from_time = $item->working_timetable_from_time;
-                            $working_to_time = $item->working_timetable_to_time;
+                    // Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
+                    // Log::debug('         apicommon getWorkingHoursByStamp $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
+                    if ($mode == Config::get('const.C005.attendance_time') ||
+                        $mode == Config::get('const.C005.missing_middle_time') ||
+                        $mode == Config::get('const.C005.public_going_out_time')) {
+                        if ($record_datetime_date < $item->working_timetable_to_record_time) {
+                            // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
+                            if ($working_from_time == null) {
+                                $working_from_time = $item->working_timetable_from_time;
+                                $working_to_time = $item->working_timetable_to_time;
+                                $working_to_time_date = $item->working_timetable_to_record_time;
+                            } elseif ($working_to_time_date > $item->working_timetable_to_record_time) {
+                                $working_from_time = $item->working_timetable_from_time;
+                                $working_to_time = $item->working_timetable_to_time;
+                            }
+                        }
+                    } elseif ($mode == Config::get('const.C005.leaving_time') ||
+                            $mode == Config::get('const.C005.missing_middle_return_time') ||
+                            $mode == Config::get('const.C005.public_going_out_return_time')) {
+                        if ($record_datetime_date > $item->working_timetable_to_record_time ||
+                            ($record_datetime_date > $item->working_timetable_from_record_time &&
+                            $record_datetime_date <= $item->working_timetable_to_record_time)) {
+                            // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
+                            if ($working_from_time == null) {
+                                $working_from_time = $item->working_timetable_from_time;
+                                $working_to_time = $item->working_timetable_to_time;
+                                $working_to_time_date = $item->working_timetable_to_record_time;
+                            } elseif ($working_to_time_date < $item->working_timetable_to_record_time) {
+                                $working_from_time = $item->working_timetable_from_time;
+                                $working_to_time = $item->working_timetable_to_time;
+                            }
                         }
                     }
-                    Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
-                    Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
+                    // Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
+                    // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
                 }
             }
-            Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
-            Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
+            // Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
+            // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
             // 設定
             $array_workingHours = array(
                 'working_from_time' => $working_from_time,
@@ -1745,10 +1801,10 @@ class ApiCommonController extends Controller
             );
             return $array_workingHours;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1776,10 +1832,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1830,10 +1886,10 @@ class ApiCommonController extends Controller
             );
             return $closing;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1856,10 +1912,10 @@ class ApiCommonController extends Controller
             $closing = $setting_model->getMonthClosing();
             return $closing;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1891,25 +1947,25 @@ class ApiCommonController extends Controller
 
         if($dt->isSaturday()){
             $what_weekday['id'] = Config::get('const.C006.sat');
-            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.sat');
+            $what_weekday['week_name'] = "（".Config::get('const.WEEK_KANJI.sat')."）";
         }elseif($dt->isSunday()){
             $what_weekday['id'] = Config::get('const.C006.sun');
-            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.sun');
+            $what_weekday['week_name'] = "（".Config::get('const.WEEK_KANJI.sun')."）";
         }elseif($dt->isMonday()){
             $what_weekday['id'] = Config::get('const.C006.mon');
-            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.mon');
+            $what_weekday['week_name'] = "（".Config::get('const.WEEK_KANJI.mon')."）";
         }elseif($dt->isTuesday()){
             $what_weekday['id'] = Config::get('const.C006.tue');
-            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.tue');
+            $what_weekday['week_name'] = "（".Config::get('const.WEEK_KANJI.tue')."）";
         }elseif($dt->isWednesday()){
             $what_weekday['id'] = Config::get('const.C006.wed');
-            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.wed');
+            $what_weekday['week_name'] = "（".Config::get('const.WEEK_KANJI.wed')."）";
         }elseif($dt->isThursday()){
             $what_weekday['id'] = Config::get('const.C006.thu');
-            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.thu');
+            $what_weekday['week_name'] = "（".Config::get('const.WEEK_KANJI.thu')."）";
         }elseif($dt->isFriday()){
             $what_weekday['id'] = Config::get('const.C006.fri');
-            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.fri');
+            $what_weekday['week_name'] = "（".Config::get('const.WEEK_KANJI.fri')."）";
         }
 
         return $what_weekday;
@@ -1924,22 +1980,44 @@ class ApiCommonController extends Controller
      */
     public function getYMDWeek($dt){
         // フォーマット 2019年10月01日(火)
-        $date_name = '';
-        $calender_model = new Calendar();
-        $calender_model->setParamfromdateAttribute(date_format(new Carbon($dt), 'Ymd'));
-
-        $calender_model->setDateAttribute(date_format(new Carbon($dt), 'Ymd'));
-        $calendars = $calender_model->getCalenderDate();
-        if (count($calendars) > 0) {
-            foreach ($calendars as $result) {
-                if (isset($result->date_name)) {
-                    $date_name = $result->date_name;
-                }
-                break;
-            }
-        }
+        $array_week = array();
+        $array_week[] = Config::get('const.WEEK_KANJI.sun');
+        $array_week[] = Config::get('const.WEEK_KANJI.mon');
+        $array_week[] = Config::get('const.WEEK_KANJI.tue');
+        $array_week[] = Config::get('const.WEEK_KANJI.wed');
+        $array_week[] = Config::get('const.WEEK_KANJI.thu');
+        $array_week[] = Config::get('const.WEEK_KANJI.fri');
+        $array_week[] = Config::get('const.WEEK_KANJI.sat');
+        $target_date = new Carbon($dt);
+        $date_name = date_format($target_date, 'Y年m月d日')."（".$array_week[$target_date->dayOfWeek]."）";
+//        $date_name = date_format($target_date, 'Ymd');
         return $date_name;
     }
+
+    /**
+     * 日付のフォーマット YYYY年MM月DD日（WEEK）
+     *
+     * @param [type] $dt
+     * @param [type] $format
+     * @return array
+     */
+    // public function getYMDWeek($dt){
+    //     // フォーマット 2019年10月01日(火)
+    //     $date_name = '';
+    //     $calender_model = new Calendar();
+    //     $calender_model->setParamfromdateAttribute(date_format(new Carbon($dt), 'Ymd'));
+    //     $calender_model->setDateAttribute(date_format(new Carbon($dt), 'Ymd'));
+    //     $calendars = $calender_model->getCalenderDate();
+    //     if (count($calendars) > 0) {
+    //         foreach ($calendars as $result) {
+    //             if (isset($result->date_name)) {
+    //                 $date_name = $result->date_name;
+    //             }
+    //             break;
+    //         }
+    //     }
+    //     return $date_name;
+    // }
 
     /**
      * 勤務状況取得
@@ -1992,11 +2070,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -2049,11 +2127,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -2080,11 +2158,11 @@ class ApiCommonController extends Controller
             // }
             return $details;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -2205,10 +2283,10 @@ class ApiCommonController extends Controller
         if (isset($setting_from_datetime) && isset($setting_to_datetime)) {
             // タイムテーブル設定時刻のチェックを行う場合
             // タイムテーブル時間範囲内に休憩開始終了時刻がある場合に計算する
-            Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-            Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
-            Log::debug('calcBetweenBreakTime $setting_from_datetime = '.$setting_from_datetime);
-            Log::debug('calcBetweenBreakTime $setting_to_datetime = '.$setting_to_datetime);
+            // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+            // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+            // Log::debug('calcBetweenBreakTime $setting_from_datetime = '.$setting_from_datetime);
+            // Log::debug('calcBetweenBreakTime $setting_to_datetime = '.$setting_to_datetime);
             if (($time_calc_from <= $setting_from_datetime || $time_calc_from >= $setting_to_datetime) &&
                 ($time_calc_to <= $setting_from_datetime || $time_calc_to >= $setting_to_datetime)) {
                 $chk_time = false;
@@ -2216,10 +2294,10 @@ class ApiCommonController extends Controller
         }
         if ($chk_time) {
             //  指定時間範囲内に休憩開始終了時刻がある場合に計算する
-            Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-            Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
-            Log::debug('calcBetweenBreakTime $target_from_datetime = '.$target_from_datetime);
-            Log::debug('calcBetweenBreakTime $target_to_datetime = '.$target_to_datetime);
+            // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+            // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+            // Log::debug('calcBetweenBreakTime $target_from_datetime = '.$target_from_datetime);
+            // Log::debug('calcBetweenBreakTime $target_to_datetime = '.$target_to_datetime);
             if (($time_calc_from >= $target_from_datetime && $time_calc_from <= $target_to_datetime) ||
                 ($time_calc_to >= $target_from_datetime && $time_calc_to <= $target_to_datetime)) {
                 if ($target_from_datetime > $time_calc_from) {
@@ -2228,8 +2306,8 @@ class ApiCommonController extends Controller
                 if ($target_to_datetime < $time_calc_to) {
                     $time_calc_to = $target_to_datetime;
                 }
-                Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-                Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+                // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+                // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
                 if ($time_calc_from < $time_calc_to) {
                     $calc_times += $this->diffTimeSerial($time_calc_from, $time_calc_to);
                 }
@@ -2719,24 +2797,55 @@ class ApiCommonController extends Controller
         $usercode = $params['usercode'];
         $datefrom = $params['datefrom'];
         // 指定日が休日かどうか
+        $calender_setting_model = new CalendarSettingInformation();
+        $calender_setting_model->setParamdepartmentcodeAttribute($departmentcode);
+        $calender_setting_model->setParamemploymentstatusAttribute($employmentstatus);
+        $calender_setting_model->setParamusercodeAttribute($usercode);
+        $calender_setting_model->setParamfromdateAttribute($datefrom);
+        $calender_setting_model->setParamlimitAttribute(1);
+        $calendars = $calender_setting_model->getCalenderInfo();
         $business_kubun = null;
-        $calender_model = new Calendar();
-        $calender_model->setParamdepartmentcodeAttribute($departmentcode);
-        $calender_model->setParamemploymentstatusAttribute($employmentstatus);
-        $calender_model->setParamusercodeAttribute($usercode);
-        $calender_model->setParamfromdateAttribute($datefrom);
-        $calendars = $calender_model->getCalenderDate();
-        if (count($calendars) > 0) {
-            foreach ($calendars as $result) {
-                if (isset($result->business_kubun)) {
-                    $business_kubun = $result->business_kubun;
-                }
-                break;
+        foreach ($calendars as $result) {
+            if (isset($result->business_kubun)) {
+                $business_kubun = $result->business_kubun;
             }
+            break;
         }
 
         return $business_kubun;
     }
+ 
+    /**
+     * 法定法定外休日判定
+     * 
+     *
+     * @return 
+     */
+    // public function jdgBusinessKbn($params)
+    // {
+    //     $departmentcode = $params['departmentcode'];
+    //     $employmentstatus = $params['employmentstatus'];
+    //     $usercode = $params['usercode'];
+    //     $datefrom = $params['datefrom'];
+    //     // 指定日が休日かどうか
+    //     $business_kubun = null;
+    //     $calender_model = new Calendar();
+    //     $calender_model->setParamdepartmentcodeAttribute($departmentcode);
+    //     $calender_model->setParamemploymentstatusAttribute($employmentstatus);
+    //     $calender_model->setParamusercodeAttribute($usercode);
+    //     $calender_model->setParamfromdateAttribute($datefrom);
+    //     $calendars = $calender_model->getCalenderDate();
+    //     if (count($calendars) > 0) {
+    //         foreach ($calendars as $result) {
+    //             if (isset($result->business_kubun)) {
+    //                 $business_kubun = $result->business_kubun;
+    //             }
+    //             break;
+    //         }
+    //     }
+
+    //     return $business_kubun;
+    // }
 
     /**
      * 時間範囲内であるか判定
@@ -2864,6 +2973,20 @@ class ApiCommonController extends Controller
             return Config::get('const.C018.forget_stamp');
         }
         return Config::get('const.C018.forget_stamp');
+    }
+  
+    /**
+     * 緊急かの判定
+     * 
+     *
+     * @return 
+     */
+    public function isEmagency($working_timetable_no)
+    {
+        if ($working_timetable_no == Config::get('const.C999_NAME.emergency_timetable_no')) {
+            return true;
+        }
+        return false;
     }
     // -------------  6.判定・チェック end ----------------------------------------------------- //
 
@@ -3349,6 +3472,7 @@ class ApiCommonController extends Controller
         $systemdate = Carbon::now();
         $work_time_model = new WorkTime();
         $apicommon_model = new ApiCommonController();
+        $this->array_messagedata = array();
 
         DB::beginTransaction();
         try{
@@ -3365,44 +3489,58 @@ class ApiCommonController extends Controller
                 break;
             }
             $department_code = null;
+            $user_name = null;
             // 休暇登録
             //部署選択されていない場合は部署コードないためApiCommonControllerで取得
             if ($department_code == null) {
                 $dep_results = $apicommon_model->getUserDepartment($user_code, $target_date);
                 foreach($dep_results as $dep_result) {
                     $department_code = $dep_result->department_code;
+                    $user_name = $dep_result->name;
                     break;
                 }
             }
             $working_date = $target_date;
-            $user_holiday = new UserHolidayKubun();
-            $user_holiday->setParamUsercodeAttribute($user_code);
-            $user_holiday->setParamDepartmentcodeAttribute($department_code);
-            $user_holiday->setParamdatefromAttribute($working_date);
-            $user_holiday->setSystemDateAttribute($systemdate);
-            // 既に存在する場合は論理削除する
-            $is_exists = $user_holiday->isExistsKbn();
-            if($is_exists){
-                $user_holiday->delKbn();
+            // $user_holiday = new UserHolidayKubun();
+            // $user_holiday->setParamUsercodeAttribute($user_code);
+            // $user_holiday->setParamDepartmentcodeAttribute($department_code);
+            // $user_holiday->setParamdatefromAttribute($working_date);
+            // $user_holiday->setSystemDateAttribute($systemdate);
+            // // 既に存在する場合は論理削除する
+            // $is_exists = $user_holiday->isExistsKbn();
+            // if($is_exists){
+            //     $user_holiday->delKbn();
+            // }
+            $calendar_setting_model = new CalendarSettingInformation();
+            $calendar_setting_model->setParamUsercodeAttribute($user_code);
+            $calendar_setting_model->setParamDepartmentcodeAttribute($department_code);
+            $calendar_setting_model->setParamfromdateAttribute($working_date);
+            // 存在しない場合はエラーで返す
+            $is_exists = $calendar_setting_model->isExists();
+            if(!$is_exists){
+                DB::rollBack();
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $user_name."さん", Config::get('const.MSG_ERROR.not_setting_calendar')));
+                $this->array_messagedata[] = str_replace('{0}', $user_name."さん", Config::get('const.MSG_ERROR.not_setting_calendar'));
+                return array(
+                    'result' => false, 
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
+                );
             }
-            $user_holiday_kubuns_id = null;
+            $calendar_setting_model->setUpdatedatAttribute($systemdate);
+            $calendar_setting_model->setUpdateduserAttribute($login_user_code);
             foreach($details as $item) {
                 if($item['kbn_flag'] == 1){     // 休暇区分のみ登録
-                    $user_holiday->setWorkingdateAttribute($working_date);
-                    $user_holiday->setDepartmentcodeAttribute($department_code);
-                    $user_holiday->setUsercodeAttribute($user_code);
-                    $user_holiday->setHolidaykubunAttribute($item['user_holiday_kbn']);
-                    $user_holiday->setCreateduserAttribute($login_user_code);
-                    $user_holiday->insertKbn();
+                    $calendar_setting_model->setHolidaykubunAttribute($item['user_holiday_kbn']);
+                    // $user_holiday->setHolidaykubunAttribute($item['user_holiday_kbn']);
+                    // $user_holiday->setCreateduserAttribute($login_user_code);
+                    // $user_holiday->insertKbn();
                     // 勤怠時刻にIDを登録するのでSELECTする
-                    $id_results = $user_holiday->getDetail();
-                    foreach($id_results as $item_id) {
-                        $user_holiday_kubuns_id = $item_id->id;
-                        break;
-                    }
-                    // 休暇の場合は先頭行のみの処理でよいのでbreakする
-                    break;
+                } else {
+                    $calendar_setting_model->setHolidaykubunAttribute(0);
                 }
+                $calendar_setting_model->updateCalendar();
+                // 先頭行のみの処理でよいのでbreakする
+                break;
             }
             // 勤怠時刻登録
             // beforeidsが存在した場合は論理削除する
@@ -3445,7 +3583,7 @@ class ApiCommonController extends Controller
                 $work_time_model->setDepartmentcodeAttribute($department_code);
                 $work_time_model->setRecordtimeAttribute($record_time);
                 $work_time_model->setModeAttribute($item['mode']);
-                $work_time_model->setUserholidaykubunsidAttribute($user_holiday_kubuns_id);
+                $work_time_model->setUserholidaykubunsidAttribute(null);
                 $work_time_model->setCreateduserAttribute($login_user_code);
                 $work_time_model->setSystemDateAttribute($systemdate);
                 $positions_data = null; 
@@ -3461,6 +3599,10 @@ class ApiCommonController extends Controller
                 $work_time_model->insertWorkTime();
             }
             DB::commit();
+            return array(
+                'result' => true, 
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
+            );
 
         }catch(\PDOException $pe){
             DB::rollBack();
@@ -3520,13 +3662,13 @@ class ApiCommonController extends Controller
             DB::commit();
             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_delete_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
 
         }catch(\Exception $e){
             DB::rollBack();
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_delete_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -3554,11 +3696,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
