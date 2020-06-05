@@ -17,9 +17,6 @@ class WorkTimeLog extends Model
     protected $table_departments = 'departments';
     protected $table_generalcodes = 'generalcodes';
     protected $table_user_holiday_kubuns = 'user_holiday_kubuns';
-    protected $table_working_timetables = 'working_timetables';
-    protected $table_calendar_setting_informations = 'calendar_setting_informations';
-
     //--------------- メンバー属性 -----------------------------------
 
     private $id;
@@ -183,11 +180,11 @@ class WorkTimeLog extends Model
                 ]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -225,21 +222,13 @@ class WorkTimeLog extends Model
             $sqlString .= "    , t1.department_code as department_code ";
             $sqlString .= "    , t5.name as department_name ";
             $sqlString .= "    , t3.mode as mode ";
-            $sqlString .= "    , case ifnull(t3.record_time,'') ";
-            $sqlString .= "      when '' then '-' ";
-            $sqlString .= "      else ";
-            $sqlString .= "        case DATE_FORMAT(t3.record_time, '%H:%i') ";
-            $sqlString .= "        when '00:00' then '-' ";
-            $sqlString .= "        else ";
-            $sqlString .= "          DATE_FORMAT(t3.record_time, '%m/%d %H:%i') ";
-            $sqlString .= "        end ";
-            $sqlString .= "      end as record_time_name ";
+            $sqlString .= "    , DATE_FORMAT(t3.record_time, '%m/%d %H:%i')as record_time_name ";
             $sqlString .= "    , t3.record_time as record_time ";
             $sqlString .= "    , t3.x_positions as x_positions ";
             $sqlString .= "    , t3.y_positions as y_positions ";
             $sqlString .= "    , t4.holiday_kubun as holiday_kubun ";
             $sqlString .= "    , case ifnull(t3.mode,'') ";
-            $sqlString .= "      when '' then '-' ";
+            $sqlString .= "      when '' then '未出勤' ";
             $sqlString .= "      else ";
             $sqlString .= "        (select code_name from ".$this->table_generalcodes." where identification_id = ? and code = t3.mode and is_deleted = ?) ";
             $sqlString .= "      end as mode_name  ";
@@ -267,7 +256,7 @@ class WorkTimeLog extends Model
             $sqlString .= "        ? = ? ";
             $sqlString .= "        and apply_term_from <= ? ";
             $sqlString .= "        and kill_from_date >  ? ";
-            $sqlString .= "        and role < ? ";
+            $sqlString .= "        and role <= ? ";
             $sqlString .= "        and is_deleted = ? ";
             $sqlString .= "      group by ";
             $sqlString .= "        code ";
@@ -310,12 +299,9 @@ class WorkTimeLog extends Model
             $sqlString .= "    on ";
             $sqlString .= "      t3.user_code = t1.code ";
             $sqlString .= "      and t3.department_code = t1.department_code ";
-            $sqlString .= "    left join ".$this->table_calendar_setting_informations." as t4 ";        // user_holiday_kubuns
+            $sqlString .= "    left join ".$this->table_user_holiday_kubuns." as t4 ";
             $sqlString .= "    on ";
-            $sqlString .= "      t4.date = ? ";
-            $sqlString .= "      and t4.user_code = t1.code ";
-            $sqlString .= "      and t4.department_code = t1.department_code ";
-            $sqlString .= "      and t4.is_deleted = ? ";
+            $sqlString .= "      t4.id = t3.user_holiday_kubuns_id ";
             $sqlString .= "    inner join ( ";
             $sqlString .= "      select ";
             $sqlString .= "        t1.code as code ";
@@ -375,8 +361,6 @@ class WorkTimeLog extends Model
             $array_setBindingsStr[] = $from_datetime;
             $array_setBindingsStr[] = $to_datetime;
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = $target_date;
-            $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = $target_date;
@@ -389,11 +373,11 @@ class WorkTimeLog extends Model
             $array_setBindingsStr[] = 0;
             $result = DB::select($sqlString, $array_setBindingsStr);
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }

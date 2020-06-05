@@ -310,6 +310,10 @@ export default {
     const_generaldatas: {
       type: Array,
       default: []
+    },
+    feature_item_selections: {
+        type: Array,
+        default: []
     }
   },
   data() {

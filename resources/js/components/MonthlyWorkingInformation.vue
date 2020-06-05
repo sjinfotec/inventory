@@ -371,8 +371,13 @@
         </div>
       </div>
       <!-- /.panel -->
+    </div>
+    <!-- /main contentns row -->
+    <!-- main contentns row -->
+    <!-- ========================== 合計部 START ========================== -->
+    <div class="row justify-content-between" v-if="serchorshow === 'show'">
       <!-- .panel -->
-      <div class="col-md pt-3">
+      <div class="col-md pt-3 align-self-stretch">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header

@@ -265,32 +265,48 @@
                             class="text-center align-middle"
                           >{{ detaildate.working_date_name }}</td>
                           <td
-                            v-if="detaildate.attendance_time != '00:00' && detaildate.attendance_time != '' && detaildate.attendance_time != null"
+                            v-if="detaildate.attendance_time != '00:00' && detaildate.attendance_time != '' && detaildate.attendance_time != null && detaildate.red_result_start != 1"
                             class="text-center align-middle"
+                            >{{ detaildate.attendance_time }}</td>
+                          <td
+                            v-if="detaildate.attendance_time != '00:00' && detaildate.attendance_time != '' && detaildate.attendance_time != null && detaildate.red_result_start == 1"
+                            class="text-center align-middle time-color-red"
                             >{{ detaildate.attendance_time }}</td>
                           <td
                             v-if="detaildate.attendance_time == '00:00' || detaildate.attendance_time == '' || detaildate.attendance_time == null"
                             class="text-center align-middle"
                             ></td>
                           <td
-                            v-if="detaildate.leaving_time != '00:00' && detaildate.leaving_time != '' && detaildate.leaving_time != null"
+                            v-if="detaildate.leaving_time != '00:00' && detaildate.leaving_time != '' && detaildate.leaving_time != null && detaildate.red_result_end != 1"
                             class="text-center align-middle"
+                            >{{ detaildate.leaving_time }}</td>
+                          <td
+                            v-if="detaildate.leaving_time != '00:00' && detaildate.leaving_time != '' && detaildate.leaving_time != null && detaildate.red_result_end == 1"
+                            class="text-center align-middle time-color-red"
                             >{{ detaildate.leaving_time }}</td>
                           <td
                             v-if="detaildate.leaving_time == '00:00' || detaildate.leaving_time == '' || detaildate.leaving_time == null"
                             class="text-center align-middle"
                             ></td>
                           <td
-                            v-if="detaildate.pcstart_time != '00:00' && detaildate.pcstart_time != '' && detaildate.pcstart_time != null"
+                            v-if="detaildate.pcstart_time != '00:00' && detaildate.pcstart_time != '' && detaildate.pcstart_time != null && detaildate.red_result_start != 1"
                             class="text-center align-middle"
+                            >{{ detaildate.pcstart_time }}</td>
+                          <td
+                            v-if="detaildate.pcstart_time != '00:00' && detaildate.pcstart_time != '' && detaildate.pcstart_time != null && detaildate.red_result_start == 1"
+                            class="text-center align-middle time-color-red"
                             >{{ detaildate.pcstart_time }}</td>
                           <td
                             v-if="detaildate.pcstart_time == '00:00' || detaildate.pcstart_time == '' || detaildate.pcstart_time == null"
                             class="text-center align-middle"
                             ></td>
                           <td
-                            v-if="detaildate.pcend_time != '00:00' && detaildate.pcend_time != '' && detaildate.pcend_time != null"
+                            v-if="detaildate.pcend_time != '00:00' && detaildate.pcend_time != '' && detaildate.pcend_time != null && detaildate.red_result_end != 1"
                             class="text-center align-middle"
+                            >{{ detaildate.pcend_time }}</td>
+                          <td
+                            v-if="detaildate.pcend_time != '00:00' && detaildate.pcend_time != '' && detaildate.pcend_time != null && detaildate.red_result_end == 1"
+                            class="text-center align-middle time-color-red"
                             >{{ detaildate.pcend_time }}</td>
                           <td
                             v-if="detaildate.pcend_time == '00:00' || detaildate.pcend_time == '' || detaildate.pcend_time == null"
@@ -820,4 +836,7 @@ table {
 .mw-rem-4 {
   min-width: 4rem;
 }
+
+.time-color-red { color: red; }
+
 </style>

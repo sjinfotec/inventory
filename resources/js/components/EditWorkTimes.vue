@@ -151,6 +151,7 @@
           v-bind:heads="heads"
           v-bind:accountdatas="accountdatas"
           v-bind:halfautoset="get_AutoHalfSet"
+          v-bind:feature-item-selections="feature_item_selections"
         >
         </edit-work-times-table>
       </div>
@@ -170,9 +171,8 @@ import {requestable} from '../mixins/requestable.js';
 
 // CONST
 const CONST_C025 = 'C025';
-const CONST_C025_GENERALUSER_INDEX = 0;   // index
-const CONST_C025_ADMINUSER_INDEX = 2;   // index
-const CONST_HALF_HOLIDAY_SET_CODE = 2;
+const CONST_C042 = 'C042';
+const CONST_HALF_HOLIDAY_SET_PHYSICAL_NAME = 'half_holiday';
 
 export default {
   name: "EditWorkTimes",
@@ -226,7 +226,8 @@ export default {
       showeditworktimestable: true,
       accountdata_data: [],
       const_C025_data: [],
-      isAutoHalfSet: true
+      isAutoHalfSet: true,
+      halfholiday_code: ""
     };
   },
   components: {
@@ -235,9 +236,10 @@ export default {
   computed: {
     get_AutoHalfSet: function() {
       this.isAutoHalfSet = false;
+      var halfholiday = this.get_HalfHolidaySetCode;
       let $this = this;
       this.feature_item_selections.forEach( function( item ) {
-        if (item.item_code == CONST_HALF_HOLIDAY_SET_CODE) {
+        if (item.item_code == halfholiday) {
           if (item.value_select == 1) {
             $this.isAutoHalfSet = true;
           } else {
@@ -248,6 +250,20 @@ export default {
       });
 
       return this.isAutoHalfSet;
+    },
+    get_HalfHolidaySetCode: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C042) {
+          if (item.physical_name == CONST_HALF_HOLIDAY_SET_PHYSICAL_NAME) {
+            $this.attendance_code = item.code;
+            return $this.halfholiday_code;
+          }
+        }
+        i++;
+      });    
+      return this.halfholiday_code;
     },
     get_Account: function() {
       let $this = this;

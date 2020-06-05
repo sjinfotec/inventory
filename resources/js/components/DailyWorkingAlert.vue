@@ -160,7 +160,7 @@
           v-bind:heads="detailsEdt"
           v-bind:accountdatas="accountdatas"
           v-bind:halfautoset="get_IsAutoHalfSet"
-          v-on:cancelclick-event="cancelClick"
+          v-bind:feature-item-selections="feature_item_selections"
         >
         </edit-work-times-table>
       </div>
@@ -244,10 +244,12 @@ export default {
   },
   computed: {
     get_C025: function() {
+      console.log('get_C025 in');
       let $this = this;
       var i = 0;
       this.const_generaldatas.forEach( function( item ) {
         if (item.identification_id == CONST_C025) {
+          console.log('get_C025 set');
           $this.const_C025_data.push($this.const_generaldatas[i]);
         }
         i++;
