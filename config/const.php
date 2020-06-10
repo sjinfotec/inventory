@@ -767,7 +767,7 @@ return [
         'already_item' => 'すでに登録されている[{0}]です',
         'not_found_data' => '該当するデータは見つかりませんでした。',
         'parameter_illegal' => '不正なパラメータです。',
-        'file_download_error' => 'ファイルダウンロード失敗しました。'
+        'file_download_error' => 'ファイルダウンロード失敗しました。',
         'file_upload_error' => 'ファイルアップロード失敗しました。'
     ],
 
@@ -826,7 +826,7 @@ return [
     ],
 
     'ACCOUNTID' => [
-        'account_id' => 'SSJJOO00'
+        'account_id' => 'S02DTA00'
     ],
 
     // メニュー項目数   未使用

@@ -1331,8 +1331,6 @@ export default {
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.selectedUserValue = "";
       this.getDo = 1;
-      this.applytermdate = this.valuefromdate;
-      this.getDo = 1;
       this.getUserSelected();
       // this.selectMode = '';
       this.isinitbutton = false;

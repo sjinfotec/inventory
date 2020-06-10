@@ -48,7 +48,8 @@ use App\FeatureItemSelection;
  *          共通コードリスト取得        : getGeneralList            : generalcodes
  *          承認者リスト取得            : getConfirmlList           : confirms
  *      3.ユーザ情報取得
- *          ユーザ情報取得                              : getUserInfo               : users            
+ *          ユーザ情報取得                              : getUserInfo               : users         
+ *          ユーザーカレンダーシフト情報取得               : getCalendarInformations    : calendar_setting_informations
  *          ユーザシフト情報取得                        : getShiftInformation               : ShiftInformation        
  *          ログインユーザー部署ロール取得（画面から）      : getLoginUserDepartment            
  *          ログインユーザー権限取得（画面から）            : getLoginUserRole                  
@@ -734,12 +735,35 @@ class ApiCommonController extends Controller
      *
      * @return list
      */
-    public function getTimeTableList(){
+    public function getTimeTableList(Request $request){
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
         try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            $targetdate = '';
+            if (isset($params['targetdate'])) {
+                $targetdate =  $params['targetdate'];
+            }
+            // 適用期間日付の取得
+            $dt = null;
+            if ($targetdate != '') {
+                $dt = new Carbon($targetdate);
+            } else {
+                $dt = new Carbon();
+            }
             $time_tables = new WorkingTimeTable();
+            $time_tables->setParamdatefromAttribute($dt);
             $details = $time_tables->getTimeTables();
 
             return response()->json(
@@ -748,13 +772,13 @@ class ApiCommonController extends Controller
             );
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
-
     }
 
     /**
@@ -1128,6 +1152,227 @@ class ApiCommonController extends Controller
             throw $e;
         }
             
+    }
+
+    /**
+     * ユーザーカレンダーシフト情報取得
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function getCalendarInformations($params){
+        $departmentcode = $params['departmentcode'];
+        $employmentstatus = $params['employmentstatus'];
+        $usercode = $params['usercode'];
+        $fromdate = $params['fromdate'];
+        $todate = $params['todate'];
+        $this->array_messagedata = array();
+        $details = array();
+        $detail_dates = array();
+        $result = true;
+        try {
+            $dt1 = new Carbon($fromdate);
+            $dt2 = new Carbon($todate);
+            $calendar_setting_model = new CalendarSettingInformation();
+            $calendar_setting_model->setParamdepartmentcodeAttribute($departmentcode);
+            $calendar_setting_model->setParamemploymentstatusAttribute($employmentstatus);
+            $calendar_setting_model->setParamusercodeAttribute($usercode);
+            $calendar_setting_model->setParamfromdateAttribute($dt1->format('Ymd'));
+            $calendar_setting_model->setParamtodateAttribute($dt2->format('Ymd'));
+            $results = $calendar_setting_model->getShiftDetail();
+            $current_user_code = null;
+            $current_item = null;
+            $array_user_data = array();
+            $array_user_date_data = array();
+            $set_detail_dates = false;
+            $night_day_cnt = 0;
+            $regular_day_cnt = 0;
+            $paid_holiday_cnt = 0;
+            $night_day_times = 0;
+            $regular_day_times = 0;
+            foreach($results as $item) {
+                if($current_user_code == null) {$current_user_code = $item->user_code;}
+                if($current_item == null) {$current_item = $item;}
+                if($current_user_code == $item->user_code) {
+                    if (!$set_detail_dates) {
+                        $detail_dates[] = array(
+                            'date' => $item->date,
+                            'date_name' => $item->date_name
+                        );
+                    }
+                    $array_user_date_data[] = array(
+                        'date' => $item->date,
+                        'weekday_kubun' => $item->weekday_kubun,
+                        'business_kubun' => $item->business_kubun,
+                        'working_timetable_no' => $item->working_timetable_no,
+                        'holiday_kubun' => $item->holiday_kubun,
+                        'date_name' => $item->date_name,
+                        'md_name' => $item->md_name,
+                        'public_holidays_name' => $item->public_holidays_name,
+                        'business_kubun_name' => $item->business_kubun_name,
+                        'use_free_item' => $item->use_free_item,
+                        'working_timetable_name' => $item->working_timetable_name,
+                        'holiday_kubun_name' => $item->holiday_kubun_name,
+                        'total_working_times' => $item->total_working_times
+                    );
+                    $night_day_cnt += $item->night_day_cnt;
+                    $regular_day_cnt += $item->regular_day_cnt;
+                    $paid_holiday_cnt += $item->paid_holiday_cnt;
+                    if ($item->night_day_cnt == 1) {$night_day_times += $item->total_working_times;}
+                    if ($item->regular_day_cnt == 1) {$regular_day_times += $item->total_working_times;}
+                    if ($current_item->date != $item->date) {$current_item->date = $item->date;}
+                } else {
+                    if (count($detail_dates) > 0 && !$set_detail_dates) {
+                        $set_detail_dates = true;
+                    }
+                    // todateまで
+                    $dtfrom = new Carbon($current_item->date);
+                    $dt = $dtfrom->addDay();
+                    $todate = $params['todate'];
+                    $dtto = new Carbon($todate);
+                    while ($dt<=$dtto) {
+                        $dt_w = $dt;
+                        $array_user_date_data[] = array(
+                            'date' => $dt_w->format("Ymd"),
+                            'weekday_kubun' => 0,
+                            'business_kubun' => 0,
+                            'working_timetable_no' => 0,
+                            'holiday_kubun' => 0,
+                            'date_name' => "",
+                            'md_name' => "",
+                            'public_holidays_name' => "",
+                            'business_kubun_name' => "",
+                            'use_free_item' => "",
+                            'working_timetable_name' => "カレンダー未設定",
+                            'holiday_kubun_name' => "",
+                            'total_working_times' => 0
+                            );
+                        $dt->addDay();
+                    }
+                    $array_user_data[] = array(
+                        'department_code' => $current_item->department_code,
+                        'employment_status' => $current_item->employment_status,
+                        'user_code' => $current_item->user_code,
+                        'department_name' => $current_item->department_name,
+                        'employment_name' => $current_item->employment_name,
+                        'user_name' => $current_item->user_name,
+                        'night_day_cnt' => $night_day_cnt,
+                        'regular_day_cnt' => $regular_day_cnt,
+                        'paid_holiday_cnt' => $paid_holiday_cnt,
+                        'night_day_times' => $night_day_times,
+                        'regular_day_times' =>  $regular_day_times,
+                        'array_user_date_data' => $array_user_date_data
+                    );
+                    $current_user_code = $item->user_code;
+                    $current_item = $item;
+                    $array_user_date_data = array();
+                    // fromdateまで
+                    $dtfrom = new Carbon($fromdate);
+                    $dt = $dtfrom;
+                    $dtto = new Carbon($item->date);
+                    while ($dt<$dtto) {
+                        $dt_w = $dt;
+                        $array_user_date_data[] = array(
+                            'date' => $dt_w->format("Ymd"),
+                            'weekday_kubun' => 0,
+                            'business_kubun' => 0,
+                            'working_timetable_no' => 0,
+                            'holiday_kubun' => 0,
+                            'date_name' => "",
+                            'md_name' => "",
+                            'public_holidays_name' => "",
+                            'business_kubun_name' => "",
+                            'use_free_item' => "",
+                            'working_timetable_name' => "カレンダー未設定",
+                            'holiday_kubun_name' => "",
+                            'total_working_times' => 0
+                            );
+                        $dt->addDay();
+                    }
+                    $array_user_date_data[] = array(
+                        'date' => $item->date,
+                        'weekday_kubun' => $item->weekday_kubun,
+                        'business_kubun' => $item->business_kubun,
+                        'working_timetable_no' => $item->working_timetable_no,
+                        'holiday_kubun' => $item->holiday_kubun,
+                        'date_name' => $item->date_name,
+                        'md_name' => $item->md_name,
+                        'public_holidays_name' => $item->public_holidays_name,
+                        'business_kubun_name' => $item->business_kubun_name,
+                        'use_free_item' => $item->use_free_item,
+                        'working_timetable_name' => $item->working_timetable_name,
+                        'holiday_kubun_name' => $item->holiday_kubun_name,
+                        'total_working_times' => $item->total_working_times
+                    );
+                    $night_day_cnt = 0;
+                    $regular_day_cnt = 0;
+                    $paid_holiday_cnt = 0;
+                    $night_day_times = 0;
+                    $regular_day_times = 0;
+                    $night_day_cnt += $item->night_day_cnt;
+                    $regular_day_cnt += $item->regular_day_cnt;
+                    $paid_holiday_cnt += $item->paid_holiday_cnt;
+                    if ($item->night_day_cnt == 1) {$night_day_times += $item->total_working_times;}
+                    if ($item->regular_day_cnt == 1) {$regular_day_times += $item->total_working_times;}
+                }
+            }
+            // 残り
+            if (count($array_user_date_data) > 0) {
+                // todateまで
+                $dtfrom = new Carbon($current_item->date);
+                $dt = $dtfrom->addDay();
+                $todate = $params['todate'];
+                $dtto = new Carbon($todate);
+                while ($dt<=$dtto) {
+                    $dt_w = $dt;
+                    $array_user_date_data[] = array(
+                        'date' => $dt_w->format("Ymd"),
+                        'weekday_kubun' => 0,
+                        'business_kubun' => 0,
+                        'working_timetable_no' => 0,
+                        'holiday_kubun' => 0,
+                        'date_name' => "",
+                        'md_name' => "",
+                        'public_holidays_name' => "",
+                        'business_kubun_name' => "",
+                        'use_free_item' => "",
+                        'working_timetable_name' => "カレンダー未設定",
+                        'holiday_kubun_name' => "",
+                        'total_working_times' => 0
+                    );
+                    $dt->addDay();
+                }
+                $array_user_data[] = array(
+                    'department_code' => $current_item->department_code,
+                    'employment_status' => $current_item->employment_status,
+                    'user_code' => $current_item->user_code,
+                    'department_name' => $current_item->department_name,
+                    'employment_name' => $current_item->employment_name,
+                    'user_name' => $current_item->user_name,
+                    'night_day_cnt' => $night_day_cnt,
+                    'regular_day_cnt' => $regular_day_cnt,
+                    'paid_holiday_cnt' => $paid_holiday_cnt,
+                    'night_day_times' => $night_day_times,
+                    'regular_day_times' =>  $regular_day_times,
+                    'array_user_date_data' => $array_user_date_data
+                );
+            }
+            $details = $array_user_data;
+            if (count($details) == 0 || count($array_user_date_data) == 0) {
+                $this->array_messagedata[] = Config::get('const.MSG_INFO.no_data');
+            }
+            $result = true;
+            return response()->json(
+                ['result' => $result, 'details' => $details, 'detail_dates' => $detail_dates,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
     /**

@@ -410,6 +410,7 @@ class MonthlyWorkingInformationController extends Controller
             $feature_attendance_count = 0;          // 出勤回数
             $feature_rest_count = 0;                // 休憩回数
             $mode_list = 0;                         // 2なら緊急取集使用
+            $early_time = null;                     // 1なら早出時間集計
             $em_details = array();
             foreach($feature_data as $item) {
                 if ($item->item_code == Config::get('const.C042.attendance_count')) {
@@ -429,7 +430,10 @@ class MonthlyWorkingInformationController extends Controller
                         $em_details = $time_table->getDetail();
                     }
                 }
-                if ($feature_attendance_count > 0 && $feature_rest_count > 0 && $mode_list > 0) {
+                if ($item->item_code == Config::get('const.C042.early_time')) {
+                    $early_time = intval($item->value_select);
+                }
+                if ($feature_attendance_count > 0 && $feature_rest_count > 0 && $mode_list > 0 && $early_time != null) {
                     break;
                 }
             }
@@ -465,8 +469,9 @@ class MonthlyWorkingInformationController extends Controller
                     'business_kubun' => $business_kubun,
                     'feature_attendance_count' => $feature_attendance_count,
                     'feature_rest_count' => $feature_rest_count,
+                    'early_time' => $early_time,
                     'em_details' => $em_details,
-                    'calc_date' => $calc_date
+                    'calc_date' => $datefrom
                 );
                 $calc_result = $daily_controller->addDailyCalc($array_impl_addDailyCalc);
                 $calc_date = date_format($dt1->addDay(1), 'Ymd');

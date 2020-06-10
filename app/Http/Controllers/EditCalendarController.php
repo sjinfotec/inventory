@@ -32,6 +32,13 @@ class EditCalendarController extends Controller
     {
         return view('setting_calendar');
     }
+
+    /**
+     * データ取得       apicommonに移動 getCalendarInformations
+     *
+     * @param Request $request
+     * @return array
+     */
     public function getDetail(Request $request){
         $this->array_messagedata = array();
         $details = array();
@@ -93,109 +100,29 @@ class EditCalendarController extends Controller
             // 検索日付期間設定
             $search_y_m = $year."".$month;
             $dt1 = new Carbon($search_y_m.'15');
-            $make_fromdate = $dt1->startOfMonth();
+            $fromdate = $dt1->startOfMonth();
             $dt2 = new Carbon($search_y_m.'15');
-            $make_todate = $dt2->endOfMonth();
-            $calendar_setting_model = new CalendarSettingInformation();
-            $calendar_setting_model->setParamdepartmentcodeAttribute($departmentcode);
-            $calendar_setting_model->setParamemploymentstatusAttribute($employmentstatus);
-            $calendar_setting_model->setParamusercodeAttribute($usercode);
-            $calendar_setting_model->setParamfromdateAttribute($make_fromdate->format('Ymd'));
-            $calendar_setting_model->setParamtodateAttribute($make_todate->format('Ymd'));
-            $results = $calendar_setting_model->getDetail();
-            $current_user_code = null;
-            $current_item = null;
-            $array_user_data = array();
-            $array_user_date_data = array();
-            $set_detail_dates = false;
-            foreach($results as $item) {
-                if($current_user_code == null) {$current_user_code = $item->user_code;}
-                if($current_item == null) {$current_item = $item;}
-                if($current_user_code == $item->user_code) {
-                    if (!$set_detail_dates) {
-                        $detail_dates[] = array(
-                            'date' => $item->date,
-                            'date_name' => $item->date_name
-                        );
-                    }
-                    $array_user_date_data[] = array(
-                        'date' => $item->date,
-                        'weekday_kubun' => $item->weekday_kubun,
-                        'business_kubun' => $item->business_kubun,
-                        'working_timetable_no' => $item->working_timetable_no,
-                        'holiday_kubun' => $item->holiday_kubun,
-                        'date_name' => $item->date_name,
-                        'md_name' => $item->md_name,
-                        'public_holidays_name' => $item->public_holidays_name,
-                        'business_kubun_name' => $item->business_kubun_name,
-                        'use_free_item' => $item->use_free_item,
-                        'working_timetable_name' => $item->working_timetable_name,
-                        'holiday_kubun_name' => $item->holiday_kubun_name
-                    );
-                } else {
-                    if (count($detail_dates) > 0 && !$set_detail_dates) {
-                        $set_detail_dates = true;
-                    }
-                    $array_user_data[] = array(
-                        'department_code' => $current_item->department_code,
-                        'employment_status' => $current_item->employment_status,
-                        'user_code' => $current_item->user_code,
-                        'department_name' => $current_item->department_name,
-                        'employment_name' => $current_item->employment_name,
-                        'user_name' => $current_item->user_name,
-                        'array_user_date_data' => $array_user_date_data
-                    );
-                    $current_user_code = $item->user_code;
-                    $current_item = $item;
-                    $array_user_date_data = array();
-                    $array_user_date_data[] = array(
-                        'date' => $item->date,
-                        'weekday_kubun' => $item->weekday_kubun,
-                        'business_kubun' => $item->business_kubun,
-                        'working_timetable_no' => $item->working_timetable_no,
-                        'holiday_kubun' => $item->holiday_kubun,
-                        'date_name' => $item->date_name,
-                        'md_name' => $item->md_name,
-                        'public_holidays_name' => $item->public_holidays_name,
-                        'business_kubun_name' => $item->business_kubun_name,
-                        'use_free_item' => $item->use_free_item,
-                        'working_timetable_name' => $item->working_timetable_name,
-                        'holiday_kubun_name' => $item->holiday_kubun_name
-                    );
-                }
-            }
-            // 残り
-            if (count($array_user_date_data) > 0) {
-                $array_user_data[] = array(
-                    'department_code' => $current_item->department_code,
-                    'employment_status' => $current_item->employment_status,
-                    'user_code' => $current_item->user_code,
-                    'department_name' => $current_item->department_name,
-                    'employment_name' => $current_item->employment_name,
-                    'user_name' => $current_item->user_name,
-                    'array_user_date_data' => $array_user_date_data
-                );
-            }
-            $details = $array_user_data;
-            if (count($details) == 0) {
-                $this->array_messagedata[] = Config::get('const.MSG_INFO.no_data');
-                $result = true;
-            }
-            return response()->json(
-                ['result' => $result, 'details' => $details, 'detail_dates' => $detail_dates,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            $todate = $dt2->endOfMonth();
+            $apicommon_model = new ApiCommonController();
+            // addDailyCalc implement
+            $array_impl_getCalendarInformations = array (
+                'departmentcode' => $departmentcode,
+                'employmentstatus' => $employmentstatus,
+                'usercode' => $usercode,
+                'fromdate' => $fromdate,
+                'todate' => $todate
             );
+            $results = $apicommon_model->getCalendarInformations($array_impl_getCalendarInformations);
+            return $results;
         }catch(\PDOException $pe){
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
-            Log::error($e->getMessage());
             throw $e;
         }
     }
 
     /**
-     * データ取得
+     * データ取得       apicommonに移動 getCalendarInformations
      *
      * @param Request $request
      * @return array
@@ -761,7 +688,12 @@ class EditCalendarController extends Controller
             $converts = array();
             // 日付分の設定データを配列に設定する
             $dt = new Carbon($fromdate);
-            $dtEnd = new Carbon($todate);
+            $dtEnd = null;
+            if ($todate == null) {
+                $dtEnd = $dt;
+            } else {
+                $dtEnd = new Carbon($todate);
+            }
             $index = 0;
             while (true) {
                 $formated = $dt;

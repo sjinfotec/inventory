@@ -371,8 +371,6 @@ class DailyWorkingInformationController extends Controller
             // temporary作成
             $addCalc = $this->addDailyCalc($array_impl_addDailyCalc);
             if ($addCalc) {
-            }
-            if ($addCalc) {
                 $working_model->setParamdatefromAttribute(date_format(new Carbon($datefrom), 'Ymd'));
                 $working_model->setParamdatetoAttribute(date_format(new Carbon($dateto), 'Ymd'));
                 $working_model->setParamEmploymentStatusAttribute($employmentstatus);
