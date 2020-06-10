@@ -385,7 +385,7 @@
             v-bind:header-text2="'集計月の合計が表示されます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
-          <div class="card-body pt-2">
+          <div class="card-body pt-2 print-none">
             <!-- panel contents -->
             <!-- .row -->
             <monthly-working-info-table
@@ -955,8 +955,19 @@ export default {
 };
 </script>
 <style scoped>
-@page {
+/* @page {
     size : landscape;
+} */
+
+.print_pages{
+/*A4縦*/
+  width: 172mm;
+  height: 251mm;
+  page-break-after: always;
+}
+  /*最後のページは改ページを入れない*/
+.print_pages:last-child{
+    page-break-after: auto;
 }
 
 .table th, .table td {
