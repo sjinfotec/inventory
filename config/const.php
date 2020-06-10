@@ -826,7 +826,7 @@ return [
     ],
 
     'ACCOUNTID' => [
-        'account_id' => 'SSJJOO00'
+        'account_id' => 'S02DTA00'
     ],
 
     // メニュー項目数   未使用

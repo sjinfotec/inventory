@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use App\Http\Controllers\ApiCommonController;
+use Carbon\Carbon;
+
 
 class CalendarSettingInformation extends Model
 {
@@ -192,6 +194,9 @@ class CalendarSettingInformation extends Model
     private $paramdepartmentcode;
     private $paramemploymentstatus;
     private $paramusercode;
+    private $parambusinesskubun;       
+    private $paramworkingtimetableno;     
+    private $paramholidaykubun;     
     private $paramlimit;
     
     // 開始日付
@@ -247,6 +252,39 @@ class CalendarSettingInformation extends Model
     public function setParamusercodeAttribute($value)
     {
         $this->paramusercode = $value;
+    }
+
+    // 営業日区分
+    public function getParambusinesskubunAttribute()
+    {
+        return $this->parambusinesskubun;
+    }
+
+    public function setParambusinesskubunAttribute($value)
+    {
+        $this->parambusinesskubun = $value;
+    }
+     
+    // 休暇区分
+    public function getParamholidaykubunAttribute()
+    {
+        return $this->paramholidaykubun;
+    }
+
+    public function setParamholidaykubunAttribute($value)
+    {
+        $this->paramholidaykubun = $value;
+    }
+     
+    // タイムテーブルNO
+    public function getParamworkingtimetablenoAttribute()
+    {
+        return $this->paramworkingtimetableno;
+    }
+
+    public function setParamworkingtimetablenoAttribute($value)
+    {
+        $this->paramworkingtimetableno = $value;
     }
      
     // 件数limit
@@ -343,21 +381,19 @@ class CalendarSettingInformation extends Model
             $array_update_item = array();
             if(!empty($this->weekday_kubun)) {
                 $array_update_item['weekday_kubun'] = $this->weekday_kubun;
-                Log::debug('$this->array_update_item weekday_kubun = '.$this->array_update_item['weekday_kubun']);
             }
             if(!empty($this->business_kubun)) {
                 $array_update_item['business_kubun'] = $this->business_kubun;
-                Log::debug('$this->array_update_item business_kubun = '.$this->array_update_item['business_kubun']);
             }
             if(!empty($this->holiday_kubun)) {
                 $array_update_item['holiday_kubun'] = $this->holiday_kubun;
-                Log::debug('$this->array_update_item holiday_kubun = '.$this->array_update_item['holiday_kubun']);
+            }
+            if(!empty($this->working_timetable_no)) {
+                $array_update_item['working_timetable_no'] = $this->working_timetable_no;
             }
             if(count($array_update_item) > 0) {
                 $array_update_item['updated_user'] = $this->updated_user;
                 $array_update_item['updated_at'] = $this->updated_at;
-                Log::debug('$this->array_update_item updated_user = '.$this->array_update_item['updated_user']);
-                Log::debug('$this->array_update_item updated_at = '.$this->array_update_item['updated_at']);
                 $mainquery
                     ->where($this->table.'.is_deleted', 0)
                     ->update($array_update_item);
@@ -545,10 +581,12 @@ class CalendarSettingInformation extends Model
                         DATE_FORMAT(".$this->table.".date,'%c月%e日'),'(',substring('月火水木金土日',convert(".$this->table.".weekday_kubun+1,char),1),')') as md_name "
                     )
                 ->selectRaw("ifnull(t4.name, '') as public_holidays_name")
-                ->selectRaw("ifnull(t6.secound_code_name, '') as business_kubun_name")
+                ->selectRaw("ifnull(t6.code_name, '') as business_kubun_name")
+                ->selectRaw("ifnull(t6.secound_code_name, '') as business_kubun_secound_name")
                 ->selectRaw("ifnull(t7.use_free_item, '') as use_free_item")
                 ->selectRaw("ifnull(t8.name, '') as working_timetable_name")
-                ->selectRaw("ifnull(t7.secound_code_name, '') as holiday_kubun_name");
+                ->selectRaw("ifnull(t7.code_name, '') as holiday_kubun_name")
+                ->selectRaw("ifnull(t7.secound_code_name, '') as holiday_kubun_secound_name");
             // join
             // 適用期間日付の取得
             $apicommon = new ApiCommonController();
@@ -645,6 +683,333 @@ class CalendarSettingInformation extends Model
                 ->orderBy($this->table.'.date', 'asc');
             $result = $mainquery->get();
 
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+
+        return $result;
+    }
+
+    /**
+     * 検索
+     *
+     * @return void
+     */
+    public function getShiftDetail(){
+        try {
+            $apicommon = new ApiCommonController();
+            // usersの最大適用開始日付subquery
+            $subquery1 = $apicommon->makeUserApplyTermSql($this->paramtodate, Config::get('const.C025.admin_user'));
+            // departmentsの最大適用開始日付subquery
+            $subquery2 = $apicommon->makeDepartmentApplyTermSql($this->paramtodate, $this->paramtodate);
+            // working_timetablesの最大適用開始日付subquery
+            $subquery3 = $apicommon->makeWorkingTimeTableApplyTermSql($this->paramtodate);
+
+            $sqlString = "";
+            $sqlString .= "select ";
+            $sqlString .= "  t1.date ";
+            $sqlString .= "  , t1.department_code ";
+            $sqlString .= "  , t1.employment_status ";
+            $sqlString .= "  , t1.user_code ";
+            $sqlString .= "  , t1.weekday_kubun ";
+            $sqlString .= "  , t1.business_kubun ";
+            $sqlString .= "  , t1.working_timetable_no ";
+            $sqlString .= "  , t1.holiday_kubun ";
+            $sqlString .= "  , t2.name as user_name ";
+            $sqlString .= "  , t4.name as department_name ";
+            $sqlString .= "  , t6.code_name as employment_name ";
+            $sqlString .= "  , concat(  ";
+            $sqlString .= "    DATE_FORMAT(t1.date, '%e日') ";
+            $sqlString .= "    , '(' ";
+            $sqlString .= "    , substring(  ";
+            $sqlString .= "      '月火水木金土日' ";
+            $sqlString .= "      , convert( t1.weekday_kubun + 1, char )  ";
+            $sqlString .= "      , 1 ";
+            $sqlString .= "      )  ";
+            $sqlString .= "    , ')' ";
+            $sqlString .= "    ) as date_name ";
+            $sqlString .= "  , concat(  ";
+            $sqlString .= "    DATE_FORMAT(t1.date, '%c月%e日') ";
+            $sqlString .= "    , '(' ";
+            $sqlString .= "    , substring(  ";
+            $sqlString .= "      '月火水木金土日' ";
+            $sqlString .= "      , convert( t1.weekday_kubun + 1, char )  ";
+            $sqlString .= "      , 1 ";
+            $sqlString .= "      )  ";
+            $sqlString .= "    , ')' ";
+            $sqlString .= "    ) as md_name ";
+            $sqlString .= "  , ifnull(t5.name, '') as public_holidays_name ";
+            $sqlString .= "  , ifnull(t7.code_name, '') as business_kubun_name ";
+            $sqlString .= "  , ifnull(t7.secound_code_name, '') as business_kubun_secound_name ";
+            $sqlString .= "  , ifnull(t8.use_free_item, '') as use_free_item ";
+            $sqlString .= "  , ifnull(t9.name, '') as working_timetable_name ";
+            $sqlString .= "  , ifnull(t8.code_name, '') as holiday_kubun_name ";
+            $sqlString .= "  , ifnull(t8.secound_code_name, '') as holiday_kubun_secound_name  ";
+            $sqlString .= "  , case ifnull(t1.business_kubun, 0) ";
+            $sqlString .= "      when 0 then 0 ";
+            $sqlString .= "      when ".Config::get('const.C007.legal_holoday')." then 0 ";
+            $sqlString .= "      when ".Config::get('const.C007.legal_out_holoday')." then 0 ";
+            $sqlString .= "      else  ";
+            $sqlString .= "        case ifnull(t1.holiday_kubun, 0) ";
+            $sqlString .= "          when 0 then ";
+            $sqlString .= "            case substring(ifnull(t8.use_free_item, '00'),2,1) ";
+            $sqlString .= "              when '0' then ";
+            $sqlString .= "                case ifnull(t9.from_time, '')  ";
+            $sqlString .= "                  when '' then 0  ";
+            $sqlString .= "                  else ";
+            $sqlString .= "                    case ifnull(t9.to_time, '')  ";
+            $sqlString .= "                      when '' then 0  ";
+            $sqlString .= "                      else ";
+            $sqlString .= "                        case t9.from_time <= t9.to_time  ";
+            $sqlString .= "                          when true then 1  ";
+            $sqlString .= "                          else 0  ";
+            $sqlString .= "                        end  ";
+            $sqlString .= "                    end  ";
+            $sqlString .= "                end  ";
+            $sqlString .= "            end  ";
+            $sqlString .= "          else 0 ";
+            $sqlString .= "        end  ";
+            $sqlString .= "    end as regular_day_cnt ";
+            $sqlString .= "  , case ifnull(t1.business_kubun, 0) ";
+            $sqlString .= "      when 0 then 0 ";
+            $sqlString .= "      when ".Config::get('const.C007.legal_holoday')." then 0 ";
+            $sqlString .= "      when ".Config::get('const.C007.legal_out_holoday')." then 0 ";
+            $sqlString .= "      else  ";
+            $sqlString .= "        case ifnull(t1.holiday_kubun, 0) ";
+            $sqlString .= "          when 0 then ";
+            $sqlString .= "            case substring(ifnull(t8.use_free_item, '00'),2,1) ";
+            $sqlString .= "              when '0' then ";
+            $sqlString .= "                case ifnull(t9.from_time, '')  ";
+            $sqlString .= "                  when '' then 0  ";
+            $sqlString .= "                  else ";
+            $sqlString .= "                    case ifnull(t9.to_time, '')  ";
+            $sqlString .= "                      when '' then 0  ";
+            $sqlString .= "                      else ";
+            $sqlString .= "                        case t9.from_time > t9.to_time  ";
+            $sqlString .= "                          when true then 1  ";
+            $sqlString .= "                          else 0  ";
+            $sqlString .= "                        end  ";
+            $sqlString .= "                    end  ";
+            $sqlString .= "                end  ";
+            $sqlString .= "            end  ";
+            $sqlString .= "          else 0 ";
+            $sqlString .= "        end  ";
+            $sqlString .= "    end as night_day_cnt ";
+            $sqlString .= "  , case ifnull(t1.holiday_kubun, 0) ";
+            $sqlString .= "      when ".Config::get('const.C013.paid_holiday')." then 1 ";
+            $sqlString .= "      when ".Config::get('const.C013.morning_off')." then 0.5 ";
+            $sqlString .= "      when ".Config::get('const.C013.afternoon_off')." then 0.5 ";
+            $sqlString .= "      else 0 ";
+            $sqlString .= "    end as paid_holiday_cnt ";
+            $sqlString .= "  , ifnull(t10.total_working_times,0) as total_working_times ";
+            $sqlString .= "from ";
+            $sqlString .= "  ".$this->table." as t1  ";
+            $sqlString .= "  left join ".$this->table_users." as t2 ";
+            $sqlString .= "    on t2.code = t1.user_code ";
+            $sqlString .= "    and t2.department_code = t1.department_code ";
+            $sqlString .= "    and t2.employment_status = t1.employment_status ";
+            $sqlString .= "    and t1.is_deleted = ? ";
+            $sqlString .= "    and t2.is_deleted = ? ";
+            $sqlString .= "  inner join ( ";
+            $sqlString .= "    ".$subquery1." ";
+            $sqlString .= "  ) as t3 ";
+            $sqlString .= "    on t3.code = t2.code ";
+            $sqlString .= "    and t3.max_apply_term_from = t2.apply_term_from ";
+            $sqlString .= "  left join (  ";
+            $sqlString .= "    ".$subquery2." ";
+            $sqlString .= "  ) as t4 ";
+            $sqlString .= "    on t4.code = t1.department_code ";
+            $sqlString .= "    and t1.is_deleted = ? ";
+            $sqlString .= "  left join ".$this->table_public_holidays." as t5 ";
+            $sqlString .= "    on t5.date = t1.date ";
+            $sqlString .= "    and t5.is_deleted = ? ";
+            $sqlString .= "  left join ".$this->table_generalcodes." as t6  ";
+            $sqlString .= "    on t6.code = t1.employment_status ";
+            $sqlString .= "    and t6.identification_id = ? ";
+            $sqlString .= "    and t6.is_deleted = ? ";
+            $sqlString .= "  left join ".$this->table_generalcodes." as t7 ";
+            $sqlString .= "    on t7.code = t1.business_kubun ";
+            $sqlString .= "    and t7.identification_id = ? ";
+            $sqlString .= "    and t7.is_deleted = ? ";
+            $sqlString .= "  left join ".$this->table_generalcodes." as t8  ";
+            $sqlString .= "    on t8.code = t1.holiday_kubun  ";
+            $sqlString .= "    and t8.identification_id = ? ";
+            $sqlString .= "    and t8.is_deleted = ? ";
+            $sqlString .= "  left join (  ";
+            // ------------ min,max使用のため$subquery3使わず start --------------
+            $sqlString .= "    select ";
+            $sqlString .= "      t1.no as no ";
+            $sqlString .= "      , t1.name as name ";
+            $sqlString .= "      , t1.ago_time_no as ago_time_no ";
+            $sqlString .= "      , t1.working_time_kubun as working_time_kubun  ";
+            $sqlString .= "      , min(t1.from_time) as from_time ";
+            $sqlString .= "      , min(t1.to_time) as to_time ";
+            $sqlString .= "    from ";
+            $sqlString .= "      ".$this->table_working_timetables." as t1  ";
+            $sqlString .= "      inner join (  ";
+            $sqlString .= "        select ";
+            $sqlString .= "          no as no ";
+            $sqlString .= "          , MAX(apply_term_from) as max_apply_term_from  ";
+            $sqlString .= "        from ";
+            $sqlString .= "          ".$this->table_working_timetables."  ";
+            $sqlString .= "        where ";
+            $sqlString .= "          ? = ? ";
+            $sqlString .= "          and apply_term_from <= ? ";
+            $sqlString .= "          and is_deleted = ? ";
+            $sqlString .= "        group by ";
+            $sqlString .= "          no ";
+            $sqlString .= "      ) as t2  ";
+            $sqlString .= "        on t1.no = t2.no ";
+            $sqlString .= "        and t1.apply_term_from = t2.max_apply_term_from ";
+            $sqlString .= "    where ";
+            $sqlString .= "      ? = ? ";
+            $sqlString .= "      and t1.from_time is not null ";
+            $sqlString .= "      and t1.working_time_kubun = ? ";
+            $sqlString .= "      and t1.is_deleted = ? ";
+            $sqlString .= "    group by ";
+            $sqlString .= "      t1.no ";
+            $sqlString .= "      , t1.name ";
+            $sqlString .= "      , t1.ago_time_no ";
+            $sqlString .= "      , t1.working_time_kubun ";
+            // ------------ min,max使用のため$subquery3使わず end --------------
+            $sqlString .= "  ) as t9  ";
+            $sqlString .= "    on t9.no = t1.working_timetable_no  ";
+            $sqlString .= "    and t1.is_deleted = ? ";
+            $sqlString .= "  left join working_time_dates as t10 ";
+            $sqlString .= "  on t10.working_date = t1.date ";
+            $sqlString .= "    and t10.department_code = t1.department_code ";
+            $sqlString .= "    and t10.user_code = t1.user_code ";
+            $sqlString .= "    and t10.is_deleted = ? ";
+            $sqlString .= "  where ";
+            $sqlString .= "    ? = ? ";
+            if(!empty($this->paramdepartmentcode)) {
+                $sqlString .= "    and t1.department_code = ? ";
+            }
+            if(!empty($this->paramemploymentstatus)) {
+                $sqlString .= "    and t1.employment_status = ? ";
+            }
+            if(!empty($this->paramusercode)){
+                $sqlString .= "    and t1.user_code = ? ";
+            }
+            if(!empty($this->paramfromdate) && !empty($this->paramtodate)) {
+                $sqlString .= "    and t1.date between ? and ? ";
+            } else {
+                if(!empty($this->paramfromdate)) {
+                    $sqlString .= "    and t1.date = ? ";
+                }
+            }
+            if(!empty($this->parambusinesskubun)){
+                $sqlString .= "    and t1.business_kubun = ? ";
+            }
+            if(!empty($this->paramholidaykubun)){
+                $sqlString .= "    and t1.holiday_kubun = ? ";
+            }
+            if(!empty($this->paramworkingtimetableno)){
+                $sqlString .= "    and t1.working_timetable_no = ? ";
+            }
+            $sqlString .= "    and t1.is_deleted = ? ";
+            $sqlString .= "  order by ";
+            $sqlString .= "    t1.department_code asc ";
+            $sqlString .= "    , t1.employment_status asc ";
+            $sqlString .= "    , t1.user_code asc ";
+            $sqlString .= "    , t1.date asc ";
+
+            // バインド
+            $dt = null;
+            if (isset($this->paramfromdate)) {
+                $dt = new Carbon($this->paramfromdate);
+            } else {
+                $dt = new Carbon();
+            }
+            $target_start_date = $dt->format('Ymd');
+            $dt = null;
+            if (isset($this->paramtodate)) {
+                $dt = new Carbon($this->paramtodate);
+            } else {
+                $dt = new Carbon();
+            }
+            $target_end_date = $dt->format('Ymd');
+
+            $array_setBindingsStr = array();
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+            // $subquery1
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $target_end_date;
+            $array_setBindingsStr[] = Config::get('const.C025.admin_user');
+            $array_setBindingsStr[] = 0;
+            // $subquery2
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $target_end_date;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $target_end_date;
+            $array_setBindingsStr[] = 0;
+
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = Config::get('const.C001.value');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = Config::get('const.C007.value');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = Config::get('const.C013.value');
+            $array_setBindingsStr[] = 0;
+            // $subquery3
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $target_end_date;
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = Config::get('const.C004.regular_working_time');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 0;
+
+            $array_setBindingsStr[] = 0;
+
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if(!empty($this->paramdepartmentcode)) {
+                $array_setBindingsStr[] = $this->paramdepartmentcode;
+            }
+            if(!empty($this->paramemploymentstatus)) {
+                $array_setBindingsStr[] = $this->paramemploymentstatus;
+            }
+            if(!empty($this->paramusercode)){
+                $array_setBindingsStr[] = $this->paramusercode;
+            }
+            if(!empty($this->paramfromdate) && !empty($this->paramtodate)) {
+                $array_setBindingsStr[] = $target_start_date;
+                $array_setBindingsStr[] = $target_end_date;
+            } else {
+                if(!empty($this->paramfromdate)) {
+                    $array_setBindingsStr[] = $target_start_date;
+                }
+            }
+            if(!empty($this->parambusinesskubun)){
+                $array_setBindingsStr[] = $this->parambusinesskubun;
+            }
+            if(!empty($this->paramholidaykubun)){
+                $array_setBindingsStr[] = $this->paramholidaykubun;
+            }
+            if(!empty($this->paramworkingtimetableno)){
+                $array_setBindingsStr[] = $this->paramworkingtimetableno;
+            }
+            $array_setBindingsStr[] = 0;
+
+            $result = DB::select($sqlString, $array_setBindingsStr);
+            return $result;
+    
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());

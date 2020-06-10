@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!------------------------------------------------ 未使用 ------------------------------------------>
     <!-- main contentns row -->
     <div class="row justify-content-between">
       <!-- .panel -->
@@ -837,12 +838,17 @@ export default {
           this.alert("error", "雇用形態リスト取得に失敗しました", "エラー");
         });
     },
-    getTimeTableList() {
-      this.$axios
-        .get("/get_time_table_list")
+    // タイムテーブル選択リスト取得処理
+    getTimeTableList(targetdate) {
+      if (targetdate == "") {
+        targetdate = moment(new Date()).format("YYYYMMDD");
+      }
+      var arrayParams = {
+        targetdate : targetdate
+      };
+      this.postRequest("/get_time_table_list", arrayParams)
         .then(response => {
-          this.timeTableList = response.data;
-          console.log("タイムテーブルリスト取得");
+          this.getThentimetable(response);
         })
         .catch(reason => {
           this.alert("error", "タイムテーブルリスト取得に失敗しました", "エラー");

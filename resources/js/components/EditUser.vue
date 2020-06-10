@@ -2547,7 +2547,7 @@ export default {
         this.htmlMessageSwal("確認", messages, "info", true, true).then(
           result => {
             if (result) {
-              this.store();
+              this.storeData();
             }
           }
         );
@@ -2785,6 +2785,17 @@ export default {
           this.serverCatch("ユーザ", "取得");
         });
     },
+    // 氏名登録処理
+    storeData() {
+      var arrayParams = { details: this.form };
+      this.postRequest("/edit_user/store", arrayParams)
+        .then(response => {
+          this.putThenHead(response, "登録");
+        })
+        .catch(reason => {
+          this.serverCatch("ユーザ", "登録");
+        });
+    },
     // タイムテーブル設定処理
     FixTimetable() {
       this.timetable['timeptn'] = this.timetable_check.chkptn;
@@ -2871,10 +2882,10 @@ export default {
       if (targetdate == "") {
         targetdate = moment(new Date()).format("YYYYMMDD");
       }
-      this.postRequest("/get_time_table_list", {
-        targetdate: targetdate,
-        killvalue: this.valueTimeTablekillcheck
-      })
+      var arrayParams = {
+        targetdate : targetdate
+      };
+      this.postRequest("/get_time_table_list", arrayParams)
         .then(response => {
           this.getThentimetable(response);
         })
@@ -3131,6 +3142,25 @@ export default {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch("タイムテーブル", eventtext);
+        }
+      }
+    },
+    // 更新系正常処理
+    putThenHead(response, eventtext) {
+      var messages = [];
+      var res = response.data;
+      if (res.result) {
+        messages.push("ユーザーを" + eventtext + "しました。");
+        messages.push(
+          "個人のカレンダー設定する場合はカレンダー設定処理をしてください。"
+        );
+        this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
+        this.refreshUserList();
+      } else {
+        if (res.messagedata.length > 0) {
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
+        } else {
+          this.serverCatch("ユーザー", eventtext);
         }
       }
     },
