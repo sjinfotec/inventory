@@ -152,7 +152,7 @@
                 <btn-csv-download
                   v-bind:btn-mode="item['code']"
                   v-bind:general-data="get_C037"
-                  v-bind:general-description="item['description']"
+                  v-bind:general-physicalname="item['physical_name']"
                   v-bind:is-csvbutton="iscsvbutton"
                   v-bind:csv-date="''"
                 >

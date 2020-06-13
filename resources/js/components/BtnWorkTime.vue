@@ -133,6 +133,11 @@
       <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
       {{ btnName }}</button>
     </div>
+    <div v-if="btnMode === 'csvshift'" class="btn-group d-flex" v-on:click="csvshiftclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+      <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
+      ダウンロード</button>
+    </div>
     <div v-if="btnMode === 'passreset'" class="btn-group d-flex" v-on:click="passresetclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
         パスワードを変更する</button>
@@ -268,6 +273,9 @@ export default {
     },
     filedownloadclickBtn : function() {
       this.$emit('filedownload-event',event);
+    },
+    csvshiftclickBtn : function() {
+      this.$emit('csv-event',event);
     },
     passresetclickBtn : function() {
       this.$emit('passreset-event',event);

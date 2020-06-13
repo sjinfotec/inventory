@@ -17,8 +17,8 @@
                   <td class="text-center align-middle mw-rem-2-6" v-if="isEdtbutton">操作</td>
                   <td v-for="(item,rowIndex) in detailDates" v-bind:key="item.date"
                     class="text-center align-middle mw-rem-10">{{ item['date_name'] }}</td>
-                  <td class="text-center align-middle mw-rem-5">夜勤</td>
                   <td class="text-center align-middle mw-rem-5">日勤</td>
+                  <td class="text-center align-middle mw-rem-5">夜勤</td>
                   <!-- <td class="text-center align-middle mw-rem-5">週休振替</td> -->
                   <td class="text-center align-middle mw-rem-5">有給休暇</td>
                 </tr>
@@ -40,25 +40,25 @@
                       <div v-else-if="item2['business_kubun'] === 1 && item2['holiday_kubun'] !== 0">{{ item2['holiday_kubun_name'] }}</div>
                       <div v-else>{{ item2['business_kubun_name'] }}</div>
                     </td>
-                    <td class="text-center align-middle mw-rem-5" v-if="item1['night_day_cnt'] > 0">{{ item1['night_day_cnt'] }}</td>
+                    <td class="text-center align-middle mw-rem-5" v-if="item1['regular_day_cnt'] > 0">{{ item1['regular_day_cnt'] }}日</td>
                     <td class="text-center align-middle mw-rem-5" v-else></td>
-                    <td class="text-center align-middle mw-rem-5" v-if="item1['regular_day_cnt'] > 0">{{ item1['regular_day_cnt'] }}</td>
+                    <td class="text-center align-middle mw-rem-5" v-if="item1['night_day_cnt'] > 0">{{ item1['night_day_cnt'] }}日</td>
                     <td class="text-center align-middle mw-rem-5" v-else></td>
                     <!-- <td class="text-center align-middle mw-rem-5"></td> -->
-                    <td class="text-center align-middle mw-rem-5" v-if="item1['paid_holiday_cnt'] > 0">{{ item1['paid_holiday_cnt'] }}</td>
+                    <td class="text-center align-middle mw-rem-5" v-if="item1['paid_holiday_cnt'] > 0">{{ item1['paid_holiday_cnt'] }}日</td>
                     <td class="text-center align-middle mw-rem-5" v-else></td>
                   </tr>
-                  <tr>
-                    <td class="text-center align-middle mw-rem-2-6">実績</td>
+                  <tr bgcolor="#EEFFFF">
+                    <td class="text-center align-middle mw-rem-2-6 form-control-sm-2">実績</td>
                     <td
                       v-for="(item3,rowIndex3) in item1['array_user_date_data']" v-bind:key="item3['date']"
                       class="text-center align-middle mw-rem-10">
-                      <div v-if="item3['total_working_times'] === 0"></div>
+                      <div v-if="item3['total_working_times'] === '0.00'"></div>
                       <div v-else>{{ item3['total_working_times'] }}</div>
                     </td>
-                    <td class="text-center align-middle mw-rem-5" v-if="item1['night_day_times'] > 0">{{ item1['night_day_times'] }}</td>
+                    <td class="text-center align-middle mw-rem-5" v-if="item1['regular_day_times'] > 0">{{ item1['regular_day_times'] }}時間</td>
                     <td class="text-center align-middle mw-rem-5" v-else></td>
-                    <td class="text-center align-middle mw-rem-5" v-if="item1['regular_day_times'] > 0">{{ item1['regular_day_times'] }}</td>
+                    <td class="text-center align-middle mw-rem-5" v-if="item1['night_day_times'] > 0">{{ item1['night_day_times'] }}時間</td>
                     <td class="text-center align-middle mw-rem-5" v-else></td>
                     <!-- <td class="text-center align-middle mw-rem-5"></td> -->
                     <td class="text-center align-middle mw-rem-5"></td>
@@ -69,7 +69,7 @@
           </div>
         </div>
       </div>
-      <!-- /.row -->
+      <!-- /.row -->  
     </div>
     <!-- ----------- テーブル部 END ---------------- -->
   </div>
@@ -124,6 +124,13 @@ tbody {
 
 .mw-rem-2-6 {
   min-width: 2.6rem;
+}
+.form-control-sm-2 {
+  height: calc(1.3em + 0.5rem + 2px);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7875rem;
+  line-height: 1.5;
+  border-radius: 0.2rem;
 }
 
 input {

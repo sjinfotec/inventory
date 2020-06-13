@@ -883,6 +883,7 @@ class TempCalcWorkingTime extends Model
                 't1.business_name as business_name',
                 't1.holiday_kubun as holiday_kubun',
                 't1.holiday_name as holiday_name',
+                't2.use_free_item as use_free_item',
                 't2.description as holiday_description',
                 't1.closing as closing',
                 't1.uplimit_time as uplimit_time',

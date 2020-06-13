@@ -126,7 +126,9 @@ return [
         'deemed_business_trip' => 18,
         'deemed_direct_go' => 19,
         'deemed_direct_return' => 20,
-        'public_damage' => 21
+        'public_damage' => 21,
+        'nigth_shift' => 22,
+        'deemed_direct_go_return' => 23
     ],
 
     'C013_DESC_VALUE' => [
@@ -164,7 +166,9 @@ return [
         'deemed_business_trip' => "みなし",
         'deemed_direct_go' => "みなし",
         'deemed_direct_return' => "みなし",
-        'public_damage' => "1日集計対象休暇"
+        'public_damage' => "1日集計対象休暇",
+        'nigth_shift' => "1日集計対象休暇",
+        'deemed_direct_go_return' => "みなし"
     ],
 
     'C014' => [
@@ -388,7 +392,8 @@ return [
         'csvcalc' => 1,
         'csvsalary' => 2,
         'csvlog' => 3,
-        'usersdownload' => 4
+        'usersdownload' => 4,
+        'csvshift' => 5
     ],
  
     // 'C037_DESC_VALUE' => [
@@ -454,7 +459,8 @@ return [
         'half_holiday' => 2,
         'rest_count' => 3,
         'mode_list' => 4,
-        'early_time' => 5
+        'early_time' => 5,
+        'select_clear' => 6
     ],
  
     'C043' => [
@@ -753,7 +759,7 @@ return [
         'not_setting_beginning_month' => '期首月が設定されていません。',
         'not_setting_timetable' => '期間内に該当する勤務時間がないかまたはタイムテーブルが設定されていません。',
         'data_error_dailycalc' => '労働時間計算処理にてエラーのため計算できませんでした。',
-        'not_setting_calendar' => '{0}のカレンダー設定がされていません。',
+        'not_setting_calendar' => '{0}の'.PHP_EOL.'カレンダー設定がされていません。',
         'data_access_error_dailycalc' => '労働時間計算処理にてデータアクセスエラーのため計算できませんでした。',
         'data_access_error' => 'データアクセスエラーのため取得できませんでした。',
         'data_insert_error' => '登録処理に失敗しました。',

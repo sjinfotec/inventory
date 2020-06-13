@@ -431,7 +431,7 @@ class EditCalendarController extends Controller
                                 }
                             }
                         }
-                        $user_holiday_model->setHolidaykubunAttribute($data['holidays']);
+                        $calendar_setting_model->setHolidaykubunAttribute($data['holidays']);
                         $calendar_setting_model->updateCalendar();
                     }
                 }

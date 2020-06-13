@@ -582,6 +582,12 @@ class DailyWorkingInformationController extends Controller
         $usercode = $params['usercode'];
         $calc_date = $params['calc_date'];
 
+        Log::debug('                       datefrom = '.$datefrom);
+        Log::debug('                       dateto = '.$dateto);
+        Log::debug('                       employmentstatus = '.$employmentstatus);
+        Log::debug('                       departmentcode = '.$departmentcode);
+        Log::debug('                       usercode = '.$usercode);
+        Log::debug('                       calc_date = '.$calc_date);
         // 出勤・退勤データtempから登録
         $temp_working_model = new TempWorkingTimeDate();
         $temp_working_model->setParamdatefromAttribute(date_format(new Carbon($calc_date), 'Ymd'));
@@ -591,6 +597,7 @@ class DailyWorkingInformationController extends Controller
         $temp_working_model->setParamUsercodeAttribute($usercode);
         try{
             $temp_working_time_dates = $temp_working_model->getTempWorkingTimeDateUserJoin($calc_date);
+            Log::debug('                       count($temp_working_time_dates) = '.count($temp_working_time_dates));
             if (count($temp_working_time_dates) > 0) {
                 $working_model = new WorkingTimedate();
                 $working_model->setParamdatefromAttribute(date_format(new Carbon($calc_date), 'Ymd'));
@@ -601,6 +608,7 @@ class DailyWorkingInformationController extends Controller
                 $working_model->insertWorkingTimeDateFromTemp($temp_working_time_dates);
 
             }
+            Log::debug('---------------------- 日次集計作成 addworkingTimeDate end ------------------------ ');
             return true;
         }catch(\PDOException $pe){
             $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
@@ -613,7 +621,6 @@ class DailyWorkingInformationController extends Controller
             Log::error($e->getMessage());
             throw $e;
         }
-        Log::debug('---------------------- 日次集計作成 addworkingTimeDate end ------------------------ ');
     }
 
     /**
@@ -724,25 +731,25 @@ class DailyWorkingInformationController extends Controller
                         if ($result->mode == Config::get('const.C005.attendance_time') ||
                             $result->mode == Config::get('const.C005.emergency_time')) {
                             $attendance_work_time = $result->record_datetime;
+                            $array_impl_setWorkingtimetabletime = array (
+                                'target_date' => $target_date_ymd,
+                                'feature_attendance_count' => $feature_attendance_count,
+                                'attendance_work_time' => $attendance_work_time,
+                                'early_time' => $early_time,
+                                'em_details' => $em_details,
+                                'result' => $result
+                            );
+                            $array_result = $this->setWorkingtimetabletime($array_impl_setWorkingtimetabletime);
+                            // TODO $resultを変更したくない
+                            $result->working_timetable_no = $array_result['working_timetable_no'];
+                            $result->working_timetable_name = $array_result['working_timetable_name'];
+                            $result->working_timetable_from_time = $array_result['working_from_time'];
+                            $result->working_timetable_to_time = $array_result['working_to_time'];
+                            Log::debug('         タイムテーブル　変更後　no　     $result->working_timetable_no = '.$result->working_timetable_no);
+                            Log::debug('         タイムテーブル　変更後　name   　$result->working_timetable_name    = '.$result->working_timetable_name);
+                            Log::debug('         タイムテーブル　変更後　開始時刻　$result->working_timetable_from_time = '.$result->working_timetable_from_time);
+                            Log::debug('         タイムテーブル　変更後　終了時刻　result->working_timetable_to_time    = '.$result->working_timetable_to_time);
                         }
-                        $array_impl_setWorkingtimetabletime = array (
-                            'target_date' => $target_date_ymd,
-                            'feature_attendance_count' => $feature_attendance_count,
-                            'attendance_work_time' => $attendance_work_time,
-                            'early_time' => $early_time,
-                            'em_details' => $em_details,
-                            'result' => $result
-                        );
-                        $array_result = $this->setWorkingtimetabletime($array_impl_setWorkingtimetabletime);
-                        // TODO $resultを変更したくない
-                        $result->working_timetable_no = $array_result['working_timetable_no'];
-                        $result->working_timetable_name = $array_result['working_timetable_name'];
-                        $result->working_timetable_from_time = $array_result['working_from_time'];
-                        $result->working_timetable_to_time = $array_result['working_to_time'];
-                        Log::debug('         タイムテーブル　変更後　no　     $result->working_timetable_no = '.$result->working_timetable_no);
-                        Log::debug('         タイムテーブル　変更後　name   　$result->working_timetable_name    = '.$result->working_timetable_name);
-                        Log::debug('         タイムテーブル　変更後　開始時刻　$result->working_timetable_from_time = '.$result->working_timetable_from_time);
-                        Log::debug('         タイムテーブル　変更後　終了時刻　result->working_timetable_to_time    = '.$result->working_timetable_to_time);
                         $array_impl_isCurrentDateCalc = array (
                             'target_date_ymd' => $target_date_ymd,
                             'attendance_flg' => $attendance_target_flg,
@@ -1481,6 +1488,7 @@ class DailyWorkingInformationController extends Controller
         $target_result = $params['target_result'];
         $interval = $target_result->interval1;
         $user_holiday_kubun = $target_result->user_holiday_kubun;
+        $use_free_item = $target_result->use_free_item;
         $target_record_time = $target_result->record_datetime;
 
         $work_time = new WorkTime();
@@ -1570,6 +1578,7 @@ class DailyWorkingInformationController extends Controller
                     'business_kubun' => $business_kubun,
                     'interval' => $interval,
                     'user_holiday_kubun' => $user_holiday_kubun,
+                    'use_free_item' => $use_free_item,
                     'value_working_timetable_no' => $value_working_timetable_no
                 );
                 $this->setAttendancetime($array_impl_setAttendancetime);
@@ -1602,6 +1611,7 @@ class DailyWorkingInformationController extends Controller
                     'before_value_datetime' => $before_value_datetime,
                     'business_kubun' => $business_kubun,
                     'user_holiday_kubun' => $user_holiday_kubun,
+                    'use_free_item' => $use_free_item,
                     'value_working_timetable_no' => $value_working_timetable_no,
                     'attendance_time_index' => $attendance_time_index
                 );
@@ -1631,6 +1641,7 @@ class DailyWorkingInformationController extends Controller
                     'before_value_datetime' => $before_value_datetime,
                     'business_kubun' => $business_kubun,
                     'user_holiday_kubun' => $user_holiday_kubun,
+                    'use_free_item' => $use_free_item,
                     'value_working_timetable_no' => $value_working_timetable_no,
                     'attendance_time_index' => $attendance_time_index
                 );
@@ -1659,6 +1670,7 @@ class DailyWorkingInformationController extends Controller
                     'before_value_datetime' => $before_value_datetime,
                     'business_kubun' => $business_kubun,
                     'user_holiday_kubun' => $user_holiday_kubun,
+                    'use_free_item' => $use_free_item,
                     'value_working_timetable_no' => $value_working_timetable_no,
                     'attendance_time_index' => $attendance_time_index
                 );
@@ -1687,6 +1699,7 @@ class DailyWorkingInformationController extends Controller
                     'before_value_datetime' => $before_value_datetime,
                     'business_kubun' => $business_kubun,
                     'user_holiday_kubun' => $user_holiday_kubun,
+                    'use_free_item' => $use_free_item,
                     'value_working_timetable_no' => $value_working_timetable_no,
                     'attendance_time_index' => $attendance_time_index
                 );
@@ -1715,6 +1728,7 @@ class DailyWorkingInformationController extends Controller
                     'before_value_datetime' => $before_value_datetime,
                     'business_kubun' => $business_kubun,
                     'user_holiday_kubun' => $user_holiday_kubun,
+                    'use_free_item' => $use_free_item,
                     'value_working_timetable_no' => $value_working_timetable_no,
                     'attendance_time_index' => $attendance_time_index
                 );
@@ -1745,6 +1759,7 @@ class DailyWorkingInformationController extends Controller
                     'business_kubun' => $business_kubun,
                     'interval' => $interval,
                     'user_holiday_kubun' => $user_holiday_kubun,
+                    'use_free_item' => $use_free_item,
                     'value_working_timetable_no' => $value_working_timetable_no
                 );
                 $this->setEmergencytime($array_impl_setEmergencytime);
@@ -1778,6 +1793,7 @@ class DailyWorkingInformationController extends Controller
                     'before_value_datetime' => $before_value_datetime,
                     'business_kubun' => $business_kubun,
                     'user_holiday_kubun' => $user_holiday_kubun,
+                    'use_free_item' => $use_free_item,
                     'value_working_timetable_no' => $value_working_timetable_no,
                     'attendance_time_index' => $attendance_time_index
                 );
@@ -1824,6 +1840,7 @@ class DailyWorkingInformationController extends Controller
         $business_kubun = $params['business_kubun'];
         $interval = $params['interval'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $value_working_timetable_no = $params['value_working_timetable_no'];
         $apicommon = new ApiCommonController();
         $attendance_from_date = new Carbon($work_time->getParamDatefromAttribute());        // 出勤1日のはじめ
@@ -1871,14 +1888,14 @@ class DailyWorkingInformationController extends Controller
                     // 退勤から出勤までのタイム差を取得しインターバルチェック
                     $value_check_interval = $apicommon->chkInteval($record_datetime, $record_before_datetime);
                 } elseif ($record_datetime >= $timetable_from_date &&
-                            $record_datetime <= $timetable_to_date) {                        // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
+                            $record_datetime <= $timetable_to_date) {                       // タイムテーブルの始業時刻 <= 打刻時刻 < タイムテーブルの終業時刻
                     // パターン３（遅刻出勤（遅刻=1）。勤務状態は出勤状態）
                     $ptn = '3';
                     // 退勤から出勤までのタイム差を取得しインターバルチェック
                     $value_check_interval = $apicommon->chkInteval($record_datetime, $record_before_datetime);
                 } elseif ($record_datetime >= $timetable_to_date &&
-                            $record_datetime <= $attendance_to_date) {                       // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
-                    //if ($record_before_datetime < $attendance_from_date) {                  // １個前の打刻時刻 < 出勤1日のはじめ
+                            $record_datetime <= $attendance_to_date) {                      // タイムテーブルの終業時刻 <= 打刻時刻 < 出勤1日の終わり
+                    //if ($record_before_datetime < $attendance_from_date) {                // １個前の打刻時刻 < 出勤1日のはじめ
                         // パターン４（遅刻出勤（要確認）。勤務状態は出勤状態）
                         $ptn = '4';
                         // 退勤から出勤までのタイム差を取得しインターバルチェック
@@ -2056,6 +2073,7 @@ class DailyWorkingInformationController extends Controller
             'value_mobile_positions' => $value_mobile_positions,
             'business_kubun' => $business_kubun,
             'user_holiday_kubun' => $user_holiday_kubun,
+            'use_free_item' => $use_free_item,
             'value_working_timetable_no' => $value_working_timetable_no
         );
         $this->pushArrayCalc($this->setAttendanceCollectPtn($array_impl_setAttendanceCollectPtn));
@@ -2085,6 +2103,7 @@ class DailyWorkingInformationController extends Controller
     {
         Log::debug('---------------------- setAttendanceCollectPtn in -- -------------------- ');
         // パラメータ設定
+        Log::debug('                       ptn = '.$params['ptn']);
         $ptn = $params['ptn'];
         $record_datetime = $params['record_datetime'];
         $value_record_datetime_id = $params['value_record_datetime_id'];
@@ -2098,6 +2117,7 @@ class DailyWorkingInformationController extends Controller
         $value_mobile_positions = $params['value_mobile_positions'];
         $business_kubun = $params['business_kubun'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $working_timetable_no = $params['value_working_timetable_no'];
         $temp_calc_model = new TempCalcWorkingTime();
 
@@ -2155,11 +2175,15 @@ class DailyWorkingInformationController extends Controller
             // 遅刻の設定値（休日は"0"）
             if (!isset($business_kubun)) { $business_kubun = Config::get('const.C007.basic'); }
             if (!isset($user_holiday_kubun)) { $user_holiday_kubun = Config::get('const.C013.non_set'); }
-            if ($business_kubun == Config::get('const.C007.basic') && 
-                ($user_holiday_kubun == Config::get('const.C013.non_set') ||
-                $user_holiday_kubun == Config::get('const.C013.morning_off') ||
-                $user_holiday_kubun == Config::get('const.C013.afternoon_off'))) {
-                $temp_calc_model->setLateAttribute('1');
+            Log::debug('        用途フリー項目 =  '.$use_free_item);
+            if ($business_kubun == Config::get('const.C007.basic')) {
+                if ((!isset($use_free_item)) ||
+                    (isset($use_free_item) &&
+                    (substr($use_free_item, Config::get('const.USEFREEITEM.day_holiday'), 1) == "1"))) {
+                    $temp_calc_model->setLateAttribute('1');
+                } else {
+                    $temp_calc_model->setLateAttribute('0');
+                }
             } else {
                 $temp_calc_model->setLateAttribute('0');
             }
@@ -2185,11 +2209,15 @@ class DailyWorkingInformationController extends Controller
             // 遅刻の設定値（休日は"0"）
             if (!isset($business_kubun)) { $business_kubun = Config::get('const.C007.basic'); }
             if (!isset($user_holiday_kubun)) { $user_holiday_kubun = Config::get('const.C013.non_set'); }
-            if ($business_kubun == Config::get('const.C007.basic') && 
-                ($user_holiday_kubun == Config::get('const.C013.non_set') ||
-                $user_holiday_kubun == Config::get('const.C013.morning_off') ||
-                $user_holiday_kubun == Config::get('const.C013.afternoon_off'))) {
-                $temp_calc_model->setLateAttribute('1');
+            Log::debug('        用途フリー項目 =  '.$use_free_item);
+            if ($business_kubun == Config::get('const.C007.basic')) {
+                if ((!isset($use_free_item)) ||
+                    (isset($use_free_item) &&
+                    (substr($use_free_item, Config::get('const.USEFREEITEM.day_holiday'), 1) == "1"))) {
+                    $temp_calc_model->setLateAttribute('1');
+                } else {
+                    $temp_calc_model->setLateAttribute('0');
+                }
             } else {
                 $temp_calc_model->setLateAttribute('0');
             }
@@ -2298,6 +2326,7 @@ class DailyWorkingInformationController extends Controller
             $before_value_datetime = $params['before_value_datetime'];
             $business_kubun = $params['business_kubun'];
             $user_holiday_kubun = $params['user_holiday_kubun'];
+            $use_free_item = $params['use_free_item'];
             $value_working_timetable_no = $params['value_working_timetable_no'];
             $attendance_time_index = $params['attendance_time_index'];
 
@@ -2554,6 +2583,7 @@ class DailyWorkingInformationController extends Controller
                 'value_mobile_positions' => $value_mobile_positions,
                 'business_kubun' => $business_kubun,
                 'user_holiday_kubun' => $user_holiday_kubun,
+                'use_free_item' => $use_free_item,
                 'value_working_timetable_no' => $value_working_timetable_no,
                 'attendance_time_index' => $attendance_time_index
             );
@@ -2603,6 +2633,7 @@ class DailyWorkingInformationController extends Controller
         $value_mobile_positions = $params['value_mobile_positions'];
         $business_kubun = $params['business_kubun'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $value_working_timetable_no = $params['value_working_timetable_no'];
         $attendance_time_index = $params['attendance_time_index'];
 
@@ -2699,13 +2730,17 @@ class DailyWorkingInformationController extends Controller
             // 遅刻の設定値（休日は"0"）
             if (!isset($business_kubun)) { $business_kubun = Config::get('const.C007.basic'); }
             if (!isset($user_holiday_kubun)) { $user_holiday_kubun = Config::get('const.C013.non_set'); }
-            if ($business_kubun == Config::get('const.C007.basic') && 
-                ($user_holiday_kubun == Config::get('const.C013.non_set') ||
-                $user_holiday_kubun == Config::get('const.C013.morning_off') ||
-                $user_holiday_kubun == Config::get('const.C013.afternoon_off'))) {
-                $temp_calc_model->setLeaveearlyAttribute('1');
+            Log::debug('        用途フリー項目 =  '.$use_free_item);
+            if ($business_kubun == Config::get('const.C007.basic')) {
+                if ((!isset($use_free_item)) ||
+                    (isset($use_free_item) &&
+                    (substr($use_free_item, Config::get('const.USEFREEITEM.day_holiday'), 1) == "1"))) {
+                    $temp_calc_model->setLateAttribute('1');
+                } else {
+                    $temp_calc_model->setLateAttribute('0');
+                }
             } else {
-                $temp_calc_model->setLeaveearlyAttribute('0');
+                $temp_calc_model->setLateAttribute('0');
             }
             if ($attendance_time_index >= 0) {
                 $temp_calc_model->setCurrentcalcAttribute($this->array_calc_calc[$attendance_time_index]);
@@ -2879,6 +2914,7 @@ class DailyWorkingInformationController extends Controller
         $before_value_datetime = $params['before_value_datetime'];
         $business_kubun = $params['business_kubun'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $value_working_timetable_no = $params['value_working_timetable_no'];
         $attendance_time_index = $params['attendance_time_index'];
 
@@ -3021,6 +3057,7 @@ class DailyWorkingInformationController extends Controller
             'value_mobile_positions' => $value_mobile_positions,
             'business_kubun' => $business_kubun,
             'user_holiday_kubun' => $user_holiday_kubun,
+            'use_free_item' => $use_free_item,
             'value_working_timetable_no' => $value_working_timetable_no,
             'attendance_time_index' => $attendance_time_index
         );
@@ -3062,6 +3099,7 @@ class DailyWorkingInformationController extends Controller
         $value_mobile_positions = $params['value_mobile_positions'];
         $business_kubun = $params['business_kubun'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $value_working_timetable_no = $params['value_working_timetable_no'];
         $attendance_time_index = $params['attendance_time_index'];
 
@@ -3203,6 +3241,7 @@ class DailyWorkingInformationController extends Controller
         $before_value_datetime = $params['before_value_datetime'];
         $business_kubun = $params['business_kubun'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $value_working_timetable_no = $params['value_working_timetable_no'];
         $attendance_time_index = $params['attendance_time_index'];
 
@@ -3336,6 +3375,7 @@ class DailyWorkingInformationController extends Controller
             'value_mobile_positions' => $value_mobile_positions,
             'business_kubun' => $business_kubun,
             'user_holiday_kubun' => $user_holiday_kubun,
+            'use_free_item' => $use_free_item,
             'value_working_timetable_no' => $value_working_timetable_no,
             'attendance_time_index' => $attendance_time_index
         );
@@ -3377,6 +3417,7 @@ class DailyWorkingInformationController extends Controller
         $value_mobile_positions = $params['value_mobile_positions'];
         $business_kubun = $params['business_kubun'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $value_working_timetable_no = $params['value_working_timetable_no'];
         $attendance_time_index = $params['attendance_time_index'];
 
@@ -3493,6 +3534,7 @@ class DailyWorkingInformationController extends Controller
         $before_value_datetime = $params['before_value_datetime'];
         $business_kubun = $params['business_kubun'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $value_working_timetable_no = $params['value_working_timetable_no'];
         $attendance_time_index = $params['attendance_time_index'];
 
@@ -3632,6 +3674,7 @@ class DailyWorkingInformationController extends Controller
             'value_mobile_positions' => $value_mobile_positions,
             'business_kubun' => $business_kubun,
             'user_holiday_kubun' => $user_holiday_kubun,
+            'use_free_item' => $use_free_item,
             'value_working_timetable_no' => $value_working_timetable_no,
             'attendance_time_index' => $attendance_time_index
         );
@@ -3675,6 +3718,7 @@ class DailyWorkingInformationController extends Controller
         $value_mobile_positions = $params['value_mobile_positions'];
         $business_kubun = $params['business_kubun'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $value_working_timetable_no = $params['value_working_timetable_no'];
         $attendance_time_index = $params['attendance_time_index'];
 
@@ -3816,6 +3860,7 @@ class DailyWorkingInformationController extends Controller
         $before_value_datetime = $params['before_value_datetime'];
         $business_kubun = $params['business_kubun'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $value_working_timetable_no = $params['value_working_timetable_no'];
         $attendance_time_index = $params['attendance_time_index'];
 
@@ -3946,6 +3991,7 @@ class DailyWorkingInformationController extends Controller
             'value_mobile_positions' => $value_mobile_positions,
             'business_kubun' => $business_kubun,
             'user_holiday_kubun' => $user_holiday_kubun,
+            'use_free_item' => $use_free_item,
             'value_working_timetable_no' => $value_working_timetable_no,
             'attendance_time_index' => $attendance_time_index
         );
@@ -3988,6 +4034,7 @@ class DailyWorkingInformationController extends Controller
         $value_mobile_positions = $params['value_mobile_positions'];
         $business_kubun = $params['business_kubun'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $value_working_timetable_no = $params['value_working_timetable_no'];
         $attendance_time_index = $params['attendance_time_index'];
 
@@ -4107,6 +4154,7 @@ class DailyWorkingInformationController extends Controller
         $business_kubun = $params['business_kubun'];
         $interval = $params['interval'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $value_working_timetable_no = $params['value_working_timetable_no'];
         $apicommon = new ApiCommonController();
         $attendance_from_date = new Carbon($work_time->getParamDatefromAttribute());        // 出勤1日のはじめ
@@ -4208,6 +4256,7 @@ class DailyWorkingInformationController extends Controller
             'value_mobile_positions' => $value_mobile_positions,
             'business_kubun' => $business_kubun,
             'user_holiday_kubun' => $user_holiday_kubun,
+            'use_free_item' => $use_free_item,
             'value_working_timetable_no' => $value_working_timetable_no
         );
         $this->pushArrayCalc($this->setEmergencyCollectPtn($array_impl_setEmergencyCollectPtn));
@@ -4250,6 +4299,7 @@ class DailyWorkingInformationController extends Controller
         $value_mobile_positions = $params['value_mobile_positions'];
         $business_kubun = $params['business_kubun'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $working_timetable_no = $params['value_working_timetable_no'];
         $temp_calc_model = new TempCalcWorkingTime();
 
@@ -4389,6 +4439,7 @@ class DailyWorkingInformationController extends Controller
         $before_value_datetime = $params['before_value_datetime'];
         $business_kubun = $params['business_kubun'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $value_working_timetable_no = $params['value_working_timetable_no'];
         $attendance_time_index = $params['attendance_time_index'];
 
@@ -4495,6 +4546,7 @@ class DailyWorkingInformationController extends Controller
             'value_mobile_positions' => $value_mobile_positions,
             'business_kubun' => $business_kubun,
             'user_holiday_kubun' => $user_holiday_kubun,
+            'use_free_item' => $use_free_item,
             'value_working_timetable_no' => $value_working_timetable_no,
             'attendance_time_index' => $attendance_time_index
         );
@@ -4537,6 +4589,7 @@ class DailyWorkingInformationController extends Controller
         $value_mobile_positions = $params['value_mobile_positions'];
         $business_kubun = $params['business_kubun'];
         $user_holiday_kubun = $params['user_holiday_kubun'];
+        $use_free_item = $params['use_free_item'];
         $value_working_timetable_no = $params['value_working_timetable_no'];
         $attendance_time_index = $params['attendance_time_index'];
 
@@ -5079,80 +5132,107 @@ class DailyWorkingInformationController extends Controller
         for($i=0;$i<count($this->array_calc_mode);$i++){
             $this->user_temp_seq++;
             $temp_calc_model->setSeqAttribute($this->user_temp_seq);
-            if (isset($result->holiday_kubun)) {
-                if ($result->holiday_kubun == Config::get('const.C013.morning_off') || $result->holiday_kubun == Config::get('const.C013.afternoon_off')) {
-                    Log::debug('                       insTempCalcItem 半休 = '.$result->holiday_kubun);
-                    $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
-                    $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
-                    $temp_calc_model->setWorktimesidAttribute($this->array_dsp_time_id[$i]);
-                    $temp_calc_model->setEditordepartmentcodeAttribute($this->array_dsp_editor_department_code[$i]);
-                    $temp_calc_model->setEditordepartmentnameAttribute($this->array_dsp_editor_department_name[$i]);
-                    $temp_calc_model->setEditorusercodeAttribute($this->array_dsp_editor_user_code[$i]);
-                    $temp_calc_model->setEditorusernameAttribute($this->array_dsp_editor_user_name[$i]);
-                    $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
-                    if (isset($this->array_calc_time[$i])) {
-                        $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
-                        $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
-                        $temp_calc_model->setRecordmonthAttribute($edt_calc_datetime->format('m'));
-                        $temp_calc_model->setRecorddateAttribute($edt_calc_datetime->format('Ymd'));
-                        $temp_calc_model->setRecordtimeAttribute($edt_calc_datetime->format('His'));
+            Log::debug('        用途フリー項目 =  '.$result->use_free_item);
+            if ((!isset($result->use_free_item)) ||
+                (isset($result->use_free_item) &&
+                (substr($result->use_free_item, Config::get('const.USEFREEITEM.day_holiday'), 1) == "0"))) {
+                $temp_calc_model->setLateAttribute('1');
+            } else {
+                $temp_calc_model->setLateAttribute('0');
+            }
+            $set_chk = "";
+            if (isset($result->use_free_item)) {
+                if (substr($result->use_free_item, Config::get('const.USEFREEITEM.day_holiday'), 1) == "0") {
+                    if (isset($result->user_holiday_kubun)) {
+                        $set_chk = "1";
                     } else {
-                        $temp_calc_model->setRecordyearAttribute($dt->format('Y'));
-                        $temp_calc_model->setRecordmonthAttribute($dt->format('m'));
-                        $temp_calc_model->setRecorddateAttribute($dt->format('Ymd'));
-                        $temp_calc_model->setRecordtimeAttribute(null);
+                        $set_chk = "2";
                     }
-                    $temp_calc_model->setWorkingstatusAttribute($this->array_calc_status[$i]);
-                } elseif ($result->holiday_kubun == Config::get('const.C013.non_set')) {
-                    Log::debug('                       insTempCalcItem non_set = '.$result->holiday_kubun);
-                    Log::debug('                       insTempCalcItem array_calc_mode = '.$this->array_calc_mode[$i]);
-                    Log::debug('                       insTempCalcItem array_calc_time = '.$this->array_calc_time[$i]);
-                    $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
-                    $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
-                    $temp_calc_model->setWorktimesidAttribute($this->array_dsp_time_id[$i]);
-                    $temp_calc_model->setEditordepartmentcodeAttribute($this->array_dsp_editor_department_code[$i]);
-                    $temp_calc_model->setEditordepartmentnameAttribute($this->array_dsp_editor_department_name[$i]);
-                    $temp_calc_model->setEditorusercodeAttribute($this->array_dsp_editor_user_code[$i]);
-                    $temp_calc_model->setEditorusernameAttribute($this->array_dsp_editor_user_name[$i]);
-                    $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
-                    $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
-                    if (isset($this->array_calc_time[$i])) {
-                        $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
-                        $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
-                        $temp_calc_model->setRecordmonthAttribute($edt_calc_datetime->format('m'));
-                        $temp_calc_model->setRecorddateAttribute($edt_calc_datetime->format('Ymd'));
-                        $temp_calc_model->setRecordtimeAttribute($edt_calc_datetime->format('His'));
-                    } else {
-                        $temp_calc_model->setRecordyearAttribute($dt->format('Y'));
-                        $temp_calc_model->setRecordmonthAttribute($dt->format('m'));
-                        $temp_calc_model->setRecorddateAttribute($dt->format('Ymd'));
-                        $temp_calc_model->setRecordtimeAttribute(null);
-                    }
-                    $temp_calc_model->setWorkingstatusAttribute($this->array_calc_status[$i]);
                 } else {
-                    Log::debug('                       insTempCalcItem なし = '.$result->holiday_kubun);
-                    $temp_calc_model->setModeAttribute(null);
-                    $temp_calc_model->setRecorddatetimeAttribute(null);
-                    $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
-                    $temp_calc_model->setWorktimesidAttribute($this->array_dsp_time_id[$i]);
-                    $temp_calc_model->setEditordepartmentcodeAttribute($this->array_dsp_editor_department_code[$i]);
-                    $temp_calc_model->setEditordepartmentnameAttribute($this->array_dsp_editor_department_name[$i]);
-                    $temp_calc_model->setEditorusercodeAttribute($this->array_dsp_editor_user_code[$i]);
-                    $temp_calc_model->setEditorusernameAttribute($this->array_dsp_editor_user_name[$i]);
-                    if (isset($this->array_calc_time[$i])) {
-                        $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
-                        $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
-                        $temp_calc_model->setRecordmonthAttribute($edt_calc_datetime->format('m'));
-                        $temp_calc_model->setRecorddateAttribute($edt_calc_datetime->format('Ymd'));
-                        $temp_calc_model->setRecordtimeAttribute($edt_calc_datetime->format('His'));
+                    if (isset($result->user_holiday_kubun)) {
+                        $set_chk = "3";
                     } else {
-                        $temp_calc_model->setRecordyearAttribute($dt->format('Y'));
-                        $temp_calc_model->setRecordmonthAttribute($dt->format('m'));
-                        $temp_calc_model->setRecorddateAttribute($dt->format('Ymd'));
-                        $temp_calc_model->setRecordtimeAttribute(null);
+                        $set_chk = "2";
                     }
-                    $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.user_holiday'));
                 }
+            } else {
+                $set_chk = "4";
+            }
+
+            Log::debug('                       insTempCalcItem holiday_kubun = '.$result->holiday_kubun);
+            Log::debug('                       insTempCalcItem use_free_item = '.$result->use_free_item);
+            Log::debug('                       insTempCalcItem set_chk = '.$set_chk);
+            if ($set_chk == "1") {
+                $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
+                $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
+                $temp_calc_model->setWorktimesidAttribute($this->array_dsp_time_id[$i]);
+                $temp_calc_model->setEditordepartmentcodeAttribute($this->array_dsp_editor_department_code[$i]);
+                $temp_calc_model->setEditordepartmentnameAttribute($this->array_dsp_editor_department_name[$i]);
+                $temp_calc_model->setEditorusercodeAttribute($this->array_dsp_editor_user_code[$i]);
+                $temp_calc_model->setEditorusernameAttribute($this->array_dsp_editor_user_name[$i]);
+                $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
+                if (isset($this->array_calc_time[$i])) {
+                    $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
+                    $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
+                    $temp_calc_model->setRecordmonthAttribute($edt_calc_datetime->format('m'));
+                    $temp_calc_model->setRecorddateAttribute($edt_calc_datetime->format('Ymd'));
+                    $temp_calc_model->setRecordtimeAttribute($edt_calc_datetime->format('His'));
+                } else {
+                    $temp_calc_model->setRecordyearAttribute($dt->format('Y'));
+                    $temp_calc_model->setRecordmonthAttribute($dt->format('m'));
+                    $temp_calc_model->setRecorddateAttribute($dt->format('Ymd'));
+                    $temp_calc_model->setRecordtimeAttribute(null);
+                }
+                $temp_calc_model->setWorkingstatusAttribute($this->array_calc_status[$i]);
+            } elseif ($set_chk == "2") {
+                Log::debug('                       insTempCalcItem non_set = '.$result->holiday_kubun);
+                Log::debug('                       insTempCalcItem array_calc_mode = '.$this->array_calc_mode[$i]);
+                Log::debug('                       insTempCalcItem array_calc_time = '.$this->array_calc_time[$i]);
+                $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
+                $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
+                $temp_calc_model->setWorktimesidAttribute($this->array_dsp_time_id[$i]);
+                $temp_calc_model->setEditordepartmentcodeAttribute($this->array_dsp_editor_department_code[$i]);
+                $temp_calc_model->setEditordepartmentnameAttribute($this->array_dsp_editor_department_name[$i]);
+                $temp_calc_model->setEditorusercodeAttribute($this->array_dsp_editor_user_code[$i]);
+                $temp_calc_model->setEditorusernameAttribute($this->array_dsp_editor_user_name[$i]);
+                $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
+                $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
+                if (isset($this->array_calc_time[$i])) {
+                    $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
+                    $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
+                    $temp_calc_model->setRecordmonthAttribute($edt_calc_datetime->format('m'));
+                    $temp_calc_model->setRecorddateAttribute($edt_calc_datetime->format('Ymd'));
+                    $temp_calc_model->setRecordtimeAttribute($edt_calc_datetime->format('His'));
+                } else {
+                    $temp_calc_model->setRecordyearAttribute($dt->format('Y'));
+                    $temp_calc_model->setRecordmonthAttribute($dt->format('m'));
+                    $temp_calc_model->setRecorddateAttribute($dt->format('Ymd'));
+                    $temp_calc_model->setRecordtimeAttribute(null);
+                }
+                $temp_calc_model->setWorkingstatusAttribute($this->array_calc_status[$i]);
+            } elseif ($set_chk == "3") {
+                Log::debug('                       insTempCalcItem なし = '.$result->holiday_kubun);
+                $temp_calc_model->setModeAttribute(null);
+                $temp_calc_model->setRecorddatetimeAttribute(null);
+                $temp_calc_model->setWorkingtimetablenoAttribute($this->array_calc_working_timetable_no[$i]);
+                $temp_calc_model->setWorktimesidAttribute($this->array_dsp_time_id[$i]);
+                $temp_calc_model->setEditordepartmentcodeAttribute($this->array_dsp_editor_department_code[$i]);
+                $temp_calc_model->setEditordepartmentnameAttribute($this->array_dsp_editor_department_name[$i]);
+                $temp_calc_model->setEditorusercodeAttribute($this->array_dsp_editor_user_code[$i]);
+                $temp_calc_model->setEditorusernameAttribute($this->array_dsp_editor_user_name[$i]);
+                if (isset($this->array_calc_time[$i])) {
+                    $edt_calc_datetime = new Carbon($this->array_calc_time[$i]);
+                    $temp_calc_model->setRecordyearAttribute($edt_calc_datetime->format('Y'));
+                    $temp_calc_model->setRecordmonthAttribute($edt_calc_datetime->format('m'));
+                    $temp_calc_model->setRecorddateAttribute($edt_calc_datetime->format('Ymd'));
+                    $temp_calc_model->setRecordtimeAttribute($edt_calc_datetime->format('His'));
+                } else {
+                    $temp_calc_model->setRecordyearAttribute($dt->format('Y'));
+                    $temp_calc_model->setRecordmonthAttribute($dt->format('m'));
+                    $temp_calc_model->setRecorddateAttribute($dt->format('Ymd'));
+                    $temp_calc_model->setRecordtimeAttribute(null);
+                }
+                $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.user_holiday'));
             } else {
                 $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
                 $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
@@ -5373,6 +5453,7 @@ class DailyWorkingInformationController extends Controller
             Log::debug('        当日分計算　=  '.$result->current_calc);
             Log::debug('        勤務状態 =  '.$result->working_status);
             Log::debug('        タイムテーブル番号 =  '.$result->working_timetable_no);
+            Log::debug('        用途フリー項目 =  '.$result->use_free_item);
             // 緊急か？
             $apicommon = new ApiCommonController();
             $isemergency_time = $apicommon->isEmagency($result->working_timetable_no);
@@ -5789,8 +5870,8 @@ class DailyWorkingInformationController extends Controller
                         $emergency_return_time = '';
                     }
                     // calcTimes計算対象外であった場合、
-                    // 出勤していなく１日休暇設定されていればデータ作成
-                    // 出勤していなく休暇設定されていなければデータ作成
+                    // 出勤していなく１日休暇設定されていればデータ作成 use_free_item ="1"
+                    // 出勤していなく休暇設定されていなければデータ作成 use_free_item ="0"
                     //if (!$set_calcTimes_flg && isset($result->holiday_kubun)) {
                     Log::debug('        temp_working_time_datesデータ作成事前条件チェック $set_calcTimes_flg = '.$set_calcTimes_flg);
                     Log::debug('        temp_working_time_datesデータ作成事前条件チェック $mode_chk = '.$mode_chk);
@@ -5798,17 +5879,10 @@ class DailyWorkingInformationController extends Controller
                         Log::debug('        temp_working_time_datesデータ作成開始 ');
                         Log::debug('            calcTimes計算対象外データ作成 =  '.$current_user_code);
                         Log::debug('                休暇区分  = '.$result->holiday_kubun);
-                        if (($result->holiday_kubun != Config::get('const.C013.non_set') &&
-                            $result->holiday_kubun != Config::get('const.C013.morning_off') &&
-                            $result->holiday_kubun != Config::get('const.C013.afternoon_off') &&
-                            $result->holiday_kubun != Config::get('const.C013.absence_work') &&
-                            $result->holiday_kubun != Config::get('const.C013.late_work') &&
-                            $result->holiday_kubun != Config::get('const.C013.leave_early_work') &&
-                            $result->holiday_kubun != Config::get('const.C013.deemed_business_trip') &&
-                            $result->holiday_kubun != Config::get('const.C013.deemed_direct_go') &&
-                            $result->holiday_kubun != Config::get('const.C013.deemed_direct_return')) ||
-                            (!isset($result->holiday_kubun) ||
-                            $result->holiday_kubun != Config::get('const.C013.non_set'))) {
+                        Log::debug('        用途フリー項目 =  '.$result->use_free_item);
+                        if ((!isset($result->use_free_item)) ||
+                            (isset($result->use_free_item) &&
+                                (substr($result->use_free_item, Config::get('const.USEFREEITEM.day_holiday'), 1) == "1"))) {
                             // setLeavingCollectPtn implement
                             $array_impl_addTempWorkingTimeDate = array (
                                 'target_date' => $current_date,
@@ -6594,17 +6668,10 @@ class DailyWorkingInformationController extends Controller
                     Log::debug('        temp_working_time_datesデータ作成開始 ');
                     Log::debug('            現データが当日計算対象データ作成 =  '.$current_user_code);
                     Log::debug('                休暇区分  = '.$result->holiday_kubun);
-                    if (($result->holiday_kubun != Config::get('const.C013.non_set') &&
-                        $result->holiday_kubun != Config::get('const.C013.morning_off') &&
-                        $result->holiday_kubun != Config::get('const.C013.afternoon_off') &&
-                        $result->holiday_kubun != Config::get('const.C013.absence_work') &&
-                        $result->holiday_kubun != Config::get('const.C013.late_work') &&
-                        $result->holiday_kubun != Config::get('const.C013.leave_early_work') &&
-                        $result->holiday_kubun != Config::get('const.C013.deemed_business_trip') &&
-                        $result->holiday_kubun != Config::get('const.C013.deemed_direct_go') &&
-                        $result->holiday_kubun != Config::get('const.C013.deemed_direct_return')) ||
-                        (!isset($result->holiday_kubun) ||
-                        $result->holiday_kubun != Config::get('const.C013.non_set'))) {
+                    Log::debug('        用途フリー項目 =  '.$result->use_free_item);
+                    if ((!isset($result->use_free_item)) ||
+                        (isset($result->use_free_item) &&
+                        (substr($result->use_free_item, Config::get('const.USEFREEITEM.day_holiday'), 1) == "1"))) {
                         // setLeavingCollectPtn implement
                         $array_impl_addTempWorkingTimeDate = array (
                             'target_date' => $current_date,
@@ -7087,17 +7154,10 @@ class DailyWorkingInformationController extends Controller
                     Log::debug('        temp_working_time_datesデータ作成開始 ');
                     Log::debug('            現データが当日計算対象データ作成 =  '.$current_user_code);
                     Log::debug('                休暇区分  = '.$result->holiday_kubun);
-                    if (($result->holiday_kubun != Config::get('const.C013.non_set') &&
-                        $result->holiday_kubun != Config::get('const.C013.morning_off') &&
-                        $result->holiday_kubun != Config::get('const.C013.afternoon_off') &&
-                        $result->holiday_kubun != Config::get('const.C013.absence_work') &&
-                        $result->holiday_kubun != Config::get('const.C013.late_work') &&
-                        $result->holiday_kubun != Config::get('const.C013.leave_early_work') &&
-                        $result->holiday_kubun != Config::get('const.C013.deemed_business_trip') &&
-                        $result->holiday_kubun != Config::get('const.C013.deemed_direct_go') &&
-                        $result->holiday_kubun != Config::get('const.C013.deemed_direct_return')) ||
-                        (!isset($result->holiday_kubun) ||
-                        $result->holiday_kubun != Config::get('const.C013.non_set'))) {
+                    Log::debug('        用途フリー項目 =  '.$result->use_free_item);
+                    if ((!isset($result->use_free_item)) ||
+                        (isset($result->use_free_item) &&
+                        (substr($result->use_free_item, Config::get('const.USEFREEITEM.day_holiday'), 1) == "1"))) {
                         // setLeavingCollectPtn implement
                         $array_impl_addTempWorkingTimeDate = array (
                             'target_date' => $current_date,
@@ -7581,17 +7641,10 @@ class DailyWorkingInformationController extends Controller
                     Log::debug('        temp_working_time_datesデータ作成開始 ');
                     Log::debug('            現データが当日計算対象データ作成 =  '.$current_user_code);
                     Log::debug('                休暇区分  = '.$result->holiday_kubun);
-                    if (($result->holiday_kubun != Config::get('const.C013.non_set') &&
-                        $result->holiday_kubun != Config::get('const.C013.morning_off') &&
-                        $result->holiday_kubun != Config::get('const.C013.afternoon_off') &&
-                        $result->holiday_kubun != Config::get('const.C013.absence_work') &&
-                        $result->holiday_kubun != Config::get('const.C013.late_work') &&
-                        $result->holiday_kubun != Config::get('const.C013.leave_early_work') &&
-                        $result->holiday_kubun != Config::get('const.C013.deemed_business_trip') &&
-                        $result->holiday_kubun != Config::get('const.C013.deemed_direct_go') &&
-                        $result->holiday_kubun != Config::get('const.C013.deemed_direct_return')) ||
-                        (!isset($result->holiday_kubun) ||
-                        $result->holiday_kubun != Config::get('const.C013.non_set'))) {
+                    Log::debug('        用途フリー項目 =  '.$result->use_free_item);
+                    if ((!isset($result->use_free_item)) ||
+                        (isset($result->use_free_item) &&
+                        (substr($result->use_free_item, Config::get('const.USEFREEITEM.day_holiday'), 1) == "1"))) {
                         // setLeavingCollectPtn implement
                         $array_impl_addTempWorkingTimeDate = array (
                             'target_date' => $current_date,
@@ -8369,10 +8422,13 @@ class DailyWorkingInformationController extends Controller
                 $attendence_note_set = true;
             }
             // 設定
+            Log::debug('  count($array_add_attendance_time) = '.count($array_add_attendance_time));
             $array_decide_times = $this->decideWorkingTimeFrom($array_add_attendance_time, count($array_add_attendance_time));
+            Log::debug('  count($array_decide_times) = '.count($array_decide_times));
             for ($i=0;$i<count($array_decide_times);$i++) {
                 if ($i<count($array_decide_times)) {
                     if ($break_attendance_time == null) {$break_attendance_time = $array_decide_times[$i]; }
+                    Log::debug('  $i<count($array_decide_times $array_decide_times[$i] = '.$array_decide_times[$i]);
                     $temp_working_model->setAttendancetimeAttribute($i, $array_decide_times[$i]);
                     $temp_working_model->setAttendancetimeidAttribute($i, $array_add_attendance_time_id[$i]);
                     $temp_working_model->setAttendanceeditordepartmentcodeAttribute($i, $array_add_attendance_editor_department_code[$i]);
@@ -8385,6 +8441,7 @@ class DailyWorkingInformationController extends Controller
                         $temp_working_model->setAttendancetimepositionsAttribute($i, null);
                     }
                 } else {
+                    Log::debug('  else $array_decide_times[$i] = '.$array_decide_times[$i]);
                     $temp_working_model->setAttendancetimeAttribute($i, null);
                     $temp_working_model->setAttendancetimeidAttribute($i, null);
                     $temp_working_model->setAttendanceeditordepartmentcodeAttribute($i, null);
@@ -9303,7 +9360,9 @@ class DailyWorkingInformationController extends Controller
         Log::debug('---------------------- decideWorkingTimeFrom in ------------------------ ');
         $arrray_decide_times = array();
         for ($i=0;$i<$index;$i++) {
+            Log::debug('  count($target_array_time) = '.count($target_array_time));
             if (count($target_array_time) > 0 && $i < count($target_array_time)){
+                Log::debug('  $target_array_time[$i] = '.$target_array_time[$i]);
                 $arrray_decide_times[$i] = $target_array_time[$i];
             } else {
                 $arrray_decide_times[$i] = null;

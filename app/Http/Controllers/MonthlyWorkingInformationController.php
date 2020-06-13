@@ -471,7 +471,7 @@ class MonthlyWorkingInformationController extends Controller
                     'feature_rest_count' => $feature_rest_count,
                     'early_time' => $early_time,
                     'em_details' => $em_details,
-                    'calc_date' => $datefrom
+                    'calc_date' => $calc_date
                 );
                 $calc_result = $daily_controller->addDailyCalc($array_impl_addDailyCalc);
                 $calc_date = date_format($dt1->addDay(1), 'Ymd');
