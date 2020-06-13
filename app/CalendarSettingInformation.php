@@ -715,6 +715,11 @@ class CalendarSettingInformation extends Model
             $sqlString = "";
             $sqlString .= "select ";
             $sqlString .= "  t1.date ";
+            $sqlString .= "  , substring(  ";
+            $sqlString .= "    '月火水木金土日' ";
+            $sqlString .= "    , convert( t1.weekday_kubun + 1, char )  ";
+            $sqlString .= "    , 1 ";
+            $sqlString .= "    ) as week_name  ";
             $sqlString .= "  , t1.department_code ";
             $sqlString .= "  , t1.employment_status ";
             $sqlString .= "  , t1.user_code ";

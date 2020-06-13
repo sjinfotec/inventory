@@ -1197,6 +1197,7 @@ class ApiCommonController extends Controller
                     if (!$set_detail_dates) {
                         $detail_dates[] = array(
                             'date' => $item->date,
+                            'week_name' => $item->week_name,
                             'date_name' => $item->date_name
                         );
                     }
@@ -1213,7 +1214,7 @@ class ApiCommonController extends Controller
                         'use_free_item' => $item->use_free_item,
                         'working_timetable_name' => $item->working_timetable_name,
                         'holiday_kubun_name' => $item->holiday_kubun_name,
-                        'total_working_times' => $item->total_working_times
+                        'total_working_times' => number_format($item->total_working_times, 2, '.', '')
                     );
                     $night_day_cnt += $item->night_day_cnt;
                     $regular_day_cnt += $item->regular_day_cnt;
@@ -1259,8 +1260,8 @@ class ApiCommonController extends Controller
                         'night_day_cnt' => $night_day_cnt,
                         'regular_day_cnt' => $regular_day_cnt,
                         'paid_holiday_cnt' => $paid_holiday_cnt,
-                        'night_day_times' => $night_day_times,
-                        'regular_day_times' =>  $regular_day_times,
+                        'night_day_times' => number_format($night_day_times, 2, '.', ''),
+                        'regular_day_times' =>  number_format($regular_day_times, 2, '.', ''),
                         'array_user_date_data' => $array_user_date_data
                     );
                     $current_user_code = $item->user_code;
@@ -1302,7 +1303,7 @@ class ApiCommonController extends Controller
                         'use_free_item' => $item->use_free_item,
                         'working_timetable_name' => $item->working_timetable_name,
                         'holiday_kubun_name' => $item->holiday_kubun_name,
-                        'total_working_times' => $item->total_working_times
+                        'total_working_times' => number_format($item->total_working_times, 2, '.', '')
                     );
                     $night_day_cnt = 0;
                     $regular_day_cnt = 0;
@@ -1352,8 +1353,8 @@ class ApiCommonController extends Controller
                     'night_day_cnt' => $night_day_cnt,
                     'regular_day_cnt' => $regular_day_cnt,
                     'paid_holiday_cnt' => $paid_holiday_cnt,
-                    'night_day_times' => $night_day_times,
-                    'regular_day_times' =>  $regular_day_times,
+                    'night_day_times' => number_format($night_day_times, 2, '.', ''),
+                    'regular_day_times' => number_format($regular_day_times, 2, '.', ''),
                     'array_user_date_data' => $array_user_date_data
                 );
             }

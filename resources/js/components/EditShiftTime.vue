@@ -188,7 +188,7 @@
           <!-- ----------- 個別編集部 START ---------------- -->
           <!-- panel contents -->
           <!-- .row -->
-          <div class="col-md-3 pb-2 w-15 text-center align-middle">
+          <div class="col-md-6 pb-2 w-15 text-center align-middle">
             <col-note
               v-bind:item-name="'個別編集'"
               v-bind:item-control="'INFO'"
@@ -197,7 +197,7 @@
               data-placement="top"
             ></col-note>
           </div>
-          <!-- /.row -->
+          <!-- /.col -->
           <!-- ----------- 項目部 START ---------------- -->
           <table-shift-time
             v-bind:detail-dates="detail_dates"
@@ -207,6 +207,36 @@
           ></table-shift-time>
           <!-- ----------- 項目部 END ---------------- -->
           <!-- ----------- 個別編集部 END ---------------- -->
+          <!-- ----------- CSVボタン START ---------------- -->
+          <div class="card-body pt-2">
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-2 pb-2">
+                <btn-work-time
+                  v-bind:btn-mode="'dummy'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+              <!-- col -->
+              <div class="col-md-2 pb-2" v-for="(item,index) in get_C037_CSV">
+                <btn-csv-download
+                  v-bind:btn-mode="item['code']"
+                  v-bind:csv-data="detail_dates"
+                  v-bind:csv-data-sub="details"
+                  v-bind:general-data="get_C037"
+                  v-bind:general-physicalname="item['physical_name']"
+                  v-bind:is-csvbutton="iscsvbutton"
+                  v-bind:csv-date="datejaFormat"
+                >
+                </btn-csv-download>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+          </div>
+          <!-- ----------- CSVボタン END ---------------- -->
           <!-- panel header -->
           <daily-working-information-panel-header
             v-bind:header-text1="'◆シフト一括編集'"
@@ -508,6 +538,9 @@ import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
+// CONST
+const CONST_C037 = 'C037';
+const CONST_C037_CSVSHIFT_CODE = 5;
 
 export default {
   name: "SettingCalendar",
@@ -520,6 +553,8 @@ export default {
   },
   data() {
     return {
+      const_C037_data: [],
+      const_C037_csv: [],
       valuefromdate: "",
       valuetodate: "",
       selectedEmploymentValue: "",
@@ -537,6 +572,7 @@ export default {
       search_selectedDepartmentValue: "",
       search_selectedUserValue: "",
       datejaFormat: "",
+      datejaFormat2: "",
       issearchbutton: false,
       isfixbutton: false,
       selectMode: "",
@@ -568,8 +604,35 @@ export default {
       workingtimetablenobatch_w : "",
       timetableList: [],
       date_min : "2019-01-01",
-      date_max : "2099-12-31"
+      date_max : "2099-12-31",
+      iscsvbutton: false
     };
+  },
+  computed: {
+    get_C037: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C037) {
+          $this.const_C037_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C037_data;
+    },
+    get_C037_CSV: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C037) {
+          if (item.code == CONST_C037_CSVSHIFT_CODE) {
+            $this.const_C037_csv.push($this.const_generaldatas[i]);
+          }
+        }
+        i++;
+      });    
+      return this.const_C037_csv;
+    }
   },
   // マウント時
   mounted() {
@@ -1197,36 +1260,31 @@ export default {
     // 集計パネルヘッダ文字列編集処理
     setPanelHeader: function() {
       moment.locale("ja");
-      var datejaFormat = "";
-      var datejaFormat2 = "";
+      this.datejaFormat = "";
+      this.datejaFormat2 = "";
       this.stringtext = "";
       this.stringtext2 = "";
       if (this.search_valuefromdate != null && this.search_valuefromdate != "") {
         if (this.search_valuetodate != null && this.search_valuetodate != "") {
-          datejaFormat +=  moment(this.search_valuefromdate).format("YYYY年MM月DD日");
-          datejaFormat +=  "から";
-          datejaFormat +=  moment(this.search_valuetodate).format("YYYY年MM月DD日");
-          if (this.selectMode == 'INT') {
-            this.stringtext =
-              datejaFormat + "のシフトを設定";
-          } else {
-            this.stringtext =
-              datejaFormat + "のシフトを表示";
-          }
+          this.datejaFormat +=  moment(this.search_valuefromdate).format("YYYY年MM月DD日");
+          this.datejaFormat +=  "から";
+          this.datejaFormat +=  moment(this.search_valuetodate).format("YYYY年MM月DD日");
+          this.stringtext =
+            this.datejaFormat + "のシフトを表示";
         }
       }
       if (this.valuefromday != null && this.valuefromday != "") {
         if (this.valuetoday != null && this.valuetoday != "") {
-          datejaFormat2 +=  moment(this.valuefromday).format("YYYY年MM月DD日");
-          datejaFormat2 +=  "から";
-          datejaFormat2 +=  moment(this.valuetoday).format("YYYY年MM月DD日");
+          this.datejaFormat2 +=  moment(this.valuefromday).format("YYYY年MM月DD日");
+          this.datejaFormat2 +=  "から";
+          this.datejaFormat2 +=  moment(this.valuetoday).format("YYYY年MM月DD日");
         }
         if (this.weekbatch != null && this.weekbatch != "") {
-          datejaFormat2 +=  "または";
-          datejaFormat2 +=  this.formweekdays[this.weekbatch];
+          this.datejaFormat2 +=  "または";
+          this.datejaFormat2 +=  this.formweekdays[this.weekbatch];
         }
         this.stringtext2 =
-          datejaFormat2 + "のシフトを一括編集";
+          this.datejaFormat2 + "のシフトを一括編集";
       }
     }
   }

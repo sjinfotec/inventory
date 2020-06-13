@@ -434,8 +434,6 @@ class EditShiftTimeController extends Controller
             $index = 0;
             while(true) {
                 $set_date = date_format($dt, 'Ymd');
-                Log::error('set_date = '.$set_date);
-                Log::error('dt_todate_ymd = '.$dt_todate_ymd);
                 if ($set_date > $dt_todate_ymd) {
                     break;
                 }

@@ -214,7 +214,7 @@
                   v-bind:btn-mode="item['code']"
                   v-bind:csv-data="calcresults"
                   v-bind:general-data="get_c037"
-                  v-bind:general-description="item['description']"
+                  v-bind:general-physicalname="item['physical_name']"
                   v-bind:is-csvbutton="iscsvbutton"
                   v-bind:csv-date="datejaFormat"
                 >
@@ -411,7 +411,7 @@
                   v-bind:btn-mode="item['code']"
                   v-bind:csv-data="calcresults"
                   v-bind:general-data="get_c037"
-                  v-bind:general-description="item['description']"
+                  v-bind:general-physicalname="item['physical_name']"
                   v-bind:is-csvbutton="iscsvbutton"
                   v-bind:csv-date="datejaFormat"
                 >

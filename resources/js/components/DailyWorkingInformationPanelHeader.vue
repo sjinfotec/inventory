@@ -1,5 +1,5 @@
 <template>
-  <div class="classText print-none">
+  <div :class="classText + ' print-none'">
     <h1 class="float-sm-left font-size-rg mb-0">{{ headerText1 }}</h1>
     <span class="float-sm-right font-size-sm mb-0">{{ headerText2 }}</span>
   </div>

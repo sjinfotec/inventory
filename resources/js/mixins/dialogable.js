@@ -111,9 +111,9 @@ export const dialogable = {
         // -------------------------- private メソッド ------------------------
         // 配列→String改行
         arrayTostring(arrayMessage) {
-            var stringdata = arrayMessage[0];
+            var stringdata = arrayMessage[0].replace(/\n/g, '<br/>');
             for (var i = 1; i < arrayMessage.length; i++) {
-                stringdata += "<br>" + arrayMessage[i];
+                stringdata += "<br>" + arrayMessage[i].replace(/\n/g, '<br/>');
             }
             return stringdata;
         }

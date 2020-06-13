@@ -173,6 +173,7 @@ import {requestable} from '../mixins/requestable.js';
 const CONST_C025 = 'C025';
 const CONST_C042 = 'C042';
 const CONST_HALF_HOLIDAY_SET_PHYSICAL_NAME = 'half_holiday';
+const CONST_SELECT_CLEAR_SET_PHYSICAL_NAME = 'select_clear';
 
 export default {
   name: "EditWorkTimes",
@@ -227,7 +228,9 @@ export default {
       accountdata_data: [],
       const_C025_data: [],
       isAutoHalfSet: true,
-      halfholiday_code: ""
+      halfholiday_code: "",
+      isSelectClear: true,
+      selectclear_code: ""
     };
   },
   components: {
@@ -257,13 +260,44 @@ export default {
       this.const_generaldatas.forEach( function( item ) {
         if (item.identification_id == CONST_C042) {
           if (item.physical_name == CONST_HALF_HOLIDAY_SET_PHYSICAL_NAME) {
-            $this.attendance_code = item.code;
+            $this.halfholiday_code = item.code;
             return $this.halfholiday_code;
           }
         }
         i++;
       });    
       return this.halfholiday_code;
+    },
+    get_SelectClear: function() {
+      this.isSelectClear = true;
+      var selectclear = this.get_SelectClearSetCode;
+      let $this = this;
+      this.feature_item_selections.forEach( function( item ) {
+        if (item.item_code == selectclear) {
+          if (item.value_select == 1) {
+            $this.isSelectClear = true;
+          } else {
+            $this.isSelectClear = false;
+          }
+          return $this.isSelectClear;
+        }
+      });
+
+      return this.isSelectClear;
+    },
+    get_SelectClearSetCode: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C042) {
+          if (item.physical_name == CONST_SELECT_CLEAR_SET_PHYSICAL_NAME) {
+            $this.selectclear_code = item.code;
+            return $this.selectclear_code;
+          }
+        }
+        i++;
+      });    
+      return this.selectclear_code;
     },
     get_Account: function() {
       let $this = this;
@@ -345,14 +379,16 @@ export default {
       this.date_name = moment(value).format("YYYY年MM月DD日");
       this.selectedName = this.user_name + "　" + this.date_name + "分勤怠編集" ;
       // ユーザー選択コンポーネントの取得メソッドを実行
-      this.selectedEmploymentValue = "";
-      this.selectedDepartmentValue = "";
-      this.selectedUserValue = "";
-      this.getDo = 1;
-      this.applytermdate = this.valuefromdate;
-      this.getDepartmentSelected();
-      this.getUserSelected();
-      this.selectMode = '';
+      if (this.get_SelectClear) {
+        this.selectedEmploymentValue = "";
+        this.selectedDepartmentValue = "";
+        this.selectedUserValue = "";
+        this.getDo = 1;
+        this.applytermdate = this.valuefromdate;
+        this.getDepartmentSelected();
+        this.getUserSelected();
+        this.selectMode = '';
+      }
     },
     // 指定年月がクリアされた場合の処理
     fromdateCleared: function() {

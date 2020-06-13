@@ -1553,7 +1553,7 @@ class WorkTime extends Model
             $sqlString .= "  , t1.user_name as user_name ";
             $sqlString .= "  , t1.department_name as department_name ";
             $sqlString .= "  , t1.code_name as code_name ";
-            $sqlString .= "  , t2.holiday_kubun as holiday_kubun ";
+            $sqlString .= "  , t2.holiday_kubun as user_holiday_kbn ";
             $sqlString .= "  , t1.record_ymd as record_ymd ";
             $sqlString .= "  , t1.record_date as record_date ";
             $sqlString .= "  , t1.date as date ";
