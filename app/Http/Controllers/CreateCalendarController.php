@@ -16,7 +16,7 @@ use App\Http\Controllers\ApiCommonController;
 
 
 /*
- * 未使用
+ * **************************************** 未使用 *************************************************
  * 
 */
 
@@ -181,13 +181,13 @@ class CreateCalendarController extends Controller
 
         }catch(\PDOException $pe){
             $this->array_messagedata[] =  array(Config::get('const.RESPONCE_ITEM.message') =>Config::get('const.MSG_ERROR.data_insert_error'));
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')));
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')));
             Log::error($pe->getMessage());
             DB::rollBack();
             return false;
         }catch(\Exception $e){
             $this->array_messagedata[] =  array(Config::get('const.RESPONCE_ITEM.message') =>Config::get('const.MSG_ERROR.data_insert_error'));
-            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')));
+            Log::error(str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')));
             Log::error($e->getMessage());
             DB::rollBack();
             $result =  false;

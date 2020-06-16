@@ -140,7 +140,7 @@
             ref="refdailyworkingalerttable"
             v-bind:alert-lists="details"
             v-bind:tablebody-height="'height: 400px !important;'"
-            v-bind:is-edit="isEdit"
+            v-bind:is-edit="get_IsEdit"
             v-on:detaileditclick-event="detailEdtClick"
           ></daily-working-alert-table>
           <!-- ----------- 項目部 END ---------------- -->
@@ -155,11 +155,12 @@
           v-if="showeditworktimestable"
           ref="refeditworktimestable"
           v-bind:authusers="authusers"
-          v-bind:generaluser="generaluser"
-          v-bind:generalapproveruser="generalapproveruser"
-          v-bind:adminuser="adminuser"
+          v-bind:const_c025="get_C025"
+          v-bind:const_generaldatas="const_generaldatas"
           v-bind:heads="detailsEdt"
-          v-on:cancelclick-event="cancelClick"
+          v-bind:accountdatas="accountdatas"
+          v-bind:halfautoset="get_IsAutoHalfSet"
+          v-bind:feature-item-selections="feature_item_selections"
         >
         </edit-work-times-table>
       </div>
@@ -176,30 +177,38 @@ import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
+// CONST
+const CONST_C025 = 'C025';
+const CONST_C025_GENERALUSER_INDEX = 0;   // index
+const CONST_C025_ADMINUSER_INDEX = 2;   // index
+const CONST_HALF_HOLIDAY_SET_CODE = 2;
+const CONST_INDEXORHOME_INDEX = 1;
+const CONST_INDEXORHOME_HOME = 2;
+
 export default {
   name: "dailyworkingtime",
   mixins: [ dialogable, checkable, requestable ],
   props: {
+    accountdatas: {
+        type: Array,
+        default: []
+    },
     authusers: {
         type: Array,
         default: []
     },
-    generaluser: {
-        type: Number,
-        default: 0
+    feature_item_selections: {
+        type: Array,
+        default: []
     },
-    generalapproveruser: {
-        type: Number,
-        default: 0
-    },
-    adminuser: {
-        type: Number,
-        default: 0
+    const_generaldatas: {
+        type: Array,
+        default: []
     },
     indexorhome: {
         type: Number,
         default: 0
-    },
+    }
   },
   data: function() {
     return {
@@ -226,25 +235,59 @@ export default {
       detailsEdt: [],
       login_user_code: "",
       login_user_role: "",
-      login_generaluser_role: "",
-      login_generalapproveruser_role: "",
-      login_adminuser_role: "",
       index_or_home: "",
       showeditworktimestable: true,
-      showdailyworkingalerttable: true
+      showdailyworkingalerttable: true,
+      const_C025_data: [],
+      isAutoHalfSet: true
     };
+  },
+  computed: {
+    get_C025: function() {
+      console.log('get_C025 in');
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C025) {
+          console.log('get_C025 set');
+          $this.const_C025_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C025_data;
+    },
+    get_IsAutoHalfSet: function() {
+      this.isAutoHalfSet = false;
+      let $this = this;
+      this.feature_item_selections.forEach( function( item ) {
+        if (item.item_code == CONST_HALF_HOLIDAY_SET_CODE) {
+          if (item.value_select == 1) {
+            $this.isAutoHalfSet = true;
+          } else {
+            $this.isAutoHalfSet = false;
+          }
+          return $this.isAutoHalfSet;
+        }
+      });
+
+      return this.isAutoHalfSet;
+    },
+    get_IsEdit: function() {
+      this.get_C025;
+      if (this.const_C025_data.length == 0) {
+        this.get_C025;
+      }
+      this.isEdit = false;
+      if (this.authusers['role'] == this.const_C025_data[CONST_C025_ADMINUSER_INDEX]['code']) {
+        this.isEdit = true;
+      }
+      return this.isEdit;
+    }
   },
   // マウント時
   mounted() {
     this.login_user_code = this.authusers['code'];
     this.login_user_role = this.authusers['role'];
-    this.login_generaluser_role = this.generaluser;
-    this.login_generalapproveruser_role = this.generalapproveruser;
-    this.login_adminuser_role = this.adminuser;
-    if (this.login_user_role == this.login_adminuser_role) {
-      this.isEdit = true;
-    }
-    this.login_adminuser_role = this.adminuser;
     this.index_or_home = this.indexorhome;
     this.valuefromdate = this.defaultDate;
     moment.locale("ja");
@@ -255,7 +298,7 @@ export default {
     this.$refs.selectdepartmentlist.getList(this.applytermdate);
     this.getUserSelected();
     // 1:index 2:homeindex
-    if (this.index_or_home == 2) {
+    if (this.index_or_home == CONST_INDEXORHOME_HOME) {
       this.selectMode = '';
       this.itemClear();
       this.getItem();

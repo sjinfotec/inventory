@@ -28,7 +28,7 @@
       </div>
       <!-- 勤怠履歴登録 -->
       <div class="p-4" v-if="menudatas[get_c038[7]['sort_seq'] - 1]['is_select']">
-        <a class href="/edit_attendancelog">
+        <a class href="/store_attendancelog">
           <img width="100" height="100" class src="/images/icon19.svg" alt />
         </a>
       </div>
@@ -43,7 +43,7 @@
         class="p-4"
         v-if="menudatas[get_c038[10]['sort_seq'] - 1]['is_select'] && login_user_role === get_c025[2]['code']"
       >
-        <a class href="/setting_shift_time">
+        <a class href="/edit_shift_time">
           <img width="100" height="100" class src="/images/icon08.svg" alt />
         </a>
       </div>
@@ -310,6 +310,10 @@ export default {
     const_generaldatas: {
       type: Array,
       default: []
+    },
+    feature_item_selections: {
+        type: Array,
+        default: []
     }
   },
   data() {

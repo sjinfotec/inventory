@@ -128,9 +128,17 @@ Vue.component(
 
 // -------------------------- 編集 ----------------------------------------------
 // シフト編集
+// Vue.component(
+//     "setting-shift-time",
+//     require("./components/SettingShiftTime.vue").default
+// );
 Vue.component(
-    "setting-shift-time",
-    require("./components/SettingShiftTime.vue").default
+    "edit-shift-time",
+    require("./components/EditShiftTime.vue").default
+);
+Vue.component(
+    "table-shift-time",
+    require("./components/TableShiftTime.vue").default
 );
 // 未使用
 // Vue.component(
@@ -221,8 +229,6 @@ Vue.component(
     "input-time-disabled",
     require("./components/InputTimeDisabled.vue").default
 );
-
-Vue.component("user-add", require("./components/UserAdd.vue").default);
 
 Vue.component("edit-user", require("./components/EditUser.vue").default);
 

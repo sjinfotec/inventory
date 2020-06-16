@@ -30,7 +30,7 @@ class CreateTimeTableController extends Controller
     }
 
     /**
-     * 詳細取得
+     * 詳細取得（CreateTimeTable.vue,CreateApprovalRouteNo.vue）
      *
      * @param Request $request
      * @return void
@@ -144,31 +144,39 @@ class CreateTimeTableController extends Controller
             $feature_model = new FeatureItemSelection();
             $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
             $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
-            $feature_model->setParamitemcodeAttribute(Config::get('const.C042.attendance_count'));
             $feature_data = $feature_model->getItem();
-            $regularTime_count = 0;
+            $attendance_count = 0;
+            $rest_count = 0;
             foreach($feature_data as $item) {
-                if (isset($item->value_select)) {
-                    $regularTime_count = intval($item->value_select);
+                if (isset($item->item_code)) {
+                    if ($item->item_code == Config::get('const.C042.attendance_count')) {
+                        $attendance_count = intval($item->value_select);
+                    }
+                    if ($item->item_code == Config::get('const.C042.rest_count')) {
+                        $rest_count = intval($item->value_select);
+                    }
+                }
+                if ($attendance_count > 0 && $rest_count > 0) {
+                    break;
                 }
             }
             $details = $params['details'];
             $data[0]['apply_term_from'] = $details['apply_term_from'];
             $data_index = 0;
-            for ($i=0;$i<$regularTime_count;$i++) {
-                $data[$data_index]['working_time_kubun'] = 1;
+            for ($i=0;$i<$attendance_count;$i++) {
+                $data[$data_index]['working_time_kubun'] = Config::get('const.C004.regular_working_time');
                 $data[$data_index]['from_time'] = $details['regularTime'][$i]['fromTime'];
                 $data[$data_index]['to_time'] = $details['regularTime'][$i]['toTime'];
                 $data_index++;
             }
-            for ($i=0;$i<5;$i++) {
-                $data[$data_index]['working_time_kubun'] = 2;
+            for ($i=0;$i<$rest_count;$i++) {
+                $data[$data_index]['working_time_kubun'] = Config::get('const.C004.regular_working_breaks_time');
                 $data[$data_index]['from_time'] = $details['regularRestTime'][$i]['fromTime'];
                 $data[$data_index]['to_time'] = $details['regularRestTime'][$i]['toTime'];
                 $data_index++;
             }
             for ($i=0;$i<1;$i++) {
-                $data[$data_index]['working_time_kubun'] = 4;
+                $data[$data_index]['working_time_kubun'] = Config::get('const.C004.out_of_regular_night_working_time');
                 $data[$data_index]['from_time'] = $details['midnightTime'][$i]['fromTime'];
                 $data[$data_index]['to_time'] = $details['midnightTime'][$i]['toTime'];
                 $data_index++;
@@ -300,8 +308,29 @@ class CreateTimeTableController extends Controller
         $name = "";
         DB::beginTransaction();
         try{
-            $start_index = ($index - 1) * 7;
-            $end_index = $start_index + 6;
+            //feature selection
+            $feature_model = new FeatureItemSelection();
+            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+            $feature_data = $feature_model->getItem();
+            $attendance_count = 0;
+            $rest_count = 0;
+            foreach($feature_data as $item) {
+                if (isset($item->item_code)) {
+                    if ($item->item_code == Config::get('const.C042.attendance_count')) {
+                        $attendance_count = intval($item->value_select);
+                    }
+                    if ($item->item_code == Config::get('const.C042.rest_count')) {
+                        $rest_count = intval($item->value_select);
+                    }
+                }
+                if ($attendance_count > 0 && $rest_count > 0) {
+                    break;
+                }
+            }
+            // +1 は深夜時間の分
+            $start_index = ($index - 1) * ($attendance_count + $rest_count + 1);
+            $end_index = $start_index + $attendance_count + $rest_count;
             for ($i=$start_index; $i <= $end_index; $i++) {
                 if($i == $start_index){
                     if(isset($details[$i]['apply_term_from'])){
@@ -417,8 +446,29 @@ class CreateTimeTableController extends Controller
         $user_code = $user->code;
         DB::beginTransaction();
         try{
-            $start_index = ($index - 1) * 7;
-            $end_index = $start_index + 6;
+            //feature selection
+            $feature_model = new FeatureItemSelection();
+            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+            $feature_data = $feature_model->getItem();
+            $attendance_count = 0;
+            $rest_count = 0;
+            foreach($feature_data as $item) {
+                if (isset($item->item_code)) {
+                    if ($item->item_code == Config::get('const.C042.attendance_count')) {
+                        $attendance_count = intval($item->value_select);
+                    }
+                    if ($item->item_code == Config::get('const.C042.rest_count')) {
+                        $rest_count = intval($item->value_select);
+                    }
+                }
+                if ($attendance_count > 0 && $rest_count > 0) {
+                    break;
+                }
+            }
+            // +1 は深夜時間の分
+            $start_index = ($index - 1) * ($attendance_count + $rest_count + 1);
+            $end_index = $start_index + ($attendance_count + $rest_count);
             for ($i=$start_index; $i <= $end_index; $i++) {
                 log::debug('$details[$i] = '.$details[$i]['id']);
                 $time_table->setIdAttribute($details[$i]['id']);   

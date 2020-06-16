@@ -33,7 +33,6 @@ class StoreAttendanceLogController extends Controller
      * @return response
      */
     public function store(Request $request){
-        Log::debug('  store in');
         $this->array_messagedata = array();
         $details = array();
         $result = true;
@@ -71,17 +70,19 @@ class StoreAttendanceLogController extends Controller
             $eventlogs = $params['eventlogs'];
             $department_code = null;
             $employment_status = null;
-            Log::debug('  user_code >= '.$user_code);
             // eventlogsの検索パラメータ設定
             // 部署雇用形態はusersから
             $apicommon_model = new ApiCommonController();
             $result = $apicommon_model->getUserDepartmentEmploymentRole($login_user_code, null);
             foreach($result as $item) {
-                Log::debug('  department_code >= '.$item->department_code);
                 $department_code = $item->department_code;
                 $employment_status = $item->employment_status;
                 break;
             }
+            Log::debug('  user_code = '.$user_code);
+            Log::debug('  department_code = '.$department_code);
+            Log::debug('  employment_status = '.$employment_status);
+            Log::debug('  login_user_code = '.$login_user_code);
             $attendance_model = new AttendanceLog();
             $attendance_model->setParamdepartmentcodeAttribute($department_code);
             $attendance_model->setParamemploymentstatusAttribute($employment_status);
@@ -103,6 +104,7 @@ class StoreAttendanceLogController extends Controller
             }
 
             // eventlogsの登録設定
+            Log::debug('  count($filtered) = '.count($filtered));
             if (count($filtered) > 0) {
                 $systemdate = Carbon::now();
                 $attendance_model->setDepartmentcodeAttribute($department_code);
@@ -134,10 +136,13 @@ class StoreAttendanceLogController extends Controller
         try {
             foreach ($filtered as $item) {
                 // 登録済みであるか？
+                Log::debug('  $item[event_date] = '.$item['event_date']);
+                Log::debug('  $item[event_mode] = '.$item['event_mode']);
                 $attendance_model->setParamworkingdatefromAttribute($item['event_date']);
                 $attendance_model->setParamworkingdatetoAttribute($item['event_date']);
                 $attendance_model->setParameventmodeAttribute($item['event_mode']);
                 $attendance_model->setParameventtimeAttribute(substr($item['event_date'],0,4)."/".substr($item['event_date'],4,2)."/".substr($item['event_date'],6,2)." ".$item['event_time']);
+                Log::debug('  setParameventtimeAttribute = '.substr($item['event_date'],0,4)."/".substr($item['event_date'],4,2)."/".substr($item['event_date'],6,2)." ".$item['event_time']);
                 if (!$attendance_model->isExist()) {
                     // イベントログ設定
                     $attendance_model->setWorkingdateAttribute($item['event_date']);
@@ -150,7 +155,7 @@ class StoreAttendanceLogController extends Controller
             DB::commit();
         }catch(\PDOException $pe){
             DB::rollBack();
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.data_insert_erorr'));
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.data_insert_error'));
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){

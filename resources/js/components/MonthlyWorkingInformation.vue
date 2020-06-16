@@ -214,7 +214,7 @@
                   v-bind:btn-mode="item['code']"
                   v-bind:csv-data="calcresults"
                   v-bind:general-data="get_c037"
-                  v-bind:general-description="item['description']"
+                  v-bind:general-physicalname="item['physical_name']"
                   v-bind:is-csvbutton="iscsvbutton"
                   v-bind:csv-date="datejaFormat"
                 >
@@ -371,8 +371,13 @@
         </div>
       </div>
       <!-- /.panel -->
+    </div>
+    <!-- /main contentns row -->
+    <!-- main contentns row -->
+    <!-- ========================== 合計部 START ========================== -->
+    <div class="row justify-content-between" v-if="serchorshow === 'show'">
       <!-- .panel -->
-      <div class="col-md pt-3">
+      <div class="col-md pt-3 align-self-stretch">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -380,7 +385,7 @@
             v-bind:header-text2="'集計月の合計が表示されます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
-          <div class="card-body pt-2">
+          <div class="card-body pt-2 print-none">
             <!-- panel contents -->
             <!-- .row -->
             <monthly-working-info-table
@@ -406,7 +411,7 @@
                   v-bind:btn-mode="item['code']"
                   v-bind:csv-data="calcresults"
                   v-bind:general-data="get_c037"
-                  v-bind:general-description="item['description']"
+                  v-bind:general-physicalname="item['physical_name']"
                   v-bind:is-csvbutton="iscsvbutton"
                   v-bind:csv-date="datejaFormat"
                 >
@@ -950,8 +955,19 @@ export default {
 };
 </script>
 <style scoped>
-@page {
+/* @page {
     size : landscape;
+} */
+
+.print_pages{
+/*A4縦*/
+  width: 172mm;
+  height: 251mm;
+  page-break-after: always;
+}
+  /*最後のページは改ページを入れない*/
+.print_pages:last-child{
+    page-break-after: auto;
 }
 
 .table th, .table td {
