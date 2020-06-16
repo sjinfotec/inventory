@@ -32,21 +32,22 @@ class CommonServiceProvider extends ServiceProvider
     {
 
         //account
-        $account_data = collect([
-            'account_id' => Config::get('const.ACCOUNTID.account_id')
-        ]);
-        View::share('account_datas', $account_data);
+        //$account_data = collect([
+        //    'account_id' => Config::get('const.ACCOUNTID.account_id'),
+        //    'edition' => Config::get('const.EDITION.EDITION')
+        //]);
+        //View::share('account_datas', $account_data);
 
         //menu selection
-        $menu_model = new MenuItemSelection();
-        $menu_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
-        $menu_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
-        $menu_data = $menu_model->getMenuItem();
-        View::share('menu_selections', $menu_data);
+        //$menu_model = new MenuItemSelection();
+        //$menu_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+        //$menu_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+        //$menu_data = $menu_model->getMenuItem();
+        //View::share('menu_selections', $menu_data);
 
         //const
-        $general_model = new GeneralCodes();
-        $general_datas = $general_model->getGeneralcode();
-        View::share('const_general_datas', $general_datas);
+        //$general_model = new GeneralCodes();
+        //$general_datas = $general_model->getGeneralcode();
+        //View::share('const_general_datas', $general_datas);
     }
 }

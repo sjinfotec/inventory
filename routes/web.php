@@ -90,6 +90,11 @@ Route::get('/setting_shift_time', 'SttingShiftTimeController@index')->middleware
 Route::post('/setting_shift_time/del', 'SttingShiftTimeController@del')->middleware('auth');
 Route::post('/setting_shift_time/store', 'SttingShiftTimeController@store')->middleware('auth');
 Route::post('/setting_shift_time/range_del', 'SttingShiftTimeController@rangeDel')->middleware('auth');
+Route::get('/edit_shift_time', 'EditShiftTimeController@index')->middleware('auth');
+Route::post('/edit_shift_time/get', 'EditShiftTimeController@getDetail')->middleware('auth');
+Route::post('/edit_shift_time/fix', 'EditShiftTimeController@fix')->middleware('auth');
+Route::post('/edit_shift_time/fixbatch', 'EditShiftTimeController@fixbatch')->middleware('auth');
+Route::post('/edit_shift_time/fixbatchw', 'EditShiftTimeController@fixbatchW')->middleware('auth');
 // 勤怠ログ登録
 Route::get('/store_attendancelog', 'StoreAttendanceLogController@index')->middleware('auth');
 Route::post('/store_attendancelog/store', 'StoreAttendanceLogController@store')->middleware('auth');

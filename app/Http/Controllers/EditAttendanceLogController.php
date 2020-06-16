@@ -139,6 +139,8 @@ class EditAttendanceLogController extends Controller
                 if ($brk_working_date == null) {$brk_working_date = $item->working_date;}
                 if ($brk_item == null) {$brk_item = $item;}
                 $isdiff = false;
+                $array_chk_start = array();
+                $array_chk_end = array();
                 if ($brk_department_code != $item->department_code) {
                     // 優先順位  pcstart<logon  pcend<logout  windows10はlogonかlogoutが多い
                     // PC起動
@@ -176,9 +178,9 @@ class EditAttendanceLogController extends Controller
                     if ($pcstart_difference_reason == null || $pcstart_difference_reason == "") {
                         $pcstart_difference_reason = $pcend_difference_reason_pcend;
                     }
-                    if ($this->isDiffTime($attendance_record_time, $pcstart_record_time, $differencetime)) {
-                        $isdiff = true;
-                    } else if ($this->isDiffTime($pcend_record_time, $leaving_record_time, $differencetime)) {
+                    $array_chk_start = $this->chkisDiffTime($attendance_record_time, $pcstart_record_time, $differencetime);
+                    $array_chk_end = $this->chkisDiffTime($pcend_record_time, $leaving_record_time, $differencetime);
+                    if ($array_chk_start['result'] || $array_chk_end['result']) {
                         $isdiff = true;
                     }
                     if ($isdiff) {
@@ -198,7 +200,9 @@ class EditAttendanceLogController extends Controller
                                 'pcend_time' => $pcend_time,
                                 'pcend_record_time' => $pcend_record_time,
                                 'pcend_id' => $pcend_id,
-                                'difference_reason' => $pcstart_difference_reason
+                                'difference_reason' => $pcstart_difference_reason,
+                                'red_result_start' => $array_chk_start['red_result'],
+                                'red_result_end' => $array_chk_end['red_result']
                             );
                         }
                     }
@@ -273,9 +277,9 @@ class EditAttendanceLogController extends Controller
                         if ($pcstart_difference_reason == null || $pcstart_difference_reason == "") {
                             $pcstart_difference_reason = $pcend_difference_reason_pcend;
                         }
-                        if ($this->isDiffTime($attendance_record_time, $pcstart_record_time, $differencetime)) {
-                            $isdiff = true;
-                        } else if ($this->isDiffTime($pcend_record_time, $leaving_record_time, $differencetime)) {
+                        $array_chk_start = $this->chkisDiffTime($attendance_record_time, $pcstart_record_time, $differencetime);
+                        $array_chk_end = $this->chkisDiffTime($pcend_record_time, $leaving_record_time, $differencetime);
+                        if ($array_chk_start['result'] || $array_chk_end['result']) {
                             $isdiff = true;
                         }
                         if ($isdiff) {
@@ -295,8 +299,10 @@ class EditAttendanceLogController extends Controller
                                     'pcend_time' => $pcend_time,
                                     'pcend_record_time' => $pcend_record_time,
                                     'pcend_id' => $pcend_id,
-                                    'difference_reason' => $pcstart_difference_reason
-                                );
+                                    'difference_reason' => $pcstart_difference_reason,
+                                    'red_result_start' => $array_chk_start['red_result'],
+                                    'red_result_end' => $array_chk_end['red_result']
+                                    );
                             }
                         }
                         if (count($array_date) > 0) {
@@ -369,9 +375,9 @@ class EditAttendanceLogController extends Controller
                             if ($pcstart_difference_reason == null || $pcstart_difference_reason == "") {
                                 $pcstart_difference_reason = $pcend_difference_reason_pcend;
                             }
-                            if ($this->isDiffTime($attendance_record_time, $pcstart_record_time, $differencetime)) {
-                                $isdiff = true;
-                            } else if ($this->isDiffTime($pcend_record_time, $leaving_record_time, $differencetime)) {
+                            $array_chk_start = $this->chkisDiffTime($attendance_record_time, $pcstart_record_time, $differencetime);
+                            $array_chk_end = $this->chkisDiffTime($pcend_record_time, $leaving_record_time, $differencetime);
+                            if ($array_chk_start['result'] || $array_chk_end['result']) {
                                 $isdiff = true;
                             }
                             if ($isdiff) {
@@ -390,7 +396,9 @@ class EditAttendanceLogController extends Controller
                                     'pcend_time' => $pcend_time,
                                     'pcend_record_time' => $pcend_record_time,
                                     'pcend_id' => $pcend_id,
-                                    'difference_reason' => $pcstart_difference_reason
+                                    'difference_reason' => $pcstart_difference_reason,
+                                    'red_result_start' => $array_chk_start['red_result'],
+                                    'red_result_end' => $array_chk_end['red_result']
                                 );
                             }
                             $brk_item = $item;
@@ -419,14 +427,26 @@ class EditAttendanceLogController extends Controller
                     }
                 }
                 if (isset($item->mode)) {
-                    if ($item->mode ==  Config::get('const.C012.attendance')) {
+                    if ($item->mode ==  Config::get('const.C005.attendance_time')) {
                         if ($attendance_time == "") {
                             $attendance_time = $item->scan_time;
                             $attendance_record_time = $item->record_time;
                             $attendance_id = $item->id;
                         }
                     }
-                    if ($item->mode ==  Config::get('const.C012.leaving')) {
+                    if ($item->mode ==  Config::get('const.C005.emergency_time')) {
+                        if ($attendance_time == "") {
+                            $attendance_time = $item->scan_time;
+                            $attendance_record_time = $item->record_time;
+                            $attendance_id = $item->id;
+                        }
+                    }
+                    if ($item->mode ==  Config::get('const.C005.leaving_time')) {
+                        $leaving_time = $item->scan_time;
+                        $leaving_record_time = $item->record_time;
+                        $leaving_id = $item->id;
+                    }
+                    if ($item->mode ==  Config::get('const.C005.emergency_return_time')) {
                         $leaving_time = $item->scan_time;
                         $leaving_record_time = $item->record_time;
                         $leaving_id = $item->id;
@@ -499,9 +519,9 @@ class EditAttendanceLogController extends Controller
                 if ($pcstart_difference_reason == null || $pcstart_difference_reason == "") {
                     $pcstart_difference_reason = $pcend_difference_reason_pcend;
                 }
-                if ($this->isDiffTime($attendance_record_time, $pcstart_record_time, $differencetime)) {
-                    $isdiff = true;
-                } else if ($this->isDiffTime($pcend_record_time, $leaving_record_time, $differencetime)) {
+                $array_chk_start = $this->chkisDiffTime($attendance_record_time, $pcstart_record_time, $differencetime);
+                $array_chk_end = $this->chkisDiffTime($pcend_record_time, $leaving_record_time, $differencetime);
+                if ($array_chk_start['result'] || $array_chk_end['result']) {
                     $isdiff = true;
                 }
                 if ($isdiff) {
@@ -520,8 +540,10 @@ class EditAttendanceLogController extends Controller
                         'pcend_time' => $pcend_time,
                         'pcend_record_time' => $pcend_record_time,
                         'pcend_id' => $pcend_id,
-                        'difference_reason' => $pcstart_difference_reason
-                    );
+                        'difference_reason' => $pcstart_difference_reason,
+                        'red_result_start' => $array_chk_start['red_result'],
+                        'red_result_end' => $array_chk_end['red_result']
+        );
                 }
                 if (count($array_date) > 0) {
                     $array_details[] = array(
@@ -674,7 +696,7 @@ class EditAttendanceLogController extends Controller
             DB::commit();
         }catch(\PDOException $pe){
             DB::rollBack();
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.data_insert_erorr'));
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.data_insert_error'));
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
@@ -798,23 +820,52 @@ class EditAttendanceLogController extends Controller
      * @param [type] $details
      * @return boolean
      */
-    private function isDiffTime($from_time, $to_time, $diffTime){
-        Log::debug('isDiffTime $from_time = '.$from_time);
-        Log::debug('isDiffTime $to_time = '.$to_time);
-        Log::debug('isDiffTime $diffTime = '.$diffTime);
-        if ($diffTime == 0) { return true; }
-        if (($from_time == null || $from_time == "") || ($to_time == null || $to_time == "")) 
-        { 
-            return false;
-        }
+    private function chkisDiffTime($from_time, $to_time, $diffTime){
+
+        $result = true;
+        $red_result = true;
+        $red_chk_time = 1800;
+        Log::debug('chkisDiffTime $from_time = '.$from_time);
+        Log::debug('chkisDiffTime $to_time = '.$to_time);
+        Log::debug('chkisDiffTime $diffTime = '.$diffTime);
         // 計算開始
         $apicommon_model = new ApiCommonController();
         $diffTimeSerial = $apicommon_model->diffTimeSerial($from_time, $to_time);
-        Log::debug('isDiffTime $diffTimeSerial = '.$diffTimeSerial);
-        Log::debug('isDiffTime $diffTime * 60 = '.$diffTime * 60);
+        Log::debug('chkisDiffTime $diffTimeSerial = '.$diffTimeSerial);
+        Log::debug('chkisDiffTime $diffTime * 60 = '.$diffTime * 60);
         if ($diffTimeSerial < 0) { $diffTimeSerial = 0 - $diffTimeSerial; }
-        if ($diffTimeSerial >= $diffTime * 60) { return true; }
+        if ($diffTime == 0) {
+            $result = true;
+            if (($from_time == null || $from_time == "") || ($to_time == null || $to_time == "")) 
+            { 
+                $red_result = false;
+                return array( 'result' => $result, 'red_result' => $red_result);
+            } else {
+                if ($diffTimeSerial >= $red_chk_time) {
+                    $red_result = true;
+                } else {
+                    $red_result = false;
+                }
+            }
+            return array( 'result' => $result, 'red_result' => $red_result);
+        }
+        if (($from_time == null || $from_time == "") || ($to_time == null || $to_time == "")) 
+        { 
+            $result = false;
+            $red_result = false;
+            return array( 'result' => $result, 'red_result' => $red_result);
+        }
+        if ($diffTimeSerial >= $red_chk_time) {
+            $red_result = true;
+        } else {
+            $red_result = false;
+        }
+        if ($diffTimeSerial >= $diffTime * 60) {
+            $result = true;
+        } else {
+            $result = false;
+        }
 
-        return false;
+        return array( 'result' => $result, 'red_result' => $red_result);
     }
 }

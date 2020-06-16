@@ -73,8 +73,8 @@ class ApiCardRegisterController extends Controller
                     }
                 } else {
                     DB::rollBack();
-                    $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.data_select_erorr'));
-                    Log::error(str_replace('{0}', 'users', Config::get('const.LOG_MSG.data_select_erorr')));
+                    $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.data_select_error'));
+                    Log::error(str_replace('{0}', 'users', Config::get('const.LOG_MSG.data_select_error')));
                 }
             }catch(\PDOException $pe){
                 DB::rollBack();
@@ -83,7 +83,7 @@ class ApiCardRegisterController extends Controller
             }catch(\Exception $e){
                 DB::rollBack();
                 $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.insert_error'));
-                Log::error(str_replace('{0}', 'card_informations', Config::get('const.LOG_MSG.data_insert_erorr')));
+                Log::error(str_replace('{0}', 'card_informations', Config::get('const.LOG_MSG.data_insert_error')));
                 Log::error($e->getMessage());
             }
         }
@@ -138,11 +138,11 @@ class ApiCardRegisterController extends Controller
             return true;
 
         }catch(\PDOException $pe){
-            Log::error(str_replace('{0}', 'card_informations', Config::get('const.LOG_MSG.data_insert_erorr')));
+            Log::error(str_replace('{0}', 'card_informations', Config::get('const.LOG_MSG.data_insert_error')));
             Log::error($pe->getMessage());
 
         }catch(\Exception $e){
-            Log::error(str_replace('{0}', 'card_informations', Config::get('const.LOG_MSG.data_insert_erorr')));
+            Log::error(str_replace('{0}', 'card_informations', Config::get('const.LOG_MSG.data_insert_error')));
             Log::error($e->getMessage());
         }
     }

@@ -2,7 +2,7 @@
   <div>
     <btn-work-time
       v-on:csv-event="csvmain"
-      v-bind:btn-mode="generalDescription"
+      v-bind:btn-mode="generalPhysicalname"
       v-bind:is-push="isCsvbutton">
     </btn-work-time>
   </div>
@@ -26,11 +26,15 @@ export default {
       type: Array,
       default: []
     },
+    csvDataSub: {
+      type: Array,
+      default: []
+    },
     generalData: {
       type: Array,
       default: []
     },
-    generalDescription: {
+    generalPhysicalname: {
       type: String,
       default: ""
     },
@@ -98,6 +102,8 @@ export default {
           this.downloadCSVLog();
         } else if (this.btnMode == this.generalData[3]['code']) {
           this.getUserListCsv();
+        } else if (this.btnMode == this.generalData[4]['code']) {
+          this.downloadCSVShift();
         }
       } else {
         if (res.messagedata.length > 0) {
@@ -302,6 +308,36 @@ export default {
         link.click();
       }
     },
+    // シフト集計
+    downloadCSVShift() {
+      var csv = "";
+      var line = "";
+      // タイトル
+      line =
+        "勤務予定・実績表（" + this.csvDate + "分）" + "\r\n" + "\r\n";
+      csv += line;
+      // 項目名
+      line = this.makeTitleLine();
+      csv += line;
+      line = ",,,,";
+      var canma = "";
+      var item_week_name = "";
+      this.csvData.forEach(item => {
+        item_week_name = item['week_name'];
+        line += canma + item_week_name;
+        canma = ",";
+      });
+      csv += line + "\r\n";
+      // データ
+      let $this = this;
+      this.csvDataSub.forEach(user => {
+        line = $this.makeItemLineCsvShift(user)
+        csv += line;
+      });
+      csv += "\r\n";
+      // 文字コード変換
+      this.convTosjis(csv, moment().format('YYYYMMDDhhmmss') + "_" + this.csvDate + "勤務予定・実績表" + ".csv");
+    },
 
     // CSVタイトル作成処理
     makeTitleLine() {
@@ -422,6 +458,109 @@ export default {
       linetext += "\r\n";
       return linetext;
     },
+    
+    // CSV項目作成処理（シフト）
+    makeItemLineCsvShift(user) {
+      var linetext = "";
+      var canma = "";
+      var item_name = "";
+      var item_data = "";
+      var slice_item_name = "";
+      var rec_cnt = 0;
+      for (var i=0;i<2;i++) {
+        this.details.forEach(item => {
+          slice_item_name = item['item_name'].slice(0, 3) ;
+          if (slice_item_name == "day") {
+            if (item['item_name'] == "day1") {
+              rec_cnt = 0;
+            }
+            if ( rec_cnt < Object.keys(user['array_user_date_data']).length) {
+              if (i == 0) {
+                // 画面と同じ条件であること  start --------------------------
+                if (user['array_user_date_data'][rec_cnt]['business_kubun'] == 1 && user['array_user_date_data'][rec_cnt]['holiday_kubun'] == 0) {
+                  item_data = user['array_user_date_data'][rec_cnt]['working_timetable_name'];
+                } else if (user['array_user_date_data'][rec_cnt]['business_kubun'] == 1 && user['array_user_date_data'][rec_cnt]['holiday_kubun'] != 0) {
+                  item_data = user['array_user_date_data'][rec_cnt]['holiday_kubun_name'];
+                } else {
+                  item_data = user['array_user_date_data'][rec_cnt]['business_kubun_name'];
+                }
+                linetext += canma + item_data;
+                // 画面と同じ条件であること  end --------------------------
+              } else {
+                // 画面と同じ条件であること  start --------------------------
+                if (user['array_user_date_data'][rec_cnt]['total_working_times'] == '0.00') {
+                  item_data = "";
+                } else {
+                  item_data = user['array_user_date_data'][rec_cnt]['total_working_times'];
+                }
+                linetext += canma + item_data;
+                // 画面と同じ条件であること  end --------------------------
+              }
+            } else {
+              linetext += canma;
+            }
+            rec_cnt++;
+          } else if (item['item_name'] == "scheduled_results") {
+              if (i == 0) {
+                linetext += canma + "予定";
+              } else {
+                linetext += canma + "実績";
+              }
+          } else if (item['is_select'] == 1) {
+            if (item['item_code'] != 99) {
+              if (i == 0) {
+                item_name = item['item_name'];
+                item_data = "";
+                if (item['item_code'] < 4) {
+                  if (user[item_name] != "" && user[item_name] != null) {
+                    item_data = user[item_name];
+                  }
+                } else {
+                  if (user[item_name] != "" && user[item_name] != null) {
+                    item_data = user[item_name] + "日";
+                  }
+                }
+              } else {
+                item_name = item['item_name'];
+                if (item['item_code'] < 4) {
+                  item_data = "";
+                } else {
+                  // 画面と同じ条件であること  start --------------------------
+                  if (item_name == "regular_day_cnt") {
+                    if (user['regular_day_times'] > 0) {
+                      item_data = user['regular_day_times'] + "時間";
+                    } else {
+                      item_data = "";
+                    }
+                  } else if (item_name == "night_day_cnt") {
+                    if (user['night_day_times'] > 0) {
+                      item_data = user['night_day_times'] + "時間";
+                    } else {
+                      item_data = "";
+                    }
+                  } else if (item_name == "paid_holiday_cnt") {
+                    if (user[item_name] != "" && user[item_name] != null) {
+                      item_data = user[item_name] + "日";
+                    }
+                  } else {
+                    item_data = "";
+                  }
+                  // 画面と同じ条件であること  end --------------------------
+                }
+              }
+              linetext += canma + item_data;
+            }
+          }
+          if (linetext != "") {
+            canma = ",";
+          }
+        });
+        linetext += "\r\n";
+        canma = "";
+      }
+      return linetext;
+    },
+
 
     // CSV項目作成処理
     convTosjis(csv, filename) {

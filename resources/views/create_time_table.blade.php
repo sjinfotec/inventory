@@ -38,7 +38,11 @@
 	<!-- /main contentns row -->
 	@endif
 	@can('admin-higher')
-		<create-time-table></create-time-table>
+		<create-time-table
+			v-bind:feature_item_selections="{{ $feature_item_selections }}"
+			v-bind:const_generaldatas="{{ $const_general_datas }}"
+		>
+		</create-time-table>
 	@endcan
 	<!-- /main contentns row -->
 @endsection

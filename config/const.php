@@ -38,18 +38,20 @@ return [
         'missing_middle_time' => 11,
         'missing_middle_return_time' => 12,
         'public_going_out_time' => 21,
-        'public_going_out_return_time' => 22
+        'public_going_out_return_time' => 22,
+        'emergency_time' => 31,
+        'emergency_return_time' => 32
     ],
 
     'C006' => [
         'value' => 'C006',
-        'sun' => 0,
-        'mon' => 1,
-        'tue' => 2,
-        'wed' => 3,
-        'thu' => 4,
-        'fri' => 5,
-        'sat' => 6
+        'sun' => 6,
+        'mon' => 0,
+        'tue' => 1,
+        'wed' => 2,
+        'thu' => 3,
+        'fri' => 4,
+        'sat' => 5
     ],
 
     'C007' => [
@@ -60,7 +62,10 @@ return [
     ],
 
     'C008' => [
-        'value' => 'C008'
+        'value' => 'C008',
+        'summer_holiday' => '1',
+        'newyear_holidqy' => '2',
+        'special_holiday' => '3'
     ],
 
     'C009' => [
@@ -90,6 +95,8 @@ return [
         'public_going_out' => 5,
         'public_going_out_return' => 6,
         'user_holiday' => 7,
+        'emergency' => 8,
+        'emergency_return' => 9,
         'continue_work' => 10,
         'forget' => 90,
         'unknown' => 99
@@ -119,7 +126,9 @@ return [
         'deemed_business_trip' => 18,
         'deemed_direct_go' => 19,
         'deemed_direct_return' => 20,
-        'public_damage' => 21
+        'public_damage' => 21,
+        'nigth_shift' => 22,
+        'deemed_direct_go_return' => 23
     ],
 
     'C013_DESC_VALUE' => [
@@ -157,7 +166,9 @@ return [
         'deemed_business_trip' => "みなし",
         'deemed_direct_go' => "みなし",
         'deemed_direct_return' => "みなし",
-        'public_damage' => "1日集計対象休暇"
+        'public_damage' => "1日集計対象休暇",
+        'nigth_shift' => "1日集計対象休暇",
+        'deemed_direct_go_return' => "みなし"
     ],
 
     'C014' => [
@@ -206,6 +217,11 @@ return [
         'value' => 'C019',
         'max_times' => 5
     ],
+ 
+    'C020' => [
+        'value' => 'C020',
+        'minimum_times' => 5
+    ],
   
     'C021' => [
         'value' => 'C021',
@@ -250,7 +266,8 @@ return [
         'value' => 'C025',
         'general_user' => 1,
         'general_approver__user' => 5,
-        'admin_user' => 9
+        'admin_user' => 9,
+        'high_user' => 10
     ],
  
     'C026' => [
@@ -316,6 +333,28 @@ return [
         'approvaled' => 2
     ],
  
+    'C032' => [
+        'value' => 'C032',
+        'holidaytransfer_demand' => 3,
+        'submission_demand' => 4,
+        'paidholiday_demand' => 6,
+        'late_demand' => 7,
+        'earlyleave_demand' => 8,
+        'goingout_demand' => 9,
+        'absence_demand' => 10
+    ],
+ 
+    'C032_NAME' => [
+        'value' => 'C032_NAME',
+        'holidaytransfer_demand' => "休日振替申請",
+        'submission_demand' => "代休申請",
+        'paidholiday_demand' => "有給休暇申請",
+        'late_demand' => "遅刻申請",
+        'earlyleave_demand' => "早退申請",
+        'goingout_demand' => "外出申請書",
+        'absence_demand' => "欠勤申請"
+    ],
+ 
     'C033' => [
         'value' => 'C033',
         'pcstart' => 6005,
@@ -329,10 +368,6 @@ return [
         'closing' => 1,
         'first' => 2
     ],
-
-    'C036' => [
-        'value' => 'C036'
-    ],
  
     'C035' => [
         'value' => 'C035',
@@ -341,7 +376,9 @@ return [
         'missing_middle_time' => 11,
         'missing_middle_return_time' => 12,
         'public_going_out_time' => 21,
-        'public_going_out_return_time' => 22
+        'public_going_out_return_time' => 22,
+        'emergency_time' => 31,
+        'emergency_return_time' => 32
     ],
  
     'C036' => [
@@ -355,12 +392,13 @@ return [
         'csvcalc' => 1,
         'csvsalary' => 2,
         'csvlog' => 3,
-        'usersdownload' => 4
+        'usersdownload' => 4,
+        'csvshift' => 5
     ],
  
-    'C037_DESC_VALUE' => [
-        'array' => array('C037', 'csvcalc', 'csvsalary', 'csvlog', 'usersdownload')
-    ],
+    // 'C037_DESC_VALUE' => [
+    //     'array' => array('C037', 'csvcalc', 'csvsalary', 'csvlog', 'usersdownload')
+    // ],
 
     'C038' => [
         'value' => 'C038',
@@ -415,28 +453,49 @@ return [
         'timetable_week' => 2
     ],
  
+    'C042' => [
+        'value' => 'C042',
+        'attendance_count' => 1,
+        'half_holiday' => 2,
+        'rest_count' => 3,
+        'mode_list' => 4,
+        'early_time' => 5,
+        'select_clear' => 6
+    ],
+ 
+    'C043' => [
+        'value' => 'C043',
+        'emergency' => 31,
+        'emergency_return' => 32
+    ],
+ 
     'C999' => [
         'value' => 'C999',
         'main' => 1,
         'sub' => 2,
-        'timetable_no' => 3
+        'legal_timetable_no' => 3,
+        'from_timetable_no' => 4,
+        'emergency_timetable_no' => 5
     ],
  
     'C999_NAME' => [
         'value' => 'C999',
         'main' => 9999,
         'sub' => 'systemuser',
-        'timetable_no' => 9999
+        'legal_timetable_no' => 9999,
+        'from_timetable_no' => 9000,
+        'emergency_timetable_no' => 9000,
+        'link_end_timetable_no' => 9900
     ],
 
     'WEEK_KANJI' => [
-        'sun' => '(日)',
-        'mon' => '(月)',
-        'tue' => '(火)',
-        'wed' => '(水)',
-        'thu' => '(木)',
-        'fri' => '(金)',
-        'sat' => '(土)'
+        'sun' => '日',
+        'mon' => '月',
+        'tue' => '火',
+        'wed' => '水',
+        'thu' => '木',
+        'fri' => '金',
+        'sat' => '土'
     ],
 
     'WORKING_TIME_NAME' => [
@@ -495,7 +554,8 @@ return [
     'INC_NO' => [
         'attendace_leaving' => 1,
         'missing_return' => 2,
-        'public_going_out_return' => 3
+        'public_going_out_return' => 3,
+        'emergency_return' => 4
     ],
 
     'REMARKS_DATA' => [
@@ -698,10 +758,10 @@ return [
         'not_setting_time_rounding' => '時間計算の端数処理が設定されていません。',
         'not_setting_beginning_month' => '期首月が設定されていません。',
         'not_setting_timetable' => '期間内に該当する勤務時間がないかまたはタイムテーブルが設定されていません。',
-        'data_eror_dailycalc' => '労働時間計算処理にてエラーのため計算できませんでした。',
-        'not_setting_calendar' => '{0}のカレンダー設定がされていません。',
-        'data_accesee_eror_dailycalc' => '労働時間計算処理にてデータアクセスエラーのため計算できませんでした。',
-        'data_accesee_eror' => 'データアクセスエラーのため取得できませんでした。',
+        'data_error_dailycalc' => '労働時間計算処理にてエラーのため計算できませんでした。',
+        'not_setting_calendar' => '{0}の'.PHP_EOL.'カレンダー設定がされていません。',
+        'data_access_error_dailycalc' => '労働時間計算処理にてデータアクセスエラーのため計算できませんでした。',
+        'data_access_error' => 'データアクセスエラーのため取得できませんでした。',
         'data_insert_error' => '登録処理に失敗しました。',
         'mismatch_data' => 'データ不整合',
         'rounding_not_demand' => '承認回覧中のため、申請できません。',
@@ -713,19 +773,20 @@ return [
         'already_item' => 'すでに登録されている[{0}]です',
         'not_found_data' => '該当するデータは見つかりませんでした。',
         'parameter_illegal' => '不正なパラメータです。',
-        'file_download_error' => 'ファイルダウンロード失敗しました。'
+        'file_download_error' => 'ファイルダウンロード失敗しました。',
+        'file_upload_error' => 'ファイルアップロード失敗しました。'
     ],
 
     'LOG_MSG' => [
-        'data_eror_dailycalc' => 'data_error_dailycalc not calc',
-        'data_select_erorr' => 'データselectエラー table = [{0}]',
-        'data_insert_erorr' => 'データinsertエラー table = [{0}]',
-        'data_update_erorr' => 'データupdateエラー table = [{0}]',
-        'data_delete_erorr' => 'データdeleteエラー table = [{0}]',
-        'data_exists_erorr' => 'データexistsエラー table = [{0}]',
-        'data_maxget_erorr' => 'データmaxgetエラー table = [{0}]',
-        'data_count_erorr' => 'データcountエラー table = [{0}]',
-        'data_access_erorr' => 'データaccessエラー table = [{0}]',
+        'data_error_dailycalc' => 'data_error_dailycalc not calc',
+        'data_select_error' => 'データselectエラー table = [{0}]',
+        'data_insert_error' => 'データinsertエラー table = [{0}]',
+        'data_update_error' => 'データupdateエラー table = [{0}]',
+        'data_delete_error' => 'データdeleteエラー table = [{0}]',
+        'data_exists_error' => 'データexistsエラー table = [{0}]',
+        'data_maxget_error' => 'データmaxgetエラー table = [{0}]',
+        'data_count_error' => 'データcountエラー table = [{0}]',
+        'data_access_error' => 'データaccessエラー table = [{0}]',
         'unknown_error' => '不明なエラー',
         'mismatch_data' => 'データ不整合',
         'not_set_time_rounding ' => '時間の端数処理が設定されていない',

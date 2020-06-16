@@ -146,10 +146,12 @@
           v-if="showeditworktimestable"
           ref="refeditworktimestable"
           v-bind:authusers="authusers"
-          v-bind:generaluser="generaluser"
-          v-bind:generalapproveruser="generalapproveruser"
-          v-bind:adminuser="adminuser"
+          v-bind:const_c025="get_C025"
+          v-bind:const_generaldatas="const_generaldatas"
           v-bind:heads="heads"
+          v-bind:accountdatas="accountdatas"
+          v-bind:halfautoset="get_AutoHalfSet"
+          v-bind:feature-item-selections="feature_item_selections"
         >
         </edit-work-times-table>
       </div>
@@ -167,26 +169,32 @@ import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
+// CONST
+const CONST_C025 = 'C025';
+const CONST_C042 = 'C042';
+const CONST_HALF_HOLIDAY_SET_PHYSICAL_NAME = 'half_holiday';
+const CONST_SELECT_CLEAR_SET_PHYSICAL_NAME = 'select_clear';
+
 export default {
   name: "EditWorkTimes",
   mixins: [ dialogable, checkable, requestable ],
   props: {
+    accountdatas: {
+        type: Array,
+        default: []
+    },
     authusers: {
         type: Array,
         default: []
     },
-    generaluser: {
-        type: Number,
-        default: 0
+    feature_item_selections: {
+        type: Array,
+        default: []
     },
-    generalapproveruser: {
-        type: Number,
-        default: 0
-    },
-    adminuser: {
-        type: Number,
-        default: 0
-    },
+    const_generaldatas: {
+        type: Array,
+        default: []
+    }
   },
   data() {
     return {
@@ -216,25 +224,106 @@ export default {
       heads: [],
       login_user_code: "",
       login_user_role: "",
-      login_generaluser_role: "",
-      login_generalapproveruser_role: "",
-      login_adminuser_role: "",
-      showeditworktimestable: true
+      showeditworktimestable: true,
+      accountdata_data: [],
+      const_C025_data: [],
+      isAutoHalfSet: true,
+      halfholiday_code: "",
+      isSelectClear: true,
+      selectclear_code: ""
     };
   },
   components: {
     Datepicker
   },
+  computed: {
+    get_AutoHalfSet: function() {
+      this.isAutoHalfSet = false;
+      var halfholiday = this.get_HalfHolidaySetCode;
+      let $this = this;
+      this.feature_item_selections.forEach( function( item ) {
+        if (item.item_code == halfholiday) {
+          if (item.value_select == 1) {
+            $this.isAutoHalfSet = true;
+          } else {
+            $this.isAutoHalfSet = false;
+          }
+          return $this.isAutoHalfSet;
+        }
+      });
+
+      return this.isAutoHalfSet;
+    },
+    get_HalfHolidaySetCode: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C042) {
+          if (item.physical_name == CONST_HALF_HOLIDAY_SET_PHYSICAL_NAME) {
+            $this.halfholiday_code = item.code;
+            return $this.halfholiday_code;
+          }
+        }
+        i++;
+      });    
+      return this.halfholiday_code;
+    },
+    get_SelectClear: function() {
+      this.isSelectClear = true;
+      var selectclear = this.get_SelectClearSetCode;
+      let $this = this;
+      this.feature_item_selections.forEach( function( item ) {
+        if (item.item_code == selectclear) {
+          if (item.value_select == 1) {
+            $this.isSelectClear = true;
+          } else {
+            $this.isSelectClear = false;
+          }
+          return $this.isSelectClear;
+        }
+      });
+
+      return this.isSelectClear;
+    },
+    get_SelectClearSetCode: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C042) {
+          if (item.physical_name == CONST_SELECT_CLEAR_SET_PHYSICAL_NAME) {
+            $this.selectclear_code = item.code;
+            return $this.selectclear_code;
+          }
+        }
+        i++;
+      });    
+      return this.selectclear_code;
+    },
+    get_Account: function() {
+      let $this = this;
+      this.accountdata_data = [];
+      this.accountdatas.forEach( function( item ) {
+        $this.accountdata_data.push($this.accountdatas[i]);
+        return this.accountdata_data;
+      });    
+      return this.accountdata_data;
+    },
+    get_C025: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C025) {
+          $this.const_C025_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C025_data;
+    }
+  },
   // マウント時
   mounted() {
     this.login_user_code = this.authusers['code'];
     this.login_user_role = this.authusers['role'];
-    this.login_generaluser_role = this.generaluser;
-    this.login_generalapproveruser_role = this.generalapproveruser;
-    this.login_adminuser_role = this.adminuser;
-    if (this.login_user_role == this.login_adminuser_role) {
-      this.isEdit = true;
-    }
     this.valuedate = this.defaultDate;
     this.valuefromdate = moment(this.defaultDate).format("YYYYMMDD");
     this.valuesubadddate = this.valuefromdate;
@@ -290,14 +379,16 @@ export default {
       this.date_name = moment(value).format("YYYY年MM月DD日");
       this.selectedName = this.user_name + "　" + this.date_name + "分勤怠編集" ;
       // ユーザー選択コンポーネントの取得メソッドを実行
-      this.selectedEmploymentValue = "";
-      this.selectedDepartmentValue = "";
-      this.selectedUserValue = "";
-      this.getDo = 1;
-      this.applytermdate = this.valuefromdate;
-      this.getDepartmentSelected();
-      this.getUserSelected();
-      this.selectMode = '';
+      if (this.get_SelectClear) {
+        this.selectedEmploymentValue = "";
+        this.selectedDepartmentValue = "";
+        this.selectedUserValue = "";
+        this.getDo = 1;
+        this.applytermdate = this.valuefromdate;
+        this.getDepartmentSelected();
+        this.getUserSelected();
+        this.selectMode = '';
+      }
     },
     // 指定年月がクリアされた場合の処理
     fromdateCleared: function() {

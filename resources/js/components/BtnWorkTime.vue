@@ -106,11 +106,11 @@
         この内容で差異理由を登録する</button>
     </div>
     <div v-if="btnMode === 'back'" class="btn-group d-flex" v-on:click="backclickBtn()">
-      <button type="button" class="btn btn-outline-secondary btn-lg font-size-rg w-100" :disabled="isPush">
+      <button type="button" class="btn btn-info btn-lg font-size-rg w-100" :disabled="isPush">
         戻る</button>
     </div>
     <div v-if="btnMode === 'cancel'" class="btn-group d-flex" v-on:click="cancelclickBtn()">
-      <button type="button" class="btn btn-outline-secondary btn-lg font-size-rg w-100" :disabled="isPush">
+      <button type="button" class="btn btn-info btn-lg font-size-rg w-100" :disabled="isPush">
         キャンセル</button>
     </div>
     <div v-if="btnMode === 'csvcalc'" class="btn-group d-flex" v-on:click="csvcalcclickBtn()">
@@ -132,6 +132,11 @@
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
       <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
       {{ btnName }}</button>
+    </div>
+    <div v-if="btnMode === 'csvshift'" class="btn-group d-flex" v-on:click="csvshiftclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+      <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
+      ダウンロード</button>
     </div>
     <div v-if="btnMode === 'passreset'" class="btn-group d-flex" v-on:click="passresetclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
@@ -268,6 +273,9 @@ export default {
     },
     filedownloadclickBtn : function() {
       this.$emit('filedownload-event',event);
+    },
+    csvshiftclickBtn : function() {
+      this.$emit('csv-event',event);
     },
     passresetclickBtn : function() {
       this.$emit('passreset-event',event);

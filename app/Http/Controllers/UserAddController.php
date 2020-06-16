@@ -418,7 +418,7 @@ class UserAddController extends Controller
             DB::rollBack();
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "users shift_informations", Config::get('const.LOG_MSG.data_access_erorr')));
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "users shift_informations", Config::get('const.LOG_MSG.data_access_error')));
             Log::error($e->getMessage());
             DB::rollBack();
             throw $e;
@@ -585,12 +585,12 @@ class UserAddController extends Controller
             );
         }catch(\PDOException $pe){
             DB::rollBack();
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
             DB::rollBack();
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -752,7 +752,7 @@ class UserAddController extends Controller
             DB::commit();
         }catch(\PDOException $pe){
             DB::rollBack();
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.data_insert_erorr'));
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.data_insert_error'));
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){

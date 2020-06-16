@@ -141,10 +141,10 @@ class ApprovalController extends Controller
             }
             $list_result = true;
         }catch(\PDOException $pe){
-            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror'));
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_access_error'));
             Log::error($pe->getMessage());
         }catch(\Exception $e){
-            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror'));
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_access_error'));
             Log::error($e->getMessage());
         }
         Log::debug('---- 申請一覧取得処理 終了 -------------- ');
@@ -355,12 +355,12 @@ class ApprovalController extends Controller
             // メールアドレス取得
             $confirm_email = $apicommon->getUserMailAddress($confirm_user_code, $target_date);
         }catch(\PDOException $pe){
-            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_select_erorr'));
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_select_error'));
             $store_result = false;
             Log::error($pe->getMessage());
         }catch(\Exception $e){
             DB::rollBack();
-            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_select_erorr'));
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_select_error'));
             $store_result = false;
             Log::error($e->getMessage());
         }
@@ -499,12 +499,12 @@ class ApprovalController extends Controller
             $store_result = true;
         }catch(\PDOException $pe){
             DB::rollBack();
-            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror'));
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_access_error'));
             $store_result = false;
             Log::error($pe->getMessage());
         }catch(\Exception $e){
             DB::rollBack();
-            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror'));
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_access_error'));
             $store_result = false;
             Log::error($e->getMessage());
         }

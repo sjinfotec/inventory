@@ -64,7 +64,7 @@
                                     <!-- <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_calendar') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-outlined-flag-w.svg') }}" alt="">カレンダー編集</a></li> -->
                                     @can('admin-higher')
                                         @if($menu_selections[Config::get('const.MENUITEM.create_shift_time') - 1]->is_select)
-                                            <li><a class="px-3 py-1 text-white d-block" href="{{ url('/setting_shift_time') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-access-time-w.svg') }}" alt="">シフト編集</a></li>
+                                            <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_shift_time') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-access-time-w.svg') }}" alt="">シフト編集</a></li>
                                         @endif
                                         @if($menu_selections[Config::get('const.MENUITEM.edit_work_times') - 1]->is_select)
                                             <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_work_times') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-access-time-w.svg') }}" alt="">勤怠編集</a></li>
