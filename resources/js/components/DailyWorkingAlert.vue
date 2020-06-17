@@ -301,7 +301,7 @@ export default {
     if (this.index_or_home == CONST_INDEXORHOME_HOME) {
       this.selectMode = '';
       this.itemClear();
-      this.getItem();
+      this.getItem(false);
       this.refreshDailyWorkingAlertTable();
     }
   },
@@ -409,7 +409,7 @@ export default {
       this.validate = this.checkForm(e);
       if (this.validate) {
         this.itemClear();
-        this.getItem();
+        this.getItem(true);
       }
       this.refreshDailyWorkingAlertTable();
     },
@@ -427,7 +427,7 @@ export default {
     },
     // ------------------------ サーバー処理 ----------------------------
     // 日次警告取得処理
-    getItem() {
+    getItem(ismsgout) {
       // 処理中メッセージ表示
       this.$swal({
         title: "処　理　中...",
@@ -446,7 +446,7 @@ export default {
           this.postRequest("/daily_alert/show", arrayParams)
             .then(response  => {
               this.$swal.close();
-              this.getThen(response);
+              this.getThen(response, ismsgout);
             })
             .catch(reason => {
               this.$swal.close();
@@ -473,11 +473,16 @@ export default {
       );
     },
     // 取得正常処理（アラート）
-    getThen(response) {
+    getThen(response, ismsgout) {
       var res = response.data;
       if (res.result) {
         this.details = res.details;
         this.dateName = res.datename;
+        if (ismsgout) {
+          if (res.messagedata.length > 0) {
+            this.htmlMessageSwal("確認", res.messagedata, "info", true, false);
+          }
+        }
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);

@@ -809,7 +809,7 @@ return [
 
     // 未使用
     'DISTRIBUTION' => [
-        'DISTRIBUTION' => 1
+        'DISTRIBUTION' => 3
     ],
 
     // 未使用
@@ -820,7 +820,7 @@ return [
     ],
 
     'EDITION' => [
-        'EDITION' => 3
+        'EDITION' => 5
     ],
 
     'EDITION_VALUE' => [
@@ -832,7 +832,7 @@ return [
     ],
 
     'ACCOUNTID' => [
-        'account_id' => 'S02DTA00'
+        'account_id' => 'CSD1000L'
     ],
 
     // メニュー項目数   未使用
@@ -874,8 +874,11 @@ return [
         'operation_block' => 24,
         'user_pass' => 25,
         'file_download' => 26,
-        'edit_worktime_user' => 101,
-        'edit_worktime_user_conditional' => 102
+        'edit_worktime_user' => 27,
+        'edit_worktime_user_conditional' => 28,
+        'TeamViewer' => 29,
+        'account_admin' => 30,
+        'clientServer' => 31
     ]
 
 ];

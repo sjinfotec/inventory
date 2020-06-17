@@ -7,12 +7,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use App\Http\Requests\StoreTimeTablePost;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use App\WorkingTimeTable;
-use App\FeatureItemSelection;
+use Illuminate\Support\Facades\Validator;
 
 class CreateTimeTableController extends Controller
 {

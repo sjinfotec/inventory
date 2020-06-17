@@ -113,99 +113,163 @@
               <!-- /.panel header -->
             </div>
             <!-- /.row -->
-            <!-- 所定労働時間 -->
-            <!-- .row -->
-            <div
-              v-for="(item, index) in get_RegularTime" v-bind:key="index"
-              class="row justify-content-between"
-            >
-              <!-- .col -->
-              <div class="col-md-6 pb-2" v-if="index === 0">
-                <input-time
-                  v-bind:item-title="'所定労働開始時間 '+(index+1)"
-                  v-bind:item-required="true"
-                  v-bind:place-holder="'※開始時刻を半角で入力します'"
-                  v-bind:value-data="regularTime[index]['fromTime']"
-                  v-on:change-event="timeChanges($event, '1', index)"
-                ></input-time>
-              </div>
-              <div class="col-md-6 pb-2" v-else>
-                <input-time
-                  v-bind:item-title="'所定労働開始時間 '+(index+1)"
-                  v-bind:item-required="false"
-                  v-bind:place-holder="'※開始時刻を半角で入力します'"
-                  v-bind:value-data="regularTime[index]['fromTime']"
-                  v-on:change-event="timeChanges($event, '1', index)"
-                ></input-time>
-              </div>
-              <!-- /.col -->
-              <!-- .col -->
-              <div class="col-md-6 pb-2" v-if="index === 0">
-                <input-time
-                  v-bind:item-title="'所定労働終了時間 '+(index+1)"
-                  v-bind:item-required="true"
-                  v-bind:place-holder="'※終了時刻を半角で入力します'"
-                  v-bind:value-data="regularTime[index]['toTime']"
-                  v-on:change-event="timeChanges($event, '2', index)"
-                ></input-time>
-              </div>
-              <div class="col-md-6 pb-2" v-else>
-                <input-time
-                  v-bind:item-title="'所定労働終了時間 '+(index+1)"
-                  v-bind:item-required="false"
-                  v-bind:place-holder="'※終了時刻を半角で入力します'"
-                  v-bind:value-data="regularTime[index]['toTime']"
-                  v-on:change-event="timeChanges($event, '2', index)"
-                ></input-time>
-              </div>
-              <!-- /.col -->
-            </div>
-            <!-- /.row -->
-            <!-- /.所定労働時間 -->
             <!-- .row -->
             <div class="row justify-content-between">
-              <!-- panel header -->
-              <daily-working-information-panel-header
-                v-bind:header-text1="'◆休憩時間設定'"
-                v-bind:header-text2="'労働時間に集計しない時間帯を設定します'"
-                v-bind:class-text="'card-header col-12 bg-transparent pb-2 border-0'"
-              ></daily-working-information-panel-header>
-              <!-- /.panel header -->
-            </div>
-            <!-- /.row -->
-            <!-- 休憩時間 -->
-            <!-- .row -->
-            <div
-              class="row justify-content-between"
-              v-for="(item,index) in get_RegularRestTime" v-bind:key="index"
-            >
+              <!-- 所定労働開始時間 -->
               <!-- .col -->
-              <div
-                class="col-md-6 pb-2"
-              >
+              <div class="col-md-6 pb-2">
                 <input-time
-                  v-bind:item-title="'休憩開始時間 '+(index+1)"
-                  v-bind:item-required="false"
+                  v-bind:item-title="'所定労働開始時間'"
+                  v-bind:item-required="true"
                   v-bind:place-holder="'※開始時刻を半角で入力します'"
-                  v-bind:value-data="regularRestTime[index]['fromTime']"
-                  v-on:change-event="timeChanges($event, '3', index)"
+                  v-bind:value-data="form.regularFrom"
+                  v-on:change-event="timeChanges($event, '1')"
                 ></input-time>
               </div>
               <!-- /.col -->
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <input-time
-                  v-bind:item-title="'休憩終了時間 '+(index+1)"
-                  v-bind:item-required="false"
+                  v-bind:item-title="'所定労働終了時間'"
+                  v-bind:item-required="true"
                   v-bind:place-holder="'※終了時刻を半角で入力します'"
-                  v-bind:value-data="regularRestTime[index]['toTime']"
-                  v-on:change-event="timeChanges($event, '4', index)"
+                  v-bind:value-data="form.regularTo"
+                  v-on:change-event="timeChanges($event, '2')"
                 ></input-time>
               </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
-            <!-- /.休憩時間 -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- panel header -->
+              <daily-working-information-panel-header
+                v-bind:header-text1="'◆休憩時間設定'"
+                v-bind:header-text2="'5パターンまで設定できます'"
+                v-bind:class-text="'card-header col-12 bg-transparent pb-2 border-0'"
+              ></daily-working-information-panel-header>
+              <!-- /.panel header -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- 休憩開始時間 A -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <input-time
+                  v-bind:item-title="'休憩開始時間 A'"
+                  v-bind:item-required="false"
+                  v-bind:place-holder="'※開始時刻を半角で入力します'"
+                  v-bind:value-data="form.regularRestFrom1"
+                  v-on:change-event="timeChanges($event, '3')"
+                ></input-time>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <input-time
+                  v-bind:item-title="'休憩終了時間 A'"
+                  v-bind:item-required="false"
+                  v-bind:place-holder="'※終了時刻を半角で入力します'"
+                  v-bind:value-data="form.regularRestTo1"
+                  v-on:change-event="timeChanges($event, '4')"
+                ></input-time>
+              </div>
+              <!-- /.col -->
+              <!-- 休憩開始時間 B -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <input-time
+                  v-bind:item-title="'休憩開始時間 B'"
+                  v-bind:item-required="false"
+                  v-bind:place-holder="'※開始時刻を半角で入力します'"
+                  v-bind:value-data="form.regularRestFrom2"
+                  v-on:change-event="timeChanges($event, '5')"
+                ></input-time>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <input-time
+                  v-bind:item-title="'休憩終了時間 B'"
+                  v-bind:item-required="false"
+                  v-bind:place-holder="'※終了時刻を半角で入力します'"
+                  v-bind:value-data="form.regularRestTo2"
+                  v-on:change-event="timeChanges($event, '6')"
+                ></input-time>
+              </div>
+              <!-- /.col -->
+              <!-- 休憩開始時間 C -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <input-time
+                  v-bind:item-title="'休憩開始時間 C'"
+                  v-bind:item-required="false"
+                  v-bind:place-holder="'※開始時刻を半角で入力します'"
+                  v-bind:value-data="form.regularRestFrom3"
+                  v-on:change-event="timeChanges($event, '7')"
+                ></input-time>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <input-time
+                  v-bind:item-title="'休憩終了時間 C'"
+                  v-bind:item-required="false"
+                  v-bind:place-holder="'※終了時刻を半角で入力します'"
+                  v-bind:value-data="form.regularRestTo3"
+                  v-on:change-event="timeChanges($event, '8')"
+                ></input-time>
+              </div>
+              <!-- /.col -->
+              <!-- 休憩開始時間 D -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <input-time
+                  v-bind:item-title="'休憩開始時間 D'"
+                  v-bind:item-required="false"
+                  v-bind:place-holder="'※開始時刻を半角で入力します'"
+                  v-bind:value-data="form.regularRestFrom4"
+                  v-on:change-event="timeChanges($event, '9')"
+                ></input-time>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <input-time
+                  v-bind:item-title="'休憩終了時間 D'"
+                  v-bind:item-required="false"
+                  v-bind:place-holder="'※終了時刻を半角で入力します'"
+                  v-bind:value-data="form.regularRestTo4"
+                  v-on:change-event="timeChanges($event, '10')"
+                ></input-time>
+              </div>
+              <!-- /.col -->
+              <!-- 休憩開始時間 E -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <input-time
+                  v-bind:item-title="'休憩開始時間 E'"
+                  v-bind:item-required="false"
+                  v-bind:place-holder="'※開始時刻を半角で入力します'"
+                  v-bind:value-data="form.regularRestFrom5"
+                  v-on:change-event="timeChanges($event, '11')"
+                ></input-time>
+              </div>
+              <!-- /.col -->
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <input-time
+                  v-bind:item-title="'休憩終了時間 E'"
+                  v-bind:item-required="false"
+                  v-bind:place-holder="'※終了時刻を半角で入力します'"
+                  v-bind:value-data="form.regularRestTo5"
+                  v-on:change-event="timeChanges($event, '12')"
+                ></input-time>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- panel header -->
@@ -217,37 +281,33 @@
               <!-- /.panel header -->
             </div>
             <!-- /.row -->
-            <!-- 深夜労働時間 -->
             <!-- .row -->
-            <div
-              class="row justify-content-between"
-              v-for="(item,index) in get_MidNightTime" v-bind:key="index"
-            >
+            <div class="row justify-content-between">
+              <!-- 深夜労働開始時間 -->
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <input-time
-                  v-bind:item-title="'深夜労働開始時間 '+(index+1)"
+                  v-bind:item-title="'深夜労働開始時間'"
                   v-bind:item-required="true"
                   v-bind:place-holder="'※開始時刻を半角で入力します'"
-                  v-bind:value-data="midnightTime[index]['fromTime']"
-                  v-on:change-event="timeChanges($event, '5', index)"
+                  v-bind:value-data="form.irregularMidNightFrom"
+                  v-on:change-event="timeChanges($event, '13')"
                 ></input-time>
               </div>
               <!-- /.col -->
               <!-- .col -->
               <div class="col-md-6 pb-2">
                 <input-time
-                  v-bind:item-title="'深夜労働終了時間 '+(index+1)"
+                  v-bind:item-title="'深夜労働終了時間'"
                   v-bind:item-required="true"
                   v-bind:place-holder="'※終了時刻を半角で入力します'"
-                  v-bind:value-data="midnightTime[index]['toTime']"
-                  v-on:change-event="timeChanges($event, '6', index)"
+                  v-bind:value-data="form.irregularMidNightTo"
+                  v-on:change-event="timeChanges($event, '14')"
                 ></input-time>
               </div>
               <!-- /.col -->
             </div>
             <!-- /.row -->
-            <!-- /.深夜労働時間 -->
             <!-- ----------- 項目部 END ---------------- -->
             <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
@@ -817,13 +877,21 @@ export default {
         apply_term_from: "",
         id: "",
         no: "",
-        regular: [],
-        regularRest: [],
-        midnight: []
+        regularFrom: "",
+        regularTo: "",
+        regularRestFrom1: "",
+        regularRestTo1: "",
+        regularRestFrom2: "",
+        regularRestTo2: "",
+        regularRestFrom3: "",
+        regularRestTo3: "",
+        regularRestFrom4: "",
+        regularRestTo4: "",
+        regularRestFrom5: "",
+        regularRestTo5: "",
+        irregularMidNightFrom: "",
+        irregularMidNightTo: ""
       },
-      regularTime: [],
-      regularRestTime: [],
-      midnightTime: [],
       count: 0,
       before_count: 0,
       timeRow_count: 0,
@@ -921,112 +989,117 @@ export default {
           this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
         }
       }
-
-      // 所定労働時間
-      for (let index = 0; index < this.regularTime.length; index++) {
-        if (index == 0) {
-          required = true;
+      // 所定労働開始時間
+      var required = true;
+      var equalength = 0;
+      var maxlength = 0;
+      var itemname = '所定労働開始時間';
+      chkArray = 
+        this.checkHeader(this.form.regularFrom, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesNew.length == 0) {
+          this.messagevalidatesNew = chkArray;
         } else {
-          required = false;
-        }
-        equalength = 0;
-        maxlength = 0;
-        itemname = '所定労働開始時間';
-        chkArray = 
-          this.checkDetailtext(this.regularTime[index]['fromTime'], required, equalength, maxlength, index+1, itemname);
-        if (chkArray.length > 0) {
-          if (this.messagevalidatesNew.length == 0) {
-            this.messagevalidatesNew = chkArray;
-          } else {
-            this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-          }
-        }
-        if (index == 0) {
-          required = true;
-        } else {
-          required = false;
-        }
-        equalength = 0;
-        maxlength = 0;
-        itemname = '所定労働終了時間';
-        chkArray = 
-          this.checkDetailtext(this.regularTime[index]['toTime'], required, equalength, maxlength, index+1, itemname);
-        if (chkArray.length > 0) {
-          if (this.messagevalidatesNew.length == 0) {
-            this.messagevalidatesNew = chkArray;
-          } else {
-            this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-          }
+          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
         }
       }
-
-      // 休憩時間
-      for (let index = 0; index < this.regularRestTime.length; index++) {
-        required = false;
-        equalength = 0;
-        maxlength = 0;
-        itemname = '休憩開始時間';
-        chkArray = 
-          this.checkDetailtext(this.regularRestTime[index]['fromTime'], required, equalength, maxlength, index+1, itemname);
-        if (chkArray.length > 0) {
-          if (this.messagevalidatesNew.length == 0) {
-            this.messagevalidatesNew = chkArray;
-          } else {
-            this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-          }
+      // 所定労働終了時間
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '所定労働終了時間';
+      chkArray = 
+        this.checkHeader(this.form.regularTo, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesNew.length == 0) {
+          this.messagevalidatesNew = chkArray;
+        } else {
+          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
         }
-        required = false;
-        equalength = 0;
-        maxlength = 0;
-        itemname = '休憩終了時間';
-        chkArray = 
-          this.checkDetailtext(this.regularRestTime[index]['toTime'], required, equalength, maxlength, index+1, itemname);
-        if (chkArray.length > 0) {
-          if (this.messagevalidatesNew.length == 0) {
-            this.messagevalidatesNew = chkArray;
-          } else {
-            this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-          }
+      }
+      // 休憩終了時間A
+      if (this.form.regularRestFrom1 != "" && this.form.regularRestFrom1 != null) {
+        if (this.form.regularRestTo1 == "" || this.form.regularRestTo1 == null) {
+          this.messagevalidatesNew.push("休憩終了時間 Aを入力してください");
+        }
+      }
+      if (this.form.regularRestTo1 != "" && this.form.regularRestTo1 != null) {
+        if (this.form.regularRestFrom1 == "" || this.form.regularRestFrom1 == null) {
+          this.messagevalidatesNew.push("休憩開始時間 Aを入力してください");
+        }
+      }
+      // 休憩終了時間B
+      if (this.form.regularRestFrom2 != "" && this.form.regularRestFrom2 != null) {
+        if (this.form.regularRestTo2 == "" || this.form.regularRestTo2 == null) {
+          this.messagevalidatesNew.push("休憩終了時間 Bを入力してください");
+        }
+      }
+      if (this.form.regularRestTo2 != "" && this.form.regularRestTo2 != null) {
+        if (this.form.regularRestFrom2 == "" || this.form.regularRestFrom2 == null) {
+          this.messagevalidatesNew.push("休憩開始時間 Bを入力してください");
+        }
+      }
+      // 休憩終了時間C
+      if (this.form.regularRestFrom3 != "" && this.form.regularRestFrom3 != null) {
+        if (this.form.regularRestTo3 == "" || this.form.regularRestTo3 == null) {
+          this.messagevalidatesNew.push("休憩終了時間 Cを入力してください");
+        }
+      }
+      if (this.form.regularRestTo3 != "" && this.form.regularRestTo3 != null) {
+        if (this.form.regularRestFrom3 == "" || this.form.regularRestFrom3 == null) {
+          this.messagevalidatesNew.push("休憩開始時間 Cを入力してください");
+        }
+      }
+      // 休憩終了時間D
+      if (this.form.regularRestFrom4 != "" && this.form.regularRestFrom4 != null) {
+        if (this.form.regularRestTo4 == "" || this.form.regularRestTo4 == null) {
+          this.messagevalidatesNew.push("休憩終了時間 Dを入力してください");
+        }
+      }
+      if (this.form.regularRestTo4 != "" && this.form.regularRestTo4 != null) {
+        if (this.form.regularRestFrom4 == "" || this.form.regularRestFrom4 == null) {
+          this.messagevalidatesNew.push("休憩開始時間 Dを入力してください");
+        }
+      }
+      // 休憩終了時間E
+      if (this.form.regularRestFrom5 != "" && this.form.regularRestFrom5 != null) {
+        if (this.form.regularRestTo5 == "" || this.form.regularRestTo5 == null) {
+          this.messagevalidatesNew.push("休憩終了時間 Eを入力してください");
+        }
+      }
+      if (this.form.regularRestTo5 != "" && this.form.regularRestTo5 != null) {
+        if (this.form.regularRestFrom5 == "" || this.form.regularRestFrom5 == null) {
+          this.messagevalidatesNew.push("休憩開始時間 Eを入力してください");
         }
       }
       // 深夜労働開始時間
-      for (let index = 0; index < this.midnightTime.length; index++) {
-        if (index == 0) {
-          required = true;
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '深夜労働開始時間';
+      chkArray = 
+        this.checkHeader(this.form.irregularMidNightFrom, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesNew.length == 0) {
+          this.messagevalidatesNew = chkArray;
         } else {
-          required = false;
-        }
-        equalength = 0;
-        maxlength = 0;
-        itemname = '深夜労働開始時間';
-        chkArray = 
-          this.checkDetailtext(this.midnightTime[index]['fromTime'], required, equalength, maxlength, index+1, itemname);
-        if (chkArray.length > 0) {
-          if (this.messagevalidatesNew.length == 0) {
-            this.messagevalidatesNew = chkArray;
-          } else {
-            this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-          }
-        }
-        if (index == 0) {
-          required = true;
-        } else {
-          required = false;
-        }
-        equalength = 0;
-        maxlength = 0;
-        itemname = '深夜労働終了時間';
-        chkArray = 
-          this.checkDetailtext(this.midnightTime[index]['toTime'], required, equalength, maxlength, index+1, itemname);
-        if (chkArray.length > 0) {
-          if (this.messagevalidatesNew.length == 0) {
-            this.messagevalidatesNew = chkArray;
-          } else {
-            this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
-          }
+          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
         }
       }
-
+      // 深夜労働終了時間
+      required = true;
+      equalength = 0;
+      maxlength = 0;
+      itemname = '深夜労働終了時間';
+      chkArray = 
+        this.checkHeader(this.form.irregularMidNightTo, required, equalength, maxlength, itemname);
+      if (chkArray.length > 0) {
+        if (this.messagevalidatesNew.length == 0) {
+          this.messagevalidatesNew = chkArray;
+        } else {
+          this.messagevalidatesNew = this.messagevalidatesNew.concat(chkArray);
+        }
+      }
       if (this.messagevalidatesNew.length > 0) {
         flag = false;
       }
@@ -1208,19 +1281,35 @@ export default {
 
     }, */
     // 時刻が変更された場合の処理
-    timeChanges: function(value, type, index) {
+    timeChanges: function(value, type) {
       if (type == '1') {
-        this.regularTime[index]['fromTime'] = value;
+        this.form.regularFrom = value;
       } else if (type == '2') {
-        this.regularTime[index]['toTime'] = value;
+        this.form.regularTo = value;
       } else if (type == '3') {
-        this.regularRestTime[index]['fromTime'] = value;
+        this.form.regularRestFrom1 = value;
       } else if (type == '4') {
-        this.regularRestTime[index]['toTime'] = value;
+        this.form.regularRestTo1 = value;
       } else if (type == '5') {
-        this.midnightTime[index]['fromTime'] = value;
+        this.form.regularRestFrom2 = value;
       } else if (type == '6') {
-        this.midnightTime[index]['toTime'] = value;
+        this.form.regularRestTo2 = value;
+      } else if (type == '7') {
+        this.form.regularRestFrom3 = value;
+      } else if (type == '8') {
+        this.form.regularRestTo3 = value;
+      } else if (type == '9') {
+        this.form.regularRestFrom4 = value;
+      } else if (type == '10') {
+        this.form.regularRestTo4 = value;
+      } else if (type == '11') {
+        this.form.regularRestFrom5 = value;
+      } else if (type == '12') {
+        this.form.regularRestTo5 = value;
+      } else if (type == '13') {
+        this.form.irregularMidNightFrom = value;
+      } else if (type == '14') {
+        this.form.irregularMidNightTo = value;
       }
     },
     // 有効期間が変更された場合の処理
@@ -1389,9 +1478,6 @@ export default {
     // タイムテーブル登録処理
     store() {
       var messages = [];
-      this.form.regularTime = this.regularTime;
-      this.form.regularRestTime = this.regularRestTime;
-      this.form.midnightTime = this.midnightTime;
       var arrayParams = { no : this.form.no, name : this.form.name, details : this.form };
       this.postRequest("/create_time_table/store", arrayParams)
         .then(response  => {
@@ -1537,40 +1623,24 @@ export default {
       this.selectMode = "";
       this.count = 0;
       this.before_count = 0;
-      var array_set = [{}];
-      this.regularTime = [];
-      for(var i=0;i<this.regularTime_count;i++) {
-          array_set = {
-            fromTime: "",
-            toTime: ""
-          };
-          this.regularTime.push(array_set);
-      }
-      array_set = [{}];
-      this.regularRestTime = [];
-      for(var i=0;i<this.regularRestTime_count;i++) {
-          array_set = {
-            fromTime: "",
-            toTime: ""
-          };
-          this.regularRestTime.push(array_set);
-      }
-      array_set = [{}];
-      this.midnightTime = [];
-      for(var i=0;i<this.midnightTime_count;i++) {
-          array_set = {
-            fromTime: "",
-            toTime: ""
-          };
-          this.midnightTime.push(array_set);
-      }
       this.form.name = "";
       this.form.apply_term_from = "";
       this.form.id = "";
       this.form.no = "";
-      this.form.regular = this.regularTime;
-      this.form.regularRest = this.regularRestTime;
-      this.form.midnight = this.midnightTime;
+      this.form.regularFrom = "";
+      this.form.regularTo = "";
+      this.form.regularRestFrom1 = "";
+      this.form.regularRestTo1 = "";
+      this.form.regularRestFrom2 = "";
+      this.form.regularRestTo2 = "";
+      this.form.regularRestFrom3 = "";
+      this.form.regularRestTo3 = "";
+      this.form.regularRestFrom4 = "";
+      this.form.regularRestTo4 = "";
+      this.form.regularRestFrom5 = "";
+      this.form.regularRestTo5 = "";
+      this.form.irregularMidNightFrom = "";
+      this.form.irregularMidNightTo = "";
     },
     checkRowData(index) {
       if (this.details[(index-1) * this.timeRow_count].name != "" && this.details[(index-1) * this.timeRow_count].name != null) { return true; }
