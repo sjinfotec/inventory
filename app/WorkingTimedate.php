@@ -2697,23 +2697,61 @@ class WorkingTimedate extends Model
             $str_replace_absence_kubun0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_absence_kubun);
             $str_replace_absence_kubun1 =str_replace('{1}', Config::get('const.C013.absence_work'), $str_replace_absence_kubun0);
 
+            $sum_time = "CONCAT( ";
+            $sum_time .= "SUM(TRUNCATE(ifnull({0}, 0), 0)) ";
+            $sum_time .= "+ TRUNCATE(SUM(TRUNCATE((MOD(ifnull({0}, 0) * 100, 100) * 60) / 100, 0)) / 60, 0)";
+            $sum_time .= ", ':', ";
+            $sum_time .= " LPAD(MOD(SUM(TRUNCATE((MOD(ifnull({0}, 0) * 100, 100) * 60) / 100, 0)) , 60), 2, '0')) as {1} ";
+
+            $sum_time1 = str_replace('{0}', $this->table.'.total_working_times', $sum_time);
+            $sum_time2 = str_replace('{1}', 'total_working_times', $sum_time1);
+            $sum_time3 = str_replace('{0}', $this->table.'.regular_working_times', $sum_time);
+            $sum_time4 = str_replace('{1}', 'regular_working_times', $sum_time3);
+            $sum_time5 = str_replace('{0}', $this->table.'.out_of_regular_working_times', $sum_time);
+            $sum_time6 = str_replace('{1}', 'out_of_regular_working_times', $sum_time5);
+            $sum_time7 = str_replace('{0}', $this->table.'.overtime_hours', $sum_time);
+            $sum_time8 = str_replace('{1}', 'overtime_hours', $sum_time7);
+            $sum_time9 = str_replace('{0}', $this->table.'.late_night_overtime_hours', $sum_time);
+            $sum_time10 = str_replace('{1}', 'late_night_overtime_hours', $sum_time9);
+            $sum_time11 = str_replace('{0}', $this->table.'.late_night_working_hours', $sum_time);
+            $sum_time12 = str_replace('{1}', 'late_night_working_hours', $sum_time11);
+            $sum_time13 = str_replace('{0}', $this->table.'.legal_working_times', $sum_time);
+            $sum_time14 = str_replace('{1}', 'legal_working_times', $sum_time13);
+            $sum_time15 = str_replace('{0}', $this->table.'.out_of_legal_working_times', $sum_time);
+            $sum_time16 = str_replace('{1}', 'out_of_legal_working_times', $sum_time15);
+            $sum_time17 = str_replace('{0}', $this->table.'.not_employment_working_hours', $sum_time);
+            $sum_time18 = str_replace('{1}', 'not_employment_working_hours', $sum_time17);
+            $sum_time19 = str_replace('{0}', $this->table.'.off_hours_working_hours', $sum_time);
+            $sum_time20 = str_replace('{1}', 'off_hours_working_hours', $sum_time19);
+            $sum_time21 = str_replace('{0}', $this->table.'.public_going_out_hours', $sum_time);
+            $sum_time22 = str_replace('{1}', 'public_going_out_hours', $sum_time21);
+            $sum_time23 = str_replace('{0}', $this->table.'.missing_middle_hours', $sum_time);
+            $sum_time24 = str_replace('{1}', 'missing_middle_hours', $sum_time23);
+            $sum_time25 = str_replace('{0}', $this->table.'.out_of_legal_working_holiday_hours', $sum_time);
+            $sum_time26 = str_replace('{1}', 'out_of_legal_working_holiday_hours', $sum_time25);
+            $sum_time27 = str_replace('{0}', $this->table.'.out_of_legal_working_holiday_night_overtime_hours', $sum_time);
+            $sum_time28 = str_replace('{1}', 'out_of_legal_working_holiday_night_overtime_hours', $sum_time27);
+            $sum_time29 = str_replace('{0}', $this->table.'.legal_working_holiday_hours', $sum_time);
+            $sum_time30 = str_replace('{1}', 'legal_working_holiday_hours', $sum_time29);
+            $sum_time31 = str_replace('{0}', $this->table.'.legal_working_holiday_night_overtime_hours', $sum_time);
+            $sum_time32 = str_replace('{1}', 'legal_working_holiday_night_overtime_hours', $sum_time31);
             $subquery = DB::table($this->table)
-                ->selectRaw('sum(ifnull('.$this->table.'.total_working_times, 0)) as total_working_times')
-                ->selectRaw('sum(ifnull('.$this->table.'.regular_working_times, 0)) as regular_working_times')
-                ->selectRaw('sum(ifnull('.$this->table.'.out_of_regular_working_times, 0)) as out_of_regular_working_times')
-                ->selectRaw('sum(ifnull('.$this->table.'.overtime_hours, 0)) as overtime_hours')
-                ->selectRaw('sum(ifnull('.$this->table.'.late_night_overtime_hours, 0)) as late_night_overtime_hours')
-                ->selectRaw('sum(ifnull('.$this->table.'.late_night_working_hours, 0)) as late_night_working_hours')
-                ->selectRaw('sum(ifnull('.$this->table.'.legal_working_times, 0)) as legal_working_times')
-                ->selectRaw('sum(ifnull('.$this->table.'.out_of_legal_working_times, 0)) as out_of_legal_working_times')
-                ->selectRaw('sum(ifnull('.$this->table.'.not_employment_working_hours, 0)) as not_employment_working_hours')
-                ->selectRaw('sum(ifnull('.$this->table.'.off_hours_working_hours, 0)) as off_hours_working_hours')
-                ->selectRaw('sum(ifnull('.$this->table.'.public_going_out_hours, 0)) as public_going_out_hours')
-                ->selectRaw('sum(ifnull('.$this->table.'.missing_middle_hours, 0)) as missing_middle_hours')
-                ->selectRaw('sum(ifnull('.$this->table.'.out_of_legal_working_holiday_hours, 0)) as out_of_legal_working_holiday_hours')
-                ->selectRaw('sum(ifnull('.$this->table.'.out_of_legal_working_holiday_night_overtime_hours, 0)) as out_of_legal_working_holiday_night_overtime_hours')
-                ->selectRaw('sum(ifnull('.$this->table.'.legal_working_holiday_hours, 0)) as legal_working_holiday_hours')
-                ->selectRaw('sum(ifnull('.$this->table.'.legal_working_holiday_night_overtime_hours, 0)) as legal_working_holiday_night_overtime_hours')
+                ->selectRaw($sum_time2)
+                ->selectRaw($sum_time4)
+                ->selectRaw($sum_time6)
+                ->selectRaw($sum_time8)
+                ->selectRaw($sum_time10)
+                ->selectRaw($sum_time12)
+                ->selectRaw($sum_time14)
+                ->selectRaw($sum_time16)
+                ->selectRaw($sum_time18)
+                ->selectRaw($sum_time20)
+                ->selectRaw($sum_time22)
+                ->selectRaw($sum_time24)
+                ->selectRaw($sum_time26)
+                ->selectRaw($sum_time28)
+                ->selectRaw($sum_time30)
+                ->selectRaw($sum_time32)
                 ->selectRaw('sum('.$str_replace_working_status11.') as total_working_status')
                 ->selectRaw('sum('.$str_replace_go_out2.') as total_go_out')
                 ->selectRaw('sum('.$str_replace_paid_holidays3.') as total_paid_holidays')
@@ -2733,15 +2771,8 @@ class WorkingTimedate extends Model
             $array_groupby = [];
             $subquery = $this->setWhereSql($subquery);
             
-            $case_where_1 = "";
             if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
                 $array_groupby[] = $this->table.'.working_date';
-
-                $case_where_1 = "CASE ifnull({0},{1}) WHEN {1} THEN '{2}' ";
-                $case_where_1 .= " WHEN {3} THEN '{4}' ";
-                $case_where_1 .= " WHEN {5} THEN '{6}' ";
-                $case_where_1 .= " ELSE '{2}' ";
-                $case_where_1 .= ' END as {7}';
             }
             if(!empty($this->param_employment_status)){
                 $array_groupby[] = $this->table.'.employment_status';
@@ -2758,22 +2789,22 @@ class WorkingTimedate extends Model
             $subquery1 = $subquery->toSql();
 
             $mainquery = DB::table(DB::raw('('.$subquery1.') AS t1'))
-                ->selectRaw(str_replace('{1}', 'total_working_times', str_replace('{0}', 't1.total_working_times', $case_where)))
-                ->selectRaw(str_replace('{1}', 'regular_working_times', str_replace('{0}', 't1.regular_working_times', $case_where)))
-                ->selectRaw(str_replace('{1}', 'out_of_regular_working_times', str_replace('{0}', 't1.out_of_regular_working_times', $case_where)))
-                ->selectRaw(str_replace('{1}', 'overtime_hours', str_replace('{0}', 't1.overtime_hours', $case_where)))
-                ->selectRaw(str_replace('{1}', 'late_night_overtime_hours', str_replace('{0}', 't1.late_night_overtime_hours', $case_where)))
-                ->selectRaw(str_replace('{1}', 'late_night_working_hours', str_replace('{0}', 't1.late_night_working_hours', $case_where)))
-                ->selectRaw(str_replace('{1}', 'legal_working_times', str_replace('{0}', 't1.legal_working_times', $case_where)))
-                ->selectRaw(str_replace('{1}', 'out_of_legal_working_times', str_replace('{0}', 't1.out_of_legal_working_times', $case_where)))
-                ->selectRaw(str_replace('{1}', 'not_employment_working_hours', str_replace('{0}', 't1.not_employment_working_hours', $case_where)))
-                ->selectRaw(str_replace('{1}', 'off_hours_working_hours', str_replace('{0}', 't1.off_hours_working_hours', $case_where)))
-                ->selectRaw(str_replace('{1}', 'public_going_out_hours', str_replace('{0}', 't1.public_going_out_hours', $case_where)))
-                ->selectRaw(str_replace('{1}', 'missing_middle_hours', str_replace('{0}', 't1.missing_middle_hours', $case_where)))
-                ->selectRaw(str_replace('{1}', 'out_of_legal_working_holiday_hours', str_replace('{0}', 't1.out_of_legal_working_holiday_hours', $case_where)))
-                ->selectRaw(str_replace('{1}', 'out_of_legal_working_holiday_night_overtime_hours', str_replace('{0}', 't1.out_of_legal_working_holiday_night_overtime_hours', $case_where)))
-                ->selectRaw(str_replace('{1}', 'legal_working_holiday_hours', str_replace('{0}', 't1.legal_working_holiday_hours', $case_where)))
-                ->selectRaw(str_replace('{1}', 'legal_working_holiday_night_overtime_hours', str_replace('{0}', 't1.legal_working_holiday_night_overtime_hours', $case_where)))
+                ->selectRaw('t1.total_working_times as total_working_times')
+                ->selectRaw('t1.regular_working_times as regular_working_times')
+                ->selectRaw('t1.out_of_regular_working_times as out_of_regular_working_times')
+                ->selectRaw('t1.overtime_hours as overtime_hours')
+                ->selectRaw('t1.late_night_overtime_hours as late_night_overtime_hours')
+                ->selectRaw('t1.late_night_working_hours as late_night_working_hours')
+                ->selectRaw('t1.legal_working_times as legal_working_times')
+                ->selectRaw('t1.out_of_legal_working_times as out_of_legal_working_times')
+                ->selectRaw('t1.not_employment_working_hours as not_employment_working_hours')
+                ->selectRaw('t1.off_hours_working_hours as off_hours_working_hours')
+                ->selectRaw('t1.public_going_out_hours as public_going_out_hours')
+                ->selectRaw('t1.missing_middle_hours as missing_middle_hours')
+                ->selectRaw('t1.out_of_legal_working_holiday_hours as out_of_legal_working_holiday_hours')
+                ->selectRaw('t1.out_of_legal_working_holiday_night_overtime_hours as out_of_legal_working_holiday_night_overtime_hours')
+                ->selectRaw('t1.legal_working_holiday_hours as legal_working_holiday_hours')
+                ->selectRaw('t1.legal_working_holiday_night_overtime_hours as legal_working_holiday_night_overtime_hours')
                 ->selectRaw('ifnull(t1.total_working_status, 0) as total_working_status' )
                 ->selectRaw('ifnull(t1.total_go_out, 0) as total_go_out' )
                 ->selectRaw('ifnull(t1.total_paid_holidays, 0) as total_paid_holidays' )

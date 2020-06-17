@@ -94,11 +94,8 @@ tbody {
   min-width: 2.6rem;
 }
 
-<<<<<<< HEAD
-=======
 
 input {
     vertical-align : middle;
 }
->>>>>>> develop
 </style>
