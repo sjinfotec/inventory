@@ -443,7 +443,7 @@ class WorkTime extends Model
                         'editor_department_code' => $this->editor_department_code,
                         'editor_user_code' => $this->editor_user_code,
                         'created_user' => $this->created_user,
-                        'created_at_'=>$this->systemdate
+                        'created_at'=>$this->systemdate
                     ]
                 );
             }
