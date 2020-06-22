@@ -90,6 +90,7 @@ use App\FeatureItemSelection;
  *          時刻日付変換from                        : convTimeToDateFrom
  *          時刻日付変換to                          : convTimeToDateTo
  *          インターバル時間を取得して分に変換する    : getIntevalMinute
+ *          timestampを時間単位の10進数に変換する    : cnvToDecFromStamp
  *      8.設定
  *          タイムテーブルの分解                        : analyzeTimeTable
  *          タイムテーブル労働開始終了時間テーブル設定    : setWorkingStartEndTimeTable
@@ -1180,6 +1181,65 @@ class ApiCommonController extends Controller
             $calendar_setting_model->setParamfromdateAttribute($dt1->format('Ymd'));
             $calendar_setting_model->setParamtodateAttribute($dt2->format('Ymd'));
             $results = $calendar_setting_model->getShiftDetail();
+            // csvitemの取得
+            $selection_code = Config::get('const.C037.csvshift');
+            $csvitem_model = new CsvItemSelection();
+            $csvitem_model->setParamaccountidAttribute(
+                array(Config::get('const.ACCOUNTID.account_id')));
+            $csvitem_model->setParamselectioncodeAttribute($selection_code);
+            $csvitem_details = $csvitem_model->getCsvItem();
+            $collect_csvitem_details = collect($csvitem_details);
+            // csv項目の選択値取得
+            $filtered = $collect_csvitem_details
+                ->where('item_name', '=', 'department_name');
+            $set_department_name = 0;
+            foreach ($filtered as $item) {
+                $set_department_name = $item->is_select;
+                break;
+            }
+            $set_employment_name = 0;
+            $filtered = $collect_csvitem_details
+                ->where('item_name', '=', 'employment_name');
+            foreach ($filtered as $item) {
+                $set_employment_name = $item->is_select;
+                break;
+            }
+            $set_user_name = 0;
+            $filtered = $collect_csvitem_details
+                ->where('item_name', '=', 'user_name');
+            foreach ($filtered as $item) {
+                $set_user_name = $item->is_select;
+                break;
+            }
+            $set_regular_day_cnt = 0;
+            $filtered = $collect_csvitem_details
+                ->where('item_name', '=', 'regular_day_cnt');
+            foreach ($filtered as $item) {
+                $set_regular_day_cnt = $item->is_select;
+                break;
+            }
+            $set_night_day_cnt = 0;
+            $filtered = $collect_csvitem_details
+                ->where('item_name', '=', 'night_day_cnt');
+            foreach ($filtered as $item) {
+                $set_night_day_cnt = $item->is_select;
+                break;
+            }
+            // 週休振替weekly_dayoff_cntはTODO
+            $set_weekly_dayoff_cnt = 0;
+            $filtered = $collect_csvitem_details
+                ->where('item_name', '=', 'weekly_dayoff_cnt');
+            foreach ($filtered as $item) {
+                $set_weekly_dayoff_cnt = $item->is_select;
+                break;
+            }
+            $set_paid_holiday_cnt = 0;
+            $filtered = $collect_csvitem_details
+                ->where('item_name', '=', 'paid_holiday_cnt');
+            foreach ($filtered as $item) {
+                $set_paid_holiday_cnt = $item->is_select;
+                break;
+            }
             $current_user_code = null;
             $current_item = null;
             $array_user_data = array();
@@ -1188,8 +1248,11 @@ class ApiCommonController extends Controller
             $night_day_cnt = 0;
             $regular_day_cnt = 0;
             $paid_holiday_cnt = 0;
+            $weekly_dayoff_cnt = 0;
             $night_day_times = 0;
             $regular_day_times = 0;
+            $paid_holiday_day_times = 0;
+            $weekly_dayoff_times = 0;
             foreach($results as $item) {
                 if($current_user_code == null) {$current_user_code = $item->user_code;}
                 if($current_item == null) {$current_item = $item;}
@@ -1221,6 +1284,8 @@ class ApiCommonController extends Controller
                     $paid_holiday_cnt += $item->paid_holiday_cnt;
                     if ($item->night_day_cnt == 1) {$night_day_times += $item->total_working_times;}
                     if ($item->regular_day_cnt == 1) {$regular_day_times += $item->total_working_times;}
+                    if ($item->paid_holiday_cnt == 1) {$paid_holiday_day_times += $item->total_working_times;}
+                    if ($item->paid_holiday_cnt == 0.5) {$paid_holiday_day_times += $item->total_working_times * 0.5;}
                     if ($current_item->date != $item->date) {$current_item->date = $item->date;}
                 } else {
                     if (count($detail_dates) > 0 && !$set_detail_dates) {
@@ -1255,13 +1320,27 @@ class ApiCommonController extends Controller
                         'employment_status' => $current_item->employment_status,
                         'user_code' => $current_item->user_code,
                         'department_name' => $current_item->department_name,
+                        'set_department_name' => $set_department_name,
                         'employment_name' => $current_item->employment_name,
+                        'set_employment_name' => $set_employment_name,
                         'user_name' => $current_item->user_name,
+                        'set_user_name' => $set_user_name,
                         'night_day_cnt' => $night_day_cnt,
+                        'set_night_day_cnt' => $set_night_day_cnt,
                         'regular_day_cnt' => $regular_day_cnt,
+                        'set_regular_day_cnt' => $set_regular_day_cnt,
+                        'weekly_dayoff_cnt' => $weekly_dayoff_cnt,
+                        'set_weekly_dayoff_cnt' => $set_weekly_dayoff_cnt,
                         'paid_holiday_cnt' => $paid_holiday_cnt,
+                        'set_paid_holiday_cnt' => $set_paid_holiday_cnt,
                         'night_day_times' => number_format($night_day_times, 2, '.', ''),
+                        'set_night_day_times' => $set_night_day_cnt,
                         'regular_day_times' =>  number_format($regular_day_times, 2, '.', ''),
+                        'set_regular_day_times' => $set_regular_day_cnt,
+                        'weekly_dayoff_times' => number_format($weekly_dayoff_times, 2, '.', ''),
+                        'set_weekly_dayoff_times' => $set_weekly_dayoff_cnt,
+                        'paid_holiday_day_times' =>  number_format($paid_holiday_day_times, 2, '.', ''),
+                        'set_paid_holiday_day_times' => $set_paid_holiday_cnt,
                         'array_user_date_data' => $array_user_date_data
                     );
                     $current_user_code = $item->user_code;
@@ -1310,11 +1389,14 @@ class ApiCommonController extends Controller
                     $paid_holiday_cnt = 0;
                     $night_day_times = 0;
                     $regular_day_times = 0;
+                    $paid_holiday_day_times = 0;
                     $night_day_cnt += $item->night_day_cnt;
                     $regular_day_cnt += $item->regular_day_cnt;
                     $paid_holiday_cnt += $item->paid_holiday_cnt;
                     if ($item->night_day_cnt == 1) {$night_day_times += $item->total_working_times;}
                     if ($item->regular_day_cnt == 1) {$regular_day_times += $item->total_working_times;}
+                    if ($item->paid_holiday_cnt == 1) {$paid_holiday_day_times += $item->total_working_times;}
+                    if ($item->paid_holiday_cnt == 0.5) {$paid_holiday_day_times += $item->total_working_times * 0.5;}
                 }
             }
             // 残り
@@ -1348,13 +1430,27 @@ class ApiCommonController extends Controller
                     'employment_status' => $current_item->employment_status,
                     'user_code' => $current_item->user_code,
                     'department_name' => $current_item->department_name,
+                    'set_department_name' => $set_department_name,
                     'employment_name' => $current_item->employment_name,
+                    'set_employment_name' => $set_employment_name,
                     'user_name' => $current_item->user_name,
+                    'set_user_name' => $set_user_name,
                     'night_day_cnt' => $night_day_cnt,
+                    'set_night_day_cnt' => $set_night_day_cnt,
                     'regular_day_cnt' => $regular_day_cnt,
+                    'set_regular_day_cnt' => $set_regular_day_cnt,
+                    'weekly_dayoff_cnt' => $weekly_dayoff_cnt,
+                    'set_weekly_dayoff_cnt' => $set_weekly_dayoff_cnt,
                     'paid_holiday_cnt' => $paid_holiday_cnt,
+                    'set_paid_holiday_cnt' => $set_paid_holiday_cnt,
                     'night_day_times' => number_format($night_day_times, 2, '.', ''),
+                    'set_night_day_times' => $set_night_day_cnt,
                     'regular_day_times' => number_format($regular_day_times, 2, '.', ''),
+                    'set_regular_day_times' => $set_regular_day_cnt,
+                    'weekly_dayoff_times' => number_format($weekly_dayoff_times, 2, '.', ''),
+                    'set_weekly_dayoff_times' => $set_weekly_dayoff_cnt,
+                    'paid_holiday_day_times' =>  number_format($paid_holiday_day_times, 2, '.', ''),
+                    'set_paid_holiday_day_times' => $set_paid_holiday_cnt,
                     'array_user_date_data' => $array_user_date_data
                 );
             }
@@ -1364,7 +1460,7 @@ class ApiCommonController extends Controller
             }
             $result = true;
             return response()->json(
-                ['result' => $result, 'details' => $details, 'detail_dates' => $detail_dates,
+                ['result' => $result, 'details' => $details, 'detail_dates' => $detail_dates, 'csvitem_details' => $csvitem_details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
@@ -3402,10 +3498,11 @@ class ApiCommonController extends Controller
      */
     public function cnvToDecFromStamp($target_time){
         $time_division = $target_time / 3600;
-        $time_int = floor($time_division);
-        $convert_time = $time_int;
+        $time_hours = floor($time_division);                            //  時間数
+        // $time_min = floor($target_time - ($time_hours * 3600) / 60);    //  分
+        $convert_time = $time_hours;
         // 小数第３位が0でない場合は四捨五入
-        $w_time_decimal_part = $time_division - $time_int;
+        $w_time_decimal_part = $time_division - $time_hours;
         if ($w_time_decimal_part > 0) {
             $w_time_decimal_part_3 = $w_time_decimal_part * 100;
             $w_time_decimal_part_31 = $w_time_decimal_part_3 - floor($w_time_decimal_part_3);

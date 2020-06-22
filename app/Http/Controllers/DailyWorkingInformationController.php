@@ -703,8 +703,9 @@ class DailyWorkingInformationController extends Controller
             //     出勤2回  10:00 11:30　skip
             //     出勤3回  10:00 11:30  skip
             $is_dup = $this->isDupTime($result, $before_result);        // false:skip
+            Log::debug('         skip?　is_dup  = '.$is_dup);
             if ($is_dup) {
-                if ($result->record_datetime != null && $result->mode != null) {
+                if ($result->record_datetime != null && $result->mode != null && $result->mode != '') {
                     // 設定値確認（エラー内容はログに出力している）
                     $chk_setting = $this->chkSettingData($result);
                     // 設定が正常である場合
@@ -5163,6 +5164,8 @@ class DailyWorkingInformationController extends Controller
             Log::debug('                       insTempCalcItem use_free_item = '.$result->use_free_item);
             Log::debug('                       insTempCalcItem set_chk = '.$set_chk);
             if ($set_chk == "1") {
+                Log::debug('                       array_calc_mode  = '.$this->array_calc_mode[$i]);
+                Log::debug('                       array_calc_time  = '.$this->array_calc_time[$i]);
                 $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
                 $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
                 $temp_calc_model->setWorktimesidAttribute($this->array_dsp_time_id[$i]);
@@ -5234,6 +5237,8 @@ class DailyWorkingInformationController extends Controller
                 }
                 $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.user_holiday'));
             } else {
+                Log::debug('                       array_calc_mode  = '.$this->array_calc_mode[$i]);
+                Log::debug('                       array_calc_time  = '.$this->array_calc_time[$i]);
                 $temp_calc_model->setModeAttribute($this->array_calc_mode[$i]);
                 $temp_calc_model->setRecorddatetimeAttribute($this->array_calc_time[$i]);
                 $temp_calc_model->setWorktimesidAttribute($this->array_dsp_time_id[$i]);
@@ -5952,7 +5957,8 @@ class DailyWorkingInformationController extends Controller
                                 'array_add_emergency_return_editor_department_name' => $array_add_emergency_return_editor_department_name,
                                 'array_add_emergency_return_editor_user_code' => $array_add_emergency_return_editor_user_code,
                                 'array_add_emergency_return_editor_user_name' => $array_add_emergency_return_editor_user_name,
-                                'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions
+                                'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions,
+                                'array_get_timetable_result' => $array_get_timetable_result
                             );
 
                             $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
@@ -6247,7 +6253,8 @@ class DailyWorkingInformationController extends Controller
                             'array_add_emergency_return_editor_department_name' => $array_add_emergency_return_editor_department_name,
                             'array_add_emergency_return_editor_user_code' => $array_add_emergency_return_editor_user_code,
                             'array_add_emergency_return_editor_user_name' => $array_add_emergency_return_editor_user_name,
-                            'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions
+                            'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions,
+                            'array_get_timetable_result' => $array_get_timetable_result
                     );
                         $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                     }
@@ -6505,7 +6512,8 @@ class DailyWorkingInformationController extends Controller
                             'array_add_emergency_return_editor_department_name' => $array_add_emergency_return_editor_department_name,
                             'array_add_emergency_return_editor_user_code' => $array_add_emergency_return_editor_user_code,
                             'array_add_emergency_return_editor_user_name' => $array_add_emergency_return_editor_user_name,
-                            'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions
+                            'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions,
+                            'array_get_timetable_result' => $array_get_timetable_result
                         );
                         $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                     }
@@ -6741,7 +6749,8 @@ class DailyWorkingInformationController extends Controller
                             'array_add_emergency_return_editor_department_name' => $array_add_emergency_return_editor_department_name,
                             'array_add_emergency_return_editor_user_code' => $array_add_emergency_return_editor_user_code,
                             'array_add_emergency_return_editor_user_name' => $array_add_emergency_return_editor_user_name,
-                            'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions
+                            'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions,
+                            'array_get_timetable_result' => $array_get_timetable_result
                         );
                         $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                         // 次データ計算事前処理
@@ -6989,7 +6998,8 @@ class DailyWorkingInformationController extends Controller
                             'array_add_emergency_return_editor_department_name' => $array_add_emergency_return_editor_department_name,
                             'array_add_emergency_return_editor_user_code' => $array_add_emergency_return_editor_user_code,
                             'array_add_emergency_return_editor_user_name' => $array_add_emergency_return_editor_user_name,
-                            'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions
+                            'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions,
+                            'array_get_timetable_result' => $array_get_timetable_result
                         );
                         $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                     }
@@ -7227,7 +7237,8 @@ class DailyWorkingInformationController extends Controller
                             'array_add_emergency_return_editor_department_name' => $array_add_emergency_return_editor_department_name,
                             'array_add_emergency_return_editor_user_code' => $array_add_emergency_return_editor_user_code,
                             'array_add_emergency_return_editor_user_name' => $array_add_emergency_return_editor_user_name,
-                            'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions
+                            'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions,
+                            'array_get_timetable_result' => $array_get_timetable_result
                         );
                         $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                         // 次データ計算事前処理
@@ -7475,7 +7486,8 @@ class DailyWorkingInformationController extends Controller
                             'array_add_emergency_return_editor_department_name' => $array_add_emergency_return_editor_department_name,
                             'array_add_emergency_return_editor_user_code' => $array_add_emergency_return_editor_user_code,
                             'array_add_emergency_return_editor_user_name' => $array_add_emergency_return_editor_user_name,
-                            'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions
+                            'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions,
+                            'array_get_timetable_result' => $array_get_timetable_result
                         );
                         $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                     }
@@ -7714,7 +7726,8 @@ class DailyWorkingInformationController extends Controller
                             'array_add_emergency_return_editor_department_name' => $array_add_emergency_return_editor_department_name,
                             'array_add_emergency_return_editor_user_code' => $array_add_emergency_return_editor_user_code,
                             'array_add_emergency_return_editor_user_name' => $array_add_emergency_return_editor_user_name,
-                            'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions
+                            'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions,
+                            'array_get_timetable_result' => $array_get_timetable_result
                         );
                         $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                         // 次データ計算事前処理
@@ -7951,7 +7964,8 @@ class DailyWorkingInformationController extends Controller
                         'array_add_emergency_return_editor_department_name' => $array_add_emergency_return_editor_department_name,
                         'array_add_emergency_return_editor_user_code' => $array_add_emergency_return_editor_user_code,
                         'array_add_emergency_return_editor_user_name' => $array_add_emergency_return_editor_user_name,
-                        'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions
+                        'array_add_emergency_return_time_positions' => $array_add_emergency_return_time_positions,
+                        'array_get_timetable_result' => $array_get_timetable_result
                     );
                     $add_result = $this->addTempWorkingTimeDate($array_impl_addTempWorkingTimeDate);
                 }catch(\PDOException $pe){
@@ -8376,6 +8390,7 @@ class DailyWorkingInformationController extends Controller
             $array_add_emergency_return_editor_user_name = $params['array_add_emergency_return_editor_user_name'];
             $array_add_emergency_return_time_positions = $params['array_add_emergency_return_time_positions'];
             $array_break_worktimetable_result = $params['array_break_worktimetable_result'];
+            $array_get_timetable_result = $params['array_get_timetable_result'];
 
             // 出退勤のデータがない場合は緊急データを出退勤にする
             Log::debug('出退勤 緊急 count($array_add_attendance_time = '.count($array_add_attendance_time));
@@ -8629,7 +8644,8 @@ class DailyWorkingInformationController extends Controller
                 'array_missing_middle_time' => $array_missing_middle_time,
                 'timetables' => $timetables,
                 'break_attendance_time' => $break_attendance_time,
-                'break_leaving_time' => $break_leaving_time
+                'break_leaving_time' => $break_leaving_time,
+                'array_get_timetable_result' => $array_get_timetable_result
             );
             $regular_calc_time_stamp = $this->calcRegulartime($array_impl_calcRegulartime);
             $regular_calc_time = $apicommon->cnvToDecFromStamp($regular_calc_time_stamp);
@@ -8885,6 +8901,7 @@ class DailyWorkingInformationController extends Controller
         $param_timetables = $params['timetables'];
         $param_break_attendance_time = $params['break_attendance_time'];
         $param_break_leaving_time = $params['break_leaving_time'];
+        $param_array_get_timetable_result = $params['array_get_timetable_result'];
         Log::debug('                       所定労働時間計算 param_target_date = '.$param_target_date);
         Log::debug('                       所定労働時間計算 $param_target_result->holiday_description = '.$param_target_result->holiday_description);
         $regular_calc_time = 0;
@@ -8898,7 +8915,8 @@ class DailyWorkingInformationController extends Controller
                 'array_missing_middle_time' => $param_array_missing_middle_time,
                 'timetables' => $param_timetables,
                 'break_attendance_time' => $param_break_attendance_time,
-                'break_leaving_time' => $param_break_leaving_time
+                'break_leaving_time' => $param_break_leaving_time,
+                'array_get_timetable_result' => $param_array_get_timetable_result
             );
             $regular_calc_time = $this->calcHolidayRegulartime($array_impl_calcHolidayRegulartime);
             Log::debug('休暇労働時間 regular_calc_time = '.$regular_calc_time);
@@ -8936,6 +8954,8 @@ class DailyWorkingInformationController extends Controller
         $param_timetables = $params['timetables'];
         $param_break_attendance_time = $params['break_attendance_time'];
         $param_break_leaving_time = $params['break_leaving_time'];
+        $param_array_get_timetable_result = $params['array_get_timetable_result'];
+        
         //  1日集計対象休暇　　午前半休　　午後半休
         $result_getHolydayTempStartEndTime = array();
         $break_workingtime = 0;
@@ -8945,7 +8965,12 @@ class DailyWorkingInformationController extends Controller
             'array_break_worktimetable_result' => $param_array_break_worktimetable_result,
             'target_date' => $param_target_date,
             'working_timetable_no' => $param_target_result->working_timetable_no,
-            'user_holiday_description' => $param_target_result->holiday_description
+            'user_holiday_description' => $param_target_result->holiday_description,
+            'break_attendance_time' => $param_break_attendance_time,
+            'break_leaving_time' => $param_break_leaving_time,
+            'time_unit' => $param_target_result->time_unit,
+            'time_rounding' => $param_target_result->time_rounding,
+            'array_get_timetable_result' => $param_array_get_timetable_result
         );
         // タイムテーブルから所定時間を取得
         $result_getHolydayTempStartEndTime = $this->getHolydayTempStartEndTime($array_impl_getHolydayTempStartEndTime);
@@ -8960,7 +8985,7 @@ class DailyWorkingInformationController extends Controller
             $break_end_time = $result_getHolydayTempStartEndTime['end_record_datetime'];
             // $break_end_time = $param_break_leaving_time;
         } elseif ($param_target_result->holiday_description == Config::get('const.C013_DESC_VALUE.half_pm')) {
-            $break_start_time = $param_break_attendance_time;
+            $break_start_time = $result_getHolydayTempStartEndTime['start_record_datetime'];
             $break_end_time = $result_getHolydayTempStartEndTime['end_record_datetime'];
         } else {
             $index = (int)(Config::get('const.C004.regular_working_time'))-1;
@@ -9017,8 +9042,15 @@ class DailyWorkingInformationController extends Controller
         $param_target_date = $params['target_date'];
         $param_working_timetable_no = $params['working_timetable_no'];
         $param_user_holiday_description = $params['user_holiday_description'];
+        $param_break_attendance_time = $params['break_attendance_time'];
+        $param_break_leaving_time = $params['break_leaving_time'];
+        $param_time_unit = $params['time_unit'];
+        $param_time_rounding = $params['time_rounding'];
+        $param_array_get_timetable_result = $params['array_get_timetable_result'];
         $result_start_record_datetime = null;
         $result_end_record_datetime = null;
+        $apicommon = new ApiCommonController();
+        Log::debug('                       $param_target_date =  '.$param_target_date);
 
         $collect_array_break_worktimetable_result = collect($param_array_break_worktimetable_result);
         // 1日集計対象休暇
@@ -9038,8 +9070,38 @@ class DailyWorkingInformationController extends Controller
                 ->where('no', '=', $param_working_timetable_no)
                 ->where('working_time_kubun', '=', Config::get('const.C004.regular_working_time'));
             foreach ($filtered as $item) {
-                $result_start_record_datetime = $dt.' '.$item->from_time;
-                $result_end_record_datetime = $dt.' '.$item->to_time;
+                // 時刻を丸め
+                $from_times = null;
+                if ($param_break_attendance_time != null && $param_break_attendance_time != "") {
+                    $from_times = $param_break_attendance_time;
+                } else {
+                    $from_times = $item->from_time;
+                }
+                // roundTimeByTimeStart implement
+                $array_roundTimeByTimeStart = array (
+                    'current_date' => $param_target_date,
+                    'start_time' => $from_times,
+                    'time_unit' => $param_time_unit,
+                    'time_rounding' => $param_time_rounding,
+                    'working_timetable_no' => $param_working_timetable_no,
+                    'array_get_timetable_result' => $param_array_get_timetable_result
+                );
+                $result_start_record_datetime = $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart);
+                $to_times = null;
+                if ($param_break_leaving_time != null && $param_break_leaving_time != "") {
+                    $to_times = $param_break_leaving_time;
+                } else {
+                    $to_times = $item->to_time;
+                }
+                $array_roundTimeByTimeEnd = array (
+                    'current_date' => $param_target_date,
+                    'end_time' => $to_times,
+                    'time_unit' => $param_time_unit,
+                    'time_rounding' => $param_time_rounding,
+                    'working_timetable_no' => $param_working_timetable_no,
+                    'array_get_timetable_result' => $param_array_get_timetable_result
+                );
+                $result_end_record_datetime = $apicommon->roundTimeByTimeEnd($array_roundTimeByTimeEnd);
                 break;
             }
         }elseif ($param_user_holiday_description == Config::get('const.C013_DESC_VALUE.half_pm')) {
@@ -9047,13 +9109,45 @@ class DailyWorkingInformationController extends Controller
             $filtered = $collect_array_break_worktimetable_result
                 ->where('no', '=', $param_working_timetable_no)
                 ->where('working_time_kubun', '=', Config::get('const.C004.regular_working_time'));
-            // 出勤は打刻時刻とするため未設定
             foreach ($filtered as $item) {
-                $result_end_record_datetime = $dt.' '.$item->to_time;
+                // 時刻を丸め
+                $from_times = null;
+                if ($param_break_attendance_time != null && $param_break_attendance_time != "") {
+                    $from_times = $param_break_attendance_time;
+                } else {
+                    $from_times = $item->from_time;
+                }
+                // roundTimeByTimeStart implement
+                $array_roundTimeByTimeStart = array (
+                    'current_date' => $param_target_date,
+                    'start_time' => $from_times,
+                    'time_unit' => $param_time_unit,
+                    'time_rounding' => $param_time_rounding,
+                    'working_timetable_no' => $param_working_timetable_no,
+                    'array_get_timetable_result' => $param_array_get_timetable_result
+                );
+                $result_start_record_datetime = $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart);
+                $to_times = null;
+                if ($param_break_leaving_time != null && $param_break_leaving_time != "") {
+                    $to_times = $param_break_leaving_time;
+                } else {
+                    $to_times = $item->to_time;
+                }
+                $array_roundTimeByTimeEnd = array (
+                    'current_date' => $param_target_date,
+                    'end_time' => $to_times,
+                    'time_unit' => $param_time_unit,
+                    'time_rounding' => $param_time_rounding,
+                    'working_timetable_no' => $param_working_timetable_no,
+                    'array_get_timetable_result' => $param_array_get_timetable_result
+                );
+                $result_end_record_datetime = $apicommon->roundTimeByTimeEnd($array_roundTimeByTimeEnd);
                 break;
             }
         }
-        Log::debug('---------------------- setNoteLateEtc end ------------------------ ');
+        Log::debug('                       $result_start_record_datetime =  '.$result_start_record_datetime);
+        Log::debug('                       $result_end_record_datetime =  '.$result_end_record_datetime);
+        Log::debug('---------------------- getHolydayTempStartEndTime end ------------------------ ');
 
         return array(
             'start_record_datetime' => $result_start_record_datetime,
@@ -10679,11 +10773,19 @@ class DailyWorkingInformationController extends Controller
                 }
             }
         } else {
+            // 対応する出勤モードの集計対象flgがtrue（出勤打刻があった）の場合は対象
             // 出勤または緊急取集開始ではない場合は対応する出勤モードの集計対象flgより設定
-            // 出対応する出勤モードの集計対象flgがtrue（出勤打刻があった）の場合は対象
             if ($attendance_flg) {
                 $target_flg = true;
             } else {
+                // 打刻時刻 >= 当日のタイムテーブル開始時刻  and 打刻時刻 <= 翌日のタイムテーブル開始時刻
+                // の場合、当日の計算対象とする
+                if ($result->record_datetime >= $w_today_from_datetime &&
+                    $result->record_datetime <= $w_plus1_from_datetime) {
+                    $target_flg = true;
+                } else {
+                    $target_flg = false;
+                }
                 // if ($result->working_timetable_from_time <= $result->working_timetable_to_time) {
                 //     $target_flg = false;
                 // } else {
@@ -10704,7 +10806,7 @@ class DailyWorkingInformationController extends Controller
                 //     if ($result->record_datetime < $w_today_from_datetime) {
                 //         $target_flg = true;
                 //     } else {
-                        $target_flg = false;
+                        // $target_flg = false;
                 //     }
                 // }
                 // -----------------------　20200321コメント化 start --------------------- 

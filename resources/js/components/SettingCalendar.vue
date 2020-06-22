@@ -790,21 +790,42 @@ const CONST_C007 = 'C007';
 const CONST_C007_ATTENDANCE = 0;    // 出勤日のindex
 // const CONST_C008 = 'C008';
 const CONST_C013 = 'C013';
-const CONST_OUT_LEGAL = 0;      // 出勤日か法定外休日かの判定文字位置（0始まり）
-const CONST_1DAY_HOLIDAY = 1;   // 1日休日かの判定文字位置（0始まり）
+const CONST_OUT_LEGAL = 0;        // 出勤日か法定外休日かの判定文字位置（0始まり）
+const CONST_1DAY_HOLIDAY = 1;     // 1日休日かの判定文字位置（0始まり）
 const CONST_C039 = 'C039';
 const CONST_C040 = 'C040';
+const CONST_CALENDAR_HOLIDAY_LIST_CODE = 7;
 
 export default {
   name: "SettingCalendar",
   mixins: [ dialogable, checkable, requestable ],
   props: {
+    feature_item_selections: {
+        type: Array,
+        default: []
+    },
     const_generaldatas: {
         type: Array,
         default: []
     }
   },
   computed: {
+    get_isCalendarHolidayList: function() {
+      this.isCalendarHolidayList = false;
+      let $this = this;
+      this.feature_item_selections.forEach( function( item ) {
+        if (item.item_code == CONST_CALENDAR_HOLIDAY_LIST_CODE) {
+          if (item.value_select == 1) {
+            $this.isCalendarHolidayList = true;
+          } else {
+            $this.isCalendarHolidayList = false;
+          }
+          return $this.isCalendarHolidayList;
+        }
+      });
+
+      return this.isCalendarHolidayList;
+    },
     get_C007: function() {
       let $this = this;
       var i = 0;
@@ -830,10 +851,15 @@ export default {
     get_C013: function() {
       let $this = this;
       var i = 0;
+      this.get_isCalendarHolidayList;
       this.const_generaldatas.forEach( function( item ) {
         if (item.identification_id == CONST_C013) {
-          if (item.use_free_item.substr(CONST_1DAY_HOLIDAY, 1) == "1") {
+          if ($this.isCalendarHolidayList) {
             $this.const_C013_data.push($this.const_generaldatas[i]);
+          } else {
+            if (item.use_free_item.substr(CONST_1DAY_HOLIDAY, 1) == "1") {
+              $this.const_C013_data.push($this.const_generaldatas[i]);
+            }
           }
         }
         i++;
@@ -888,6 +914,7 @@ export default {
       const_C013_data: [],
       const_C039_data: [],
       const_C040_data: [],
+      isCalendarHolidayList: false,
       selectedEmploymentValue: "",
       selectedDepartmentValue : "",
       valueDepartmentkillcheck : false,

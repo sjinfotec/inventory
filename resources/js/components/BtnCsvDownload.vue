@@ -467,6 +467,8 @@ export default {
       var item_data = "";
       var slice_item_name = "";
       var rec_cnt = 0;
+      var setf0 = true;
+      var setf1 = false;
       for (var i=0;i<2;i++) {
         this.details.forEach(item => {
           slice_item_name = item['item_name'].slice(0, 3) ;
@@ -500,47 +502,59 @@ export default {
               linetext += canma;
             }
             rec_cnt++;
+            if (i > 0) {
+              setf1 = true;
+            }
           } else if (item['item_name'] == "scheduled_results") {
-              if (i == 0) {
-                linetext += canma + "予定";
-              } else {
-                linetext += canma + "実績";
-              }
+            if (i == 0) {
+              setf0 = false;
+              linetext += canma + "予定";
+            } else {
+              linetext += canma + "実績";
+            }
           } else if (item['is_select'] == 1) {
             if (item['item_code'] != 99) {
               if (i == 0) {
                 item_name = item['item_name'];
                 item_data = "";
-                if (item['item_code'] < 4) {
+                if (setf0) {
                   if (user[item_name] != "" && user[item_name] != null) {
                     item_data = user[item_name];
                   }
                 } else {
-                  if (user[item_name] != "" && user[item_name] != null) {
+                  if (user['set_' + item_name] == 1 && user[item_name] != "" && user[item_name] != null) {
                     item_data = user[item_name] + "日";
                   }
                 }
               } else {
                 item_name = item['item_name'];
-                if (item['item_code'] < 4) {
+                if (!setf1) {
                   item_data = "";
                 } else {
                   // 画面と同じ条件であること  start --------------------------
                   if (item_name == "regular_day_cnt") {
-                    if (user['regular_day_times'] > 0) {
+                    if (user['set_regular_day_times'] == 1 && user['regular_day_times'] != '0.00') {
                       item_data = user['regular_day_times'] + "時間";
                     } else {
                       item_data = "";
                     }
                   } else if (item_name == "night_day_cnt") {
-                    if (user['night_day_times'] > 0) {
+                    if (user['set_night_day_times'] == 1 && user['night_day_times'] != '0.00') {
                       item_data = user['night_day_times'] + "時間";
                     } else {
                       item_data = "";
                     }
+                  } else if (item_name == "weekly_dayoff_cnt") {
+                    if (user['set_weekly_dayoff_times'] == 1 && user['weekly_dayoff_times'] != '0.00') {
+                      item_data = user['paid_holiday_day_times'] + "時間";
+                    } else {
+                      item_data = "";
+                    }
                   } else if (item_name == "paid_holiday_cnt") {
-                    if (user[item_name] != "" && user[item_name] != null) {
-                      item_data = user[item_name] + "日";
+                    if (user['set_paid_holiday_day_times'] === 1 && user['paid_holiday_day_times'] != '0.00') {
+                      item_data = user['paid_holiday_day_times'] + "時間";
+                    } else {
+                      item_data = "";
                     }
                   } else {
                     item_data = "";

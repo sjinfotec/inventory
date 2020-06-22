@@ -129,7 +129,7 @@ class DailyWorkingAlertController extends Controller
                 if (count($details) == 0) {
                     $this->array_messagedata[] = Config::get('const.MSG_INFO.no_alert_data');
                     return response()->json(
-                        ['result' => false, 'details' => $result_working, 'datename' => $date_name,
+                        ['result' => true, 'details' => $result_working, 'datename' => $date_name,
                         Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                     );
                 }

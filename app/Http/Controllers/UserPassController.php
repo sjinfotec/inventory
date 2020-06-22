@@ -21,7 +21,11 @@ class UserPassController extends Controller
      */
     public function index()
     {
-        return view('user_pass');
+        $authusers = Auth::user();
+        return view('user_pass',
+            compact(
+                'authusers'
+            ));
     }
 
     /**

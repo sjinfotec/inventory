@@ -42,7 +42,7 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2">
+              <div class="col-md-6 pb-2" v-if="this.get_LoginUserRole >= this.get_AdminUserRole">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
@@ -61,7 +61,7 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2">
+              <div class="col-md-6 pb-2" v-if="this.get_LoginUserRole >= this.get_AdminUserRole">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
@@ -99,9 +99,9 @@
                   <select-userlist
                     v-if="showuserlist"
                     ref="selectuserlist"
-                    v-bind:blank-data="true"
+                    v-bind:blank-data="get_IsUserblank"
                     v-bind:placeholder-data="'氏名を選択してください'"
-                    v-bind:selected-value="selectedUserValue"
+                    v-bind:selected-value="get_SelectedUserCode"
                     v-bind:add-new="false"
                     v-bind:get-do="getDo"
                     v-bind:date-value="applytermdate"
@@ -151,7 +151,7 @@
     <!-- main contentns row -->
     <div class="row justify-content-between">
       <!-- .panel -->
-      <div class="col-md pt-3 align-self-stretch" v-if="calcresults.length">
+      <div class="col-md pt-3 align-self-stretch" v-if="selectmode === 'DSP'">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -197,7 +197,7 @@
             <!-- /.row -->
             <!-- ----------- 選択ボタン類 END ---------------- -->
           </div>
-          <div>
+          <div v-if="calcresults.length">
             <div class="card-body mb-3 border-top">
               <!-- ----------- 日次集計テーブル START ---------------- -->
               <daily-working-info-table
@@ -209,8 +209,8 @@
                 v-bind:predeter-time-second-name="predetertimesecondname"
                 v-bind:predeter-night-time-second-name="predeternighttimesecondname"
                 v-bind:btn-mode="btnmodeswitch"
-                v-bind:login-user="authusers['code']"
-                v-bind:login-role="authusers['role']"
+                v-bind:login-user="get_LoginUserCode"
+                v-bind:login-role="get_LoginUserRole"
                 v-bind:account-data="accountdatas['account_id']"
                 v-bind:menu-data="menudatas"
               ></daily-working-info-table>
@@ -258,6 +258,7 @@ import { requestable } from "../mixins/requestable.js";
 
 // CONST
 const CONST_C025 = 'C025';
+const CONST_C025_ADMINUSER_INDEX= 2;
 
 export default {
   name: "dailyworkingtime",
@@ -312,7 +313,8 @@ export default {
       predetertimesecondname: "",
       predeternighttimesecondname: "",
       dateName: "",
-      messageshowsearch: false,
+      selectmode: "",
+      // messageshowsearch: false,
       issearchbutton: false,
       isgosubdatebutton: false,
       isgoadddatebutton: false,
@@ -321,22 +323,74 @@ export default {
       isswitchvisible: false,
       validate: true,
       initialized: false,
-      const_C025_data: []
+      const_C025_data: [],
+      isUserblank: true,
+      login_user_code: "",
+      login_user_role: "",
+      adminuserrole: ""
     };
   },
   computed: {
+    get_C025: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C025) {
+          $this.const_C025_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C025_data;
+    },
+    get_AdminUserRole: function() {
+      if (this.adminuserrole == null || this.adminuserrole == "") {
+        if (this.const_C025_data.length == 0) {
+          this.adminuserrole = this.get_C025[CONST_C025_ADMINUSER_INDEX]['code'];
+        } else {
+          this.adminuserrole = this.const_C025_data[CONST_C025_ADMINUSER_INDEX]['code'];
+        }
+      }
+      return this.adminuserrole;
+    },
+    get_IsEdit: function() {
+      if (this.const_C025_data.length == 0) {
+        this.get_C025;
+      }
+      this.isEdit = false;
+      if (this.authusers['role'] == this.get_AdminUserRole) {
+        this.isEdit = true;
+      }
+      return this.isEdit;
+    },
+    get_IsUserblank: function() {
+      if (this.get_LoginUserRole < this.get_AdminUserRole) {
+        this.isUserblank = false;
+      } else {
+        this.isUserblank = true;
+      }
+      return this.isUserblank;
+    },
+    get_LoginUserCode: function() {
+      this.login_user_code = this.authusers['code'];
+      return this.login_user_code;
+    },
+    get_LoginUserRole: function() {
+      this.login_user_role = this.authusers['role'];
+      return this.login_user_role;
+    },
+    get_SelectedUserCode: function() {
+      if (this.selectedUserValue == null || this.selectedUserValue == "") {
+        if (this.get_LoginUserRole < this.get_AdminUserRole) {
+          this.selectedUserValue = this.get_LoginUserCode;
+        }
+      }
+      return this.selectedUserValue;
+    }
   },
   // マウント時
   mounted() {
     // メソッドで使用するのでcomputedでなくてOK
-    var i = 0;
-    let $this = this;
-    this.const_generaldatas.forEach( function( item ) {
-      if (item.identification_id == CONST_C025) {
-        $this.const_C025_data.push($this.const_generaldatas[i]);
-      }
-      i++;
-    });
+    this.get_C025;
     this.valuedate = this.defaultDate;
     this.valuefromdate = moment(this.defaultDate).format("YYYYMMDD");
     this.valuesubadddate = this.valuefromdate;
@@ -344,8 +398,9 @@ export default {
     if (this.valuefromdate) {
       this.applytermdate = this.valuefromdate;
     }
-    this.$refs.selectdepartmentlist.getList(this.applytermdate);
-    this.getUserSelected();
+    // this.$refs.selectdepartmentlist.getList(this.applytermdate);
+    // this.getUserSelected();
+    this.selectmode = "";
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -379,30 +434,7 @@ export default {
         this.validate = false;
       }
       // 所属部署
-      if (this.authusers['role'] < this.const_C025_data[2]['code']) {
-        required = true;
-        equalength = 0;
-        maxlength = 0;
-        itemname = "所属部署";
-        chkArray = this.checkHeader(
-          this.selectedDepartmentValue,
-          required,
-          equalength,
-          maxlength,
-          itemname
-        );
-        if (chkArray.length > 0) {
-          if (this.messagedatadepartment.length == 0) {
-            this.messagedatadepartment.push(
-              "一般ユーザーは所属部署は必ず入力してください。"
-            );
-          } else {
-            this.messagedatadepartment = this.messagedatadepartment.concat(
-              chkArray
-            );
-          }
-          this.validate = false;
-        }
+      if (this.get_LoginUserRole < this.get_AdminUserRole) {
         required = true;
         equalength = 0;
         maxlength = 0;
@@ -488,14 +520,13 @@ export default {
       this.validate = this.checkForm(e);
       if (this.validate) {
         this.issearchbutton = true;
-        this.messageshowsearch = true;
+        this.selectmode = "DSP";
+        // this.messageshowsearch = true;
         // 入力項目クリア
         this.itemClear();
         this.valuesubadddate = moment(this.valuedate).format("YYYYMMDD");
         this.selectedName = this.user_name + "　" + moment(this.valuesubadddate).format("YYYY年MM月DD日") + "分勤怠編集" ;
         this.getItem(moment(this.valuedate).format("YYYYMMDD"));
-        this.isgosubdatebutton = true;
-        this.isgoadddatebutton = true;
       }
     },
     // 詳細表示ボタンがクリックされた場合の処理
@@ -509,7 +540,7 @@ export default {
     //前日ボタンクリック処理
     gosubateclick(e) {
       this.issearchbutton = true;
-      this.messageshowsearch = true;
+      // this.messageshowsearch = true;
       // 入力項目クリア
       this.itemClear();
       this.messagevalidatesSearch = [];
@@ -526,7 +557,7 @@ export default {
     //翌日ボタンクリック処理
     goaddateclick(e) {
       this.issearchbutton = true;
-      this.messageshowsearch = true;
+      // this.messageshowsearch = true;
       // 入力項目クリア
       this.itemClear();
       this.messagevalidatesSearch = [];
@@ -565,9 +596,11 @@ export default {
             })
             .catch(reason => {
               this.$swal.close();
-              this.messageshowsearch = false;
+              // this.messageshowsearch = false;
               this.issearchbutton = false;
               this.serverCatch("日次集計","取得");
+              this.isgosubdatebutton = true;
+              this.isgoadddatebutton = true;
             });
         }
       });
@@ -621,15 +654,19 @@ export default {
         break;
       }
       this.$forceUpdate();
-      this.messageshowsearch = false;
+      // this.messageshowsearch = false;
       this.issearchbutton = false;
+      this.isgosubdatebutton = true;
+      this.isgoadddatebutton = true;
     },
     // 異常処理
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
       this.htmlMessageSwal("エラー", messages, "error", true, false);
+      this.selectmode = "";
     },
+
     //  クリアメソッド
     itemClear: function() {
       this.resresults = [];

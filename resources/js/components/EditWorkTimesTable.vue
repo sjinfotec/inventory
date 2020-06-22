@@ -14,11 +14,11 @@
         <h1 class="float-sm-left font-size-rg">
           <span>
             <button class="btn btn-success btn-lg font-size-rg"
-            v-if="login_user_role === const_c025[get_AdminUserIndex]['code']" v-on:click="appendRowClick">+</button>
+            v-if="get_LoginUserRole === const_c025[get_AdminUserIndex]['code']" v-on:click="appendRowClick">+</button>
           </span>
           {{ selectedName }}
         </h1>
-        <span class="float-sm-right font-size-sm" v-if="login_user_role === const_c025[get_AdminUserIndex]['code']">
+        <span class="float-sm-right font-size-sm" v-if="get_LoginUserRole === const_c025[get_AdminUserIndex]['code']">
           「＋」アイコンで新規に追加することができます</span>
       </div>
       <!-- /.panel header -->
@@ -140,7 +140,7 @@
                             </div>
                           </td>
                           <td class="text-center align-middle mw-rem-20" v-else></td>
-                          <td class="text-center align-middle mw-rem-5" v-if="login_user_role === const_c025[get_AdminUserIndex]['code']">
+                          <td class="text-center align-middle mw-rem-5" v-if="get_LoginUserRole === const_c025[get_AdminUserIndex]['code']">
                             <i class="fa fa-trash" style="color: #808080;ccursor: hand; cursor:pointer;" v-on:click="rowDelClick(index)">
                            </i>
                           </td>
@@ -169,28 +169,31 @@
         <!-- .row -->
         <div class="row justify-content-between">
           <!-- col -->
-          <div class="col-md-12 pb-2" v-if="login_user_role === const_c025[get_AdminUserIndex]['code']">
+          <div class="col-md-12 pb-2" v-if="get_LoginUserRole === const_c025[get_AdminUserIndex]['code']">
             <btn-work-time
               v-on:editfixclick-event="editfixclick"
               v-bind:btn-mode="'editfix'"
-              v-bind:is-push="issearchbutton"
+              v-bind:is-push="isfixbutton"
             ></btn-work-time>
           </div>
           <!-- /.col -->
         </div>
         <!-- /.row -->
         <!-- .row -->
-        <!-- <div class="row justify-content-between"> -->
+        <div class="row justify-content-between">
           <!-- col -->
-          <!-- <div class="col-md-12 pb-2">
-            <btn-work-time v-bind:btn-mode="'cancel'" v-on:cancelclick-event="cancelclick"></btn-work-time>
-          </div> -->
+          <div class="col-md-12 pb-2">
+            <btn-work-time
+              v-on:backclick-event="backclick"
+              v-bind:btn-mode="'back'"
+              v-bind:is-push="isbackbutton"
+            ></btn-work-time>
+          </div>
           <!-- /.col -->
-        <!-- </div> -->
+        </div>
         <!-- /.row -->
-        <!-- /.panel contents -->
+        <!-- ----------- 選択ボタン類 END ---------------- -->
       </div>
-      <!-- ----------- 選択ボタン類 END ---------------- -->
     </div>
     <!-- /.panel -->
   </div>
@@ -229,6 +232,7 @@ const DEEMED_NAME = 'みなし';
 const DEEMED_BUSINESS_TRIP = 'みなし出張';
 const DEEMED_DIRECT_GO = 'みなし直行';
 const DEEMED_DIRECT_RETURN = 'みなし直帰';
+const DEEMED_DIRECT_GO_RETURN = 'みなし直行直帰';
 const ALLDAY_CALC_NAME = '1日集計対象休暇';
 const LATE_NAME = '遅刻';
 const EARLY_NAME = '早退';
@@ -321,6 +325,14 @@ export default {
 
       return this.mode_list_value_select;
     },
+    get_LoginUserCode: function() {
+      this.login_user_code = this.authusers['code'];
+      return this.login_user_code;
+    },
+    get_LoginUserRole: function() {
+      this.login_user_role = this.authusers['role'];
+      return this.login_user_role;
+    },
     get_AdminUserIndex: function() {
       return CONST_C025_ADMINUSER_INDEX;
     }
@@ -348,6 +360,8 @@ export default {
       const_C013_data: [],
       selectedName: "",
       issearchbutton: false,
+      isfixbutton: true,
+      isbackbutton: false,
       isgosubdatebutton: false,
       isgoadddatebutton: false,
       ja: ja,
@@ -362,8 +376,6 @@ export default {
   },
   // マウント時
   mounted() {
-    this.login_user_code = this.authusers['code'];
-    this.login_user_role = this.authusers['role'];
     this.headsedt = this.heads;
     this.edtUsercode = this.headsedt['user_code'];
     this.edtUsername = this.headsedt['user_name'];
@@ -573,6 +585,8 @@ export default {
             this.edtDetailes(this.details);
             this.count = this.details.length
             this.before_user_holiday_kbn = this.value_user_holiday_kbn;
+          } else {
+            this.before_user_holiday_kbn = this.value_user_holiday_kbn;
           }
         }        
       }
@@ -626,6 +640,7 @@ export default {
           };
         this.details.push(arrayobject);
         this.count = this.details.length
+        this.isfixbutton = false;
       // }
     },
     // 更新確定ボタンクリック処理
@@ -673,9 +688,9 @@ export default {
         this.count = this.details.length
       }
     },
-    // cancelclick : function() {
-    //   this.$emit('cancelclick-event',event);
-    // },
+    backclick : function() {
+      this.$emit('backclick-event',event);
+    },
     // -------------------- サーバー処理 ----------------------------
     // 勤怠取得処理
     getWorkTime(datevalue) {
@@ -782,6 +797,9 @@ export default {
           messages.push("勤怠データありませんでした。");
           messages.push("プラスアイコンで追加できます。");
           this.htmlMessageSwal("確認", messages, "info", true, false);
+          this.isfixbutton = true;
+        } else {
+          this.isfixbutton = false;
         }
       } else {
         if (res.messagedata.length > 0) {
@@ -811,6 +829,7 @@ export default {
     },
     // 休暇区分判定 みなしは休暇ではないのでfalse
     jdgeHolidayKbn: function(holiday_kbn) {
+      if (this.const_C013_data.length) { this.get_C013; }
       for (var i=0;i<this.const_C013_data.length;i++) {
         if (holiday_kbn == this.const_C013_data[i].code) {
           if (this.const_C013_data[i].description == ALLDAY_NAME) {

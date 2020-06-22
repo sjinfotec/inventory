@@ -942,12 +942,6 @@ export default {
       this.record_time = time;
       this.mode_name = this.getMethodName(mode);
       this.dialogVisible = true;
-    },
-    hide: function() {
-      this.$modal.hide("hello-world");
-    },
-    show: function() {
-      this.$modal.show("hello-world");
     }
   }
 };

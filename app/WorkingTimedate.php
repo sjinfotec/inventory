@@ -3035,7 +3035,17 @@ class WorkingTimedate extends Model
                 }
                 $temp_array[] = $temp_collect->toArray();
             } 
-            DB::table($this->table)->insert($temp_array);
+            // データ量が多いと一括insertがエラーになる対策
+            //     1000ごとでinsert実施
+            // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
+            $temp_chunk = array_chunk($temp_array, 200);
+            foreach ($temp_chunk as $value) {
+                DB::table($this->table)->insert($value);
+                // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
+                //     \Log::debug('sql_debug_log', ['getCalenderDate' => \DB::getQueryLog()]);
+                //     \DB::disableQueryLog();
+                // }
+            }
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$pe');
             Log::error($pe->getMessage());
