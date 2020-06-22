@@ -11,25 +11,22 @@
             <!-- <table class="table"> -->
               <thead>
                 <tr>
-                  <td class="text-center align-middle mw-rem-10">部署</td>
-                  <td class="text-center align-middle mw-rem-10">雇用形態</td>
-                  <td class="text-center align-middle mw-rem-10">氏名</td>
+                  <td v-for="(csvitem1,Index1) in get_TITLE1"
+                    class="text-center align-middle mw-rem-10">{{ csvitem1 }}</td>
                   <td class="text-center align-middle mw-rem-2-6" v-if="isEdtbutton">操作</td>
                   <td v-for="(item,rowIndex) in detailDates" v-bind:key="item.date"
                     class="text-center align-middle mw-rem-10">{{ item['date_name'] }}</td>
-                  <td class="text-center align-middle mw-rem-5">日勤</td>
-                  <td class="text-center align-middle mw-rem-5">夜勤</td>
-                  <!-- <td class="text-center align-middle mw-rem-5">週休振替</td> -->
-                  <td class="text-center align-middle mw-rem-5">有給休暇</td>
+                  <td v-for="(csvitem2,Index2) in get_TITLE2"
+                    class="text-center align-middle mw-rem-5">{{ csvitem2 }}</td>
                 </tr>
               </thead>
               <tbody>
                 <template v-for="(item1,rowIndex1) in details">
                 <!-- <tr v-for="(item1,rowIndex1) in details" v-bind:key="item1['user_code']"> -->
                   <tr>
-                    <td rowspan="2" class="text-left align-middle mw-rem-10">{{ item1['department_name'] }}</td>
-                    <td rowspan="2" class="text-left align-middle mw-rem-10">{{ item1['employment_name'] }}</td>
-                    <td rowspan="2" class="text-left align-middle mw-rem-10">{{ item1['user_name'] }}</td>
+                    <td rowspan="2" class="text-left align-middle mw-rem-10" v-if="item1['set_department_name'] === 1">{{ item1['department_name'] }}</td>
+                    <td rowspan="2" class="text-left align-middle mw-rem-10" v-if="item1['set_employment_name'] === 1">{{ item1['employment_name'] }}</td>
+                    <td rowspan="2" class="text-left align-middle mw-rem-10" v-if="item1['set_user_name'] === 1">{{ item1['user_name'] }}</td>
                     <td class="text-center align-middle mw-rem-2-6" style="text-align:center" v-if="isEdtbutton">
                       <input type="image" src="images/btn01.svg" v-on:click="detailEdtClick(rowIndex1)" alt />
                     </td>
@@ -40,13 +37,22 @@
                       <div v-else-if="item2['business_kubun'] === 1 && item2['holiday_kubun'] !== 0">{{ item2['holiday_kubun_name'] }}</div>
                       <div v-else>{{ item2['business_kubun_name'] }}</div>
                     </td>
-                    <td class="text-center align-middle mw-rem-5" v-if="item1['regular_day_cnt'] > 0">{{ item1['regular_day_cnt'] }}日</td>
-                    <td class="text-center align-middle mw-rem-5" v-else></td>
-                    <td class="text-center align-middle mw-rem-5" v-if="item1['night_day_cnt'] > 0">{{ item1['night_day_cnt'] }}日</td>
-                    <td class="text-center align-middle mw-rem-5" v-else></td>
-                    <!-- <td class="text-center align-middle mw-rem-5"></td> -->
-                    <td class="text-center align-middle mw-rem-5" v-if="item1['paid_holiday_cnt'] > 0">{{ item1['paid_holiday_cnt'] }}日</td>
-                    <td class="text-center align-middle mw-rem-5" v-else></td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_regular_day_cnt'] === 1 && item1['regular_day_cnt'] > 0">{{ item1['regular_day_cnt'] }}日</td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_regular_day_cnt'] === 1 && item1['regular_day_cnt'] === 0"></td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_night_day_cnt'] === 1 && item1['night_day_cnt'] > 0">{{ item1['night_day_cnt'] }}日</td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_night_day_cnt'] === 1 && item1['night_day_cnt'] === 0"></td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_weekly_dayoff_cnt'] === 1 && item1['weekly_dayoff_cnt'] > 0">{{ item1['weekly_dayoff_cnt'] }}日</td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_weekly_dayoff_cnt'] === 1 && item1['weekly_dayoff_cnt'] === 0"></td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_paid_holiday_cnt'] === 1 && item1['paid_holiday_cnt'] > 0">{{ item1['paid_holiday_cnt'] }}日</td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_paid_holiday_cnt'] === 1 && item1['paid_holiday_cnt'] === 0"></td>
                   </tr>
                   <tr bgcolor="#EEFFFF">
                     <td class="text-center align-middle mw-rem-2-6 form-control-sm-2">実績</td>
@@ -56,12 +62,22 @@
                       <div v-if="item3['total_working_times'] === '0.00'"></div>
                       <div v-else>{{ item3['total_working_times'] }}</div>
                     </td>
-                    <td class="text-center align-middle mw-rem-5" v-if="item1['regular_day_times'] > 0">{{ item1['regular_day_times'] }}時間</td>
-                    <td class="text-center align-middle mw-rem-5" v-else></td>
-                    <td class="text-center align-middle mw-rem-5" v-if="item1['night_day_times'] > 0">{{ item1['night_day_times'] }}時間</td>
-                    <td class="text-center align-middle mw-rem-5" v-else></td>
-                    <!-- <td class="text-center align-middle mw-rem-5"></td> -->
-                    <td class="text-center align-middle mw-rem-5"></td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_regular_day_times'] === 1 && item1['regular_day_times'] > '0.00'">{{ item1['regular_day_times'] }}時間</td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_regular_day_times'] === 1 && item1['regular_day_times'] === '0.00'"></td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_night_day_times'] === 1 && item1['night_day_times'] > '0.00'">{{ item1['night_day_times'] }}時間</td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_night_day_times'] === 1 && item1['night_day_times'] === '0.00'"></td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_weekly_dayoff_times'] === 1 && item1['weekly_dayoff_times'] > '0.00'">{{ item1['weekly_dayoff_times'] }}時間</td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_weekly_dayoff_times'] === 1 && item1['weekly_dayoff_times'] === '0.00'"></td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_paid_holiday_day_times'] === 1 && item1['paid_holiday_day_times'] > '0.00'">{{ item1['paid_holiday_day_times'] }}時間</td>
+                    <td class="text-center align-middle mw-rem-5"
+                      v-if="item1['set_paid_holiday_day_times'] === 1 && item1['paid_holiday_day_times'] === '0.00'"></td>
                   </tr>
                 </template>
               </tbody>
@@ -87,10 +103,62 @@ export default {
       type: Array,
       default: []
     },
+    detailCsvitems: {
+      type: Array,
+      default: []
+    },
     isEdtbutton: {
       type: Boolean,
       default: false
     }
+  },
+  computed: {
+    get_TITLE1: function() {
+      this.detailCsvitems1 = [];
+      let $this = this;
+      var setf = true;
+      this.detailCsvitems.forEach( function( item ) {
+        if (item.item_name == 'scheduled_results') {
+          setf = false;
+          return;
+        }
+        if (setf) {
+          if (item.is_select == 1) {
+            if (item.tem_code != 99) {
+              $this.detailCsvitems1.push(item.item_out_name);
+            }
+          }
+        }
+      });
+
+      return this.detailCsvitems1;
+    },
+    get_TITLE2: function() {
+      this.detailCsvitems2 = [];
+      let $this = this;
+      var setf = false;
+      this.detailCsvitems.forEach( function( item ) {
+        if (item.item_name == 'day31') {
+          setf = true;
+          return;
+        }
+        if (setf) {
+          if (item.is_select == 1) {
+            if (item.tem_code != 99) {
+              $this.detailCsvitems2.push(item.item_out_name);
+            }
+          }
+        }
+      });
+
+      return this.detailCsvitems2;
+    }
+  },
+  data: function() {
+    return {
+      detailCsvitems1: [],
+      detailCsvitems2: []
+    };
   },
   methods: {
     // ------------------------ イベント処理 ------------------------------------

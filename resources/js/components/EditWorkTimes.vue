@@ -4,7 +4,7 @@
     <div class="row justify-content-between print-none">
       <!-- ========================== 検索部 START ========================== -->
       <!-- .panel -->
-      <div class="col-md pt-3">
+      <div class="col-md pt-3" v-if="selectMode==''">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -80,7 +80,7 @@
                     ref="selectdepartmentlist"
                     v-bind:blank-data="true"
                     v-bind:placeholder-data="'部署を選択してください'"
-                    v-bind:selected-department="selectedDepartmentValue"
+                    v-bind:selected-value="selectedDepartmentValue"
                     v-bind:add-new="false"
                     v-bind:date-value="''"
                     v-bind:kill-value="valueDepartmentkillcheck"
@@ -152,6 +152,7 @@
           v-bind:accountdatas="accountdatas"
           v-bind:halfautoset="get_AutoHalfSet"
           v-bind:feature-item-selections="feature_item_selections"
+          v-on:backclick-event="backclick"
         >
         </edit-work-times-table>
       </div>
@@ -222,8 +223,6 @@ export default {
       default: "2019/10/24",
       validate: false,
       heads: [],
-      login_user_code: "",
-      login_user_role: "",
       showeditworktimestable: true,
       accountdata_data: [],
       const_C025_data: [],
@@ -322,12 +321,11 @@ export default {
   },
   // マウント時
   mounted() {
-    this.login_user_code = this.authusers['code'];
-    this.login_user_role = this.authusers['role'];
     this.valuedate = this.defaultDate;
     this.valuefromdate = moment(this.defaultDate).format("YYYYMMDD");
     this.valuesubadddate = this.valuefromdate;
     this.date_name = moment(this.defaultDate).format("YYYY年MM月DD日");
+    this.selectMode = '';
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -378,17 +376,13 @@ export default {
       this.valuesubadddate = this.valuefromdate;
       this.date_name = moment(value).format("YYYY年MM月DD日");
       this.selectedName = this.user_name + "　" + this.date_name + "分勤怠編集" ;
-      // ユーザー選択コンポーネントの取得メソッドを実行
-      if (this.get_SelectClear) {
-        this.selectedEmploymentValue = "";
-        this.selectedDepartmentValue = "";
-        this.selectedUserValue = "";
-        this.getDo = 1;
-        this.applytermdate = this.valuefromdate;
-        this.getDepartmentSelected();
-        this.getUserSelected();
-        this.selectMode = '';
+      // 再取得
+      this.applytermdate = ""
+      if (this.valuefromdate) {
+          this.applytermdate = this.valuefromdate;
       }
+      this.getDepartmentSelected();
+      this.getUserSelected();
     },
     // 指定年月がクリアされた場合の処理
     fromdateCleared: function() {
@@ -443,6 +437,10 @@ export default {
         }
       }
       this.refeditworktimestable();
+    },
+    // 戻るボタンクリック処理
+    backclick() {
+      this.selectMode = '';
     },
     // -------------------- サーバー処理 ----------------------------
 

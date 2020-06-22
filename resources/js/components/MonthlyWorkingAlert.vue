@@ -56,7 +56,7 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2">
+              <div class="col-md-6 pb-2" v-if="this.get_LoginUserRole >= this.get_AdminUserRole">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label class="input-group-text font-size-sm line-height-xs label-width-120" for="inputGroupSelect01">雇用形態</label>
@@ -72,7 +72,7 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2">
+              <div class="col-md-6 pb-2" v-if="this.get_LoginUserRole >= this.get_AdminUserRole">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label class="input-group-text font-size-sm line-height-xs label-width-120" for="inputGroupSelect01">所属部署</label>
@@ -100,9 +100,9 @@
                   </div>
                   <select-userlist v-if="showuserlist"
                     ref="selectuserlist"
-                    v-bind:blank-data="true"
+                    v-bind:blank-data="get_IsUserblank"
                     v-bind:placeholder-data="'氏名を選択してください'"
-                    v-bind:selected-value="selectedUserValue"
+                    v-bind:selected-value="get_SelectedUserCode"
                     v-bind:add-new="false"
                     v-bind:get-do="'1'"
                     v-bind:date-value="applytermdate"
@@ -212,6 +212,10 @@ import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
+// CONST
+const CONST_C025 = 'C025';
+const CONST_C025_ADMINUSER_INDEX = 2;     // index
+
 export default {
   name: "monthlyworkingtime",
   mixins: [ dialogable, checkable, requestable ],
@@ -249,19 +253,85 @@ export default {
       messagedatadepartment: [],
       messagedatauser: [],
       validate: false,
-      initialized: false
+      initialized: false,
+      login_user_code: "",
+      login_user_role: "",
+      const_C025_data: [],
+      isUserblank: true,
+      adminuserrole: ""
     };
+  },
+  props: {
+    authusers: {
+        type: Array,
+        default: []
+    },
+    feature_item_selections: {
+        type: Array,
+        default: []
+    },
+    const_generaldatas: {
+        type: Array,
+        default: []
+    }
+  },
+  computed: {
+    get_C025: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C025) {
+          $this.const_C025_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C025_data;
+    },
+    get_AdminUserRole: function() {
+      if (this.adminuserrole == null || this.adminuserrole == "") {
+        if (this.const_C025_data.length == 0) {
+          this.adminuserrole = this.get_C025[CONST_C025_ADMINUSER_INDEX]['code'];
+        } else {
+          this.adminuserrole = this.const_C025_data[CONST_C025_ADMINUSER_INDEX]['code'];
+        }
+      }
+      return this.adminuserrole;
+    },
+    get_IsUserblank: function() {
+      if (this.get_LoginUserRole < this.get_AdminUserRole) {
+        this.isUserblank = false;
+      } else {
+        this.isUserblank = true;
+      }
+      return this.isUserblank;
+    },
+    get_LoginUserCode: function() {
+      this.login_user_code = this.authusers['code'];
+      return this.login_user_code;
+    },
+    get_LoginUserRole: function() {
+      this.login_user_role = this.authusers['role'];
+      return this.login_user_role;
+    },
+    get_SelectedUserCode: function() {
+      if (this.selectedUserValue == null || this.selectedUserValue == "") {
+        if (this.get_LoginUserRole < this.get_AdminUserRole) {
+          this.selectedUserValue = this.get_LoginUserCode;
+        }
+      }
+      return this.selectedUserValue;
+    }
   },
   // マウント時
   mounted() {
     this.valuefromym = this.defaultDate;
-    this.getUserRole();
+    // this.getUserRole();
     this.applytermdate = ""
     if (this.valuefromdate) {
       this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
     }
-    this.$refs.selectdepartmentlist.getList(this.applytermdate);
-    this.getUserSelected();
+    // this.$refs.selectdepartmentlist.getList(this.applytermdate);
+    // this.getUserSelected();
     },
   methods: {
     // バリデーション
@@ -288,18 +358,14 @@ export default {
           this.messagedatadepartment.push("所属部署は必ず入力してください。");
           this.validate = false;
         }
-        if (this.userrole < "8") {
+        if (this.get_LoginUserRole < this.get_AdminUserRole) {
           if (!this.selectedUserValue) {
             this.messagedatauser.push("氏名は必ず入力してください。");
             this.validate = false;
           }
         }
       } else {
-        if (this.userrole < "8") {
-          if (!this.selectedDepartmentValue) {
-            this.messagedatadepartment.push("所属部署は必ず入力してください。");
-            this.validate = false;
-          }
+        if (this.get_LoginUserRole < this.get_AdminUserRole) {
           if (!this.selectedUserValue) {
             this.messagedatauser.push("氏名は必ず入力してください。");
             this.validate = false;

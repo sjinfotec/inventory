@@ -41,6 +41,7 @@
 						v-bind:authusers="{{ $authusers }}"
 						v-bind:accountdatas="{{ $account_datas }}"
 						v-bind:menudatas="{{ $menu_selections }}"
+						v-bind:feature_item_selections="{{ $feature_item_selections }}"
 						v-bind:const_generaldatas="{{ $const_general_datas }}"
 					>
 					</daily-working-information>

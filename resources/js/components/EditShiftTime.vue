@@ -49,8 +49,8 @@
                     v-bind:default-date="valuetodate"
                     v-bind:date-format="DatePickerFormat"
                     v-bind:place-holder="'終了日付を選択してください'"
-                    v-on:change-event="fromtoChanges"
-                    v-on:clear-event="fromtoCleared"
+                    v-on:change-event="todateChanges"
+                    v-on:clear-event="todateCleared"
                   ></input-datepicker>
                 </div>
               </div>
@@ -202,6 +202,7 @@
           <table-shift-time
             v-bind:detail-dates="detail_dates"
             v-bind:details="details"
+            v-bind:detail-csvitems="csvitem_details"
             v-bind:is-edtbutton="true"
             v-on:detaileditclick-event="detailEdtClick"
           ></table-shift-time>
@@ -584,6 +585,7 @@ export default {
       stringtext2: "",
       details: [],
       detail_dates: [],
+      csvitem_details: [],
       use_free_item: [{}],
       array_working_timetable_no: [{}],
       formweekdays: [
@@ -824,7 +826,7 @@ export default {
     // 開始日付が変更された場合の処理
     fromdateChanges: function(value) {
       this.valuefromdate = value;
-      this.valuetodate = new Date(moment(this.valuefromdate).add(1, 'months').subtract(1, 'days'));
+      this.valuetodate = moment(this.valuefromdate).add(1, 'months').subtract(1, 'days').toDate();
       // 再取得
       this.applytermdate = ""
       if (this.valuefromdate) {
@@ -843,11 +845,11 @@ export default {
       this.applytermdate = "";
     },
     // 終了日付が変更された場合の処理
-    fromtoChanges: function(value, arrayitem) {
+    todateChanges: function(value, arrayitem) {
       this.valuetodate = value;
     },
     // 終了日付がクリアされた場合の処理
-    fromtoCleared: function() {
+    todateCleared: function() {
       this.valuetodate = "";
     },
     // 雇用形態が変更された場合の処理
@@ -1174,6 +1176,7 @@ export default {
       if (res.result) {
         this.details = res.details;
         this.detail_dates = res.detail_dates;
+        this.csvitem_details = res.csvitem_details;
         this.valuefromday = moment(this.valuefromdate).format("YYYY-MM-DD");
         this.valuetoday = moment(this.valuetodate).format("YYYY-MM-DD");
         this.date_min = moment(this.valuefromdate).format("YYYY-MM-DD");

@@ -438,9 +438,11 @@ class MonthlyWorkingInformationController extends Controller
                 }
             }
             while (true) {
-                // Log::debug(' ●● 最新更新集計 対象日付 ●● $calc_date = '.$calc_date);
+                Log::debug(' ●● 最新更新集計 対象日付 ●● $calc_date = '.$calc_date);
                 $dt1 = new Carbon($calc_date);
                 // if ($dt1 > $dt2) { break; }
+                Log::debug('    break dt1 = '.$dt1);
+                Log::debug('    break dt_end = '.$dt_end);
                 if ($dt1 > $dt_end) { break; }
                 // 打刻時刻を取得
                 $work_time->setParamDatefromAttribute($calc_date);
@@ -458,11 +460,20 @@ class MonthlyWorkingInformationController extends Controller
                     'datefrom' => $calc_date
                 );
                 $business_kubun = $apicommon->jdgBusinessKbn($array_impl_jdgBusinessKbn);
+                // -------------- debug -------------- start --------
+                if ($business_kubun == 1) {
+                    Log::debug('------------- 集計開始 日付 = '.$calc_date.' 出勤日　business_kubun = '.$business_kubun );
+                } elseif($business_kubun == 2) {
+                    Log::debug('------------- 集計開始 日付 = '.$calc_date.' 法定外休日　business_kubun = '.$business_kubun );
+                } else {
+                    Log::debug('------------- 集計開始 日付 = '.$calc_date.' 法定休日　business_kubun = '.$business_kubun );
+                }
+                // -------------- debug -------------- end --------
                 // addDailyCalc implement
                 $array_impl_addDailyCalc = array (
                     'work_time' => $work_time,
-                    'datefrom' => $datefrom,
-                    'dateto' => $dateto,
+                    'datefrom' => $calc_date,
+                    'dateto' => $calc_date,
                     'employmentstatus' => $employmentstatus,
                     'departmentcode' => $departmentcode,
                     'usercode' => $usercode,
@@ -474,6 +485,7 @@ class MonthlyWorkingInformationController extends Controller
                     'calc_date' => $calc_date
                 );
                 $calc_result = $daily_controller->addDailyCalc($array_impl_addDailyCalc);
+                Log::debug(' ●● 最新更新集計 対象日付 ●● $addDailyCalc end ');
                 $calc_date = date_format($dt1->addDay(1), 'Ymd');
             }
             DB::commit();

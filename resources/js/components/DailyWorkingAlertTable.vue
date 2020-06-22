@@ -39,10 +39,11 @@
                 <td class="text-left align-middle mw-rem-8">{{ alertList.employment_status_name }}</td>
                 <td class="text-left align-middle mw-rem-8">{{ alertList.department_name }}</td>
                 <td class="text-left align-middle mw-rem-12">{{ alertList.user_name }}</td>
-                <td class="text-center align-middle mw-rem-5" v-if="isEdit">
-                  <i class="fa fa-edit" style="color: red;ccursor: hand; cursor:pointer;" v-on:click="detailEdtClick(index)">
+                <td class="text-center align-middle mw-rem-2-6" style="text-align:center" v-if="isEdit">
+                  <input type="image" src="images/btn01.svg" v-on:click="detailEdtClick(index)" alt />
+                  <!-- <i class="fa fa-edit" style="color: red;ccursor: hand; cursor:pointer;" v-on:click="detailEdtClick(index)">
                     <span style="color: #0000FF;cursor: hand; cursor:pointer;">編集</span>
-                  </i>
+                  </i> -->
                 </td>
                 <td class="text-left align-middle mw-rem-8">{{ alertList.current_record_time }}</td>
                 <td class="text-left align-middle mw-rem-8">{{ alertList.current_mode_name }}</td>
@@ -141,6 +142,10 @@ tbody {
     border-style: solid dashed !important;
     border-width: 1px !important;
     border-color: #95c5ed #dee2e6 !important;
+}
+
+.mw-rem-2-6 {
+  min-width: 2.6rem;
 }
 
 .mw-rem-8 {

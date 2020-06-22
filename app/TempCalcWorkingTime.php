@@ -846,6 +846,7 @@ class TempCalcWorkingTime extends Model
      */
     public function getTempCalcWorkingtime(){
         try{
+            // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
             $mainquery = DB::table($this->table.' AS t1')
             ->select(
                 't1.working_date as working_date',
@@ -940,7 +941,11 @@ class TempCalcWorkingTime extends Model
                 ->orderBy('t1.user_code','asc')
                 ->orderBy('t1.seq','asc')
                 ->get();
-        }catch(\PDOException $pe){
+            // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
+            //     \Log::debug('sql_debug_log', ['getTempCalcWorkingtime' => \DB::getQueryLog()]);
+            //     \DB::disableQueryLog();
+            // }
+            }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
