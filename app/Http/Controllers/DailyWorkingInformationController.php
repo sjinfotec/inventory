@@ -1200,16 +1200,30 @@ class DailyWorkingInformationController extends Controller
                         $before_holiday_date != $result->user_working_date) {
                         Log::debug('        データ break $result->user_holiday_kubun= '.$result->user_holiday_kubun);
                         Log::debug('        データ break $result->business_kubun= '.$result->business_kubun);
+                        Log::debug('        データ break $result->user_working_date = '.$result->user_working_date);
+                        // 出勤打刻flgをfalseに初期設定
+                        $attendance_target_flg = false;
+                        $attendance_work_time = null;
                         // 有効打刻データがなくて、休暇扱いか出勤日である場合はtempに出力
                         // 打刻されていれば出勤以外は出力対象外
                         $temp_out_flg1 = false;
                         $temp_out_flg2 = false;
                         $temp_out_flg3 = false;
-                        if (isset($result->user_holiday_kubun) && $result->user_holiday_kubun >= (int)Config::get('const.C013.paid_holiday')) {
-                            $temp_out_flg1 = true;
-                        }
-                        if ($result->business_kubun == Config::get('const.C007.basic')) {
-                            $temp_out_flg2 = true;
+                        if (isset($result->user_holiday_kubun)) {
+                            if ($result->user_holiday_kubun >= (int)Config::get('const.C013.paid_holiday')) {
+                                // 当日の休暇である場合
+                                if ($result->user_working_date == $target_date_ymd) {
+                                    $temp_out_flg1 = true;
+                                }
+                            } else {
+                                if ($result->business_kubun == Config::get('const.C007.basic')) {
+                                    $temp_out_flg2 = true;
+                                }
+                            }
+                        } else {
+                            if ($result->business_kubun == Config::get('const.C007.basic')) {
+                                $temp_out_flg2 = true;
+                            }
                         }
                         if (!$attendance_target_flg)
                         {
