@@ -12,7 +12,7 @@
               在席者数：
               <span class="badge badge-light">{{ ondetails_length}}名</span>
             </button>
-            <table class="table table-sm table-bordered table-hover table-striped thead-dark">
+            <table class="table table-striped border-bottom font-size-sm text-nowrap">
               <!-- <table class="table"> -->
               <thead class="thead-dark">
                 <tr>
@@ -71,7 +71,7 @@
               在席者数：
               <span class="badge badge-light">{{ ondetails_length}}名</span>
             </button>
-            <table class="table table-sm table-bordered table-hover table-striped thead-dark">
+            <table class="table table-striped border-bottom font-size-sm text-nowrap">
               <thead class="thead-dark">
                 <tr>
                   <td class="text-center align-middle mw-rem-10">部署</td>
@@ -100,7 +100,7 @@
               離席者数：
               <span class="badge badge-light">{{ offdetails_length}}名</span>
             </button>
-            <table class="table table-sm table-bordered table-hover table-striped thead-dark">
+            <table class="table table-striped border-bottom font-size-sm text-nowrap">
               <!-- <table class="table"> -->
               <thead>
                 <tr>
@@ -133,7 +133,7 @@
               離席者数：
               <span class="badge badge-light">{{ offdetails_length}}名</span>
             </button>
-            <table class="table table-sm table-bordered table-hover table-striped thead-dark">
+            <table class="table table-striped border-bottom font-size-sm text-nowrap">
               <thead class="thead-dark">
                 <tr>
                   <td class="text-center align-middle mw-rem-10">部署</td>
@@ -321,13 +321,13 @@ tbody {
   height: 300px !important;
 }
 
-/* .table th,
+.table th,
 .table td {
   padding: 0rem !important;
   border-style: solid dashed !important;
   border-width: 1px !important;
   border-color: #95c5ed #dee2e6 !important;
-} */
+}
 .bg-color-exists {
   background-color: aliceblue;
 }

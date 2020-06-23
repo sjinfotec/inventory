@@ -10,7 +10,7 @@
                 <td class="text-center align-middle mw-rem-8">雇用形態</td>
                 <td class="text-center align-middle mw-rem-8">部署</td>
                 <td class="text-center align-middle mw-rem-12">氏名</td>
-                <td class="text-center align-middle mw-rem-5" v-if="isEdit">操作</td>
+                <td class="text-center align-middle mw-rem-2-6" v-if="isEdit">操作</td>
                 <td class="text-center align-middle mw-rem-8">打刻時刻</td>
                 <td class="text-center align-middle mw-rem-8">打刻モード</td>
                 <td class="text-center align-middle mw-rem-8">直前打刻時刻</td>
