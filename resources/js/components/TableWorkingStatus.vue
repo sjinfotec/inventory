@@ -115,7 +115,33 @@
                 <tr v-for="(item,offrowIndex) in offdetails" v-bind:key="item['user_code']">
                   <td class="text-left align-middle mw-rem-10">{{ item['department_name'] }}</td>
                   <td class="text-left align-middle mw-rem-10">{{ item['user_name'] }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ item['record_time_name'] }}</td>
+                  <!-- <td class="text-center align-middle mw-rem-8">{{ item['record_time_name'] }}</td> -->
+                  <daily-working-info-time-table
+                    v-bind:calc-list="{
+                      x_positions: item['x_positions'],
+                      y_positions: item['y_positions'],
+                      editor_department_code: null,
+                      editor_department_name: null,
+                      editor_user_name: null,
+                      working_time: item['record_time_name'],
+                      holiday_description: null
+                    }"
+                    v-bind:login-user="loginUser"
+                    v-bind:login-role="loginRole"
+                    v-bind:account-data="accountData"
+                    v-bind:menu-data="menuData"
+                    v-bind:user-index="userindex"
+                    v-bind:usercon-index="userconindex"
+                    v-bind:ssjjoo-id="ssjjoo_id"
+                    v-bind:edituser-id="edit_user_id"
+                    v-bind:class-text="'text-center align-middle mw-rem-8'"
+                    v-on:click-event="showMap(
+                      item['record_time_name'],
+                      item['user_name'],
+                      item['x_positions'],
+                      item['y_positions'],
+                      item['mode_name'])"
+                  ></daily-working-info-time-table>
                   <td class="text-center align-middle mw-rem-5">{{ item['mode_name'] }}</td>
                   <td
                     class="text-center align-middle mw-rem-10"
