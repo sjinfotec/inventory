@@ -321,13 +321,13 @@ tbody {
   height: 300px !important;
 }
 
-/* .table th,
+.table th,
 .table td {
   padding: 0rem !important;
   border-style: solid dashed !important;
   border-width: 1px !important;
   border-color: #95c5ed #dee2e6 !important;
-} */
+}
 .bg-color-exists {
   background-color: aliceblue;
 }

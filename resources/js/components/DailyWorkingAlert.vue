@@ -161,6 +161,7 @@
           v-bind:accountdatas="accountdatas"
           v-bind:halfautoset="get_IsAutoHalfSet"
           v-bind:feature-item-selections="feature_item_selections"
+          v-on:backclick-event="backclick"
         >
         </edit-work-times-table>
       </div>
@@ -179,7 +180,7 @@ import {requestable} from '../mixins/requestable.js';
 
 // CONST
 const CONST_C025 = 'C025';
-const CONST_C025_ADMINUSER_INDEX = 2;     // index
+const CONST_C025_ADMINUSER_CODE = 9;     // index
 const CONST_HALF_HOLIDAY_SET_CODE = 2;
 const CONST_INDEXORHOME_HOME = 2;
 
@@ -272,11 +273,7 @@ export default {
     },
     get_AdminUserRole: function() {
       if (this.adminuserrole == null || this.adminuserrole == "") {
-        if (this.const_C025_data.length == 0) {
-          this.adminuserrole = this.get_C025[CONST_C025_ADMINUSER_INDEX]['code'];
-        } else {
-          this.adminuserrole = this.const_C025_data[CONST_C025_ADMINUSER_INDEX]['code'];
-        }
+        this.adminuserrole = CONST_C025_ADMINUSER_CODE;
       }
       return this.adminuserrole;
     },
@@ -434,6 +431,11 @@ export default {
       this.selectMode = 'EDT';
       this.detailsEdt = this.details[index];
       this.refreshEdtWorkingTimesTable();
+    },
+    // 戻るボタンクリックされた場合の処理
+    backclick : function() {
+      this.selectMode = '';
+      this.refreshDailyWorkingAlertTable();
     },
     // キャンセルボタンクリックされた場合の処理
     cancelClick: function(e, arrayitem) {
