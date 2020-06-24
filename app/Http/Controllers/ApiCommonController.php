@@ -2699,7 +2699,7 @@ class ApiCommonController extends Controller
     }
 
     /**
-     * 時間丸め処理（時間丸めする：出勤用）
+     * 時間丸め処理（時間丸めタイムテーブルに合わせる：出勤用）
      *
      * @return 分で返却
      */
@@ -2777,7 +2777,7 @@ class ApiCommonController extends Controller
     }
 
     /**
-     * 時間丸め処理（時間丸めする：退勤用）
+     * 時間丸め処理（時間丸めタイムテーブルに合わせる：退勤用）
      *
      * @return 分で返却
      */
@@ -2861,273 +2861,1106 @@ class ApiCommonController extends Controller
     }
 
     /**
-     * 時間丸め処理（シリアルで丸めする）
+     * 時間丸め処理（外出開始用）
      *
      * @return 分で返却
      */
-    public function roundTime($round_time, $time_unit, $time_rounding){
+    public function roundTimeStart($params){
 
-        Log::debug('roundTime $round_time = '.$round_time);
-        Log::debug('roundTime $time_unit = '.$time_unit);
-        Log::debug('roundTime $time_rounding = '.$time_rounding);
+        $round_time = $params['round_time'];
+        $time_unit = $params['time_unit'];
+        $time_rounding = $params['time_rounding'];
+        Log::debug('roundTimeStart $round_time = '.$round_time);
+        Log::debug('roundTimeStart $time_unit = '.$time_unit);
+        Log::debug('roundTimeStart $time_rounding = '.$time_rounding);
+        $dt = new Carbon($round_time);
+        $target_datetime = $dt->format("Y-m-d H:i:s");
+        $target_ymd = $dt->format("Y-m-d");
+        $target_his = $dt->format("His");
+        $target_h = $dt->format("H");
+        $target_i = $dt->format("i");
+        $target_s = $dt->format("s");
         if ($time_rounding == Config::get('const.C010.round_half_up')) {
             // 四捨五入
             if ($time_unit == Config::get('const.C009.round1')) {
-                // 分求める
-                $result_round_time = round($round_time / 60);
-                } elseif ($time_unit == Config::get('const.C009.round5')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 3) {
-                    $result_round_time = $w_time2;
-                } elseif ($w_time3 < 8) {
-                    $result_round_time = $w_time2 + 5;
-                } elseif ($w_time3 < 13) {
-                    $result_round_time = $w_time2 + 10;
-                } elseif ($w_time3 < 18) {
-                    $result_round_time = $w_time2 + 15;
-                } elseif ($w_time3 < 23) {
-                    $result_round_time = $w_time2 + 20;
-                } elseif ($w_time3 < 28) {
-                    $result_round_time = $w_time2 + 25;
-                } elseif ($w_time3 < 33) {
-                    $result_round_time = $w_time2 + 30;
-                } elseif ($w_time3 < 38) {
-                    $result_round_time = $w_time2 + 35;
-                } elseif ($w_time3 < 43) {
-                    $result_round_time = $w_time2 + 40;
-                } elseif ($w_time3 < 48) {
-                    $result_round_time = $w_time2 + 45;
-                } elseif ($w_time3 < 53) {
-                    $result_round_time = $w_time2 + 50;
-                } elseif ($w_time3 < 58) {
-                    $result_round_time = $w_time2 + 55;
+                if ($target_s >= 30) {
+                    $target_s = 0;
+                    $target_i += 1;
+                    if ($target_i >= 60) {
+                        $target_i = 0;
+                        $target_h += 1;
+                        if ($target_h >= 24) {
+                            $target_h = 0;
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                            $dt2 = $dt->copy();
+                            $dt3 = $dt2->addDay(1);
+                            $target_ymd = $dt3->format("Y-m-d");
+                        }
+                    }
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_s = 0;
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round5')) {
+                if ($target_i >= 58) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i >= 53) {
+                    $target_i = 55;
+                } elseif($target_i >= 48) {
+                    $target_i = 50;
+                } elseif($target_i >= 43) {
+                    $target_i = 45;
+                } elseif($target_i >= 38) {
+                    $target_i = 40;
+                } elseif($target_i >= 33) {
+                    $target_i = 35;
+                } elseif($target_i >= 28) {
+                    $target_i = 30;
+                } elseif($target_i >= 23) {
+                    $target_i = 25;
+                } elseif($target_i >= 18) {
+                    $target_i = 20;
+                } elseif($target_i >= 13) {
+                    $target_i = 15;
+                } elseif($target_i >= 8) {
+                    $target_i = 10;
+                } elseif($target_i >= 3) {
+                    $target_i = 5;
+                } else {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round10')) {
-                // 分求める
-                $result_round_time = round($round_time / 60 / 10) * 10;
+                if ($target_i >= 55) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i >= 45) {
+                    $target_i = 50;
+                } elseif($target_i >= 35) {
+                    $target_i = 40;
+                } elseif($target_i >= 25) {
+                    $target_i = 30;
+                } elseif($target_i >= 15) {
+                    $target_i = 20;
+                } elseif($target_i >= 5) {
+                    $target_i = 10;
+                } else {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round15')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 8) {
-                    $result_round_time = $w_time2;
-                } elseif ($w_time3 < 23) {
-                    $result_round_time = $w_time2 + 15;
-                } elseif ($w_time3 < 38) {
-                    $result_round_time = $w_time2 + 30;
-                } elseif ($w_time3 < 53) {
-                    $result_round_time = $w_time2 + 45;
+                if ($target_i >= 53) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i >= 38) {
+                    $target_i = 45;
+                } elseif($target_i >= 23) {
+                    $target_i = 30;
+                } elseif($target_i >= 8) {
+                    $target_i = 15;
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round30')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 15) {
-                    $result_round_time = $w_time2;
-                } elseif ($w_time3 < 45) {
-                    $result_round_time = $w_time2 + 30;
+                if ($target_i >= 45) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i >= 15) {
+                    $target_i = 30;
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round60')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 30) {
-                    $result_round_time = $w_time2;
+                if ($target_i >= 30) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             }
         } elseif ($time_rounding == Config::get('const.C010.round_down')) {
             // 切り捨て
             if ($time_unit == Config::get('const.C009.round1')) {
-                // 分求める
-                $result_round_time = floor($round_time / 60);
+                if ($target_s <= 59) {
+                    $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round5')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 5) {
-                    $result_round_time = $w_time2;
-                } elseif ($w_time3 < 10) {
-                    $result_round_time = $w_time2 + 5;
-                } elseif ($w_time3 < 15) {
-                    $result_round_time = $w_time2 + 10;
-                } elseif ($w_time3 < 20) {
-                    $result_round_time = $w_time2 + 15;
-                } elseif ($w_time3 < 25) {
-                    $result_round_time = $w_time2 + 20;
-                } elseif ($w_time3 < 30) {
-                    $result_round_time = $w_time2 + 25;
-                } elseif ($w_time3 < 35) {
-                    $result_round_time = $w_time2 + 30;
-                } elseif ($w_time3 < 40) {
-                    $result_round_time = $w_time2 + 35;
-                } elseif ($w_time3 < 45) {
-                    $result_round_time = $w_time2 + 40;
-                } elseif ($w_time3 < 50) {
-                    $result_round_time = $w_time2 + 45;
-                } elseif ($w_time3 < 55) {
-                    $result_round_time = $w_time2 + 50;
-                } elseif ($w_time3 < 60) {
-                    $result_round_time = $w_time2 + 55;
+                if ($target_i > 55) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i > 50) {
+                    $target_i = 55;
+                } elseif($target_i > 45) {
+                    $target_i = 50;
+                } elseif($target_i > 40) {
+                    $target_i = 45;
+                } elseif($target_i > 35) {
+                    $target_i = 40;
+                } elseif($target_i > 30) {
+                    $target_i = 35;
+                } elseif($target_i > 25) {
+                    $target_i = 30;
+                } elseif($target_i > 20) {
+                    $target_i = 25;
+                } elseif($target_i > 15) {
+                    $target_i = 20;
+                } elseif($target_i > 10) {
+                    $target_i = 15;
+                } elseif($target_i > 5) {
+                    $target_i = 10;
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round10')) {
-                // 分求める
-                $result_round_time = floor($round_time / 60 / 10) * 10;
+                if ($target_i > 50) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i > 40) {
+                    $target_i = 50;
+                } elseif($target_i > 30) {
+                    $target_i = 40;
+                } elseif($target_i > 20) {
+                    $target_i = 30;
+                } elseif($target_i > 10) {
+                    $target_i = 20;
+                } elseif($target_i > 0) {
+                    $target_i = 10;
+                } else {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round15')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 15) {
-                    $result_round_time = $w_time2;
-                } elseif ($w_time3 < 30) {
-                    $result_round_time = $w_time2 + 15;
-                } elseif ($w_time3 < 45) {
-                    $result_round_time = $w_time2 + 30;
-                } elseif ($w_time3 < 60) {
-                    $result_round_time = $w_time2 + 45;
+                if ($target_i > 45) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i > 30) {
+                    $target_i = 45;
+                } elseif($target_i > 15) {
+                    $target_i = 30;
+                } elseif($target_i > 0) {
+                    $target_i = 15;
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round30')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 30) {
-                    $result_round_time = $w_time2;
-                } elseif ($w_time3 < 60) {
-                    $result_round_time = $w_time2 + 30;
+                if ($target_i > 30) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round60')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 60) {
-                    $result_round_time = $w_time2;
-                } else {
-                    $result_round_time = $w_time2 + 60;
+                $target_i = 0;
+                if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                    if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             }
         } elseif ($time_rounding == Config::get('const.C010.round_up')) {
             // 切り上げ
             if ($time_unit == Config::get('const.C009.round1')) {
-                // 分求める
-                $result_round_time = ceil($round_time / 60);
+                if ($target_s >= 0) {
+                    $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round5')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 5) {
-                    $result_round_time = $w_time2 + 5;
-                } elseif ($w_time3 < 10) {
-                    $result_round_time = $w_time2 + 10;
-                } elseif ($w_time3 < 15) {
-                    $result_round_time = $w_time2 + 15;
-                } elseif ($w_time3 < 20) {
-                    $result_round_time = $w_time2 + 20;
-                } elseif ($w_time3 < 25) {
-                    $result_round_time = $w_time2 + 25;
-                } elseif ($w_time3 < 30) {
-                    $result_round_time = $w_time2 + 30;
-                } elseif ($w_time3 < 35) {
-                    $result_round_time = $w_time2 + 35;
-                } elseif ($w_time3 < 40) {
-                    $result_round_time = $w_time2 + 40;
-                } elseif ($w_time3 < 45) {
-                    $result_round_time = $w_time2 + 45;
-                } elseif ($w_time3 < 50) {
-                    $result_round_time = $w_time2 + 50;
-                } elseif ($w_time3 < 55) {
-                    $result_round_time = $w_time2 + 55;
-                } elseif ($w_time3 < 60) {
-                    $result_round_time = $w_time2 + 60;
+                if ($target_i >= 55) {
+                    $target_i = 55;
+                } elseif($target_i >= 50) {
+                    $target_i = 50;
+                } elseif($target_i >= 45) {
+                    $target_i = 45;
+                } elseif($target_i >= 40) {
+                    $target_i = 40;
+                } elseif($target_i >= 35) {
+                    $target_i = 35;
+                } elseif($target_i >= 30) {
+                    $target_i = 30;
+                } elseif($target_i >= 25) {
+                    $target_i = 25;
+                } elseif($target_i >= 20) {
+                    $target_i = 20;
+                } elseif($target_i >= 15) {
+                    $target_i = 15;
+                } elseif($target_i >= 10) {
+                    $target_i = 10;
+                } elseif($target_i >= 5) {
+                    $target_i = 5;
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round10')) {
-                // 分求める
-                $result_round_time = ceil($round_time / 60 / 10) * 10;
-            } elseif ($time_unit == Config::get('const.C009.round15')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 15) {
-                    $result_round_time = $w_time2 + 15;
-                } elseif ($w_time3 < 30) {
-                    $result_round_time = $w_time2 + 30;
-                } elseif ($w_time3 < 45) {
-                    $result_round_time = $w_time2 + 45;
-                } elseif ($w_time3 < 60) {
-                    $result_round_time = $w_time2 + 60;
+                if ($target_i >= 50) {
+                    $target_i = 50;
+                } elseif($target_i >= 40) {
+                    $target_i = 40;
+                } elseif($target_i >= 30) {
+                    $target_i = 30;
+                } elseif($target_i >= 20) {
+                    $target_i = 20;
+                } elseif($target_i >= 10) {
+                    $target_i = 10;
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round30')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 30) {
-                    $result_round_time = $w_time2 + 30;
-                } elseif ($w_time3 < 60) {
-                    $result_round_time = $w_time2 + 60;
+                if ($target_i >= 30) {
+                    $target_i = 30;
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round60')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 60) {
-                    $result_round_time = $w_time2 + 60;
-                } else {
-                    $result_round_time = $w_time2 + 60;
+                $target_i = 0;
+                if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                    if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             }
-        } elseif ($time_unit == Config::get('const.C010.non')) {
-            // なし
-            $result_round_time = $round_time / 60;
-        } else {
-            $result_round_time = $round_time / 60;
         }
 
-        return $result_round_time;
+        Log::debug('roundTimeStart $target_datetime = '.$target_datetime);
+        return $target_datetime;
     }
+
+    /**
+     * 時間丸め処理（外出終了用）
+     *
+     * @return 分で返却
+     */
+    public function roundTimeEnd($params){
+
+        $round_time = $params['round_time'];
+        $time_unit = $params['time_unit'];
+        $time_rounding = $params['time_rounding'];
+        Log::debug('roundTimeEnd $round_time = '.$round_time);
+        Log::debug('roundTimeEnd $time_unit = '.$time_unit);
+        Log::debug('roundTimeEnd $time_rounding = '.$time_rounding);
+        $dt = new Carbon($round_time);
+        $target_datetime = $dt->format("Y-m-d H:i:s");
+        $target_ymd = $dt->format("Y-m-d");
+        $target_his = $dt->format("His");
+        $target_h = $dt->format("H");
+        $target_i = $dt->format("i");
+        $target_s = $dt->format("s");
+        if ($time_rounding == Config::get('const.C010.round_half_up')) {
+            // 四捨五入
+            if ($time_unit == Config::get('const.C009.round1')) {
+                if ($target_s < 30) {
+                    $target_s = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } else {
+                    $target_s = 0;
+                    $target_i += 1;
+                    if ($target_i >= 60) {
+                        $target_i = 0;
+                        $target_h += 1;
+                        if ($target_h >= 24) {
+                            $target_h = 0;
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                            $dt2 = $dt->copy();
+                            $dt3 = $dt2->addDay(1);
+                            $target_ymd = $dt3->format("Y-m-d");
+                        }
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round5')) {
+                if ($target_i < 3) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } elseif($target_i < 8) {
+                    $target_i = 5;
+                } elseif($target_i < 13) {
+                    $target_i = 10;
+                } elseif($target_i < 18) {
+                    $target_i = 15;
+                } elseif($target_i < 23) {
+                    $target_i = 20;
+                } elseif($target_i < 28) {
+                    $target_i = 25;
+                } elseif($target_i < 33) {
+                    $target_i = 30;
+                } elseif($target_i < 38) {
+                    $target_i = 35;
+                } elseif($target_i < 43) {
+                    $target_i = 40;
+                } elseif($target_i < 48) {
+                    $target_i = 45;
+                } elseif($target_i < 53) {
+                    $target_i = 50;
+                } elseif($target_i < 58) {
+                    $target_i = 55;
+                } else {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round10')) {
+                if ($target_i < 5) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } elseif($target_i < 15) {
+                    $target_i = 10;
+                } elseif($target_i < 25) {
+                    $target_i = 20;
+                } elseif($target_i < 35) {
+                    $target_i = 30;
+                } elseif($target_i < 45) {
+                    $target_i = 40;
+                } elseif($target_i < 55) {
+                    $target_i = 50;
+                } else {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round15')) {
+                if ($target_i < 8) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } elseif($target_i < 23) {
+                    $target_i = 15;
+                } elseif($target_i < 38) {
+                    $target_i = 30;
+                } elseif($target_i < 53) {
+                    $target_i = 45;
+                } else {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round30')) {
+                if ($target_i < 15) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } elseif($target_i < 45) {
+                    $target_i = 30;
+                } else {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round60')) {
+                if ($target_i < 30) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } else {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            }
+        } elseif ($time_rounding == Config::get('const.C010.round_down')) {
+            // 切り捨て
+            if ($time_unit == Config::get('const.C009.round1')) {
+                if ($target_s <= 59) {
+                    $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round5')) {
+                if ($target_i < 5) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } elseif($target_i < 10) {
+                    $target_i = 5;
+                } elseif($target_i < 15) {
+                    $target_i = 10;
+                } elseif($target_i < 20) {
+                    $target_i = 15;
+                } elseif($target_i < 25) {
+                    $target_i = 20;
+                } elseif($target_i < 30) {
+                    $target_i = 25;
+                } elseif($target_i < 35) {
+                    $target_i = 30;
+                } elseif($target_i < 40) {
+                    $target_i = 35;
+                } elseif($target_i < 45) {
+                    $target_i = 40;
+                } elseif($target_i < 50) {
+                    $target_i = 45;
+                } elseif($target_i < 55) {
+                    $target_i = 50;
+                } elseif($target_i < 60) {
+                    $target_i = 55;
+                } else {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round10')) {
+                if ($target_i < 10) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } elseif($target_i < 20) {
+                    $target_i = 10;
+                } elseif($target_i < 30) {
+                    $target_i = 20;
+                } elseif($target_i < 40) {
+                    $target_i = 30;
+                } elseif($target_i < 50) {
+                    $target_i = 40;
+                } else {
+                    $target_i = 50;
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round15')) {
+                if ($target_i < 15) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } elseif($target_i < 30) {
+                    $target_i = 15;
+                } elseif($target_i < 45) {
+                    $target_i = 30;
+                } else {
+                    $target_i = 45;
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round30')) {
+                if ($target_i < 30) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } else {
+                    $target_i = 30;
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round60')) {
+                $target_i = 0;
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            }
+        } elseif ($time_rounding == Config::get('const.C010.round_up')) {
+            // 切り上げ
+            if ($time_unit == Config::get('const.C009.round1')) {
+                if ($target_s > 0) {
+                    $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                    $target_i += 1;
+                    if ($target_i >= 60) {
+                        $target_i = 0;
+                        $target_h += 1;
+                        if ($target_h >= 24) {
+                            $target_h = 0;
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                            $dt2 = $dt->copy();
+                            $dt3 = $dt2->addDay(1);
+                            $target_ymd = $dt3->format("Y-m-d");
+                        }
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round5')) {
+                if ($target_i > 55) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i > 50) {
+                    $target_i = 55;
+                } elseif($target_i > 45) {
+                    $target_i = 50;
+                } elseif($target_i > 40) {
+                    $target_i = 45;
+                } elseif($target_i > 35) {
+                    $target_i = 40;
+                } elseif($target_i > 30) {
+                    $target_i = 35;
+                } elseif($target_i > 25) {
+                    $target_i = 30;
+                } elseif($target_i > 20) {
+                    $target_i = 25;
+                } elseif($target_i > 15) {
+                    $target_i = 20;
+                } elseif($target_i > 10) {
+                    $target_i = 15;
+                } elseif($target_i > 5) {
+                    $target_i = 10;
+                } elseif($target_i > 0) {
+                    $target_i = 5;
+                } else {
+                    $target_i = 0;
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round10')) {
+                if ($target_i > 50) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i > 40) {
+                    $target_i = 50;
+                } elseif($target_i > 30) {
+                    $target_i = 40;
+                } elseif($target_i > 20) {
+                    $target_i = 30;
+                } elseif($target_i > 10) {
+                    $target_i = 20;
+                } elseif($target_i > 0) {
+                    $target_i = 10;
+                } else {
+                    $target_i = 0;
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round30')) {
+                if ($target_i > 30) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i > 0) {
+                    $target_i = 30;
+                } else {
+                    $target_i = 0;
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round60')) {
+                if ($target_i > 0) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } else {
+                    $target_i = 0;
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            }
+        }
+
+        Log::debug('roundTimeEnd $target_datetime = '.$target_datetime);
+        return $target_datetime;
+    }
+    // public function roundTime($round_time, $time_unit, $time_rounding){
+
+    //     Log::debug('roundTime $round_time = '.$round_time);
+    //     Log::debug('roundTime $time_unit = '.$time_unit);
+    //     Log::debug('roundTime $time_rounding = '.$time_rounding);
+    //     if ($time_rounding == Config::get('const.C010.round_half_up')) {
+    //         // 四捨五入
+    //         if ($time_unit == Config::get('const.C009.round1')) {
+    //             // 分求める
+    //             $result_round_time = round($round_time / 60);
+    //             } elseif ($time_unit == Config::get('const.C009.round5')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 3) {
+    //                 $result_round_time = $w_time2;
+    //             } elseif ($w_time3 < 8) {
+    //                 $result_round_time = $w_time2 + 5;
+    //             } elseif ($w_time3 < 13) {
+    //                 $result_round_time = $w_time2 + 10;
+    //             } elseif ($w_time3 < 18) {
+    //                 $result_round_time = $w_time2 + 15;
+    //             } elseif ($w_time3 < 23) {
+    //                 $result_round_time = $w_time2 + 20;
+    //             } elseif ($w_time3 < 28) {
+    //                 $result_round_time = $w_time2 + 25;
+    //             } elseif ($w_time3 < 33) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } elseif ($w_time3 < 38) {
+    //                 $result_round_time = $w_time2 + 35;
+    //             } elseif ($w_time3 < 43) {
+    //                 $result_round_time = $w_time2 + 40;
+    //             } elseif ($w_time3 < 48) {
+    //                 $result_round_time = $w_time2 + 45;
+    //             } elseif ($w_time3 < 53) {
+    //                 $result_round_time = $w_time2 + 50;
+    //             } elseif ($w_time3 < 58) {
+    //                 $result_round_time = $w_time2 + 55;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round10')) {
+    //             // 分求める
+    //             $result_round_time = round($round_time / 60 / 10) * 10;
+    //         } elseif ($time_unit == Config::get('const.C009.round15')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 8) {
+    //                 $result_round_time = $w_time2;
+    //             } elseif ($w_time3 < 23) {
+    //                 $result_round_time = $w_time2 + 15;
+    //             } elseif ($w_time3 < 38) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } elseif ($w_time3 < 53) {
+    //                 $result_round_time = $w_time2 + 45;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round30')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 15) {
+    //                 $result_round_time = $w_time2;
+    //             } elseif ($w_time3 < 45) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round60')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 30) {
+    //                 $result_round_time = $w_time2;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         }
+    //     } elseif ($time_rounding == Config::get('const.C010.round_down')) {
+    //         // 切り捨て
+    //         if ($time_unit == Config::get('const.C009.round1')) {
+    //             // 分求める
+    //             $result_round_time = floor($round_time / 60);
+    //         } elseif ($time_unit == Config::get('const.C009.round5')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 5) {
+    //                 $result_round_time = $w_time2;
+    //             } elseif ($w_time3 < 10) {
+    //                 $result_round_time = $w_time2 + 5;
+    //             } elseif ($w_time3 < 15) {
+    //                 $result_round_time = $w_time2 + 10;
+    //             } elseif ($w_time3 < 20) {
+    //                 $result_round_time = $w_time2 + 15;
+    //             } elseif ($w_time3 < 25) {
+    //                 $result_round_time = $w_time2 + 20;
+    //             } elseif ($w_time3 < 30) {
+    //                 $result_round_time = $w_time2 + 25;
+    //             } elseif ($w_time3 < 35) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } elseif ($w_time3 < 40) {
+    //                 $result_round_time = $w_time2 + 35;
+    //             } elseif ($w_time3 < 45) {
+    //                 $result_round_time = $w_time2 + 40;
+    //             } elseif ($w_time3 < 50) {
+    //                 $result_round_time = $w_time2 + 45;
+    //             } elseif ($w_time3 < 55) {
+    //                 $result_round_time = $w_time2 + 50;
+    //             } elseif ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2 + 55;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round10')) {
+    //             // 分求める
+    //             $result_round_time = floor($round_time / 60 / 10) * 10;
+    //         } elseif ($time_unit == Config::get('const.C009.round15')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 15) {
+    //                 $result_round_time = $w_time2;
+    //             } elseif ($w_time3 < 30) {
+    //                 $result_round_time = $w_time2 + 15;
+    //             } elseif ($w_time3 < 45) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } elseif ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2 + 45;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round30')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 30) {
+    //                 $result_round_time = $w_time2;
+    //             } elseif ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round60')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         }
+    //     } elseif ($time_rounding == Config::get('const.C010.round_up')) {
+    //         // 切り上げ
+    //         if ($time_unit == Config::get('const.C009.round1')) {
+    //             // 分求める
+    //             $result_round_time = ceil($round_time / 60);
+    //         } elseif ($time_unit == Config::get('const.C009.round5')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 5) {
+    //                 $result_round_time = $w_time2 + 5;
+    //             } elseif ($w_time3 < 10) {
+    //                 $result_round_time = $w_time2 + 10;
+    //             } elseif ($w_time3 < 15) {
+    //                 $result_round_time = $w_time2 + 15;
+    //             } elseif ($w_time3 < 20) {
+    //                 $result_round_time = $w_time2 + 20;
+    //             } elseif ($w_time3 < 25) {
+    //                 $result_round_time = $w_time2 + 25;
+    //             } elseif ($w_time3 < 30) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } elseif ($w_time3 < 35) {
+    //                 $result_round_time = $w_time2 + 35;
+    //             } elseif ($w_time3 < 40) {
+    //                 $result_round_time = $w_time2 + 40;
+    //             } elseif ($w_time3 < 45) {
+    //                 $result_round_time = $w_time2 + 45;
+    //             } elseif ($w_time3 < 50) {
+    //                 $result_round_time = $w_time2 + 50;
+    //             } elseif ($w_time3 < 55) {
+    //                 $result_round_time = $w_time2 + 55;
+    //             } elseif ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2 + 60;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round10')) {
+    //             // 分求める
+    //             $result_round_time = ceil($round_time / 60 / 10) * 10;
+    //         } elseif ($time_unit == Config::get('const.C009.round15')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 15) {
+    //                 $result_round_time = $w_time2 + 15;
+    //             } elseif ($w_time3 < 30) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } elseif ($w_time3 < 45) {
+    //                 $result_round_time = $w_time2 + 45;
+    //             } elseif ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2 + 60;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round30')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 30) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } elseif ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2 + 60;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round60')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2 + 60;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         }
+    //     } elseif ($time_unit == Config::get('const.C010.non')) {
+    //         // なし
+    //         $result_round_time = $round_time / 60;
+    //     } else {
+    //         $result_round_time = $round_time / 60;
+    //     }
+
+    //     return $result_round_time;
+    // }
 
     // -------------  5.算出情報取得  end ------------------------------------------------------- //
     
