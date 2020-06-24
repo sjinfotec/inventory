@@ -5783,6 +5783,18 @@ class DailyWorkingInformationController extends Controller
                                 }
                                 Log::debug('        temp_working_time_dates  $roundTimestart_time = '.$roundTimestart_time);
                                 Log::debug('        temp_working_time_dates  $roundTimeend_time = '.$roundTimeend_time);
+                                // $array_impl_calcTimes = array (
+                                //     'inc' => Config::get('const.INC_NO.public_going_out_return'),
+                                //     'timetables' => $timetables,
+                                //     'working_timetable_no' => $working_timetable_no,
+                                //     'isemergency_time' => $isemergency_time,
+                                //     'working_time_kubun' => $array_working_time_kubun[$i],
+                                //     'current_date' => $current_date,
+                                //     'roundTimestart_time' => $public_going_out_time,
+                                //     'roundTimeend_time' => $public_going_out_return_time,
+                                //     'array_attendance_calc_time' => $array_attendance_calc_time,
+                                //     'array_missing_middle_time' => $array_public_going_out_time
+                                // );
                                 $array_impl_calcTimes = array (
                                     'inc' => Config::get('const.INC_NO.public_going_out_return'),
                                     'timetables' => $timetables,
@@ -5790,8 +5802,8 @@ class DailyWorkingInformationController extends Controller
                                     'isemergency_time' => $isemergency_time,
                                     'working_time_kubun' => $array_working_time_kubun[$i],
                                     'current_date' => $current_date,
-                                    'roundTimestart_time' => $public_going_out_time,
-                                    'roundTimeend_time' => $public_going_out_return_time,
+                                    'roundTimestart_time' => $roundTimestart_time,
+                                    'roundTimeend_time' => $roundTimeend_time,
                                     'array_attendance_calc_time' => $array_attendance_calc_time,
                                     'array_missing_middle_time' => $array_public_going_out_time
                                 );
