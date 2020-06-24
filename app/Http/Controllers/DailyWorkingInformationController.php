@@ -5674,8 +5674,10 @@ class DailyWorkingInformationController extends Controller
                                     'array_get_timetable_result' => $array_get_timetable_result
                                 );
                                 if (!$isemergency_time) {
-                                    $roundTimestart_time = $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart);
-                                    $roundTimeend_time = $apicommon->roundTimeByTimeEnd($array_roundTimeByTimeEnd);
+                                    // $roundTimestart_time = $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart);
+                                    // $roundTimeend_time = $apicommon->roundTimeByTimeEnd($array_roundTimeByTimeEnd);
+                                    $roundTimestart_time = $apicommon->roundTime($missing_middle_time, $result->time_unit, $result->time_rounding);
+                                    $roundTimeend_time = $apicommon->roundTime($missing_middle_return_time, $result->time_unit, $result->time_rounding);
                                 } else {
                                     $roundTimestart_time = $missing_middle_time;
                                     $roundTimeend_time = $missing_middle_return_time;
@@ -5728,8 +5730,37 @@ class DailyWorkingInformationController extends Controller
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
                             if (($array_working_time_kubun[$i] <> Config::get('const.C004.regular_working_breaks_time')) &&
                                 ($array_working_time_kubun[$i] <> Config::get('const.C004.working_breaks_time')))  {
+                                // roundTimeByTimeStart implement
+                                $array_roundTimeByTimeStart = array (
+                                    'current_date' => $current_date,
+                                    'start_time' => $public_going_out_time,
+                                    'time_unit' => $result->time_unit,
+                                    'time_rounding' => $result->time_rounding,
+                                    'working_timetable_no' => $working_timetable_no,
+                                    'array_get_timetable_result' => $array_get_timetable_result
+                                );
+                                // roundTimeByTimeEnd implement
+                                $array_roundTimeByTimeEnd = array (
+                                    'current_date' => $current_date,
+                                    'end_time' => $public_going_out_return_time,
+                                    'time_unit' => $result->time_unit,
+                                    'time_rounding' => $result->time_rounding,
+                                    'working_timetable_no' => $working_timetable_no,
+                                    'array_get_timetable_result' => $array_get_timetable_result
+                                );
+                                if (!$isemergency_time) {
+                                    // $roundTimestart_time = $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart);
+                                    // $roundTimeend_time = $apicommon->roundTimeByTimeEnd($array_roundTimeByTimeEnd);
+                                    $roundTimestart_time = $apicommon->roundTime($public_going_out_time, $result->time_unit, $result->time_rounding);
+                                    $roundTimeend_time = $apicommon->roundTime($public_going_out_return_time, $result->time_unit, $result->time_rounding);
+                                } else {
+                                    $roundTimestart_time = $public_going_out_time;
+                                    $roundTimeend_time = $public_going_out_return_time;
+                                }
+                                Log::debug('        temp_working_time_dates  $roundTimestart_time = '.$roundTimestart_time);
+                                Log::debug('        temp_working_time_dates  $roundTimeend_time = '.$roundTimeend_time);
                                 $array_impl_calcTimes = array (
-                                    'inc' => Config::get('const.INC_NO.public_return'),
+                                    'inc' => Config::get('const.INC_NO.public_going_out_return'),
                                     'timetables' => $timetables,
                                     'working_timetable_no' => $working_timetable_no,
                                     'isemergency_time' => $isemergency_time,
@@ -8069,7 +8100,7 @@ class DailyWorkingInformationController extends Controller
                 // ------------------ DEBUG end ----------------------------------------
                 // 深夜労働残業時間以外の場合
                 if ($working_time_kubun != Config::get('const.C004.out_of_regular_night_working_time') ||
-                    $inc == Config::get('const.INC_NO.missing_return') ||
+                    $inc == Config::get('const.INC_NO.public_going_out_return') ||
                     $inc == Config::get('const.INC_NO.public_return')) {
                     // 打刻時刻$targetが所定時間内$working_timeの場合
                     $isbetweenTime = $apicommon->chkBetweenTime($target_from_time, $target_to_time, $working_time_calc_from, $working_time_calc_to);
@@ -8082,10 +8113,7 @@ class DailyWorkingInformationController extends Controller
                             if ($target_to_time < $working_time_calc_to) {
                                 $working_time_calc_to = $target_to_time;
                             }
-                            if ($inc == Config::get('const.INC_NO.missing_return') ||
-                                $inc == Config::get('const.INC_NO.public_return')) {
-                            }
-                                    $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
+                            $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
                             $working_times += $calc_times;
                             // ------------------ DEBUG strat ----------------------------------------
                             Log::debug('          　深夜労働残業時間以外の場合');
@@ -8095,16 +8123,6 @@ class DailyWorkingInformationController extends Controller
                             Log::debug('            労働時間      calc_times = '.$calc_times."  ".$calc_times / 60 / 60);
                             Log::debug('            累計労働時間  working_times = '.$working_times."  ".$working_times / 60 / 60);
                             // ------------------ DEBUG end ----------------------------------------
-                // roundTimeByTimeStart implement
-                // $array_roundTimeByTimeStart = array (
-                //     'current_date' => $param_target_date,
-                //     'start_time' => $from_times,
-                //     'time_unit' => $param_time_unit,
-                //     'time_rounding' => $param_time_rounding,
-                //     'working_timetable_no' => $param_working_timetable_no,
-                //     'array_get_timetable_result' => $param_array_get_timetable_result
-                // );
-                // $result_start_record_datetime = $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart);
                         }
                     }
                     // 夜勤の場合は打刻target_from_time、target_to_timeが翌日の場合があるため

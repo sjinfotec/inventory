@@ -2867,6 +2867,9 @@ class ApiCommonController extends Controller
      */
     public function roundTime($round_time, $time_unit, $time_rounding){
 
+        Log::debug('roundTime $round_time = '.$round_time);
+        Log::debug('roundTime $time_unit = '.$time_unit);
+        Log::debug('roundTime $time_rounding = '.$time_rounding);
         if ($time_rounding == Config::get('const.C010.round_half_up')) {
             // 四捨五入
             if ($time_unit == Config::get('const.C009.round1')) {
