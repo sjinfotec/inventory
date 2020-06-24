@@ -5655,29 +5655,41 @@ class DailyWorkingInformationController extends Controller
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
                             if (($array_working_time_kubun[$i] <> Config::get('const.C004.regular_working_breaks_time')) &&
                                 ($array_working_time_kubun[$i] <> Config::get('const.C004.working_breaks_time')))  {
-                                // roundTimeByTimeStart implement
-                                $array_roundTimeByTimeStart = array (
-                                    'current_date' => $current_date,
-                                    'start_time' => $missing_middle_time,
-                                    'time_unit' => $result->time_unit,
-                                    'time_rounding' => $result->time_rounding,
-                                    'working_timetable_no' => $working_timetable_no,
-                                    'array_get_timetable_result' => $array_get_timetable_result
-                                );
-                                // roundTimeByTimeEnd implement
-                                $array_roundTimeByTimeEnd = array (
-                                    'current_date' => $current_date,
-                                    'end_time' => $missing_middle_return_time,
-                                    'time_unit' => $result->time_unit,
-                                    'time_rounding' => $result->time_rounding,
-                                    'working_timetable_no' => $working_timetable_no,
-                                    'array_get_timetable_result' => $array_get_timetable_result
-                                );
+                                // // roundTimeByTimeStart implement
+                                // $array_roundTimeByTimeStart = array (
+                                //     'current_date' => $current_date,
+                                //     'start_time' => $missing_middle_time,
+                                //     'time_unit' => $result->time_unit,
+                                //     'time_rounding' => $result->time_rounding,
+                                //     'working_timetable_no' => $working_timetable_no,
+                                //     'array_get_timetable_result' => $array_get_timetable_result
+                                // );
+                                // // roundTimeByTimeEnd implement
+                                // $array_roundTimeByTimeEnd = array (
+                                //     'current_date' => $current_date,
+                                //     'end_time' => $missing_middle_return_time,
+                                //     'time_unit' => $result->time_unit,
+                                //     'time_rounding' => $result->time_rounding,
+                                //     'working_timetable_no' => $working_timetable_no,
+                                //     'array_get_timetable_result' => $array_get_timetable_result
+                                // );
                                 if (!$isemergency_time) {
+                                    // roundTimeByTimeStart implement
+                                    $array_roundTimeStart = array (
+                                        'round_time' => $missing_middle_time,
+                                        'time_unit' => $result->time_unit,
+                                        'time_rounding' => $result->time_rounding
+                                    );
+                                    // roundTimeByTimeEnd implement
+                                    $array_roundTimeEnd = array (
+                                        'round_time' => $missing_middle_return_time,
+                                        'time_unit' => $result->time_unit,
+                                        'time_rounding' => $result->time_rounding
+                                    );
                                     // $roundTimestart_time = $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart);
                                     // $roundTimeend_time = $apicommon->roundTimeByTimeEnd($array_roundTimeByTimeEnd);
-                                    $roundTimestart_time = $apicommon->roundTime($missing_middle_time, $result->time_unit, $result->time_rounding);
-                                    $roundTimeend_time = $apicommon->roundTime($missing_middle_return_time, $result->time_unit, $result->time_rounding);
+                                    $roundTimestart_time = $apicommon->roundTimeStart($array_roundTimeStart);
+                                    $roundTimeend_time = $apicommon->roundTimeEnd($array_roundTimeEnd);
                                 } else {
                                     $roundTimestart_time = $missing_middle_time;
                                     $roundTimeend_time = $missing_middle_return_time;
@@ -5730,29 +5742,41 @@ class DailyWorkingInformationController extends Controller
                         for ($i=0;$i<count($array_working_time_kubun);$i++) {
                             if (($array_working_time_kubun[$i] <> Config::get('const.C004.regular_working_breaks_time')) &&
                                 ($array_working_time_kubun[$i] <> Config::get('const.C004.working_breaks_time')))  {
-                                // roundTimeByTimeStart implement
-                                $array_roundTimeByTimeStart = array (
-                                    'current_date' => $current_date,
-                                    'start_time' => $public_going_out_time,
-                                    'time_unit' => $result->time_unit,
-                                    'time_rounding' => $result->time_rounding,
-                                    'working_timetable_no' => $working_timetable_no,
-                                    'array_get_timetable_result' => $array_get_timetable_result
-                                );
-                                // roundTimeByTimeEnd implement
-                                $array_roundTimeByTimeEnd = array (
-                                    'current_date' => $current_date,
-                                    'end_time' => $public_going_out_return_time,
-                                    'time_unit' => $result->time_unit,
-                                    'time_rounding' => $result->time_rounding,
-                                    'working_timetable_no' => $working_timetable_no,
-                                    'array_get_timetable_result' => $array_get_timetable_result
-                                );
+                                // // roundTimeByTimeStart implement
+                                // $array_roundTimeByTimeStart = array (
+                                //     'current_date' => $current_date,
+                                //     'start_time' => $public_going_out_time,
+                                //     'time_unit' => $result->time_unit,
+                                //     'time_rounding' => $result->time_rounding,
+                                //     'working_timetable_no' => $working_timetable_no,
+                                //     'array_get_timetable_result' => $array_get_timetable_result
+                                // );
+                                // // roundTimeByTimeEnd implement
+                                // $array_roundTimeByTimeEnd = array (
+                                //     'current_date' => $current_date,
+                                //     'end_time' => $public_going_out_return_time,
+                                //     'time_unit' => $result->time_unit,
+                                //     'time_rounding' => $result->time_rounding,
+                                //     'working_timetable_no' => $working_timetable_no,
+                                //     'array_get_timetable_result' => $array_get_timetable_result
+                                // );
                                 if (!$isemergency_time) {
+                                    // roundTimeByTimeStart implement
+                                    $array_roundTimeStart = array (
+                                        'round_time' => $public_going_out_time,
+                                        'time_unit' => $result->time_unit,
+                                        'time_rounding' => $result->time_rounding
+                                    );
+                                    // roundTimeByTimeEnd implement
+                                    $array_roundTimeEnd = array (
+                                        'round_time' => $public_going_out_return_time,
+                                        'time_unit' => $result->time_unit,
+                                        'time_rounding' => $result->time_rounding
+                                    );
                                     // $roundTimestart_time = $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart);
                                     // $roundTimeend_time = $apicommon->roundTimeByTimeEnd($array_roundTimeByTimeEnd);
-                                    $roundTimestart_time = $apicommon->roundTime($public_going_out_time, $result->time_unit, $result->time_rounding);
-                                    $roundTimeend_time = $apicommon->roundTime($public_going_out_return_time, $result->time_unit, $result->time_rounding);
+                                    $roundTimestart_time = $apicommon->roundTimeStart($array_roundTimeStart);
+                                    $roundTimeend_time = $apicommon->roundTimeEnd($array_roundTimeEnd);
                                 } else {
                                     $roundTimestart_time = $public_going_out_time;
                                     $roundTimeend_time = $public_going_out_return_time;
