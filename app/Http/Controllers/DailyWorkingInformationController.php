@@ -8013,6 +8013,7 @@ class DailyWorkingInformationController extends Controller
     private function calcTimes($params)
     {
         Log::debug('---------------------- calcTimes ------------------------ ');
+        Log::debug('            inc = '.$params['inc']);
         $inc = $params['inc'];
         $timetables = $params['timetables'];
         $working_timetable_no = $params['working_timetable_no'];
@@ -8081,7 +8082,10 @@ class DailyWorkingInformationController extends Controller
                             if ($target_to_time < $working_time_calc_to) {
                                 $working_time_calc_to = $target_to_time;
                             }
-                            $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
+                            if ($inc == Config::get('const.INC_NO.missing_return') ||
+                                $inc == Config::get('const.INC_NO.public_return')) {
+                            }
+                                    $calc_times = $apicommon->diffTimeSerial($working_time_calc_from, $working_time_calc_to);
                             $working_times += $calc_times;
                             // ------------------ DEBUG strat ----------------------------------------
                             Log::debug('          　深夜労働残業時間以外の場合');
@@ -8091,6 +8095,16 @@ class DailyWorkingInformationController extends Controller
                             Log::debug('            労働時間      calc_times = '.$calc_times."  ".$calc_times / 60 / 60);
                             Log::debug('            累計労働時間  working_times = '.$working_times."  ".$working_times / 60 / 60);
                             // ------------------ DEBUG end ----------------------------------------
+                // roundTimeByTimeStart implement
+                // $array_roundTimeByTimeStart = array (
+                //     'current_date' => $param_target_date,
+                //     'start_time' => $from_times,
+                //     'time_unit' => $param_time_unit,
+                //     'time_rounding' => $param_time_rounding,
+                //     'working_timetable_no' => $param_working_timetable_no,
+                //     'array_get_timetable_result' => $param_array_get_timetable_result
+                // );
+                // $result_start_record_datetime = $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart);
                         }
                     }
                     // 夜勤の場合は打刻target_from_time、target_to_timeが翌日の場合があるため
@@ -10576,9 +10590,11 @@ class DailyWorkingInformationController extends Controller
 
             // 出退勤
             if ($result->mode == Config::get('const.C005.attendance_time') || $result->mode == Config::get('const.C005.leaving_time')) {
+                Log::debug('         setWorkingtimetabletime 出退勤 $result->mode = '.$result->mode);
                 $apicommon = new ApiCommonController();
                 // 出退勤打刻回数が複数回の場合は、タイムテーブル開始終了時刻が対応されていないため、打刻時刻より開始終了時刻を特定する
                 // 出退勤打刻回数 feature_attendance_count
+                Log::debug('         setWorkingtimetabletime 出退勤 $feature_attendance_count = '.$feature_attendance_count);
                 if ($feature_attendance_count > 1) {
                     // calcWorkingTimeDate implement
                     $array_impl_getWorkingHoursByStamp = array (
@@ -10591,9 +10607,13 @@ class DailyWorkingInformationController extends Controller
                     $array_result = $apicommon->getWorkingHoursByStamp($array_impl_getWorkingHoursByStamp);
                     $working_from_time = $array_result['working_from_time'];
                     $working_to_time = $array_result['working_to_time'];
+                    Log::debug('         setWorkingtimetabletime 出退勤 $working_from_time = '.$working_from_time);
+                    Log::debug('         setWorkingtimetabletime 出退勤 $working_to_time = '.$working_to_time);
                 }
                 // 早出も集計する場合、出勤時刻前の場合のリンクNOが設定されていれば
                 // タイムテーブル開始終了時刻を１時間間に調整
+                Log::debug('         setWorkingtimetabletime 出退勤 $early_time = '.$early_time);
+                Log::debug('         setWorkingtimetabletime 出退勤 $result->ago_time_no = '.$result->ago_time_no);
                 if ($early_time == 1 && $result->ago_time_no != 0) {
                     // 打刻時刻とタイムテーブル開始終了時刻に1時間以上差があれば
                     // 出勤時刻前の場合のリンクNOのタイムテーブルを取得する
@@ -10602,16 +10622,16 @@ class DailyWorkingInformationController extends Controller
                     $w_ymd = date_format($dt, 'Y-m-d');
                     if ($result->mode == Config::get('const.C005.attendance_time')) {
                         $from_datetime = $w_ymd.' '.$working_from_time;
-                        Log::debug('         setWorkingtimetabletime $result->record_datetime = '.$result->record_datetime);
-                        Log::debug('         setWorkingtimetabletime $from_datetime = '.$from_datetime);
+                        Log::debug('         setWorkingtimetabletime 出退勤 $result->record_datetime = '.$result->record_datetime);
+                        Log::debug('         setWorkingtimetabletime 出退勤 $from_datetime = '.$from_datetime);
                         $calc_times = $apicommon->diffTimeSerial($result->record_datetime, $from_datetime);
                     } elseif ($result->mode == Config::get('const.C005.leaving_time')) {
                         $to_datetime = $w_ymd.' '.$working_to_time;
-                        Log::debug('         setWorkingtimetabletime $result->record_datetime = '.$result->record_datetime);
-                        Log::debug('         setWorkingtimetabletime $to_datetime = '.$to_datetime);
+                        Log::debug('         setWorkingtimetabletime 出退勤 $result->record_datetime = '.$result->record_datetime);
+                        Log::debug('         setWorkingtimetabletime 出退勤 $to_datetime = '.$to_datetime);
                         $calc_times = $apicommon->diffTimeSerial($result->record_datetime, $to_datetime);
                     }
-                    Log::debug('         setWorkingtimetabletime $calc_times = '.$calc_times);
+                    Log::debug('         setWorkingtimetabletime 出退勤 $calc_times = '.$calc_times);
                     if ($calc_times >= 3600) {
                         $time_table = new WorkingTimeTable();
                         $time_table->setNoAttribute($result->ago_time_no);
@@ -10635,6 +10655,7 @@ class DailyWorkingInformationController extends Controller
                     return $array_workingHours;
                 }
                 // 出退勤打刻回数 feature_attendance_count
+                Log::debug('         setWorkingtimetabletime 出退勤 $feature_attendance_count = '.$feature_attendance_count);
                 if ($feature_attendance_count == 1) {
                     // そのまま返却
                     $array_workingHours = array(

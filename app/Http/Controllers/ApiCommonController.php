@@ -2711,6 +2711,7 @@ class ApiCommonController extends Controller
         $time_rounding = $params['time_rounding'];
         $working_timetable_no = $params['working_timetable_no'];
         $array_get_timetable_result = $params['array_get_timetable_result'];
+        Log::debug('roundTimeByTimeStart $start_time = '.$start_time);
         // 1分単位の場合はそのまま
         if ($time_unit == Config::get('const.C009.round1')) {
             return $start_time;
@@ -2771,6 +2772,7 @@ class ApiCommonController extends Controller
             }
             $result_round_time = date('Y-m-d H:i:00',strtotime(('+'.$calc_times_round).' second',strtotime($source_dt)));
         }
+        Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
         return $result_round_time;
     }
 
@@ -2787,6 +2789,7 @@ class ApiCommonController extends Controller
         $time_rounding = $params['time_rounding'];
         $working_timetable_no = $params['working_timetable_no'];
         $array_get_timetable_result = $params['array_get_timetable_result'];
+        Log::debug('roundTimeByTimeStart $end_time = '.$end_time);
         // 1分単位の場合はそのまま
         if ($time_unit == Config::get('const.C009.round1')) {
             return $end_time;
@@ -2853,6 +2856,7 @@ class ApiCommonController extends Controller
             }
             $result_round_time = date('Y-m-d H:i:00',strtotime(('+'.$calc_times_round).' second',strtotime($source_dt)));
         }
+        Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
         return $result_round_time;
     }
 

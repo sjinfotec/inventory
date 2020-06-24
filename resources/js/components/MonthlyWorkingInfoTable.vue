@@ -209,10 +209,10 @@
                     <td class="text-center align-middle mw-rem-5">{{ total.late_night_overtime_hours }}</td>
                     <!-- /深夜残業時間 -->
                     <!-- 法定休日労働時間 -->
-                    <td class="text-center align-middle mw-rem-5">{{ total.late_night_working_hours }}</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.legal_working_holiday_hours }}</td>
                     <!-- /法定休日労働時間 -->
                     <!-- 法定外（所定休日）休日労働時間 -->
-                    <td class="text-center align-middle mw-rem-5">{{ total.public_going_out_hours }}</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.out_of_legal_working_holiday_hours }}</td>
                     <!-- /法定外（所定休日）休日労働時間 -->
                     <!-- 深夜労働時間 -->
                     <td class="text-center align-middle mw-rem-5">{{ total.late_night_working_hours }}</td>
