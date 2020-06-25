@@ -8729,14 +8729,31 @@ class DailyWorkingInformationController extends Controller
                 'break_leaving_time' => $break_leaving_time,
                 'array_get_timetable_result' => $array_get_timetable_result
             );
-            $regular_calc_time_stamp = $this->calcRegulartime($array_impl_calcRegulartime);
+            $array_regular_calc_time_stamp = $this->calcRegulartime($array_impl_calcRegulartime);
+            // タイムテーブルの所定時間
+            $regular_calc_time_stamp_basic = $array_regular_calc_time_stamp['regular_calc_time_basic'];
+            // 所定時間内の実働時間
+            $regular_calc_time_stamp = $array_regular_calc_time_stamp['regular_calc_time'];
+            $regular_calc_time_basic = $apicommon->cnvToDecFromStamp($regular_calc_time_stamp_basic);
             $regular_calc_time = $apicommon->cnvToDecFromStamp($regular_calc_time_stamp);
             $holiday_calc_time_stamp = 0;
             $holiday_calc_time = 0;
             Log::debug('  target_result->business_kubun = '.$target_result->business_kubun);
+            Log::debug('  regular_calc_time_basic = '.$regular_calc_time_basic);
             Log::debug('  regular_calc_time = '.$regular_calc_time);
             if ($target_result->business_kubun == Config::get('const.C007.basic')) {
-                $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);               // 所定労働時間（出勤日）
+                if ($target_result->holiday_description == null || $target_result->holiday_description == "") {
+                    $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time);               // 所定労働時間（出勤日）
+                } elseif ($target_result->holiday_description == Config::get('const.C013_DESC.morning_off') ||
+                    $target_result->holiday_description == Config::get('const.C013_DESC.afternoon_off')) {
+                    $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time_basic);               // 所定労働時間（半休）
+                } elseif ($target_result->holiday_description == Config::get('const.C013_DESC.paid_holiday') ||
+                    $target_result->holiday_description == Config::get('const.C013_DESC.public_damage') ||
+                    $target_result->holiday_description == Config::get('const.C013_DESC.nigth_shift')) {
+                    $temp_working_model->setRegularworkingtimesAttribute($regular_calc_time_basic);               // 所定労働時間（1日集計対象休暇）
+                } else {
+                    $temp_working_model->setRegularworkingtimesAttribute(0);                                // 所定労働時間（1日休）
+                }
             } elseif ($target_result->business_kubun == Config::get('const.C007.legal_out_holoday')) {
                 $holiday_calc_time_stamp = $regular_calc_time_stamp;
                 $regular_calc_time_stamp = 0;
@@ -8792,11 +8809,23 @@ class DailyWorkingInformationController extends Controller
                 $temp_working_model->setLatenightovertimehoursAttribute($lastnight_overtime_hours);                         // 深夜残業時間
                 $temp_working_model->setOutoflegalworkingholidayhoursAttribute($holiday_calc_time);                         // 法定外休日労働時間
                 $temp_working_model->setLegalworkingholidayhoursAttribute($holiday_calc_time);                              // 法定休日労働時間
-                // 合計勤務時間
+                // 合計実働勤務時間
+                Log::debug('  1 $regular_calc_time_stamp_basic = '.$regular_calc_time_stamp_basic);
                 Log::debug('  1 $regular_calc_time_stamp = '.$regular_calc_time_stamp);
                 Log::debug('  1 $overtime_hours_stamp = '.$overtime_hours_stamp);
                 Log::debug('  1 $lastnight_overtime_hours_stamp = '.$lastnight_overtime_hours_stamp);
-                $total_time_stamp = $regular_calc_time_stamp + $overtime_hours_stamp + $lastnight_overtime_hours_stamp;
+                if ($target_result->holiday_description == null || $target_result->holiday_description == "") {
+                    $total_time_stamp = $regular_calc_time_stamp + $overtime_hours_stamp + $lastnight_overtime_hours_stamp;
+                } elseif ($target_result->holiday_description == Config::get('const.C013_DESC.morning_off') ||
+                            $target_result->holiday_description == Config::get('const.C013_DESC.afternoon_off')) {
+                    if ($regular_calc_time_stamp < $regular_calc_time_stamp_basic) {
+                        $total_time_stamp = $regular_calc_time_stamp + $overtime_hours_stamp + $lastnight_overtime_hours_stamp;
+                    } else {
+                        $total_time_stamp = $regular_calc_time_stamp_basic + $overtime_hours_stamp + $lastnight_overtime_hours_stamp;
+                    }
+                } else {
+                    $total_time_stamp = 0;
+                }
                 Log::debug('  1 $total_time_stamp = '.$total_time_stamp);
                 $total_time = $apicommon->cnvToDecFromStamp($total_time_stamp);
                 Log::debug('  1 $total_time = '.$total_time);
@@ -8977,7 +9006,7 @@ class DailyWorkingInformationController extends Controller
         // パラメータ設定
         $param_target_date = $params['target_date'];
         $param_target_result = $params['target_result'];
-        $param_rray_break_worktimetable_result = $params['array_break_worktimetable_result'];
+        $param_array_break_worktimetable_result = $params['array_break_worktimetable_result'];
         $param_array_attendance_calc_time = $params['array_attendance_calc_time'];
         $param_array_missing_middle_time = $params['array_missing_middle_time'];
         $param_timetables = $params['timetables'];
@@ -8986,13 +9015,68 @@ class DailyWorkingInformationController extends Controller
         $param_array_get_timetable_result = $params['array_get_timetable_result'];
         Log::debug('                       所定労働時間計算 param_target_date = '.$param_target_date);
         Log::debug('                       所定労働時間計算 $param_target_result->holiday_description = '.$param_target_result->holiday_description);
+        $regular_calc_time_basic = 0;
         $regular_calc_time = 0;
+        $index = (int)(Config::get('const.C004.regular_working_time'))-1;
+        Log::debug('                       所定労働時間計算 $param_array_attendance_calc_time[$index] = '.$param_array_attendance_calc_time[$index]);
+        // 通常の所定労働
+        $collect_array_break_worktimetable_result = collect($param_array_break_worktimetable_result);
+        $filtered = $collect_array_break_worktimetable_result
+            ->where('no', '=', $param_target_result->working_timetable_no)
+            ->where('working_time_kubun', Config::get('const.C004.regular_working_time'));
+        $regular_calc_time_basic = 0;
+        $dt = new Carbon($param_target_date);
+        $dt_ymd = date_format($dt, 'Y-m-d');
+        $dt_addday = date_format($dt->copy()->addDay(), 'Y-m-d');
+        $apicommon = new ApiCommonController();
+        foreach ($filtered as $item) {
+            Log::debug('                       所定労働時間計算 $item->from_time = '.$item->from_time);
+            Log::debug('                       所定労働時間計算 $item->to_time = '.$item->to_time);
+            if ($item->from_time != null && $item->from_time != "") {
+                $break_start_time = $dt_ymd.' '.$item->from_time;
+                if ($item->from_time <= $item->to_time) {
+                    $break_end_time = $dt_ymd.' '.$item->to_time;
+                } else {
+                    $break_end_time = $dt_addday.' '.$item->to_time;
+                }
+                Log::debug('                       所定労働時間計算 $break_start_time = '.$break_start_time);
+                Log::debug('                       所定労働時間計算 $break_end_time = '.$break_end_time);
+                $regular_calc_time_basic += $apicommon->diffTimeSerial($break_start_time, $break_end_time);
+                // 休憩時間を除く
+                $filtered_breaks = $collect_array_break_worktimetable_result
+                    ->where('no', '=', $param_target_result->working_timetable_no)
+                    ->where('working_time_kubun', Config::get('const.C004.regular_working_breaks_time'))
+                    ->where('from_time', '>=', $item->from_time)
+                    ->where('to_time', '<=', $item->to_time);
+                $regular_calc_time_basic_breaks = 0;
+                foreach ($filtered_breaks as $item_breaks) {
+                    Log::debug('                       所定労働時間計算 休憩時間 $item_breaks->from_time = '.$item_breaks->from_time);
+                    Log::debug('                       所定労働時間計算 休憩時間 $item_breaks->to_time = '.$item_breaks->to_time);
+                    if ($item_breaks->from_time != null && $item_breaks->from_time != "") {
+                        $break_start_time = $dt_ymd.' '.$item_breaks->from_time;
+                        if ($item_breaks->from_time <= $item_breaks->to_time) {
+                            $break_end_time = $dt_ymd.' '.$item_breaks->to_time;
+                        } else {
+                            $break_end_time = $dt_addday.' '.$item_breaks->to_time;
+                        }
+                        Log::debug('                       所定労働時間計算 休憩時間 $break_start_time = '.$break_start_time);
+                        Log::debug('                       所定労働時間計算 休憩時間 $break_end_time = '.$break_end_time);
+                        $regular_calc_time_basic_breaks += $apicommon->diffTimeSerial($break_start_time, $break_end_time);
+                    }
+                }
+                Log::debug('                       所定労働時間計算 休憩時間 $regular_calc_time_basic_breaks = '.$regular_calc_time_basic_breaks);
+                $regular_calc_time_basic = $regular_calc_time_basic - $regular_calc_time_basic_breaks;
+            }
+        }
+        Log::debug('                       所定労働時間計算 $regular_calc_time_basic = '.$regular_calc_time_basic);
+
+        // 休暇時の所定労働
         if ($param_target_result->holiday_description != "" && $param_target_result->holiday_description != null) {
             // calcHolidayRegulartime implement
             $array_impl_calcHolidayRegulartime = array (
                 'target_date' => $param_target_date,
                 'target_result' => $param_target_result,
-                'array_break_worktimetable_result' => $param_rray_break_worktimetable_result,
+                'array_break_worktimetable_result' => $param_array_break_worktimetable_result,
                 'array_attendance_calc_time' => $param_array_attendance_calc_time,
                 'array_missing_middle_time' => $param_array_missing_middle_time,
                 'timetables' => $param_timetables,
@@ -9003,19 +9087,15 @@ class DailyWorkingInformationController extends Controller
             $regular_calc_time = $this->calcHolidayRegulartime($array_impl_calcHolidayRegulartime);
             Log::debug('休暇労働時間 regular_calc_time = '.$regular_calc_time);
         } else {
-            $index = (int)(Config::get('const.C004.regular_working_time'))-1;
-            Log::debug('                       所定労働時間計算 $param_array_attendance_calc_time[$index] = '.$param_array_attendance_calc_time[$index]);
             if ($param_array_attendance_calc_time[$index] > 0) {
                 $regular_calc_time = $param_array_attendance_calc_time[$index] - $param_array_missing_middle_time[$index];
             }
         }
-        if ($regular_calc_time > 0) {
-            $apicommon = new ApiCommonController();
-        }
 
         Log::debug('---------------------- 所定労働時間計算 calcRegulartime end ------------------------ ');
+        Log::debug('$regular_calc_time_basic ='.$regular_calc_time_basic);
         Log::debug('$regular_calc_time ='.$regular_calc_time);
-        return $regular_calc_time;
+        return array('regular_calc_time_basic' => $regular_calc_time_basic, 'regular_calc_time' => $regular_calc_time);
     }
  
     /**
@@ -9154,6 +9234,7 @@ class DailyWorkingInformationController extends Controller
             foreach ($filtered as $item) {
                 // 時刻を丸め
                 $from_times = null;
+                // 出勤に打刻あれば打刻を設定
                 if ($param_break_attendance_time != null && $param_break_attendance_time != "") {
                     $from_times = $param_break_attendance_time;
                 } else {
@@ -9170,6 +9251,7 @@ class DailyWorkingInformationController extends Controller
                 );
                 $result_start_record_datetime = $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart);
                 $to_times = null;
+                // 退勤に打刻あれば打刻を設定
                 if ($param_break_leaving_time != null && $param_break_leaving_time != "") {
                     $to_times = $param_break_leaving_time;
                 } else {
@@ -9194,6 +9276,7 @@ class DailyWorkingInformationController extends Controller
             foreach ($filtered as $item) {
                 // 時刻を丸め
                 $from_times = null;
+                // 出勤に打刻あれば打刻を設定
                 if ($param_break_attendance_time != null && $param_break_attendance_time != "") {
                     $from_times = $param_break_attendance_time;
                 } else {
@@ -9210,6 +9293,7 @@ class DailyWorkingInformationController extends Controller
                 );
                 $result_start_record_datetime = $apicommon->roundTimeByTimeStart($array_roundTimeByTimeStart);
                 $to_times = null;
+                // 退勤に打刻あれば打刻を設定
                 if ($param_break_leaving_time != null && $param_break_leaving_time != "") {
                     $to_times = $param_break_leaving_time;
                 } else {
