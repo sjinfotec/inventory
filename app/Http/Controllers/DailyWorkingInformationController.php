@@ -9025,6 +9025,8 @@ class DailyWorkingInformationController extends Controller
             ->where('no', '=', $param_target_result->working_timetable_no)
             ->where('working_time_kubun', Config::get('const.C004.regular_working_time'));
         $regular_calc_time_basic = 0;
+        $break_start_time = null;
+        $break_end_time = null;
         $dt = new Carbon($param_target_date);
         $dt_ymd = date_format($dt, 'Y-m-d');
         $dt_addday = date_format($dt->copy()->addDay(), 'Y-m-d');
@@ -9045,23 +9047,49 @@ class DailyWorkingInformationController extends Controller
                 // 休憩時間を除く
                 $filtered_breaks = $collect_array_break_worktimetable_result
                     ->where('no', '=', $param_target_result->working_timetable_no)
-                    ->where('working_time_kubun', Config::get('const.C004.regular_working_breaks_time'))
-                    ->where('from_time', '>=', $item->from_time)
-                    ->where('to_time', '<=', $item->to_time);
+                    ->where('working_time_kubun', Config::get('const.C004.regular_working_breaks_time'));
                 $regular_calc_time_basic_breaks = 0;
+                $break_start_time_breaks = null;
+                $break_end_time_breaks = null;
                 foreach ($filtered_breaks as $item_breaks) {
                     Log::debug('                       所定労働時間計算 休憩時間 $item_breaks->from_time = '.$item_breaks->from_time);
                     Log::debug('                       所定労働時間計算 休憩時間 $item_breaks->to_time = '.$item_breaks->to_time);
                     if ($item_breaks->from_time != null && $item_breaks->from_time != "") {
-                        $break_start_time = $dt_ymd.' '.$item_breaks->from_time;
-                        if ($item_breaks->from_time <= $item_breaks->to_time) {
-                            $break_end_time = $dt_ymd.' '.$item_breaks->to_time;
+                        Log::debug('                       所定労働時間計算 休憩時間 $break_start_time = '.$item->from_time);
+                        Log::debug('                       所定労働時間計算 休憩時間 $break_end_time = '.$item->to_time);
+                        if ($item->from_time <= $item->to_time) {
+                            $break_start_time_breaks = $dt_ymd.' '.$item_breaks->from_time;
+                            Log::debug('                       所定労働時間計算1 休憩時間 $item_breaks->from_time = '.$item_breaks->from_time);
+                            Log::debug('                       所定労働時間計算1 休憩時間 $item_breaks->to_time = '.$item_breaks->to_time);
+                            if ($item_breaks->from_time <= $item_breaks->to_time) {
+                                $break_end_time_breaks = $dt_ymd.' '.$item_breaks->to_time;
+                            } else {
+                                $break_end_time_breaks = $dt_addday.' '.$item_breaks->to_time;
+                            }
                         } else {
-                            $break_end_time = $dt_addday.' '.$item_breaks->to_time;
+                            Log::debug('                       所定労働時間計算2 休憩時間 $item_breaks->from_time = '.$item_breaks->from_time);
+                            if ($item_breaks->from_time > $item->to_time) {
+                                $break_start_time_breaks = $dt_ymd.' '.$item_breaks->from_time;
+                            } else {
+                                $break_start_time_breaks = $dt_addday.' '.$item_breaks->from_time;
+                            }
+                            Log::debug('                       所定労働時間計算2 休憩時間 $break_start_time_breaks = '.$break_start_time_breaks);
+                            Log::debug('                       所定労働時間計算2 休憩時間 $item_breaks->to_time = '.$item_breaks->to_time);
+                            if ($item_breaks->to_time > $item->to_time) {
+                                $break_end_time_breaks = $dt_ymd.' '.$item_breaks->to_time;
+                            } else {
+                                $break_end_time_breaks = $dt_addday.' '.$item_breaks->to_time;
+                            }
+                            Log::debug('                       所定労働時間計算2 休憩時間 $break_start_time_breaks = '.$break_start_time_breaks);
                         }
                         Log::debug('                       所定労働時間計算 休憩時間 $break_start_time = '.$break_start_time);
                         Log::debug('                       所定労働時間計算 休憩時間 $break_end_time = '.$break_end_time);
-                        $regular_calc_time_basic_breaks += $apicommon->diffTimeSerial($break_start_time, $break_end_time);
+                        Log::debug('                       所定労働時間計算 休憩時間 $break_start_time_breaks = '.$break_start_time_breaks);
+                        Log::debug('                       所定労働時間計算 休憩時間 $break_end_time_breaks = '.$break_end_time_breaks);
+                        if ($break_start_time_breaks >= $break_start_time && $break_end_time_breaks <= $break_end_time) {
+                            $regular_calc_time_basic_breaks += $apicommon->diffTimeSerial($break_start_time_breaks, $break_end_time_breaks);
+                            Log::debug('                       所定労働時間計算 休憩時間 $regular_calc_time_basic_breaks = '.$regular_calc_time_basic_breaks);
+                        }
                     }
                 }
                 Log::debug('                       所定労働時間計算 休憩時間 $regular_calc_time_basic_breaks = '.$regular_calc_time_basic_breaks);
