@@ -2473,10 +2473,11 @@ class WorkingTimedate extends Model
             // departmentsの最大適用開始日付subquery
             $subquery2 = $apicommon->getDepartmentApplyTermSubquery($targetdate);
 
+            // department_code employment_status 締め途中で変更するとjoinできないため条件をuse_codeのみに変更 20200626 ほか検討要 TODO
             $mainquery
                 ->leftJoin($this->table_calendar_setting_informations, function ($join) { 
-                    $join->on($this->table_calendar_setting_informations.'.department_code', '=', $this->table_users.'.department_code');
-                    $join->on($this->table_calendar_setting_informations.'.employment_status', '=', $this->table_users.'.employment_status');
+                    // $join->on($this->table_calendar_setting_informations.'.department_code', '=', $this->table_users.'.department_code');
+                    // $join->on($this->table_calendar_setting_informations.'.employment_status', '=', $this->table_users.'.employment_status');
                     $join->on($this->table_calendar_setting_informations.'.user_code', '=', $this->table_users.'.code')
                     ->where($this->table_users.'.is_deleted', '=', 0)       // $this->table
                     ->where($this->table_calendar_setting_informations.'.is_deleted', '=', 0);
