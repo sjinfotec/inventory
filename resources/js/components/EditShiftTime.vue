@@ -4,7 +4,7 @@
     <div class="row justify-content-between">
       <!-- ========================== 検索部 START ========================== -->
       <!-- .panel -->
-      <div class="col-md pt-3" v-if="selectMode==''">
+      <div class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -30,6 +30,8 @@
                     v-bind:default-date="valuefromdate"
                     v-bind:date-format="DatePickerFormat"
                     v-bind:place-holder="'開始日付を選択してください'"
+                    v-bind:isclear-button="isclearbottun"
+                    v-bind:is-disable="isserchable"
                     v-on:change-event="fromdateChanges"
                     v-on:clear-event="fromdateCleared"
                   ></input-datepicker>
@@ -49,6 +51,8 @@
                     v-bind:default-date="valuetodate"
                     v-bind:date-format="DatePickerFormat"
                     v-bind:place-holder="'終了日付を選択してください'"
+                    v-bind:isclear-button="isclearbottun"
+                    v-bind:is-disable="isserchable"
                     v-on:change-event="todateChanges"
                     v-on:clear-event="todateCleared"
                   ></input-datepicker>
@@ -73,6 +77,7 @@
                       v-bind:blank-data="true"
                       v-bind:placeholder-data="'雇用形態を選択してください'"
                       v-bind:selected-value="selectedEmploymentValue"
+                      v-bind:is-disable="isserchable"
                       v-on:change-event="employmentChanges"
                   ></select-employmentstatuslist>
                 </div>
@@ -95,6 +100,7 @@
                     v-bind:date-value="''"
                     v-bind:kill-value="valueDepartmentkillcheck"
                     v-bind:row-index=0
+                    v-bind:is-disable="isserchable"
                     v-on:change-event="departmentChanges"
                   ></select-departmentlist>
                 </div>
@@ -121,6 +127,7 @@
                     v-bind:row-index=0
                     v-bind:department-value="selectedDepartmentValue"
                     v-bind:employment-value="''"
+                    v-bind:is-disable="isserchable"
                     v-on:change-event="userChanges"
                   ></select-userlist>
                 </div>
@@ -577,6 +584,8 @@ export default {
       issearchbutton: false,
       isfixbutton: false,
       selectMode: "",
+      isserchable: false,
+      isclearbottun: true,
       messagevalidatesInit: [],
       messagevalidatesSearch: [],
       messagevalidatesEdt: [],
@@ -933,6 +942,8 @@ export default {
       }
       if (messages.length == 0) {
         this.selectMode = 'EDT';
+        this.isserchable = true;
+        this.isclearbottun = false;
         for (var i=0; i<detailsEdtdatedata.length; i++) {
           this.business[i] = detailsEdtdatedata[i]['business_kubun'];
           this.holiday[i] = detailsEdtdatedata[i]['holiday_kubun'];
@@ -972,10 +983,14 @@ export default {
     // キャンセルボタンクリック処理
     serchbackclick() {
       this.selectMode = '';
+      this.isserchable = false;
+      this.isclearbottun = true;
     },
     // 戻るボタンクリック処理
     fixbackclick() {
       this.selectMode = 'SER';
+      this.isserchable = true;
+      this.isclearbottun = false;
     },
     // 一括更新ボタンクリック処理（日付）
     fixbatchclick() {
@@ -1192,6 +1207,8 @@ export default {
           }
         } else {
           this.selectMode = 'SER';
+          this.isserchable = true;
+          this.isclearbottun = false;
         }
       } else {
         if (res.messagedata.length > 0) {
@@ -1221,6 +1238,8 @@ export default {
       if (res.result) {
         this.$toasted.show("シフトを" + eventtext + "しました");
         this.selectMode = '';
+        this.isserchable = false;
+        this.isclearbottun = true;
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false)
@@ -1243,6 +1262,8 @@ export default {
         }
       }
       this.selectMode = 'SER';
+      this.isserchable = true;
+      this.isclearbottun = false;
       this.getItem();
     },
     // 異常処理

@@ -2,12 +2,12 @@
   <datepicker 
     :language="ja"
     :format="dateFormat"
-    :clear-button="true"
+    :clear-button="isclearButton"
     v-model="defaultDate"
     v-on:closed="dateclosed()"
     v-on:cleared="datecleared()"
     :placeholder="placeHolder"
-    :disabled="false"
+    :disabled="isDisable"
     >
   </datepicker>
 </template>
@@ -29,6 +29,14 @@ export default {
     dateFormat: {
       type: String,
       default: 'yyyy年MM月dd日'
+    },
+    isclearButton: {
+      type: Boolean,
+      default: true
+    },
+    isDisable: {
+      type: Boolean,
+      default: false
     }
   },
   // マウント時
