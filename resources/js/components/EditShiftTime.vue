@@ -734,6 +734,10 @@ export default {
     checkFormBatch: function() {
       this.messagevalidatesBatch = [];
       var flag = true;
+      var flagfrom = true;
+      var flagto = true;
+      var chkday = null;
+      var chkdate = null;
       // 開始日
       var chkArray = [];
       var required = true;
@@ -747,6 +751,14 @@ export default {
           this.messagevalidatesBatch = chkArray;
         } else {
           this.messagevalidatesBatch = this.messagevalidatesBatch.concat(chkArray);
+        }
+        flagfrom = false;
+      }
+      if (flagfrom) {
+        chkday = moment(this.valuefromday).format("YYYYMMDD");
+        chkdate = moment(this.valuefromdate).format("YYYYMMDD");
+        if (chkday < chkdate) {
+          this.messagevalidatesBatch.push("検索条件の開始日付より過去の日付は入力できません");
         }
       }
       // 終了日
@@ -764,6 +776,14 @@ export default {
             this.messagevalidatesBatch = chkArray;
           } else {
             this.messagevalidatesBatch = this.messagevalidatesBatch.concat(chkArray);
+          }
+          flagto = false;
+        }
+        if (flagto) {
+          chkday = moment(this.valuetoday).format("YYYYMMDD");
+          chkdate = moment(this.valuetodate).format("YYYYMMDD");
+          if (chkday > chkdate) {
+            this.messagevalidatesBatch.push("検索条件の終了日付より未来の日付は入力できません");
           }
         }
       }

@@ -4,7 +4,7 @@
     <div class="row justify-content-between print-none">
       <!-- ========================== 検索部 START ========================== -->
       <!-- .panel -->
-      <div class="col-md pt-3" v-if="selectMode==''">
+      <div class="col-md pt-3">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -43,6 +43,9 @@
                   <input-datepicker
                     v-bind:default-date="valuedate"
                     v-bind:date-format="'yyyy年MM月dd日'"
+                    v-bind:place-holder="'指定日付を選択してください'"
+                    v-bind:isclear-button="isclearbottun"
+                    v-bind:is-disable="isserchable"
                     v-on:change-event="fromdateChanges"
                     v-on:clear-event="fromdateCleared"
                   ></input-datepicker>
@@ -63,6 +66,7 @@
                     v-bind:blank-data="true"
                     v-bind:placeholder-data="'雇用形態を選択してください'"
                     v-bind:selected-value="selectedEmploymentValue"
+                    v-bind:is-disable="isserchable"
                     v-on:change-event="employmentChanges"
                   ></select-employmentstatuslist>
                 </div>
@@ -85,6 +89,7 @@
                     v-bind:date-value="''"
                     v-bind:kill-value="valueDepartmentkillcheck"
                     v-bind:row-index=0
+                    v-bind:is-disable="isserchable"
                     v-on:change-event="departmentChanges"
                   ></select-departmentlist>
                 </div>
@@ -111,6 +116,7 @@
                     v-bind:row-index=0
                     v-bind:department-value="selectedDepartmentValue"
                     v-bind:employment-value="selectedEmploymentValue"
+                    v-bind:is-disable="isserchable"
                     v-on:change-event="userChanges"
                   ></select-userlist>
                 </div>
@@ -213,6 +219,8 @@ export default {
       user_name: "",
       selectMode: "",
       applytermdate: "",
+      isclearbottun: true,
+      isserchable: false,
       getDo: 0,
       selectedName: "",
       valuefromdate: "",
@@ -326,6 +334,8 @@ export default {
     this.valuesubadddate = this.valuefromdate;
     this.date_name = moment(this.defaultDate).format("YYYY年MM月DD日");
     this.selectMode = '';
+    this.isclearbottun = true;
+    this.isserchable = false;
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -399,6 +409,8 @@ export default {
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.selectedUserValue = "";
       this.selectMode = '';
+      this.isclearbottun = true;
+      this.isserchable = false;
       this.getDo = 1;
       this.getUserSelected();
     },
@@ -409,6 +421,8 @@ export default {
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.selectedUserValue = "";
       this.selectMode = '';
+      this.isclearbottun = true;
+      this.isserchable = false;
       this.getDo = 1;
       this.getUserSelected();
     },
@@ -418,6 +432,7 @@ export default {
       this.user_name = arrayitem['name'];
       this.selectedName = this.user_name + "　" + this.date_name + "分勤怠編集" ;
       this.selectMode = '';
+      this.isclearbottun = true;
     },
     // 表示ボタンクリック処理
     searchclick() {
@@ -425,6 +440,8 @@ export default {
       this.valuesubadddate = "";
       if (this.checkFormSearch()) {
         this.selectMode = 'EDT';
+        this.isclearbottun = false;
+        this.isserchable = true;
         this.valuesubadddate = moment(this.valuedate).format("YYYYMMDD");
         this.selectedName = this.user_name + "　" + moment(this.valuesubadddate).format("YYYY年MM月DD日") + "分勤怠編集" ;
         this.heads = {
@@ -441,6 +458,8 @@ export default {
     // 戻るボタンクリック処理
     backclick() {
       this.selectMode = '';
+      this.isclearbottun = true;
+      this.isserchable = false;
     },
     // -------------------- サーバー処理 ----------------------------
 

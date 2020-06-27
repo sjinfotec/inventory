@@ -59,25 +59,25 @@
                     <td
                       v-for="(item3,rowIndex3) in item1['array_user_date_data']" v-bind:key="item3['date']"
                       class="text-center align-middle mw-rem-10">
-                      <div v-if="item3['total_working_times'] === '0.00'"></div>
+                      <div v-if="item3['total_working_times'] === ''"></div>
                       <div v-else>{{ item3['total_working_times'] }}</div>
                     </td>
                     <td class="text-center align-middle mw-rem-5"
-                      v-if="item1['set_regular_day_times'] === 1 && item1['regular_day_times'] > '0.00'">{{ item1['regular_day_times'] }}時間</td>
+                      v-if="item1['set_regular_day_times'] === 1 && item1['regular_day_times'] !== ''">{{ item1['regular_day_times'] }}</td>
                     <td class="text-center align-middle mw-rem-5"
-                      v-if="item1['set_regular_day_times'] === 1 && item1['regular_day_times'] === '0.00'"></td>
+                      v-if="item1['set_regular_day_times'] === 1 && item1['regular_day_times'] === ''"></td>
                     <td class="text-center align-middle mw-rem-5"
-                      v-if="item1['set_night_day_times'] === 1 && item1['night_day_times'] > '0.00'">{{ item1['night_day_times'] }}時間</td>
+                      v-if="item1['set_night_day_times'] === 1 && item1['night_day_times'] !== ''">{{ item1['night_day_times'] }}</td>
                     <td class="text-center align-middle mw-rem-5"
-                      v-if="item1['set_night_day_times'] === 1 && item1['night_day_times'] === '0.00'"></td>
+                      v-if="item1['set_night_day_times'] === 1 && item1['night_day_times'] === ''"></td>
                     <td class="text-center align-middle mw-rem-5"
-                      v-if="item1['set_weekly_dayoff_times'] === 1 && item1['weekly_dayoff_times'] > '0.00'">{{ item1['weekly_dayoff_times'] }}時間</td>
+                      v-if="item1['set_weekly_dayoff_times'] === 1 && item1['weekly_dayoff_times'] !== ''">{{ item1['weekly_dayoff_times'] }}</td>
                     <td class="text-center align-middle mw-rem-5"
-                      v-if="item1['set_weekly_dayoff_times'] === 1 && item1['weekly_dayoff_times'] === '0.00'"></td>
+                      v-if="item1['set_weekly_dayoff_times'] === 1 && item1['weekly_dayoff_times'] === ''"></td>
                     <td class="text-center align-middle mw-rem-5"
-                      v-if="item1['set_paid_holiday_day_times'] === 1 && item1['paid_holiday_day_times'] > '0.00'">{{ item1['paid_holiday_day_times'] }}時間</td>
+                      v-if="item1['set_paid_holiday_day_times'] === 1 && item1['paid_holiday_day_times'] !== ''">{{ item1['paid_holiday_day_times'] }}</td>
                     <td class="text-center align-middle mw-rem-5"
-                      v-if="item1['set_paid_holiday_day_times'] === 1 && item1['paid_holiday_day_times'] === '0.00'"></td>
+                      v-if="item1['set_paid_holiday_day_times'] === 1 && item1['paid_holiday_day_times'] === ''"></td>
                   </tr>
                 </template>
               </tbody>
