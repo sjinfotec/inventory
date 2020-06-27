@@ -1249,10 +1249,14 @@ class ApiCommonController extends Controller
             $regular_day_cnt = 0;
             $paid_holiday_cnt = 0;
             $weekly_dayoff_cnt = 0;
-            $night_day_times = 0;
-            $regular_day_times = 0;
-            $paid_holiday_day_times = 0;
-            $weekly_dayoff_times = 0;
+            $night_day_times_h = 0;         // 夜勤(H)
+            $night_day_times_m = 0;         // 夜勤(m)
+            $regular_day_times_h = 0;       // 日勤(H)
+            $regular_day_times_m = 0;       // 日勤(m)
+            $paid_holiday_day_times_h = 0;  // 休暇(H)
+            $paid_holiday_day_times_m = 0;  // 休暇(m)
+            $weekly_dayoff_times_h = 0;     // 週休振替(H)  保留
+            $weekly_dayoff_times_m = 0;     // 週休振替(m)  保留
             foreach($results as $item) {
                 if($current_user_code == null) {$current_user_code = $item->user_code;}
                 if($current_item == null) {$current_item = $item;}
@@ -1263,6 +1267,16 @@ class ApiCommonController extends Controller
                             'week_name' => $item->week_name,
                             'date_name' => $item->date_name
                         );
+                    }
+                    $str_total_working_times = "";
+                    if ($item->total_working_times_h > 0 || $item->total_working_times_m > 0)  {
+                        $str_total_working_times = 
+                            str_pad($item->total_working_times_h, 2, 0, STR_PAD_LEFT).':'.str_pad($item->total_working_times_m, 2, 0, STR_PAD_LEFT);
+                    }
+                    $str_regular_working_times = "";
+                    if ($item->regular_working_times_h > 0 || $item->regular_working_times_m > 0)  {
+                        $str_regular_working_times = 
+                            str_pad($item->regular_working_times_h, 2, 0, STR_PAD_LEFT).':'.str_pad($item->regular_working_times_m, 2, 0, STR_PAD_LEFT);
                     }
                     $array_user_date_data[] = array(
                         'date' => $item->date,
@@ -1277,15 +1291,28 @@ class ApiCommonController extends Controller
                         'use_free_item' => $item->use_free_item,
                         'working_timetable_name' => $item->working_timetable_name,
                         'holiday_kubun_name' => $item->holiday_kubun_name,
-                        'total_working_times' => number_format($item->total_working_times, 2, '.', '')
+                        'total_working_times' => $str_total_working_times,
+                        'regular_working_times' => $str_regular_working_times
                     );
                     $night_day_cnt += $item->night_day_cnt;
                     $regular_day_cnt += $item->regular_day_cnt;
                     $paid_holiday_cnt += $item->paid_holiday_cnt;
-                    if ($item->night_day_cnt == 1) {$night_day_times += $item->total_working_times;}
-                    if ($item->regular_day_cnt == 1) {$regular_day_times += $item->total_working_times;}
-                    if ($item->paid_holiday_cnt == 1) {$paid_holiday_day_times += $item->total_working_times;}
-                    if ($item->paid_holiday_cnt == 0.5) {$paid_holiday_day_times += $item->total_working_times * 0.5;}
+                    if ($item->night_day_cnt == 1) {
+                        $night_day_times_h += $item->total_working_times_h;
+                        $night_day_times_m += $item->total_working_times_m;
+                    }
+                    if ($item->regular_day_cnt == 1) {
+                        $regular_day_times_h += $item->total_working_times_h;
+                        $regular_day_times_m += $item->total_working_times_m;
+                    }
+                    if ($item->paid_holiday_cnt == 1) {
+                        $paid_holiday_day_times_h += $item->regular_working_times_h;
+                        $paid_holiday_day_times_m += $item->regular_working_times_m;
+                    }
+                    if ($item->paid_holiday_cnt == 0.5) {
+                        $paid_holiday_day_times_h += $item->regular_working_times_h * 0.5;
+                        $paid_holiday_day_times_m += $item->regular_working_times_m * 0.5;
+                    }
                     if ($current_item->date != $item->date) {$current_item->date = $item->date;}
                 } else {
                     if (count($detail_dates) > 0 && !$set_detail_dates) {
@@ -1311,9 +1338,45 @@ class ApiCommonController extends Controller
                             'use_free_item' => "",
                             'working_timetable_name' => "カレンダー未設定",
                             'holiday_kubun_name' => "",
-                            'total_working_times' => 0
-                            );
+                            'total_working_times' => "",
+                            'regular_working_times' => ""
+                        );
                         $dt->addDay();
+                    }
+                    $str_night_day_times = "";
+                    if ($night_day_times_h > 0 || $night_day_times_m > 0)  {
+                        $floor_m = floor($night_day_times_m / 60);
+                        $set_m = $night_day_times_m - $floor_m * 60;
+                        $set_h = $night_day_times_h + $floor_m;
+                        $str_night_day_times = 
+                            str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                    }
+                    $str_regular_day_times = "";
+                    if ($regular_day_times_h > 0 || $regular_day_times_m > 0)  {
+                        $floor_m = floor($regular_day_times_m / 60);
+                        $set_m = $regular_day_times_m - $floor_m * 60;
+                        $set_h = $regular_day_times_h + $floor_m;
+                        $str_regular_day_times = 
+                            str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                    }
+                    $str_weekly_dayoff_times = "";
+                    if ($weekly_dayoff_times_h > 0 || $weekly_dayoff_times_m > 0)  {
+                        $floor_m = floor($weekly_dayoff_times_m / 60);
+                        $set_m = $weekly_dayoff_times_m - $floor_m * 60;
+                        $set_h = $weekly_dayoff_times_h + $floor_m;
+                        $str_weekly_dayoff_times = 
+                            str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                    }
+                    $str_paid_holiday_day_times = "";
+                    if ($paid_holiday_day_times_h > 0 || $paid_holiday_day_times_m > 0)  {
+                        $floor_h = floor($paid_holiday_day_times_h);
+                        $set_m = ($paid_holiday_day_times_h - $floor_h) * 60;
+                        $paid_holiday_day_times_m = $paid_holiday_day_times_m + $set_m;
+                        $floor_m = floor($paid_holiday_day_times_m / 60);
+                        $set_m = $paid_holiday_day_times_m - ($floor_m * 60);
+                        $set_h = $floor_h + $floor_m;
+                        $str_paid_holiday_day_times = 
+                            str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
                     }
                     $array_user_data[] = array(
                         'department_code' => $current_item->department_code,
@@ -1333,13 +1396,13 @@ class ApiCommonController extends Controller
                         'set_weekly_dayoff_cnt' => $set_weekly_dayoff_cnt,
                         'paid_holiday_cnt' => $paid_holiday_cnt,
                         'set_paid_holiday_cnt' => $set_paid_holiday_cnt,
-                        'night_day_times' => number_format($night_day_times, 2, '.', ''),
+                        'night_day_times' => $str_night_day_times,
                         'set_night_day_times' => $set_night_day_cnt,
-                        'regular_day_times' =>  number_format($regular_day_times, 2, '.', ''),
+                        'regular_day_times' =>  $str_regular_day_times,
                         'set_regular_day_times' => $set_regular_day_cnt,
-                        'weekly_dayoff_times' => number_format($weekly_dayoff_times, 2, '.', ''),
+                        'weekly_dayoff_times' => $str_weekly_dayoff_times,
                         'set_weekly_dayoff_times' => $set_weekly_dayoff_cnt,
-                        'paid_holiday_day_times' =>  number_format($paid_holiday_day_times, 2, '.', ''),
+                        'paid_holiday_day_times' =>  $str_paid_holiday_day_times,
                         'set_paid_holiday_day_times' => $set_paid_holiday_cnt,
                         'array_user_date_data' => $array_user_date_data
                     );
@@ -1365,9 +1428,20 @@ class ApiCommonController extends Controller
                             'use_free_item' => "",
                             'working_timetable_name' => "カレンダー未設定",
                             'holiday_kubun_name' => "",
-                            'total_working_times' => 0
+                            'total_working_times' => "",
+                            'regular_working_times' => ""
                             );
                         $dt->addDay();
+                    }
+                    $str_total_working_times = "";
+                    if ($item->total_working_times_h > 0 || $item->total_working_times_m > 0)  {
+                        $str_total_working_times = 
+                            str_pad($item->total_working_times_h, 2, 0, STR_PAD_LEFT).':'.str_pad($item->total_working_times_m, 2, 0, STR_PAD_LEFT);
+                    }
+                    $str_regular_working_times = "";
+                    if ($item->regular_working_times_h > 0 || $item->regular_working_times_m > 0)  {
+                        $str_regular_working_times = 
+                            str_pad($item->regular_working_times_h, 2, 0, STR_PAD_LEFT).':'.str_pad($item->regular_working_times_m, 2, 0, STR_PAD_LEFT);
                     }
                     $array_user_date_data[] = array(
                         'date' => $item->date,
@@ -1382,21 +1456,37 @@ class ApiCommonController extends Controller
                         'use_free_item' => $item->use_free_item,
                         'working_timetable_name' => $item->working_timetable_name,
                         'holiday_kubun_name' => $item->holiday_kubun_name,
-                        'total_working_times' => number_format($item->total_working_times, 2, '.', '')
+                        'total_working_times' => $str_total_working_times,
+                        'regular_working_times' => $str_regular_working_times
                     );
                     $night_day_cnt = 0;
                     $regular_day_cnt = 0;
                     $paid_holiday_cnt = 0;
-                    $night_day_times = 0;
-                    $regular_day_times = 0;
-                    $paid_holiday_day_times = 0;
+                    $night_day_times_h = 0;
+                    $night_day_times_m = 0;
+                    $regular_day_times_h = 0;
+                    $regular_day_times_m = 0;
+                    $paid_holiday_day_times_h = 0;
+                    $paid_holiday_day_times_m = 0;
                     $night_day_cnt += $item->night_day_cnt;
                     $regular_day_cnt += $item->regular_day_cnt;
                     $paid_holiday_cnt += $item->paid_holiday_cnt;
-                    if ($item->night_day_cnt == 1) {$night_day_times += $item->total_working_times;}
-                    if ($item->regular_day_cnt == 1) {$regular_day_times += $item->total_working_times;}
-                    if ($item->paid_holiday_cnt == 1) {$paid_holiday_day_times += $item->total_working_times;}
-                    if ($item->paid_holiday_cnt == 0.5) {$paid_holiday_day_times += $item->total_working_times * 0.5;}
+                    if ($item->night_day_cnt == 1) {
+                        $night_day_times_h += $item->total_working_times_h;
+                        $night_day_times_m += $item->total_working_times_m;
+                    }
+                    if ($item->regular_day_cnt == 1) {
+                        $regular_day_times_h += $item->total_working_times_h;
+                        $regular_day_times_m += $item->total_working_times_m;
+                    }
+                    if ($item->paid_holiday_cnt == 1) {
+                        $paid_holiday_day_times_h += $item->regular_working_times_h;
+                        $paid_holiday_day_times_m += $item->regular_working_times_m;
+                    }
+                    if ($item->paid_holiday_cnt == 0.5) {
+                        $paid_holiday_day_times_h += $item->regular_working_times_h * 0.5;
+                        $paid_holiday_day_times_m += $item->regular_working_times_m * 0.5;
+                    }
                 }
             }
             // 残り
@@ -1425,6 +1515,41 @@ class ApiCommonController extends Controller
                     );
                     $dt->addDay();
                 }
+                $str_night_day_times = "";
+                if ($night_day_times_h > 0 || $night_day_times_m > 0)  {
+                    $floor_m = floor($night_day_times_m / 60);
+                    $set_m = $night_day_times_m - $floor_m * 60;
+                    $set_h = $night_day_times_h + $floor_m;
+                    $str_night_day_times = 
+                        str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                }
+                $str_regular_day_times = "";
+                if ($regular_day_times_h > 0 || $regular_day_times_m > 0)  {
+                    $floor_m = floor($regular_day_times_m / 60);
+                    $set_m = $regular_day_times_m - $floor_m * 60;
+                    $set_h = $regular_day_times_h + $floor_m;
+                    $str_regular_day_times = 
+                        str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                }
+                $str_weekly_dayoff_times = "";
+                if ($weekly_dayoff_times_h > 0 || $weekly_dayoff_times_m > 0)  {
+                    $floor_m = floor($weekly_dayoff_times_m / 60);
+                    $set_m = $weekly_dayoff_times_m - $floor_m * 60;
+                    $set_h = $weekly_dayoff_times_h + $floor_m;
+                    $str_weekly_dayoff_times = 
+                        str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                }
+                $str_paid_holiday_day_times = "";
+                if ($paid_holiday_day_times_h > 0 || $paid_holiday_day_times_m > 0)  {
+                    $floor_h = floor($paid_holiday_day_times_h);
+                    $set_m = ($paid_holiday_day_times_h - $floor_h) * 60;
+                    $paid_holiday_day_times_m = $paid_holiday_day_times_m + $set_m;
+                    $floor_m = floor($paid_holiday_day_times_m / 60);
+                    $set_m = $paid_holiday_day_times_m - $floor_m * 60;
+                    $set_h = $floor_h + $floor_m;
+                    $str_paid_holiday_day_times = 
+                        str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                }
                 $array_user_data[] = array(
                     'department_code' => $current_item->department_code,
                     'employment_status' => $current_item->employment_status,
@@ -1443,13 +1568,13 @@ class ApiCommonController extends Controller
                     'set_weekly_dayoff_cnt' => $set_weekly_dayoff_cnt,
                     'paid_holiday_cnt' => $paid_holiday_cnt,
                     'set_paid_holiday_cnt' => $set_paid_holiday_cnt,
-                    'night_day_times' => number_format($night_day_times, 2, '.', ''),
+                    'night_day_times' => $str_night_day_times,
                     'set_night_day_times' => $set_night_day_cnt,
-                    'regular_day_times' => number_format($regular_day_times, 2, '.', ''),
+                    'regular_day_times' => $str_regular_day_times,
                     'set_regular_day_times' => $set_regular_day_cnt,
-                    'weekly_dayoff_times' => number_format($weekly_dayoff_times, 2, '.', ''),
+                    'weekly_dayoff_times' => $str_weekly_dayoff_times,
                     'set_weekly_dayoff_times' => $set_weekly_dayoff_cnt,
-                    'paid_holiday_day_times' =>  number_format($paid_holiday_day_times, 2, '.', ''),
+                    'paid_holiday_day_times' =>  $str_paid_holiday_day_times,
                     'set_paid_holiday_day_times' => $set_paid_holiday_cnt,
                     'array_user_date_data' => $array_user_date_data
                 );
