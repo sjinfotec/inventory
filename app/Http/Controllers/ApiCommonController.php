@@ -4275,7 +4275,7 @@ class ApiCommonController extends Controller
      * 
      * @return チェック結果
      */
-    public function chkMode($target_mode, $source_mode){
+    public function chkMode($target_mode, $source_mode, $is_chk_mode_autoset){
 
         if ( $source_mode == '') {
             if ($target_mode == Config::get('const.C005.attendance_time')) {
@@ -4287,6 +4287,9 @@ class ApiCommonController extends Controller
             if ($source_mode == Config::get('const.C005.leaving_time')) {
                 return Config::get('const.RESULT_CODE.normal');
             }
+            if ($source_mode == Config::get('const.C005.attendance_time') && $is_chk_mode_autoset) {
+                return Config::get('const.RESULT_CODE.normal');
+            }
         } elseif ($target_mode == Config::get('const.C005.leaving_time')) {
             if ($source_mode == Config::get('const.C005.attendance_time')) {
                 return Config::get('const.RESULT_CODE.normal');
@@ -4295,6 +4298,9 @@ class ApiCommonController extends Controller
                 return Config::get('const.RESULT_CODE.normal');
             }
             if ($source_mode == Config::get('const.C005.public_going_out_return_time')) {
+                return Config::get('const.RESULT_CODE.normal');
+            }
+            if ($source_mode == Config::get('const.C005.leaving_time') && $is_chk_mode_autoset) {
                 return Config::get('const.RESULT_CODE.normal');
             }
         } elseif ($target_mode == Config::get('const.C005.missing_middle_time')) {

@@ -507,6 +507,9 @@ class WorkTime extends Model
                 if(!empty($this->param_user_code)){
                     $mainquery->where('t1.user_code', $this->param_user_code);                  //user_code指定
                 }
+                if(!empty($this->param_date_from) && !empty($this->param_date_to)){
+                    $mainquery->whereBetween('t1.record_time', [$this->param_date_from, $this->param_date_to]);
+                }
                 if(!empty($this->param_mode)){
                     $mainquery->where('t1.mode', $this->param_mode);                            //mode指定
                 }
