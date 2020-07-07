@@ -34,7 +34,7 @@ class EditCalendarController extends Controller
     }
 
     /**
-     * データ取得       apicommonに移動 getCalendarInformations
+     * データ取得
      *
      * @param Request $request
      * @return array
@@ -416,13 +416,15 @@ class EditCalendarController extends Controller
                         $calendar_setting_model->setParamemploymentstatusAttribute($usersitem->employment_status);
                         $calendar_setting_model->setParamusercodeAttribute($usersitem->code);
                         $calendar_setting_model->setParamfromdateAttribute($data['date']);
+                        Log::debug("data['date'] = ".$data['date']);
+                        Log::debug("data['businessdays'] = ".$data['businessdays']);
+                        Log::debug("data['holidays'] = ".$data['holidays']);
                         $calendar_setting_model->setBusinesskubunAttribute($data['businessdays']);
                         $calendar_setting_model->setHolidaykubunAttribute($data['holidays']);
                         $calendar_setting_model->setUpdateduserAttribute($login_user_code);
                         $calendar_setting_model->setUpdatedatAttribute($systemdate);
                         // 休暇区分更新
                         $user_holiday_kubun = null;
-                        Log::debug("data['holidays'] = ".$data['holidays']);
                         if ($data['holidays'] != null && $data['holidays'] != "" && $data['holidays'] != "0") {
                             if (strlen($data['use_free_items']) > 0) {
                                 Log::debug("data['use_free_items'] = ".$data['use_free_items']);
@@ -1080,6 +1082,7 @@ class EditCalendarController extends Controller
                     $calendar_setting_model->setEmploymentstatusAttribute($users_data->employment_status);
                     $calendar_setting_model->setDepartmentcodeAttribute($users_data->department_code);
                     $calendar_setting_model->setUsercodeAttribute($users_data->code);
+                    $calendar_setting_model->setWorkingtimetablenoAttribute($users_data->working_timetable_no);
                     $results = $calendar_setting_model->getCalenderDateYear($ptn, $formdata);
                     $temp_array = array();
                     foreach($results as $result) {

@@ -10557,8 +10557,8 @@ class DailyWorkingInformationController extends Controller
                     'weekday_name' => $working_time["weekday_name"],
                     'business_kubun' => $working_time["business_kubun"],
                     'business_name' => $working_time["business_name"],
-                    'unused_holiday_kubun' => $working_time["unused_holiday_kubun"],
-                    'unused_holiday_name' => $working_time["unused_holiday_name"],
+                    // 'unused_holiday_kubun' => $working_time["unused_holiday_kubun"],
+                    // 'unused_holiday_name' => $working_time["unused_holiday_name"],
                     'closing' => $working_time["closing"],
                     'uplimit_time' => $working_time["uplimit_time"],
                     'statutory_uplimit_time' => $working_time["statutory_uplimit_time"],
@@ -10576,13 +10576,13 @@ class DailyWorkingInformationController extends Controller
                     'fixedtime' => $working_time["fixedtime"],
                     'holiday_kubun' => $working_time["holiday_kubun"],
                     'holiday_name' => $working_time["holiday_name"],
-                    'holiday_description' => $working_time["holiday_description"],
-                    'calendars_business_kubun' => $working_time["calendars_business_kubun"],
-                    'working_time_name' => $working_time["working_time_name"],
-                    'predeter_time_name' => $working_time["predeter_time_name"],
-                    'predeter_time_secondname' => $working_time["predeter_time_secondname"],
-                    'predeter_night_time_name' => $working_time["predeter_night_time_name"],
-                    'predeter_night_time_secondname' => $working_time["predeter_night_time_secondname"]
+                    'holiday_description' => $working_time["holiday_description"]
+                    // 'calendars_business_kubun' => $working_time["calendars_business_kubun"],
+                    // 'working_time_name' => $working_time["working_time_name"],
+                    // 'predeter_time_name' => $working_time["predeter_time_name"],
+                    // 'predeter_time_secondname' => $working_time["predeter_time_secondname"],
+                    // 'predeter_night_time_name' => $working_time["predeter_night_time_name"],
+                    // 'predeter_night_time_secondname' => $working_time["predeter_night_time_secondname"]
                 );
             } else {
                 $array_working_time_dates[] = array(
@@ -10674,8 +10674,8 @@ class DailyWorkingInformationController extends Controller
                     'weekday_name' => '',
                     'business_kubun' => '',
                     'business_name' => '',
-                    'unused_holiday_kubun' => '',
-                    'unused_holiday_name' => '',
+                    // 'unused_holiday_kubun' => '',
+                    // 'unused_holiday_name' => '',
                     'closing' => '',
                     'uplimit_time' => '',
                     'statutory_uplimit_time' => '',
@@ -10693,13 +10693,13 @@ class DailyWorkingInformationController extends Controller
                     'fixedtime' => '',
                     'holiday_kubun' => '',
                     'holiday_name' => '',
-                    'holiday_description' => '',
-                    'calendars_business_kubun' => '',
-                    'working_time_name' => '',
-                    'predeter_time_name' => '',
-                    'predeter_time_secondname' => '',
-                    'predeter_night_time_name' => '',
-                    'predeter_night_time_secondname' => ''
+                    'holiday_description' => ''
+                    // 'calendars_business_kubun' => '',
+                    // 'working_time_name' => '',
+                    // 'predeter_time_name' => '',
+                    // 'predeter_time_secondname' => '',
+                    // 'predeter_night_time_name' => '',
+                    // 'predeter_night_time_secondname' => ''
                 );
             }
         }

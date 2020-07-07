@@ -128,7 +128,8 @@ return [
         'deemed_direct_return' => 20,
         'public_damage' => 21,
         'nigth_shift' => 22,
-        'deemed_direct_go_return' => 23
+        'deemed_direct_go_return' => 23,
+        'assign_paid_holiday' => 24
     ],
 
     'C013_DESC_VALUE' => [
@@ -168,7 +169,8 @@ return [
         'deemed_direct_return' => "みなし",
         'public_damage' => "1日集計対象休暇",
         'nigth_shift' => "1日集計対象休暇",
-        'deemed_direct_go_return' => "みなし"
+        'deemed_direct_go_return' => "みなし",
+        'assign_paid_holiday' => "1日集計対象休暇"
     ],
 
     'C014' => [
@@ -642,6 +644,7 @@ return [
         'interval_stamp' => 8,
         'max_time_over' => 9,
         'dup_time_check' => 10,
+        'time_autoset' => 11,
         'other' => 99
     ],
  
@@ -724,8 +727,8 @@ return [
         'file30' => 'pceventlogmanual.pdf',
         'file31' => 'Operationmanual(TeamViewer).xlsx',
         'file32' => 'Operationmanual(TeamViewer).pdf',
-        'file33' => '',
-        'file34' => '',
+        'file33' => 'Operationmanual(function).xlsx',
+        'file34' => 'Operationmanual(function).pdf',
         'file35' => '',
         'file36' => '',
         'file37' => '',
@@ -843,7 +846,8 @@ return [
     // 用途フリー項目
     'USEFREEITEM' => [
         'out_legal' => 0,           // 出勤日か法定外休日かの判定文字位置（0始まり）
-        'day_holiday' => 1          // 1日休日かの判定文字位置（0始まり）
+        'day_holiday' => 1,         // 1日休日かの判定文字位置（0始まり）
+        'time_autoset' => 2         // 勤怠編集で時刻を自動設定する休日区分（0始まり）
     ],
     
     //

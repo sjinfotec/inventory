@@ -58,7 +58,7 @@
                     v-bind:selected-value="selectedUserValue"
                     v-bind:add-new="true"
                     v-bind:get-do="getDo"
-                    v-bind:date-value="applytermdate"
+                    v-bind:date-value="get_NewDateYMD"
                     v-bind:kill-value="valueUserkillcheck"
                     v-bind:row-index="0"
                     v-bind:department-value="selectedDepartmentValue"
@@ -107,30 +107,30 @@
             <!-- /.row -->
             <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <!-- <div class="row justify-content-between"> -->
               <!-- col -->
-              <div class="col-md-12 pb-2">
+              <!-- <div class="col-md-12 pb-2">
                 <btn-work-time
                   v-on:searchclick-event="searchclick"
                   v-bind:btn-mode="'search'"
                   v-bind:is-push="false"
                 ></btn-work-time>
-              </div>
+              </div> -->
               <!-- /.col -->
-            </div>
+            <!-- </div> -->
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <!-- <div class="row justify-content-between"> -->
               <!-- col -->
-              <div class="col-md-12 pb-2">
+              <!-- <div class="col-md-12 pb-2">
                 <btn-work-time
                   v-on:timetableedit-event="timetableeditclick"
                   v-bind:btn-mode="'timetableedit'"
                   v-bind:is-push="false"
                 ></btn-work-time>
-              </div>
+              </div> -->
               <!-- /.col -->
-            </div>
+            <!-- </div> -->
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between">
@@ -438,6 +438,36 @@
             <!-- /.row -->
             <!-- ----------- メッセージ部 END ---------------- -->
             <!-- ----------- 項目部 START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      v-bind:title="'勤怠管理を始める日を入力します'"
+                      id="basic-addon1"
+                    >
+                      適用開始日
+                      <span class="color-red">[必須]</span>
+                    </span>
+                  </div>
+                  <input
+                    type="date"
+                    class="form-control"
+                    v-bind:value="get_FormApplyNewDate"
+                    v-on:input="form.apply_term_from = $event.target.value"
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    v-bind:title="'勤怠管理を始める日を入力します'"
+                    name="applytermfrom"
+                  />
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- .col -->
@@ -1671,6 +1701,18 @@ export default {
       });    
       return this.const_C041_data;
     },
+    get_NewDateY_M_D: function() {
+      return moment(new Date()).format("YYYY-MM-DD");
+    },
+    get_NewDateYMD: function() {
+      return moment(new Date()).format("YYYYMMDD");
+    },
+    get_FormApplyNewDate: function() {
+      if (this.form.apply_term_from == "") {
+        this.form.apply_term_from = this.get_NewDateY_M_D;
+      }
+      return this.form.apply_term_from;
+    }
   },
   data() {
     return {
@@ -1741,15 +1783,12 @@ export default {
       before_count: 0,
       getDo: 1,
       departmentList: [],
-      applytermdate: moment(new Date()).format("YYYYMMDD"),
       timetableList: [],
       cardId: "",
       mobile_address: "",
       dialogVisible: false,
       latest_user_code: "",
       messageshowsearch: false,
-      login_user_code: "",
-      login_user_role: "",
       input_mobile_address: "",
       iscsvbutton: false,
       valuefromdate: "",
@@ -1759,8 +1798,6 @@ export default {
   },
   // マウント時
   mounted() {
-    this.login_user_code = this.authusers["code"];
-    this.login_user_role = this.authusers["role"];
     this.details = [];
     this.getDepartmentList("");
     this.getTimeTableList("");
@@ -2386,6 +2423,7 @@ export default {
     userChanges: function(value, arrayitem) {
       this.selectedUserValue = value;
       this.selectedUserName = arrayitem["name"];
+      this.searchclick();
     },
     // 廃止チェックボックスが変更された場合の処理
     checkboxChangeUser: function() {
@@ -2428,7 +2466,7 @@ export default {
     },
     // 表示するボタンクリック処理
     searchclick: function() {
-      // 入力項目の部署クリア
+      // 入力項目のクリア
       this.selectMode = "";
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use App\User;
 use App\WorkTime;
 use App\WorkTimeLog;
+use App\CalendarSettingInformation;
 use App\Http\Controllers\ApiCommonController;
 use Carbon\Carbon;
 
@@ -80,6 +81,9 @@ class ApiGetAttendanceResultController extends Controller
                             $this->insertTable($array_impl_insertTable);
                         } elseif($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.dup_time_check')) {
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.dup_time_check'));
+                        } elseif($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.time_autoset')) {
+                            // 半休やみなしは時刻自動設定のため登録なし
+                            $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
                         } else {
                             // エラー追加 20200121
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.unknown'));
@@ -219,8 +223,88 @@ class ApiGetAttendanceResultController extends Controller
                 $chk_max_times = Config::get('const.RESULT_CODE.max_times');
             }
         } */
+        if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
+            if ($mode == Config::get('const.C005.attendance_time')) {
+                // getUsefreeitem implement
+                $array_impl_getUsefreeitem = array (
+                    'department_code' => $user_data->department_code,
+                    'user_code' => $user_data->code,
+                    'mode' => $mode,
+                    'systemdate' => $systemdate
+                );
+                $use_free_item = $this->getUsefreeitem($array_impl_getUsefreeitem);
+                if (strlen($use_free_item) >= 3)  {
+                    $use_free_item_chk = substr($use_free_item, Config::get('const.USEFREEITEM.time_autoset'), 1);
+                    if ($use_free_item_chk == "1" || $use_free_item_chk == "3")  {
+                        $array_impl_getTimeMode = array (
+                            'target_date' => $systemdate,
+                            'department_code' => $user_data->department_code,
+                            'user_code' => $user_data->code,
+                            'mode' => $mode
+                        );
+                        $recordtime = $apicommon->getTimeMode($array_impl_getTimeMode);
+                        if ($recordtime != null && $recordtime != "") {
+                            $chk_result = Config::get('const.RESULT_CODE.time_autoset');
+                        }
+                    }
+                }
+            } elseif ($mode == Config::get('const.C005.leaving_time')) {
+                // getUsefreeitem implement
+                $array_impl_getUsefreeitem = array (
+                    'department_code' => $user_data->department_code,
+                    'user_code' => $user_data->code,
+                    'mode' => $mode,
+                    'systemdate' => $systemdate
+                );
+                $use_free_item = $this->getUsefreeitem($array_impl_getUsefreeitem);
+                if (strlen($use_free_item) >= 3)  {
+                    $use_free_item_chk = substr($use_free_item, Config::get('const.USEFREEITEM.time_autoset'), 1);
+                    if ($use_free_item_chk == "2" || $use_free_item_chk == "3")  {
+                        $array_impl_getTimeMode = array (
+                            'target_date' => $systemdate,
+                            'department_code' => $user_data->department_code,
+                            'user_code' => $user_data->code,
+                            'mode' => $mode
+                        );
+                        $recordtime = $apicommon->getTimeMode($array_impl_getTimeMode);
+                        if ($recordtime != null && $recordtime != "") {
+                            $chk_result = Config::get('const.RESULT_CODE.time_autoset');
+                        }
+                    }
+                }
+            }
+        }
 
         return array($chk_result,  $chk_max_times,  $check_interval);
+    }
+    /**
+     * 用途フリー項目取得
+     *
+     * @param [type] $user_id
+     * @param [type] $mode
+     * @return void
+     */
+    private function getUsefreeitem($params){
+        // パラメータ
+        $department_code = $params['department_code'];
+        $user_code = $params['user_code'];
+        $mode = $params['mode'];
+        $systemdate = $params['systemdate'];
+
+        $use_free_item = null;
+        $calendar_setting_model = new CalendarSettingInformation();
+        $calendar_setting_model->setParamfromdateAttribute($systemdate->format('Ymd'));
+        $calendar_setting_model->setParamdepartmentcodeAttribute($department_code);
+        $calendar_setting_model->setParamusercodeAttribute($user_code);
+        $result_datas = $calendar_setting_model->getHolidayinfo();
+        foreach($result_datas as $item) {
+            if (isset($item->use_free_item)) {
+                $use_free_item = $item->use_free_item;
+                break;
+            }
+            break;
+        }
+        return $use_free_item;
     }
 
     /**

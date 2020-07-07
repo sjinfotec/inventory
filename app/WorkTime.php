@@ -489,6 +489,47 @@ class WorkTime extends Model
     }
 
     /**
+     * 打刻モードデータ取得
+     *
+     * @return void
+     */
+    public function getModeInfo(){
+        try {
+            $mainquery = DB::table($this->table.' AS t1')
+                ->select(
+                    't1.record_time',
+                    't1.mode'
+                );
+                if(!empty($this->param_employment_status)){
+                    $mainquery->where('t1.employment_status', $this->param_employment_status);  //　雇用形態指定
+                }
+                if(!empty($this->param_department_code)){
+                    $mainquery->where('t1.department_code', $this->param_department_code);      //department_code指定
+                }
+                if(!empty($this->param_user_code)){
+                    $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
+                }
+                if(!empty($this->param_mode)){
+                    $mainquery->where('t1.mode', $this->param_mode);                            //mode指定
+                }
+                $result = $mainquery
+                    ->where('t1.is_deleted', '=', 0)
+                    ->get();
+                return $result;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $tasks;
+    }
+
+    /**
      * 日次労働時間取得事前チェック
      *
      *      指定したユーザー、部署、日付範囲内の労働時間計算のもとデータを取得するSQL

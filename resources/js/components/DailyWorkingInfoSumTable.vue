@@ -176,22 +176,22 @@ export default {
       type: String,
       default: ""
     },
-    predeterTimeName: {
-      type: String,
-      default: "残業時間"
-    },
-    predeterNightTimeName: {
-      type: String,
-      default: "深夜残業時間"
-    },
-    predeterTimeSecondName: {
-      type: String,
-      default: "残業時間"
-    },
-    predeterNightTimeSecondName: {
-      type: String,
-      default: "深夜残業"
-    },
+    // predeterTimeName: {
+    //   type: String,
+    //   default: "残業時間"
+    // },
+    // predeterNightTimeName: {
+    //   type: String,
+    //   default: "深夜残業時間"
+    // },
+    // predeterTimeSecondName: {
+    //   type: String,
+    //   default: "残業時間"
+    // },
+    // predeterNightTimeSecondName: {
+    //   type: String,
+    //   default: "深夜残業"
+    // },
     // TODO: 本来は .envに記載して取得したい
     apiKey: {
       type: String,

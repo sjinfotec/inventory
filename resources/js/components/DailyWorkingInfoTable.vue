@@ -277,7 +277,7 @@
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-if="calcList.holiday_description === '1日集計対象休暇'"
-                ></td>
+                >{{ calcList.working_status_name }}</td>
                 <td
                   class="text-center align-middle mw-rem-5"
                   v-else
@@ -783,22 +783,22 @@ export default {
       type: String,
       default: ""
     },
-    predeterTimeName: {
-      type: String,
-      default: "残業時間"
-    },
-    predeterNightTimeName: {
-      type: String,
-      default: "深夜残業時間"
-    },
-    predeterTimeSecondName: {
-      type: String,
-      default: "残業時間"
-    },
-    predeterNightTimeSecondName: {
-      type: String,
-      default: "深夜残業"
-    },
+    // predeterTimeName: {
+    //   type: String,
+    //   default: "残業時間"
+    // },
+    // predeterNightTimeName: {
+    //   type: String,
+    //   default: "深夜残業時間"
+    // },
+    // predeterTimeSecondName: {
+    //   type: String,
+    //   default: "残業時間"
+    // },
+    // predeterNightTimeSecondName: {
+    //   type: String,
+    //   default: "深夜残業"
+    // },
     loginUser: {
       type: String,
       default: ""

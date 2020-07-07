@@ -864,58 +864,157 @@ export default {
           } else if (item.description == HALFDAY_AM_NAME) {
             // 出勤自動設定
             if (this.halfautoset) {
-              this.details.push(this.edtDetailesBreakAttendance(edtdetail));
+              if (this.before_count == 0) {
+                this.details.push(this.edtDetailesBreakAttendance(edtdetail));    // lunch_end_recordtime
+              } else {
+                // 旧detailsから設定
+                var isoldTime = false;
+                old_details.forEach(detail => {
+                  if (detail.mode == ATTENDANCE) {
+                    isoldTime = true;
+                    this.details.push(this.edtDetailesfromOld(detail));
+                  } else {
+                    if (detail.mode != "" && detail.mode != null) {
+                      this.details.push(this.edtDetailesfromOld(detail));
+                    }
+                  }
+                });
+                if (!isoldTime) {
+                  this.details.push(this.edtDetailesBreakAttendance(edtdetail));    // lunch_end_recordtime
+                }
+              }
             }
-            // if (this.before_count > 0) {
-            //   // 旧detailsから出勤以外を設定
-            //   old_details.forEach(detail => {
-            //     if (detail.mode != "" && detail.mode != null && detail.mode != ATTENDANCE) {
-            //       this.details.push(this.edtDetailesfromOld(detail));
-            //     }
-            //   });
-            // }
           // 午後半休
           } else if (item.code_name == HALFDAY_PM_NAME) {
-            // if (this.before_count > 0) {
-            //   // 旧detailsから出勤以外を設定
-            //   old_details.forEach(detail => {
-            //     if (detail.mode != "" && detail.mode != null && detail.mode != LEAVING) {
-            //       this.details.push(this.edtDetailesfromOld(detail));
-            //     }
-            //   });
-            // }
             // 退勤自動設定
             if (this.halfautoset) {
-              this.details.push(this.edtDetailesBreakLeaving(edtdetail));
+              if (this.before_count == 0) {
+                this.details.push(this.edtDetailesBreakLeaving(edtdetail));     // lunch_start_recordtime
+              } else {
+                // 旧detailsから設定
+                var isoldTime = false;
+                old_details.forEach(detail => {
+                  if (detail.mode == LEAVING) {
+                    isoldTime = true;
+                    this.details.push(this.edtDetailesfromOld(detail));
+                  } else {
+                    if (detail.mode != "" && detail.mode != null) {
+                      this.details.push(this.edtDetailesfromOld(detail));
+                    }
+                  }
+                });
+                if (!isoldTime) {
+                  this.details.push(this.edtDetailesBreakLeaving(edtdetail));   // lunch_start_recordtime
+                }
+              }
             }
           // みなし
           } else if (item.code_name == DEEMED_BUSINESS_TRIP) {
             // 出勤自動設定
-            this.details.push(this.edtDetailesAttendance(edtdetail));
             // 退勤自動設定
-            this.details.push(this.edtDetailesLeaving(edtdetail));
+            if (this.halfautoset) {
+              if (this.before_count == 0) {
+                this.details.push(this.edtDetailesAttendance(edtdetail));     // regular_start_recordtime
+                this.details.push(this.edtDetailesLeaving(edtdetail));        // regular_end_recordtime
+              } else {
+                // 旧detailsから設定
+                var isoldTime1 = false;
+                var isoldTime2 = false;
+                old_details.forEach(detail => {
+                  if (detail.mode == ATTENDANCE) {
+                    isoldTime1 = true;
+                    this.details.push(this.edtDetailesfromOld(detail));
+                  } else if (detail.mode == LEAVING) {
+                    isoldTime2 = true;
+                    this.details.push(this.edtDetailesfromOld(detail));
+                  } else if (detail.mode != "" && detail.mode != null) {
+                      this.details.push(this.edtDetailesfromOld(detail));
+                  }
+                });
+                if (!isoldTime1) {
+                  this.details.push(this.edtDetailesAttendance(edtdetail));     // regular_start_recordtime
+                }
+                if (!isoldTime2) {
+                  this.details.push(this.edtDetailesLeaving(edtdetail));        // regular_end_recordtime
+                }
+              }
+            }
           } else if (item.code_name == DEEMED_DIRECT_GO) {
             // 出勤自動設定
-            this.details.push(this.edtDetailesAttendance(edtdetail));
-            // if (this.before_count > 0) {
-            //   // 旧detailsから出勤以外を設定
-            //   old_details.forEach(detail => {
-            //     if (detail.mode != "" && detail.mode != null && detail.mode != ATTENDANCE) {
-            //       this.details.push(this.edtDetailesfromOld(detail));
-            //     }
-            //   });
-            // }
+            if (this.halfautoset) {
+              if (this.before_count == 0) {
+                this.details.push(this.edtDetailesAttendance(edtdetail));     // regular_start_recordtime
+              } else {
+                // 旧detailsから設定
+                var isoldTime = false;
+                old_details.forEach(detail => {
+                  if (detail.mode == ATTENDANCE) {
+                    isoldTime = true;
+                    this.details.push(this.edtDetailesfromOld(detail));
+                  } else {
+                    if (detail.mode != "" && detail.mode != null) {
+                      this.details.push(this.edtDetailesfromOld(detail));
+                    }
+                  }
+                });
+                if (!isoldTime) {
+                  this.details.push(this.edtDetailesAttendance(edtdetail));    // regular_start_recordtime
+                }
+              }
+            }
           } else if (item.code_name == DEEMED_DIRECT_RETURN) {
-            // if (this.before_count > 0) {
-            //   // 旧detailsから退勤以外を設定
-            //   old_details.forEach(detail => {
-            //     if (detail.mode != "" && detail.mode != null && detail.mode != LEAVING) {
-            //       this.details.push(this.edtDetailesfromOld(detail));
-            //     }
-            //   });
-            // }
             // 退勤自動設定
-            this.details.push(this.edtDetailesLeaving(edtdetail));
+            if (this.halfautoset) {
+              if (this.before_count == 0) {
+                this.details.push(this.edtDetailesLeaving(edtdetail));        // regular_end_recordtime
+              } else {
+                // 旧detailsから設定
+                var isoldTime = false;
+                old_details.forEach(detail => {
+                  if (detail.mode == LEAVING) {
+                    isoldTime = true;
+                    this.details.push(this.edtDetailesfromOld(detail));
+                  } else {
+                    if (detail.mode != "" && detail.mode != null) {
+                      this.details.push(this.edtDetailesfromOld(detail));
+                    }
+                  }
+                });
+                if (!isoldTime) {
+                  this.details.push(this.edtDetailesLeaving(edtdetail));      // regular_end_recordtime
+                }
+              }
+            }
+          } else if (item.code_name == DEEMED_DIRECT_GO_RETURN) {
+            // 出勤自動設定
+            // 退勤自動設定
+            if (this.halfautoset) {
+              if (this.before_count == 0) {
+                this.details.push(this.edtDetailesAttendance(edtdetail));    // regular_start_recordtime
+                this.details.push(this.edtDetailesLeaving(edtdetail));       // regular_end_recordtime
+              } else {
+                // 旧detailsから設定
+                var isoldTime1 = false;
+                var isoldTime2 = false;
+                old_details.forEach(detail => {
+                  if (detail.mode == ATTENDANCE) {
+                    isoldTime1 = true;
+                    this.details.push(this.edtDetailesfromOld(detail));
+                  } else if (detail.mode == LEAVING) {
+                    isoldTime2 = true;
+                    this.details.push(this.edtDetailesfromOld(detail));
+                  } else if (detail.mode != "" && detail.mode != null) {
+                      this.details.push(this.edtDetailesfromOld(detail));
+                  }
+                });
+                if (!isoldTime1) {
+                  this.details.push(this.edtDetailesAttendance(edtdetail));    // regular_start_recordtime
+                }
+                if (!isoldTime2) {
+                  this.details.push(this.edtDetailesLeaving(edtdetail));       // regular_end_recordtime
+                }
+              }
+            }
           // 1日集計対象休暇
           } else if (item.description == ALLDAY_CALC_NAME) {
             this.details.push(this.edtDetailesAllDay());

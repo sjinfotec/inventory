@@ -312,7 +312,7 @@ export default {
       return this.selectedUserValue;
     }
   },
-  // マウント時selectedUserValue
+  // マウント
   mounted() {
     this.index_or_home = this.indexorhome;
     this.valuefromdate = this.defaultDate;
