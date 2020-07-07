@@ -84,6 +84,7 @@ class ApiGetAttendanceResultController extends Controller
                         } elseif($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.dup_time_check')) {
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.dup_time_check'));
                         } elseif($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.time_autoset')) {
+                            Log::debug('store time_autoset');
                             // insertTable implement
                             $array_impl_insertTable = array (
                                 'user_data' => $user_data,
@@ -93,6 +94,7 @@ class ApiGetAttendanceResultController extends Controller
                                 'systemdate' => $systemdate,
                                 'mode_id' => $array_chkAttendance_result[3]['mode_id']
                             );
+                            Log::debug('store mode_id = '.$array_chkAttendance_result[3]['mode_id']);
                             $this->insertTable($array_impl_insertTable);
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
                         } else {
@@ -177,6 +179,8 @@ class ApiGetAttendanceResultController extends Controller
         $work_time_model->setParamDepartmentcodeAttribute($user_data->department_code);
         $work_time_model->setParamUsercodeAttribute($user_data->code);
         $work_time_model->setParamdatefromNoneditAttribute($systemdate->format('Ymd His'));
+        $array_timemodes = array();
+        $is_chk_mode_autoset = false;
         $this->source_mode = '';
         // MAX打刻取得
         $chk_result = Config::get('const.RESULT_CODE.normal');
@@ -199,7 +203,56 @@ class ApiGetAttendanceResultController extends Controller
                     }
 
                     if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
-                        $chk_result = $apicommon->chkMode($mode, $this->source_mode);
+                        if ($mode == Config::get('const.C005.attendance_time')) {
+                            // getUsefreeitem implement
+                            $array_impl_getUsefreeitem = array (
+                                'department_code' => $user_data->department_code,
+                                'user_code' => $user_data->code,
+                                'mode' => $mode,
+                                'systemdate' => $systemdate
+                            );
+                            $use_free_item = $this->getUsefreeitem($array_impl_getUsefreeitem);
+                            if (strlen($use_free_item) >= 3)  {
+                                $use_free_item_chk = substr($use_free_item, Config::get('const.USEFREEITEM.time_autoset'), 1);
+                                if ($use_free_item_chk == "1" || $use_free_item_chk == "3")  {
+                                    $array_impl_getTimeMode = array (
+                                        'target_date' => $systemdate,
+                                        'department_code' => $user_data->department_code,
+                                        'user_code' => $user_data->code,
+                                        'mode' => $mode
+                                    );
+                                    $array_timemodes = $apicommon->getTimeMode($array_impl_getTimeMode);
+                                    if ($array_timemodes['recordtime'] != null && $array_timemodes['recordtime'] != "") {
+                                        $is_chk_mode_autoset = true;
+                                    }
+                                }
+                            }
+                        } elseif ($mode == Config::get('const.C005.leaving_time')) {
+                            // getUsefreeitem implement
+                            $array_impl_getUsefreeitem = array (
+                                'department_code' => $user_data->department_code,
+                                'user_code' => $user_data->code,
+                                'mode' => $mode,
+                                'systemdate' => $systemdate
+                            );
+                            $use_free_item = $this->getUsefreeitem($array_impl_getUsefreeitem);
+                            if (strlen($use_free_item) >= 3)  {
+                                $use_free_item_chk = substr($use_free_item, Config::get('const.USEFREEITEM.time_autoset'), 1);
+                                if ($use_free_item_chk == "2" || $use_free_item_chk == "3")  {
+                                    $array_impl_getTimeMode = array (
+                                        'target_date' => $systemdate,
+                                        'department_code' => $user_data->department_code,
+                                        'user_code' => $user_data->code,
+                                        'mode' => $mode
+                                    );
+                                    $array_timemodes = $apicommon->getTimeMode($array_impl_getTimeMode);
+                                    if ($array_timemodes['recordtime'] != null && $array_timemodes['recordtime'] != "") {
+                                        $is_chk_mode_autoset = true;
+                                    }
+                                }
+                            }
+                        }
+                        $chk_result = $apicommon->chkMode($mode, $this->source_mode, $is_chk_mode_autoset);
                         if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
                             // 出勤インターバルチェック（緊急はやらない）
                             if ($mode == Config::get('const.C005.attendance_time')) {
@@ -207,6 +260,9 @@ class ApiGetAttendanceResultController extends Controller
                                     $check_interval = $apicommon->chkInteval($systemdate, $result->record_datetime);
                                 }
                             }
+                        }
+                        if ($is_chk_mode_autoset) {
+                            $chk_result = Config::get('const.RESULT_CODE.time_autoset');
                         }
                     }
                 } else {
@@ -235,57 +291,7 @@ class ApiGetAttendanceResultController extends Controller
                 $chk_max_times = Config::get('const.RESULT_CODE.max_times');
             }
         } */
-        $$array_timemodes = array();
         if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
-            if ($mode == Config::get('const.C005.attendance_time')) {
-                // getUsefreeitem implement
-                $array_impl_getUsefreeitem = array (
-                    'department_code' => $user_data->department_code,
-                    'user_code' => $user_data->code,
-                    'mode' => $mode,
-                    'systemdate' => $systemdate
-                );
-                $use_free_item = $this->getUsefreeitem($array_impl_getUsefreeitem);
-                if (strlen($use_free_item) >= 3)  {
-                    $use_free_item_chk = substr($use_free_item, Config::get('const.USEFREEITEM.time_autoset'), 1);
-                    if ($use_free_item_chk == "1" || $use_free_item_chk == "3")  {
-                        $array_impl_getTimeMode = array (
-                            'target_date' => $systemdate,
-                            'department_code' => $user_data->department_code,
-                            'user_code' => $user_data->code,
-                            'mode' => $mode
-                        );
-                        $array_timemodes = $apicommon->getTimeMode($array_impl_getTimeMode);
-                        if ($array_timemodes['recordtime'] != null && $array_timemodes['recordtime'] != "") {
-                            $chk_result = Config::get('const.RESULT_CODE.time_autoset');
-                        }
-                    }
-                }
-            } elseif ($mode == Config::get('const.C005.leaving_time')) {
-                // getUsefreeitem implement
-                $array_impl_getUsefreeitem = array (
-                    'department_code' => $user_data->department_code,
-                    'user_code' => $user_data->code,
-                    'mode' => $mode,
-                    'systemdate' => $systemdate
-                );
-                $use_free_item = $this->getUsefreeitem($array_impl_getUsefreeitem);
-                if (strlen($use_free_item) >= 3)  {
-                    $use_free_item_chk = substr($use_free_item, Config::get('const.USEFREEITEM.time_autoset'), 1);
-                    if ($use_free_item_chk == "2" || $use_free_item_chk == "3")  {
-                        $array_impl_getTimeMode = array (
-                            'target_date' => $systemdate,
-                            'department_code' => $user_data->department_code,
-                            'user_code' => $user_data->code,
-                            'mode' => $mode
-                        );
-                        $array_timemodes = $apicommon->getTimeMode($array_impl_getTimeMode);
-                        if ($array_timemodes['recordtime'] != null && $array_timemodes['recordtime'] != "") {
-                            $chk_result = Config::get('const.RESULT_CODE.time_autoset');
-                        }
-                    }
-                }
-            }
         }
 
         return array($chk_result,  $chk_max_times,  $check_interval, $array_timemodes);
@@ -342,10 +348,14 @@ class ApiGetAttendanceResultController extends Controller
             // 打刻データ登録
             DB::beginTransaction();
             // mode_idある場合は論理削除
-            $work_time = new WorkTime();
-            $work_time->setIdAttribute($mode_id);
-            $work_time->setSystemDateAttribute($systemdate);
-            $work_time->delWorkTimeBysystem();
+            Log::debug('insertTable mode_id = '.$mode_id);
+            if ($mode_id != null) {
+                $work_time = new WorkTime();
+                $work_time->setIdAttribute($mode_id);
+                $work_time->setSystemDateAttribute($systemdate);
+                $work_time->delWorkTimeBysystem();
+                Log::debug('insertTable delWorkTimeBysystem ');
+            }
             // insertTime implement
             $array_impl_insertTime = array (
                 'user_data' => $user_data,
