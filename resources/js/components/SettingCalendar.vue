@@ -540,7 +540,7 @@
                       <tbody>
                         <tr v-for="(item1,index1) in detailsEdt['array_user_date_data']" v-bind:key="item1['date']">
                           <td class="text-left align-middle">{{item1['md_name']}}</td>
-                          <td class="text-center align-middle">
+                          <td class="text-center align-middle" v-if="item1['date_null'] === 1">
                             <select class="form-control" v-model="business[index1]" @change="businessDayChanges(business[index1], index1)">
                               <option value></option>
                               <option
@@ -550,8 +550,28 @@
                               >{{ blist.code_name }}</option>
                             </select>
                           </td>
-                          <td class="text-center align-middle">
+                          <td class="text-center align-middle" v-else>
+                            <select disabled class="form-control" v-bind:value="business[index1]">
+                              <option value></option>
+                              <option
+                                v-for="blist in get_C007"
+                                :value="blist.code"
+                                v-bind:key="blist.code"
+                              >{{ blist.code_name }}</option>
+                            </select>
+                          </td>
+                          <td class="text-center align-middle" v-if="item1['date_null'] === 1">
                             <select class="form-control" v-model="holiday[index1]" @change="holiDayChanges(holiday[index1], index1)">
+                              <option value></option>
+                              <option
+                                v-for="hlist in get_C013"
+                                :value="hlist.code"
+                                v-bind:key="hlist.code"
+                              >{{ hlist.code_name }}</option>
+                            </select>
+                          </td>
+                          <td class="text-center align-middle" v-else>
+                            <select disabled class="form-control" v-bin:value="holiday[index1]">
                               <option value></option>
                               <option
                                 v-for="hlist in get_C013"
@@ -1074,13 +1094,15 @@ export default {
       var maxlength = 0;
       var itemname = '営業日区分';
       for ( var i=0; i<this.business.length;i++ ) {
-        chkArray = 
-          this.checkDetailtext(this.business[i], required, equalength, maxlength, itemname, this.detailsEdt['array_user_date_data'][i]['date_name']);
-        if (chkArray.length > 0) {
-          if (this.messagevalidatesEdt.length == 0) {
-            this.messagevalidatesEdt = chkArray;
-          } else {
-            this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
+        if (this.detailsEdt['array_user_date_data'][i]['date_null'] == 1) {
+          chkArray = 
+            this.checkDetailtext(this.business[i], required, equalength, maxlength, itemname, this.detailsEdt['array_user_date_data'][i]['date_name']);
+          if (chkArray.length > 0) {
+            if (this.messagevalidatesEdt.length == 0) {
+              this.messagevalidatesEdt = chkArray;
+            } else {
+              this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
+            }
           }
         }
       }

@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\WorkingTimeTable;
 use Illuminate\Support\Facades\Validator;
+use App\FeatureItemSelection;
 
 class CreateTimeTableController extends Controller
 {
@@ -164,22 +165,23 @@ class CreateTimeTableController extends Controller
             $data_index = 0;
             for ($i=0;$i<$attendance_count;$i++) {
                 $data[$data_index]['working_time_kubun'] = Config::get('const.C004.regular_working_time');
-                $data[$data_index]['from_time'] = $details['regularTime'][$i]['fromTime'];
-                $data[$data_index]['to_time'] = $details['regularTime'][$i]['toTime'];
+                Log::debug('store = '.$details['regularFrom'][$i]['fromTime']);
+                Log::debug('store = '.$details['regularTo'][$i]['regularTo']);
+                $data[$data_index]['from_time'] = $details['regularFrom'][$i]['fromTime'];
+                $data[$data_index]['to_time'] = $details['regularTo'][$i]['regularTo'];
                 $data_index++;
             }
             for ($i=0;$i<$rest_count;$i++) {
                 $data[$data_index]['working_time_kubun'] = Config::get('const.C004.regular_working_breaks_time');
-                $data[$data_index]['from_time'] = $details['regularRestTime'][$i]['fromTime'];
+                Log::debug('store = '.$details['regularRestFrom'][$i]['fromTime']);
+                Log::debug('store = '.$details['regularRestTime'][$i]['regularTo']);
+                $data[$data_index]['from_time'] = $details['regularRestFrom'][$i]['fromTime'];
                 $data[$data_index]['to_time'] = $details['regularRestTime'][$i]['toTime'];
                 $data_index++;
             }
-            for ($i=0;$i<1;$i++) {
-                $data[$data_index]['working_time_kubun'] = Config::get('const.C004.out_of_regular_night_working_time');
-                $data[$data_index]['from_time'] = $details['midnightTime'][$i]['fromTime'];
-                $data[$data_index]['to_time'] = $details['midnightTime'][$i]['toTime'];
-                $data_index++;
-            }
+            $data[$data_index]['working_time_kubun'] = Config::get('const.C004.out_of_regular_night_working_time');
+            Log::debug('store = '.$details['irregularMidNightFrom']);
+            Log::debug('store = '.$details['irregularMidNightTo']);
             $resultno = $this->insert($data ,$no, $name);
             return response()->json(
                 ['result' => true, 'no' => $resultno,

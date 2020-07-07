@@ -60,6 +60,7 @@ use App\FeatureItemSelection;
  *          ユーザー休暇区分取得                        : getUserHolidaykbn                 : UserHolidayKubun  CalendarSettingInformation            
  *          ユーザー所定時刻半休時刻取得                : getWorkingHours                   : WorkingTimeTable             
  *          ユーザー打刻時刻から所定時刻取得             : getWorkingHoursByStamp            : WorkingTimeTable             
+ *          ユーザー打刻モードのデータ取得               : getTimeMode                       : work_times             
  *      4.その他情報取得
  *          会社情報取得                                : getCompanyInfoApply       : Company
  *          指定月締日取得（画面から）                  : getClosingDay              : Setting   
@@ -1286,6 +1287,7 @@ class ApiCommonController extends Controller
                         'holiday_kubun' => $item->holiday_kubun,
                         'date_name' => $item->date_name,
                         'md_name' => $item->md_name,
+                        'date_null' => $item->date_null,
                         'public_holidays_name' => $item->public_holidays_name,
                         'business_kubun_name' => $item->business_kubun_name,
                         'use_free_item' => $item->use_free_item,
@@ -1333,6 +1335,7 @@ class ApiCommonController extends Controller
                             'holiday_kubun' => 0,
                             'date_name' => "",
                             'md_name' => "",
+                            'date_null' => 1,
                             'public_holidays_name' => "",
                             'business_kubun_name' => "",
                             'use_free_item' => "",
@@ -1423,6 +1426,7 @@ class ApiCommonController extends Controller
                             'holiday_kubun' => 0,
                             'date_name' => "",
                             'md_name' => "",
+                            'date_null' => 1,
                             'public_holidays_name' => "",
                             'business_kubun_name' => "",
                             'use_free_item' => "",
@@ -1451,6 +1455,7 @@ class ApiCommonController extends Controller
                         'holiday_kubun' => $item->holiday_kubun,
                         'date_name' => $item->date_name,
                         'md_name' => $item->md_name,
+                        'date_null' => $item->date_null,
                         'public_holidays_name' => $item->public_holidays_name,
                         'business_kubun_name' => $item->business_kubun_name,
                         'use_free_item' => $item->use_free_item,
@@ -1506,6 +1511,7 @@ class ApiCommonController extends Controller
                         'holiday_kubun' => 0,
                         'date_name' => "",
                         'md_name' => "",
+                        'date_null' => 1,
                         'public_holidays_name' => "",
                         'business_kubun_name' => "",
                         'use_free_item' => "",
@@ -1850,6 +1856,7 @@ class ApiCommonController extends Controller
                     't2.name as department_name',
                     $this->table_users.'.employment_status as employment_status',
                     't3.code_name as employment_name',
+                    $this->table_users.'.working_timetable_no as working_timetable_no',
                     $this->table_users.'.role as role')
                 ->JoinSub($subquery3, 't1', function ($join) { 
                     $join->on('t1.code', '=', $this->table_users.'.code');
@@ -2267,6 +2274,52 @@ class ApiCommonController extends Controller
                 'working_to_time' => $working_to_time
             );
             return $array_workingHours;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * ユーザー打刻モードのデータ取得
+     *
+     * @return list
+     */
+    public function getTimeMode($params){
+        $this->array_messagedata = array();
+        try{
+            $target_date = $params['target_date'];
+            $department_code = $params['department_code'];
+            $user_code = $params['user_code'];
+            $mode = $params['mode'];
+
+            $work_time_model = new WorkTime();
+            $target_dateYmd = date_format(new Carbon($target_date), 'Ymd');
+            $work_time_model->setParamdatefromAttribute($target_dateYmd);
+            $work_time_model->setParamdatetoAttribute($target_dateYmd);
+            $work_time_model->setParamDepartmentcodeAttribute($department_code);
+            $work_time_model->setParamUsercodeAttribute($user_code);
+            $work_time_model->setParamModeAttribute($mode);
+            Log::debug('         apicommon getTimeMode $target_dateYmd = '.$target_dateYmd);
+            Log::debug('         apicommon getTimeMode $department_code = '.$department_code);
+            Log::debug('         apicommon getTimeMode $user_code = '.$user_code);
+            Log::debug('         apicommon getTimeMode $mode = '.$mode);
+            $results = $work_time_model->getModeInfo();
+            $recordtime = null;
+            foreach($results as $item) {
+                if (isset($item->record_time)) {
+                    if ($item->record_time != "") {
+                        $recordtime = $item->record_time;
+                        break;
+                    }
+                }
+                break;
+            }
+            return $recordtime;
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
@@ -4503,6 +4556,7 @@ class ApiCommonController extends Controller
      */
     public function analyzeTimeTable($timetables, $working_time_kubun, $working_timetable_no){
         $array_times = array();
+        $temp_times = array();
         if ($working_time_kubun != Config::get('const.C004.out_of_regular_working_time')) {
             $filtered = $timetables->where('no', $working_timetable_no)->where('working_time_kubun', $working_time_kubun);
             foreach($filtered as $result_time) {

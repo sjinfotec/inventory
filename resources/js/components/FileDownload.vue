@@ -225,6 +225,28 @@
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
+                  <a href="/file_download?filekbn=33">・操作マニュアル（機能編）（EXCEL 最新版） -- ファイル名：Operationmanual(function).xlsx</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=34">・操作マニュアル（機能編）（PDF 最新版） -- ファイル名：Operationmanual(function).pdf</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
                   <a href="/file_download?filekbn=27">・操作マニュアル（弥生給与ソフト連携）（EXCEL 最新版） -- ファイル名：Operationmanual(yayoi).xlsx</a>
                 </div>
               </div>

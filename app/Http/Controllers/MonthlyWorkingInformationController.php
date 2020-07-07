@@ -852,11 +852,13 @@ class MonthlyWorkingInformationController extends Controller
             'user_code' => $result->user_code,
             'workingdate' => date_format($datetime, 'Ymd'),
             'workingdatename' => date_format($datetime, 'Y年m月d日')."（".$week_data."）",
-            'attendance' => $result->attendance_time_1,
-            'leaving' => $result->leaving_time_1,
+            'attendance' => $attendance,
+            'leaving' => $leaving,
             'public_going_out_hours' => $result->public_going_out_hours,
             'missing_middle_hours' => $result->missing_middle_hours,
             'remark_holiday_name' => $remark_data1,
+            'business_kubun' => $result->business_kubun,
+            'business_name' => $result->business_name,
             'total_working_times' => $total_working_times,
             'regular_working_times' => $regular_working_times,
             'off_hours_working_hours' => $off_hours_working_hours,
@@ -902,6 +904,9 @@ class MonthlyWorkingInformationController extends Controller
                 'total_leave_early' => $working_time_sum_result->total_leave_early,
                 'total_late' => $working_time_sum_result->total_late,
                 'total_absence' => $working_time_sum_result->total_absence,
+                'total_congratulatory' => $working_time_sum_result->total_congratulatory,
+                'total_public_damage' => $working_time_sum_result->total_public_damage,
+                'total_deemed' => $working_time_sum_result->total_deemed,
                 'date' => $array_date
             );
             break;
@@ -934,6 +939,9 @@ class MonthlyWorkingInformationController extends Controller
                 'total_leave_early' => 0,
                 'total_late' => 0,
                 'total_absence' => 0,
+                'total_congratulatory' => 0,
+                'total_public_damage' => 0,
+                'total_deemed' => 0,
                 'date' => $array_date
             );
         }

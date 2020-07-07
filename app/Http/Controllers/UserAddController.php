@@ -13,7 +13,7 @@ use App\UserModel;
 use App\Department;
 use App\WorkingTimeTable;
 use App\GeneralCodes;
-use App\Calendar;
+use App\CalendarSettingInformation;
 use App\ShiftInformation;
 use Carbon\Carbon;
 use App\Http\Controllers\ApiCommonController;
@@ -117,7 +117,9 @@ class UserAddController extends Controller
             $systemdate = Carbon::now();
             $user = Auth::user();
             $user_code = $user->code;
-            $users->setApplytermfromAttribute(Config::get('const.INIT_DATE.initdate'));
+            // $users->setApplytermfromAttribute(Config::get('const.INIT_DATE.initdate'));
+            $applyfrom = new Carbon($data['apply_term_from']);
+            $users->setApplytermfromAttribute($applyfrom->format('Ymd'));
             $users->setCodeAttribute($data['code']);
             $users->setDepartmentcodeAttribute($data['department_code']);
             $users->setEmploymentstatusAttribute($data['employment_status']);
@@ -136,18 +138,14 @@ class UserAddController extends Controller
             // insert
             $users->insertNewUser();
             // calendar作成
-            // $calendar_model = new Calendar();
-            // $calendar_model->setUsercodeAttribute($data['code']);
-            // $calendar_model->setCreateduserAttribute($user_code);
-            // $calendar_model->setCreatedatAttribute($systemdate);
-            // $result = $calendar_model->storeByUser();
-            $result = true;
-            if ($result) {
-                DB::commit();
-            } else {
-                DB::rollBack();
-            }
-            return $result;
+            // showCalc implement
+            $array_impl_calendarByUser = array (
+                'users' => $users,
+                'datas' => $data
+            );
+            $this->calendarByUser($array_impl_calendarByUser);
+            DB::commit();
+            return true;
         }catch(\PDOException $pe){
             Log::error($pe->getMessage());
             DB::rollBack();
@@ -155,6 +153,56 @@ class UserAddController extends Controller
         }catch(\Exception $e){
             Log::error($e->getMessage());
             DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * カレンダーを初期設定
+     *
+     */
+    private function calendarByUser($params){
+
+        $users = $params['users'];
+        $datas = $params['datas'];
+        $fromdate = $users->getApplytermfromAttribute();
+        $dt = new Carbon($fromdate);
+        $dtfrom = $dt->copy()->subDay();
+        $todate = new Carbon($dtfrom);
+        $todate->addYear()->subDay();
+        try{
+            $calendar_setting_model = new CalendarSettingInformation();
+            // 作成
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $calendar_setting_model->setCreateduserAttribute($login_user_code);
+            $calendar_setting_model->getParamemploymentstatusAttribute($users->getEmploymentstatusAttribute());
+            $calendar_setting_model->getParamdepartmentcodeAttribute($users->getDepartmentcodeAttribute());
+            $calendar_setting_model->setParamusercodeAttribute($users->getCodeAttribute());
+            $calendar_setting_model->setParamfromdateAttribute($dtfrom->format('Ymd'));
+            $calendar_setting_model->setParamtodateAttribute($todate->format('Ymd'));
+            // 削除
+            $calendar_setting_model->delDate();
+            // 作成
+            $calendar_setting_model->setParamfromdateAttribute($dtfrom->format('Ymd'));
+            $calendar_setting_model->setEmploymentstatusAttribute($users->getEmploymentstatusAttribute());
+            $calendar_setting_model->setDepartmentcodeAttribute($users->getDepartmentcodeAttribute());
+            $calendar_setting_model->setUsercodeAttribute($users->getCodeAttribute());
+            $calendar_setting_model->setWorkingtimetablenoAttribute($users->getWorkingtimetablenoAttribute());
+            $results = $calendar_setting_model->getCalenderDateYear(Config::get('const.CALENDAR_PTN.ptn1'), $datas);
+            $temp_array = array();
+            foreach($results as $result) {
+                $temp_collect = collect($result);
+                $temp_array[] = $temp_collect->toArray();
+            }
+            if (count($temp_array) > 0) {
+                $results = $calendar_setting_model->insCalenderDateYear($temp_array);
+            }
+
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
             throw $e;
         }
     }
@@ -715,9 +763,10 @@ class UserAddController extends Controller
                     // タイムテーブル名からタイムテーブルNO設定
                     $user_working_timetable_no = 1;
                     if ($item['user_working_timetable_name'] != null && $item['user_working_timetable_name'] != "") {
-                        $filtered = $taimetables->where('name', "=", $item['user_working_timetable_name']);
-                        foreach ($filtered as $g_item) {
-                            $user_working_timetable_no = $g_item->no;
+                        $collect_taimetables = new Collection($taimetables);
+                        $filtered = $collect_taimetables->where('name', "=", $item['user_working_timetable_name']);
+                        foreach ($filtered as $t_item) {
+                            $user_working_timetable_no = $t_item->no;
                             break;
                         }
                     }

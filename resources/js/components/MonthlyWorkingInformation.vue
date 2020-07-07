@@ -327,7 +327,16 @@
                             </thead>
                             <tbody>
                               <tr v-for="calclisttimedate in calclist.date">
-                                <td
+                                <td v-if="calclisttimedate.business_kubun === 1"
+                                  class="text-center align-middle"
+                                >{{ calclisttimedate.workingdatename }}</td>
+                                <td v-else-if="calclisttimedate.business_kubun === 2"
+                                  class="text-center align-middle"
+                                ><span class="color-red">{{ calclisttimedate.workingdatename }}</span></td>
+                                <td v-else-if="calclisttimedate.business_kubun === 3"
+                                  class="text-center align-middle"
+                                ><span class="color-blue">{{ calclisttimedate.workingdatename }}</span></td>
+                                <td v-else
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.workingdatename }}</td>
                                 <td
@@ -350,7 +359,16 @@
                                 <td
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.late_night_overtime_hours }}</td>
-                                <td
+                                <td v-if="calclisttimedate.business_kubun === 1"
+                                  class="text-left align-middle"
+                                >{{ calclisttimedate.remark_holiday_name }}</td>
+                                <td v-else-if="calclisttimedate.business_kubun === 2"
+                                  class="text-left align-middle color-red"
+                                ><span class="color-red">{{ calclisttimedate.business_name }}</span>  {{ calclisttimedate.remark_holiday_name }}</td>
+                                <td v-else-if="calclisttimedate.business_kubun === 3"
+                                  class="text-left align-middle color-blue"
+                                ><span class="color-blue">{{ calclisttimedate.business_name }}</span>  {{ calclisttimedate.remark_holiday_name }}</td>
+                                <td v-else
                                   class="text-left align-middle"
                                 >{{ calclisttimedate.remark_holiday_name }}</td>
                               </tr>
@@ -1024,5 +1042,9 @@ export default {
 
 .mw-rem-3 {
   min-width: 3rem !important;
+}
+
+.color-blue {
+  color: blue;
 }
 </style>

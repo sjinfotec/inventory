@@ -556,6 +556,66 @@ class CalendarSettingInformation extends Model
      *
      * @return void
      */
+    public function getHolidayinfo(){
+        try {
+            $mainquery = DB::table($this->table)
+                ->select(
+                    $this->table.'.holiday_kubun'
+                );
+            $mainquery
+                ->selectRaw('t1.code_name as holiday_name')
+                ->selectRaw('t1.use_free_item as use_free_item');
+            $mainquery
+                ->leftJoin($this->table_generalcodes.' as t1', function ($join) { 
+                    $join->on('t1.code', '=',  $this->table.'.holiday_kubun')
+                    ->where('t1.identification_id', '=', Config::get('const.C013.value'))
+                    ->where('t1.is_deleted', '=', 0);
+            });
+            if(!empty($this->paramfromdate) && !empty($this->paramtodate)) {
+                $mainquery
+                    ->whereBetween($this->table.'.date', [$this->paramfromdate, $this->paramtodate]);
+            } else {
+                if(!empty($this->paramfromdate)) {
+                    $mainquery
+                        ->where($this->table.'.date',$this->paramfromdate);
+                }
+            }
+            if(!empty($this->paramdepartmentcode)) {
+                $mainquery
+                    ->where($this->table.'.department_code',$this->paramdepartmentcode);
+            }
+            if(!empty($this->paramemploymentstatus)) {
+                $mainquery
+                    ->where($this->table.'.employment_status',$this->paramemploymentstatus);
+            }
+            if(!empty($this->paramusercode)) {
+                $mainquery
+                    ->where($this->table.'.user_code',$this->paramusercode);
+            }
+            $mainquery->where($this->table.'.is_deleted',0);
+            $result = null;
+            if(empty($this->paramlimit)) {
+                $result = $mainquery->get();
+            } else {
+                $result = $mainquery->limit($this->paramlimit)->get();
+            }
+            return $result;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 検索
+     *
+     * @return void
+     */
     public function getDetail(){
         try {
             $mainquery = DB::table($this->table)
@@ -714,274 +774,304 @@ class CalendarSettingInformation extends Model
 
             $sqlString = "";
             $sqlString .= "select ";
-            $sqlString .= "  t1.date ";
+            $sqlString .= "  t1.department_code as department_code ";
+            $sqlString .= "  , t1.employment_status as employment_status ";
+            $sqlString .= "  , t1.code as user_code ";
+            $sqlString .= "  , t1.name as user_name ";
+            $sqlString .= "  , t3.name as department_name ";
+            $sqlString .= "  , t4.code_name as employment_name ";
+            $sqlString .= "  , t5.date as date ";
+            $sqlString .= "  , case ifnull(t6.date, 0) ";
+            $sqlString .= "    when 0 then 0 ";
+            $sqlString .= "    else 1 ";
+            $sqlString .= "    end as date_null ";
             $sqlString .= "  , substring(  ";
-            $sqlString .= "    '月火水木金土日' ";
-            $sqlString .= "    , convert( t1.weekday_kubun + 1, char )  ";
-            $sqlString .= "    , 1 ";
-            $sqlString .= "    ) as week_name  ";
-            $sqlString .= "  , t1.department_code ";
-            $sqlString .= "  , t1.employment_status ";
-            $sqlString .= "  , t1.user_code ";
-            $sqlString .= "  , t1.weekday_kubun ";
-            $sqlString .= "  , t1.business_kubun ";
-            $sqlString .= "  , t1.working_timetable_no ";
-            $sqlString .= "  , t1.holiday_kubun ";
-            $sqlString .= "  , t2.name as user_name ";
-            $sqlString .= "  , t4.name as department_name ";
-            $sqlString .= "  , t6.code_name as employment_name ";
-            $sqlString .= "  , concat(  ";
-            $sqlString .= "    DATE_FORMAT(t1.date, '%e日') ";
-            $sqlString .= "    , '(' ";
-            $sqlString .= "    , substring(  ";
             $sqlString .= "      '月火水木金土日' ";
-            $sqlString .= "      , convert( t1.weekday_kubun + 1, char )  ";
+            $sqlString .= "      , convert(t5.weekday_kubun + 1, char) ";
             $sqlString .= "      , 1 ";
+            $sqlString .= "    ) as week_name ";
+            $sqlString .= "  , concat(  ";
+            $sqlString .= "      DATE_FORMAT(t5.date, '%e日') ";
+            $sqlString .= "      , '(' ";
+            $sqlString .= "      , substring(  ";
+            $sqlString .= "        '月火水木金土日' ";
+            $sqlString .= "        , convert(t5.weekday_kubun + 1, char) ";
+            $sqlString .= "        , 1 ";
             $sqlString .= "      )  ";
-            $sqlString .= "    , ')' ";
+            $sqlString .= "      , ')' ";
             $sqlString .= "    ) as date_name ";
-            $sqlString .= "  , concat(  ";
-            $sqlString .= "    DATE_FORMAT(t1.date, '%c月%e日') ";
-            $sqlString .= "    , '(' ";
-            $sqlString .= "    , substring(  ";
-            $sqlString .= "      '月火水木金土日' ";
-            $sqlString .= "      , convert( t1.weekday_kubun + 1, char )  ";
-            $sqlString .= "      , 1 ";
+            $sqlString .= "    , concat(  ";
+            $sqlString .= "      DATE_FORMAT(t5.date, '%c月%e日') ";
+            $sqlString .= "      , '(' ";
+            $sqlString .= "      , substring(  ";
+            $sqlString .= "        '月火水木金土日' ";
+            $sqlString .= "        , convert(t5.weekday_kubun + 1, char) ";
+            $sqlString .= "        , 1 ";
             $sqlString .= "      )  ";
-            $sqlString .= "    , ')' ";
+            $sqlString .= "      , ')' ";
             $sqlString .= "    ) as md_name ";
-            $sqlString .= "  , ifnull(t5.name, '') as public_holidays_name ";
-            $sqlString .= "  , ifnull(t7.code_name, '') as business_kubun_name ";
-            $sqlString .= "  , ifnull(t7.secound_code_name, '') as business_kubun_secound_name ";
-            $sqlString .= "  , ifnull(t8.use_free_item, '') as use_free_item ";
-            $sqlString .= "  , ifnull(t9.name, '') as working_timetable_name ";
-            $sqlString .= "  , ifnull(t8.code_name, '') as holiday_kubun_name ";
-            $sqlString .= "  , ifnull(t8.secound_code_name, '') as holiday_kubun_secound_name  ";
-            $sqlString .= "  , case ifnull(t1.business_kubun, 0) ";
-            $sqlString .= "      when 0 then 0 ";
-            $sqlString .= "      when ".Config::get('const.C007.legal_holoday')." then 0 ";
-            $sqlString .= "      when ".Config::get('const.C007.legal_out_holoday')." then 0 ";
-            $sqlString .= "      else  ";
-            $sqlString .= "        case ifnull(t1.holiday_kubun, 0) ";
-            $sqlString .= "          when 0 then ";
-            $sqlString .= "            case substring(ifnull(t8.use_free_item, '00'),2,1) ";
-            $sqlString .= "              when '0' then ";
-            $sqlString .= "                case ifnull(t9.from_time, '')  ";
-            $sqlString .= "                  when '' then 0  ";
-            $sqlString .= "                  else ";
-            $sqlString .= "                    case ifnull(t9.to_time, '')  ";
-            $sqlString .= "                      when '' then 0  ";
-            $sqlString .= "                      else ";
-            $sqlString .= "                        case t9.from_time <= t9.to_time  ";
-            $sqlString .= "                          when true then 1  ";
-            $sqlString .= "                          else 0  ";
-            $sqlString .= "                        end  ";
-            $sqlString .= "                    end  ";
-            $sqlString .= "                end  ";
-            $sqlString .= "            end  ";
+            $sqlString .= "  , t5.weekday_kubun as weekday_kubun ";
+            $sqlString .= "  , t6.business_kubun as business_kubun ";
+            $sqlString .= "  , t6.working_timetable_no as working_timetable_no ";
+            $sqlString .= "  , t6.holiday_kubun as holiday_kubun ";
+            $sqlString .= "  , ifnull(t7.name, '') as public_holidays_name ";
+            $sqlString .= "  , ifnull(t8.code_name, '') as business_kubun_name ";
+            $sqlString .= "  , ifnull(t8.secound_code_name, '') as business_kubun_secound_name ";
+            $sqlString .= "  , ifnull(t9.use_free_item, '') as use_free_item ";
+            $sqlString .= "  , ifnull(t10.name, '') as working_timetable_name ";
+            $sqlString .= "  , ifnull(t9.code_name, '') as holiday_kubun_name ";
+            $sqlString .= "  , ifnull(t9.secound_code_name, '') as holiday_kubun_secound_name ";
+            $sqlString .= "  , case ifnull(t6.business_kubun, 0)  ";
+            $sqlString .= "    when 0 then 0 ";
+            $sqlString .= "    when ".Config::get('const.C007.legal_holoday')." then 0 ";
+            $sqlString .= "    when ".Config::get('const.C007.legal_out_holoday')." then 0 ";
+            $sqlString .= "    else "; 
+            $sqlString .= "      case ifnull(t6.holiday_kubun, 0) "; 
+            $sqlString .= "      when 0 then ";
+            $sqlString .= "        case substring(ifnull(t9.use_free_item, '00'), 2, 1)  ";
+            $sqlString .= "        when '0' then ";
+            $sqlString .= "          case ifnull(t10.from_time, '')  ";
+            $sqlString .= "          when '' then 0  ";
             $sqlString .= "          else ";
-            $sqlString .= "            case ifnull(t1.holiday_kubun, 0)  ";
-            $sqlString .= "              when 2 then ";
-            $sqlString .= "                case ifnull(t9.to_time, '')  ";
-            $sqlString .= "                  when '' then 0  ";
-            $sqlString .= "                  else ";
-            $sqlString .= "                    case t9.from_time <= t9.to_time ";
-            $sqlString .= "                      when true then 1  ";
-            $sqlString .= "                      else 0  ";
-            $sqlString .= "                    end  ";
-            $sqlString .= "                end  ";
-            $sqlString .= "              when 3 then ";
-            $sqlString .= "                case ifnull(t9.to_time, '')  ";
-            $sqlString .= "                  when '' then 0  ";
-            $sqlString .= "                  else ";
-            $sqlString .= "                    case t9.from_time <= t9.to_time  ";
-            $sqlString .= "                      when true then 1  ";
-            $sqlString .= "                      else 0  ";
-            $sqlString .= "                    end  ";
-            $sqlString .= "                end  ";
+            $sqlString .= "            case ifnull(t10.to_time, '')  ";
+            $sqlString .= "            when '' then 0  ";
+            $sqlString .= "            else";
+            $sqlString .= "              case t10.from_time <= t10.to_time  ";
+            $sqlString .= "              when true then 1  ";
             $sqlString .= "              else 0  ";
+            $sqlString .= "              end  ";
             $sqlString .= "            end  ";
+            $sqlString .= "          end  ";
             $sqlString .= "        end  ";
+            $sqlString .= "      else ";
+            $sqlString .= "        case ifnull(t6.holiday_kubun, 0)  ";
+            $sqlString .= "        when ".Config::get('const.C013.morning_off')." then ";
+            $sqlString .= "          case ifnull(t10.to_time, '')  ";
+            $sqlString .= "          when '' then 0  ";
+            $sqlString .= "          else ";
+            $sqlString .= "            case t10.from_time <= t10.to_time  ";
+            $sqlString .= "            when true then 0.5 ";
+            $sqlString .= "            else 0  ";
+            $sqlString .= "            end  ";
+            $sqlString .= "          end  ";
+            $sqlString .= "        when ".Config::get('const.C013.afternoon_off')." then ";
+            $sqlString .= "          case ifnull(t10.to_time, '')  ";
+            $sqlString .= "          when '' then 0  ";
+            $sqlString .= "          else ";
+            $sqlString .= "            case t10.from_time <= t10.to_time  ";
+            $sqlString .= "            when true then 0.5 ";
+            $sqlString .= "            else 0  ";
+            $sqlString .= "            end  ";
+            $sqlString .= "          end  ";
+            $sqlString .= "        else 0  ";
+            $sqlString .= "        end  ";
+            $sqlString .= "      end  ";
             $sqlString .= "    end as regular_day_cnt ";
-            $sqlString .= "  , case ifnull(t1.business_kubun, 0) ";
-            $sqlString .= "      when 0 then 0 ";
-            $sqlString .= "      when ".Config::get('const.C007.legal_holoday')." then 0 ";
-            $sqlString .= "      when ".Config::get('const.C007.legal_out_holoday')." then 0 ";
-            $sqlString .= "      else  ";
-            $sqlString .= "        case ifnull(t1.holiday_kubun, 0) ";
-            $sqlString .= "          when 0 then ";
-            $sqlString .= "            case substring(ifnull(t8.use_free_item, '00'),2,1) ";
-            $sqlString .= "              when '0' then ";
-            $sqlString .= "                case ifnull(t9.from_time, '')  ";
-            $sqlString .= "                  when '' then 0  ";
-            $sqlString .= "                  else ";
-            $sqlString .= "                    case ifnull(t9.to_time, '')  ";
-            $sqlString .= "                      when '' then 0  ";
-            $sqlString .= "                      else ";
-            $sqlString .= "                        case t9.from_time > t9.to_time  ";
-            $sqlString .= "                          when true then 1  ";
-            $sqlString .= "                          else 0  ";
-            $sqlString .= "                        end  ";
-            $sqlString .= "                    end  ";
-            $sqlString .= "                end  ";
-            $sqlString .= "            end  ";
+            $sqlString .= "  , case ifnull(t6.business_kubun, 0)  ";
+            $sqlString .= "    when 0 then 0 ";
+            $sqlString .= "    when ".Config::get('const.C007.legal_holoday')." then 0 ";
+            $sqlString .= "    when ".Config::get('const.C007.legal_out_holoday')." then 0 ";
+            $sqlString .= "    else ";
+            $sqlString .= "      case ifnull(t6.holiday_kubun, 0)  ";
+            $sqlString .= "      when 0 then ";
+            $sqlString .= "        case substring(ifnull(t9.use_free_item, '00'), 2, 1)  ";
+            $sqlString .= "        when '0' then ";
+            $sqlString .= "          case ifnull(t10.from_time, '')  ";
+            $sqlString .= "          when '' then 0  ";
             $sqlString .= "          else ";
-            $sqlString .= "            case ifnull(t1.holiday_kubun, 0)  ";
-            $sqlString .= "              when 2 then ";
-            $sqlString .= "                case ifnull(t9.to_time, '')  ";
-            $sqlString .= "                  when '' then 0  ";
-            $sqlString .= "                  else ";
-            $sqlString .= "                    case t9.from_time > t9.to_time ";
-            $sqlString .= "                      when true then 1  ";
-            $sqlString .= "                      else 0  ";
-            $sqlString .= "                    end  ";
-            $sqlString .= "                end  ";
-            $sqlString .= "              when 3 then ";
-            $sqlString .= "                case ifnull(t9.to_time, '')  ";
-            $sqlString .= "                  when '' then 0  ";
-            $sqlString .= "                  else ";
-            $sqlString .= "                    case t9.from_time > t9.to_time  ";
-            $sqlString .= "                      when true then 1  ";
-            $sqlString .= "                      else 0  ";
-            $sqlString .= "                    end  ";
-            $sqlString .= "                end  ";
+            $sqlString .= "            case ifnull(t10.to_time, '')  ";
+            $sqlString .= "            when '' then 0  ";
+            $sqlString .= "            else ";
+            $sqlString .= "              case t10.from_time > t10.to_time  ";
+            $sqlString .= "              when true then 1  ";
             $sqlString .= "              else 0  ";
+            $sqlString .= "              end  ";
             $sqlString .= "            end  ";
+            $sqlString .= "          end  ";
             $sqlString .= "        end  ";
+            $sqlString .= "      else ";
+            $sqlString .= "        case ifnull(t6.holiday_kubun, 0)  ";
+            $sqlString .= "        when ".Config::get('const.C013.morning_off')." then ";
+            $sqlString .= "          case ifnull(t10.to_time, '')  ";
+            $sqlString .= "          when '' then 0  ";
+            $sqlString .= "          else ";
+            $sqlString .= "            case t10.from_time > t10.to_time  ";
+            $sqlString .= "            when true then 0.5 ";
+            $sqlString .= "            else 0  ";
+            $sqlString .= "            end  ";
+            $sqlString .= "          end  ";
+            $sqlString .= "        when ".Config::get('const.C013.afternoon_off')." then ";
+            $sqlString .= "          case ifnull(t10.to_time, '')  ";
+            $sqlString .= "          when '' then 0  ";
+            $sqlString .= "          else ";
+            $sqlString .= "            case t10.from_time > t10.to_time  ";
+            $sqlString .= "            when true then 0.5 ";
+            $sqlString .= "            else 0  ";
+            $sqlString .= "            end  ";
+            $sqlString .= "          end  ";
+            $sqlString .= "        else 0  ";
+            $sqlString .= "        end  ";
+            $sqlString .= "      end  ";
             $sqlString .= "    end as night_day_cnt ";
-            $sqlString .= "  , case ifnull(t1.holiday_kubun, 0) ";
-            $sqlString .= "      when ".Config::get('const.C013.paid_holiday')." then 1 ";
-            $sqlString .= "      when ".Config::get('const.C013.morning_off')." then 0.5 ";
-            $sqlString .= "      when ".Config::get('const.C013.afternoon_off')." then 0.5 ";
-            $sqlString .= "      else 0 ";
+            $sqlString .= "  , case ifnull(t6.holiday_kubun, 0)  ";
+            $sqlString .= "    when ".Config::get('const.C013.paid_holiday')." then 1 ";
+            $sqlString .= "    when ".Config::get('const.C013.morning_off')." then 0.5 ";
+            $sqlString .= "    when ".Config::get('const.C013.afternoon_off')." then 0.5 ";
+            $sqlString .= "    else 0  ";
             $sqlString .= "    end as paid_holiday_cnt ";
-            $sqlString .= "  , case ifnull(t10.total_working_times,0)  ";
-            $sqlString .= "      when 0 then 0 ";
-            $sqlString .= "      else TRUNCATE(t10.total_working_times, 0) ";
-            $sqlString .= "    end as total_working_times_h  ";
-            $sqlString .= "  , case ifnull(t10.total_working_times,0)  ";
-            $sqlString .= "      when 0 then 0 ";
-            $sqlString .= "      else TRUNCATE((mod(t10.total_working_times * 100, 100) * 60) / 100, 0) ";
-            $sqlString .= "    end as total_working_times_m  ";
-            $sqlString .= "  , case ifnull(t10.regular_working_times,0)  ";
-            $sqlString .= "      when 0 then 0 ";
-            $sqlString .= "      else TRUNCATE(t10.regular_working_times, 0) ";
-            $sqlString .= "    end as regular_working_times_h  ";
-            $sqlString .= "  , case ifnull(t10.regular_working_times,0)  ";
-            $sqlString .= "      when 0 then 0 ";
-            $sqlString .= "      else TRUNCATE((mod(t10.regular_working_times * 100, 100) * 60) / 100, 0) ";
+            $sqlString .= "  , case ifnull(t11.total_working_times, 0)  ";
+            $sqlString .= "    when 0 then 0  ";
+            $sqlString .= "    else TRUNCATE (t11.total_working_times, 0)  ";
+            $sqlString .= "    end as total_working_times_h ";
+            $sqlString .= "  , case ifnull(t11.total_working_times, 0)  ";
+            $sqlString .= "    when 0 then 0  ";
+            $sqlString .= "    else TRUNCATE (  ";
+            $sqlString .= "      (mod(t11.total_working_times * 100, 100) * 60) / 100 ";
+            $sqlString .= "    , 0 ";
+            $sqlString .= "    )  ";
+            $sqlString .= "    end as total_working_times_m ";
+            $sqlString .= "  , case ifnull(t11.regular_working_times, 0)  ";
+            $sqlString .= "    when 0 then 0  ";
+            $sqlString .= "    else TRUNCATE (t11.regular_working_times, 0)  ";
+            $sqlString .= "    end as regular_working_times_h ";
+            $sqlString .= "  , case ifnull(t11.regular_working_times, 0)  ";
+            $sqlString .= "    when 0 then 0  ";
+            $sqlString .= "    else TRUNCATE (  ";
+            $sqlString .= "      (mod(t11.regular_working_times * 100, 100) * 60) / 100 ";
+            $sqlString .= "    , 0 ";
+            $sqlString .= "    )  ";
             $sqlString .= "    end as regular_working_times_m  ";
-            $sqlString .= "from ";
-            $sqlString .= "  ".$this->table." as t1  ";
-            $sqlString .= "  left join ".$this->table_users." as t2 ";
-            $sqlString .= "    on t2.code = t1.user_code ";
-            $sqlString .= "    and t2.department_code = t1.department_code ";
-            $sqlString .= "    and t2.employment_status = t1.employment_status ";
-            $sqlString .= "    and t1.is_deleted = ? ";
-            $sqlString .= "    and t2.is_deleted = ? ";
-            $sqlString .= "  inner join ( ";
-            $sqlString .= "    ".$subquery1." ";
-            $sqlString .= "  ) as t3 ";
-            $sqlString .= "    on t3.code = t2.code ";
-            $sqlString .= "    and t3.max_apply_term_from = t2.apply_term_from ";
-            $sqlString .= "  left join (  ";
-            $sqlString .= "    ".$subquery2." ";
-            $sqlString .= "  ) as t4 ";
-            $sqlString .= "    on t4.code = t1.department_code ";
-            $sqlString .= "    and t1.is_deleted = ? ";
-            $sqlString .= "  left join ".$this->table_public_holidays." as t5 ";
-            $sqlString .= "    on t5.date = t1.date ";
-            $sqlString .= "    and t5.is_deleted = ? ";
-            $sqlString .= "  left join ".$this->table_generalcodes." as t6  ";
-            $sqlString .= "    on t6.code = t1.employment_status ";
-            $sqlString .= "    and t6.identification_id = ? ";
-            $sqlString .= "    and t6.is_deleted = ? ";
-            $sqlString .= "  left join ".$this->table_generalcodes." as t7 ";
-            $sqlString .= "    on t7.code = t1.business_kubun ";
-            $sqlString .= "    and t7.identification_id = ? ";
-            $sqlString .= "    and t7.is_deleted = ? ";
-            $sqlString .= "  left join ".$this->table_generalcodes." as t8  ";
-            $sqlString .= "    on t8.code = t1.holiday_kubun  ";
-            $sqlString .= "    and t8.identification_id = ? ";
-            $sqlString .= "    and t8.is_deleted = ? ";
-            $sqlString .= "  left join (  ";
-            // ------------ min,max使用のため$subquery3使わず start --------------
-            $sqlString .= "    select ";
-            $sqlString .= "      t1.no as no ";
-            $sqlString .= "      , t1.name as name ";
-            $sqlString .= "      , t1.ago_time_no as ago_time_no ";
-            $sqlString .= "      , t1.working_time_kubun as working_time_kubun  ";
-            $sqlString .= "      , min(t1.from_time) as from_time ";
-            $sqlString .= "      , min(t1.to_time) as to_time ";
-            $sqlString .= "    from ";
-            $sqlString .= "      ".$this->table_working_timetables." as t1  ";
-            $sqlString .= "      inner join (  ";
-            $sqlString .= "        select ";
-            $sqlString .= "          no as no ";
-            $sqlString .= "          , MAX(apply_term_from) as max_apply_term_from  ";
-            $sqlString .= "        from ";
-            $sqlString .= "          ".$this->table_working_timetables."  ";
-            $sqlString .= "        where ";
-            $sqlString .= "          ? = ? ";
-            $sqlString .= "          and apply_term_from <= ? ";
-            $sqlString .= "          and is_deleted = ? ";
-            $sqlString .= "        group by ";
-            $sqlString .= "          no ";
-            $sqlString .= "      ) as t2  ";
-            $sqlString .= "        on t1.no = t2.no ";
-            $sqlString .= "        and t1.apply_term_from = t2.max_apply_term_from ";
-            $sqlString .= "    where ";
-            $sqlString .= "      ? = ? ";
-            $sqlString .= "      and t1.from_time is not null ";
-            $sqlString .= "      and t1.working_time_kubun = ? ";
+            $sqlString .= "  from ";
+            $sqlString .= "    ".$this->table_users." t1 ";
+            $sqlString .= "    inner join ( ";
+            $sqlString .= "      ".$subquery1." ";
+            $sqlString .= "    ) as t2 ";
+            $sqlString .= "      on t2.code = t1.code ";
+            $sqlString .= "      and t2.max_apply_term_from = t1.apply_term_from ";
+            $sqlString .= "    left join (  ";
+            $sqlString .= "      ".$subquery2." ";
+            $sqlString .= "    ) as t3 ";
+            $sqlString .= "      on t3.code = t1.department_code ";
             $sqlString .= "      and t1.is_deleted = ? ";
-            $sqlString .= "    group by ";
-            $sqlString .= "      t1.no ";
-            $sqlString .= "      , t1.name ";
-            $sqlString .= "      , t1.ago_time_no ";
-            $sqlString .= "      , t1.working_time_kubun ";
-            // ------------ min,max使用のため$subquery3使わず end --------------
-            $sqlString .= "  ) as t9  ";
-            $sqlString .= "    on t9.no = t1.working_timetable_no  ";
-            $sqlString .= "    and t1.is_deleted = ? ";
-            $sqlString .= "  left join working_time_dates as t10 ";
-            $sqlString .= "  on t10.working_date = t1.date ";
-            $sqlString .= "    and t10.department_code = t1.department_code ";
-            $sqlString .= "    and t10.user_code = t1.user_code ";
-            $sqlString .= "    and t10.is_deleted = ? ";
-            $sqlString .= "  where ";
-            $sqlString .= "    ? = ? ";
-            if(!empty($this->paramdepartmentcode)) {
-                $sqlString .= "    and t1.department_code = ? ";
-            }
-            if(!empty($this->paramemploymentstatus)) {
-                $sqlString .= "    and t1.employment_status = ? ";
-            }
-            if(!empty($this->paramusercode)){
-                $sqlString .= "    and t1.user_code = ? ";
-            }
+            $sqlString .= "    left join ".$this->table_generalcodes." as t4 ";
+            $sqlString .= "      on t4.code = t1.employment_status ";
+            $sqlString .= "      and t4.identification_id = ? ";
+            $sqlString .= "      and t4.is_deleted = ? ";
+            $sqlString .= "    cross join ";
+            $sqlString .= "      ( ";
+            $sqlString .= "      select ";
+            $sqlString .= "        max(t1.date) as date ";
+            $sqlString .= "        , t1.weekday_kubun as weekday_kubun ";
+            $sqlString .= "      from ";
+            $sqlString .= "       ".$this->table." as t1 ";
+            $sqlString .= "      where ";
+            $sqlString .= "        ? = ? ";
             if(!empty($this->paramfromdate) && !empty($this->paramtodate)) {
-                $sqlString .= "    and t1.date between ? and ? ";
+                $sqlString .= "      and t1.date between ? and ? ";
             } else {
                 if(!empty($this->paramfromdate)) {
-                    $sqlString .= "    and t1.date = ? ";
+                    $sqlString .= "      and t1.date = ? ";
                 }
             }
+            $sqlString .= "        and t1.is_deleted = ? ";
+            $sqlString .= "      group by ";
+            $sqlString .= "        t1.date ";
+            $sqlString .= "        , t1.weekday_kubun ";
+            $sqlString .= "      ) t5 ";
+            $sqlString .= "    left join ".$this->table." as t6 ";
+            $sqlString .= "      on t6.date = t5.date ";
+            $sqlString .= "      and t6.department_code = t1.department_code ";
+            $sqlString .= "      and t6.user_code = t1.code ";
+            $sqlString .= "      and t6.is_deleted = ? ";
+            $sqlString .= "    left join ".$this->table_public_holidays." as t7 ";
+            $sqlString .= "      on t7.date = t6.date ";
+            $sqlString .= "      and t7.is_deleted = ? ";
+            $sqlString .= "    left join ".$this->table_generalcodes." as t8 ";
+            $sqlString .= "      on t8.code = t6.business_kubun ";
+            $sqlString .= "      and t8.identification_id = ? ";
+            $sqlString .= "      and t8.is_deleted = ? ";
+            $sqlString .= "    left join ".$this->table_generalcodes." as t9 ";
+            $sqlString .= "      on t9.code = t6.holiday_kubun  ";
+            $sqlString .= "      and t9.identification_id = ? ";
+            $sqlString .= "      and t9.is_deleted = ? ";
+            $sqlString .= "      left join (  ";
+            // ------------ min,max使用のため$subquery3使わず start --------------
+            $sqlString .= "        select ";
+            $sqlString .= "          t1.no as no ";
+            $sqlString .= "          , t1.name as name ";
+            $sqlString .= "          , t1.ago_time_no as ago_time_no ";
+            $sqlString .= "          , t1.working_time_kubun as working_time_kubun  ";
+            $sqlString .= "          , min(t1.from_time) as from_time ";
+            $sqlString .= "          , min(t1.to_time) as to_time ";
+            $sqlString .= "        from ";
+            $sqlString .= "          ".$this->table_working_timetables." as t1  ";
+            $sqlString .= "          inner join (  ";
+            $sqlString .= "            select ";
+            $sqlString .= "              no as no ";
+            $sqlString .= "              , MAX(apply_term_from) as max_apply_term_from  ";
+            $sqlString .= "            from ";
+            $sqlString .= "              ".$this->table_working_timetables."  ";
+            $sqlString .= "            where ";
+            $sqlString .= "              ? = ? ";
+            $sqlString .= "              and apply_term_from <= ? ";
+            $sqlString .= "              and is_deleted = ? ";
+            $sqlString .= "            group by ";
+            $sqlString .= "              no ";
+            $sqlString .= "          ) as t2  ";
+            $sqlString .= "            on t1.no = t2.no ";
+            $sqlString .= "            and t1.apply_term_from = t2.max_apply_term_from ";
+            $sqlString .= "        where ";
+            $sqlString .= "          ? = ? ";
+            $sqlString .= "          and t1.from_time is not null ";
+            $sqlString .= "          and t1.working_time_kubun = ? ";
+            $sqlString .= "         and t1.is_deleted = ? ";
+            $sqlString .= "        group by ";
+            $sqlString .= "          t1.no ";
+            $sqlString .= "          , t1.name ";
+            $sqlString .= "          , t1.ago_time_no ";
+            $sqlString .= "          , t1.working_time_kubun ";
+            // ------------ min,max使用のため$subquery3使わず end --------------
+            $sqlString .= "      ) as t10 ";
+            $sqlString .= "        on t10.no = t6.working_timetable_no  ";
+            $sqlString .= "        and t6.is_deleted = ? ";
+            $sqlString .= "    left join working_time_dates as t11 ";
+            $sqlString .= "      on t11.working_date = t6.date ";
+            $sqlString .= "      and t11.department_code = t1.department_code ";
+            $sqlString .= "      and t11.user_code = t1.code ";
+            $sqlString .= "      and t11.is_deleted = ? ";
+            $sqlString .= "    where ";
+            $sqlString .= "      ? = ? ";
+            if(!empty($this->paramdepartmentcode)) {
+                $sqlString .= "      and t1.department_code = ? ";
+            }
+            if(!empty($this->paramemploymentstatus)) {
+                $sqlString .= "      and t1.employment_status = ? ";
+            }
+            if(!empty($this->paramusercode)){
+                $sqlString .= "      and t1.code = ? ";
+            }
+            // if(!empty($this->paramfromdate) && !empty($this->paramtodate)) {
+            //     $sqlString .= "      and t1.date between ? and ? ";
+            // } else {
+            //     if(!empty($this->paramfromdate)) {
+            //         $sqlString .= "      and t1.date = ? ";
+            //     }
+            // }
             if(!empty($this->parambusinesskubun)){
-                $sqlString .= "    and t1.business_kubun = ? ";
+                $sqlString .= "      and t6.business_kubun = ? ";
             }
             if(!empty($this->paramholidaykubun)){
-                $sqlString .= "    and t1.holiday_kubun = ? ";
+                $sqlString .= "      and t6.holiday_kubun = ? ";
             }
             if(!empty($this->paramworkingtimetableno)){
-                $sqlString .= "    and t1.working_timetable_no = ? ";
+                $sqlString .= "      and t6.working_timetable_no = ? ";
             }
-            $sqlString .= "    and t1.is_deleted = ? ";
+            $sqlString .= "      and t1.is_deleted = ? ";
             $sqlString .= "  order by ";
             $sqlString .= "    t1.department_code asc ";
             $sqlString .= "    , t1.employment_status asc ";
-            $sqlString .= "    , t1.user_code asc ";
-            $sqlString .= "    , t1.date asc ";
+            $sqlString .= "    , t1.code asc ";
+            $sqlString .= "    , t5.date asc ";
 
             // バインド
             $dt = null;
@@ -1000,8 +1090,6 @@ class CalendarSettingInformation extends Model
             $target_end_date = $dt->format('Ymd');
 
             $array_setBindingsStr = array();
-            $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = 0;
             // $subquery1
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
@@ -1017,15 +1105,33 @@ class CalendarSettingInformation extends Model
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = $target_end_date;
             $array_setBindingsStr[] = 0;
-
+            // t4
             $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = Config::get('const.C001.value');;
             $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = Config::get('const.C001.value');
+            // cross join
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if(!empty($this->paramfromdate) && !empty($this->paramtodate)) {
+                $array_setBindingsStr[] = $target_start_date;
+                $array_setBindingsStr[] = $target_end_date;
+            } else {
+                if(!empty($this->paramfromdate)) {
+                    $array_setBindingsStr[] = $target_start_date;
+                }
+            }
             $array_setBindingsStr[] = 0;
+            // t6
+            $array_setBindingsStr[] = 0;
+            // t7
+            $array_setBindingsStr[] = 0;
+            // t8
             $array_setBindingsStr[] = Config::get('const.C007.value');
             $array_setBindingsStr[] = 0;
+            // t9
             $array_setBindingsStr[] = Config::get('const.C013.value');
             $array_setBindingsStr[] = 0;
+
             // $subquery3
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
@@ -1036,7 +1142,6 @@ class CalendarSettingInformation extends Model
             $array_setBindingsStr[] = Config::get('const.C004.regular_working_time');
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 0;
-
             $array_setBindingsStr[] = 0;
 
             $array_setBindingsStr[] = 1;
@@ -1050,14 +1155,14 @@ class CalendarSettingInformation extends Model
             if(!empty($this->paramusercode)){
                 $array_setBindingsStr[] = $this->paramusercode;
             }
-            if(!empty($this->paramfromdate) && !empty($this->paramtodate)) {
-                $array_setBindingsStr[] = $target_start_date;
-                $array_setBindingsStr[] = $target_end_date;
-            } else {
-                if(!empty($this->paramfromdate)) {
-                    $array_setBindingsStr[] = $target_start_date;
-                }
-            }
+            // if(!empty($this->paramfromdate) && !empty($this->paramtodate)) {
+            //     $array_setBindingsStr[] = $target_start_date;
+            //     $array_setBindingsStr[] = $target_end_date;
+            // } else {
+            //     if(!empty($this->paramfromdate)) {
+            //         $array_setBindingsStr[] = $target_start_date;
+            //     }
+            // }
             if(!empty($this->parambusinesskubun)){
                 $array_setBindingsStr[] = $this->parambusinesskubun;
             }
@@ -1173,6 +1278,7 @@ class CalendarSettingInformation extends Model
                 }
                 $systemdate = Carbon::now();
                 $data = $mainquery            
+                    ->selectRaw("'".$this->working_timetable_no."' as working_timetable_no")
                     ->selectRaw("'".$this->created_user."' as created_user")
                     ->selectRaw('null as updated_user')
                     ->selectRaw("'".$systemdate."' as created_at")
