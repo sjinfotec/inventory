@@ -2309,17 +2309,21 @@ class ApiCommonController extends Controller
             Log::debug('         apicommon getTimeMode $user_code = '.$user_code);
             Log::debug('         apicommon getTimeMode $mode = '.$mode);
             $results = $work_time_model->getModeInfo();
+            $mode_id = null;
+            $mode = null;
             $recordtime = null;
             foreach($results as $item) {
                 if (isset($item->record_time)) {
                     if ($item->record_time != "") {
+                        $mode_id = $item->id;
+                        $mode = $item->mode;
                         $recordtime = $item->record_time;
                         break;
                     }
                 }
                 break;
             }
-            return $recordtime;
+            return array( 'mode_id' => $mode_id, 'mode' => $mode, 'recordtime' => $recordtime );
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;

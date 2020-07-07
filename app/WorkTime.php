@@ -497,17 +497,15 @@ class WorkTime extends Model
         try {
             $mainquery = DB::table($this->table.' AS t1')
                 ->select(
+                    't1.id',
                     't1.record_time',
                     't1.mode'
                 );
-                if(!empty($this->param_employment_status)){
-                    $mainquery->where('t1.employment_status', $this->param_employment_status);  //　雇用形態指定
-                }
                 if(!empty($this->param_department_code)){
                     $mainquery->where('t1.department_code', $this->param_department_code);      //department_code指定
                 }
                 if(!empty($this->param_user_code)){
-                    $mainquery->where('t1.code', $this->param_user_code);                       //user_code指定
+                    $mainquery->where('t1.user_code', $this->param_user_code);                  //user_code指定
                 }
                 if(!empty($this->param_mode)){
                     $mainquery->where('t1.mode', $this->param_mode);                            //mode指定
@@ -1807,7 +1805,7 @@ class WorkTime extends Model
     // }
 
     /**
-     * 論理削除
+     * 論理削除（編集）
      *
      * @return void
      */
@@ -1822,6 +1820,32 @@ class WorkTime extends Model
                     'editor_user_code' => $this->editor_user_code,
                     'is_deleted' => 1,
                     'updated_user' => $this->updated_user,
+                    'updated_at' => $this->systemdate
+                    ]);
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 論理削除
+     *
+     * @return void
+     */
+    public function delWorkTimeBysystem(){
+        try {
+            DB::table($this->table)
+                ->where('id', $this->id)
+                ->where('is_deleted', 0)
+                ->update([
+                    'is_deleted' => 1,
+                    'updated_user' => 'system',
                     'updated_at' => $this->systemdate
                     ]);
         }catch(\PDOException $pe){
