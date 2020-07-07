@@ -222,7 +222,7 @@ class ApiGetAttendanceResultController extends Controller
                                         'mode' => $mode
                                     );
                                     $array_timemodes = $apicommon->getTimeMode($array_impl_getTimeMode);
-                                    if ($array_timemodes['recordtime'] != null && $array_timemodes['recordtime'] != "") {
+                                    if ($array_timemodes['recordtime'] != null && $array_timemodes['recordtime'] != "" && $array_timemodes['is_editor']) {
                                         $is_chk_mode_autoset = true;
                                     }
                                 }
@@ -246,7 +246,7 @@ class ApiGetAttendanceResultController extends Controller
                                         'mode' => $mode
                                     );
                                     $array_timemodes = $apicommon->getTimeMode($array_impl_getTimeMode);
-                                    if ($array_timemodes['recordtime'] != null && $array_timemodes['recordtime'] != "") {
+                                    if ($array_timemodes['recordtime'] != null && $array_timemodes['recordtime'] != "" && $array_timemodes['is_editor']) {
                                         $is_chk_mode_autoset = true;
                                     }
                                 }
