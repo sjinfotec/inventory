@@ -64,7 +64,8 @@ class ApiGetAttendanceResultController extends Controller
                                 'mode' => $mode,
                                 'card_id' => $card_id,
                                 'array_chkAttendance_result' => $array_chkAttendance_result,
-                                'systemdate' => $systemdate
+                                'systemdate' => $systemdate,
+                                'mode_id' => null
                             );
                             $this->insertTable($array_impl_insertTable);
                         } elseif($array_chkAttendance_result[0] == Config::get('const.C018.forget_stamp')) {
@@ -76,13 +77,23 @@ class ApiGetAttendanceResultController extends Controller
                                 'mode' => $mode,
                                 'card_id' => $card_id,
                                 'array_chkAttendance_result' => $array_chkAttendance_result,
-                                'systemdate' => $systemdate
+                                'systemdate' => $systemdate,
+                                'mode_id' => null
                             );
                             $this->insertTable($array_impl_insertTable);
                         } elseif($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.dup_time_check')) {
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.dup_time_check'));
                         } elseif($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.time_autoset')) {
-                            // 半休やみなしは時刻自動設定のため登録なし
+                            // insertTable implement
+                            $array_impl_insertTable = array (
+                                'user_data' => $user_data,
+                                'mode' => $mode,
+                                'card_id' => $card_id,
+                                'array_chkAttendance_result' => $array_chkAttendance_result,
+                                'systemdate' => $systemdate,
+                                'mode_id' => $array_chkAttendance_result[3]['mode_id']
+                            );
+                            $this->insertTable($array_impl_insertTable);
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
                         } else {
                             // エラー追加 20200121
@@ -93,7 +104,8 @@ class ApiGetAttendanceResultController extends Controller
                                 'mode' => $mode,
                                 'card_id' => $card_id,
                                 'array_chkAttendance_result' => $array_chkAttendance_result,
-                                'systemdate' => $systemdate
+                                'systemdate' => $systemdate,
+                                'mode_id' => null
                             );
                             $this->insertTable($array_impl_insertTable);
                         }
@@ -223,6 +235,7 @@ class ApiGetAttendanceResultController extends Controller
                 $chk_max_times = Config::get('const.RESULT_CODE.max_times');
             }
         } */
+        $$array_timemodes = array();
         if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
             if ($mode == Config::get('const.C005.attendance_time')) {
                 // getUsefreeitem implement
@@ -242,8 +255,8 @@ class ApiGetAttendanceResultController extends Controller
                             'user_code' => $user_data->code,
                             'mode' => $mode
                         );
-                        $recordtime = $apicommon->getTimeMode($array_impl_getTimeMode);
-                        if ($recordtime != null && $recordtime != "") {
+                        $array_timemodes = $apicommon->getTimeMode($array_impl_getTimeMode);
+                        if ($array_timemodes['recordtime'] != null && $array_timemodes['recordtime'] != "") {
                             $chk_result = Config::get('const.RESULT_CODE.time_autoset');
                         }
                     }
@@ -266,8 +279,8 @@ class ApiGetAttendanceResultController extends Controller
                             'user_code' => $user_data->code,
                             'mode' => $mode
                         );
-                        $recordtime = $apicommon->getTimeMode($array_impl_getTimeMode);
-                        if ($recordtime != null && $recordtime != "") {
+                        $array_timemodes = $apicommon->getTimeMode($array_impl_getTimeMode);
+                        if ($array_timemodes['recordtime'] != null && $array_timemodes['recordtime'] != "") {
                             $chk_result = Config::get('const.RESULT_CODE.time_autoset');
                         }
                     }
@@ -275,7 +288,7 @@ class ApiGetAttendanceResultController extends Controller
             }
         }
 
-        return array($chk_result,  $chk_max_times,  $check_interval);
+        return array($chk_result,  $chk_max_times,  $check_interval, $array_timemodes);
     }
     /**
      * 用途フリー項目取得
@@ -291,6 +304,8 @@ class ApiGetAttendanceResultController extends Controller
         $mode = $params['mode'];
         $systemdate = $params['systemdate'];
 
+        $use_id = null;
+        $use_mode = null;
         $use_free_item = null;
         $calendar_setting_model = new CalendarSettingInformation();
         $calendar_setting_model->setParamfromdateAttribute($systemdate->format('Ymd'));
@@ -321,10 +336,16 @@ class ApiGetAttendanceResultController extends Controller
         $card_id = $params['card_id'];
         $array_chkAttendance_result = $params['array_chkAttendance_result'];
         $systemdate = $params['systemdate'];
+        $mode_id = $params['mode_id'];
 
         try{
             // 打刻データ登録
             DB::beginTransaction();
+            // mode_idある場合は論理削除
+            $work_time = new WorkTime();
+            $work_time->setIdAttribute($mode_id);
+            $work_time->setSystemDateAttribute($systemdate);
+            $work_time->delWorkTimeBysystem();
             // insertTime implement
             $array_impl_insertTime = array (
                 'user_data' => $user_data,
