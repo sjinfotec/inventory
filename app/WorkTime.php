@@ -499,7 +499,8 @@ class WorkTime extends Model
                 ->select(
                     't1.id',
                     't1.record_time',
-                    't1.mode'
+                    't1.mode',
+                    't1.is_editor'
                 );
                 if(!empty($this->param_department_code)){
                     $mainquery->where('t1.department_code', $this->param_department_code);      //department_code指定
