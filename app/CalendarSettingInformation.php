@@ -379,16 +379,16 @@ class CalendarSettingInformation extends Model
                     ->where($this->table.'.user_code',$this->paramusercode);
             }
             $array_update_item = array();
-            if(!empty($this->weekday_kubun)) {
+            if(!empty($this->weekday_kubun) || $this->weekday_kubun === 0) {
                 $array_update_item['weekday_kubun'] = $this->weekday_kubun;
             }
-            if(!empty($this->business_kubun)) {
+            if(!empty($this->business_kubun) || $this->business_kubun === 0) {
                 $array_update_item['business_kubun'] = $this->business_kubun;
             }
-            if(!empty($this->holiday_kubun)) {
+            if(!empty($this->holiday_kubun) || $this->holiday_kubun === 0) {
                 $array_update_item['holiday_kubun'] = $this->holiday_kubun;
             }
-            if(!empty($this->working_timetable_no)) {
+            if(!empty($this->working_timetable_no) || $this->working_timetable_no === 0) {
                 $array_update_item['working_timetable_no'] = $this->working_timetable_no;
             }
             if(count($array_update_item) > 0) {

@@ -42,7 +42,11 @@ class ApiGetAttendanceResultController extends Controller
             $systemdate = Carbon::now();
             $response = collect();              // 端末の戻り値
             $this->source_mode = '';
-            $array_chkAttendance_result = array(Config::get('const.RESULT_CODE.normal'), Config::get('const.RESULT_CODE.normal'));
+            $array_chkAttendance_result = 
+                array(Config::get('const.RESULT_CODE.normal')
+                    , Config::get('const.RESULT_CODE.normal')
+                    , Config::get('const.RESULT_CODE.normal')
+                    , null);
             // カード情報存在チェック
             $is_exists = DB::table('card_informations')->where('card_idm', $card_id)->exists();
             if($is_exists){
@@ -92,9 +96,9 @@ class ApiGetAttendanceResultController extends Controller
                                 'card_id' => $card_id,
                                 'array_chkAttendance_result' => $array_chkAttendance_result,
                                 'systemdate' => $systemdate,
-                                'mode_id' => $array_chkAttendance_result[3]['mode_id']
+                                'mode_id' => $array_chkAttendance_result[3]
                             );
-                            Log::debug('store mode_id = '.$array_chkAttendance_result[3]['mode_id']);
+                            Log::debug('store mode_id = '.$array_chkAttendance_result[3]);
                             $this->insertTable($array_impl_insertTable);
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
                         } else {
@@ -179,8 +183,8 @@ class ApiGetAttendanceResultController extends Controller
         $work_time_model->setParamDepartmentcodeAttribute($user_data->department_code);
         $work_time_model->setParamUsercodeAttribute($user_data->code);
         $work_time_model->setParamdatefromNoneditAttribute($systemdate->format('Ymd His'));
-        $array_timemodes = array();
         $is_chk_mode_autoset = false;
+        $mode_autoset_id = null;
         $this->source_mode = '';
         // MAX打刻取得
         $chk_result = Config::get('const.RESULT_CODE.normal');
@@ -202,9 +206,12 @@ class ApiGetAttendanceResultController extends Controller
                         }
                     }
                     if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
+                        $chk_systemdate = $systemdate->format('Ymd');
                         if ($mode == Config::get('const.C005.attendance_time')) {
                             // 直前の打刻日
-                            if ($systemdate == $result->record_ymd) {
+                            Log::debug('attendance_time $chk_systemdate = '.$chk_systemdate);
+                            Log::debug('attendance_time $result->record_ymd = '.$result->record_ymd);
+                            if ($chk_systemdate == $result->record_ymd) {
                                 // 休暇区分で自動設定されている場合は重複打刻となるのでモードチェックするかしないかの判定を行う
                                 // getUsefreeitem implement
                                 $array_impl_getUsefreeitem = array (
@@ -216,35 +223,56 @@ class ApiGetAttendanceResultController extends Controller
                                 $use_free_item = $this->getUsefreeitem($array_impl_getUsefreeitem);
                                 if (strlen($use_free_item) >= 3)  {
                                     $use_free_item_chk = substr($use_free_item, Config::get('const.USEFREEITEM.time_autoset'), 1);
+                                    Log::debug('attendance_time $use_free_item_chk = '.$use_free_item_chk);
                                     if ($use_free_item_chk == "1" || $use_free_item_chk == "3")  {
+                                        Log::debug('attendance_time $result->record_datetime = '.$result->record_datetime);
+                                        Log::debug('attendance_time $result->is_editor = '.$result->is_editor);
                                         if ($result->record_datetime != null && $result->record_datetime != "" && $result->is_editor) {
                                             $is_chk_mode_autoset = true;
+                                            $mode_autoset_id = $result->id;
                                         }
                                     }
                                 }
                             }
                         } elseif ($mode == Config::get('const.C005.leaving_time')) {
-                            // 直前の打刻日
-                            if ($systemdate == $result->record_ymd) {
-                                // 休暇区分で自動設定されている場合は重複打刻となるのでモードチェックするかしないかの判定を行う
-                                // getUsefreeitem implement
-                                $array_impl_getUsefreeitem = array (
-                                    'department_code' => $user_data->department_code,
-                                    'user_code' => $user_data->code,
-                                    'mode' => $mode,
-                                    'systemdate' => $systemdate
-                                );
-                                $use_free_item = $this->getUsefreeitem($array_impl_getUsefreeitem);
-                                if (strlen($use_free_item) >= 3)  {
-                                    $use_free_item_chk = substr($use_free_item, Config::get('const.USEFREEITEM.time_autoset'), 1);
-                                    if ($use_free_item_chk == "2" || $use_free_item_chk == "3")  {
-                                        if ($result->record_datetime != null && $result->record_datetime != "" && $result->is_editor) {
-                                            $is_chk_mode_autoset = true;
+                            // その日の退勤打刻を取得
+                            $work_time_model->setParamdatefromNoneditAttribute($systemdate->format('Ymd '.'23:59:59'));
+                            $work_time_model->setParamModeAttribute($mode);
+                            $daily_leaving_times = $work_time_model->getDailyMaxData();
+                            Log::debug('leaving_time $chk_systemdate = '.$chk_systemdate);
+                            if(count($daily_leaving_times) > 0){
+                                foreach($daily_leaving_times as $item) {
+                                    Log::debug('leaving_time $item->record_ymd = '.$item->record_ymd);
+                                    if ($chk_systemdate == $item->record_ymd) {
+                                        // 休暇区分で自動設定されている場合は重複打刻となるのでモードチェックするかしないかの判定を行う
+                                        // getUsefreeitem implement
+                                        $array_impl_getUsefreeitem = array (
+                                            'department_code' => $user_data->department_code,
+                                            'user_code' => $user_data->code,
+                                            'mode' => $mode,
+                                            'systemdate' => $systemdate
+                                        );
+                                        $use_free_item = $this->getUsefreeitem($array_impl_getUsefreeitem);
+                                        if (strlen($use_free_item) >= 3)  {
+                                            $use_free_item_chk = substr($use_free_item, Config::get('const.USEFREEITEM.time_autoset'), 1);
+                                            Log::debug('leaving_time $use_free_item_chk = '.$use_free_item_chk);
+                                            if ($use_free_item_chk == "2" || $use_free_item_chk == "3")  {
+                                                Log::debug('leaving_time $item->record_datetime = '.$item->record_datetime);
+                                                Log::debug('leaving_time $item->is_editor = '.$item->is_editor);
+                                                if ($item->record_datetime != null && $item->record_datetime != "" && $item->is_editor) {
+                                                    $is_chk_mode_autoset = true;
+                                                    $mode_autoset_id = $item->id;
+                                                }
+                                            }
                                         }
                                     }
+                                    break;
                                 }
                             }
                         }
+                        Log::debug('$mode = '.$mode);
+                        Log::debug('$this->source_mode = '.$this->source_mode);
+                        Log::debug('$is_chk_mode_autoset = '.$is_chk_mode_autoset);
                         $chk_result = $apicommon->chkMode($mode, $this->source_mode, $is_chk_mode_autoset);
                         if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
                             if ($is_chk_mode_autoset) {
@@ -284,10 +312,8 @@ class ApiGetAttendanceResultController extends Controller
                 $chk_max_times = Config::get('const.RESULT_CODE.max_times');
             }
         } */
-        if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
-        }
 
-        return array($chk_result,  $chk_max_times,  $check_interval, $array_timemodes);
+        return array($chk_result,  $chk_max_times,  $check_interval, $mode_autoset_id);
     }
     /**
      * 用途フリー項目取得

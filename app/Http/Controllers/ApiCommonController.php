@@ -4898,19 +4898,26 @@ class ApiCommonController extends Controller
             }
             $calendar_setting_model->setUpdatedatAttribute($systemdate);
             $calendar_setting_model->setUpdateduserAttribute($login_user_code);
-            foreach($details as $item) {
-                if($item['kbn_flag'] == 1){     // 休暇区分のみ登録
-                    $calendar_setting_model->setHolidaykubunAttribute($item['user_holiday_kbn']);
-                    // $user_holiday->setHolidaykubunAttribute($item['user_holiday_kbn']);
-                    // $user_holiday->setCreateduserAttribute($login_user_code);
-                    // $user_holiday->insertKbn();
-                    // 勤怠時刻にIDを登録するのでSELECTする
-                } else {
-                    $calendar_setting_model->setHolidaykubunAttribute(0);
-                }
+            Log::debug('addAttendanceWork count details = '.count($details));
+            if (count($details) == 0) {
+                $calendar_setting_model->setHolidaykubunAttribute(0);
                 $calendar_setting_model->updateCalendar();
-                // 先頭行のみの処理でよいのでbreakする
-                break;
+            } else {
+                foreach($details as $item) {
+                    Log::debug('addAttendanceWork kbn_flag = '.$item['kbn_flag']);
+                    if($item['kbn_flag'] == 1){     // 休暇区分のみ登録
+                        $calendar_setting_model->setHolidaykubunAttribute($item['user_holiday_kbn']);
+                        // $user_holiday->setHolidaykubunAttribute($item['user_holiday_kbn']);
+                        // $user_holiday->setCreateduserAttribute($login_user_code);
+                        // $user_holiday->insertKbn();
+                        // 勤怠時刻にIDを登録するのでSELECTする
+                    } else {
+                        $calendar_setting_model->setHolidaykubunAttribute(0);
+                    }
+                    $calendar_setting_model->updateCalendar();
+                    // 先頭行のみの処理でよいのでbreakする
+                    break;
+                }
             }
             // 勤怠時刻登録
             // beforeidsが存在した場合は論理削除する
