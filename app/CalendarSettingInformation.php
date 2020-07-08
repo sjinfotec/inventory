@@ -556,50 +556,138 @@ class CalendarSettingInformation extends Model
      *
      * @return void
      */
+    // public function getHolidayinfo(){
+    //     try {
+    //         $mainquery = DB::table($this->table)
+    //             ->select(
+    //                 $this->table.'.holiday_kubun'
+    //             );
+    //         $mainquery
+    //             ->selectRaw('t1.code_name as holiday_name')
+    //             ->selectRaw('t1.use_free_item as use_free_item');
+    //         $mainquery
+    //             ->leftJoin($this->table_generalcodes.' as t1', function ($join) { 
+    //                 $join->on('t1.code', '=',  $this->table.'.holiday_kubun')
+    //                 ->where('t1.identification_id', '=', Config::get('const.C013.value'))
+    //                 ->where('t1.is_deleted', '=', 0);
+    //         });
+    //         if(!empty($this->paramfromdate) && !empty($this->paramtodate)) {
+    //             $mainquery
+    //                 ->whereBetween($this->table.'.date', [$this->paramfromdate, $this->paramtodate]);
+    //         } else {
+    //             if(!empty($this->paramfromdate)) {
+    //                 $mainquery
+    //                     ->where($this->table.'.date',$this->paramfromdate);
+    //             }
+    //         }
+    //         if(!empty($this->paramdepartmentcode)) {
+    //             $mainquery
+    //                 ->where($this->table.'.department_code',$this->paramdepartmentcode);
+    //         }
+    //         if(!empty($this->paramemploymentstatus)) {
+    //             $mainquery
+    //                 ->where($this->table.'.employment_status',$this->paramemploymentstatus);
+    //         }
+    //         if(!empty($this->paramusercode)) {
+    //             $mainquery
+    //                 ->where($this->table.'.user_code',$this->paramusercode);
+    //         }
+    //         $mainquery->where($this->table.'.is_deleted',0);
+    //         $result = null;
+    //         if(empty($this->paramlimit)) {
+    //             $result = $mainquery->get();
+    //         } else {
+    //             $result = $mainquery->limit($this->paramlimit)->get();
+    //         }
+    //         return $result;
+    //     }catch(\PDOException $pe){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+    //         Log::error($pe->getMessage());
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+    // }
     public function getHolidayinfo(){
         try {
-            $mainquery = DB::table($this->table)
-                ->select(
-                    $this->table.'.holiday_kubun'
-                );
-            $mainquery
-                ->selectRaw('t1.code_name as holiday_name')
-                ->selectRaw('t1.use_free_item as use_free_item');
-            $mainquery
-                ->leftJoin($this->table_generalcodes.' as t1', function ($join) { 
-                    $join->on('t1.code', '=',  $this->table.'.holiday_kubun')
-                    ->where('t1.identification_id', '=', Config::get('const.C013.value'))
-                    ->where('t1.is_deleted', '=', 0);
-            });
+            $casesql = "select ";
+            $casesql .= "{0} from ".$this->table_generalcodes." ";
+            $casesql .= "where ";
+            $casesql .= "  ? = ? ";
+            $casesql .= "  and {1} = {2} ";
+            $casesql .= "  and identification_id = ? ";
+            $casesql .= "  and is_deleted = ? ";
+            $casesql_holiday_name0 = str_replace('{0}', 'code_name', $casesql);
+            $casesql_holiday_name1 = str_replace('{1}', 'code', $casesql_holiday_name0);
+            $casesql_holiday_name2 = str_replace('{2}', 't1.holiday_kubun', $casesql_holiday_name1);
+            $casesql_use_free_item0 = str_replace('{0}', 'use_free_item', $casesql);
+            $casesql_use_free_item1 = str_replace('{1}', 'code', $casesql_use_free_item0);
+            $casesql_use_free_item2 = str_replace('{2}', 't1.holiday_kubun', $casesql_use_free_item1);
+            
+            $sqlString = "";
+            $sqlString .= "select ";
+            $sqlString .= "  t1.holiday_kubun as holiday_kubun ";
+            $sqlString .= "  , case ifnull(t1.holiday_kubun, null) ";
+            $sqlString .= "    when null then null ";
+            $sqlString .= "    else (";
+            $sqlString .= "    ".$casesql_holiday_name2;
+            $sqlString .= "    ) end as holiday_name ";
+            $sqlString .= "  , case ifnull(t1.holiday_kubun, null) ";
+            $sqlString .= "    when null then null ";
+            $sqlString .= "    else (";
+            $sqlString .= "    ".$casesql_use_free_item2;
+            $sqlString .= "    ) end as use_free_item ";
+            $sqlString .= "  from ";
+            $sqlString .= "  ".$this->table." as t1 ";
+            $sqlString .= "  where ";
+            $sqlString .= "    ? = ? ";
             if(!empty($this->paramfromdate) && !empty($this->paramtodate)) {
-                $mainquery
-                    ->whereBetween($this->table.'.date', [$this->paramfromdate, $this->paramtodate]);
+                $sqlString .= "    and t1.date between ? and ? ";
             } else {
                 if(!empty($this->paramfromdate)) {
-                    $mainquery
-                        ->where($this->table.'.date',$this->paramfromdate);
+                    $sqlString .= "    and t1.date = ? ";
                 }
             }
             if(!empty($this->paramdepartmentcode)) {
-                $mainquery
-                    ->where($this->table.'.department_code',$this->paramdepartmentcode);
-            }
-            if(!empty($this->paramemploymentstatus)) {
-                $mainquery
-                    ->where($this->table.'.employment_status',$this->paramemploymentstatus);
+                $sqlString .= "    and t1.department_code = ? ";
             }
             if(!empty($this->paramusercode)) {
-                $mainquery
-                    ->where($this->table.'.user_code',$this->paramusercode);
+                $sqlString .= "    and t1.user_code = ? ";
             }
-            $mainquery->where($this->table.'.is_deleted',0);
-            $result = null;
-            if(empty($this->paramlimit)) {
-                $result = $mainquery->get();
+            $sqlString .= "    and t1.is_deleted = ? ";
+
+            // バインド
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = Config::get('const.C013.value');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = Config::get('const.C013.value');
+            $array_setBindingsStr[] = 0;
+            $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = 1;
+            if(!empty($this->paramfromdate) && !empty($this->paramtodate)) {
+                $array_setBindingsStr[] = $this->paramfromdate;
+                $array_setBindingsStr[] = $this->paramtodate;
             } else {
-                $result = $mainquery->limit($this->paramlimit)->get();
+                if(!empty($this->paramfromdate)) {
+                    $array_setBindingsStr[] = $this->paramfromdate;
+                }
             }
+            if(!empty($this->paramdepartmentcode)) {
+                $array_setBindingsStr[] = $this->paramdepartmentcode;
+            }
+            if(!empty($this->paramusercode)) {
+                $array_setBindingsStr[] = $this->paramusercode;
+            }
+            $array_setBindingsStr[] = 0;
+
+            $result = DB::select($sqlString, $array_setBindingsStr);
             return $result;
+
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
