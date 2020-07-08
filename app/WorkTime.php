@@ -1551,10 +1551,15 @@ class WorkTime extends Model
             // sunquery1    t1:work_times
             $mainquery = DB::table($this->table.' AS t1')
                 ->select(
+                    't1.id as id',
                     't1.mode as mode',
                     't1.user_holiday_kubuns_id as user_holiday_kubuns_id',
                     't1.record_time as record_datetime'
-                    )
+                    't1.is_editor as is_editor'
+                );
+            $mainquery                
+                ->selectRaw("DATE_FORMAT(t1.record_time,'%Y%m%d') as record_ymd");
+            $mainquery                
                 ->JoinSub($sunquery1, 't2', function ($join) { 
                     $join->on('t2.user_code', '=', 't1.user_code');
                     $join->on('t2.department_code', '=', 't1.department_code');
