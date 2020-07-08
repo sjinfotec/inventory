@@ -1544,7 +1544,12 @@ class WorkTime extends Model
                     )
                 ->where($this->table.'.user_code', '=', $this->param_user_code)
                 ->where($this->table.'.department_code', '=', $this->param_department_code)
-                ->where($this->table.'.record_time', '<', $this->param_date_from)
+                ->where($this->table.'.record_time', '<', $this->param_date_from);
+            if (!empty($this->param_mode)) {
+                $sunquery1
+                    ->where($this->table.'.mode', '=', $this->param_mode);
+            }
+            $sunquery1
                 ->groupBy($this->table.'.user_code', $this->table.'.department_code', $this->table.'.is_deleted');
 
             // mainqueryにsunqueryを組み込む
@@ -1554,7 +1559,7 @@ class WorkTime extends Model
                     't1.id as id',
                     't1.mode as mode',
                     't1.user_holiday_kubuns_id as user_holiday_kubuns_id',
-                    't1.record_time as record_datetime'
+                    't1.record_time as record_datetime',
                     't1.is_editor as is_editor'
                 );
             $mainquery                
@@ -1566,8 +1571,8 @@ class WorkTime extends Model
                     $join->on('t2.max_record_time', '=', 't1.record_time')
                     ->where('t2.is_deleted', '=', 0);
                 })
-                ->where('t1.is_deleted', '=', 0)
-                ->get();
+                ->where('t1.is_deleted', '=', 0);
+            $result = $mainquery->get();
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
@@ -1579,7 +1584,7 @@ class WorkTime extends Model
         }
 
 
-        return $mainquery;
+        return $result;
     }
 
     /**
