@@ -340,13 +340,21 @@
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.workingdatename }}</td>
                                 <td
-                                  v-if="calclisttimedate.attendance != '00:00' || calclisttimedate.leaving != '00:00'"
+                                  v-if="calclisttimedate.attendance != null && calclisttimedate.attendance != '00:00'"
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.attendance }}</td>
                                 <td
-                                  v-if="calclisttimedate.attendance != '00:00' || calclisttimedate.leaving != '00:00'"
+                                  v-else
+                                  class="text-center align-middle"
+                                ></td>
+                                <td
+                                  v-if="calclisttimedate.leaving != null && calclisttimedate.leaving != '00:00'"
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.leaving }}</td>
+                                <td
+                                  v-else
+                                  class="text-center align-middle"
+                                ></td>
                                 <td
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.total_working_times }}</td>

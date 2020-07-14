@@ -15,14 +15,14 @@
                     v-bind:title="edtString"
                     @mouseover="edttooltips('実働時間 = 所定労働時間 + 残業時間（法定休日労働時間,法定外休日労働時間） + ', '深夜残業','')"
                   >実働時間</td>
-                  <td class="text-center align-middle mw-rem-8">所定労働時間</td>
-                  <td class="text-center align-middle mw-rem-8">残業時間</td>
-                  <td class="text-center align-middle mw-rem-8">深夜残業時間</td>
-                  <td class="text-center align-middle mw-rem-8">法定休日労働時間</td>
-                  <!-- <td class="text-center align-middle mw-rem-8">法定休日深夜時間</td> -->
-                  <td class="text-center align-middle mw-rem-8">法定外休日労働時間</td>
-                  <!-- <td class="text-center align-middle mw-rem-8">法定外休日深夜時間</td> -->
-                  <td class="text-center align-middle mw-rem-8">深夜労働時間</td>
+                  <td class="text-center align-middle mw-rem-5">所定労働時間</td>
+                  <td class="text-center align-middle mw-rem-4">残業時間</td>
+                  <td class="text-center align-middle mw-rem-5">深夜残業時間</td>
+                  <td class="text-center align-middle mw-rem-5">法定休日労働時間</td>
+                  <!-- <td class="text-center align-middle mw-rem-6">法定休日深夜時間</td> -->
+                  <td class="text-center align-middle mw-rem-6">法定外休日労働時間</td>
+                  <!-- <td class="text-center align-middle mw-rem-6">法定外休日深夜時間</td> -->
+                  <td class="text-center align-middle mw-rem-5">深夜労働時間</td>
                   <td
                     class="text-center align-middle mw-rem-5"
                     data-toggle="tooltip"
@@ -30,14 +30,16 @@
                     v-bind:title="edtString"
                     @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                   >不就労時間</td>
-                  <td class="text-center align-middle mw-rem-5">出勤者数</td>
-                  <td class="text-center align-middle mw-rem-5">外出者数</td>
+                  <td class="text-center align-middle mw-rem-3">出勤者数</td>
+                  <td class="text-center align-middle mw-rem-3">外出者数</td>
                   <td class="text-center align-middle mw-rem-5">有給休暇者数</td>
                   <td class="text-center align-middle mw-rem-5">特別休暇者数</td>
-                  <td class="text-center align-middle mw-rem-5">早退者数</td>
-                  <td class="text-center align-middle mw-rem-5">遅刻者数</td>
-                  <td class="text-center align-middle mw-rem-5">欠勤者数</td>
-                  <td class="text-center align-middle mw-rem-15">備考</td>
+                  <td class="text-center align-middle mw-rem-3">早退者数</td>
+                  <td class="text-center align-middle mw-rem-3">遅刻者数</td>
+                  <td class="text-center align-middle mw-rem-3">欠勤者数</td>
+                  <td class="text-center align-middle mw-rem-4">みなし日数</td>
+                  <td class="text-center align-middle mw-rem-3">公傷日数</td>
+                  <td class="text-center align-middle mw-rem-5">慶弔休暇日数</td>
                 </tr>
                 <tr v-if="detailOrTotal === 'total' && btnMode ==='detailswitch'" bgcolor="#e3fbef">
                   <td
@@ -47,16 +49,16 @@
                     v-bind:title="edtString"
                     @mouseover="edttooltips('実働時間 = 所定労働時間 + 残業時間（法定休日労働時間,法定外休日労働時間） + ', '深夜残業','')"
                   >実働時間</td>
-                  <td class="text-center align-middle mw-rem-8">所定労働時間</td>
-                  <td class="text-center align-middle mw-rem-8">残業時間</td>
-                  <td class="text-center align-middle mw-rem-8">深夜残業時間</td>
-                  <td class="text-center align-middle mw-rem-8">法定休日労働時間</td>
-                  <!-- <td class="text-center align-middle mw-rem-8">法定休日深夜時間</td> -->
-                  <td class="text-center align-middle mw-rem-8">法定外休日労働時間</td>
-                  <!-- <td class="text-center align-middle mw-rem-8">法定外休日深夜時間</td> -->
-                  <td class="text-center align-middle mw-rem-8">深夜労働時間</td>
-                  <td class="text-center align-middle mw-rem-8">法定時間</td>
-                  <td class="text-center align-middle mw-rem-8">法定外時間</td>
+                  <td class="text-center align-middle mw-rem-5">所定労働時間</td>
+                  <td class="text-center align-middle mw-rem-4">残業時間</td>
+                  <td class="text-center align-middle mw-rem-5">深夜残業時間</td>
+                  <td class="text-center align-middle mw-rem-5">法定休日労働時間</td>
+                  <!-- <td class="text-center align-middle mw-rem-6">法定休日深夜時間</td> -->
+                  <td class="text-center align-middle mw-rem-6">法定外休日労働時間</td>
+                  <!-- <td class="text-center align-middle mw-rem-6">法定外休日深夜時間</td> -->
+                  <td class="text-center align-middle mw-rem-5">深夜労働時間</td>
+                  <td class="text-center align-middle mw-rem-5">法定時間</td>
+                  <td class="text-center align-middle mw-rem-5">法定外時間</td>
                   <td
                     class="text-center align-middle w-15"
                     data-toggle="tooltip"
@@ -64,14 +66,16 @@
                     v-bind:title="edtString"
                     @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                   >不就労時間</td>
-                  <td class="text-center align-middle mw-rem-5">出勤者数</td>
-                  <td class="text-center align-middle mw-rem-5">外出者数</td>
+                  <td class="text-center align-middle mw-rem-3">出勤者数</td>
+                  <td class="text-center align-middle mw-rem-3">外出者数</td>
                   <td class="text-center align-middle mw-rem-5">有給休暇者数</td>
                   <td class="text-center align-middle mw-rem-5">特別休暇者数</td>
-                  <td class="text-center align-middle mw-rem-5">早退者数</td>
-                  <td class="text-center align-middle mw-rem-5">遅刻者数</td>
-                  <td class="text-center align-middle mw-rem-5">欠勤者数</td>
-                  <td class="text-center align-middle mw-rem-15">備考</td>
+                  <td class="text-center align-middle mw-rem-3">早退者数</td>
+                  <td class="text-center align-middle mw-rem-3">遅刻者数</td>
+                  <td class="text-center align-middle mw-rem-3">欠勤者数</td>
+                  <td class="text-center align-middle mw-rem-4">みなし日数</td>
+                  <td class="text-center align-middle mw-rem-3">公傷日数</td>
+                  <td class="text-center align-middle mw-rem-5">慶弔休暇日数</td>
                 </tr>
               </thead>
               <tbody>
@@ -86,14 +90,14 @@
                     v-bind:title="edtString"
                     @mouseover="edttooltips('実働時間 = 所定労働時間 + 残業時間（法定休日労働時間,法定外休日労働時間） + ', '深夜残業','')"
                   >{{ calcList.total_working_times }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.regular_working_times }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.off_hours_working_hours }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.late_night_overtime_hours }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.legal_working_holiday_hours }}</td>
-                  <!-- <td class="text-center align-middle mw-rem-8">{{ calcList.legal_working_holiday_night_overtime_hours }}</td> -->
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.out_of_legal_working_holiday_hours }}</td>
-                  <!-- <td class="text-center align-middle mw-rem-8">{{ calcList.out_of_legal_working_holiday_night_overtime_hours }}</td> -->
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.late_night_working_hours }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ calcList.regular_working_times }}</td>
+                  <td class="text-center align-middle mw-rem-4">{{ calcList.off_hours_working_hours }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ calcList.late_night_overtime_hours }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ calcList.legal_working_holiday_hours }}</td>
+                  <!-- <td class="text-center align-middle mw-rem-6">{{ calcList.legal_working_holiday_night_overtime_hours }}</td> -->
+                  <td class="text-center align-middle mw-rem-6">{{ calcList.out_of_legal_working_holiday_hours }}</td>
+                  <!-- <td class="text-center align-middle mw-rem-6">{{ calcList.out_of_legal_working_holiday_night_overtime_hours }}</td> -->
+                  <td class="text-center align-middle mw-rem-5">{{ calcList.late_night_working_hours }}</td>
                   <td
                     class="text-center align-middle mw-rem-5"
                     data-toggle="tooltip"
@@ -101,14 +105,16 @@
                     v-bind:title="edtString"
                     @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                   >{{ calcList.not_employment_working_hours }}</td>
-                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_working_status }}</td>
-                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_go_out }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_working_status }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_go_out }}</td>
                   <td class="text-center align-middlee mw-rem-5">{{ calcList.total_paid_holidays }}</td>
                   <td class="text-center align-middlee mw-rem-5">{{ calcList.total_holiday_kubun }}</td>
-                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_leave_early }}</td>
-                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_late }}</td>
-                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_absence }}</td>
-                  <td class="text-left align-middlee mw-rem-15"></td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_leave_early }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_late }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_absence }}</td>
+                  <td class="text-center align-middlee mw-rem-4">{{ calcList.total_deemed }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_public_damage }}</td>
+                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_congratulatory }}</td>
                 </tr>
                 <tr
                   v-if="detailOrTotal === 'total' && btnMode ==='detailswitch'"
@@ -121,16 +127,16 @@
                     v-bind:title="edtString"
                     @mouseover="edttooltips('実働時間 = 所定労働時間 + 残業時間（法定休日労働時間,法定外休日労働時間） + ', '深夜残業','')"
                   >{{ calcList.total_working_times }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.regular_working_times }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.off_hours_working_hours }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.late_night_overtime_hours }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.legal_working_holiday_hours }}</td>
-                  <!-- <td class="text-center align-middle mw-rem-8">{{ calcList.legal_working_holiday_night_overtime_hours }}</td> -->
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.out_of_legal_working_holiday_hours }}</td>
-                  <!-- <td class="text-center align-middle mw-rem-8">{{ calcList.out_of_legal_working_holiday_night_overtime_hours }}</td> -->
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.late_night_working_hours }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.legal_working_times }}</td>
-                  <td class="text-center align-middle mw-rem-8">{{ calcList.out_of_legal_working_times }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ calcList.regular_working_times }}</td>
+                  <td class="text-center align-middle mw-rem-4">{{ calcList.off_hours_working_hours }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ calcList.late_night_overtime_hours }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ calcList.legal_working_holiday_hours }}</td>
+                  <!-- <td class="text-center align-middle mw-rem-6">{{ calcList.legal_working_holiday_night_overtime_hours }}</td> -->
+                  <td class="text-center align-middle mw-rem-6">{{ calcList.out_of_legal_working_holiday_hours }}</td>
+                  <!-- <td class="text-center align-middle mw-rem-6">{{ calcList.out_of_legal_working_holiday_night_overtime_hours }}</td> -->
+                  <td class="text-center align-middle mw-rem-5">{{ calcList.late_night_working_hours }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ calcList.legal_working_times }}</td>
+                  <td class="text-center align-middle mw-rem-5">{{ calcList.out_of_legal_working_times }}</td>
                   <td
                     class="text-center align-middle mw-rem-5"
                     data-toggle="tooltip"
@@ -138,14 +144,16 @@
                     v-bind:title="edtString"
                     @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                   >{{ calcList.not_employment_working_hours }}</td>
-                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_working_status }}</td>
-                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_go_out }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_working_status }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_go_out }}</td>
                   <td class="text-center align-middlee mw-rem-5">{{ calcList.total_paid_holidays }}</td>
                   <td class="text-center align-middlee mw-rem-5">{{ calcList.total_holiday_kubun }}</td>
-                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_leave_early }}</td>
-                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_late }}</td>
-                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_absence }}</td>
-                  <td class="text-left align-middlee mw-rem-15"></td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_leave_early }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_late }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_absence }}</td>
+                  <td class="text-center align-middlee mw-rem-4">{{ calcList.total_deemed }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_public_damage }}</td>
+                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_congratulatory }}</td>
                 </tr>
               </tbody>
             </table>
@@ -296,7 +304,19 @@ table {
   min-width: 4rem;
 }
 
-.mw-rem-8 {
+.mw-rem-5 {
+  min-width: 5rem;
+}
+
+.mw-rem-6 {
+  min-width: 6rem;
+}
+
+.mw-rem-6 {
+  min-width: 7rem;
+}
+
+.mw-rem-6 {
   min-width: 8rem;
 }
 </style>

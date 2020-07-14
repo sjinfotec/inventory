@@ -7,15 +7,12 @@
   <td
     :class="classText"
     v-else-if="menuData[userIndex]['is_select'] === 0 && menuData[userconIndex]['is_select'] === 0"
-    data-toggle="tooltip"
-    data-placement="top"
-    v-bind:title="edtString"
   >
     {{ calcList.working_time }}
   </td>
   <td
     :class="classText"
-    v-else-if="menuData[userIndex]['is_select'] === 1 && calcList.x_positions && calcList.editor_department_code"
+    v-else-if="menuData[userIndex]['is_select'] === 1 && loginRole === adminRole && calcList.x_positions && calcList.editor_department_code"
     style="color:#ff0000"
     data-toggle="tooltip"
     data-placement="top"
@@ -32,12 +29,30 @@
   </td>
   <td
     :class="classText"
-    v-else-if="menuData[userIndex]['is_select'] === 1 && !calcList.x_positions && calcList.editor_department_code"
+    v-else-if="menuData[userIndex]['is_select'] === 1 && loginRole !== adminRole && calcList.x_positions && calcList.editor_department_code"
+  >
+    {{ calcList.working_time }}
+    <img
+      class="icon-size-sm svg_img orange600"
+      src="/images/red_map_pin.svg"
+      v-on:click="selClick()"
+      alt
+    />
+  </td>
+  <td
+    :class="classText"
+    v-else-if="menuData[userIndex]['is_select'] === 1 && loginRole === adminRole && !calcList.x_positions && calcList.editor_department_code"
     style="color:#ff0000"
     data-toggle="tooltip"
     data-placement="top"
     v-bind:title="edtString"
     @mouseover="edttooltips(calcList.editor_department_name + '：' + calcList.editor_user_name,'')"
+  >
+    {{ calcList.working_time }}
+  </td>
+  <td
+    :class="classText"
+    v-else-if="menuData[userIndex]['is_select'] === 1 && loginRole !== adminRole && !calcList.x_positions && calcList.editor_department_code"
   >
     {{ calcList.working_time }}
   </td>
@@ -126,11 +141,6 @@
 </template>
 <script>
 
-// CONST
-const C_USER_INDEX = 26;
-const C_USER_CON_INDEX = 27;
-const C_SSJJOO_ID = 'SSJJOO00';
-
 export default {
   name: "dailyworkinginfotimetable",
   props: {
@@ -142,6 +152,10 @@ export default {
       default: ""
     },
     loginRole: {
+      type: String,
+      default: ""
+    },
+    adminRole: {
       type: String,
       default: ""
     },
@@ -178,17 +192,6 @@ export default {
     return {
       edtString: ""
     };
-  },
-  computed: {
-    userindex: function() {
-      return C_USER_INDEX;
-    },
-    userconindex: function() {
-      return C_USER_CON_INDEX;
-    },
-    ssjjoo_id: function() {
-      return C_SSJJOO_ID;
-    }
   },
   methods: {
     // tooltips

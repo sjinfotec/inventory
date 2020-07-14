@@ -160,6 +160,10 @@
       <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
         登録しているユーザーのタイムテーブルを一括設定する</button>
     </div>
+    <div v-if="btnMode ==='dailycalc'" class="btn-group d-flex" v-on:click="dailycalcclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
+        日次集計印刷</button>
+    </div>
   </div>
 </template>
 <script>
@@ -291,6 +295,9 @@ export default {
     },
     timetableeditclickBtn : function() {
       this.$emit('timetableedit-event',event);
+    },
+    dailycalcclickBtn : function() {
+      this.$emit('dailycalc-event',event);
     },
     // tooltips
     edttooltips: function(value1) {
