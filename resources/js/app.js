@@ -84,6 +84,10 @@ Vue.component(
     require("./components/DailyWorkingInfoTimeTable.vue").default
 );
 Vue.component(
+    "daily-working-info-table-print",
+    require("./components/DailyWorkingInfoTablePrint.vue").default
+);
+Vue.component(
     "daily-working-info-sum-table",
     require("./components/DailyWorkingInfoSumTable.vue").default
 );

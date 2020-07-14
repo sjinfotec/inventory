@@ -1,6 +1,6 @@
                     @if(Auth::check())
                     <!-- offcanvas-left -->
-                    <div class="col-xl-2 px-0 offcanvas-collapse offcanvas-collapse-from-left side-base">
+                    <div class="col-xl-2 px-0 offcanvas-collapse offcanvas-collapse-from-left side-base print-none">
                         <nav class="text-white">
                             <h3 class="side-head p-3 font-size-rg">アカウント情報</h3>
                             <div class="float-left mx-2">

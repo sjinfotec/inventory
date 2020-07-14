@@ -118,19 +118,20 @@
                   }"
                   v-bind:login-user="loginUser"
                   v-bind:login-role="loginRole"
+                  v-bind:admin-role="adminRole"
                   v-bind:account-data="accountData"
                   v-bind:menu-data="menuData"
-                  v-bind:user-index="userindex"
-                  v-bind:usercon-index="userconindex"
-                  v-bind:ssjjoo-id="ssjjoo_id"
-                  v-bind:edituser-id="edit_user_id"
+                  v-bind:user-index="edituserIndex"
+                  v-bind:usercon-index="edituserConIndex"
+                  v-bind:ssjjoo-id="get_SsjjooId"
+                  v-bind:edituser-id="get_EditUserId_Ssjjoo"
                   v-on:click-event="showMap(
                       calcList.attendance_time,
                       calcList.user_name,
                       calcList.x_attendance_time_positions,
                       calcList.y_attendance_time_positions,
                       index,
-                      mode_attendance)"
+                      get_ModeAttendance)"
                 ></daily-working-info-time-table>
                 <!-- /出勤 -->
                 <!-- 退勤 -->
@@ -146,19 +147,20 @@
                   }"
                   v-bind:login-user="loginUser"
                   v-bind:login-role="loginRole"
+                  v-bind:admin-role="adminRole"
                   v-bind:account-data="accountData"
                   v-bind:menu-data="menuData"
-                  v-bind:user-index="userindex"
-                  v-bind:usercon-index="userconindex"
-                  v-bind:ssjjoo-id="ssjjoo_id"
-                  v-bind:edituser-id="edit_user_id"
+                  v-bind:user-index="edituserIndex"
+                  v-bind:usercon-index="edituserConIndex"
+                  v-bind:ssjjoo-id="get_SsjjooId"
+                  v-bind:edituser-id="get_EditUserId_Ssjjoo"
                   v-on:click-event="showMap(
                       calcList.leaving_time,
                       calcList.user_name,
                       calcList.x_leaving_time_positions,
                       calcList.y_leaving_time_positions,
                       index,
-                      mode_leaving)"
+                      get_ModeLeaving)"
                 ></daily-working-info-time-table>
                 <!-- /退勤 -->
                 <!-- 公用外出　開始 -->
@@ -174,19 +176,20 @@
                   }"
                   v-bind:login-user="loginUser"
                   v-bind:login-role="loginRole"
+                  v-bind:admin-role="adminRole"
                   v-bind:account-data="accountData"
                   v-bind:menu-data="menuData"
-                  v-bind:user-index="userindex"
-                  v-bind:usercon-index="userconindex"
-                  v-bind:ssjjoo-id="ssjjoo_id"
-                  v-bind:edituser-id="edit_user_id"
+                  v-bind:user-index="edituserIndex"
+                  v-bind:usercon-index="edituserConIndex"
+                  v-bind:ssjjoo-id="get_SsjjooId"
+                  v-bind:edituser-id="get_EditUserId_Ssjjoo"
                   v-on:click-event="showMap(
                       calcList.public_going_out_time,
                       calcList.user_name,
                       calcList.x_public_going_out_time_positions,
                       calcList.y_public_going_out_time_positions,
                       index,
-                      mode_official_out_start)"
+                      get_ModeMissingMiddle)"
                 ></daily-working-info-time-table>
                 <!-- /公用外出　終了 -->
                 <!-- 公用外出戻り　開始 -->
@@ -202,19 +205,20 @@
                   }"
                   v-bind:login-user="loginUser"
                   v-bind:login-role="loginRole"
+                  v-bind:admin-role="adminRole"
                   v-bind:account-data="accountData"
                   v-bind:menu-data="menuData"
-                  v-bind:user-index="userindex"
-                  v-bind:usercon-index="userconindex"
-                  v-bind:ssjjoo-id="ssjjoo_id"
-                  v-bind:edituser-id="edit_user_id"
+                  v-bind:user-index="edituserIndex"
+                  v-bind:usercon-index="edituserConIndex"
+                  v-bind:ssjjoo-id="get_SsjjooId"
+                  v-bind:edituser-id="get_EditUserId_Ssjjoo"
                   v-on:click-event="showMap(
                       calcList.public_going_out_return_time,
                       calcList.user_name,
                       calcList.x_public_going_out_return_time_positions,
                       calcList.y_public_going_out_return_time_positions,
                       index,
-                      mode_official_out_end)"
+                      get_ModeMissingMiddleReturn)"
                 ></daily-working-info-time-table>
                 <!-- /公用外出戻り　終了 -->
                 <!-- 私用外出　開始 -->
@@ -230,19 +234,20 @@
                   }"
                   v-bind:login-user="loginUser"
                   v-bind:login-role="loginRole"
+                  v-bind:admin-role="adminRole"
                   v-bind:account-data="accountData"
                   v-bind:menu-data="menuData"
-                  v-bind:user-index="userindex"
-                  v-bind:usercon-index="userconindex"
-                  v-bind:ssjjoo-id="ssjjoo_id"
-                  v-bind:edituser-id="edit_user_id"
+                  v-bind:user-index="edituserIndex"
+                  v-bind:usercon-index="edituserConIndex"
+                  v-bind:ssjjoo-id="get_SsjjooId"
+                  v-bind:edituser-id="get_EditUserId_Ssjjoo"
                   v-on:click-event="showMap(
                       calcList.missing_middle_time,
                       calcList.user_name,
                       calcList.x_missing_middle_time_positions,
                       calcList.y_missing_middle_time_positions,
                       index,
-                      mode_private_out_start)"
+                      get_ModePublicGoingOut)"
                 ></daily-working-info-time-table>
                 <!-- /私用外出　終了 -->
                 <!-- 私用外出戻り　開始 -->
@@ -258,19 +263,20 @@
                   }"
                   v-bind:login-user="loginUser"
                   v-bind:login-role="loginRole"
+                  v-bind:admin-role="adminRole"
                   v-bind:account-data="accountData"
                   v-bind:menu-data="menuData"
-                  v-bind:user-index="userindex"
-                  v-bind:usercon-index="userconindex"
-                  v-bind:ssjjoo-id="ssjjoo_id"
-                  v-bind:edituser-id="edit_user_id"
+                  v-bind:user-index="edituserIndex"
+                  v-bind:usercon-index="edituserConIndex"
+                  v-bind:ssjjoo-id="get_SsjjooId"
+                  v-bind:edituser-id="get_EditUserId_Ssjjoo"
                   v-on:click-event="showMap(
                       calcList.missing_middle_return_time,
                       calcList.user_name,
                       calcList.x_missing_middle_return_time_positions,
                       calcList.y_missing_middle_return_time_positions,
                       index,
-                      mode_private_out_end)"
+                      get_ModePublicGoingOutReturn)"
                 ></daily-working-info-time-table>
                 <!-- /私用外出戻り　終了 -->
                 <!-- 勤務状態 -->
@@ -402,27 +408,28 @@
                   }"
                   v-bind:login-user="loginUser"
                   v-bind:login-role="loginRole"
+                  v-bind:admin-role="adminRole"
                   v-bind:account-data="accountData"
                   v-bind:menu-data="menuData"
-                  v-bind:user-index="userindex"
-                  v-bind:usercon-index="userconindex"
-                  v-bind:ssjjoo-id="ssjjoo_id"
-                  v-bind:edituser-id="edit_user_id"
+                  v-bind:user-index="edituserIndex"
+                  v-bind:usercon-index="edituserConIndex"
+                  v-bind:ssjjoo-id="get_SsjjooId"
+                  v-bind:edituser-id="get_EditUserId_Ssjjoo"
                   v-on:click-event="showMap(
                       calcList.attendance_time,
                       calcList.user_name,
                       calcList.x_attendance_time_positions,
                       calcList.y_attendance_time_positions,
                       index,
-                      mode_attendance)"
+                      get_ModeAttendance)"
                 ></daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-if="menuData[userindex]['is_select'] === 1 && calcList.attendance_editor_department_name"
+                  v-if="menuData[this.edituserIndex]['is_select'] === 1 && calcList.attendance_editor_department_name"
                 >{{ calcList.attendance_editor_department_name }}：{{ calcList.attendance_editor_user_name }}</td>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.attendance_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
+                  v-else-if="menuData[this.edituserConIndex]['is_select'] === 1 && calcList.attendance_editor_department_name && accountData === ssjjoo_id && loginUser === get_EditUserId_Ssjjoo"
                 >{{ calcList.attendance_editor_department_name }}：{{ calcList.attendance_editor_user_name }}</td>
                 <td class="text-left text-align-left mw-rem-10" v-else></td>
                 <!-- /出勤 -->
@@ -439,27 +446,28 @@
                   }"
                   v-bind:login-user="loginUser"
                   v-bind:login-role="loginRole"
+                  v-bind:admin-role="adminRole"
                   v-bind:account-data="accountData"
                   v-bind:menu-data="menuData"
-                  v-bind:user-index="userindex"
-                  v-bind:usercon-index="userconindex"
+                  v-bind:user-index="edituserIndex"
+                  v-bind:usercon-index="edituserConIndex"
                   v-bind:ssjjoo-id="ssjjoo_id"
-                  v-bind:edituser-id="edit_user_id"
+                  v-bind:edituser-id="get_EditUserId_Ssjjoo"
                   v-on:click-event="showMap(
                       calcList.leaving_time,
                       calcList.user_name,
                       calcList.x_leaving_time_positions,
                       calcList.y_leaving_time_positions,
                       index,
-                      mode_leaving)"
+                      get_ModeLeaving)"
                 ></daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-if="menuData[userindex]['is_select'] === 1 && calcList.leaving_editor_department_name"
+                  v-if="menuData[this.edituserIndex]['is_select'] === 1 && calcList.leaving_editor_department_name"
                 >{{ calcList.leaving_editor_department_name }}：{{ calcList.leaving_editor_user_name }}</td>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.leaving_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
+                  v-else-if="menuData[this.edituserConIndex]['is_select'] === 1 && calcList.leaving_editor_department_name && accountData === ssjjoo_id && loginUser === get_EditUserId_Ssjjoo"
                 >{{ calcList.leaving_editor_department_name }}：{{ calcList.leaving_editor_user_name }}</td>
                 <td class="text-left text-align-left mw-rem-10" v-else></td>
                 <!-- /退勤 -->
@@ -476,27 +484,28 @@
                   }"
                   v-bind:login-user="loginUser"
                   v-bind:login-role="loginRole"
+                  v-bind:admin-role="adminRole"
                   v-bind:account-data="accountData"
                   v-bind:menu-data="menuData"
-                  v-bind:user-index="userindex"
-                  v-bind:usercon-index="userconindex"
+                  v-bind:user-index="edituserIndex"
+                  v-bind:usercon-index="edituserConIndex"
                   v-bind:ssjjoo-id="ssjjoo_id"
-                  v-bind:edituser-id="edit_user_id"
+                  v-bind:edituser-id="get_EditUserId_Ssjjoo"
                   v-on:click-event="showMap(
                       calcList.public_going_out_time,
                       calcList.user_name,
                       calcList.x_public_going_out_time_positions,
                       calcList.y_public_going_out_time_positions,
                       index,
-                      mode_official_out_start)"
+                      get_ModeMissingMiddle)"
                 ></daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-if="menuData[userindex]['is_select'] === 1 && calcList.public_editor_department_name"
+                  v-if="menuData[this.edituserIndex]['is_select'] === 1 && calcList.public_editor_department_name"
                 >{{ calcList.public_editor_department_name }}：{{ calcList.public_editor_user_name }}</td>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.public_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
+                  v-else-if="menuData[this.edituserConIndex]['is_select'] === 1 && calcList.public_editor_department_name && accountData === ssjjoo_id && loginUser === get_EditUserId_Ssjjoo"
                 >{{ calcList.public_editor_department_name }}：{{ calcList.public_editor_user_name }}</td>
                 <td class="text-left text-align-left mw-rem-10" v-else></td>
                 <!-- /公用外出　終了 -->
@@ -513,27 +522,28 @@
                   }"
                   v-bind:login-user="loginUser"
                   v-bind:login-role="loginRole"
+                  v-bind:admin-role="adminRole"
                   v-bind:account-data="accountData"
                   v-bind:menu-data="menuData"
-                  v-bind:user-index="userindex"
-                  v-bind:usercon-index="userconindex"
+                  v-bind:user-index="edituserIndex"
+                  v-bind:usercon-index="edituserConIndex"
                   v-bind:ssjjoo-id="ssjjoo_id"
-                  v-bind:edituser-id="edit_user_id"
+                  v-bind:edituser-id="get_EditUserId_Ssjjoo"
                   v-on:click-event="showMap(
                       calcList.public_going_out_return_time,
                       calcList.user_name,
                       calcList.x_public_going_out_return_time_positions,
                       calcList.y_public_going_out_return_time_positions,
                       index,
-                      mode_official_out_end)"
+                      get_ModeMissingMiddleReturn)"
                 ></daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-if="menuData[userindex]['is_select'] === 1 && calcList.public_return_editor_department_name"
+                  v-if="menuData[this.edituserIndex]['is_select'] === 1 && calcList.public_return_editor_department_name"
                 >{{ calcList.public_return_editor_department_name }}：{{ calcList.public_return_editor_user_name }}</td>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.public_return_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
+                  v-else-if="menuData[this.edituserConIndex]['is_select'] === 1 && calcList.public_return_editor_department_name && accountData === ssjjoo_id && loginUser === get_EditUserId_Ssjjoo"
                 >{{ calcList.public_return_editor_department_name }}：{{ calcList.public_return_editor_user_name }}</td>
                 <td class="text-left text-align-left mw-rem-10" v-else></td>
                 <!-- /公用外出戻り　終了 -->
@@ -550,27 +560,28 @@
                   }"
                   v-bind:login-user="loginUser"
                   v-bind:login-role="loginRole"
+                  v-bind:admin-role="adminRole"
                   v-bind:account-data="accountData"
                   v-bind:menu-data="menuData"
-                  v-bind:user-index="userindex"
-                  v-bind:usercon-index="userconindex"
+                  v-bind:user-index="edituserIndex"
+                  v-bind:usercon-index="edituserConIndex"
                   v-bind:ssjjoo-id="ssjjoo_id"
-                  v-bind:edituser-id="edit_user_id"
+                  v-bind:edituser-id="get_EditUserId_Ssjjoo"
                   v-on:click-event="showMap(
                       calcList.missing_middle_time,
                       calcList.user_name,
                       calcList.x_missing_middle_time_positions,
                       calcList.y_missing_middle_time_positions,
                       index,
-                      mode_private_out_start)"
+                      get_ModePublicGoingOut)"
                 ></daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-if="menuData[userindex]['is_select'] === 1 && calcList.missing_editor_department_name"
+                  v-if="menuData[this.edituserIndex]['is_select'] === 1 && calcList.missing_editor_department_name"
                 >{{ calcList.missing_editor_department_name }}：{{ calcList.missing_editor_user_name }}</td>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.missing_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
+                  v-else-if="menuData[this.edituserConIndex]['is_select'] === 1 && calcList.missing_editor_department_name && accountData === ssjjoo_id && loginUser === get_EditUserId_Ssjjoo"
                 >{{ calcList.missing_editor_department_name }}：{{ calcList.missing_editor_user_name }}</td>
                 <td class="text-left text-align-left mw-rem-10" v-else></td>
                 <!-- /私用外出　終了 -->
@@ -587,27 +598,28 @@
                   }"
                   v-bind:login-user="loginUser"
                   v-bind:login-role="loginRole"
+                  v-bind:admin-role="adminRole"
                   v-bind:account-data="accountData"
                   v-bind:menu-data="menuData"
-                  v-bind:user-index="userindex"
-                  v-bind:usercon-index="userconindex"
+                  v-bind:user-index="edituserIndex"
+                  v-bind:usercon-index="edituserConIndex"
                   v-bind:ssjjoo-id="ssjjoo_id"
-                  v-bind:edituser-id="edit_user_id"
+                  v-bind:edituser-id="get_EditUserId_Ssjjoo"
                   v-on:click-event="showMap(
                       calcList.missing_middle_return_time,
                       calcList.user_name,
                       calcList.x_missing_middle_return_time_positions,
                       calcList.y_missing_middle_return_time_positions,
                       index,
-                      mode_private_out_end)"
+                      get_ModePublicGoingOutReturn)"
                 ></daily-working-info-time-table>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-if="menuData[userindex]['is_select'] === 1 && calcList.missing_return_editor_department_name"
+                  v-if="menuData[this.edituserIndex]['is_select'] === 1 && calcList.missing_return_editor_department_name"
                 >{{ calcList.missing_return_editor_department_name }}：{{ calcList.missing_return_editor_user_name }}</td>
                 <td
                   class="text-left text-align-left mw-rem-10"
-                  v-else-if="menuData[userconindex]['is_select'] === 1 && calcList.missing_return_editor_department_name && accountData === ssjjoo_id && loginUser === edit_user_id"
+                  v-else-if="menuData[this.edituserConIndex]['is_select'] === 1 && calcList.missing_return_editor_department_name && accountData === ssjjoo_id && loginUser === get_EditUserId_Ssjjoo"
                 >{{ calcList.missing_return_editor_department_name }}：{{ calcList.missing_return_editor_user_name }}</td>
                 <td class="text-left text-align-left mw-rem-10" v-else></td>
                 <!-- /私用外出戻り　終了 -->
@@ -754,16 +766,16 @@
 <script>
 // CONST
 // 打刻モード
-const ATTENDANCE = 1;
-const LEAVING = 2;
-const OFFICIAL_OUT_START = 11;
-const OFFICIAL_OUT_END = 12;
-const PRIVATE_OUT_START = 21;
-const PRIVATE_OUT_END = 22;
-const C_USER_INDEX = 26; // 編集者表示
-const C_USER_CON_INDEX = 27; // 条件付き編集者表示
-const C_SSJJOO_ID = "SSJJOO00"; // 三条ID
-const C_EDIT_USER = "23"; // 三条編集者ID
+const CONST_C005_ATTENDANCE_PHYSICAL_NAME = "attendance_time";
+const CONST_C005_LEAVING_PHYSICAL_NAME = "leaving_time";
+const CONST_C005_MISSINGMIDDLE_PHYSICAL_NAME = "missing_middle_time";
+const CONST_C005_MISSINGMIDDLE_RETURN_PHYSICAL_NAME = "missing_middle_return_time";
+const CONST_C005_PUBLICGOINGOUT_PHYSICAL_NAME = "public_going_out_time";
+const CONST_C005_PUBLICGOINGOUT_RETURN_PHYSICAL_NAME = "public_going_out_return_time";
+const CONST_C005_EMERGENCY_PHYSICAL_NAME = "emergency_time";
+const CONST_C005_EMERGENCY_RETURN_PHYSICAL_NAME = "emergency_return_time";
+const C_SSJJOO_ID = "SSJJOO00";     // 三条ID
+const C_EDIT_USER = "23";           // 三条編集者ID
 
 export default {
   name: "dailyworkinginfotable",
@@ -807,6 +819,10 @@ export default {
       type: String,
       default: ""
     },
+    adminRole: {
+      type: String,
+      default: ""
+    },
     accountData: {
       type: String,
       default: ""
@@ -815,46 +831,128 @@ export default {
       type: Array,
       default: []
     },
-    // TODO: 本来は .envに記載して取得したい
-    apiKey: {
-      type: String,
-      default: "AIzaSyDmNKensj6Y3qEY9t0v1kbQqUxdOrhq3X8"
+    edituserIndex: {
+      type: Number,
+      default: 0
+    },
+    edituserConIndex: {
+      type: Number,
+      default: 0
+    },
+    c005Data: {
+      type: Array,
+      default: 0
     }
   },
   computed: {
-    // scriptjs(
-    //       "https://maps.googleapis.com/maps/api/js?key=AIzaSyDmNKensj6Y3qEY9t0v1kbQqUxdOrhq3X8&callback=initMap",
-    //       "loadGoogleMap"
-    //     );
-    // scriptjs.ready("loadGoogleMap", this.loadMap);
-    mode_attendance: function() {
-      return ATTENDANCE;
+    get_ModeAttendance: function() {
+      if (this.mode_attendance == null || this.mode_attendance == "") {
+        let $this = this;
+        var i = 0;
+        this.c005Data.forEach( function( item ) {
+          if (item.physical_name == CONST_C005_ATTENDANCE_PHYSICAL_NAME) {
+            $this.mode_attendance = item.code;
+          }
+          i++;
+        });    
+      }
+      return this.mode_attendance;
     },
-    mode_leaving: function() {
-      return LEAVING;
+    get_ModeLeaving: function() {
+      if (this.mode_leaving == null || this.mode_leaving == "") {
+        let $this = this;
+        var i = 0;
+        this.c005Data.forEach( function( item ) {
+          if (item.physical_name == CONST_C005_LEAVING_PHYSICAL_NAME) {
+            $this.mode_leaving = item.code;
+          }
+          i++;
+        });    
+      }
+      return this.mode_leaving;
     },
-    mode_official_out_start: function() {
-      return OFFICIAL_OUT_START;
+    get_ModeMissingMiddle: function() {
+      if (this.mode_missing_middle == null || this.mode_missing_middle == "") {
+        let $this = this;
+        var i = 0;
+        this.c005Data.forEach( function( item ) {
+          if (item.physical_name == CONST_C005_MISSINGMIDDLE_PHYSICAL_NAME) {
+            $this.mode_missing_middle = item.code;
+          }
+          i++;
+        });    
+      }
+      return this.mode_missing_middle;
     },
-    mode_official_out_end: function() {
-      return OFFICIAL_OUT_END;
+    get_ModeMissingMiddleReturn: function() {
+      if (this.mode_missing_middle_return == null || this.mode_missing_middle_return == "") {
+        let $this = this;
+        var i = 0;
+        this.c005Data.forEach( function( item ) {
+          if (item.physical_name == CONST_C005_MISSINGMIDDLE_RETURN_PHYSICAL_NAME) {
+            $this.mode_missing_middle_return = item.code;
+          }
+          i++;
+        });    
+      }
+      return this.mode_missing_middle_return;
     },
-    mode_private_out_start: function() {
-      return PRIVATE_OUT_START;
+    get_ModePublicGoingOut: function() {
+      if (this.mode_public_going_out == null || this.mode_public_going_out == "") {
+        let $this = this;
+        var i = 0;
+        this.c005Data.forEach( function( item ) {
+          if (item.physical_name == CONST_C005_PUBLICGOINGOUT_PHYSICAL_NAME) {
+            $this.mode_public_going_out = item.code;
+          }
+          i++;
+        });    
+      }
+      return this.mode_public_going_out;
     },
-    mode_private_out_end: function() {
-      return PRIVATE_OUT_END;
+    get_ModePublicGoingOutReturn: function() {
+      if (this.mode_public_going_out_return == null || this.mode_public_going_out_return == "") {
+        let $this = this;
+        var i = 0;
+        this.c005Data.forEach( function( item ) {
+          if (item.physical_name == CONST_C005_PUBLICGOINGOUT_RETURN_PHYSICAL_NAME) {
+            $this.mode_public_going_out_return = item.code;
+          }
+          i++;
+        });    
+      }
+      return this.mode_public_going_out_return;
     },
-    userindex: function() {
-      return C_USER_INDEX;
+    get_ModeEmergency: function() {
+      if (this.mode_emergency == null || this.mode_emergency == "") {
+        let $this = this;
+        var i = 0;
+        this.c005Data.forEach( function( item ) {
+          if (item.physical_name == CONST_C005_EMERGENCY_PHYSICAL_NAME) {
+            $this.mode_emergency = item.code;
+          }
+          i++;
+        });    
+      }
+      return this.mode_emergency;
     },
-    userconindex: function() {
-      return C_USER_CON_INDEX;
+    get_ModeEmergencyReturn: function() {
+      if (this.mode_emergency_return == null || this.mode_emergency_return == "") {
+        let $this = this;
+        var i = 0;
+        this.c005Data.forEach( function( item ) {
+          if (item.physical_name == CONST_C005_EMERGENCY_RETURN_PHYSICAL_NAME) {
+            $this.mode_emergency_return = item.code;
+          }
+          i++;
+        });    
+      }
+      return this.mode_emergency_return;
     },
-    ssjjoo_id: function() {
+    get_SsjjooId: function() {
       return C_SSJJOO_ID;
     },
-    edit_user_id: function() {
+    get_EditUserId_Ssjjoo: function() {
       return C_EDIT_USER;
     }
   },
@@ -874,7 +972,15 @@ export default {
       record_time: "",
       user_name: "",
       mode_name: "",
-      menu_data: []
+      menu_data: [],
+      mode_attendance: "",
+      mode_leaving: "",
+      mode_missing_middle: "",
+      mode_missing_middle_return: "",
+      mode_public_going_out: "",
+      mode_public_going_out_return: "",
+      mode_emergency: "",
+      mode_emergency_return: ""
     };
   },
   methods: {
@@ -896,23 +1002,29 @@ export default {
     // モード名取得
     getMethodName(mode) {
       switch (mode) {
-        case ATTENDANCE:
+        case this.get_ModeAttendance:
           this.mode_name = "出勤";
           break;
-        case LEAVING:
+        case this.get_ModeLeaving:
           this.mode_name = "退勤";
           break;
-        case PRIVATE_OUT_START:
+        case this.get_ModeMissingMiddle:
           this.mode_name = "私用外出　開始";
           break;
-        case PRIVATE_OUT_END:
+        case this.get_ModeMissingMiddleReturn:
           this.mode_name = "私用外出　終了";
           break;
-        case OFFICIAL_OUT_START:
+        case this.get_ModePublicGoingOut:
           this.mode_name = "公用外出　開始";
           break;
-        case OFFICIAL_OUT_END:
+        case this.get_ModePublicGoingOutReturn:
           this.mode_name = "公用外出　終了";
+          break;
+        case this.get_ModeEmergency:
+          this.mode_name = "緊急収集　開始";
+          break;
+        case this.get_ModeEmergencyReturn:
+          this.mode_name = "緊急収集　終了";
           break;
         default:
           this.mode_name = "";

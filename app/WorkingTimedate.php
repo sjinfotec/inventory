@@ -2174,17 +2174,27 @@ class WorkingTimedate extends Model
                 ->addselect($this->table.'.working_status');
             // $remarks_date_holiday_name = ' CASE ifnull('.$this->table.".holiday_name, '') WHEN '' THEN '' ELSE ".$this->table.'.holiday_name END as remark_holiday_name'; 
             $remarks_date_holiday_name = 't2.code_name as remark_holiday_name'; 
-            $remarks_date_check_result = ' CASE ifnull('.$this->table.'.check_result, 0)';
-            $remarks_date_check_result .= ' WHEN '.Config::get('const.C018.forget_stamp')." THEN '".Config::get('const.C018_NAME.forget_stamp')."' ";
-            $remarks_date_check_result .= ' WHEN '.Config::get('const.C018.interval_stamp')." THEN '".Config::get('const.C018_NAME.interval_stamp')."' ";
-            $remarks_date_check_result .= ' WHEN '.Config::get('const.C018.no_leave_apply')." THEN '".Config::get('const.C018_NAME.no_leave_apply')."' ";
-            $remarks_date_check_result .= " ELSE '' END as remark_check_result"; 
-            $remarks_date_check_max_times = ' CASE ifnull('.$this->table.'.check_max_times, 0)';
-            $remarks_date_check_max_times .= ' WHEN '.Config::get('const.C018.max_time_over')." THEN '".Config::get('const.C018_NAME.max_time_over')."' ";
-            $remarks_date_check_max_times .= " ELSE '' END as remark_check_max_times"; 
-            $remarks_date_check_interval = ' CASE ifnull('.$this->table.'.check_interval, 0)';
-            $remarks_date_check_interval .= ' WHEN '.Config::get('const.C018.interval_stamp')." THEN '".Config::get('const.C018_NAME.interval_stamp')."' ";
-            $remarks_date_check_interval .= " ELSE '' END as remark_check_interval"; 
+
+            $remarks_date_check_result = "";
+            $remarks_date_check_max_times = "";
+            $remarks_date_check_interval = "";
+            if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
+                $remarks_date_check_result = ' CASE ifnull('.$this->table.'.check_result, 0)';
+                $remarks_date_check_result .= ' WHEN '.Config::get('const.C018.forget_stamp')." THEN '".Config::get('const.C018_NAME.forget_stamp')."' ";
+                $remarks_date_check_result .= ' WHEN '.Config::get('const.C018.interval_stamp')." THEN '".Config::get('const.C018_NAME.interval_stamp')."' ";
+                $remarks_date_check_result .= ' WHEN '.Config::get('const.C018.no_leave_apply')." THEN '".Config::get('const.C018_NAME.no_leave_apply')."' ";
+                $remarks_date_check_result .= " ELSE '' END as remark_check_result"; 
+                $remarks_date_check_max_times = ' CASE ifnull('.$this->table.'.check_max_times, 0)';
+                $remarks_date_check_max_times .= ' WHEN '.Config::get('const.C018.max_time_over')." THEN '".Config::get('const.C018_NAME.max_time_over')."' ";
+                $remarks_date_check_max_times .= " ELSE '' END as remark_check_max_times"; 
+                $remarks_date_check_interval = ' CASE ifnull('.$this->table.'.check_interval, 0)';
+                $remarks_date_check_interval .= ' WHEN '.Config::get('const.C018.interval_stamp')." THEN '".Config::get('const.C018_NAME.interval_stamp')."' ";
+                $remarks_date_check_interval .= " ELSE '' END as remark_check_interval"; 
+            } elseif ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic')) {
+                $remarks_date_check_result = " '' as remark_check_result"; 
+                $remarks_date_check_max_times = " '' as remark_check_max_times"; 
+                $remarks_date_check_interval = " '' as remark_check_interval"; 
+            }
             
             $mainquery
                 ->selectRaw('ifnull('.$this->table.".working_status_name,'　')  as working_status_name")
@@ -2643,13 +2653,24 @@ class WorkingTimedate extends Model
             $case_go_out .= "ELSE 0 ";
             $case_go_out .= ' END ';
 
-            $case_paid_holidays = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
-            $case_paid_holidays .= "WHEN {1} THEN 1 ";
-            $case_paid_holidays .= "WHEN {2} THEN 0.5 ";
-            $case_paid_holidays .= "WHEN {3} THEN 0.5 ";
-            $case_paid_holidays .= "WHEN {4} THEN 1 ";
-            $case_paid_holidays .= "ELSE 0 ";
-            $case_paid_holidays .= 'END ';
+            $case_paid_holidays = "";
+            if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
+                $case_paid_holidays = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
+                $case_paid_holidays .= "WHEN {1} THEN 1 ";
+                $case_paid_holidays .= "WHEN {2} THEN 1 ";
+                $case_paid_holidays .= "WHEN {3} THEN 1 ";
+                $case_paid_holidays .= "WHEN {4} THEN 1 ";
+                $case_paid_holidays .= "ELSE 0 ";
+                $case_paid_holidays .= 'END ';
+            } else {
+                $case_paid_holidays = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
+                $case_paid_holidays .= "WHEN {1} THEN 1 ";
+                $case_paid_holidays .= "WHEN {2} THEN 0.5 ";
+                $case_paid_holidays .= "WHEN {3} THEN 0.5 ";
+                $case_paid_holidays .= "WHEN {4} THEN 1 ";
+                $case_paid_holidays .= "ELSE 0 ";
+                $case_paid_holidays .= 'END ';
+            }
 
             $case_holiday_kubun = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
             $case_holiday_kubun .= "WHEN {1} THEN 1 ";

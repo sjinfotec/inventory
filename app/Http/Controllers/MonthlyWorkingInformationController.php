@@ -788,19 +788,20 @@ class MonthlyWorkingInformationController extends Controller
 
         $attendance = $result->attendance_time_1;
         $leaving = "";
-        if($result->leaving_time_1 != "00:00") {
+        // Log::debug(' setArrayDate $result->leaving_time_1 = '.$result->leaving_time_1);
+        if($result->leaving_time_1 != null && $result->leaving_time_1 != "00:00") {
             $leaving = $result->leaving_time_1;
         }
-        if($result->leaving_time_2 != "00:00") {
+        if($result->leaving_time_2 != null && $result->leaving_time_2 != "00:00") {
             $leaving = $result->leaving_time_2;
         }
-        if($result->leaving_time_3 != "00:00") {
+        if($result->leaving_time_3 != null && $result->leaving_time_3 != "00:00") {
             $leaving = $result->leaving_time_3;
         }
-        if($result->leaving_time_4 != "00:00") {
+        if($result->leaving_time_4 != null && $result->leaving_time_4 != "00:00") {
             $leaving = $result->leaving_time_4;
         }
-        if($result->leaving_time_5 != "00:00") {
+        if($result->leaving_time_5 != null && $result->leaving_time_5 != "00:00") {
             $leaving = $result->leaving_time_5;
         }
         $total_working_times = $result->total_working_times;
@@ -848,6 +849,8 @@ class MonthlyWorkingInformationController extends Controller
         } else {
             $remark_data .= ' '.$result->remark_check_interval;
         }
+        // Log::debug(' setArrayDate attendance = '.$attendance);
+        // Log::debug(' setArrayDate leaving = '.$leaving);
         return array(
             'user_code' => $result->user_code,
             'workingdate' => date_format($datetime, 'Ymd'),
