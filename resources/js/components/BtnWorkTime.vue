@@ -106,11 +106,11 @@
         この内容で差異理由を登録する</button>
     </div>
     <div v-if="btnMode === 'back'" class="btn-group d-flex" v-on:click="backclickBtn()">
-      <button type="button" class="btn btn-outline-secondary btn-lg font-size-rg w-100" :disabled="isPush">
+      <button type="button" class="btn btn-info btn-lg font-size-rg w-100" :disabled="isPush">
         戻る</button>
     </div>
     <div v-if="btnMode === 'cancel'" class="btn-group d-flex" v-on:click="cancelclickBtn()">
-      <button type="button" class="btn btn-outline-secondary btn-lg font-size-rg w-100" :disabled="isPush">
+      <button type="button" class="btn btn-info btn-lg font-size-rg w-100" :disabled="isPush">
         キャンセル</button>
     </div>
     <div v-if="btnMode === 'csvcalc'" class="btn-group d-flex" v-on:click="csvcalcclickBtn()">
@@ -133,6 +133,11 @@
       <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
       {{ btnName }}</button>
     </div>
+    <div v-if="btnMode === 'csvshift'" class="btn-group d-flex" v-on:click="csvshiftclickBtn()">
+      <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
+      <img class="icon-size-sm mr-2 pb-1" src="/images/round-get-app-w.svg" alt="">
+      ダウンロード</button>
+    </div>
     <div v-if="btnMode === 'passreset'" class="btn-group d-flex" v-on:click="passresetclickBtn()">
       <button type="button" class="btn btn-success btn-lg font-size-rg w-100" :disabled="isPush">
         パスワードを変更する</button>
@@ -154,6 +159,10 @@
     <div v-if="btnMode ==='timetableedit'" class="btn-group d-flex" v-on:click="timetableeditclickBtn()">
       <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
         登録しているユーザーのタイムテーブルを一括設定する</button>
+    </div>
+    <div v-if="btnMode ==='dailycalc'" class="btn-group d-flex" v-on:click="dailycalcclickBtn()">
+      <button type="button" class="btn btn-primary btn-lg font-size-rg w-100" :disabled="isPush">
+        日次集計印刷</button>
     </div>
   </div>
 </template>
@@ -269,6 +278,9 @@ export default {
     filedownloadclickBtn : function() {
       this.$emit('filedownload-event',event);
     },
+    csvshiftclickBtn : function() {
+      this.$emit('csv-event',event);
+    },
     passresetclickBtn : function() {
       this.$emit('passreset-event',event);
     },
@@ -283,6 +295,9 @@ export default {
     },
     timetableeditclickBtn : function() {
       this.$emit('timetableedit-event',event);
+    },
+    dailycalcclickBtn : function() {
+      this.$emit('dailycalc-event',event);
     },
     // tooltips
     edttooltips: function(value1) {

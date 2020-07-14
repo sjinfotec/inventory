@@ -10,7 +10,7 @@
                 <td class="text-center align-middle mw-rem-8">雇用形態</td>
                 <td class="text-center align-middle mw-rem-8">部署</td>
                 <td class="text-center align-middle mw-rem-12">氏名</td>
-                <td class="text-center align-middle mw-rem-5" v-if="isEdit">操作</td>
+                <td class="text-center align-middle mw-rem-2-6" v-if="get_IsEdit">操作</td>
                 <td class="text-center align-middle mw-rem-8">打刻時刻</td>
                 <td class="text-center align-middle mw-rem-8">打刻モード</td>
                 <td class="text-center align-middle mw-rem-8">直前打刻時刻</td>
@@ -39,7 +39,8 @@
                 <td class="text-left align-middle mw-rem-8">{{ alertList.employment_status_name }}</td>
                 <td class="text-left align-middle mw-rem-8">{{ alertList.department_name }}</td>
                 <td class="text-left align-middle mw-rem-12">{{ alertList.user_name }}</td>
-                <td class="text-center align-middle mw-rem-5" v-if="isEdit">
+                <td class="text-center align-middle mw-rem-2-6" style="text-align:center" v-if="get_IsEdit">
+                  <!-- <input type="image" src="images/btn01.svg" v-on:click="detailEdtClick(index)" alt /> -->
                   <i class="fa fa-edit" style="color: red;ccursor: hand; cursor:pointer;" v-on:click="detailEdtClick(index)">
                     <span style="color: #0000FF;cursor: hand; cursor:pointer;">編集</span>
                   </i>
@@ -108,6 +109,11 @@ export default {
       default: false
     }
   },
+  computed: {
+    get_IsEdit: function() {
+      return this.isEdit;
+    }
+  },
   data: function() {
     return {
       tableheight: this.tablebodyHeight
@@ -141,6 +147,10 @@ tbody {
     border-style: solid dashed !important;
     border-width: 1px !important;
     border-color: #95c5ed #dee2e6 !important;
+}
+
+.mw-rem-2-6 {
+  min-width: 2.6rem;
 }
 
 .mw-rem-8 {

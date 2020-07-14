@@ -39,6 +39,7 @@
 		@endif
 		<monthly-working-information
 			v-bind:authusers="{{ $authusers }}"
+			v-bind:feature_item_selections="{{ $feature_item_selections }}"
 			v-bind:const_generaldatas="{{ $const_general_datas }}"
 		>
 		</monthly-working-information>

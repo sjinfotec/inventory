@@ -62,14 +62,14 @@
                     v-bind:default-date="valuetodate"
                     v-bind:date-format="DatePickerFormat"
                     v-bind:place-holder="'終了日付を選択してください'"
-                    v-on:change-event="fromtoChanges"
-                    v-on:clear-event="fromtoCleared"
+                    v-on:change-event="todateChanges"
+                    v-on:clear-event="todateCleared"
                   ></input-datepicker>
                 </div>
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2">
+              <div class="col-md-6 pb-2" v-if="this.get_LoginUserRole >= this.get_AdminUserRole">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
@@ -88,7 +88,7 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2">
+              <div class="col-md-6 pb-2" v-if="this.get_LoginUserRole >= this.get_AdminUserRole">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
@@ -122,9 +122,9 @@
                   </div>
                   <select-userlist v-if="showuserlist"
                     ref="selectuserlist"
-                    v-bind:blank-data="true"
+                    v-bind:blank-data="get_IsUserblank"
                     v-bind:placeholder-data="'氏名を選択してください'"
-                    v-bind:selected-value="selectedUserValue"
+                    v-bind:selected-value="get_SelectedUserCode"
                     v-bind:add-new="false"
                     v-bind:get-do="'1'"
                     v-bind:date-value="applytermdate"
@@ -214,7 +214,7 @@
                   v-bind:btn-mode="item['code']"
                   v-bind:csv-data="calcresults"
                   v-bind:general-data="get_c037"
-                  v-bind:general-description="item['description']"
+                  v-bind:general-physicalname="item['physical_name']"
                   v-bind:is-csvbutton="iscsvbutton"
                   v-bind:csv-date="datejaFormat"
                 >
@@ -327,17 +327,34 @@
                             </thead>
                             <tbody>
                               <tr v-for="calclisttimedate in calclist.date">
-                                <td
+                                <td v-if="calclisttimedate.business_kubun === 1"
+                                  class="text-center align-middle"
+                                >{{ calclisttimedate.workingdatename }}</td>
+                                <td v-else-if="calclisttimedate.business_kubun === 2"
+                                  class="text-center align-middle"
+                                ><span class="color-red">{{ calclisttimedate.workingdatename }}</span></td>
+                                <td v-else-if="calclisttimedate.business_kubun === 3"
+                                  class="text-center align-middle"
+                                ><span class="color-blue">{{ calclisttimedate.workingdatename }}</span></td>
+                                <td v-else
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.workingdatename }}</td>
                                 <td
-                                  v-if="calclisttimedate.attendance != '00:00' || calclisttimedate.leaving != '00:00'"
+                                  v-if="calclisttimedate.attendance != null && calclisttimedate.attendance != '00:00'"
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.attendance }}</td>
                                 <td
-                                  v-if="calclisttimedate.attendance != '00:00' || calclisttimedate.leaving != '00:00'"
+                                  v-else
+                                  class="text-center align-middle"
+                                ></td>
+                                <td
+                                  v-if="calclisttimedate.leaving != null && calclisttimedate.leaving != '00:00'"
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.leaving }}</td>
+                                <td
+                                  v-else
+                                  class="text-center align-middle"
+                                ></td>
                                 <td
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.total_working_times }}</td>
@@ -350,7 +367,16 @@
                                 <td
                                   class="text-center align-middle"
                                 >{{ calclisttimedate.late_night_overtime_hours }}</td>
-                                <td
+                                <td v-if="calclisttimedate.business_kubun === 1"
+                                  class="text-left align-middle"
+                                >{{ calclisttimedate.remark_holiday_name }}</td>
+                                <td v-else-if="calclisttimedate.business_kubun === 2"
+                                  class="text-left align-middle color-red"
+                                ><span class="color-red">{{ calclisttimedate.business_name }}</span>  {{ calclisttimedate.remark_holiday_name }}</td>
+                                <td v-else-if="calclisttimedate.business_kubun === 3"
+                                  class="text-left align-middle color-blue"
+                                ><span class="color-blue">{{ calclisttimedate.business_name }}</span>  {{ calclisttimedate.remark_holiday_name }}</td>
+                                <td v-else
                                   class="text-left align-middle"
                                 >{{ calclisttimedate.remark_holiday_name }}</td>
                               </tr>
@@ -371,8 +397,13 @@
         </div>
       </div>
       <!-- /.panel -->
+    </div>
+    <!-- /main contentns row -->
+    <!-- main contentns row -->
+    <!-- ========================== 合計部 START ========================== -->
+    <div class="row justify-content-between" v-if="serchorshow === 'show'">
       <!-- .panel -->
-      <div class="col-md pt-3">
+      <div class="col-md pt-3 align-self-stretch">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -380,7 +411,7 @@
             v-bind:header-text2="'集計月の合計が表示されます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
-          <div class="card-body pt-2">
+          <div class="card-body pt-2 print-none">
             <!-- panel contents -->
             <!-- .row -->
             <monthly-working-info-table
@@ -406,7 +437,7 @@
                   v-bind:btn-mode="item['code']"
                   v-bind:csv-data="calcresults"
                   v-bind:general-data="get_c037"
-                  v-bind:general-description="item['description']"
+                  v-bind:general-physicalname="item['physical_name']"
                   v-bind:is-csvbutton="iscsvbutton"
                   v-bind:csv-date="datejaFormat"
                 >
@@ -433,12 +464,18 @@ import {requestable} from '../mixins/requestable.js';
 
 // CONST
 const CONST_C037 = 'C037';
+const CONST_C025 = 'C025';
+const CONST_C025_ADMINUSER_INDEX= 2;
 
 export default {
   name: "monthlyworkingtime",
   mixins: [ dialogable, checkable, requestable ],
   props: {
     authusers: {
+        type: Array,
+        default: []
+    },
+    feature_item_selections: {
         type: Array,
         default: []
     },
@@ -460,6 +497,51 @@ export default {
         i++;
       });    
       return this.const_C037_data;
+    },
+    get_C025: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C025) {
+          $this.const_C025_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C025_data;
+    },
+    get_AdminUserRole: function() {
+      if (this.adminuserrole == null || this.adminuserrole == "") {
+        if (this.const_C025_data.length == 0) {
+          this.adminuserrole = this.get_C025[CONST_C025_ADMINUSER_INDEX]['code'];
+        } else {
+          this.adminuserrole = this.const_C025_data[CONST_C025_ADMINUSER_INDEX]['code'];
+        }
+      }
+      return this.adminuserrole;
+    },
+    get_IsUserblank: function() {
+      if (this.get_LoginUserRole < this.get_AdminUserRole) {
+        this.isUserblank = false;
+      } else {
+        this.isUserblank = true;
+      }
+      return this.isUserblank;
+    },
+    get_LoginUserCode: function() {
+      this.login_user_code = this.authusers['code'];
+      return this.login_user_code;
+    },
+    get_LoginUserRole: function() {
+      this.login_user_role = this.authusers['role'];
+      return this.login_user_role;
+    },
+    get_SelectedUserCode: function() {
+      if (this.selectedUserValue == null || this.selectedUserValue == "") {
+        if (this.get_LoginUserRole < this.get_AdminUserRole) {
+          this.selectedUserValue = this.get_LoginUserCode;
+        }
+      }
+      return this.selectedUserValue;
     }
   },
   data: function() {
@@ -498,24 +580,25 @@ export default {
       const_C037_data: [],
       messagedatasserver: [],
       messagedatadepartment: [],
-      messagedatauser: []
+      messagedatauser: [],
+      const_C025_data: [],
+      isUserblank: true,
+      adminuserrole: ""
     };
   },
   // マウント時
   mounted() {
-    this.login_user_code = this.authusers['code'];
-    this.login_user_role = this.authusers['role'];
     // 今月初末を取得
     const defaultfromDate = moment().startOf('month');
     const defaulttoDate = moment().endOf('month');
     this.valuefromdate = new Date(defaultfromDate);
     this.valuetodate = new Date(defaulttoDate);
     this.applytermdate = ""
-    if (this.valuetodate) {
-      this.applytermdate = moment(this.valuetodate).format("YYYYMMDD");
+    if (this.valuefromdate) {
+      this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
     }
-    this.$refs.selectdepartmentlist.getList(this.applytermdate);
-    this.getUserSelected();
+    // this.$refs.selectdepartmentlist.getList(this.applytermdate);
+    // this.getUserSelected();
     this.showorupdate = "search";
   },
   methods: {
@@ -558,7 +641,7 @@ export default {
       equalength = 0;
       maxlength = 0;
       itemname = '氏名';
-      if (this.login_user_role < "8") {
+      if (this.get_LoginUserRole < this.get_AdminUserRole) {
         chkArray = 
           this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
         if (chkArray.length > 0) {
@@ -637,7 +720,7 @@ export default {
       equalength = 0;
       maxlength = 0;
       itemname = '氏名';
-      if (this.login_user_role < "8") {
+      if (this.get_LoginUserRole < this.get_AdminUserRole) {
         chkArray = 
           this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
         if (chkArray.length > 0) {
@@ -670,36 +753,20 @@ export default {
     // 開始日付が変更された場合の処理
     fromdateChanges: function(value) {
       this.valuefromdate = value;
-      var fromm = moment(this.valuefromdate).format("MM");
-      var tom = moment(this.valuetodate).format("MM");
-      if (fromm != tom) {
-        this.valuetodate =  new Date(moment(this.valuefromdate).endOf('month'));
-      }
-      // パネルに表示
-      this.setPanelHeader();
-    },
-    // 開始日付がクリアされた場合の処理
-    fromdateCleared: function() {
-      this.valuefromdate = "";
-      // パネルに表示
-      this.setPanelHeader();
-    },
-    // 終了日付が変更された場合の処理
-    fromtoChanges: function(value, arrayitem) {
-      this.valuetodate = value;
+      this.valuetodate = moment(this.valuefromdate).add(1, 'months').subtract(1, 'days').toDate();
       // パネルに表示
       this.setPanelHeader();
       // 再取得
       this.applytermdate = ""
-      if (this.valuetodate) {
-          this.applytermdate = moment(this.valuetodate).format("YYYYMMDD");
+      if (this.valuefromdate) {
+          this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
       }
       this.$refs.selectdepartmentlist.getList(this.applytermdate);
       this.getUserSelected();
     },
-    // 終了日付がクリアされた場合の処理
-    fromtoCleared: function() {
-      this.valuetodate = "";
+    // 開始日付がクリアされた場合の処理
+    fromdateCleared: function() {
+      this.valuefromdate = "";
       // パネルに表示
       this.setPanelHeader();
       // 再取得
@@ -707,6 +774,18 @@ export default {
       this.$refs.selectdepartmentlist.getList(this.applytermdate);
       this.getUserSelected();
       this.applytermdate = "";
+    },
+    // 終了日付が変更された場合の処理
+    todateChanges: function(value, arrayitem) {
+      this.valuetodate = value;
+      // パネルに表示
+      this.setPanelHeader();
+    },
+    // 終了日付がクリアされた場合の処理
+    todateCleared: function() {
+      this.valuetodate = "";
+      // パネルに表示
+      this.setPanelHeader();
     },
     // 雇用形態が変更された場合の処理
     employmentChanges: function(value) {
@@ -827,8 +906,8 @@ export default {
     getUserSelected: function() {
       // 再取得
       this.applytermdate = ""
-      if (this.valuetodate) {
-          this.applytermdate = moment(this.valuetodate).format("YYYYMMDD");
+      if (this.valuefromdate) {
+          this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
       }
       this.$refs.selectuserlist.getList(
         this.applytermdate,
@@ -950,8 +1029,19 @@ export default {
 };
 </script>
 <style scoped>
-@page {
+/* @page {
     size : landscape;
+} */
+
+.print_pages{
+/*A4縦*/
+  width: 172mm;
+  height: 251mm;
+  page-break-after: always;
+}
+  /*最後のページは改ページを入れない*/
+.print_pages:last-child{
+    page-break-after: auto;
 }
 
 .table th, .table td {
@@ -960,5 +1050,9 @@ export default {
 
 .mw-rem-3 {
   min-width: 3rem !important;
+}
+
+.color-blue {
+  color: blue;
 }
 </style>

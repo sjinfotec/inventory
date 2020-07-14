@@ -58,7 +58,7 @@
                     v-bind:selected-value="selectedUserValue"
                     v-bind:add-new="true"
                     v-bind:get-do="getDo"
-                    v-bind:date-value="applytermdate"
+                    v-bind:date-value="get_NewDateYMD"
                     v-bind:kill-value="valueUserkillcheck"
                     v-bind:row-index="0"
                     v-bind:department-value="selectedDepartmentValue"
@@ -107,30 +107,30 @@
             <!-- /.row -->
             <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <!-- <div class="row justify-content-between"> -->
               <!-- col -->
-              <div class="col-md-12 pb-2">
+              <!-- <div class="col-md-12 pb-2">
                 <btn-work-time
                   v-on:searchclick-event="searchclick"
                   v-bind:btn-mode="'search'"
                   v-bind:is-push="false"
                 ></btn-work-time>
-              </div>
+              </div> -->
               <!-- /.col -->
-            </div>
+            <!-- </div> -->
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <!-- <div class="row justify-content-between"> -->
               <!-- col -->
-              <div class="col-md-12 pb-2">
+              <!-- <div class="col-md-12 pb-2">
                 <btn-work-time
                   v-on:timetableedit-event="timetableeditclick"
                   v-bind:btn-mode="'timetableedit'"
                   v-bind:is-push="false"
                 ></btn-work-time>
-              </div>
+              </div> -->
               <!-- /.col -->
-            </div>
+            <!-- </div> -->
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between">
@@ -152,7 +152,7 @@
                 <btn-csv-download
                   v-bind:btn-mode="item['code']"
                   v-bind:general-data="get_C037"
-                  v-bind:general-description="item['description']"
+                  v-bind:general-physicalname="item['physical_name']"
                   v-bind:is-csvbutton="iscsvbutton"
                   v-bind:csv-date="''"
                 >
@@ -438,6 +438,36 @@
             <!-- /.row -->
             <!-- ----------- メッセージ部 END ---------------- -->
             <!-- ----------- 項目部 START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-6 pb-2">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <span
+                      class="input-group-text font-size-sm line-height-xs label-width-150"
+                      v-bind:title="'勤怠管理を始める日を入力します'"
+                      id="basic-addon1"
+                    >
+                      適用開始日
+                      <span class="color-red">[必須]</span>
+                    </span>
+                  </div>
+                  <input
+                    type="date"
+                    class="form-control"
+                    v-bind:value="get_FormApplyNewDate"
+                    v-on:input="form.apply_term_from = $event.target.value"
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    v-bind:title="'勤怠管理を始める日を入力します'"
+                    name="applytermfrom"
+                  />
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- .col -->
@@ -1671,6 +1701,18 @@ export default {
       });    
       return this.const_C041_data;
     },
+    get_NewDateY_M_D: function() {
+      return moment(new Date()).format("YYYY-MM-DD");
+    },
+    get_NewDateYMD: function() {
+      return moment(new Date()).format("YYYYMMDD");
+    },
+    get_FormApplyNewDate: function() {
+      if (this.form.apply_term_from == "") {
+        this.form.apply_term_from = this.get_NewDateY_M_D;
+      }
+      return this.form.apply_term_from;
+    }
   },
   data() {
     return {
@@ -1741,15 +1783,12 @@ export default {
       before_count: 0,
       getDo: 1,
       departmentList: [],
-      applytermdate: moment(new Date()).format("YYYYMMDD"),
       timetableList: [],
       cardId: "",
       mobile_address: "",
       dialogVisible: false,
       latest_user_code: "",
       messageshowsearch: false,
-      login_user_code: "",
-      login_user_role: "",
       input_mobile_address: "",
       iscsvbutton: false,
       valuefromdate: "",
@@ -1759,8 +1798,6 @@ export default {
   },
   // マウント時
   mounted() {
-    this.login_user_code = this.authusers["code"];
-    this.login_user_role = this.authusers["role"];
     this.details = [];
     this.getDepartmentList("");
     this.getTimeTableList("");
@@ -2386,6 +2423,7 @@ export default {
     userChanges: function(value, arrayitem) {
       this.selectedUserValue = value;
       this.selectedUserName = arrayitem["name"];
+      this.searchclick();
     },
     // 廃止チェックボックスが変更された場合の処理
     checkboxChangeUser: function() {
@@ -2428,7 +2466,7 @@ export default {
     },
     // 表示するボタンクリック処理
     searchclick: function() {
-      // 入力項目の部署クリア
+      // 入力項目のクリア
       this.selectMode = "";
       this.messagevalidatesNew = [];
       this.messagevalidatesEdt = [];
@@ -2547,7 +2585,7 @@ export default {
         this.htmlMessageSwal("確認", messages, "info", true, true).then(
           result => {
             if (result) {
-              this.store();
+              this.storeData();
             }
           }
         );
@@ -2785,6 +2823,17 @@ export default {
           this.serverCatch("ユーザ", "取得");
         });
     },
+    // 氏名登録処理
+    storeData() {
+      var arrayParams = { details: this.form };
+      this.postRequest("/edit_user/store", arrayParams)
+        .then(response => {
+          this.putThenHead(response, "登録");
+        })
+        .catch(reason => {
+          this.serverCatch("ユーザ", "登録");
+        });
+    },
     // タイムテーブル設定処理
     FixTimetable() {
       this.timetable['timeptn'] = this.timetable_check.chkptn;
@@ -2871,10 +2920,10 @@ export default {
       if (targetdate == "") {
         targetdate = moment(new Date()).format("YYYYMMDD");
       }
-      this.postRequest("/get_time_table_list", {
-        targetdate: targetdate,
-        killvalue: this.valueTimeTablekillcheck
-      })
+      var arrayParams = {
+        targetdate : targetdate
+      };
+      this.postRequest("/get_time_table_list", arrayParams)
         .then(response => {
           this.getThentimetable(response);
         })
@@ -3131,6 +3180,25 @@ export default {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch("タイムテーブル", eventtext);
+        }
+      }
+    },
+    // 更新系正常処理
+    putThenHead(response, eventtext) {
+      var messages = [];
+      var res = response.data;
+      if (res.result) {
+        messages.push("ユーザーを" + eventtext + "しました。");
+        messages.push(
+          "個人のカレンダー設定する場合はカレンダー設定処理をしてください。"
+        );
+        this.htmlMessageSwal(eventtext + "完了", messages, "info", true, false);
+        this.refreshUserList();
+      } else {
+        if (res.messagedata.length > 0) {
+          this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
+        } else {
+          this.serverCatch("ユーザー", eventtext);
         }
       }
     },

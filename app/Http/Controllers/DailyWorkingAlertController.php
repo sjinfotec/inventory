@@ -25,16 +25,10 @@ class DailyWorkingAlertController extends Controller
     public function index()
     {
         $authusers = Auth::user();
-        $generaluser = Config::get('const.C025.general_user');
-        $generalapproveruser = Config::get('const.C025.general_approver__user');
-        $adminuser = Config::get('const.C025.admin_user');
-        $indexorhome = 1;
+        $indexorhome = 1;       // メニューより起動
         return view('daily_working_alert',
             compact(
                 'authusers',
-                'generaluser',
-                'generalapproveruser',
-                'adminuser',
                 'indexorhome'
             ));
     }
@@ -58,16 +52,10 @@ class DailyWorkingAlertController extends Controller
     public function alerthome()
     {
         $authusers = Auth::user();
-        $generaluser = Config::get('const.C025.general_user');
-        $generalapproveruser = Config::get('const.C025.general_approver__user');
-        $adminuser = Config::get('const.C025.admin_user');
-        $indexorhome = 2;
+        $indexorhome = 2;       // ホームより起動
         return view('daily_working_alert',
             compact(
                 'authusers',
-                'generaluser',
-                'generalapproveruser',
-                'adminuser',
                 'indexorhome'
             ));
     }
@@ -141,7 +129,7 @@ class DailyWorkingAlertController extends Controller
                 if (count($details) == 0) {
                     $this->array_messagedata[] = Config::get('const.MSG_INFO.no_alert_data');
                     return response()->json(
-                        ['result' => false, 'details' => $result_working, 'datename' => $date_name,
+                        ['result' => true, 'details' => $result_working, 'datename' => $date_name,
                         Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                     );
                 }
@@ -162,11 +150,10 @@ class DailyWorkingAlertController extends Controller
             if (count($result_working) == 0) {
                 $this->array_messagedata[] = Config::get('const.MSG_INFO.no_alert_data');
                 return response()->json(
-                    ['result' => false, 'details' => $result_working, 'datename' => $date_name,
+                    ['result' => true, 'details' => $result_working, 'datename' => $date_name,
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
-    
 
             return response()->json(
                 ['result' => true, 'details' => $result_working, 'datename' => $date_name,

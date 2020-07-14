@@ -3,7 +3,7 @@
     <!-- main contentns row -->
     <div class="row justify-content-between">
       <!-- .panel -->
-      <div class="col-md pt-3">
+      <div class="col-md pt-3 print-none">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -42,7 +42,7 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2">
+              <div class="col-md-6 pb-2" v-if="this.get_LoginUserRole >= this.get_AdminUserRole">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
@@ -61,7 +61,7 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2">
+              <div class="col-md-6 pb-2" v-if="this.get_LoginUserRole >= this.get_AdminUserRole">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
@@ -99,9 +99,9 @@
                   <select-userlist
                     v-if="showuserlist"
                     ref="selectuserlist"
-                    v-bind:blank-data="true"
+                    v-bind:blank-data="get_IsUserblank"
                     v-bind:placeholder-data="'氏名を選択してください'"
-                    v-bind:selected-value="selectedUserValue"
+                    v-bind:selected-value="get_SelectedUserCode"
                     v-bind:add-new="false"
                     v-bind:get-do="getDo"
                     v-bind:date-value="applytermdate"
@@ -151,7 +151,7 @@
     <!-- main contentns row -->
     <div class="row justify-content-between">
       <!-- .panel -->
-      <div class="col-md pt-3 align-self-stretch" v-if="calcresults.length">
+      <div class="col-md pt-3 align-self-stretch print-none" v-if="selectmode === 'DSP'">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -160,7 +160,20 @@
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
           <!-- panel body -->
-          <div class="card-body pt-2">
+          <div class="card-body pt-2 print-none">
+            <!-- ----------- 印刷ボタン START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-2 pb-2">
+                <btn-work-time
+                  v-on:dailycalc-event="printclick"
+                  v-bind:btn-mode="'dailycalc'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+            </div>
+            <!-- ----------- 印刷ボタン END ---------------- -->
             <!-- ----------- 選択ボタン類 START ---------------- -->
             <!-- .row -->
             <div class="row justify-content-between">
@@ -197,7 +210,7 @@
             <!-- /.row -->
             <!-- ----------- 選択ボタン類 END ---------------- -->
           </div>
-          <div>
+          <div v-if="calcresults.length">
             <div class="card-body mb-3 border-top">
               <!-- ----------- 日次集計テーブル START ---------------- -->
               <daily-working-info-table
@@ -209,16 +222,23 @@
                 v-bind:predeter-time-second-name="predetertimesecondname"
                 v-bind:predeter-night-time-second-name="predeternighttimesecondname"
                 v-bind:btn-mode="btnmodeswitch"
-                v-bind:login-user="authusers['code']"
-                v-bind:login-role="authusers['role']"
+                v-bind:login-user="get_LoginUserCode"
+                v-bind:login-role="get_LoginUserRole"
+                v-bind:admin-role="get_AdminUserRole"
                 v-bind:account-data="accountdatas['account_id']"
                 v-bind:menu-data="menudatas"
+                v-bind:edituser-index="get_EditUserIndex"
+                v-bind:edituser-con-index="get_EditUserConIndex"
+                v-bind:c005-data="get_C005"
               ></daily-working-info-table>
               <!-- ----------- 日次集計テーブル END ---------------- -->
             </div>
           </div>
           <!-- /panel body -->
         </div>
+      </div>
+      <!-- /.panel -->
+      <div class="col-md pt-3 align-self-stretch print-none" v-if="selectmode === 'DSP'">
         <div class="card shadow-pl" v-if="sumresults.length">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -226,6 +246,8 @@
             v-bind:header-text2="'集計日の合計が表示されます'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
+        </div>
+        <div class="card shadow-pl" v-if="sumresults.length">
           <!-- panel body -->
           <div class="card-body pt-2">
             <!-- panel contents -->
@@ -245,6 +267,109 @@
         </div>
       </div>
       <!-- /.panel -->
+      <!-- .panel -->
+      <div class="col-md pt-3 align-self-stretch print-only print-daily-zoom" v-if="selectmode === 'DSP'">
+        <div class="card shadow-pl">
+          <!-- panel header -->
+          <div class="card-header bg-transparent pb-2 border-0">
+            <h1 class="float-sm-left font-size-rg line-height-0-5 mb-0">{{ stringtext }}</h1>
+          </div>
+          <!-- /.panel header -->
+          <!-- panel body -->
+          <div class="card-body pt-2 print-none">
+            <!-- ----------- 選択ボタン類 START ---------------- -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- col -->
+              <div class="col-md-4 pb-2">
+                <btn-work-time
+                  v-on:gosubateclick-event="gosubateclick"
+                  v-bind:btn-mode="'gosubdate'"
+                  v-bind:is-display="isgosubdatebutton"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+              <!-- col -->
+              <div class="col-md-4 pb-2">
+                <btn-work-time
+                  v-on:switchclick-event="switchclick"
+                  v-bind:btn-mode="btnmodeswitch"
+                  v-bind:is-push="isswitchbutton"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+              <!-- col -->
+              <div class="col-md-4 pb-2">
+                <btn-work-time
+                  v-on:goaddateclick-event="goaddateclick"
+                  v-bind:btn-mode="'goadddate'"
+                  v-bind:is-display="isgoadddatebutton"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- ----------- 選択ボタン類 END ---------------- -->
+          </div>
+        </div>
+        <div class="card shadow-pl" v-if="sumresults.length">
+          <div class="card-body mb-3 border-top" v-if="calcresults.length">
+            <!-- ----------- 日次集計テーブル START ---------------- -->
+            <daily-working-info-table-print
+              v-bind:detail-or-total="'detail'"
+              v-bind:calc-lists="calcresults"
+              v-bind:date-name="dateName"
+              v-bind:predeter-time-name="predetertimename"
+              v-bind:predeter-night-time-name="predeternighttimename"
+              v-bind:predeter-time-second-name="predetertimesecondname"
+              v-bind:predeter-night-time-second-name="predeternighttimesecondname"
+              v-bind:btn-mode="btnmodeswitch"
+              v-bind:login-user="get_LoginUserCode"
+              v-bind:login-role="get_LoginUserRole"
+              v-bind:account-data="accountdatas['account_id']"
+              v-bind:menu-data="menudatas"
+              v-bind:edituser-index="get_EditUserIndex"
+              v-bind:edituser-con-index="get_EditUserConIndex"
+            ></daily-working-info-table-print>
+          </div>
+          <!-- /panel body -->
+        </div>
+      </div>
+      <!-- /.panel -->
+      <div class="col-md pt-3 align-self-stretch print-only print-daily-zoom" v-if="selectmode === 'DSP'">
+        <div class="card shadow-pl" v-if="sumresults.length">
+          <!-- panel header -->
+            <!-- ----------- 日次集計テーブル END ---------------- -->
+            <div class="card shadow-pl" v-if="sumresults.length">
+              <!-- panel header -->
+              <div class="card-header bg-transparent pb-2 border-0">
+                <h1 class="float-sm-left font-size-rg mb-0">合  計</h1>
+              </div>
+              <!-- /.panel header -->
+              <!-- panel body -->
+              <div class="card-body pt-2">
+                <!-- panel contents -->
+                <!-- .row -->
+                <daily-working-info-sum-table
+                  v-bind:detail-or-total="'total'"
+                  v-bind:calc-lists="sumresults"
+                  v-bind:predeter-time-name="predetertimename"
+                  v-bind:predeter-night-time-name="predeternighttimename"
+                  v-bind:predeter-time-secondname="predetertimesecondname"
+                  v-bind:predeter-night-time-secondname="predeternighttimesecondname"
+                  v-bind:btn-mode="btnmodeswitch"
+                ></daily-working-info-sum-table>
+                <!-- /.row -->
+                <!-- /panel contents -->
+              </div>
+            </div>
+          </div>
+          <!-- /panel body -->
+        </div>
+      </div>
+      <!-- /.panel -->
     </div>
     <!-- /main contentns row -->
   </div>
@@ -257,7 +382,11 @@ import { checkable } from "../mixins/checkable.js";
 import { requestable } from "../mixins/requestable.js";
 
 // CONST
+const CONST_C005 = 'C005';
 const CONST_C025 = 'C025';
+const CONST_C025_ADMINUSER_PHYSICAL_NAME= "admin_user";
+const CONST_MENU_EDITUSER_PHYSICAL_NAME= "edit_worktime_user";
+const CONST_MENU_EDITUSER_CON_PHYSICAL_NAME= "edit_worktime_user_conditional";
 
 export default {
   name: "dailyworkingtime",
@@ -312,7 +441,8 @@ export default {
       predetertimesecondname: "",
       predeternighttimesecondname: "",
       dateName: "",
-      messageshowsearch: false,
+      selectmode: "",
+      // messageshowsearch: false,
       issearchbutton: false,
       isgosubdatebutton: false,
       isgoadddatebutton: false,
@@ -321,22 +451,120 @@ export default {
       isswitchvisible: false,
       validate: true,
       initialized: false,
-      const_C025_data: []
+      general_C025_data: [],
+      general_C005_data: [],
+      isUserblank: true,
+      login_user_code: "",
+      login_user_role: "",
+      adminuserrole: ""
     };
   },
   computed: {
+    get_C005: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C005) {
+          $this.general_C005_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.general_C005_data;
+    },
+    get_C025: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C025) {
+          $this.general_C025_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.general_C025_data;
+    },
+    get_AdminUserRole: function() {
+      if (this.adminuserrole == null || this.adminuserrole == "") {
+        if (this.general_C025_data.length == 0) {
+          let $this = this;
+          this.get_C025.forEach( function( item ) {
+            if (item.physical_name == CONST_C025_ADMINUSER_PHYSICAL_NAME) {
+              $this.adminuserrole = item.code;
+            }
+          });    
+        } else {
+          let $this = this;
+          this.general_C025_data.forEach( function( item ) {
+            if (item.physical_name == CONST_C025_ADMINUSER_PHYSICAL_NAME) {
+              $this.adminuserrole = item.code;
+            }
+          });    
+        }
+      }
+      return this.adminuserrole;
+    },
+    get_IsEdit: function() {
+      this.isEdit = false;
+      if (this.authusers['role'] == this.get_AdminUserRole) {
+        this.isEdit = true;
+      }
+      return this.isEdit;
+    },
+    get_IsUserblank: function() {
+      this.isUserblank = true;
+      if (this.get_LoginUserRole < this.get_AdminUserRole) {
+        this.isUserblank = false;
+      }
+      return this.isUserblank;
+    },
+    get_LoginUserCode: function() {
+      this.login_user_code = this.authusers['code'];
+      return this.login_user_code;
+    },
+    get_LoginUserRole: function() {
+      this.login_user_role = this.authusers['role'];
+      return this.login_user_role;
+    },
+    get_SelectedUserCode: function() {
+      if (this.selectedUserValue == null || this.selectedUserValue == "") {
+        if (this.get_LoginUserRole < this.get_AdminUserRole) {
+          this.selectedUserValue = this.get_LoginUserCode;
+        }
+      }
+      return this.selectedUserValue;
+    },
+    get_EditUserIndex: function() {
+      var edituser_index = 0;
+      if (this.menudatas.length > 0) {
+        let $this = this;
+        var i = 0;
+        this.menudatas.forEach( function( item ) {
+          if (item.item_name == CONST_MENU_EDITUSER_PHYSICAL_NAME) {
+            edituser_index = i;
+          }
+          i++;
+        });
+      }
+      return edituser_index;
+    },
+    get_EditUserConIndex: function() {
+      var edituser_con_index = 0;
+      if (this.menudatas.length > 0) {
+        let $this = this;
+        var i = 0;
+        this.menudatas.forEach( function( item ) {
+          if (item.item_name == CONST_MENU_EDITUSER_CON_PHYSICAL_NAME) {
+            edituser_con_index = i;
+          }
+          i++;
+        });
+      }
+      return edituser_con_index;
+    }
   },
   // マウント時
   mounted() {
     // メソッドで使用するのでcomputedでなくてOK
-    var i = 0;
-    let $this = this;
-    this.const_generaldatas.forEach( function( item ) {
-      if (item.identification_id == CONST_C025) {
-        $this.const_C025_data.push($this.const_generaldatas[i]);
-      }
-      i++;
-    });
+    this.get_C025;
     this.valuedate = this.defaultDate;
     this.valuefromdate = moment(this.defaultDate).format("YYYYMMDD");
     this.valuesubadddate = this.valuefromdate;
@@ -344,8 +572,9 @@ export default {
     if (this.valuefromdate) {
       this.applytermdate = this.valuefromdate;
     }
-    this.$refs.selectdepartmentlist.getList(this.applytermdate);
-    this.getUserSelected();
+    // this.$refs.selectdepartmentlist.getList(this.applytermdate);
+    // this.getUserSelected();
+    this.selectmode = "";
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -379,30 +608,7 @@ export default {
         this.validate = false;
       }
       // 所属部署
-      if (this.authusers['role'] < this.const_C025_data[2]['code']) {
-        required = true;
-        equalength = 0;
-        maxlength = 0;
-        itemname = "所属部署";
-        chkArray = this.checkHeader(
-          this.selectedDepartmentValue,
-          required,
-          equalength,
-          maxlength,
-          itemname
-        );
-        if (chkArray.length > 0) {
-          if (this.messagedatadepartment.length == 0) {
-            this.messagedatadepartment.push(
-              "一般ユーザーは所属部署は必ず入力してください。"
-            );
-          } else {
-            this.messagedatadepartment = this.messagedatadepartment.concat(
-              chkArray
-            );
-          }
-          this.validate = false;
-        }
+      if (this.get_LoginUserRole < this.get_AdminUserRole) {
         required = true;
         equalength = 0;
         maxlength = 0;
@@ -486,16 +692,15 @@ export default {
       this.isswitchvisible = false;
       this.valuesubadddate = "";
       this.validate = this.checkForm(e);
+      this.isswitchbutton = false;
       if (this.validate) {
         this.issearchbutton = true;
-        this.messageshowsearch = true;
+        // this.messageshowsearch = true;
         // 入力項目クリア
         this.itemClear();
         this.valuesubadddate = moment(this.valuedate).format("YYYYMMDD");
         this.selectedName = this.user_name + "　" + moment(this.valuesubadddate).format("YYYY年MM月DD日") + "分勤怠編集" ;
         this.getItem(moment(this.valuedate).format("YYYYMMDD"));
-        this.isgosubdatebutton = true;
-        this.isgoadddatebutton = true;
       }
     },
     // 詳細表示ボタンがクリックされた場合の処理
@@ -509,7 +714,7 @@ export default {
     //前日ボタンクリック処理
     gosubateclick(e) {
       this.issearchbutton = true;
-      this.messageshowsearch = true;
+      // this.messageshowsearch = true;
       // 入力項目クリア
       this.itemClear();
       this.messagevalidatesSearch = [];
@@ -526,7 +731,7 @@ export default {
     //翌日ボタンクリック処理
     goaddateclick(e) {
       this.issearchbutton = true;
-      this.messageshowsearch = true;
+      // this.messageshowsearch = true;
       // 入力項目クリア
       this.itemClear();
       this.messagevalidatesSearch = [];
@@ -540,6 +745,12 @@ export default {
         this.getItem(this.valuesubadddate);
       }
     },
+    //印刷ボタンクリック処理
+    printclick(e) {
+      this.btnMode = "basicswitch";
+      window.print();
+    },
+    
     // ------------------------ サーバー処理 ----------------------------
     // 日次集計取得処理
     getItem(datevalue) {
@@ -565,9 +776,12 @@ export default {
             })
             .catch(reason => {
               this.$swal.close();
-              this.messageshowsearch = false;
+              // this.messageshowsearch = false;
               this.issearchbutton = false;
               this.serverCatch("日次集計","取得");
+              this.isgosubdatebutton = true;
+              this.isgoadddatebutton = true;
+              this.selectmode = "DSP";
             });
         }
       });
@@ -621,15 +835,20 @@ export default {
         break;
       }
       this.$forceUpdate();
-      this.messageshowsearch = false;
+      // this.messageshowsearch = false;
       this.issearchbutton = false;
+      this.isgosubdatebutton = true;
+      this.isgoadddatebutton = true;
+      this.selectmode = "DSP";
     },
     // 異常処理
     serverCatch(kbn, eventtext) {
       var messages = [];
       messages.push(kbn + "情報" + eventtext + "に失敗しました");
       this.htmlMessageSwal("エラー", messages, "error", true, false);
+      this.selectmode = "";
     },
+
     //  クリアメソッド
     itemClear: function() {
       this.resresults = [];
@@ -644,3 +863,37 @@ export default {
   }
 };
 </script>
+<style scoped>
+@page {
+  size : 297mm 210mm;
+}
+
+@media print {
+  .print-daily-zoom {
+    zoom: 90%;
+  }
+}
+/* .print_pages{ */
+/*A4横*/
+  /* width: 297mm;
+  height: 210mm;
+  page-break-before: always;
+} */
+/*最後のページは改ページを入れない*/
+.print_pages:last-child{
+    page-break-after: auto;
+}
+
+.table th, .table td {
+    padding: 0.4rem !important;
+}
+
+.mw-rem-3 {
+  min-width: 3rem !important;
+}
+
+.line-height-0-5 {
+  line-height: 0.5;
+}
+
+</style>

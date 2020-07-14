@@ -4,15 +4,15 @@
 				<!-- main contents -->
 				<div class="col-xl-10">
 					<!-- main contentns row -->
-					<div class="row justify-content-between">
+					<div class="row justify-content-between print-none">
 						<!-- .panel -->
 						<div class="col-md">
 							<div class="card bg-secondary text-white pt-2 border-0 shadow-pl">
 								<!-- panel header -->
 								<div class="card-header bg-transparent pt-2 border-0">
 									<h1 class="float-left font-size-xl">
-                                        <img class="icon-size-rg mr-3" src="{{ asset('images/round-restore-w.svg') }}" alt="">日次集計
-                                    </h1>
+											<img class="icon-size-rg mr-3" src="{{ asset('images/round-restore-w.svg') }}" alt="">日次集計
+									</h1>
 								</div>
 								<!-- /.panel header -->
 							</div>
@@ -22,7 +22,7 @@
 					<!-- /main contentns row -->
 					@if (session('status'))
 					<!-- main contentns row -->
-					<div class="row justify-content-between">
+					<div class="row justify-content-between print-none">
 						<!-- .panel -->
 						<div class="col-md pt-3">
 							<div class="card shadow-pl">
@@ -41,6 +41,7 @@
 						v-bind:authusers="{{ $authusers }}"
 						v-bind:accountdatas="{{ $account_datas }}"
 						v-bind:menudatas="{{ $menu_selections }}"
+						v-bind:feature_item_selections="{{ $feature_item_selections }}"
 						v-bind:const_generaldatas="{{ $const_general_datas }}"
 					>
 					</daily-working-information>

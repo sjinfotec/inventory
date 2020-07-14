@@ -38,6 +38,10 @@
 		</div>
 		<!-- /main contentns row -->
 		@endif
-		<user-pass></user-pass>
+		<user-pass
+			v-bind:authusers="{{ $authusers }}"
+			v-bind:feature_item_selections="{{ $feature_item_selections }}"
+			v-bind:const_generaldatas="{{ $const_general_datas }}"
+		></user-pass>
 		<!-- /main contentns row -->
 @endsection

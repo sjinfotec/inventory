@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
-
+use Illuminate\Support\Collection;
 
 class GeneralCodes extends Model
 {
@@ -78,6 +78,19 @@ class GeneralCodes extends Model
     public function setDescriptionAttribute($value)
     {
         $this->description = $value;
+    }
+
+    private $physical_name;                 // 物理名称
+
+    // 物理名称
+    public function getPhysicalnameAttribute()
+    {
+        return $this->physical_name;
+    }
+
+    public function setPhysicalnameAttribute($value)
+    {
+        $this->physical_name = $value;
     }
 
     private $code_name;                     // 項目名
@@ -246,6 +259,7 @@ class GeneralCodes extends Model
                     $this->table.'.sort_seq as sort_seq',
                     $this->table.'.identification_name as identification_name',
                     $this->table.'.description as description',
+                    $this->table.'.physical_name as physical_name',
                     $this->table.'.code_name as code_name',
                     $this->table.'.secound_code_name as secound_code_name',
                     $this->table.'.use_free_item as use_free_item',
@@ -266,11 +280,11 @@ class GeneralCodes extends Model
                 ->orderBy($this->table.'.sort_seq', 'asc')
                 ->get();
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }

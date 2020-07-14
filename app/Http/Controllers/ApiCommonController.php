@@ -22,7 +22,8 @@ use App\WorkTimeLog;
 use App\WorkTime;
 use App\UserModel;
 use App\CsvItemSelection;
-
+use App\CalendarSettingInformation;
+use App\FeatureItemSelection;
 
 
 /**
@@ -47,7 +48,8 @@ use App\CsvItemSelection;
  *          共通コードリスト取得        : getGeneralList            : generalcodes
  *          承認者リスト取得            : getConfirmlList           : confirms
  *      3.ユーザ情報取得
- *          ユーザ情報取得                              : getUserInfo               : users            
+ *          ユーザ情報取得                              : getUserInfo               : users         
+ *          ユーザーカレンダーシフト情報取得               : getCalendarInformations    : calendar_setting_informations
  *          ユーザシフト情報取得                        : getShiftInformation               : ShiftInformation        
  *          ログインユーザー部署ロール取得（画面から）      : getLoginUserDepartment            
  *          ログインユーザー権限取得（画面から）            : getLoginUserRole                  
@@ -55,8 +57,10 @@ use App\CsvItemSelection;
  *          ユーザー部署取得                            : getUserDepartment                 : users 
  *          ユーザーの部署と雇用形態と権限取得          : getUserDepartmentEmploymentRole      : users
  *          ユーザーメールアドレス取得                  : getUserMailAddress                : users      
- *          ユーザー休暇区分取得                        : getUserHolidaykbn                 : UserHolidayKubun              
- *          ユーザー所定時刻取得                        : getWorkingHours                   : WorkingTimeTable             
+ *          ユーザー休暇区分取得                        : getUserHolidaykbn                 : UserHolidayKubun  CalendarSettingInformation            
+ *          ユーザー所定時刻半休時刻取得                : getWorkingHours                   : WorkingTimeTable             
+ *          ユーザー打刻時刻から所定時刻取得             : getWorkingHoursByStamp            : WorkingTimeTable             
+ *          ユーザー打刻モードのデータ取得               : getTimeMode                       : work_times             
  *      4.その他情報取得
  *          会社情報取得                                : getCompanyInfoApply       : Company
  *          指定月締日取得（画面から）                  : getClosingDay              : Setting   
@@ -80,12 +84,14 @@ use App\CsvItemSelection;
  *          時間範囲内であるか判定          : chkBetweenTime
  *          出勤時間差をチェック            : chkInteval        : Setting
  *          打刻のモードチェック            : chkMode
+ *          緊急かの判定                    : isEmagency
  *      7.変換
  *          時刻日付変換                            : convTimeToDate
  *          時刻日付変換                            : convTimeToDateTarget
  *          時刻日付変換from                        : convTimeToDateFrom
  *          時刻日付変換to                          : convTimeToDateTo
  *          インターバル時間を取得して分に変換する    : getIntevalMinute
+ *          timestampを時間単位の10進数に変換する    : cnvToDecFromStamp
  *      8.設定
  *          タイムテーブルの分解                        : analyzeTimeTable
  *          タイムテーブル労働開始終了時間テーブル設定    : setWorkingStartEndTimeTable
@@ -277,12 +283,14 @@ class ApiCommonController extends Controller
                     't1.name as name',
                     't1.from_time as from_time',
                     't1.to_time as to_time',
+                    't1.ago_time_no as ago_time_no',
                     't1.working_time_kubun as working_time_kubun'
                 )
                 ->JoinSub($subquery1, 't2', function ($join) { 
                     $join->on('t1.no', '=', 't2.no');
                     $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
                 })
+                ->whereNotNull('t1.from_time')
                 ->where('t1.is_deleted', '=', 0);
                 return $subquery2;
         }catch(\PDOException $pe){
@@ -307,6 +315,7 @@ class ApiCommonController extends Controller
         $makeSql .= "   ,t1.name as name ";
         $makeSql .= "   ,t1.from_time as from_time ";
         $makeSql .= "   ,t1.to_time as to_time ";
+        $makeSql .= "   ,t1.ago_time_no as ago_time_no ";
         $makeSql .= "   ,t1.working_time_kubun as working_time_kubun ";
         $makeSql .= " from ";
         $makeSql .= " ".$this->table_working_timetables." as t1 ";
@@ -327,6 +336,7 @@ class ApiCommonController extends Controller
         $makeSql .= "   and t1.apply_term_from = t2.max_apply_term_from ";
         $makeSql .= " where ? = ? ";
         $makeSql .= "   and t1.no < ? ";
+        $makeSql .= "   and t1.from_time is not null ";
         $makeSql .= "   and t1.is_deleted = ? ";
 
         return $makeSql;
@@ -537,11 +547,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -607,11 +617,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -712,11 +722,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -727,12 +737,35 @@ class ApiCommonController extends Controller
      *
      * @return list
      */
-    public function getTimeTableList(){
+    public function getTimeTableList(Request $request){
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
         try {
+            // パラメータチェック
+            $params = array();
+            if (!isset($request->keyparams)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $params = $request->keyparams;
+            $targetdate = '';
+            if (isset($params['targetdate'])) {
+                $targetdate =  $params['targetdate'];
+            }
+            // 適用期間日付の取得
+            $dt = null;
+            if ($targetdate != '') {
+                $dt = new Carbon($targetdate);
+            } else {
+                $dt = new Carbon();
+            }
             $time_tables = new WorkingTimeTable();
+            $time_tables->setParamdatefromAttribute($dt);
             $details = $time_tables->getTimeTables();
 
             return response()->json(
@@ -740,14 +773,14 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
-
     }
 
     /**
@@ -768,10 +801,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -795,10 +828,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -826,11 +859,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -858,11 +891,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -890,11 +923,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -910,23 +943,33 @@ class ApiCommonController extends Controller
         $details = new Collection();
         $result = true;
         try {
-            $details =
-                DB::table($this->table_generalcodes)
-                    ->where('identification_id', 'C005')
-                    ->where('is_deleted', 0)
-                    ->orderby('sort_seq','asc')
-                    ->get();
+            $feature_model = new FeatureItemSelection();
+            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+            $feature_model->setParamitemcodeAttribute(Config::get('const.C042.mode_list'));
+            $feature_data = $feature_model->getItem();
+            $value_select = "0";
+            foreach($feature_data as $item) {
+                $value_select = $item->value_select;
+                break;
+            }
+            $details = DB::table($this->table_generalcodes)
+                ->where('identification_id', 'C005')
+                ->where('use_free_item', '<=', $value_select)
+                ->where('is_deleted', 0)
+                ->orderby('sort_seq','asc')
+                ->get();
 
             return response()->json(
                 ['result' => $result, 'details' => $details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -967,10 +1010,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -992,11 +1035,11 @@ class ApiCommonController extends Controller
                     ->get();
             return $details;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1040,10 +1083,10 @@ class ApiCommonController extends Controller
             $confirm_model->setParamMainsubAttribute($mainorsub);
             $codeList = $confirm_model->selectConfirmList($target_date);
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1102,15 +1145,462 @@ class ApiCommonController extends Controller
                 ->get();
             return $data;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
             
+    }
+
+    /**
+     * ユーザーカレンダーシフト情報取得
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function getCalendarInformations($params){
+        $departmentcode = $params['departmentcode'];
+        $employmentstatus = $params['employmentstatus'];
+        $usercode = $params['usercode'];
+        $fromdate = $params['fromdate'];
+        $todate = $params['todate'];
+        $this->array_messagedata = array();
+        $details = array();
+        $detail_dates = array();
+        $result = true;
+        try {
+            $dt1 = new Carbon($fromdate);
+            $dt2 = new Carbon($todate);
+            $calendar_setting_model = new CalendarSettingInformation();
+            $calendar_setting_model->setParamdepartmentcodeAttribute($departmentcode);
+            $calendar_setting_model->setParamemploymentstatusAttribute($employmentstatus);
+            $calendar_setting_model->setParamusercodeAttribute($usercode);
+            $calendar_setting_model->setParamfromdateAttribute($dt1->format('Ymd'));
+            $calendar_setting_model->setParamtodateAttribute($dt2->format('Ymd'));
+            $results = $calendar_setting_model->getShiftDetail();
+            // csvitemの取得
+            $selection_code = Config::get('const.C037.csvshift');
+            $csvitem_model = new CsvItemSelection();
+            $csvitem_model->setParamaccountidAttribute(
+                array(Config::get('const.ACCOUNTID.account_id')));
+            $csvitem_model->setParamselectioncodeAttribute($selection_code);
+            $csvitem_details = $csvitem_model->getCsvItem();
+            $collect_csvitem_details = collect($csvitem_details);
+            // csv項目の選択値取得
+            $filtered = $collect_csvitem_details
+                ->where('item_name', '=', 'department_name');
+            $set_department_name = 0;
+            foreach ($filtered as $item) {
+                $set_department_name = $item->is_select;
+                break;
+            }
+            $set_employment_name = 0;
+            $filtered = $collect_csvitem_details
+                ->where('item_name', '=', 'employment_name');
+            foreach ($filtered as $item) {
+                $set_employment_name = $item->is_select;
+                break;
+            }
+            $set_user_name = 0;
+            $filtered = $collect_csvitem_details
+                ->where('item_name', '=', 'user_name');
+            foreach ($filtered as $item) {
+                $set_user_name = $item->is_select;
+                break;
+            }
+            $set_regular_day_cnt = 0;
+            $filtered = $collect_csvitem_details
+                ->where('item_name', '=', 'regular_day_cnt');
+            foreach ($filtered as $item) {
+                $set_regular_day_cnt = $item->is_select;
+                break;
+            }
+            $set_night_day_cnt = 0;
+            $filtered = $collect_csvitem_details
+                ->where('item_name', '=', 'night_day_cnt');
+            foreach ($filtered as $item) {
+                $set_night_day_cnt = $item->is_select;
+                break;
+            }
+            // 週休振替weekly_dayoff_cntはTODO
+            $set_weekly_dayoff_cnt = 0;
+            $filtered = $collect_csvitem_details
+                ->where('item_name', '=', 'weekly_dayoff_cnt');
+            foreach ($filtered as $item) {
+                $set_weekly_dayoff_cnt = $item->is_select;
+                break;
+            }
+            $set_paid_holiday_cnt = 0;
+            $filtered = $collect_csvitem_details
+                ->where('item_name', '=', 'paid_holiday_cnt');
+            foreach ($filtered as $item) {
+                $set_paid_holiday_cnt = $item->is_select;
+                break;
+            }
+            $current_user_code = null;
+            $current_item = null;
+            $array_user_data = array();
+            $array_user_date_data = array();
+            $set_detail_dates = false;
+            $night_day_cnt = 0;
+            $regular_day_cnt = 0;
+            $paid_holiday_cnt = 0;
+            $weekly_dayoff_cnt = 0;
+            $night_day_times_h = 0;         // 夜勤(H)
+            $night_day_times_m = 0;         // 夜勤(m)
+            $regular_day_times_h = 0;       // 日勤(H)
+            $regular_day_times_m = 0;       // 日勤(m)
+            $paid_holiday_day_times_h = 0;  // 休暇(H)
+            $paid_holiday_day_times_m = 0;  // 休暇(m)
+            $weekly_dayoff_times_h = 0;     // 週休振替(H)  保留
+            $weekly_dayoff_times_m = 0;     // 週休振替(m)  保留
+            foreach($results as $item) {
+                if($current_user_code == null) {$current_user_code = $item->user_code;}
+                if($current_item == null) {$current_item = $item;}
+                if($current_user_code == $item->user_code) {
+                    if (!$set_detail_dates) {
+                        $detail_dates[] = array(
+                            'date' => $item->date,
+                            'week_name' => $item->week_name,
+                            'date_name' => $item->date_name
+                        );
+                    }
+                    $str_total_working_times = "";
+                    if ($item->total_working_times_h > 0 || $item->total_working_times_m > 0)  {
+                        $str_total_working_times = 
+                            str_pad($item->total_working_times_h, 2, 0, STR_PAD_LEFT).':'.str_pad($item->total_working_times_m, 2, 0, STR_PAD_LEFT);
+                    }
+                    $str_regular_working_times = "";
+                    if ($item->regular_working_times_h > 0 || $item->regular_working_times_m > 0)  {
+                        $str_regular_working_times = 
+                            str_pad($item->regular_working_times_h, 2, 0, STR_PAD_LEFT).':'.str_pad($item->regular_working_times_m, 2, 0, STR_PAD_LEFT);
+                    }
+                    $array_user_date_data[] = array(
+                        'date' => $item->date,
+                        'weekday_kubun' => $item->weekday_kubun,
+                        'business_kubun' => $item->business_kubun,
+                        'working_timetable_no' => $item->working_timetable_no,
+                        'holiday_kubun' => $item->holiday_kubun,
+                        'date_name' => $item->date_name,
+                        'md_name' => $item->md_name,
+                        'date_null' => $item->date_null,
+                        'public_holidays_name' => $item->public_holidays_name,
+                        'business_kubun_name' => $item->business_kubun_name,
+                        'use_free_item' => $item->use_free_item,
+                        'working_timetable_name' => $item->working_timetable_name,
+                        'holiday_kubun_name' => $item->holiday_kubun_name,
+                        'total_working_times' => $str_total_working_times,
+                        'regular_working_times' => $str_regular_working_times
+                    );
+                    $night_day_cnt += $item->night_day_cnt;
+                    $regular_day_cnt += $item->regular_day_cnt;
+                    $paid_holiday_cnt += $item->paid_holiday_cnt;
+                    if ($item->night_day_cnt == 1) {
+                        $night_day_times_h += $item->total_working_times_h;
+                        $night_day_times_m += $item->total_working_times_m;
+                    }
+                    if ($item->regular_day_cnt == 1) {
+                        $regular_day_times_h += $item->total_working_times_h;
+                        $regular_day_times_m += $item->total_working_times_m;
+                    }
+                    if ($item->paid_holiday_cnt == 1) {
+                        $paid_holiday_day_times_h += $item->regular_working_times_h;
+                        $paid_holiday_day_times_m += $item->regular_working_times_m;
+                    }
+                    if ($item->paid_holiday_cnt == 0.5) {
+                        $paid_holiday_day_times_h += $item->regular_working_times_h * 0.5;
+                        $paid_holiday_day_times_m += $item->regular_working_times_m * 0.5;
+                    }
+                    if ($current_item->date != $item->date) {$current_item->date = $item->date;}
+                } else {
+                    if (count($detail_dates) > 0 && !$set_detail_dates) {
+                        $set_detail_dates = true;
+                    }
+                    // todateまで
+                    $dtfrom = new Carbon($current_item->date);
+                    $dt = $dtfrom->addDay();
+                    $todate = $params['todate'];
+                    $dtto = new Carbon($todate);
+                    while ($dt<=$dtto) {
+                        $dt_w = $dt;
+                        $array_user_date_data[] = array(
+                            'date' => $dt_w->format("Ymd"),
+                            'weekday_kubun' => 0,
+                            'business_kubun' => 0,
+                            'working_timetable_no' => 0,
+                            'holiday_kubun' => 0,
+                            'date_name' => "",
+                            'md_name' => "",
+                            'date_null' => 1,
+                            'public_holidays_name' => "",
+                            'business_kubun_name' => "",
+                            'use_free_item' => "",
+                            'working_timetable_name' => "カレンダー未設定",
+                            'holiday_kubun_name' => "",
+                            'total_working_times' => "",
+                            'regular_working_times' => ""
+                        );
+                        $dt->addDay();
+                    }
+                    $str_night_day_times = "";
+                    if ($night_day_times_h > 0 || $night_day_times_m > 0)  {
+                        $floor_m = floor($night_day_times_m / 60);
+                        $set_m = $night_day_times_m - $floor_m * 60;
+                        $set_h = $night_day_times_h + $floor_m;
+                        $str_night_day_times = 
+                            str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                    }
+                    $str_regular_day_times = "";
+                    if ($regular_day_times_h > 0 || $regular_day_times_m > 0)  {
+                        $floor_m = floor($regular_day_times_m / 60);
+                        $set_m = $regular_day_times_m - $floor_m * 60;
+                        $set_h = $regular_day_times_h + $floor_m;
+                        $str_regular_day_times = 
+                            str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                    }
+                    $str_weekly_dayoff_times = "";
+                    if ($weekly_dayoff_times_h > 0 || $weekly_dayoff_times_m > 0)  {
+                        $floor_m = floor($weekly_dayoff_times_m / 60);
+                        $set_m = $weekly_dayoff_times_m - $floor_m * 60;
+                        $set_h = $weekly_dayoff_times_h + $floor_m;
+                        $str_weekly_dayoff_times = 
+                            str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                    }
+                    $str_paid_holiday_day_times = "";
+                    if ($paid_holiday_day_times_h > 0 || $paid_holiday_day_times_m > 0)  {
+                        $floor_h = floor($paid_holiday_day_times_h);
+                        $set_m = ($paid_holiday_day_times_h - $floor_h) * 60;
+                        $paid_holiday_day_times_m = $paid_holiday_day_times_m + $set_m;
+                        $floor_m = floor($paid_holiday_day_times_m / 60);
+                        $set_m = $paid_holiday_day_times_m - ($floor_m * 60);
+                        $set_h = $floor_h + $floor_m;
+                        $str_paid_holiday_day_times = 
+                            str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                    }
+                    $array_user_data[] = array(
+                        'department_code' => $current_item->department_code,
+                        'employment_status' => $current_item->employment_status,
+                        'user_code' => $current_item->user_code,
+                        'department_name' => $current_item->department_name,
+                        'set_department_name' => $set_department_name,
+                        'employment_name' => $current_item->employment_name,
+                        'set_employment_name' => $set_employment_name,
+                        'user_name' => $current_item->user_name,
+                        'set_user_name' => $set_user_name,
+                        'night_day_cnt' => $night_day_cnt,
+                        'set_night_day_cnt' => $set_night_day_cnt,
+                        'regular_day_cnt' => $regular_day_cnt,
+                        'set_regular_day_cnt' => $set_regular_day_cnt,
+                        'weekly_dayoff_cnt' => $weekly_dayoff_cnt,
+                        'set_weekly_dayoff_cnt' => $set_weekly_dayoff_cnt,
+                        'paid_holiday_cnt' => $paid_holiday_cnt,
+                        'set_paid_holiday_cnt' => $set_paid_holiday_cnt,
+                        'night_day_times' => $str_night_day_times,
+                        'set_night_day_times' => $set_night_day_cnt,
+                        'regular_day_times' =>  $str_regular_day_times,
+                        'set_regular_day_times' => $set_regular_day_cnt,
+                        'weekly_dayoff_times' => $str_weekly_dayoff_times,
+                        'set_weekly_dayoff_times' => $set_weekly_dayoff_cnt,
+                        'paid_holiday_day_times' =>  $str_paid_holiday_day_times,
+                        'set_paid_holiday_day_times' => $set_paid_holiday_cnt,
+                        'array_user_date_data' => $array_user_date_data
+                    );
+                    $current_user_code = $item->user_code;
+                    $current_item = $item;
+                    $array_user_date_data = array();
+                    // fromdateまで
+                    $dtfrom = new Carbon($fromdate);
+                    $dt = $dtfrom;
+                    $dtto = new Carbon($item->date);
+                    while ($dt<$dtto) {
+                        $dt_w = $dt;
+                        $array_user_date_data[] = array(
+                            'date' => $dt_w->format("Ymd"),
+                            'weekday_kubun' => 0,
+                            'business_kubun' => 0,
+                            'working_timetable_no' => 0,
+                            'holiday_kubun' => 0,
+                            'date_name' => "",
+                            'md_name' => "",
+                            'date_null' => 1,
+                            'public_holidays_name' => "",
+                            'business_kubun_name' => "",
+                            'use_free_item' => "",
+                            'working_timetable_name' => "カレンダー未設定",
+                            'holiday_kubun_name' => "",
+                            'total_working_times' => "",
+                            'regular_working_times' => ""
+                            );
+                        $dt->addDay();
+                    }
+                    $str_total_working_times = "";
+                    if ($item->total_working_times_h > 0 || $item->total_working_times_m > 0)  {
+                        $str_total_working_times = 
+                            str_pad($item->total_working_times_h, 2, 0, STR_PAD_LEFT).':'.str_pad($item->total_working_times_m, 2, 0, STR_PAD_LEFT);
+                    }
+                    $str_regular_working_times = "";
+                    if ($item->regular_working_times_h > 0 || $item->regular_working_times_m > 0)  {
+                        $str_regular_working_times = 
+                            str_pad($item->regular_working_times_h, 2, 0, STR_PAD_LEFT).':'.str_pad($item->regular_working_times_m, 2, 0, STR_PAD_LEFT);
+                    }
+                    $array_user_date_data[] = array(
+                        'date' => $item->date,
+                        'weekday_kubun' => $item->weekday_kubun,
+                        'business_kubun' => $item->business_kubun,
+                        'working_timetable_no' => $item->working_timetable_no,
+                        'holiday_kubun' => $item->holiday_kubun,
+                        'date_name' => $item->date_name,
+                        'md_name' => $item->md_name,
+                        'date_null' => $item->date_null,
+                        'public_holidays_name' => $item->public_holidays_name,
+                        'business_kubun_name' => $item->business_kubun_name,
+                        'use_free_item' => $item->use_free_item,
+                        'working_timetable_name' => $item->working_timetable_name,
+                        'holiday_kubun_name' => $item->holiday_kubun_name,
+                        'total_working_times' => $str_total_working_times,
+                        'regular_working_times' => $str_regular_working_times
+                    );
+                    $night_day_cnt = 0;
+                    $regular_day_cnt = 0;
+                    $paid_holiday_cnt = 0;
+                    $night_day_times_h = 0;
+                    $night_day_times_m = 0;
+                    $regular_day_times_h = 0;
+                    $regular_day_times_m = 0;
+                    $paid_holiday_day_times_h = 0;
+                    $paid_holiday_day_times_m = 0;
+                    $night_day_cnt += $item->night_day_cnt;
+                    $regular_day_cnt += $item->regular_day_cnt;
+                    $paid_holiday_cnt += $item->paid_holiday_cnt;
+                    if ($item->night_day_cnt == 1) {
+                        $night_day_times_h += $item->total_working_times_h;
+                        $night_day_times_m += $item->total_working_times_m;
+                    }
+                    if ($item->regular_day_cnt == 1) {
+                        $regular_day_times_h += $item->total_working_times_h;
+                        $regular_day_times_m += $item->total_working_times_m;
+                    }
+                    if ($item->paid_holiday_cnt == 1) {
+                        $paid_holiday_day_times_h += $item->regular_working_times_h;
+                        $paid_holiday_day_times_m += $item->regular_working_times_m;
+                    }
+                    if ($item->paid_holiday_cnt == 0.5) {
+                        $paid_holiday_day_times_h += $item->regular_working_times_h * 0.5;
+                        $paid_holiday_day_times_m += $item->regular_working_times_m * 0.5;
+                    }
+                }
+            }
+            // 残り
+            if (count($array_user_date_data) > 0) {
+                // todateまで
+                $dtfrom = new Carbon($current_item->date);
+                $dt = $dtfrom->addDay();
+                $todate = $params['todate'];
+                $dtto = new Carbon($todate);
+                while ($dt<=$dtto) {
+                    $dt_w = $dt;
+                    $array_user_date_data[] = array(
+                        'date' => $dt_w->format("Ymd"),
+                        'weekday_kubun' => 0,
+                        'business_kubun' => 0,
+                        'working_timetable_no' => 0,
+                        'holiday_kubun' => 0,
+                        'date_name' => "",
+                        'md_name' => "",
+                        'date_null' => 1,
+                        'public_holidays_name' => "",
+                        'business_kubun_name' => "",
+                        'use_free_item' => "",
+                        'working_timetable_name' => "カレンダー未設定",
+                        'holiday_kubun_name' => "",
+                        'total_working_times' => 0
+                    );
+                    $dt->addDay();
+                }
+                $str_night_day_times = "";
+                if ($night_day_times_h > 0 || $night_day_times_m > 0)  {
+                    $floor_m = floor($night_day_times_m / 60);
+                    $set_m = $night_day_times_m - $floor_m * 60;
+                    $set_h = $night_day_times_h + $floor_m;
+                    $str_night_day_times = 
+                        str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                }
+                $str_regular_day_times = "";
+                if ($regular_day_times_h > 0 || $regular_day_times_m > 0)  {
+                    $floor_m = floor($regular_day_times_m / 60);
+                    $set_m = $regular_day_times_m - $floor_m * 60;
+                    $set_h = $regular_day_times_h + $floor_m;
+                    $str_regular_day_times = 
+                        str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                }
+                $str_weekly_dayoff_times = "";
+                if ($weekly_dayoff_times_h > 0 || $weekly_dayoff_times_m > 0)  {
+                    $floor_m = floor($weekly_dayoff_times_m / 60);
+                    $set_m = $weekly_dayoff_times_m - $floor_m * 60;
+                    $set_h = $weekly_dayoff_times_h + $floor_m;
+                    $str_weekly_dayoff_times = 
+                        str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                }
+                $str_paid_holiday_day_times = "";
+                if ($paid_holiday_day_times_h > 0 || $paid_holiday_day_times_m > 0)  {
+                    $floor_h = floor($paid_holiday_day_times_h);
+                    $set_m = ($paid_holiday_day_times_h - $floor_h) * 60;
+                    $paid_holiday_day_times_m = $paid_holiday_day_times_m + $set_m;
+                    $floor_m = floor($paid_holiday_day_times_m / 60);
+                    $set_m = $paid_holiday_day_times_m - $floor_m * 60;
+                    $set_h = $floor_h + $floor_m;
+                    $str_paid_holiday_day_times = 
+                        str_pad($set_h, 2, 0, STR_PAD_LEFT).':'.str_pad($set_m, 2, 0, STR_PAD_LEFT);
+                }
+                $array_user_data[] = array(
+                    'department_code' => $current_item->department_code,
+                    'employment_status' => $current_item->employment_status,
+                    'user_code' => $current_item->user_code,
+                    'department_name' => $current_item->department_name,
+                    'set_department_name' => $set_department_name,
+                    'employment_name' => $current_item->employment_name,
+                    'set_employment_name' => $set_employment_name,
+                    'user_name' => $current_item->user_name,
+                    'set_user_name' => $set_user_name,
+                    'night_day_cnt' => $night_day_cnt,
+                    'set_night_day_cnt' => $set_night_day_cnt,
+                    'regular_day_cnt' => $regular_day_cnt,
+                    'set_regular_day_cnt' => $set_regular_day_cnt,
+                    'weekly_dayoff_cnt' => $weekly_dayoff_cnt,
+                    'set_weekly_dayoff_cnt' => $set_weekly_dayoff_cnt,
+                    'paid_holiday_cnt' => $paid_holiday_cnt,
+                    'set_paid_holiday_cnt' => $set_paid_holiday_cnt,
+                    'night_day_times' => $str_night_day_times,
+                    'set_night_day_times' => $set_night_day_cnt,
+                    'regular_day_times' => $str_regular_day_times,
+                    'set_regular_day_times' => $set_regular_day_cnt,
+                    'weekly_dayoff_times' => $str_weekly_dayoff_times,
+                    'set_weekly_dayoff_times' => $set_weekly_dayoff_cnt,
+                    'paid_holiday_day_times' =>  $str_paid_holiday_day_times,
+                    'set_paid_holiday_day_times' => $set_paid_holiday_cnt,
+                    'array_user_date_data' => $array_user_date_data
+                );
+            }
+            $details = $array_user_data;
+            if (count($details) == 0 || count($array_user_date_data) == 0) {
+                $this->array_messagedata[] = Config::get('const.MSG_INFO.no_data');
+            }
+            $result = true;
+            return response()->json(
+                ['result' => $result, 'details' => $details, 'detail_dates' => $detail_dates, 'csvitem_details' => $csvitem_details,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -1185,10 +1675,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1211,10 +1701,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1241,10 +1731,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1283,11 +1773,11 @@ class ApiCommonController extends Controller
             if(!isset($userrole)) { return null; }
             return $userrole;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1330,11 +1820,11 @@ class ApiCommonController extends Controller
                 ->get();
                 return $mainquery;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1366,6 +1856,7 @@ class ApiCommonController extends Controller
                     't2.name as department_name',
                     $this->table_users.'.employment_status as employment_status',
                     't3.code_name as employment_name',
+                    $this->table_users.'.working_timetable_no as working_timetable_no',
                     $this->table_users.'.role as role')
                 ->JoinSub($subquery3, 't1', function ($join) { 
                     $join->on('t1.code', '=', $this->table_users.'.code');
@@ -1388,11 +1879,11 @@ class ApiCommonController extends Controller
                 ->get();
             return $data;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1433,11 +1924,11 @@ class ApiCommonController extends Controller
             if(!isset($useremail)) { return null; }
             return $useremail;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1454,10 +1945,10 @@ class ApiCommonController extends Controller
         $holiday_kbn = null;
         try {
             // ユーザー休暇区分取得
-            $user_holiday_model = new UserHolidayKubun();
-            $user_holiday_model->setParamUsercodeAttribute($user_id);
-            $user_holiday_model->setParamdatefromAttribute($target_date);
-            $results = $user_holiday_model->getDetail();
+            $calendar_setting_model = new CalendarSettingInformation();
+            $calendar_setting_model->setParamusercodeAttribute($user_id);
+            $calendar_setting_model->setParamfromdateAttribute($target_date);
+            $results = $calendar_setting_model->getCalenderInfo();
             foreach($results as $item) {
                 if (isset($item->holiday_kubun)) {
                     $holiday_kbn = $item->holiday_kubun;
@@ -1466,17 +1957,48 @@ class ApiCommonController extends Controller
             }
             return $holiday_kbn;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
     }
 
     /**
-     * ユーザー所定時刻取得
+     * ユーザー休暇区分取得
+     *
+     * @param target_date YYYYMMDD
+     * @return list
+     */
+    // public function getUserHolidaykbn($user_id, $target_date){
+    //     $holiday_kbn = null;
+    //     try {
+    //         // ユーザー休暇区分取得
+    //         $user_holiday_model = new UserHolidayKubun();
+    //         $user_holiday_model->setParamUsercodeAttribute($user_id);
+    //         $user_holiday_model->setParamdatefromAttribute($target_date);
+    //         $results = $user_holiday_model->getDetail();
+    //         foreach($results as $item) {
+    //             if (isset($item->holiday_kubun)) {
+    //                 $holiday_kbn = $item->holiday_kubun;
+    //                 break;
+    //             }
+    //         }
+    //         return $holiday_kbn;
+    //     }catch(\PDOException $pe){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+    // }
+
+    /**
+     * ユーザー所定時刻半休時刻取得
      *
      * @param Request
      * @return list
@@ -1539,13 +2061,16 @@ class ApiCommonController extends Controller
             $workingHours = $time_tables->getWorkingTimeTable();
             $regular_start_time = null;
             $regular_start_recordtime = null;
+            $regular_start_record_date = null;
             $regular_end_time = null;
             $regular_end_recordtime = null;
+            $regular_end_record_date = null;
             $lunch_start_time = null;
             $lunch_start_recordtime = null;
             $lunch_end_time = null;
             $lunch_end_recordtime = null;
             $regular_2after_recordtime = null;
+            $after_legal_working_hours_day = null;
             /*  AM10:00からの休憩とかPM3:00からの休憩とかありうるので
             *  所定時間の開始時刻＋2時間後 <= 休憩開始 and 休憩時間が30分以上
             *  を昼休みの定義とする */
@@ -1553,19 +2078,26 @@ class ApiCommonController extends Controller
             $min_from_datetime = null;
             foreach($workingHours as $item) {
                 if ($item->working_time_kubun == Config::get('const.C004.regular_working_time')) {
-                    $regular_start_time = $item->working_timetable_from_time;
-                    $regular_start_recordtime = $item->working_timetable_from_record_time;
-                    $regular_start_record_date = date_format(new Carbon($regular_start_recordtime), 'Y-m-d');
-                    $regular_end_time = $item->working_timetable_to_time;
-                    $regular_end_recordtime = $item->working_timetable_to_record_time;
-                    $regular_end_record_date = date_format(new Carbon($regular_end_recordtime), 'Y-m-d');
+                    // 出退勤が複数回ある場合も最初のみ設定
+                    if ($regular_start_time == null) { $regular_start_time = $item->working_timetable_from_time; }
+                    if ($regular_start_recordtime == null) {
+                        $regular_start_recordtime = $item->working_timetable_from_record_time;
+                        $regular_start_record_date = date_format(new Carbon($regular_start_recordtime), 'Y-m-d');
+                    }
+                    if ($regular_end_time == null) { $regular_end_time = $item->working_timetable_to_time; }
+                    if ($regular_end_recordtime == null) {
+                        $regular_end_recordtime = $item->working_timetable_to_record_time;
+                        $regular_end_record_date = date_format(new Carbon($regular_end_recordtime), 'Y-m-d');
+                    }
                     // 所定時間の開始時刻から2時間後を求める
-                    $after_legal_working_hours_day = 7200;
-                    $regular_2after_recordtime = $this->getAfterDayTime(
-                        $regular_start_recordtime,
-                        $after_legal_working_hours_day,
-                        'Y-m-d H:i:s');
-                    $regular_2after_record_date = date_format(new Carbon($regular_2after_recordtime), 'Y-m-d');
+                    if ($regular_2after_recordtime == null) {
+                        $after_legal_working_hours_day = 7200;
+                        $regular_2after_recordtime = $this->getAfterDayTime(
+                            $regular_start_recordtime,
+                            $after_legal_working_hours_day,
+                            'Y-m-d H:i:s');
+                        $regular_2after_record_date = date_format(new Carbon($regular_2after_recordtime), 'Y-m-d');
+                    }
                 } elseif ($item->working_time_kubun == Config::get('const.C004.regular_working_breaks_time')) {
                     if ($regular_2after_recordtime != null) {
                         // 所定時刻内の休憩時間であるか判断する $regular_start_recordtime - $regular_end_recordtime
@@ -1642,14 +2174,164 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
     }
+
+    /**
+     * ユーザー打刻時刻から所定時刻取得
+     *
+     * @return list
+     */
+    public function getWorkingHoursByStamp($params){
+        $this->array_messagedata = array();
+        try{
+            $target_date = $params['target_date'];
+            $user_code = $params['user_code'];
+            $mode = $params['mode'];
+            $department_code = "";
+            if (isset($params['department_code'])) {
+                $department_code = $params['department_code'];
+            } else {
+                // department_code取得する
+                $datas = $this->getUserDepartmentEmploymentRole($user_code, $target_date);
+                foreach ($datas as $item) {
+                    if (isset($item->department_code)) {
+                        $department_code = $item->department_code;
+                    }
+                    break;
+                }
+            }
+            $record_datetime = $params['record_datetime'];
+            // Log::debug('         apicommon getWorkingHoursByStamp = '.date_format(new Carbon($record_datetime), 'H:i:s'));
+            $record_datetime_date = date_format(new Carbon($target_date), 'Y-m-d')." ".date_format(new Carbon($record_datetime), 'H:i:s');
+            // Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
+            // usersのカレンダーからタイムテーブルの所定時刻を取得する
+            $time_tables = new WorkingTimeTable();
+            $target_dateYmd = date_format(new Carbon($target_date), 'Ymd');
+            $time_tables->setParamdatefromAttribute($target_dateYmd);
+            $time_tables->setParamdatetoAttribute($target_dateYmd);
+            $time_tables->setParamDepartmentcodeAttribute($department_code);
+            $time_tables->setParamUsercodeAttribute($user_code);
+            // Log::debug('         apicommon getWorkingHoursByStamp $target_dateYmd = '.$target_dateYmd);
+            // Log::debug('         apicommon getWorkingHoursByStamp $department_code = '.$department_code);
+            // Log::debug('         apicommon getWorkingHoursByStamp $user_code = '.$user_code);
+            $workingHours = $time_tables->getWorkingTimeTable();
+            $working_from_time = null;
+            $working_to_time = null;
+            $working_to_time_date = null;
+            // Log::debug('         apicommon getWorkingHoursByStamp $workingHours = '.count($workingHours));
+            foreach($workingHours as $item) {
+                // Log::debug('         apicommon getWorkingHoursByStamp $item->working_time_kubun = '.$item->working_time_kubun);
+                if ($item->working_time_kubun == Config::get('const.C004.regular_working_time')) {
+                    // Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
+                    // Log::debug('         apicommon getWorkingHoursByStamp $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
+                    if ($mode == Config::get('const.C005.attendance_time') ||
+                        $mode == Config::get('const.C005.missing_middle_time') ||
+                        $mode == Config::get('const.C005.public_going_out_time')) {
+                        if ($record_datetime_date < $item->working_timetable_to_record_time) {
+                            // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
+                            if ($working_from_time == null) {
+                                $working_from_time = $item->working_timetable_from_time;
+                                $working_to_time = $item->working_timetable_to_time;
+                                $working_to_time_date = $item->working_timetable_to_record_time;
+                            } elseif ($working_to_time_date > $item->working_timetable_to_record_time) {
+                                $working_from_time = $item->working_timetable_from_time;
+                                $working_to_time = $item->working_timetable_to_time;
+                            }
+                        }
+                    } elseif ($mode == Config::get('const.C005.leaving_time') ||
+                            $mode == Config::get('const.C005.missing_middle_return_time') ||
+                            $mode == Config::get('const.C005.public_going_out_return_time')) {
+                        if ($record_datetime_date > $item->working_timetable_to_record_time ||
+                            ($record_datetime_date > $item->working_timetable_from_record_time &&
+                            $record_datetime_date <= $item->working_timetable_to_record_time)) {
+                            // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
+                            if ($working_from_time == null) {
+                                $working_from_time = $item->working_timetable_from_time;
+                                $working_to_time = $item->working_timetable_to_time;
+                                $working_to_time_date = $item->working_timetable_to_record_time;
+                            } elseif ($working_to_time_date < $item->working_timetable_to_record_time) {
+                                $working_from_time = $item->working_timetable_from_time;
+                                $working_to_time = $item->working_timetable_to_time;
+                            }
+                        }
+                    }
+                    // Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
+                    // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
+                }
+            }
+            // Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
+            // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
+            // 設定
+            $array_workingHours = array(
+                'working_from_time' => $working_from_time,
+                'working_to_time' => $working_to_time
+            );
+            return $array_workingHours;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * ユーザー打刻モードのデータ取得
+     *
+     * @return list
+     */
+    public function getTimeMode($params){
+        $this->array_messagedata = array();
+        try{
+            $target_date = $params['target_date'];
+            $department_code = $params['department_code'];
+            $user_code = $params['user_code'];
+            $mode = $params['mode'];
+
+            $work_time_model = new WorkTime();
+            $target_dateYmd = date_format(new Carbon($target_date), 'Ymd');
+            $work_time_model->setParamdatefromAttribute($target_dateYmd);
+            $work_time_model->setParamdatetoAttribute($target_dateYmd);
+            $work_time_model->setParamDepartmentcodeAttribute($department_code);
+            $work_time_model->setParamUsercodeAttribute($user_code);
+            $work_time_model->setParamModeAttribute($mode);
+            $results = $work_time_model->getModeInfo();
+            $mode_id = null;
+            $mode = null;
+            $recordtime = null;
+            $is_editor = null;
+            foreach($results as $item) {
+                if (isset($item->record_time)) {
+                    if ($item->record_time != "") {
+                        $mode_id = $item->id;
+                        $mode = $item->mode;
+                        $recordtime = $item->record_time;
+                        $is_editor = $item->is_editor;
+                        break;
+                    }
+                }
+                break;
+            }
+            return array( 'mode_id' => $mode_id, 'mode' => $mode, 'recordtime' => $recordtime, 'is_editor' => $is_editor );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
     // -------------  3.ユーザ情報取得  end -------------------------------------------------------- //
         
     
@@ -1672,10 +2354,10 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1726,10 +2408,10 @@ class ApiCommonController extends Controller
             );
             return $closing;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1752,10 +2434,10 @@ class ApiCommonController extends Controller
             $closing = $setting_model->getMonthClosing();
             return $closing;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1787,25 +2469,25 @@ class ApiCommonController extends Controller
 
         if($dt->isSaturday()){
             $what_weekday['id'] = Config::get('const.C006.sat');
-            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.sat');
+            $what_weekday['week_name'] = "（".Config::get('const.WEEK_KANJI.sat')."）";
         }elseif($dt->isSunday()){
             $what_weekday['id'] = Config::get('const.C006.sun');
-            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.sun');
+            $what_weekday['week_name'] = "（".Config::get('const.WEEK_KANJI.sun')."）";
         }elseif($dt->isMonday()){
             $what_weekday['id'] = Config::get('const.C006.mon');
-            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.mon');
+            $what_weekday['week_name'] = "（".Config::get('const.WEEK_KANJI.mon')."）";
         }elseif($dt->isTuesday()){
             $what_weekday['id'] = Config::get('const.C006.tue');
-            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.tue');
+            $what_weekday['week_name'] = "（".Config::get('const.WEEK_KANJI.tue')."）";
         }elseif($dt->isWednesday()){
             $what_weekday['id'] = Config::get('const.C006.wed');
-            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.wed');
+            $what_weekday['week_name'] = "（".Config::get('const.WEEK_KANJI.wed')."）";
         }elseif($dt->isThursday()){
             $what_weekday['id'] = Config::get('const.C006.thu');
-            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.thu');
+            $what_weekday['week_name'] = "（".Config::get('const.WEEK_KANJI.thu')."）";
         }elseif($dt->isFriday()){
             $what_weekday['id'] = Config::get('const.C006.fri');
-            $what_weekday['week_name'] = Config::get('const.WEEK_KANJI.fri');
+            $what_weekday['week_name'] = "（".Config::get('const.WEEK_KANJI.fri')."）";
         }
 
         return $what_weekday;
@@ -1820,22 +2502,44 @@ class ApiCommonController extends Controller
      */
     public function getYMDWeek($dt){
         // フォーマット 2019年10月01日(火)
-        $date_name = '';
-        $calender_model = new Calendar();
-        $calender_model->setParamfromdateAttribute(date_format(new Carbon($dt), 'Ymd'));
-
-        $calender_model->setDateAttribute(date_format(new Carbon($dt), 'Ymd'));
-        $calendars = $calender_model->getCalenderDate();
-        if (count($calendars) > 0) {
-            foreach ($calendars as $result) {
-                if (isset($result->date_name)) {
-                    $date_name = $result->date_name;
-                }
-                break;
-            }
-        }
+        $array_week = array();
+        $array_week[] = Config::get('const.WEEK_KANJI.sun');
+        $array_week[] = Config::get('const.WEEK_KANJI.mon');
+        $array_week[] = Config::get('const.WEEK_KANJI.tue');
+        $array_week[] = Config::get('const.WEEK_KANJI.wed');
+        $array_week[] = Config::get('const.WEEK_KANJI.thu');
+        $array_week[] = Config::get('const.WEEK_KANJI.fri');
+        $array_week[] = Config::get('const.WEEK_KANJI.sat');
+        $target_date = new Carbon($dt);
+        $date_name = date_format($target_date, 'Y年m月d日')."（".$array_week[$target_date->dayOfWeek]."）";
+//        $date_name = date_format($target_date, 'Ymd');
         return $date_name;
     }
+
+    /**
+     * 日付のフォーマット YYYY年MM月DD日（WEEK）
+     *
+     * @param [type] $dt
+     * @param [type] $format
+     * @return array
+     */
+    // public function getYMDWeek($dt){
+    //     // フォーマット 2019年10月01日(火)
+    //     $date_name = '';
+    //     $calender_model = new Calendar();
+    //     $calender_model->setParamfromdateAttribute(date_format(new Carbon($dt), 'Ymd'));
+    //     $calender_model->setDateAttribute(date_format(new Carbon($dt), 'Ymd'));
+    //     $calendars = $calender_model->getCalenderDate();
+    //     if (count($calendars) > 0) {
+    //         foreach ($calendars as $result) {
+    //             if (isset($result->date_name)) {
+    //                 $date_name = $result->date_name;
+    //             }
+    //             break;
+    //         }
+    //     }
+    //     return $date_name;
+    // }
 
     /**
      * 勤務状況取得
@@ -1875,22 +2579,24 @@ class ApiCommonController extends Controller
             $ondetails = $result_details->whereIn('mode', [
                 Config::get('const.C005.attendance_time'),
                 Config::get('const.C005.missing_middle_return_time'),
-                Config::get('const.C005.public_going_out_return_time')]);
+                Config::get('const.C005.public_going_out_return_time'),
+                Config::get('const.C005.emergency_time')]);
             $offdetails = $result_details->whereIn('mode', [
                 Config::get('const.C005.leaving_time'),
                 Config::get('const.C005.missing_middle_time'),
                 Config::get('const.C005.public_going_out_time'),
+                Config::get('const.C005.emergency_return_time'),
                 null]);
             return response()->json(
                 ['result' => true, 'ondetails' => $ondetails, 'offdetails' => $offdetails,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1943,11 +2649,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1974,11 +2680,11 @@ class ApiCommonController extends Controller
             // }
             return $details;
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -2173,7 +2879,7 @@ class ApiCommonController extends Controller
     }
 
     /**
-     * 時間丸め処理（時間丸めする：出勤用）
+     * 時間丸め処理（時間丸めタイムテーブルに合わせる：出勤用）
      *
      * @return 分で返却
      */
@@ -2185,6 +2891,7 @@ class ApiCommonController extends Controller
         $time_rounding = $params['time_rounding'];
         $working_timetable_no = $params['working_timetable_no'];
         $array_get_timetable_result = $params['array_get_timetable_result'];
+        Log::debug('roundTimeByTimeStart $start_time = '.$start_time);
         // 1分単位の場合はそのまま
         if ($time_unit == Config::get('const.C009.round1')) {
             return $start_time;
@@ -2245,11 +2952,12 @@ class ApiCommonController extends Controller
             }
             $result_round_time = date('Y-m-d H:i:00',strtotime(('+'.$calc_times_round).' second',strtotime($source_dt)));
         }
+        Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
         return $result_round_time;
     }
 
     /**
-     * 時間丸め処理（時間丸めする：退勤用）
+     * 時間丸め処理（時間丸めタイムテーブルに合わせる：退勤用）
      *
      * @return 分で返却
      */
@@ -2261,6 +2969,7 @@ class ApiCommonController extends Controller
         $time_rounding = $params['time_rounding'];
         $working_timetable_no = $params['working_timetable_no'];
         $array_get_timetable_result = $params['array_get_timetable_result'];
+        Log::debug('roundTimeByTimeStart $end_time = '.$end_time);
         // 1分単位の場合はそのまま
         if ($time_unit == Config::get('const.C009.round1')) {
             return $end_time;
@@ -2327,274 +3036,1111 @@ class ApiCommonController extends Controller
             }
             $result_round_time = date('Y-m-d H:i:00',strtotime(('+'.$calc_times_round).' second',strtotime($source_dt)));
         }
+        Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
         return $result_round_time;
     }
 
     /**
-     * 時間丸め処理（シリアルで丸めする）
+     * 時間丸め処理（外出開始用）
      *
      * @return 分で返却
      */
-    public function roundTime($round_time, $time_unit, $time_rounding){
+    public function roundTimeStart($params){
 
+        $round_time = $params['round_time'];
+        $time_unit = $params['time_unit'];
+        $time_rounding = $params['time_rounding'];
+        Log::debug('roundTimeStart $round_time = '.$round_time);
+        Log::debug('roundTimeStart $time_unit = '.$time_unit);
+        Log::debug('roundTimeStart $time_rounding = '.$time_rounding);
+        $dt = new Carbon($round_time);
+        $target_datetime = $dt->format("Y-m-d H:i:s");
+        $target_ymd = $dt->format("Y-m-d");
+        $target_his = $dt->format("His");
+        $target_h = $dt->format("H");
+        $target_i = $dt->format("i");
+        $target_s = $dt->format("s");
         if ($time_rounding == Config::get('const.C010.round_half_up')) {
             // 四捨五入
             if ($time_unit == Config::get('const.C009.round1')) {
-                // 分求める
-                $result_round_time = round($round_time / 60);
-                } elseif ($time_unit == Config::get('const.C009.round5')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 3) {
-                    $result_round_time = $w_time2;
-                } elseif ($w_time3 < 8) {
-                    $result_round_time = $w_time2 + 5;
-                } elseif ($w_time3 < 13) {
-                    $result_round_time = $w_time2 + 10;
-                } elseif ($w_time3 < 18) {
-                    $result_round_time = $w_time2 + 15;
-                } elseif ($w_time3 < 23) {
-                    $result_round_time = $w_time2 + 20;
-                } elseif ($w_time3 < 28) {
-                    $result_round_time = $w_time2 + 25;
-                } elseif ($w_time3 < 33) {
-                    $result_round_time = $w_time2 + 30;
-                } elseif ($w_time3 < 38) {
-                    $result_round_time = $w_time2 + 35;
-                } elseif ($w_time3 < 43) {
-                    $result_round_time = $w_time2 + 40;
-                } elseif ($w_time3 < 48) {
-                    $result_round_time = $w_time2 + 45;
-                } elseif ($w_time3 < 53) {
-                    $result_round_time = $w_time2 + 50;
-                } elseif ($w_time3 < 58) {
-                    $result_round_time = $w_time2 + 55;
+                if ($target_s >= 30) {
+                    $target_s = 0;
+                    $target_i += 1;
+                    if ($target_i >= 60) {
+                        $target_i = 0;
+                        $target_h += 1;
+                        if ($target_h >= 24) {
+                            $target_h = 0;
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                            $dt2 = $dt->copy();
+                            $dt3 = $dt2->addDay(1);
+                            $target_ymd = $dt3->format("Y-m-d");
+                        }
+                    }
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_s = 0;
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round5')) {
+                if ($target_i >= 58) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i >= 53) {
+                    $target_i = 55;
+                } elseif($target_i >= 48) {
+                    $target_i = 50;
+                } elseif($target_i >= 43) {
+                    $target_i = 45;
+                } elseif($target_i >= 38) {
+                    $target_i = 40;
+                } elseif($target_i >= 33) {
+                    $target_i = 35;
+                } elseif($target_i >= 28) {
+                    $target_i = 30;
+                } elseif($target_i >= 23) {
+                    $target_i = 25;
+                } elseif($target_i >= 18) {
+                    $target_i = 20;
+                } elseif($target_i >= 13) {
+                    $target_i = 15;
+                } elseif($target_i >= 8) {
+                    $target_i = 10;
+                } elseif($target_i >= 3) {
+                    $target_i = 5;
+                } else {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round10')) {
-                // 分求める
-                $result_round_time = round($round_time / 60 / 10) * 10;
+                if ($target_i >= 55) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i >= 45) {
+                    $target_i = 50;
+                } elseif($target_i >= 35) {
+                    $target_i = 40;
+                } elseif($target_i >= 25) {
+                    $target_i = 30;
+                } elseif($target_i >= 15) {
+                    $target_i = 20;
+                } elseif($target_i >= 5) {
+                    $target_i = 10;
+                } else {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round15')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 8) {
-                    $result_round_time = $w_time2;
-                } elseif ($w_time3 < 23) {
-                    $result_round_time = $w_time2 + 15;
-                } elseif ($w_time3 < 38) {
-                    $result_round_time = $w_time2 + 30;
-                } elseif ($w_time3 < 53) {
-                    $result_round_time = $w_time2 + 45;
+                if ($target_i >= 53) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i >= 38) {
+                    $target_i = 45;
+                } elseif($target_i >= 23) {
+                    $target_i = 30;
+                } elseif($target_i >= 8) {
+                    $target_i = 15;
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round30')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 15) {
-                    $result_round_time = $w_time2;
-                } elseif ($w_time3 < 45) {
-                    $result_round_time = $w_time2 + 30;
+                if ($target_i >= 45) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i >= 15) {
+                    $target_i = 30;
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round60')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 30) {
-                    $result_round_time = $w_time2;
+                if ($target_i >= 30) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             }
         } elseif ($time_rounding == Config::get('const.C010.round_down')) {
             // 切り捨て
             if ($time_unit == Config::get('const.C009.round1')) {
-                // 分求める
-                $result_round_time = floor($round_time / 60);
+                if ($target_s <= 59) {
+                    $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round5')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 5) {
-                    $result_round_time = $w_time2;
-                } elseif ($w_time3 < 10) {
-                    $result_round_time = $w_time2 + 5;
-                } elseif ($w_time3 < 15) {
-                    $result_round_time = $w_time2 + 10;
-                } elseif ($w_time3 < 20) {
-                    $result_round_time = $w_time2 + 15;
-                } elseif ($w_time3 < 25) {
-                    $result_round_time = $w_time2 + 20;
-                } elseif ($w_time3 < 30) {
-                    $result_round_time = $w_time2 + 25;
-                } elseif ($w_time3 < 35) {
-                    $result_round_time = $w_time2 + 30;
-                } elseif ($w_time3 < 40) {
-                    $result_round_time = $w_time2 + 35;
-                } elseif ($w_time3 < 45) {
-                    $result_round_time = $w_time2 + 40;
-                } elseif ($w_time3 < 50) {
-                    $result_round_time = $w_time2 + 45;
-                } elseif ($w_time3 < 55) {
-                    $result_round_time = $w_time2 + 50;
-                } elseif ($w_time3 < 60) {
-                    $result_round_time = $w_time2 + 55;
+                if ($target_i > 55) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i > 50) {
+                    $target_i = 55;
+                } elseif($target_i > 45) {
+                    $target_i = 50;
+                } elseif($target_i > 40) {
+                    $target_i = 45;
+                } elseif($target_i > 35) {
+                    $target_i = 40;
+                } elseif($target_i > 30) {
+                    $target_i = 35;
+                } elseif($target_i > 25) {
+                    $target_i = 30;
+                } elseif($target_i > 20) {
+                    $target_i = 25;
+                } elseif($target_i > 15) {
+                    $target_i = 20;
+                } elseif($target_i > 10) {
+                    $target_i = 15;
+                } elseif($target_i > 5) {
+                    $target_i = 10;
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round10')) {
-                // 分求める
-                $result_round_time = floor($round_time / 60 / 10) * 10;
+                if ($target_i > 50) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i > 40) {
+                    $target_i = 50;
+                } elseif($target_i > 30) {
+                    $target_i = 40;
+                } elseif($target_i > 20) {
+                    $target_i = 30;
+                } elseif($target_i > 10) {
+                    $target_i = 20;
+                } elseif($target_i > 0) {
+                    $target_i = 10;
+                } else {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round15')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 15) {
-                    $result_round_time = $w_time2;
-                } elseif ($w_time3 < 30) {
-                    $result_round_time = $w_time2 + 15;
-                } elseif ($w_time3 < 45) {
-                    $result_round_time = $w_time2 + 30;
-                } elseif ($w_time3 < 60) {
-                    $result_round_time = $w_time2 + 45;
+                if ($target_i > 45) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i > 30) {
+                    $target_i = 45;
+                } elseif($target_i > 15) {
+                    $target_i = 30;
+                } elseif($target_i > 0) {
+                    $target_i = 15;
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round30')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 30) {
-                    $result_round_time = $w_time2;
-                } elseif ($w_time3 < 60) {
-                    $result_round_time = $w_time2 + 30;
+                if ($target_i > 30) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round60')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 60) {
-                    $result_round_time = $w_time2;
-                } else {
-                    $result_round_time = $w_time2 + 60;
+                $target_i = 0;
+                if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                    if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             }
         } elseif ($time_rounding == Config::get('const.C010.round_up')) {
             // 切り上げ
             if ($time_unit == Config::get('const.C009.round1')) {
-                // 分求める
-                $result_round_time = ceil($round_time / 60);
+                if ($target_s >= 0) {
+                    $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round5')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 5) {
-                    $result_round_time = $w_time2 + 5;
-                } elseif ($w_time3 < 10) {
-                    $result_round_time = $w_time2 + 10;
-                } elseif ($w_time3 < 15) {
-                    $result_round_time = $w_time2 + 15;
-                } elseif ($w_time3 < 20) {
-                    $result_round_time = $w_time2 + 20;
-                } elseif ($w_time3 < 25) {
-                    $result_round_time = $w_time2 + 25;
-                } elseif ($w_time3 < 30) {
-                    $result_round_time = $w_time2 + 30;
-                } elseif ($w_time3 < 35) {
-                    $result_round_time = $w_time2 + 35;
-                } elseif ($w_time3 < 40) {
-                    $result_round_time = $w_time2 + 40;
-                } elseif ($w_time3 < 45) {
-                    $result_round_time = $w_time2 + 45;
-                } elseif ($w_time3 < 50) {
-                    $result_round_time = $w_time2 + 50;
-                } elseif ($w_time3 < 55) {
-                    $result_round_time = $w_time2 + 55;
-                } elseif ($w_time3 < 60) {
-                    $result_round_time = $w_time2 + 60;
+                if ($target_i >= 55) {
+                    $target_i = 55;
+                } elseif($target_i >= 50) {
+                    $target_i = 50;
+                } elseif($target_i >= 45) {
+                    $target_i = 45;
+                } elseif($target_i >= 40) {
+                    $target_i = 40;
+                } elseif($target_i >= 35) {
+                    $target_i = 35;
+                } elseif($target_i >= 30) {
+                    $target_i = 30;
+                } elseif($target_i >= 25) {
+                    $target_i = 25;
+                } elseif($target_i >= 20) {
+                    $target_i = 20;
+                } elseif($target_i >= 15) {
+                    $target_i = 15;
+                } elseif($target_i >= 10) {
+                    $target_i = 10;
+                } elseif($target_i >= 5) {
+                    $target_i = 5;
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round10')) {
-                // 分求める
-                $result_round_time = ceil($round_time / 60 / 10) * 10;
-            } elseif ($time_unit == Config::get('const.C009.round15')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 15) {
-                    $result_round_time = $w_time2 + 15;
-                } elseif ($w_time3 < 30) {
-                    $result_round_time = $w_time2 + 30;
-                } elseif ($w_time3 < 45) {
-                    $result_round_time = $w_time2 + 45;
-                } elseif ($w_time3 < 60) {
-                    $result_round_time = $w_time2 + 60;
+                if ($target_i >= 50) {
+                    $target_i = 50;
+                } elseif($target_i >= 40) {
+                    $target_i = 40;
+                } elseif($target_i >= 30) {
+                    $target_i = 30;
+                } elseif($target_i >= 20) {
+                    $target_i = 20;
+                } elseif($target_i >= 10) {
+                    $target_i = 10;
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round30')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 30) {
-                    $result_round_time = $w_time2 + 30;
-                } elseif ($w_time3 < 60) {
-                    $result_round_time = $w_time2 + 60;
+                if ($target_i >= 30) {
+                    $target_i = 30;
                 } else {
-                    $result_round_time = $w_time2 + 60;
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             } elseif ($time_unit == Config::get('const.C009.round60')) {
-                // 切り捨てて時間求める
-                $w_time1 = floor($round_time / 60 / 60);
-                $w_time2 = $w_time1 * 60;
-                // 分の差を求める
-                $w_time3 = ($round_time / 60) - $w_time2;
-                if ($w_time3 < 60) {
-                    $result_round_time = $w_time2 + 60;
-                } else {
-                    $result_round_time = $w_time2 + 60;
+                $target_i = 0;
+                if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                    if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                    }
                 }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
             }
-        } elseif ($time_unit == Config::get('const.C010.non')) {
-            // なし
-            $result_round_time = $round_time / 60;
-        } else {
-            $result_round_time = $round_time / 60;
         }
 
-        return $result_round_time;
+        Log::debug('roundTimeStart $target_datetime = '.$target_datetime);
+        return $target_datetime;
     }
+
+    /**
+     * 時間丸め処理（外出終了用）
+     *
+     * @return 分で返却
+     */
+    public function roundTimeEnd($params){
+
+        $round_time = $params['round_time'];
+        $time_unit = $params['time_unit'];
+        $time_rounding = $params['time_rounding'];
+        Log::debug('roundTimeEnd $round_time = '.$round_time);
+        Log::debug('roundTimeEnd $time_unit = '.$time_unit);
+        Log::debug('roundTimeEnd $time_rounding = '.$time_rounding);
+        $dt = new Carbon($round_time);
+        $target_datetime = $dt->format("Y-m-d H:i:s");
+        $target_ymd = $dt->format("Y-m-d");
+        $target_his = $dt->format("His");
+        $target_h = $dt->format("H");
+        $target_i = $dt->format("i");
+        $target_s = $dt->format("s");
+        if ($time_rounding == Config::get('const.C010.round_half_up')) {
+            // 四捨五入
+            if ($time_unit == Config::get('const.C009.round1')) {
+                if ($target_s < 30) {
+                    $target_s = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } else {
+                    $target_s = 0;
+                    $target_i += 1;
+                    if ($target_i >= 60) {
+                        $target_i = 0;
+                        $target_h += 1;
+                        if ($target_h >= 24) {
+                            $target_h = 0;
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                            $dt2 = $dt->copy();
+                            $dt3 = $dt2->addDay(1);
+                            $target_ymd = $dt3->format("Y-m-d");
+                        }
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round5')) {
+                if ($target_i < 3) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } elseif($target_i < 8) {
+                    $target_i = 5;
+                } elseif($target_i < 13) {
+                    $target_i = 10;
+                } elseif($target_i < 18) {
+                    $target_i = 15;
+                } elseif($target_i < 23) {
+                    $target_i = 20;
+                } elseif($target_i < 28) {
+                    $target_i = 25;
+                } elseif($target_i < 33) {
+                    $target_i = 30;
+                } elseif($target_i < 38) {
+                    $target_i = 35;
+                } elseif($target_i < 43) {
+                    $target_i = 40;
+                } elseif($target_i < 48) {
+                    $target_i = 45;
+                } elseif($target_i < 53) {
+                    $target_i = 50;
+                } elseif($target_i < 58) {
+                    $target_i = 55;
+                } else {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round10')) {
+                if ($target_i < 5) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } elseif($target_i < 15) {
+                    $target_i = 10;
+                } elseif($target_i < 25) {
+                    $target_i = 20;
+                } elseif($target_i < 35) {
+                    $target_i = 30;
+                } elseif($target_i < 45) {
+                    $target_i = 40;
+                } elseif($target_i < 55) {
+                    $target_i = 50;
+                } else {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round15')) {
+                if ($target_i < 8) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } elseif($target_i < 23) {
+                    $target_i = 15;
+                } elseif($target_i < 38) {
+                    $target_i = 30;
+                } elseif($target_i < 53) {
+                    $target_i = 45;
+                } else {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round30')) {
+                if ($target_i < 15) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } elseif($target_i < 45) {
+                    $target_i = 30;
+                } else {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round60')) {
+                if ($target_i < 30) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } else {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            }
+        } elseif ($time_rounding == Config::get('const.C010.round_down')) {
+            // 切り捨て
+            if ($time_unit == Config::get('const.C009.round1')) {
+                if ($target_s <= 59) {
+                    $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round5')) {
+                if ($target_i < 5) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } elseif($target_i < 10) {
+                    $target_i = 5;
+                } elseif($target_i < 15) {
+                    $target_i = 10;
+                } elseif($target_i < 20) {
+                    $target_i = 15;
+                } elseif($target_i < 25) {
+                    $target_i = 20;
+                } elseif($target_i < 30) {
+                    $target_i = 25;
+                } elseif($target_i < 35) {
+                    $target_i = 30;
+                } elseif($target_i < 40) {
+                    $target_i = 35;
+                } elseif($target_i < 45) {
+                    $target_i = 40;
+                } elseif($target_i < 50) {
+                    $target_i = 45;
+                } elseif($target_i < 55) {
+                    $target_i = 50;
+                } elseif($target_i < 60) {
+                    $target_i = 55;
+                } else {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round10')) {
+                if ($target_i < 10) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } elseif($target_i < 20) {
+                    $target_i = 10;
+                } elseif($target_i < 30) {
+                    $target_i = 20;
+                } elseif($target_i < 40) {
+                    $target_i = 30;
+                } elseif($target_i < 50) {
+                    $target_i = 40;
+                } else {
+                    $target_i = 50;
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round15')) {
+                if ($target_i < 15) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } elseif($target_i < 30) {
+                    $target_i = 15;
+                } elseif($target_i < 45) {
+                    $target_i = 30;
+                } else {
+                    $target_i = 45;
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round30')) {
+                if ($target_i < 30) {
+                    $target_i = 0;
+                    if (str_pad($target_h, 2 , '0', STR_PAD_LEFT) == "00") {
+                        if (str_pad($target_i, 2 , '0', STR_PAD_LEFT) == "00") {
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        }
+                    }
+                } else {
+                    $target_i = 30;
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round60')) {
+                $target_i = 0;
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            }
+        } elseif ($time_rounding == Config::get('const.C010.round_up')) {
+            // 切り上げ
+            if ($time_unit == Config::get('const.C009.round1')) {
+                if ($target_s > 0) {
+                    $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                    $target_i += 1;
+                    if ($target_i >= 60) {
+                        $target_i = 0;
+                        $target_h += 1;
+                        if ($target_h >= 24) {
+                            $target_h = 0;
+                            $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                            $dt2 = $dt->copy();
+                            $dt3 = $dt2->addDay(1);
+                            $target_ymd = $dt3->format("Y-m-d");
+                        }
+                    }
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round5')) {
+                if ($target_i > 55) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i > 50) {
+                    $target_i = 55;
+                } elseif($target_i > 45) {
+                    $target_i = 50;
+                } elseif($target_i > 40) {
+                    $target_i = 45;
+                } elseif($target_i > 35) {
+                    $target_i = 40;
+                } elseif($target_i > 30) {
+                    $target_i = 35;
+                } elseif($target_i > 25) {
+                    $target_i = 30;
+                } elseif($target_i > 20) {
+                    $target_i = 25;
+                } elseif($target_i > 15) {
+                    $target_i = 20;
+                } elseif($target_i > 10) {
+                    $target_i = 15;
+                } elseif($target_i > 5) {
+                    $target_i = 10;
+                } elseif($target_i > 0) {
+                    $target_i = 5;
+                } else {
+                    $target_i = 0;
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round10')) {
+                if ($target_i > 50) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i > 40) {
+                    $target_i = 50;
+                } elseif($target_i > 30) {
+                    $target_i = 40;
+                } elseif($target_i > 20) {
+                    $target_i = 30;
+                } elseif($target_i > 10) {
+                    $target_i = 20;
+                } elseif($target_i > 0) {
+                    $target_i = 10;
+                } else {
+                    $target_i = 0;
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round30')) {
+                if ($target_i > 30) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } elseif($target_i > 0) {
+                    $target_i = 30;
+                } else {
+                    $target_i = 0;
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            } elseif ($time_unit == Config::get('const.C009.round60')) {
+                if ($target_i > 0) {
+                    $target_i = 0;
+                    $target_h += 1;
+                    if ($target_h >= 24) {
+                        $target_h = 0;
+                        $target_s = 1;      // 00:00:00 となった場合時刻として認識されないため 00:00:01
+                        $dt2 = $dt->copy();
+                        $dt3 = $dt2->addDay(1);
+                        $target_ymd = $dt3->format("Y-m-d");
+                    }
+                } else {
+                    $target_i = 0;
+                }
+                $target_time = str_pad($target_h, 2 , '0', STR_PAD_LEFT).":".str_pad($target_i, 2 , '0', STR_PAD_LEFT).":".str_pad($target_s, 2 , '0', STR_PAD_LEFT);
+                $target_datetime = $target_ymd.' '.$target_time;
+            }
+        }
+
+        Log::debug('roundTimeEnd $target_datetime = '.$target_datetime);
+        return $target_datetime;
+    }
+    // public function roundTime($round_time, $time_unit, $time_rounding){
+
+    //     Log::debug('roundTime $round_time = '.$round_time);
+    //     Log::debug('roundTime $time_unit = '.$time_unit);
+    //     Log::debug('roundTime $time_rounding = '.$time_rounding);
+    //     if ($time_rounding == Config::get('const.C010.round_half_up')) {
+    //         // 四捨五入
+    //         if ($time_unit == Config::get('const.C009.round1')) {
+    //             // 分求める
+    //             $result_round_time = round($round_time / 60);
+    //             } elseif ($time_unit == Config::get('const.C009.round5')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 3) {
+    //                 $result_round_time = $w_time2;
+    //             } elseif ($w_time3 < 8) {
+    //                 $result_round_time = $w_time2 + 5;
+    //             } elseif ($w_time3 < 13) {
+    //                 $result_round_time = $w_time2 + 10;
+    //             } elseif ($w_time3 < 18) {
+    //                 $result_round_time = $w_time2 + 15;
+    //             } elseif ($w_time3 < 23) {
+    //                 $result_round_time = $w_time2 + 20;
+    //             } elseif ($w_time3 < 28) {
+    //                 $result_round_time = $w_time2 + 25;
+    //             } elseif ($w_time3 < 33) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } elseif ($w_time3 < 38) {
+    //                 $result_round_time = $w_time2 + 35;
+    //             } elseif ($w_time3 < 43) {
+    //                 $result_round_time = $w_time2 + 40;
+    //             } elseif ($w_time3 < 48) {
+    //                 $result_round_time = $w_time2 + 45;
+    //             } elseif ($w_time3 < 53) {
+    //                 $result_round_time = $w_time2 + 50;
+    //             } elseif ($w_time3 < 58) {
+    //                 $result_round_time = $w_time2 + 55;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round10')) {
+    //             // 分求める
+    //             $result_round_time = round($round_time / 60 / 10) * 10;
+    //         } elseif ($time_unit == Config::get('const.C009.round15')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 8) {
+    //                 $result_round_time = $w_time2;
+    //             } elseif ($w_time3 < 23) {
+    //                 $result_round_time = $w_time2 + 15;
+    //             } elseif ($w_time3 < 38) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } elseif ($w_time3 < 53) {
+    //                 $result_round_time = $w_time2 + 45;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round30')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 15) {
+    //                 $result_round_time = $w_time2;
+    //             } elseif ($w_time3 < 45) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round60')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 30) {
+    //                 $result_round_time = $w_time2;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         }
+    //     } elseif ($time_rounding == Config::get('const.C010.round_down')) {
+    //         // 切り捨て
+    //         if ($time_unit == Config::get('const.C009.round1')) {
+    //             // 分求める
+    //             $result_round_time = floor($round_time / 60);
+    //         } elseif ($time_unit == Config::get('const.C009.round5')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 5) {
+    //                 $result_round_time = $w_time2;
+    //             } elseif ($w_time3 < 10) {
+    //                 $result_round_time = $w_time2 + 5;
+    //             } elseif ($w_time3 < 15) {
+    //                 $result_round_time = $w_time2 + 10;
+    //             } elseif ($w_time3 < 20) {
+    //                 $result_round_time = $w_time2 + 15;
+    //             } elseif ($w_time3 < 25) {
+    //                 $result_round_time = $w_time2 + 20;
+    //             } elseif ($w_time3 < 30) {
+    //                 $result_round_time = $w_time2 + 25;
+    //             } elseif ($w_time3 < 35) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } elseif ($w_time3 < 40) {
+    //                 $result_round_time = $w_time2 + 35;
+    //             } elseif ($w_time3 < 45) {
+    //                 $result_round_time = $w_time2 + 40;
+    //             } elseif ($w_time3 < 50) {
+    //                 $result_round_time = $w_time2 + 45;
+    //             } elseif ($w_time3 < 55) {
+    //                 $result_round_time = $w_time2 + 50;
+    //             } elseif ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2 + 55;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round10')) {
+    //             // 分求める
+    //             $result_round_time = floor($round_time / 60 / 10) * 10;
+    //         } elseif ($time_unit == Config::get('const.C009.round15')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 15) {
+    //                 $result_round_time = $w_time2;
+    //             } elseif ($w_time3 < 30) {
+    //                 $result_round_time = $w_time2 + 15;
+    //             } elseif ($w_time3 < 45) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } elseif ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2 + 45;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round30')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 30) {
+    //                 $result_round_time = $w_time2;
+    //             } elseif ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round60')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         }
+    //     } elseif ($time_rounding == Config::get('const.C010.round_up')) {
+    //         // 切り上げ
+    //         if ($time_unit == Config::get('const.C009.round1')) {
+    //             // 分求める
+    //             $result_round_time = ceil($round_time / 60);
+    //         } elseif ($time_unit == Config::get('const.C009.round5')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 5) {
+    //                 $result_round_time = $w_time2 + 5;
+    //             } elseif ($w_time3 < 10) {
+    //                 $result_round_time = $w_time2 + 10;
+    //             } elseif ($w_time3 < 15) {
+    //                 $result_round_time = $w_time2 + 15;
+    //             } elseif ($w_time3 < 20) {
+    //                 $result_round_time = $w_time2 + 20;
+    //             } elseif ($w_time3 < 25) {
+    //                 $result_round_time = $w_time2 + 25;
+    //             } elseif ($w_time3 < 30) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } elseif ($w_time3 < 35) {
+    //                 $result_round_time = $w_time2 + 35;
+    //             } elseif ($w_time3 < 40) {
+    //                 $result_round_time = $w_time2 + 40;
+    //             } elseif ($w_time3 < 45) {
+    //                 $result_round_time = $w_time2 + 45;
+    //             } elseif ($w_time3 < 50) {
+    //                 $result_round_time = $w_time2 + 50;
+    //             } elseif ($w_time3 < 55) {
+    //                 $result_round_time = $w_time2 + 55;
+    //             } elseif ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2 + 60;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round10')) {
+    //             // 分求める
+    //             $result_round_time = ceil($round_time / 60 / 10) * 10;
+    //         } elseif ($time_unit == Config::get('const.C009.round15')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 15) {
+    //                 $result_round_time = $w_time2 + 15;
+    //             } elseif ($w_time3 < 30) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } elseif ($w_time3 < 45) {
+    //                 $result_round_time = $w_time2 + 45;
+    //             } elseif ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2 + 60;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round30')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 30) {
+    //                 $result_round_time = $w_time2 + 30;
+    //             } elseif ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2 + 60;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         } elseif ($time_unit == Config::get('const.C009.round60')) {
+    //             // 切り捨てて時間求める
+    //             $w_time1 = floor($round_time / 60 / 60);
+    //             $w_time2 = $w_time1 * 60;
+    //             // 分の差を求める
+    //             $w_time3 = ($round_time / 60) - $w_time2;
+    //             if ($w_time3 < 60) {
+    //                 $result_round_time = $w_time2 + 60;
+    //             } else {
+    //                 $result_round_time = $w_time2 + 60;
+    //             }
+    //         }
+    //     } elseif ($time_unit == Config::get('const.C010.non')) {
+    //         // なし
+    //         $result_round_time = $round_time / 60;
+    //     } else {
+    //         $result_round_time = $round_time / 60;
+    //     }
+
+    //     return $result_round_time;
+    // }
 
     // -------------  5.算出情報取得  end ------------------------------------------------------- //
     
@@ -2613,24 +4159,55 @@ class ApiCommonController extends Controller
         $usercode = $params['usercode'];
         $datefrom = $params['datefrom'];
         // 指定日が休日かどうか
+        $calender_setting_model = new CalendarSettingInformation();
+        $calender_setting_model->setParamdepartmentcodeAttribute($departmentcode);
+        $calender_setting_model->setParamemploymentstatusAttribute($employmentstatus);
+        $calender_setting_model->setParamusercodeAttribute($usercode);
+        $calender_setting_model->setParamfromdateAttribute($datefrom);
+        $calender_setting_model->setParamlimitAttribute(1);
+        $calendars = $calender_setting_model->getCalenderInfo();
         $business_kubun = null;
-        $calender_model = new Calendar();
-        $calender_model->setParamdepartmentcodeAttribute($departmentcode);
-        $calender_model->setParamemploymentstatusAttribute($employmentstatus);
-        $calender_model->setParamusercodeAttribute($usercode);
-        $calender_model->setParamfromdateAttribute($datefrom);
-        $calendars = $calender_model->getCalenderDate();
-        if (count($calendars) > 0) {
-            foreach ($calendars as $result) {
-                if (isset($result->business_kubun)) {
-                    $business_kubun = $result->business_kubun;
-                }
-                break;
+        foreach ($calendars as $result) {
+            if (isset($result->business_kubun)) {
+                $business_kubun = $result->business_kubun;
             }
+            break;
         }
 
         return $business_kubun;
     }
+ 
+    /**
+     * 法定法定外休日判定
+     * 
+     *
+     * @return 
+     */
+    // public function jdgBusinessKbn($params)
+    // {
+    //     $departmentcode = $params['departmentcode'];
+    //     $employmentstatus = $params['employmentstatus'];
+    //     $usercode = $params['usercode'];
+    //     $datefrom = $params['datefrom'];
+    //     // 指定日が休日かどうか
+    //     $business_kubun = null;
+    //     $calender_model = new Calendar();
+    //     $calender_model->setParamdepartmentcodeAttribute($departmentcode);
+    //     $calender_model->setParamemploymentstatusAttribute($employmentstatus);
+    //     $calender_model->setParamusercodeAttribute($usercode);
+    //     $calender_model->setParamfromdateAttribute($datefrom);
+    //     $calendars = $calender_model->getCalenderDate();
+    //     if (count($calendars) > 0) {
+    //         foreach ($calendars as $result) {
+    //             if (isset($result->business_kubun)) {
+    //                 $business_kubun = $result->business_kubun;
+    //             }
+    //             break;
+    //         }
+    //     }
+
+    //     return $business_kubun;
+    // }
 
     /**
      * 時間範囲内であるか判定
@@ -2696,7 +4273,7 @@ class ApiCommonController extends Controller
      * 
      * @return チェック結果
      */
-    public function chkMode($target_mode, $source_mode){
+    public function chkMode($target_mode, $source_mode, $is_chk_mode_autoset){
 
         if ( $source_mode == '') {
             if ($target_mode == Config::get('const.C005.attendance_time')) {
@@ -2708,6 +4285,9 @@ class ApiCommonController extends Controller
             if ($source_mode == Config::get('const.C005.leaving_time')) {
                 return Config::get('const.RESULT_CODE.normal');
             }
+            if ($source_mode == Config::get('const.C005.attendance_time') && $is_chk_mode_autoset) {
+                return Config::get('const.RESULT_CODE.normal');
+            }
         } elseif ($target_mode == Config::get('const.C005.leaving_time')) {
             if ($source_mode == Config::get('const.C005.attendance_time')) {
                 return Config::get('const.RESULT_CODE.normal');
@@ -2716,6 +4296,9 @@ class ApiCommonController extends Controller
                 return Config::get('const.RESULT_CODE.normal');
             }
             if ($source_mode == Config::get('const.C005.public_going_out_return_time')) {
+                return Config::get('const.RESULT_CODE.normal');
+            }
+            if ($source_mode == Config::get('const.C005.leaving_time') && $is_chk_mode_autoset) {
                 return Config::get('const.RESULT_CODE.normal');
             }
         } elseif ($target_mode == Config::get('const.C005.missing_middle_time')) {
@@ -2746,10 +4329,32 @@ class ApiCommonController extends Controller
             if ($source_mode == Config::get('const.C005.public_going_out_time')) {
                 return Config::get('const.RESULT_CODE.normal');
             }
+        } elseif ($target_mode == Config::get('const.C005.emergency_time')) {
+            if ($source_mode == Config::get('const.C005.emergency_return_time')) {
+                return Config::get('const.RESULT_CODE.normal');
+            }
+        } elseif ($target_mode == Config::get('const.C005.emergency_return_time')) {
+            if ($source_mode == Config::get('const.C005.emergency_time')) {
+                return Config::get('const.RESULT_CODE.normal');
+            }
         } else {
             return Config::get('const.C018.forget_stamp');
         }
         return Config::get('const.C018.forget_stamp');
+    }
+  
+    /**
+     * 緊急かの判定
+     * 
+     *
+     * @return 
+     */
+    public function isEmagency($working_timetable_no)
+    {
+        if ($working_timetable_no == Config::get('const.C999_NAME.emergency_timetable_no')) {
+            return true;
+        }
+        return false;
     }
     // -------------  6.判定・チェック end ----------------------------------------------------- //
 
@@ -2919,10 +4524,11 @@ class ApiCommonController extends Controller
      */
     public function cnvToDecFromStamp($target_time){
         $time_division = $target_time / 3600;
-        $time_int = floor($time_division);
-        $convert_time = $time_int;
+        $time_hours = floor($time_division);                            //  時間数
+        // $time_min = floor($target_time - ($time_hours * 3600) / 60);    //  分
+        $convert_time = $time_hours;
         // 小数第３位が0でない場合は四捨五入
-        $w_time_decimal_part = $time_division - $time_int;
+        $w_time_decimal_part = $time_division - $time_hours;
         if ($w_time_decimal_part > 0) {
             $w_time_decimal_part_3 = $w_time_decimal_part * 100;
             $w_time_decimal_part_31 = $w_time_decimal_part_3 - floor($w_time_decimal_part_3);
@@ -2958,6 +4564,7 @@ class ApiCommonController extends Controller
      */
     public function analyzeTimeTable($timetables, $working_time_kubun, $working_timetable_no){
         $array_times = array();
+        $temp_times = array();
         if ($working_time_kubun != Config::get('const.C004.out_of_regular_working_time')) {
             $filtered = $timetables->where('no', $working_timetable_no)->where('working_time_kubun', $working_time_kubun);
             foreach($filtered as $result_time) {
@@ -3235,6 +4842,7 @@ class ApiCommonController extends Controller
         $systemdate = Carbon::now();
         $work_time_model = new WorkTime();
         $apicommon_model = new ApiCommonController();
+        $this->array_messagedata = array();
 
         DB::beginTransaction();
         try{
@@ -3251,42 +4859,63 @@ class ApiCommonController extends Controller
                 break;
             }
             $department_code = null;
+            $user_name = null;
             // 休暇登録
             //部署選択されていない場合は部署コードないためApiCommonControllerで取得
             if ($department_code == null) {
                 $dep_results = $apicommon_model->getUserDepartment($user_code, $target_date);
                 foreach($dep_results as $dep_result) {
                     $department_code = $dep_result->department_code;
+                    $user_name = $dep_result->name;
                     break;
                 }
             }
             $working_date = $target_date;
-            $user_holiday = new UserHolidayKubun();
-            $user_holiday->setParamUsercodeAttribute($user_code);
-            $user_holiday->setParamDepartmentcodeAttribute($department_code);
-            $user_holiday->setParamdatefromAttribute($working_date);
-            $user_holiday->setSystemDateAttribute($systemdate);
-            // 既に存在する場合は論理削除する
-            $is_exists = $user_holiday->isExistsKbn();
-            if($is_exists){
-                $user_holiday->delKbn();
+            // $user_holiday = new UserHolidayKubun();
+            // $user_holiday->setParamUsercodeAttribute($user_code);
+            // $user_holiday->setParamDepartmentcodeAttribute($department_code);
+            // $user_holiday->setParamdatefromAttribute($working_date);
+            // $user_holiday->setSystemDateAttribute($systemdate);
+            // // 既に存在する場合は論理削除する
+            // $is_exists = $user_holiday->isExistsKbn();
+            // if($is_exists){
+            //     $user_holiday->delKbn();
+            // }
+            $calendar_setting_model = new CalendarSettingInformation();
+            $calendar_setting_model->setParamUsercodeAttribute($user_code);
+            $calendar_setting_model->setParamDepartmentcodeAttribute($department_code);
+            $calendar_setting_model->setParamfromdateAttribute($working_date);
+            // 存在しない場合はエラーで返す
+            $is_exists = $calendar_setting_model->isExists();
+            if(!$is_exists){
+                DB::rollBack();
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $user_name."さん", Config::get('const.MSG_ERROR.not_setting_calendar')));
+                $this->array_messagedata[] = str_replace('{0}', $user_name."さん", Config::get('const.MSG_ERROR.not_setting_calendar'));
+                return array(
+                    'result' => false, 
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
+                );
             }
-            $user_holiday_kubuns_id = null;
-            foreach($details as $item) {
-                if($item['kbn_flag'] == 1){     // 休暇区分のみ登録
-                    $user_holiday->setWorkingdateAttribute($working_date);
-                    $user_holiday->setDepartmentcodeAttribute($department_code);
-                    $user_holiday->setUsercodeAttribute($user_code);
-                    $user_holiday->setHolidaykubunAttribute($item['user_holiday_kbn']);
-                    $user_holiday->setCreateduserAttribute($login_user_code);
-                    $user_holiday->insertKbn();
-                    // 勤怠時刻にIDを登録するのでSELECTする
-                    $id_results = $user_holiday->getDetail();
-                    foreach($id_results as $item_id) {
-                        $user_holiday_kubuns_id = $item_id->id;
-                        break;
+            $calendar_setting_model->setUpdatedatAttribute($systemdate);
+            $calendar_setting_model->setUpdateduserAttribute($login_user_code);
+            Log::debug('addAttendanceWork count details = '.count($details));
+            if (count($details) == 0) {
+                $calendar_setting_model->setHolidaykubunAttribute(0);
+                $calendar_setting_model->updateCalendar();
+            } else {
+                foreach($details as $item) {
+                    Log::debug('addAttendanceWork kbn_flag = '.$item['kbn_flag']);
+                    if($item['kbn_flag'] == 1){     // 休暇区分のみ登録
+                        $calendar_setting_model->setHolidaykubunAttribute($item['user_holiday_kbn']);
+                        // $user_holiday->setHolidaykubunAttribute($item['user_holiday_kbn']);
+                        // $user_holiday->setCreateduserAttribute($login_user_code);
+                        // $user_holiday->insertKbn();
+                        // 勤怠時刻にIDを登録するのでSELECTする
+                    } else {
+                        $calendar_setting_model->setHolidaykubunAttribute(0);
                     }
-                    // 休暇の場合は先頭行のみの処理でよいのでbreakする
+                    $calendar_setting_model->updateCalendar();
+                    // 先頭行のみの処理でよいのでbreakする
                     break;
                 }
             }
@@ -3331,7 +4960,7 @@ class ApiCommonController extends Controller
                 $work_time_model->setDepartmentcodeAttribute($department_code);
                 $work_time_model->setRecordtimeAttribute($record_time);
                 $work_time_model->setModeAttribute($item['mode']);
-                $work_time_model->setUserholidaykubunsidAttribute($user_holiday_kubuns_id);
+                $work_time_model->setUserholidaykubunsidAttribute(null);
                 $work_time_model->setCreateduserAttribute($login_user_code);
                 $work_time_model->setSystemDateAttribute($systemdate);
                 $positions_data = null; 
@@ -3347,6 +4976,10 @@ class ApiCommonController extends Controller
                 $work_time_model->insertWorkTime();
             }
             DB::commit();
+            return array(
+                'result' => true, 
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata
+            );
 
         }catch(\PDOException $pe){
             DB::rollBack();
@@ -3406,13 +5039,13 @@ class ApiCommonController extends Controller
             DB::commit();
             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_delete_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
 
         }catch(\Exception $e){
             DB::rollBack();
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_post_informations, Config::get('const.LOG_MSG.data_delete_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -3440,11 +5073,11 @@ class ApiCommonController extends Controller
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_generalcodes, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }

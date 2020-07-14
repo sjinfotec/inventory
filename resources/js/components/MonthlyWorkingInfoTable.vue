@@ -4,10 +4,10 @@
       <!-- panel contents -->
       <!-- .row -->
       <div class="row">
-        <div class="col-12">
+        <div class="col-lg-12">
           <div class="table-responsive">
-            <div class="col-12 p-0">
-              <table class="table table-striped border-bottom font-size-sm text-nowrap">
+            <div class="col-lg-12 p-0">
+              <table class="table table-striped border-bottom font-size-sm">
                 <thead>
                   <tr v-if="detailOrTotal === 'detail' && btnMode ==='basicswitch'" bgcolor="#e3f0fb">
                     <td class="text-center align-middle mw-rem-5">雇用形態</td>
@@ -31,12 +31,6 @@
                       v-bind:title="edtString"
                       @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                     >不就労</td>
-                    <td class="text-center align-middle mw-rem-4">出勤日数</td>
-                    <td class="text-center align-middle mw-rem-4">有休日数</td>
-                    <td class="text-center align-middle mw-rem-4">特休日数</td>
-                    <td class="text-center align-middle mw-rem-4">早退日数</td>
-                    <td class="text-center align-middle mw-rem-4">遅刻日数</td>
-                    <td class="text-center align-middle mw-rem-4">欠勤日数</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'" bgcolor="#e3f0fb">
                     <td class="text-center align-middle mw-rem-5">雇用形態</td>
@@ -63,12 +57,6 @@
                       v-bind:title="edtString"
                       @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                     >不就労</td>
-                    <td class="text-center align-middle mw-rem-4">出勤日数</td>
-                    <td class="text-center align-middle mw-rem-4">有休日数</td>
-                    <td class="text-center align-middle mw-rem-4">特休日数</td>
-                    <td class="text-center align-middle mw-rem-4">早退日数</td>
-                    <td class="text-center align-middle mw-rem-4">遅刻日数</td>
-                    <td class="text-center align-middle mw-rem-4">欠勤日数</td>
                   </tr>
                   <tr v-if="calcLists.length && detailOrTotal === 'total' && btnMode ==='basicswitch'" bgcolor="#7fffd4">
                     <td class="text-center align-middle mw-rem-5"
@@ -91,12 +79,6 @@
                       v-bind:title="edtString"
                       @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                     >不就労時間</td>
-                    <td class="text-center align-middle mw-rem-5">出勤日数</td>
-                    <td class="text-center align-middle mw-rem-5">有給休暇日数</td>
-                    <td class="text-center align-middle mw-rem-5">特別休暇日数</td>
-                    <td class="text-center align-middle mw-rem-5">早退日数</td>
-                    <td class="text-center align-middle mw-rem-5">遅刻日数</td>
-                    <td class="text-center align-middle mw-rem-5">欠勤日数</td>
                   </tr>
                   <tr v-if="calcLists.length && detailOrTotal === 'total' && btnMode ==='detailswitch'" bgcolor="#7fffd4">
                     <td class="text-center align-middle mw-rem-5"
@@ -122,12 +104,6 @@
                       v-bind:title="edtString"
                       @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                     >不就労時間</td>
-                    <td class="text-center align-middle mw-rem-5">出勤日数</td>
-                    <td class="text-center align-middle mw-rem-5">有給休暇日数</td>
-                    <td class="text-center align-middle mw-rem-5">特別休暇日数</td>
-                    <td class="text-center align-middle mw-rem-5">早退日数</td>
-                    <td class="text-center align-middle mw-rem-5">遅刻日数</td>
-                    <td class="text-center align-middle mw-rem-5">欠勤日数</td>
                   </tr>
                 </thead>
                 <tbody>
@@ -166,12 +142,6 @@
                       v-bind:title="edtString"
                       @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                     >{{ calcLists.not_employment_working_hours }}</td>
-                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_working_status }} 日</td>
-                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_paid_holidays }} 日</td>
-                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_holiday_kubun }} 日</td>
-                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_leave_early }} 日</td>
-                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_late }} 日</td>
-                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_absence }} 日</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'"
                   >
@@ -217,12 +187,6 @@
                       v-bind:title="edtString"
                       @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                     >{{ calcLists.not_employment_working_hours }}</td>
-                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_working_status }} 日</td>
-                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_paid_holidays }} 日</td>
-                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_holiday_kubun }} 日</td>
-                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_leave_early }} 日</td>
-                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_late }} 日</td>
-                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_absence }} 日</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'total' && btnMode ==='basicswitch'"
                     v-for="(total,index) in calcLists"
@@ -245,10 +209,10 @@
                     <td class="text-center align-middle mw-rem-5">{{ total.late_night_overtime_hours }}</td>
                     <!-- /深夜残業時間 -->
                     <!-- 法定休日労働時間 -->
-                    <td class="text-center align-middle mw-rem-5">{{ total.late_night_working_hours }}</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.legal_working_holiday_hours }}</td>
                     <!-- /法定休日労働時間 -->
                     <!-- 法定外（所定休日）休日労働時間 -->
-                    <td class="text-center align-middle mw-rem-5">{{ total.public_going_out_hours }}</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.out_of_legal_working_holiday_hours }}</td>
                     <!-- /法定外（所定休日）休日労働時間 -->
                     <!-- 深夜労働時間 -->
                     <td class="text-center align-middle mw-rem-5">{{ total.late_night_working_hours }}</td>
@@ -261,12 +225,6 @@
                       v-bind:title="edtString"
                       @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                     >{{ total.not_employment_working_hours }}</td>
-                    <td class="text-center align-middle mw-rem-5">{{ total.total_working_status }} 日</td>
-                    <td class="text-center align-middle mw-rem-5">{{ total.total_paid_holidays }} 日</td>
-                    <td class="text-center align-middle mw-rem-5">{{ total.total_holiday_kubun }} 日</td>
-                    <td class="text-center align-middle mw-rem-5">{{ total.total_leave_early }} 日</td>
-                    <td class="text-center align-middle mw-rem-5">{{ total.total_late }} 日</td>
-                    <td class="text-center align-middle mw-rem-5">{{ total.total_absence }} 日</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'total' && btnMode ==='detailswitch'"
                     v-for="(total,index) in calcLists"
@@ -312,12 +270,111 @@
                       v-bind:title="edtString"
                       @mouseover="edttooltips('欠勤・遅刻・早退・私用外出で働かなかった（不就労）時間。給与控除対象','','','')"
                     >{{ total.not_employment_working_hours }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              
+            </div>
+          </div>
+          <div class="table-responsive">
+            <div class="col-lg-12 p-0">
+              <table class="table table-striped border-bottom font-size-sm">
+                <thead>
+                  <tr v-if="detailOrTotal === 'detail' && btnMode ==='basicswitch'" bgcolor="#e3f0fb">
+                    <td class="text-center align-middle mw-rem-4">出勤日数</td>
+                    <td class="text-center align-middle mw-rem-4">有休日数</td>
+                    <td class="text-center align-middle mw-rem-4">特休日数</td>
+                    <td class="text-center align-middle mw-rem-4">早退日数</td>
+                    <td class="text-center align-middle mw-rem-4">遅刻日数</td>
+                    <td class="text-center align-middle mw-rem-4">欠勤日数</td>
+                    <td class="text-center align-middle mw-rem-4">みなし日数</td>
+                    <td class="text-center align-middle mw-rem-4">公傷日数</td>
+                    <td class="text-center align-middle mw-rem-4">慶弔日数</td>
+                  </tr>
+                  <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'" bgcolor="#e3f0fb">
+                    <td class="text-center align-middle mw-rem-4">出勤日数</td>
+                    <td class="text-center align-middle mw-rem-4">有休日数</td>
+                    <td class="text-center align-middle mw-rem-4">特休日数</td>
+                    <td class="text-center align-middle mw-rem-4">早退日数</td>
+                    <td class="text-center align-middle mw-rem-4">遅刻日数</td>
+                    <td class="text-center align-middle mw-rem-4">欠勤日数</td>
+                    <td class="text-center align-middle mw-rem-4">みなし日数</td>
+                    <td class="text-center align-middle mw-rem-4">公傷日数</td>
+                    <td class="text-center align-middle mw-rem-4">慶弔日数</td>
+                  </tr>
+                  <tr v-if="calcLists.length && detailOrTotal === 'total' && btnMode ==='basicswitch'" bgcolor="#7fffd4">
+                    <td class="text-center align-middle mw-rem-5">出勤日数</td>
+                    <td class="text-center align-middle mw-rem-5">有給休暇日数</td>
+                    <td class="text-center align-middle mw-rem-5">特別休暇日数</td>
+                    <td class="text-center align-middle mw-rem-5">早退日数</td>
+                    <td class="text-center align-middle mw-rem-5">遅刻日数</td>
+                    <td class="text-center align-middle mw-rem-5">欠勤日数</td>
+                    <td class="text-center align-middle mw-rem-5">みなし日数</td>
+                    <td class="text-center align-middle mw-rem-5">公傷日数</td>
+                    <td class="text-center align-middle mw-rem-5">慶弔休暇日数</td>
+                  </tr>
+                  <tr v-if="calcLists.length && detailOrTotal === 'total' && btnMode ==='detailswitch'" bgcolor="#7fffd4">
+                    <td class="text-center align-middle mw-rem-5">出勤日数</td>
+                    <td class="text-center align-middle mw-rem-5">有給休暇日数</td>
+                    <td class="text-center align-middle mw-rem-5">特別休暇日数</td>
+                    <td class="text-center align-middle mw-rem-5">早退日数</td>
+                    <td class="text-center align-middle mw-rem-5">遅刻日数</td>
+                    <td class="text-center align-middle mw-rem-5">欠勤日数</td>
+                    <td class="text-center align-middle mw-rem-5">みなし日数</td>
+                    <td class="text-center align-middle mw-rem-5">公傷日数</td>
+                    <td class="text-center align-middle mw-rem-5">慶弔休暇日数</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-if="detailOrTotal === 'detail' && btnMode ==='basicswitch'"
+                  >
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_working_status }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_paid_holidays }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_holiday_kubun }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_leave_early }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_late }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_absence }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_deemed }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_public_damage }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_congratulatory }} 日</td>
+                  </tr>
+                  <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'"
+                  >
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_working_status }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_paid_holidays }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_holiday_kubun }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_leave_early }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_late }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_absence }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_deemed }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_public_damage }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_congratulatory }} 日</td>
+                  </tr>
+                  <tr v-if="detailOrTotal === 'total' && btnMode ==='basicswitch'"
+                    v-for="(total,index) in calcLists"
+                  >
                     <td class="text-center align-middle mw-rem-5">{{ total.total_working_status }} 日</td>
                     <td class="text-center align-middle mw-rem-5">{{ total.total_paid_holidays }} 日</td>
                     <td class="text-center align-middle mw-rem-5">{{ total.total_holiday_kubun }} 日</td>
                     <td class="text-center align-middle mw-rem-5">{{ total.total_leave_early }} 日</td>
                     <td class="text-center align-middle mw-rem-5">{{ total.total_late }} 日</td>
                     <td class="text-center align-middle mw-rem-5">{{ total.total_absence }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_deemed }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_public_damage }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_congratulatory }} 日</td>
+                  </tr>
+                  <tr v-if="detailOrTotal === 'total' && btnMode ==='detailswitch'"
+                    v-for="(total,index) in calcLists"
+                  >
+                     <td class="text-center align-middle mw-rem-5">{{ total.total_working_status }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_paid_holidays }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_holiday_kubun }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_leave_early }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_late }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_absence }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_deemed }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_public_damage }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_congratulatory }} 日</td>
                   </tr>
                 </tbody>
               </table>
@@ -390,7 +447,7 @@ table {
 }
 
 .mw-rem-4 {
-  min-width: 3rem !important;
+  min-width: 4rem !important;
 }
 
 .mw-rem-5 {

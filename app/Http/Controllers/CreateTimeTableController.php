@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\WorkingTimeTable;
 use Illuminate\Support\Facades\Validator;
+use App\FeatureItemSelection;
 
 class CreateTimeTableController extends Controller
 {
@@ -29,7 +30,7 @@ class CreateTimeTableController extends Controller
     }
 
     /**
-     * 詳細取得
+     * 詳細取得（CreateTimeTable.vue,CreateApprovalRouteNo.vue）
      *
      * @param Request $request
      * @return void
@@ -139,29 +140,48 @@ class CreateTimeTableController extends Controller
                     );
                 }
             }
+            //feature selection
+            $feature_model = new FeatureItemSelection();
+            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+            $feature_data = $feature_model->getItem();
+            $attendance_count = 0;
+            $rest_count = 0;
+            foreach($feature_data as $item) {
+                if (isset($item->item_code)) {
+                    if ($item->item_code == Config::get('const.C042.attendance_count')) {
+                        $attendance_count = intval($item->value_select);
+                    }
+                    if ($item->item_code == Config::get('const.C042.rest_count')) {
+                        $rest_count = intval($item->value_select);
+                    }
+                }
+                if ($attendance_count > 0 && $rest_count > 0) {
+                    break;
+                }
+            }
             $details = $params['details'];
             $data[0]['apply_term_from'] = $details['apply_term_from'];
-            $data[0]['working_time_kubun'] = 1;
-            $data[0]['from_time'] = $details['regularFrom'];
-            $data[0]['to_time'] = $details['regularTo'];
-            $data[1]['working_time_kubun'] = 2;
-            $data[1]['from_time'] = $details['regularRestFrom1'];
-            $data[1]['to_time'] = $details['regularRestTo1'];
-            $data[2]['working_time_kubun'] = 2;
-            $data[2]['from_time'] = $details['regularRestFrom2'];
-            $data[2]['to_time'] = $details['regularRestTo2'];
-            $data[3]['working_time_kubun'] = 2;
-            $data[3]['from_time'] = $details['regularRestFrom3'];
-            $data[3]['to_time'] = $details['regularRestTo3'];
-            $data[4]['working_time_kubun'] = 2;
-            $data[4]['from_time'] = $details['regularRestFrom4'];
-            $data[4]['to_time'] = $details['regularRestTo4'];
-            $data[5]['working_time_kubun'] = 2;
-            $data[5]['from_time'] = $details['regularRestFrom5'];
-            $data[5]['to_time'] = $details['regularRestTo5'];
-            $data[6]['working_time_kubun'] = 4;
-            $data[6]['from_time'] = $details['irregularMidNightFrom'];
-            $data[6]['to_time'] = $details['irregularMidNightTo'];
+            $data_index = 0;
+            for ($i=0;$i<$attendance_count;$i++) {
+                $data[$data_index]['working_time_kubun'] = Config::get('const.C004.regular_working_time');
+                Log::debug('store = '.$details['regularFrom'][$i]['fromTime']);
+                Log::debug('store = '.$details['regularTo'][$i]['regularTo']);
+                $data[$data_index]['from_time'] = $details['regularFrom'][$i]['fromTime'];
+                $data[$data_index]['to_time'] = $details['regularTo'][$i]['regularTo'];
+                $data_index++;
+            }
+            for ($i=0;$i<$rest_count;$i++) {
+                $data[$data_index]['working_time_kubun'] = Config::get('const.C004.regular_working_breaks_time');
+                Log::debug('store = '.$details['regularRestFrom'][$i]['fromTime']);
+                Log::debug('store = '.$details['regularRestTime'][$i]['regularTo']);
+                $data[$data_index]['from_time'] = $details['regularRestFrom'][$i]['fromTime'];
+                $data[$data_index]['to_time'] = $details['regularRestTime'][$i]['toTime'];
+                $data_index++;
+            }
+            $data[$data_index]['working_time_kubun'] = Config::get('const.C004.out_of_regular_night_working_time');
+            Log::debug('store = '.$details['irregularMidNightFrom']);
+            Log::debug('store = '.$details['irregularMidNightTo']);
             $resultno = $this->insert($data ,$no, $name);
             return response()->json(
                 ['result' => true, 'no' => $resultno,
@@ -289,8 +309,29 @@ class CreateTimeTableController extends Controller
         $name = "";
         DB::beginTransaction();
         try{
-            $start_index = ($index - 1) * 7;
-            $end_index = $start_index + 6;
+            //feature selection
+            $feature_model = new FeatureItemSelection();
+            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+            $feature_data = $feature_model->getItem();
+            $attendance_count = 0;
+            $rest_count = 0;
+            foreach($feature_data as $item) {
+                if (isset($item->item_code)) {
+                    if ($item->item_code == Config::get('const.C042.attendance_count')) {
+                        $attendance_count = intval($item->value_select);
+                    }
+                    if ($item->item_code == Config::get('const.C042.rest_count')) {
+                        $rest_count = intval($item->value_select);
+                    }
+                }
+                if ($attendance_count > 0 && $rest_count > 0) {
+                    break;
+                }
+            }
+            // +1 は深夜時間の分
+            $start_index = ($index - 1) * ($attendance_count + $rest_count + 1);
+            $end_index = $start_index + $attendance_count + $rest_count;
             for ($i=$start_index; $i <= $end_index; $i++) {
                 if($i == $start_index){
                     if(isset($details[$i]['apply_term_from'])){
@@ -406,8 +447,29 @@ class CreateTimeTableController extends Controller
         $user_code = $user->code;
         DB::beginTransaction();
         try{
-            $start_index = ($index - 1) * 7;
-            $end_index = $start_index + 6;
+            //feature selection
+            $feature_model = new FeatureItemSelection();
+            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+            $feature_data = $feature_model->getItem();
+            $attendance_count = 0;
+            $rest_count = 0;
+            foreach($feature_data as $item) {
+                if (isset($item->item_code)) {
+                    if ($item->item_code == Config::get('const.C042.attendance_count')) {
+                        $attendance_count = intval($item->value_select);
+                    }
+                    if ($item->item_code == Config::get('const.C042.rest_count')) {
+                        $rest_count = intval($item->value_select);
+                    }
+                }
+                if ($attendance_count > 0 && $rest_count > 0) {
+                    break;
+                }
+            }
+            // +1 は深夜時間の分
+            $start_index = ($index - 1) * ($attendance_count + $rest_count + 1);
+            $end_index = $start_index + ($attendance_count + $rest_count);
             for ($i=$start_index; $i <= $end_index; $i++) {
                 log::debug('$details[$i] = '.$details[$i]['id']);
                 $time_table->setIdAttribute($details[$i]['id']);   

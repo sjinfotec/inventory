@@ -16,6 +16,8 @@ use App\Company;
 use App\Http\Controllers\DailyWorkingInformationController;
 use App\Http\Controllers\ApiCommonController;
 use App\GeneralCodes;
+use App\FeatureItemSelection;
+use App\WorkingTimeTable;
 
 class MonthlyWorkingInformationController extends Controller
 {
@@ -392,16 +394,55 @@ class MonthlyWorkingInformationController extends Controller
         DB::beginTransaction();
         try{
             // パラメータの内容でworking_time_datesを削除
+            // パラメータの内容でworking_time_datesを削除
+            // 日付の範囲はcalcメソッドでworkingtimedate_modelに設定済み
             $workingtimedate_model->setParamEmploymentStatusAttribute($employmentstatus);
             $workingtimedate_model->setParamDepartmentcodeAttribute($departmentcode);
             $workingtimedate_model->setParamUsercodeAttribute($usercode);
             if ($workingtimedate_model->isExistsWorkingTimeDate()) {
                 $workingtimedate_model->delWorkingTimeDate();
             };
+            //feature selection
+            $feature_model = new FeatureItemSelection();
+            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+            $feature_data = $feature_model->getItem();
+            $feature_attendance_count = 0;          // 出勤回数
+            $feature_rest_count = 0;                // 休憩回数
+            $mode_list = 0;                         // 2なら緊急取集使用
+            $early_time = null;                     // 1なら早出時間集計
+            $em_details = array();
+            foreach($feature_data as $item) {
+                if ($item->item_code == Config::get('const.C042.attendance_count')) {
+                    $feature_attendance_count = intval($item->value_select);
+                }
+                if ($item->item_code == Config::get('const.C042.rest_count')) {
+                    $feature_rest_count = intval($item->value_select);
+                }
+                if ($item->item_code == Config::get('const.C042.mode_list')) {
+                    $mode_list = intval($item->value_select);
+                    // 2なら緊急取集使用
+                    if ($mode_list == 2) {
+                        // 緊急収集のタイムテーブルを取得する
+                        $time_table = new WorkingTimeTable();
+                        $time_table->setNoAttribute(Config::get('const.C999_NAME.emergency_timetable_no'));
+                        $time_table->setParamapplytermfromAttribute($datefrom);
+                        $em_details = $time_table->getDetail();
+                    }
+                }
+                if ($item->item_code == Config::get('const.C042.early_time')) {
+                    $early_time = intval($item->value_select);
+                }
+                if ($feature_attendance_count > 0 && $feature_rest_count > 0 && $mode_list > 0 && $early_time != null) {
+                    break;
+                }
+            }
             while (true) {
-                // Log::debug(' ●● 最新更新集計 対象日付 ●● $calc_date = '.$calc_date);
+                Log::debug(' ●● 最新更新集計 対象日付 ●● $calc_date = '.$calc_date);
                 $dt1 = new Carbon($calc_date);
                 // if ($dt1 > $dt2) { break; }
+                Log::debug('    break dt1 = '.$dt1);
+                Log::debug('    break dt_end = '.$dt_end);
                 if ($dt1 > $dt_end) { break; }
                 // 打刻時刻を取得
                 $work_time->setParamDatefromAttribute($calc_date);
@@ -419,6 +460,15 @@ class MonthlyWorkingInformationController extends Controller
                     'datefrom' => $calc_date
                 );
                 $business_kubun = $apicommon->jdgBusinessKbn($array_impl_jdgBusinessKbn);
+                // -------------- debug -------------- start --------
+                if ($business_kubun == 1) {
+                    Log::debug('------------- 集計開始 日付 = '.$calc_date.' 出勤日　business_kubun = '.$business_kubun );
+                } elseif($business_kubun == 2) {
+                    Log::debug('------------- 集計開始 日付 = '.$calc_date.' 法定外休日　business_kubun = '.$business_kubun );
+                } else {
+                    Log::debug('------------- 集計開始 日付 = '.$calc_date.' 法定休日　business_kubun = '.$business_kubun );
+                }
+                // -------------- debug -------------- end --------
                 // addDailyCalc implement
                 $array_impl_addDailyCalc = array (
                     'work_time' => $work_time,
@@ -427,9 +477,15 @@ class MonthlyWorkingInformationController extends Controller
                     'employmentstatus' => $employmentstatus,
                     'departmentcode' => $departmentcode,
                     'usercode' => $usercode,
-                    'business_kubun' => $business_kubun
+                    'business_kubun' => $business_kubun,
+                    'feature_attendance_count' => $feature_attendance_count,
+                    'feature_rest_count' => $feature_rest_count,
+                    'early_time' => $early_time,
+                    'em_details' => $em_details,
+                    'calc_date' => $calc_date
                 );
                 $calc_result = $daily_controller->addDailyCalc($array_impl_addDailyCalc);
+                Log::debug(' ●● 最新更新集計 対象日付 ●● $addDailyCalc end ');
                 $calc_date = date_format($dt1->addDay(1), 'Ymd');
             }
             DB::commit();
@@ -439,7 +495,7 @@ class MonthlyWorkingInformationController extends Controller
             $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_error_dailycalc'));
         }catch(\Exception $e){
             DB::rollBack();
-            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_accesee_eror_dailycalc'));
+            $this->array_messagedata[] = array( Config::get('const.RESPONCE_ITEM.message') => Config::get('const.MSG_ERROR.data_access_error_dailycalc'));
         }
     }
 
@@ -732,19 +788,20 @@ class MonthlyWorkingInformationController extends Controller
 
         $attendance = $result->attendance_time_1;
         $leaving = "";
-        if($result->leaving_time_1 != "00:00") {
+        // Log::debug(' setArrayDate $result->leaving_time_1 = '.$result->leaving_time_1);
+        if($result->leaving_time_1 != null && $result->leaving_time_1 != "00:00") {
             $leaving = $result->leaving_time_1;
         }
-        if($result->leaving_time_2 != "00:00") {
+        if($result->leaving_time_2 != null && $result->leaving_time_2 != "00:00") {
             $leaving = $result->leaving_time_2;
         }
-        if($result->leaving_time_3 != "00:00") {
+        if($result->leaving_time_3 != null && $result->leaving_time_3 != "00:00") {
             $leaving = $result->leaving_time_3;
         }
-        if($result->leaving_time_4 != "00:00") {
+        if($result->leaving_time_4 != null && $result->leaving_time_4 != "00:00") {
             $leaving = $result->leaving_time_4;
         }
-        if($result->leaving_time_5 != "00:00") {
+        if($result->leaving_time_5 != null && $result->leaving_time_5 != "00:00") {
             $leaving = $result->leaving_time_5;
         }
         $total_working_times = $result->total_working_times;
@@ -792,15 +849,19 @@ class MonthlyWorkingInformationController extends Controller
         } else {
             $remark_data .= ' '.$result->remark_check_interval;
         }
+        // Log::debug(' setArrayDate attendance = '.$attendance);
+        // Log::debug(' setArrayDate leaving = '.$leaving);
         return array(
             'user_code' => $result->user_code,
             'workingdate' => date_format($datetime, 'Ymd'),
             'workingdatename' => date_format($datetime, 'Y年m月d日')."（".$week_data."）",
-            'attendance' => $result->attendance_time_1,
-            'leaving' => $result->leaving_time_1,
+            'attendance' => $attendance,
+            'leaving' => $leaving,
             'public_going_out_hours' => $result->public_going_out_hours,
             'missing_middle_hours' => $result->missing_middle_hours,
             'remark_holiday_name' => $remark_data1,
+            'business_kubun' => $result->business_kubun,
+            'business_name' => $result->business_name,
             'total_working_times' => $total_working_times,
             'regular_working_times' => $regular_working_times,
             'off_hours_working_hours' => $off_hours_working_hours,
@@ -846,6 +907,9 @@ class MonthlyWorkingInformationController extends Controller
                 'total_leave_early' => $working_time_sum_result->total_leave_early,
                 'total_late' => $working_time_sum_result->total_late,
                 'total_absence' => $working_time_sum_result->total_absence,
+                'total_congratulatory' => $working_time_sum_result->total_congratulatory,
+                'total_public_damage' => $working_time_sum_result->total_public_damage,
+                'total_deemed' => $working_time_sum_result->total_deemed,
                 'date' => $array_date
             );
             break;
@@ -878,6 +942,9 @@ class MonthlyWorkingInformationController extends Controller
                 'total_leave_early' => 0,
                 'total_late' => 0,
                 'total_absence' => 0,
+                'total_congratulatory' => 0,
+                'total_public_damage' => 0,
+                'total_deemed' => 0,
                 'date' => $array_date
             );
         }

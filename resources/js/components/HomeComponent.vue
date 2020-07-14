@@ -37,8 +37,8 @@
         class="p-4"
         v-if="menudatas[get_c038[10]['sort_seq'] - 1]['is_select'] && login_user_role === get_c025[2]['code']"
       >
-        <a class href="/setting_shift_time">
-          <img width="120" height="120" class src="/images/icon08.svg" alt />
+        <a class href="/edit_shift_time">
+          <img width="100" height="100" class src="/images/icon08.svg" alt />
         </a>
       </div>
       <!-- 勤怠編集 -->
@@ -304,6 +304,10 @@ export default {
     const_generaldatas: {
       type: Array,
       default: []
+    },
+    feature_item_selections: {
+        type: Array,
+        default: []
     }
   },
   data() {

@@ -846,6 +846,7 @@ class TempCalcWorkingTime extends Model
      */
     public function getTempCalcWorkingtime(){
         try{
+            // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) { \DB::enableQueryLog(); }
             $mainquery = DB::table($this->table.' AS t1')
             ->select(
                 't1.working_date as working_date',
@@ -883,6 +884,7 @@ class TempCalcWorkingTime extends Model
                 't1.business_name as business_name',
                 't1.holiday_kubun as holiday_kubun',
                 't1.holiday_name as holiday_name',
+                't2.use_free_item as use_free_item',
                 't2.description as holiday_description',
                 't1.closing as closing',
                 't1.uplimit_time as uplimit_time',
@@ -939,12 +941,16 @@ class TempCalcWorkingTime extends Model
                 ->orderBy('t1.user_code','asc')
                 ->orderBy('t1.seq','asc')
                 ->get();
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
+            //     \Log::debug('sql_debug_log', ['getTempCalcWorkingtime' => \DB::getQueryLog()]);
+            //     \DB::disableQueryLog();
+            // }
+            }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1082,11 +1088,11 @@ class TempCalcWorkingTime extends Model
                 );
                 }
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -1101,11 +1107,11 @@ class TempCalcWorkingTime extends Model
         try{
             $mainquery = DB::table($this->table)->truncate();
         }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$pe');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$pe');
             Log::error($pe->getMessage());
             throw $pe;
         }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_erorr')).'$e');
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }

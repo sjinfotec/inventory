@@ -1,8 +1,16 @@
 <template>
   <!-- リスト定義 -->
-  <select class="form-control" v-model="selectedvalue" v-on:change="selChanges(selectedvalue,rowIndex)">
+  <select v-if="!isDisable" class="form-control" v-model="selectedvalue" v-on:change="selChanges(selectedvalue,rowIndex)">
     <option disabled selected style="display:none;" v-if="this.placeholderData" value="">＜{{ placeholderData }}＞</option>
-    <option v-if="this.blankdata" value=""></option>
+    <option v-if="this.blankData" value=""></option>
+    <!-- 項目設定 -->
+    <option v-for="(item, index) in itemList" v-bind:value="item.code">
+      {{ item.name }}
+    </option>
+  </select>
+  <select v-else disabled class="form-control" v-model="selectedvalue" v-on:change="selChanges(selectedvalue,rowIndex)">
+    <option disabled selected style="display:none;" v-if="this.placeholderData" value="">＜{{ placeholderData }}＞</option>
+    <option v-if="this.blankData" value=""></option>
     <!-- 項目設定 -->
     <option v-for="(item, index) in itemList" v-bind:value="item.code">
       {{ item.name }}
@@ -24,7 +32,6 @@ export default {
       selectedname: '',
       initlist: 0,
       itemList: [],
-      blankdata: true,
       roles: []
     };
   },
@@ -78,6 +85,10 @@ export default {
         default: () => {
         return []
       }
+    },
+    isDisable: {
+        type: Boolean,
+        default: false
     }
   },
   created() {

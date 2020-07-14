@@ -540,7 +540,7 @@
                       <tbody>
                         <tr v-for="(item1,index1) in detailsEdt['array_user_date_data']" v-bind:key="item1['date']">
                           <td class="text-left align-middle">{{item1['md_name']}}</td>
-                          <td class="text-center align-middle">
+                          <td class="text-center align-middle" v-if="item1['date_null'] === 1">
                             <select class="form-control" v-model="business[index1]" @change="businessDayChanges(business[index1], index1)">
                               <option value></option>
                               <option
@@ -550,8 +550,28 @@
                               >{{ blist.code_name }}</option>
                             </select>
                           </td>
-                          <td class="text-center align-middle">
+                          <td class="text-center align-middle" v-else>
+                            <select disabled class="form-control" v-bind:value="business[index1]">
+                              <option value></option>
+                              <option
+                                v-for="blist in get_C007"
+                                :value="blist.code"
+                                v-bind:key="blist.code"
+                              >{{ blist.code_name }}</option>
+                            </select>
+                          </td>
+                          <td class="text-center align-middle" v-if="item1['date_null'] === 1">
                             <select class="form-control" v-model="holiday[index1]" @change="holiDayChanges(holiday[index1], index1)">
+                              <option value></option>
+                              <option
+                                v-for="hlist in get_C013"
+                                :value="hlist.code"
+                                v-bind:key="hlist.code"
+                              >{{ hlist.code_name }}</option>
+                            </select>
+                          </td>
+                          <td class="text-center align-middle" v-else>
+                            <select disabled class="form-control" v-bin:value="holiday[index1]">
                               <option value></option>
                               <option
                                 v-for="hlist in get_C013"
@@ -790,21 +810,42 @@ const CONST_C007 = 'C007';
 const CONST_C007_ATTENDANCE = 0;    // 出勤日のindex
 // const CONST_C008 = 'C008';
 const CONST_C013 = 'C013';
-const CONST_OUT_LEGAL = 0;      // 出勤日か法定外休日かの判定文字位置（0始まり）
-const CONST_1DAY_HOLIDAY = 1;   // 1日休日かの判定文字位置（0始まり）
+const CONST_OUT_LEGAL = 0;        // 出勤日か法定外休日かの判定文字位置（0始まり）
+const CONST_1DAY_HOLIDAY = 1;     // 1日休日かの判定文字位置（0始まり）
 const CONST_C039 = 'C039';
 const CONST_C040 = 'C040';
+const CONST_CALENDAR_HOLIDAY_LIST_CODE = 7;
 
 export default {
   name: "SettingCalendar",
   mixins: [ dialogable, checkable, requestable ],
   props: {
+    feature_item_selections: {
+        type: Array,
+        default: []
+    },
     const_generaldatas: {
         type: Array,
         default: []
     }
   },
   computed: {
+    get_isCalendarHolidayList: function() {
+      this.isCalendarHolidayList = false;
+      let $this = this;
+      this.feature_item_selections.forEach( function( item ) {
+        if (item.item_code == CONST_CALENDAR_HOLIDAY_LIST_CODE) {
+          if (item.value_select == 1) {
+            $this.isCalendarHolidayList = true;
+          } else {
+            $this.isCalendarHolidayList = false;
+          }
+          return $this.isCalendarHolidayList;
+        }
+      });
+
+      return this.isCalendarHolidayList;
+    },
     get_C007: function() {
       let $this = this;
       var i = 0;
@@ -830,10 +871,15 @@ export default {
     get_C013: function() {
       let $this = this;
       var i = 0;
+      this.get_isCalendarHolidayList;
       this.const_generaldatas.forEach( function( item ) {
         if (item.identification_id == CONST_C013) {
-          if (item.use_free_item.substr(CONST_1DAY_HOLIDAY, 1) == "1") {
+          if ($this.isCalendarHolidayList) {
             $this.const_C013_data.push($this.const_generaldatas[i]);
+          } else {
+            if (item.use_free_item.substr(CONST_1DAY_HOLIDAY, 1) == "1") {
+              $this.const_C013_data.push($this.const_generaldatas[i]);
+            }
           }
         }
         i++;
@@ -888,6 +934,7 @@ export default {
       const_C013_data: [],
       const_C039_data: [],
       const_C040_data: [],
+      isCalendarHolidayList: false,
       selectedEmploymentValue: "",
       selectedDepartmentValue : "",
       valueDepartmentkillcheck : false,
@@ -1047,13 +1094,15 @@ export default {
       var maxlength = 0;
       var itemname = '営業日区分';
       for ( var i=0; i<this.business.length;i++ ) {
-        chkArray = 
-          this.checkDetailtext(this.business[i], required, equalength, maxlength, itemname, this.detailsEdt['array_user_date_data'][i]['date_name']);
-        if (chkArray.length > 0) {
-          if (this.messagevalidatesEdt.length == 0) {
-            this.messagevalidatesEdt = chkArray;
-          } else {
-            this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
+        if (this.detailsEdt['array_user_date_data'][i]['date_null'] == 1) {
+          chkArray = 
+            this.checkDetailtext(this.business[i], required, equalength, maxlength, itemname, this.detailsEdt['array_user_date_data'][i]['date_name']);
+          if (chkArray.length > 0) {
+            if (this.messagevalidatesEdt.length == 0) {
+              this.messagevalidatesEdt = chkArray;
+            } else {
+              this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
+            }
           }
         }
       }
@@ -1330,8 +1379,6 @@ export default {
       this.selectedEmploymentValue = value;
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.selectedUserValue = "";
-      this.getDo = 1;
-      this.applytermdate = this.valuefromdate;
       this.getDo = 1;
       this.getUserSelected();
       // this.selectMode = '';

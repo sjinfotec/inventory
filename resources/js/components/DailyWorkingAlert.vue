@@ -39,7 +39,7 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2">
+              <div class="col-md-6 pb-2" v-if="this.get_LoginUserRole >= this.get_AdminUserRole">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
@@ -58,7 +58,7 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2">
+              <div class="col-md-6 pb-2" v-if="this.get_LoginUserRole >= this.get_AdminUserRole">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
@@ -92,9 +92,9 @@
                   </div>
                   <select-userlist v-if="showuserlist"
                     ref="selectuserlist"
-                    v-bind:blank-data="true"
+                    v-bind:blank-data="get_IsUserblank"
                     v-bind:placeholder-data="'氏名を選択してください'"
-                    v-bind:selected-value="selectedUserValue"
+                    v-bind:selected-value="get_SelectedUserCode"
                     v-bind:add-new="false"
                     v-bind:get-do="getDo"
                     v-bind:date-value="applytermdate"
@@ -140,7 +140,7 @@
             ref="refdailyworkingalerttable"
             v-bind:alert-lists="details"
             v-bind:tablebody-height="'height: 400px !important;'"
-            v-bind:is-edit="isEdit"
+            v-bind:is-edit="get_IsEdit"
             v-on:detaileditclick-event="detailEdtClick"
           ></daily-working-alert-table>
           <!-- ----------- 項目部 END ---------------- -->
@@ -155,11 +155,13 @@
           v-if="showeditworktimestable"
           ref="refeditworktimestable"
           v-bind:authusers="authusers"
-          v-bind:generaluser="generaluser"
-          v-bind:generalapproveruser="generalapproveruser"
-          v-bind:adminuser="adminuser"
+          v-bind:const_c025="get_C025"
+          v-bind:const_generaldatas="const_generaldatas"
           v-bind:heads="detailsEdt"
-          v-on:cancelclick-event="cancelClick"
+          v-bind:accountdatas="accountdatas"
+          v-bind:halfautoset="get_IsAutoHalfSet"
+          v-bind:feature-item-selections="feature_item_selections"
+          v-on:backclick-event="backclick"
         >
         </edit-work-times-table>
       </div>
@@ -176,30 +178,36 @@ import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
+// CONST
+const CONST_C025 = 'C025';
+const CONST_C025_ADMINUSER_CODE = 9;     // index
+const CONST_HALF_HOLIDAY_SET_CODE = 2;
+const CONST_INDEXORHOME_HOME = 2;
+
 export default {
   name: "dailyworkingtime",
   mixins: [ dialogable, checkable, requestable ],
   props: {
+    accountdatas: {
+        type: Array,
+        default: []
+    },
     authusers: {
         type: Array,
         default: []
     },
-    generaluser: {
-        type: Number,
-        default: 0
+    feature_item_selections: {
+        type: Array,
+        default: []
     },
-    generalapproveruser: {
-        type: Number,
-        default: 0
-    },
-    adminuser: {
-        type: Number,
-        default: 0
+    const_generaldatas: {
+        type: Array,
+        default: []
     },
     indexorhome: {
         type: Number,
         default: 0
-    },
+    }
   },
   data: function() {
     return {
@@ -226,25 +234,86 @@ export default {
       detailsEdt: [],
       login_user_code: "",
       login_user_role: "",
-      login_generaluser_role: "",
-      login_generalapproveruser_role: "",
-      login_adminuser_role: "",
       index_or_home: "",
       showeditworktimestable: true,
-      showdailyworkingalerttable: true
+      showdailyworkingalerttable: true,
+      const_C025_data: [],
+      isAutoHalfSet: true,
+      isUserblank: true,
+      adminuserrole: ""
     };
   },
-  // マウント時
-  mounted() {
-    this.login_user_code = this.authusers['code'];
-    this.login_user_role = this.authusers['role'];
-    this.login_generaluser_role = this.generaluser;
-    this.login_generalapproveruser_role = this.generalapproveruser;
-    this.login_adminuser_role = this.adminuser;
-    if (this.login_user_role == this.login_adminuser_role) {
-      this.isEdit = true;
+  computed: {
+    get_IsAutoHalfSet: function() {
+      this.isAutoHalfSet = false;
+      let $this = this;
+      this.feature_item_selections.forEach( function( item ) {
+        if (item.item_code == CONST_HALF_HOLIDAY_SET_CODE) {
+          if (item.value_select == 1) {
+            $this.isAutoHalfSet = true;
+          } else {
+            $this.isAutoHalfSet = false;
+          }
+          return $this.isAutoHalfSet;
+        }
+      });
+
+      return this.isAutoHalfSet;
+    },
+    get_C025: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C025) {
+          $this.const_C025_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.const_C025_data;
+    },
+    get_AdminUserRole: function() {
+      if (this.adminuserrole == null || this.adminuserrole == "") {
+        this.adminuserrole = CONST_C025_ADMINUSER_CODE;
+      }
+      return this.adminuserrole;
+    },
+    get_IsEdit: function() {
+      if (this.const_C025_data.length == 0) {
+        this.get_C025;
+      }
+      this.isEdit = false;
+      if (this.authusers['role'] == this.get_AdminUserRole) {
+        this.isEdit = true;
+      }
+      return this.isEdit;
+    },
+    get_IsUserblank: function() {
+      if (this.get_LoginUserRole < this.get_AdminUserRole) {
+        this.isUserblank = false;
+      } else {
+        this.isUserblank = true;
+      }
+      return this.isUserblank;
+    },
+    get_LoginUserCode: function() {
+      this.login_user_code = this.authusers['code'];
+      return this.login_user_code;
+    },
+    get_LoginUserRole: function() {
+      this.login_user_role = this.authusers['role'];
+      return this.login_user_role;
+    },
+    get_SelectedUserCode: function() {
+      if (this.selectedUserValue == null || this.selectedUserValue == "") {
+        if (this.get_LoginUserRole < this.get_AdminUserRole) {
+          this.selectedUserValue = this.get_LoginUserCode;
+        }
+      }
+      return this.selectedUserValue;
     }
-    this.login_adminuser_role = this.adminuser;
+  },
+  // マウント
+  mounted() {
     this.index_or_home = this.indexorhome;
     this.valuefromdate = this.defaultDate;
     moment.locale("ja");
@@ -252,13 +321,13 @@ export default {
     if (this.valuefromdate) {
       this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
     }
-    this.$refs.selectdepartmentlist.getList(this.applytermdate);
-    this.getUserSelected();
+    // this.$refs.selectdepartmentlist.getList(this.applytermdate);
+    // this.getUserSelected();
     // 1:index 2:homeindex
-    if (this.index_or_home == 2) {
+    if (this.index_or_home == CONST_INDEXORHOME_HOME) {
       this.selectMode = '';
       this.itemClear();
-      this.getItem();
+      this.getItem(false);
       this.refreshDailyWorkingAlertTable();
     }
   },
@@ -287,22 +356,8 @@ export default {
         }
         this.validate = false;
       }
-      // 所属部署
-      if (this.login_user_role < "8") {
-        required = true;
-        equalength = 0;
-        maxlength = 0;
-        itemname = '所属部署';
-        chkArray = 
-          this.checkHeader(this.selectedDepartmentValue, required, equalength, maxlength, itemname);
-        if (chkArray.length > 0) {
-          if (this.messagedatadepartment.length == 0) {
-            this.messagedatadepartment.push("一般ユーザーは所属部署は必ず入力してください。");
-          } else {
-            this.messagedatadepartment = this.messagedatadepartment.concat(chkArray);
-          }
-          this.validate = false;
-        }
+      // 氏名
+      if (this.get_LoginUserRole < this.get_AdminUserRole) {
         required = true;
         equalength = 0;
         maxlength = 0;
@@ -366,7 +421,7 @@ export default {
       this.validate = this.checkForm(e);
       if (this.validate) {
         this.itemClear();
-        this.getItem();
+        this.getItem(true);
       }
       this.refreshDailyWorkingAlertTable();
     },
@@ -377,6 +432,11 @@ export default {
       this.detailsEdt = this.details[index];
       this.refreshEdtWorkingTimesTable();
     },
+    // 戻るボタンクリックされた場合の処理
+    backclick : function() {
+      this.selectMode = '';
+      this.refreshDailyWorkingAlertTable();
+    },
     // キャンセルボタンクリックされた場合の処理
     cancelClick: function(e, arrayitem) {
       this.selectMode = '';
@@ -384,7 +444,7 @@ export default {
     },
     // ------------------------ サーバー処理 ----------------------------
     // 日次警告取得処理
-    getItem() {
+    getItem(ismsgout) {
       // 処理中メッセージ表示
       this.$swal({
         title: "処　理　中...",
@@ -403,7 +463,7 @@ export default {
           this.postRequest("/daily_alert/show", arrayParams)
             .then(response  => {
               this.$swal.close();
-              this.getThen(response);
+              this.getThen(response, ismsgout);
             })
             .catch(reason => {
               this.$swal.close();
@@ -430,11 +490,16 @@ export default {
       );
     },
     // 取得正常処理（アラート）
-    getThen(response) {
+    getThen(response, ismsgout) {
       var res = response.data;
       if (res.result) {
         this.details = res.details;
         this.dateName = res.datename;
+        if (ismsgout) {
+          if (res.messagedata.length > 0) {
+            this.htmlMessageSwal("確認", res.messagedata, "info", true, false);
+          }
+        }
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
