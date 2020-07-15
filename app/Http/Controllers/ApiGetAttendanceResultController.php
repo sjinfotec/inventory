@@ -88,7 +88,7 @@ class ApiGetAttendanceResultController extends Controller
                         } elseif($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.dup_time_check')) {
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.dup_time_check'));
                         } elseif($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.time_autoset')) {
-                            Log::debug('store time_autoset');
+                            // Log::debug('store time_autoset');
                             // insertTable implement
                             $array_impl_insertTable = array (
                                 'user_data' => $user_data,
@@ -98,7 +98,7 @@ class ApiGetAttendanceResultController extends Controller
                                 'systemdate' => $systemdate,
                                 'mode_id' => $array_chkAttendance_result[3]
                             );
-                            Log::debug('store mode_id = '.$array_chkAttendance_result[3]);
+                            // Log::debug('store mode_id = '.$array_chkAttendance_result[3]);
                             $this->insertTable($array_impl_insertTable);
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
                         } else {
@@ -209,8 +209,8 @@ class ApiGetAttendanceResultController extends Controller
                         $chk_systemdate = $systemdate->format('Ymd');
                         if ($mode == Config::get('const.C005.attendance_time')) {
                             // 直前の打刻日
-                            Log::debug('attendance_time $chk_systemdate = '.$chk_systemdate);
-                            Log::debug('attendance_time $result->record_ymd = '.$result->record_ymd);
+                            // Log::debug('attendance_time $chk_systemdate = '.$chk_systemdate);
+                            // Log::debug('attendance_time $result->record_ymd = '.$result->record_ymd);
                             if ($chk_systemdate == $result->record_ymd) {
                                 // 休暇区分で自動設定されている場合は重複打刻となるのでモードチェックするかしないかの判定を行う
                                 // getUsefreeitem implement
@@ -223,10 +223,10 @@ class ApiGetAttendanceResultController extends Controller
                                 $use_free_item = $this->getUsefreeitem($array_impl_getUsefreeitem);
                                 if (strlen($use_free_item) >= 3)  {
                                     $use_free_item_chk = substr($use_free_item, Config::get('const.USEFREEITEM.time_autoset'), 1);
-                                    Log::debug('attendance_time $use_free_item_chk = '.$use_free_item_chk);
+                                    // Log::debug('attendance_time $use_free_item_chk = '.$use_free_item_chk);
                                     if ($use_free_item_chk == "1" || $use_free_item_chk == "3")  {
-                                        Log::debug('attendance_time $result->record_datetime = '.$result->record_datetime);
-                                        Log::debug('attendance_time $result->is_editor = '.$result->is_editor);
+                                        // Log::debug('attendance_time $result->record_datetime = '.$result->record_datetime);
+                                        // Log::debug('attendance_time $result->is_editor = '.$result->is_editor);
                                         if ($result->record_datetime != null && $result->record_datetime != "" && $result->is_editor) {
                                             $is_chk_mode_autoset = true;
                                             $mode_autoset_id = $result->id;
@@ -239,10 +239,10 @@ class ApiGetAttendanceResultController extends Controller
                             $work_time_model->setParamdatefromNoneditAttribute($systemdate->format('Ymd '.'23:59:59'));
                             $work_time_model->setParamModeAttribute($mode);
                             $daily_leaving_times = $work_time_model->getDailyMaxData();
-                            Log::debug('leaving_time $chk_systemdate = '.$chk_systemdate);
+                            // Log::debug('leaving_time $chk_systemdate = '.$chk_systemdate);
                             if(count($daily_leaving_times) > 0){
                                 foreach($daily_leaving_times as $item) {
-                                    Log::debug('leaving_time $item->record_ymd = '.$item->record_ymd);
+                                    // Log::debug('leaving_time $item->record_ymd = '.$item->record_ymd);
                                     if ($chk_systemdate == $item->record_ymd) {
                                         // 休暇区分で自動設定されている場合は重複打刻となるのでモードチェックするかしないかの判定を行う
                                         // getUsefreeitem implement
@@ -255,10 +255,10 @@ class ApiGetAttendanceResultController extends Controller
                                         $use_free_item = $this->getUsefreeitem($array_impl_getUsefreeitem);
                                         if (strlen($use_free_item) >= 3)  {
                                             $use_free_item_chk = substr($use_free_item, Config::get('const.USEFREEITEM.time_autoset'), 1);
-                                            Log::debug('leaving_time $use_free_item_chk = '.$use_free_item_chk);
+                                            // Log::debug('leaving_time $use_free_item_chk = '.$use_free_item_chk);
                                             if ($use_free_item_chk == "2" || $use_free_item_chk == "3")  {
-                                                Log::debug('leaving_time $item->record_datetime = '.$item->record_datetime);
-                                                Log::debug('leaving_time $item->is_editor = '.$item->is_editor);
+                                                // Log::debug('leaving_time $item->record_datetime = '.$item->record_datetime);
+                                                // Log::debug('leaving_time $item->is_editor = '.$item->is_editor);
                                                 if ($item->record_datetime != null && $item->record_datetime != "" && $item->is_editor) {
                                                     $is_chk_mode_autoset = true;
                                                     $mode_autoset_id = $item->id;
@@ -270,9 +270,9 @@ class ApiGetAttendanceResultController extends Controller
                                 }
                             }
                         }
-                        Log::debug('$mode = '.$mode);
-                        Log::debug('$this->source_mode = '.$this->source_mode);
-                        Log::debug('$is_chk_mode_autoset = '.$is_chk_mode_autoset);
+                        // Log::debug('$mode = '.$mode);
+                        // Log::debug('$this->source_mode = '.$this->source_mode);
+                        // Log::debug('$is_chk_mode_autoset = '.$is_chk_mode_autoset);
                         $chk_result = $apicommon->chkMode($mode, $this->source_mode, $is_chk_mode_autoset);
                         if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
                             if ($is_chk_mode_autoset) {
@@ -306,7 +306,7 @@ class ApiGetAttendanceResultController extends Controller
         $work_time_model->setParamUsercodeAttribute($user_data->code);
         $work_time_model->setParamModeAttribute($mode);
         $value_count = $work_time_model->getModeCount();
-        Log::debug('chkAttendance value_count = '.$value_count);
+        // Log::debug('chkAttendance value_count = '.$value_count);
         if (isset($value_count)) {
             if ($value_count >= Config::get('const.C019.max_times')) {
                 $chk_max_times = Config::get('const.RESULT_CODE.max_times');
@@ -365,13 +365,13 @@ class ApiGetAttendanceResultController extends Controller
             // 打刻データ登録
             DB::beginTransaction();
             // mode_idある場合は論理削除
-            Log::debug('insertTable mode_id = '.$mode_id);
+            // Log::debug('insertTable mode_id = '.$mode_id);
             if ($mode_id != null) {
                 $work_time = new WorkTime();
                 $work_time->setIdAttribute($mode_id);
                 $work_time->setSystemDateAttribute($systemdate);
                 $work_time->delWorkTimeBysystem();
-                Log::debug('insertTable delWorkTimeBysystem ');
+                // Log::debug('insertTable delWorkTimeBysystem ');
             }
             // insertTime implement
             $array_impl_insertTime = array (

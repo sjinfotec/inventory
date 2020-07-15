@@ -124,11 +124,11 @@ class CardInformation extends Model
 
     public function insertCardInfo(){
         try {
-            Log::debug('insertCardInfo $this->user_code = '.$this->user_code );
-            Log::debug('insertCardInfo $this->department_code = '.$this->department_code );
-            Log::debug('insertCardInfo $this->card_idm = '.$this->card_idm );
-            Log::debug('insertCardInfo $this->created_user = '.$this->created_user );
-            Log::debug('insertCardInfo $this->systemdate = '.$this->systemdate );
+            // Log::debug('insertCardInfo $this->user_code = '.$this->user_code );
+            // Log::debug('insertCardInfo $this->department_code = '.$this->department_code );
+            // Log::debug('insertCardInfo $this->card_idm = '.$this->card_idm );
+            // Log::debug('insertCardInfo $this->created_user = '.$this->created_user );
+            // Log::debug('insertCardInfo $this->systemdate = '.$this->systemdate );
             DB::table($this->table.'')->insert(
                 [
                     'user_code' => $this->user_code,

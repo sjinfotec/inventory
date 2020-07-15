@@ -150,7 +150,7 @@ class CreateCalendarController extends Controller
                 $setting_model->setParamYearAttribute($datefrom);
                 $begining = $setting_model->getBeginingMonth();
                 if (isset($begining)) {
-                    Log::debug($datefrom.str_pad($begining, 2, "0", STR_PAD_LEFT).'01');
+                    // Log::debug($datefrom.str_pad($begining, 2, "0", STR_PAD_LEFT).'01');
                     $dt = new Carbon($datefrom.str_pad($begining, 2, "0", STR_PAD_LEFT).'01');
                     $dt_next = new Carbon($datefrom.str_pad($begining, 2, "0", STR_PAD_LEFT).'01');
                     $dt_next->addYear()->subDay();

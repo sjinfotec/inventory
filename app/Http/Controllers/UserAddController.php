@@ -385,7 +385,7 @@ class UserAddController extends Controller
             if ($data['id'] == "" || $data['id'] == null) {
                 $user_model->setCreateduserAttribute($user_code);
                 $user_model->setCreatedatAttribute($systemdate);
-                Log::debug('update password = '.$data['code']);
+                // Log::debug('update password = '.$data['code']);
                 $user_model->setPasswordAttribute(bcrypt($data['code']));
                 $user_model->insertNewUser();
             } else {

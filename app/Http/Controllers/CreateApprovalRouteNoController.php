@@ -311,10 +311,10 @@ class CreateApprovalRouteNoController extends Controller
                 $time_table->setWorkingtimekubunAttribute($details[$i]['working_time_kubun']);
                 $time_table->setFromtimeAttribute($details[$i]['from_time']);
                 $time_table->setTotimeAttribute($details[$i]['to_time']);
-                Log::debug('$i = '.$i);
-                Log::debug('$details[id] = '.$details[$i]['id']);
-                Log::debug('$details[from_time] = '.$details[$i]['from_time']);
-                Log::debug('$details[to_time] = '.$details[$i]['to_time']);
+                // Log::debug('$i = '.$i);
+                // Log::debug('$details[id] = '.$details[$i]['id']);
+                // Log::debug('$details[from_time] = '.$details[$i]['from_time']);
+                // Log::debug('$details[to_time] = '.$details[$i]['to_time']);
                 if ($details[$i]['id'] == "" || $details[$i]['id'] == null) {
                     $time_table->setCreateduserAttribute($user_code);
                     $time_table->setCreatedatAttribute($systemdate);
@@ -409,7 +409,7 @@ class CreateApprovalRouteNoController extends Controller
             $start_index = ($index - 1) * 7;
             $end_index = $start_index + 6;
             for ($i=$start_index; $i <= $end_index; $i++) {
-                log::debug('$details[$i] = '.$details[$i]['id']);
+                // Log::debug('$details[$i] = '.$details[$i]['id']);
                 $time_table->setIdAttribute($details[$i]['id']);   
                 $time_table->setUpdateduserAttribute($user_code);
                 $time_table->setUpdatedatAttribute($systemdate);
