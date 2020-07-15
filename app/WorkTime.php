@@ -2075,7 +2075,7 @@ class WorkTime extends Model
 
             $result = $mainquery->get();
             // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
-            //     \Log::debug('sql_debug_log', ['getAlertData' => \DB::getQueryLog()]);
+            //     \// Log::debug('sql_debug_log', ['getAlertData' => \DB::getQueryLog()]);
             //     \DB::disableQueryLog();
             // }
         }catch(\PDOException $pe){
@@ -2568,7 +2568,7 @@ class WorkTime extends Model
             $array_setBindingsStr[] = 0;
             $result = DB::select($sqlString, $array_setBindingsStr);
 
-            Log::debug(' $result count = '.count($result));
+            // Log::debug(' $result count = '.count($result));
             // if (Config::get('const.DEBUG_LEVEL') == Config::get('const.DEBUG_LEVEL_VALUE.DEBUG')) {
             //     \Log::debug('sql_debug_log', ['getdailyAlertData' => \DB::getQueryLog()]);
             //     \DB::disableQueryLog();

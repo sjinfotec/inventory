@@ -416,9 +416,9 @@ class EditCalendarController extends Controller
                         $calendar_setting_model->setParamemploymentstatusAttribute($usersitem->employment_status);
                         $calendar_setting_model->setParamusercodeAttribute($usersitem->code);
                         $calendar_setting_model->setParamfromdateAttribute($data['date']);
-                        Log::debug("data['date'] = ".$data['date']);
-                        Log::debug("data['businessdays'] = ".$data['businessdays']);
-                        Log::debug("data['holidays'] = ".$data['holidays']);
+                        // Log::debug("data['date'] = ".$data['date']);
+                        // Log::debug("data['businessdays'] = ".$data['businessdays']);
+                        // Log::debug("data['holidays'] = ".$data['holidays']);
                         $calendar_setting_model->setBusinesskubunAttribute($data['businessdays']);
                         $calendar_setting_model->setHolidaykubunAttribute($data['holidays']);
                         $calendar_setting_model->setUpdateduserAttribute($login_user_code);
@@ -427,7 +427,7 @@ class EditCalendarController extends Controller
                         $user_holiday_kubun = null;
                         if ($data['holidays'] != null && $data['holidays'] != "" && $data['holidays'] != "0") {
                             if (strlen($data['use_free_items']) > 0) {
-                                Log::debug("data['use_free_items'] = ".$data['use_free_items']);
+                                // Log::debug("data['use_free_items'] = ".$data['use_free_items']);
                                 if (substr($data['use_free_items'], Config::get('const.USEFREEITEM.day_holiday'), 1) == "1") {
                                     $user_holiday_kubun = $data['holidays'];
                                 }
@@ -509,10 +509,10 @@ class EditCalendarController extends Controller
     //                     $calendar_model->setUpdatedatAttribute($systemdate);
     //                     $calendar_model->updateCalendar();
     //                     // 休暇区分更新
-    //                     Log::debug("data['holidays'] = ".$data['holidays']);
+    //                     // Log::debug("data['holidays'] = ".$data['holidays']);
     //                     if ($data['holidays'] != null && $data['holidays'] != "" && $data['holidays'] != "0") {
     //                         if (strlen($data['use_free_items']) > 0) {
-    //                             Log::debug("data['use_free_items'] = ".$data['use_free_items']);
+    //                             // Log::debug("data['use_free_items'] = ".$data['use_free_items']);
     //                             if (substr($data['use_free_items'], Config::get('const.USEFREEITEM.day_holiday'), 1) == "1") {
     //                                 $working_date = $data['date'];
     //                                 $user_holiday_model->setParamUsercodeAttribute($usersitem->code);
@@ -710,7 +710,7 @@ class EditCalendarController extends Controller
                 $index++;
             }
             // fixData implement
-            Log::debug('$initptn = '.$initptn);
+            // Log::debug('$initptn = '.$initptn);
             $array_impl_fixData = array (
                 'department_code' => $departmentcode,
                 'employment_status' => $employmentstatus,
@@ -1134,11 +1134,11 @@ class EditCalendarController extends Controller
     //             //     $setting_model->setParamYearAttribute($dateyear);
     //             //     $dt = new Carbon($dateyear.$datemonth."15");
     //             //     $beforedate = $dt->subMonth();
-    //             //     Log::debug('$beforedate = '.$beforedate);
+    //             //     // Log::debug('$beforedate = '.$beforedate);
     //             //     $setting_model->setParamFiscalmonthAttribute(date_format($beforedate, 'm'));
     //             //     $begining = $setting_model->getMonthClosing();
     //             //     if (isset($begining)) {
-    //             //         Log::debug($dateyear.$datemonth.str_pad($begining, 2, "0", STR_PAD_LEFT));
+    //             //         // Log::debug($dateyear.$datemonth.str_pad($begining, 2, "0", STR_PAD_LEFT));
     //             //         $dt = new Carbon($dateyear.$datemonth.str_pad($begining, 2, "0", STR_PAD_LEFT));
     //             //         $fromdate = $dt->addDay();
     //             //     } else {
@@ -1151,7 +1151,7 @@ class EditCalendarController extends Controller
     //             //     $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
     //             //     $begining = $setting_model->getMonthClosing();
     //             //     if (isset($begining)) {
-    //             //         Log::debug($dateyear.$datemonth.str_pad($begining, 2, "0", STR_PAD_LEFT));
+    //             //         // Log::debug($dateyear.$datemonth.str_pad($begining, 2, "0", STR_PAD_LEFT));
     //             //         $dt = new Carbon($dateyear.$datemonth.str_pad($begining, 2, "0", STR_PAD_LEFT));
     //             //         $todate = $dt->addDay();
     //             //     } else {
@@ -1295,11 +1295,11 @@ class EditCalendarController extends Controller
             $usercode = $params['usercode'];
             $dateyear = $params['dateyear'];
             $datemonth = $params['datemonth'];
-            Log::debug('departmentcode = '.$departmentcode);
-            Log::debug('employmentstatus = '.$employmentstatus);
-            Log::debug('usercode = '.$usercode);
-            Log::debug('dateyear = '.$dateyear);
-            Log::debug('datemonth = '.$datemonth);
+            // Log::debug('departmentcode = '.$departmentcode);
+            // Log::debug('employmentstatus = '.$employmentstatus);
+            // Log::debug('usercode = '.$usercode);
+            // Log::debug('dateyear = '.$dateyear);
+            // Log::debug('datemonth = '.$datemonth);
             // showCalc implement
             $array_impl_copyinitCalendar = array (
                 'departmentcode' => $departmentcode,
@@ -1346,7 +1346,7 @@ class EditCalendarController extends Controller
             $fromdate = $dt;
             $dt = new Carbon($dateyear.$datemonth."01");
             $todate = $dt->addMonth()->subDay();
-            Log::debug('$todate = '.$todate);
+            // Log::debug('$todate = '.$todate);
             // 削除
             if ($employmentstatus == "") { $employmentstatus = null; }
             if ($departmentcode == "") { $departmentcode = null; }
@@ -1417,7 +1417,7 @@ class EditCalendarController extends Controller
     //         $fromdate = $dt;
     //         $dt = new Carbon($dateyear.$datemonth."01");
     //         $todate = $dt->addMonth()->subDay();
-    //         Log::debug('$todate = '.$todate);
+    //         // Log::debug('$todate = '.$todate);
     //         // 削除
     //         if ($employmentstatus == "") { $employmentstatus = null; }
     //         if ($departmentcode == "") { $departmentcode = null; }

@@ -622,31 +622,31 @@ class EditAttendanceLogController extends Controller
                 $employment_status = $item->employment_status;
                 break;
             }
-            Log::debug('  user_code = '.$user_code);
-            Log::debug('  department_code = '.$department_code);
-            Log::debug('  employment_status = '.$employment_status);
-            Log::debug('  login_user_code = '.$login_user_code);
+            // Log::debug('  user_code = '.$user_code);
+            // Log::debug('  department_code = '.$department_code);
+            // Log::debug('  employment_status = '.$employment_status);
+            // Log::debug('  login_user_code = '.$login_user_code);
             $attendance_model = new AttendanceLog();
             $attendance_model->setParamdepartmentcodeAttribute($department_code);
             $attendance_model->setParamemploymentstatusAttribute($employment_status);
             $attendance_model->setParamusercodeAttribute($user_code);
             $maxdate = $attendance_model->getWorkingdate();
-            Log::debug('  maxdate = '.$maxdate);
-            Log::debug('  eventlogs count = '.count($eventlogs));
+            // Log::debug('  maxdate = '.$maxdate);
+            // Log::debug('  eventlogs count = '.count($eventlogs));
             foreach ($eventlogs as $item) {
-                Log::debug('  event_date = '.$item['event_date']);
+                // Log::debug('  event_date = '.$item['event_date']);
             }
             // eventlogフィルター
             $collect_eventlogs = new Collection($eventlogs);
             $filtered = null;
             if (isset($maxdate)) {
-                Log::debug('  event_date >= '.$maxdate);
+                // Log::debug('  event_date >= '.$maxdate);
                 $filtered = $collect_eventlogs->where('event_date', ">=", $maxdate);
             } else {
-                Log::debug('  event_date >= 20190101');
+                // Log::debug('  event_date >= 20190101');
                 $filtered = $collect_eventlogs->where('event_date', ">=", "20190101");
             }
-            Log::debug('  filtered count = '.count($filtered));
+            // Log::debug('  filtered count = '.count($filtered));
 
             // eventlogsの登録設定
             if (count($filtered) > 0) {
@@ -825,14 +825,14 @@ class EditAttendanceLogController extends Controller
         $result = true;
         $red_result = true;
         $red_chk_time = 1800;
-        Log::debug('chkisDiffTime $from_time = '.$from_time);
-        Log::debug('chkisDiffTime $to_time = '.$to_time);
-        Log::debug('chkisDiffTime $diffTime = '.$diffTime);
+        // Log::debug('chkisDiffTime $from_time = '.$from_time);
+        // Log::debug('chkisDiffTime $to_time = '.$to_time);
+        // Log::debug('chkisDiffTime $diffTime = '.$diffTime);
         // 計算開始
         $apicommon_model = new ApiCommonController();
         $diffTimeSerial = $apicommon_model->diffTimeSerial($from_time, $to_time);
-        Log::debug('chkisDiffTime $diffTimeSerial = '.$diffTimeSerial);
-        Log::debug('chkisDiffTime $diffTime * 60 = '.$diffTime * 60);
+        // Log::debug('chkisDiffTime $diffTimeSerial = '.$diffTimeSerial);
+        // Log::debug('chkisDiffTime $diffTime * 60 = '.$diffTime * 60);
         if ($diffTimeSerial < 0) { $diffTimeSerial = 0 - $diffTimeSerial; }
         if ($diffTime == 0) {
             $result = true;

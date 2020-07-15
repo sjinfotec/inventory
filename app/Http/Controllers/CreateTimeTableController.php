@@ -165,23 +165,23 @@ class CreateTimeTableController extends Controller
             $data_index = 0;
             for ($i=0;$i<$attendance_count;$i++) {
                 $data[$data_index]['working_time_kubun'] = Config::get('const.C004.regular_working_time');
-                Log::debug('store = '.$details['regularFrom'][$i]['fromTime']);
-                Log::debug('store = '.$details['regularTo'][$i]['regularTo']);
+                // Log::debug('store = '.$details['regularFrom'][$i]['fromTime']);
+                // Log::debug('store = '.$details['regularTo'][$i]['regularTo']);
                 $data[$data_index]['from_time'] = $details['regularFrom'][$i]['fromTime'];
                 $data[$data_index]['to_time'] = $details['regularTo'][$i]['regularTo'];
                 $data_index++;
             }
             for ($i=0;$i<$rest_count;$i++) {
                 $data[$data_index]['working_time_kubun'] = Config::get('const.C004.regular_working_breaks_time');
-                Log::debug('store = '.$details['regularRestFrom'][$i]['fromTime']);
-                Log::debug('store = '.$details['regularRestTime'][$i]['regularTo']);
+                // Log::debug('store = '.$details['regularRestFrom'][$i]['fromTime']);
+                // Log::debug('store = '.$details['regularRestTime'][$i]['regularTo']);
                 $data[$data_index]['from_time'] = $details['regularRestFrom'][$i]['fromTime'];
                 $data[$data_index]['to_time'] = $details['regularRestTime'][$i]['toTime'];
                 $data_index++;
             }
             $data[$data_index]['working_time_kubun'] = Config::get('const.C004.out_of_regular_night_working_time');
-            Log::debug('store = '.$details['irregularMidNightFrom']);
-            Log::debug('store = '.$details['irregularMidNightTo']);
+            // Log::debug('store = '.$details['irregularMidNightFrom']);
+            // Log::debug('store = '.$details['irregularMidNightTo']);
             $resultno = $this->insert($data ,$no, $name);
             return response()->json(
                 ['result' => true, 'no' => $resultno,
@@ -352,10 +352,10 @@ class CreateTimeTableController extends Controller
                 $time_table->setWorkingtimekubunAttribute($details[$i]['working_time_kubun']);
                 $time_table->setFromtimeAttribute($details[$i]['from_time']);
                 $time_table->setTotimeAttribute($details[$i]['to_time']);
-                Log::debug('$i = '.$i);
-                Log::debug('$details[id] = '.$details[$i]['id']);
-                Log::debug('$details[from_time] = '.$details[$i]['from_time']);
-                Log::debug('$details[to_time] = '.$details[$i]['to_time']);
+                // Log::debug('$i = '.$i);
+                // Log::debug('$details[id] = '.$details[$i]['id']);
+                // Log::debug('$details[from_time] = '.$details[$i]['from_time']);
+                // Log::debug('$details[to_time] = '.$details[$i]['to_time']);
                 if ($details[$i]['id'] == "" || $details[$i]['id'] == null) {
                     $time_table->setCreateduserAttribute($user_code);
                     $time_table->setCreatedatAttribute($systemdate);
@@ -471,7 +471,7 @@ class CreateTimeTableController extends Controller
             $start_index = ($index - 1) * ($attendance_count + $rest_count + 1);
             $end_index = $start_index + ($attendance_count + $rest_count);
             for ($i=$start_index; $i <= $end_index; $i++) {
-                log::debug('$details[$i] = '.$details[$i]['id']);
+                // Log::debug('$details[$i] = '.$details[$i]['id']);
                 $time_table->setIdAttribute($details[$i]['id']);   
                 $time_table->setUpdateduserAttribute($user_code);
                 $time_table->setUpdatedatAttribute($systemdate);
