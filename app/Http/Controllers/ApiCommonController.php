@@ -564,7 +564,7 @@ class ApiCommonController extends Controller
      */
     public function getUserListCsv(Request $request){
 
-        // Log::debug('getUserListCsv = ');
+        // // Log::debug('getUserListCsv = ');
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
@@ -2115,35 +2115,35 @@ class ApiCommonController extends Controller
                             // 所定時間が日またぎの場合
                             $w_working_timetable_from_record_datetime = $item->working_timetable_from_record_time;
                             $w_working_timetable_to_record_datetime = $item->working_timetable_to_record_time;
-                            // Log::debug('getWorkingHours  $item->working_timetable_from_record_time = '.$item->working_timetable_from_record_time);
-                            // Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
+                            // // Log::debug('getWorkingHours  $item->working_timetable_from_record_time = '.$item->working_timetable_from_record_time);
+                            // // Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
                             if ($item->working_timetable_from_record_time < $regular_start_recordtime) {
                                 $w_working_timetable_from_record_datetime = 
                                     date_format(new Carbon($regular_end_record_date.' '.$item->working_timetable_from_time),'Y-m-d H:i:s');
                             }
-                            // Log::debug('getWorkingHours  $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
-                            // Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
+                            // // Log::debug('getWorkingHours  $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
+                            // // Log::debug('getWorkingHours  $regular_start_recordtime = '.$regular_start_recordtime);
                             if ($item->working_timetable_to_record_time < $regular_start_recordtime) {
                                 $w_working_timetable_to_record_datetime = 
                                     date_format(new Carbon($regular_end_record_date.' '.$item->working_timetable_to_time),'Y-m-d H:i:s');
                             }
-                            // Log::debug('getWorkingHours  $w_working_timetable_from_record_datetime = '.$w_working_timetable_from_record_datetime);
-                            // Log::debug('getWorkingHours  $w_working_timetable_to_record_datetime = '.$w_working_timetable_to_record_datetime);
+                            // // Log::debug('getWorkingHours  $w_working_timetable_from_record_datetime = '.$w_working_timetable_from_record_datetime);
+                            // // Log::debug('getWorkingHours  $w_working_timetable_to_record_datetime = '.$w_working_timetable_to_record_datetime);
                             if (($w_working_timetable_from_record_datetime >= $regular_start_recordtime &&
                                 $w_working_timetable_from_record_datetime <= $regular_end_recordtime) &&
                                 ($w_working_timetable_to_record_datetime >= $regular_start_recordtime &&
                                 $w_working_timetable_to_record_datetime <= $regular_end_recordtime)) {
                                 $working_timetable_from_record_datetime = $w_working_timetable_from_record_datetime;
                                 $working_timetable_to_record_datetime = $w_working_timetable_to_record_datetime;
-                                // Log::debug('getWorkingHours  $working_timetable_from_record_datetime = '.$working_timetable_from_record_datetime);
-                                // Log::debug('getWorkingHours  $working_timetable_to_record_datetime = '.$working_timetable_to_record_datetime);
+                                // // Log::debug('getWorkingHours  $working_timetable_from_record_datetime = '.$working_timetable_from_record_datetime);
+                                // // Log::debug('getWorkingHours  $working_timetable_to_record_datetime = '.$working_timetable_to_record_datetime);
                             }
                         }
                         if ($working_timetable_from_record_datetime != null && $working_timetable_to_record_datetime != null) {
                             if ($working_timetable_from_record_datetime >= $regular_2after_recordtime) {
                                 $calc_times = $this->diffTimeSerial($working_timetable_from_record_datetime, $working_timetable_to_record_datetime);
                                 // from-toで30分以上か？
-                                // Log::debug('getWorkingHours  $calc_times = '.$calc_times);
+                                // // Log::debug('getWorkingHours  $calc_times = '.$calc_times);
                                 if ($calc_times >= 1800) {
                                     $lunch_start_time = $item->working_timetable_from_time;
                                     $lunch_start_recordtime = $working_timetable_from_record_datetime;
@@ -2208,9 +2208,9 @@ class ApiCommonController extends Controller
                 }
             }
             $record_datetime = $params['record_datetime'];
-            // Log::debug('         apicommon getWorkingHoursByStamp = '.date_format(new Carbon($record_datetime), 'H:i:s'));
+            // // Log::debug('         apicommon getWorkingHoursByStamp = '.date_format(new Carbon($record_datetime), 'H:i:s'));
             $record_datetime_date = date_format(new Carbon($target_date), 'Y-m-d')." ".date_format(new Carbon($record_datetime), 'H:i:s');
-            // Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
+            // // Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
             // usersのカレンダーからタイムテーブルの所定時刻を取得する
             $time_tables = new WorkingTimeTable();
             $target_dateYmd = date_format(new Carbon($target_date), 'Ymd');
@@ -2218,24 +2218,24 @@ class ApiCommonController extends Controller
             $time_tables->setParamdatetoAttribute($target_dateYmd);
             $time_tables->setParamDepartmentcodeAttribute($department_code);
             $time_tables->setParamUsercodeAttribute($user_code);
-            // Log::debug('         apicommon getWorkingHoursByStamp $target_dateYmd = '.$target_dateYmd);
-            // Log::debug('         apicommon getWorkingHoursByStamp $department_code = '.$department_code);
-            // Log::debug('         apicommon getWorkingHoursByStamp $user_code = '.$user_code);
+            // // Log::debug('         apicommon getWorkingHoursByStamp $target_dateYmd = '.$target_dateYmd);
+            // // Log::debug('         apicommon getWorkingHoursByStamp $department_code = '.$department_code);
+            // // Log::debug('         apicommon getWorkingHoursByStamp $user_code = '.$user_code);
             $workingHours = $time_tables->getWorkingTimeTable();
             $working_from_time = null;
             $working_to_time = null;
             $working_to_time_date = null;
-            // Log::debug('         apicommon getWorkingHoursByStamp $workingHours = '.count($workingHours));
+            // // Log::debug('         apicommon getWorkingHoursByStamp $workingHours = '.count($workingHours));
             foreach($workingHours as $item) {
-                // Log::debug('         apicommon getWorkingHoursByStamp $item->working_time_kubun = '.$item->working_time_kubun);
+                // // Log::debug('         apicommon getWorkingHoursByStamp $item->working_time_kubun = '.$item->working_time_kubun);
                 if ($item->working_time_kubun == Config::get('const.C004.regular_working_time')) {
-                    // Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
-                    // Log::debug('         apicommon getWorkingHoursByStamp $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
+                    // // Log::debug('         apicommon getWorkingHoursByStamp $record_datetime_date = '.$record_datetime_date);
+                    // // Log::debug('         apicommon getWorkingHoursByStamp $item->working_timetable_to_record_time = '.$item->working_timetable_to_record_time);
                     if ($mode == Config::get('const.C005.attendance_time') ||
                         $mode == Config::get('const.C005.missing_middle_time') ||
                         $mode == Config::get('const.C005.public_going_out_time')) {
                         if ($record_datetime_date < $item->working_timetable_to_record_time) {
-                            // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
+                            // // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
                             if ($working_from_time == null) {
                                 $working_from_time = $item->working_timetable_from_time;
                                 $working_to_time = $item->working_timetable_to_time;
@@ -2251,7 +2251,7 @@ class ApiCommonController extends Controller
                         if ($record_datetime_date > $item->working_timetable_to_record_time ||
                             ($record_datetime_date > $item->working_timetable_from_record_time &&
                             $record_datetime_date <= $item->working_timetable_to_record_time)) {
-                            // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
+                            // // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time_date = '.$working_to_time_date);
                             if ($working_from_time == null) {
                                 $working_from_time = $item->working_timetable_from_time;
                                 $working_to_time = $item->working_timetable_to_time;
@@ -2262,12 +2262,12 @@ class ApiCommonController extends Controller
                             }
                         }
                     }
-                    // Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
-                    // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
+                    // // Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
+                    // // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
                 }
             }
-            // Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
-            // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
+            // // Log::debug('         apicommon getWorkingHoursByStamp $working_from_time = '.$working_from_time);
+            // // Log::debug('         apicommon getWorkingHoursByStamp $working_to_time = '.$working_to_time);
             // 設定
             $array_workingHours = array(
                 'working_from_time' => $working_from_time,
@@ -2805,10 +2805,10 @@ class ApiCommonController extends Controller
         if (isset($setting_from_datetime) && isset($setting_to_datetime)) {
             // タイムテーブル設定時刻のチェックを行う場合
             // タイムテーブル時間範囲内に休憩開始終了時刻がある場合に計算する
-            // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-            // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
-            // Log::debug('calcBetweenBreakTime $setting_from_datetime = '.$setting_from_datetime);
-            // Log::debug('calcBetweenBreakTime $setting_to_datetime = '.$setting_to_datetime);
+            // // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+            // // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+            // // Log::debug('calcBetweenBreakTime $setting_from_datetime = '.$setting_from_datetime);
+            // // Log::debug('calcBetweenBreakTime $setting_to_datetime = '.$setting_to_datetime);
             if (($time_calc_from <= $setting_from_datetime || $time_calc_from >= $setting_to_datetime) &&
                 ($time_calc_to <= $setting_from_datetime || $time_calc_to >= $setting_to_datetime)) {
                 $chk_time = false;
@@ -2816,10 +2816,10 @@ class ApiCommonController extends Controller
         }
         if ($chk_time) {
             //  指定時間範囲内に休憩開始終了時刻がある場合に計算する
-            // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-            // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
-            // Log::debug('calcBetweenBreakTime $target_from_datetime = '.$target_from_datetime);
-            // Log::debug('calcBetweenBreakTime $target_to_datetime = '.$target_to_datetime);
+            // // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+            // // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+            // // Log::debug('calcBetweenBreakTime $target_from_datetime = '.$target_from_datetime);
+            // // Log::debug('calcBetweenBreakTime $target_to_datetime = '.$target_to_datetime);
             if (($time_calc_from >= $target_from_datetime && $time_calc_from <= $target_to_datetime) ||
                 ($time_calc_to >= $target_from_datetime && $time_calc_to <= $target_to_datetime)) {
                 if ($target_from_datetime > $time_calc_from) {
@@ -2828,8 +2828,8 @@ class ApiCommonController extends Controller
                 if ($target_to_datetime < $time_calc_to) {
                     $time_calc_to = $target_to_datetime;
                 }
-                // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
-                // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
+                // // Log::debug('calcBetweenBreakTime $time_calc_from = '.$time_calc_from);
+                // // Log::debug('calcBetweenBreakTime $time_calc_to = '.$time_calc_to);
                 if ($time_calc_from < $time_calc_to) {
                     $calc_times += $this->diffTimeSerial($time_calc_from, $time_calc_to);
                 }
@@ -2891,7 +2891,7 @@ class ApiCommonController extends Controller
         $time_rounding = $params['time_rounding'];
         $working_timetable_no = $params['working_timetable_no'];
         $array_get_timetable_result = $params['array_get_timetable_result'];
-        Log::debug('roundTimeByTimeStart $start_time = '.$start_time);
+        // Log::debug('roundTimeByTimeStart $start_time = '.$start_time);
         // 1分単位の場合はそのまま
         if ($time_unit == Config::get('const.C009.round1')) {
             return $start_time;
@@ -2952,7 +2952,7 @@ class ApiCommonController extends Controller
             }
             $result_round_time = date('Y-m-d H:i:00',strtotime(('+'.$calc_times_round).' second',strtotime($source_dt)));
         }
-        Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
+        // Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
         return $result_round_time;
     }
 
@@ -2969,7 +2969,7 @@ class ApiCommonController extends Controller
         $time_rounding = $params['time_rounding'];
         $working_timetable_no = $params['working_timetable_no'];
         $array_get_timetable_result = $params['array_get_timetable_result'];
-        Log::debug('roundTimeByTimeStart $end_time = '.$end_time);
+        // Log::debug('roundTimeByTimeStart $end_time = '.$end_time);
         // 1分単位の場合はそのまま
         if ($time_unit == Config::get('const.C009.round1')) {
             return $end_time;
@@ -3036,7 +3036,7 @@ class ApiCommonController extends Controller
             }
             $result_round_time = date('Y-m-d H:i:00',strtotime(('+'.$calc_times_round).' second',strtotime($source_dt)));
         }
-        Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
+        // Log::debug('roundTimeByTimeStart $result_round_time = '.$result_round_time);
         return $result_round_time;
     }
 
@@ -3050,9 +3050,9 @@ class ApiCommonController extends Controller
         $round_time = $params['round_time'];
         $time_unit = $params['time_unit'];
         $time_rounding = $params['time_rounding'];
-        Log::debug('roundTimeStart $round_time = '.$round_time);
-        Log::debug('roundTimeStart $time_unit = '.$time_unit);
-        Log::debug('roundTimeStart $time_rounding = '.$time_rounding);
+        // Log::debug('roundTimeStart $round_time = '.$round_time);
+        // Log::debug('roundTimeStart $time_unit = '.$time_unit);
+        // Log::debug('roundTimeStart $time_rounding = '.$time_rounding);
         $dt = new Carbon($round_time);
         $target_datetime = $dt->format("Y-m-d H:i:s");
         $target_ymd = $dt->format("Y-m-d");
@@ -3453,7 +3453,7 @@ class ApiCommonController extends Controller
             }
         }
 
-        Log::debug('roundTimeStart $target_datetime = '.$target_datetime);
+        // Log::debug('roundTimeStart $target_datetime = '.$target_datetime);
         return $target_datetime;
     }
 
@@ -3467,9 +3467,9 @@ class ApiCommonController extends Controller
         $round_time = $params['round_time'];
         $time_unit = $params['time_unit'];
         $time_rounding = $params['time_rounding'];
-        Log::debug('roundTimeEnd $round_time = '.$round_time);
-        Log::debug('roundTimeEnd $time_unit = '.$time_unit);
-        Log::debug('roundTimeEnd $time_rounding = '.$time_rounding);
+        // Log::debug('roundTimeEnd $round_time = '.$round_time);
+        // Log::debug('roundTimeEnd $time_unit = '.$time_unit);
+        // Log::debug('roundTimeEnd $time_rounding = '.$time_rounding);
         $dt = new Carbon($round_time);
         $target_datetime = $dt->format("Y-m-d H:i:s");
         $target_ymd = $dt->format("Y-m-d");
@@ -3875,14 +3875,14 @@ class ApiCommonController extends Controller
             }
         }
 
-        Log::debug('roundTimeEnd $target_datetime = '.$target_datetime);
+        // Log::debug('roundTimeEnd $target_datetime = '.$target_datetime);
         return $target_datetime;
     }
     // public function roundTime($round_time, $time_unit, $time_rounding){
 
-    //     Log::debug('roundTime $round_time = '.$round_time);
-    //     Log::debug('roundTime $time_unit = '.$time_unit);
-    //     Log::debug('roundTime $time_rounding = '.$time_rounding);
+    //     // Log::debug('roundTime $round_time = '.$round_time);
+    //     // Log::debug('roundTime $time_unit = '.$time_unit);
+    //     // Log::debug('roundTime $time_rounding = '.$time_rounding);
     //     if ($time_rounding == Config::get('const.C010.round_half_up')) {
     //         // 四捨五入
     //         if ($time_unit == Config::get('const.C009.round1')) {
@@ -4898,13 +4898,13 @@ class ApiCommonController extends Controller
             }
             $calendar_setting_model->setUpdatedatAttribute($systemdate);
             $calendar_setting_model->setUpdateduserAttribute($login_user_code);
-            Log::debug('addAttendanceWork count details = '.count($details));
+            // Log::debug('addAttendanceWork count details = '.count($details));
             if (count($details) == 0) {
                 $calendar_setting_model->setHolidaykubunAttribute(0);
                 $calendar_setting_model->updateCalendar();
             } else {
                 foreach($details as $item) {
-                    Log::debug('addAttendanceWork kbn_flag = '.$item['kbn_flag']);
+                    // Log::debug('addAttendanceWork kbn_flag = '.$item['kbn_flag']);
                     if($item['kbn_flag'] == 1){     // 休暇区分のみ登録
                         $calendar_setting_model->setHolidaykubunAttribute($item['user_holiday_kbn']);
                         // $user_holiday->setHolidaykubunAttribute($item['user_holiday_kbn']);
