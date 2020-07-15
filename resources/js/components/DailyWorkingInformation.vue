@@ -151,7 +151,7 @@
     <!-- main contentns row -->
     <div class="row justify-content-between">
       <!-- .panel -->
-      <div class="col-md pt-3 align-self-stretch print-none" v-if="selectmode === 'DSP'">
+      <div class="col-md-12 pt-3 align-self-stretch print-none" v-if="selectmode === 'DSP'">
         <div class="card shadow-pl">
           <!-- panel header -->
           <daily-working-information-panel-header
@@ -159,13 +159,15 @@
             v-bind:header-text2="'時間の単位は　時:分　です'"
           ></daily-working-information-panel-header>
           <!-- /.panel header -->
+        </div>
+        <div class="card shadow-pl">
           <!-- panel body -->
-          <div class="card-body pt-2 print-none">
+          <div class="card-body pt-2">
             <!-- ----------- 印刷ボタン START ---------------- -->
             <!-- .row -->
             <div class="row justify-content-between">
               <!-- col -->
-              <div class="col-md-2 pb-2">
+              <div class="col-md-2 pb-2" v-if="calcresults.length">
                 <btn-work-time
                   v-on:dailycalc-event="printclick"
                   v-bind:btn-mode="'dailycalc'"
@@ -693,6 +695,7 @@ export default {
       this.valuesubadddate = "";
       this.validate = this.checkForm(e);
       this.isswitchbutton = false;
+      this.selectmode = "";
       if (this.validate) {
         this.issearchbutton = true;
         // this.messageshowsearch = true;
