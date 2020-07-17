@@ -1874,6 +1874,35 @@ class WorkTime extends Model
     }
 
     /**
+     * 論理削除
+     *
+     * @return void
+     */
+    public function delWorkTimeByHoliday(){
+        try {
+            DB::table($this->table)
+                ->where('user_code', $this->user_code)
+                ->where('department_code', $this->department_code)
+                ->where('record_time', $this->record_time)
+                ->whereNull('mode')
+                ->where('is_deleted', 0)
+                ->update([
+                    'is_deleted' => 1,
+                    'updated_user' => $this->updated_user,
+                    'updated_at' => $this->systemdate
+                    ]);
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
      * モード回数取得
      *
      * @return void
