@@ -681,6 +681,7 @@ class DailyWorkingInformationController extends Controller
         $this->user_temp_seq = 0;               // ユーザー単位のtemp出力時のseq
         $before_out_flg = false;
         $attendance_work_time = null;
+        $attendance_business_kubun = null;
         // ユーザー単位処理
         foreach ($worktimes as $result) {
             // 打刻データありの場合
@@ -723,6 +724,7 @@ class DailyWorkingInformationController extends Controller
                             $current_user_code != $before_user_code) {
                             $attendance_target_flg = false;
                             $attendance_work_time = null;
+                            $attendance_business_kubun = null;
                         }
                         // 出勤回数が複数回の場合はタイムテーブルの開始終了時刻が正しく対応順に取得されない場合があるので
                         // 対応するタイムテーブルの開始終了時刻を新たに設定する
@@ -732,6 +734,7 @@ class DailyWorkingInformationController extends Controller
                         if ($result->mode == Config::get('const.C005.attendance_time') ||
                             $result->mode == Config::get('const.C005.emergency_time')) {
                             $attendance_work_time = $result->record_datetime;
+                            $attendance_business_kubun = $result->business_kubun;
                             $array_impl_setWorkingtimetabletime = array (
                                 'target_date' => $target_date_ymd,
                                 'feature_attendance_count' => $feature_attendance_count,
@@ -750,6 +753,10 @@ class DailyWorkingInformationController extends Controller
                             // Log::debug('         タイムテーブル　変更後　name   　$result->working_timetable_name    = '.$result->working_timetable_name);
                             // Log::debug('         タイムテーブル　変更後　開始時刻　$result->working_timetable_from_time = '.$result->working_timetable_from_time);
                             // Log::debug('         タイムテーブル　変更後　終了時刻　result->working_timetable_to_time    = '.$result->working_timetable_to_time);
+                        } else {
+                            if ($attendance_business_kubun != null && $attendance_business_kubun != "") {
+                                $result->business_kubun = $attendance_business_kubun;
+                            }
                         }
                         $array_impl_isCurrentDateCalc = array (
                             'target_date_ymd' => $target_date_ymd,
@@ -1204,11 +1211,16 @@ class DailyWorkingInformationController extends Controller
                         // 出勤打刻flgをfalseに初期設定
                         $attendance_target_flg = false;
                         $attendance_work_time = null;
+                        $attendance_business_kubun = null;
                         // 有効打刻データがなくて、休暇扱いか出勤日である場合はtempに出力
                         // 打刻されていれば出勤以外は出力対象外
                         $temp_out_flg1 = false;
                         $temp_out_flg2 = false;
                         $temp_out_flg3 = false;
+                        $chk_business_kubun = $result->business_kubun;
+                        if ($attendance_business_kubun != null || $attendance_business_kubun != "") {
+                            $chk_business_kubun = $attendance_business_kubun;
+                        }
                         if (isset($result->user_holiday_kubun)) {
                             if ($result->user_holiday_kubun >= (int)Config::get('const.C013.paid_holiday')) {
                                 // 当日の休暇である場合
@@ -1216,12 +1228,12 @@ class DailyWorkingInformationController extends Controller
                                     $temp_out_flg1 = true;
                                 }
                             } else {
-                                if ($result->business_kubun == Config::get('const.C007.basic')) {
+                                if ($chk_business_kubun == Config::get('const.C007.basic')) {
                                     $temp_out_flg2 = true;
                                 }
                             }
                         } else {
-                            if ($result->business_kubun == Config::get('const.C007.basic')) {
+                            if ($chk_business_kubun == Config::get('const.C007.basic')) {
                                 $temp_out_flg2 = true;
                             }
                         }
@@ -10989,14 +11001,14 @@ class DailyWorkingInformationController extends Controller
             }
         } else {
             // 対応する出勤モードの集計対象flgがtrue（出勤打刻があった）の場合は対象
-            // 出勤または緊急取集開始ではない場合は対応する出勤モードの集計対象flgより設定
             if ($attendance_flg) {
                 $target_flg = true;
             } else {
-                // 打刻時刻 >= 当日のタイムテーブル開始時刻  and 打刻時刻 <= 翌日のタイムテーブル開始時刻
-                // の場合、当日の計算対象とする
+                // 出勤打刻がなかった場合は打刻エラーとなるが、出勤以外の打刻が当日分の打刻である場合対象とする
+                // 打刻時刻 >= 当日のタイムテーブル開始時刻  and 打刻時刻 <= 翌日のタイムテーブル開始時刻（当日のタイムテーブル終了時刻に変更）
+                // の場合、当日の計算対象とする（TODO 100％ひろえない）
                 if ($result->record_datetime >= $w_today_from_datetime &&
-                    $result->record_datetime <= $w_plus1_from_datetime) {
+                    $result->record_datetime <= $w_today_to_datetime) {
                     $target_flg = true;
                 } else {
                     $target_flg = false;

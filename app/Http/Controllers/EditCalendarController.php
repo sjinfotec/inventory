@@ -435,6 +435,39 @@ class EditCalendarController extends Controller
                         }
                         $calendar_setting_model->setHolidaykubunAttribute($data['holidays']);
                         $calendar_setting_model->updateCalendar();
+                        if ($data['holidays'] != null && $data['holidays'] != "" && $data['holidays'] != "0") {
+                            if (strlen($data['use_free_items']) > 0) {
+                                // Log::debug("data['use_free_items'] = ".$data['use_free_items']);
+                                if (substr($data['use_free_items'], Config::get('const.USEFREEITEM.day_holiday'), 1) == "1") {
+                                    // 勤怠時刻登録
+                                    // すでに存在する場合は勤怠編集で修正させる(休暇の場合は削除)
+                                    // Log::debug("$data[date] = ".$data['date']);
+                                    $target_ymd =  new Carbon($data['date']);
+                                    $target_ymd_date = $target_ymd->format('Y-m-d');
+                                    $record_time = $target_ymd_date." 00:00:01";
+                                    // Log::debug("$record_time = ".$record_time);
+                                    $work_time_model->setUsercodeAttribute($usersitem->code);
+                                    $work_time_model->setDepartmentcodeAttribute($usersitem->department_code);
+                                    $work_time_model->setRecordtimeAttribute($record_time);
+                                    $work_time_model->setUpdateduserAttribute($login_user_code);
+                                    $work_time_model->setSystemDateAttribute($systemdate);
+                                    $work_time_model->delWorkTimeByHoliday();
+
+                                    $work_time_model->setUsercodeAttribute($usersitem->code);
+                                    $work_time_model->setDepartmentcodeAttribute($usersitem->department_code);
+                                    $work_time_model->setRecordtimeAttribute($record_time);
+                                    $work_time_model->setModeAttribute(null);
+                                    $work_time_model->setUserholidaykubunsidAttribute(null);
+                                    $work_time_model->setCreateduserAttribute($login_user_code);
+                                    $work_time_model->setSystemDateAttribute($systemdate);
+                                    $work_time_model->setPositionsAttribute(null);
+                                    $work_time_model->setIseditorAttribute(true);
+                                    $work_time_model->setEditordepartmentcodeAttribute($login_department_code);
+                                    $work_time_model->setEditorusercodeAttribute($login_user_code);
+                                    $work_time_model->insertWorkTime();
+                                }
+                            }
+                        }
                     }
                 }
             }
