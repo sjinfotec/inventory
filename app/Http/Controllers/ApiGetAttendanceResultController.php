@@ -288,17 +288,17 @@ class ApiGetAttendanceResultController extends Controller
                     }
                 } else {
                     // ない場合は出勤以外はエラーとする
-                    $chk_result = $apicommon->chkMode($mode, '');
+                    $chk_result = $apicommon->chkMode($mode, '', false);
                 }
                 break;
             }
             if ($i == 0) {
                 // ない場合は出勤以外はエラーとする
-                $chk_result = $apicommon->chkMode($mode, '');
+                $chk_result = $apicommon->chkMode($mode, '', false);
             }
         } else {
             // ない場合は出勤以外はエラーとする
-            $chk_result = $apicommon->chkMode($mode, '');
+            $chk_result = $apicommon->chkMode($mode, '', false);
         }
 
         // 各モード1日最大5回まで(ToDo チェック保留 SQL修正必要)
