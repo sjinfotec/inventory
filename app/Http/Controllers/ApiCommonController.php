@@ -4275,6 +4275,8 @@ class ApiCommonController extends Controller
      */
     public function chkMode($target_mode, $source_mode, $is_chk_mode_autoset){
 
+        Log::debug('chkMode $target_mode = '.$target_mode);
+        Log::debug('chkMode $source_mode = '.$source_mode);
         if ( $source_mode == '') {
             if ($target_mode == Config::get('const.C005.attendance_time')) {
                 return Config::get('const.RESULT_CODE.normal');
@@ -4951,8 +4953,8 @@ class ApiCommonController extends Controller
                     }
                 }
                 $record_time = null;
-                if ($item['time'] != "" && $item['time'] != null) {
-                    $record_time = $item['date']." ".$item['time'];     // DB用
+                if ($item['timehis'] != "" && $item['timehis'] != null) {
+                    $record_time = $item['date']." ".$item['timehis'];     // DB用
                 } else {
                     $record_time = $item['date']." 00:00:01";
                 }

@@ -1611,6 +1611,7 @@ class WorkTime extends Model
             $sqlString .= "  , t1.record_date as record_date ";
             $sqlString .= "  , t1.date as date ";
             $sqlString .= "  , t1.time as time ";
+            $sqlString .= "  , t1.timehis as timehis ";
             $sqlString .= "  , t1.x_positions as x_positions ";
             $sqlString .= "  , t1.y_positions as y_positions ";
             $sqlString .= "  , case ifnull(t2.holiday_kubun, 0) ";
@@ -1632,6 +1633,7 @@ class WorkTime extends Model
             $sqlString .= "    , DATE_FORMAT(t10.record_time, '%Y年%m月%d日') as record_date ";
             $sqlString .= "    , DATE_FORMAT(t10.record_time, '%Y/%m/%d') as date ";
             $sqlString .= "    , DATE_FORMAT(t10.record_time, '%H:%i') as time ";
+            $sqlString .= "    , DATE_FORMAT(t10.record_time, '%H:%i:%s') as timehis ";
             $sqlString .= "    , X(t10.positions) as x_positions ";
             $sqlString .= "    , Y(t10.positions) as y_positions ";
             $sqlString .= "  from ";
