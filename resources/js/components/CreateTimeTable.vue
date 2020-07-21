@@ -830,9 +830,12 @@ export default {
   },
   computed: {
     get_RegularTime: function() {
-      if (this.regularTime_count > 0) {return this.form.regularTimes;}
+      if (this.regularTime_count > 0) {
+        return this.form.regularTimes;
+      }
       var array_set = [{}];
       var attendance = this.get_AttendanceCountCode;
+      this.form.regularTimes = [];
       let $this = this;
       this.feature_item_selections.forEach( function( item ) {
         if (item.item_code == attendance) {
@@ -852,6 +855,7 @@ export default {
     get_RegularRestTime: function() {
       if (this.regularRestTime_count > 0) {return this.form.regularRestTimes;}
       var array_set = [{}];
+      this.form.regularRestTimes = [];
       var rest = this.get_RestCountCode;
       let $this = this;
       this.feature_item_selections.forEach( function( item ) {
@@ -1549,6 +1553,7 @@ export default {
       this.form.no = "";
       this.get_TimeRowCount;
       var array_set = [{}];
+      this.form.regularTimes = [];
       for(var i=0;i<this.regularTime_count;i++) {
           array_set = {
             fromTime: "",
@@ -1557,6 +1562,7 @@ export default {
           this.form.regularTimes.push(array_set);
       }
       array_set = [{}];
+      this.form.regularRestTimes = [];
       for(var i=0;i<this.regularRestTime_count;i++) {
           array_set = {
             fromTime: "",
