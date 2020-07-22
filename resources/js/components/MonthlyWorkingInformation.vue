@@ -207,13 +207,13 @@
             <!-- panel contents -->
             <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
-            <div class="row" v-for="(item,index) in get_c037">
+            <div class="row" v-for="(item,index) in get_C037">
               <div class="col-md-12 pb-2">
                 <!-- col -->
                 <btn-csv-download
                   v-bind:btn-mode="item['code']"
                   v-bind:csv-data="calcresults"
-                  v-bind:general-data="get_c037"
+                  v-bind:general-data="get_C037"
                   v-bind:general-physicalname="item['physical_name']"
                   v-bind:is-csvbutton="iscsvbutton"
                   v-bind:csv-date="datejaFormat"
@@ -430,13 +430,13 @@
           >
             <!-- panel contents -->
             <!-- .row -->
-            <div class="row" v-for="(item,index) in get_c037">
+            <div class="row" v-for="(item,index) in get_C037">
               <div class="col-md-12 pb-2">
                 <!-- col -->
                 <btn-csv-download
                   v-bind:btn-mode="item['code']"
                   v-bind:csv-data="calcresults"
-                  v-bind:general-data="get_c037"
+                  v-bind:general-data="get_C037"
                   v-bind:general-physicalname="item['physical_name']"
                   v-bind:is-csvbutton="iscsvbutton"
                   v-bind:csv-date="datejaFormat"
@@ -465,7 +465,7 @@ import {requestable} from '../mixins/requestable.js';
 // CONST
 const CONST_C037 = 'C037';
 const CONST_C025 = 'C025';
-const CONST_C025_ADMINUSER_INDEX= 2;
+const CONST_C025_ADMINUSER_PHYSICAL_NAME= "admin_user";
 
 export default {
   name: "monthlyworkingtime",
@@ -485,7 +485,7 @@ export default {
     }
   },
   computed: {
-    get_c037: function() {
+    get_C037: function() {
       let $this = this;
       var i = 0;
       this.const_generaldatas.forEach( function( item ) {
@@ -503,18 +503,28 @@ export default {
       var i = 0;
       this.const_generaldatas.forEach( function( item ) {
         if (item.identification_id == CONST_C025) {
-          $this.const_C025_data.push($this.const_generaldatas[i]);
+          $this.general_C025_data.push($this.const_generaldatas[i]);
         }
         i++;
       });    
-      return this.const_C025_data;
+      return this.general_C025_data;
     },
     get_AdminUserRole: function() {
       if (this.adminuserrole == null || this.adminuserrole == "") {
-        if (this.const_C025_data.length == 0) {
-          this.adminuserrole = this.get_C025[CONST_C025_ADMINUSER_INDEX]['code'];
+        if (this.general_C025_data.length == 0) {
+          let $this = this;
+          this.get_C025.forEach( function( item ) {
+            if (item.physical_name == CONST_C025_ADMINUSER_PHYSICAL_NAME) {
+              $this.adminuserrole = item.code;
+            }
+          });    
         } else {
-          this.adminuserrole = this.const_C025_data[CONST_C025_ADMINUSER_INDEX]['code'];
+          let $this = this;
+          this.general_C025_data.forEach( function( item ) {
+            if (item.physical_name == CONST_C025_ADMINUSER_PHYSICAL_NAME) {
+              $this.adminuserrole = item.code;
+            }
+          });    
         }
       }
       return this.adminuserrole;
@@ -581,7 +591,7 @@ export default {
       messagedatasserver: [],
       messagedatadepartment: [],
       messagedatauser: [],
-      const_C025_data: [],
+      general_C025_data: [],
       isUserblank: true,
       adminuserrole: ""
     };

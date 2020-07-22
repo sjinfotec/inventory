@@ -118,8 +118,9 @@
                             <div class>
                               <input
                                 type="time"
+                                step="1"
                                 class="form-control"
-                                v-model="details[index].time"
+                                v-model="details[index].timehis"
                                 @change="changeTime(index)"
                               />
                             </div>
@@ -418,7 +419,7 @@ export default {
               maxlength = 0;
               itemname = '時刻';
               chkArray = 
-                this.checkDetail(this.details[index].time, required, equalength, maxlength, itemname, index+1) ;
+                this.checkDetail(this.details[index].timehis, required, equalength, maxlength, itemname, index+1) ;
               if (chkArray.length > 0) {
                 if (this.messagevalidatesEdt.length == 0) {
                   this.messagevalidatesEdt = chkArray;
@@ -464,7 +465,7 @@ export default {
                 maxlength = 0;
                 itemname = '時刻';
                 chkArray = 
-                  this.checkDetail(this.details[index].time, required, equalength, maxlength, itemname, index+1) ;
+                  this.checkDetail(this.details[index].timehis, required, equalength, maxlength, itemname, index+1) ;
                 if (chkArray.length > 0) {
                   if (this.messagevalidatesEdt.length == 0) {
                     this.messagevalidatesEdt = chkArray;
@@ -495,7 +496,7 @@ export default {
                 maxlength = 0;
                 itemname = '時刻';
                 chkArray = 
-                  this.checkDetail(this.details[index].time, required, equalength, maxlength, itemname, index+1) ;
+                  this.checkDetail(this.details[index].timehis, required, equalength, maxlength, itemname, index+1) ;
                 if (chkArray.length > 0) {
                   if (this.messagevalidatesEdt.length == 0) {
                     this.messagevalidatesEdt = chkArray;
@@ -523,7 +524,7 @@ export default {
               if (this.details[index].mode != "" && this.details[index].mode != null) {
                 chkArray.push("No." + (index+1) + "の勤務区分では" + "勤怠モードは入力できません");
               }
-              if (this.details[index].time != "" && this.details[index].time != null) {
+              if (this.details[index].timehis != "" && this.details[index].timehis != null) {
                 chkArray.push("No." + (index+1) + "の勤務区分では" + "時刻は入力できません");
               }
               if (chkArray.length > 0) {
@@ -634,6 +635,7 @@ export default {
             record_date : moment(this.valuesubadddate).format("YYYY年MM月DD日"),
             date : moment(this.valuesubadddate).format("YYYY/MM/DD"),
             time : "",
+            timehis : "",
             x_positions : "",
             y_positions : "",
             kbn_flag : 0
@@ -785,8 +787,9 @@ export default {
             this.before_user_holiday_kbn = this.details[i].user_holiday_kbn;
           }
           this.before_id[i] = this.details[i].id;
-          if (this.details[i].time == "00:00") {
+          if (this.details[i].timehis == "00:00:01") {
             this.details[i].time = null;
+            this.details[i].timehis = null;
           }
           this.dspdates[i] = this.details[i].record_date;
         }
@@ -823,7 +826,7 @@ export default {
     },
     checkRowData(index) {
       if (this.details[index].mode != "" && this.details[index].mode != null) { return true; }
-      if (this.details[index].time != "" && this.details[index].time != null) { return true; }
+      if (this.details[index].timehis != "" && this.details[index].timehis != null) { return true; }
       if (this.details[index].user_holiday_kbn != "" && this.details[index].user_holiday_kbn != null) { return true; }
       return false;
     },
@@ -1040,6 +1043,7 @@ export default {
         record_date : moment(this.valuesubadddate).format("YYYY年MM月DD日"),
         date : moment(this.valuesubadddate).format("YYYY/MM/DD"),
         time : "",
+        timehis : "",
         x_positions : "",
         y_positions : "",
         kbn_flag : 1
@@ -1064,6 +1068,7 @@ export default {
         record_date : moment(this.valuesubadddate).format("YYYY年MM月DD日"),
         date : moment(this.valuesubadddate).format("YYYY/MM/DD"),
         time : "",
+        timehis : "",
         x_positions : "",
         y_positions : "",
         kbn_flag : 1
@@ -1088,6 +1093,7 @@ export default {
         record_date : moment(detail.regular_start_recordtime).format("YYYY年MM月DD日"),
         date : moment(detail.regular_start_recordtime).format("YYYY/MM/DD"),
         time : detail.regular_start_time,
+        timehis : detail.regular_start_time,
         x_positions : "",
         y_positions : "",
         kbn_flag : 1
@@ -1112,6 +1118,7 @@ export default {
         record_date : moment(detail.lunch_end_recordtime).format("YYYY年MM月DD日"),
         date : moment(detail.lunch_end_recordtime).format("YYYY/MM/DD"),
         time : detail.lunch_end_time,
+        timehis : detail.lunch_end_time,
         x_positions : "",
         y_positions : "",
         kbn_flag : 1
@@ -1136,6 +1143,7 @@ export default {
         record_date : moment(detail.regular_end_recordtime).format("YYYY年MM月DD日"),
         date : moment(detail.regular_end_recordtime).format("YYYY/MM/DD"),
         time : detail.regular_end_time,
+        timehis : detail.regular_end_time,
         x_positions : "",
         y_positions : "",
         kbn_flag : 1
@@ -1160,6 +1168,7 @@ export default {
         record_date : moment(detail.lunch_start_recordtime).format("YYYY年MM月DD日"),
         date : moment(detail.lunch_start_recordtime).format("YYYY/MM/DD"),
         time : detail.lunch_start_time,
+        timehis : detail.lunch_start_time,
         x_positions : "",
         y_positions : "",
         kbn_flag : 1
@@ -1184,6 +1193,7 @@ export default {
         record_date : detail.record_date,
         date : detail.date,
         time : detail.time,
+        timehis : detail.time,
         x_positions : detail.x_positions,
         y_positions : detail.y_positions,
         kbn_flag : detail.kbn_flag
@@ -1208,6 +1218,7 @@ export default {
         record_date : moment(this.valuesubadddate).format("YYYY年MM月DD日"),
         date : moment(this.valuesubadddate).format("YYYY/MM/DD"),
         time : detail.working_timetable_from_time,
+        timehis : detail.working_timetable_from_time,
         x_positions : "",
         y_positions : "",
         kbn_flag : 1

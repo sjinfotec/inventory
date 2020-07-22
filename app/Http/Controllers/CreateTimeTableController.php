@@ -161,28 +161,39 @@ class CreateTimeTableController extends Controller
                 }
             }
             $details = $params['details'];
-            $data[0]['apply_term_from'] = $details['apply_term_from'];
             $data_index = 0;
+            // Log::debug('store attendance_count = '.$attendance_count);
             for ($i=0;$i<$attendance_count;$i++) {
                 $data[$data_index]['working_time_kubun'] = Config::get('const.C004.regular_working_time');
-                // Log::debug('store = '.$details['regularFrom'][$i]['fromTime']);
-                // Log::debug('store = '.$details['regularTo'][$i]['regularTo']);
-                $data[$data_index]['from_time'] = $details['regularFrom'][$i]['fromTime'];
-                $data[$data_index]['to_time'] = $details['regularTo'][$i]['regularTo'];
+                // Log::debug('store details regularTimes fromTime = '.$details['regularTimes'][$i]['fromTime']);
+                // Log::debug('store details regularTimes toTime = '.$details['regularTimes'][$i]['toTime']);
+                // $data[$data_index]['from_time'] = $details['regularFrom'][$i]['fromTime'];
+                // $data[$data_index]['to_time'] = $details['regularTo'][$i]['regularTo'];
+                $data[$data_index]['from_time'] = $details['regularTimes'][$i]['fromTime'];
+                $data[$data_index]['to_time'] = $details['regularTimes'][$i]['toTime'];
+                // Log::debug('store data working_time_kubun = '.$data[$data_index]['working_time_kubun']);
+                // Log::debug('store data from_time = '.$data[$data_index]['from_time']);
+                // Log::debug('store data to_time = '.$data[$data_index]['to_time']);
                 $data_index++;
             }
             for ($i=0;$i<$rest_count;$i++) {
                 $data[$data_index]['working_time_kubun'] = Config::get('const.C004.regular_working_breaks_time');
-                // Log::debug('store = '.$details['regularRestFrom'][$i]['fromTime']);
-                // Log::debug('store = '.$details['regularRestTime'][$i]['regularTo']);
-                $data[$data_index]['from_time'] = $details['regularRestFrom'][$i]['fromTime'];
-                $data[$data_index]['to_time'] = $details['regularRestTime'][$i]['toTime'];
+                // Log::debug('store details regularRestTimes fromTime = '.$details['regularRestTimes'][$i]['fromTime']);
+                // Log::debug('store details regularRestTimes toTime = '.$details['regularRestTimes'][$i]['toTime']);
+                $data[$data_index]['from_time'] = $details['regularRestTimes'][$i]['fromTime'];
+                $data[$data_index]['to_time'] = $details['regularRestTimes'][$i]['toTime'];
+                // Log::debug('store data working_time_kubun = '.$data[$data_index]['working_time_kubun']);
+                // Log::debug('store data from_time = '.$data[$data_index]['from_time']);
+                // Log::debug('store data to_time = '.$data[$data_index]['to_time']);
                 $data_index++;
             }
             $data[$data_index]['working_time_kubun'] = Config::get('const.C004.out_of_regular_night_working_time');
-            // Log::debug('store = '.$details['irregularMidNightFrom']);
-            // Log::debug('store = '.$details['irregularMidNightTo']);
-            $resultno = $this->insert($data ,$no, $name);
+            $data[$data_index]['from_time'] = $details['irregularMidNightFrom'];
+            $data[$data_index]['to_time'] = $details['irregularMidNightTo'];
+            // Log::debug('store data working_time_kubun = '.$data[$data_index]['working_time_kubun']);
+            // Log::debug('store data irregularMidNightFrom = '.$data[$data_index]['from_time']);
+            // Log::debug('store data irregularMidNightTo = '.$data[$data_index]['to_time']);
+            $resultno = $this->insert($data ,$no ,$name);
             return response()->json(
                 ['result' => true, 'no' => $resultno,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -222,11 +233,11 @@ class CreateTimeTableController extends Controller
             $time_table->setNameAttribute($name);
             $time_table->setCreateduserAttribute($user_code);
             $time_table->setCreatedatAttribute($systemdate);
-            foreach ($data as $item) {
-               $time_table->setWorkingtimekubunAttribute($item['working_time_kubun']);
-               $time_table->setFromtimeAttribute($item['from_time']);
-               $time_table->setTotimeAttribute($item['to_time']);
-               $time_table->insert();
+            for ($i=0;$i<count($data);$i++) {
+                $time_table->setWorkingtimekubunAttribute($data[$i]['working_time_kubun']);
+                $time_table->setFromtimeAttribute($data[$i]['from_time']);
+                $time_table->setTotimeAttribute($data[$i]['to_time']);
+                $time_table->insert();
             }
             DB::commit();
             return $maxno;

@@ -101,6 +101,10 @@ export default {
       if (res.result) {
         // 固有処理 START
         this.itemList = res.details;
+        if (this.addNew) {
+          this.object = { code_name: "新規に雇用形態を登録する", code: "" };
+          this.itemList.unshift(this.object);
+        }
         // 固有処理 end
       } else {
         if (res.messagedata.length > 0) {
