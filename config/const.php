@@ -109,8 +109,8 @@ return [
         'paid_holiday' => 1,
         'morning_off' => 2,
         'afternoon_off' => 3,
-        'substitute_holiday' => 4,
-        'compensation_holiday' => 5,
+        'compensation_holiday' => 4,
+        'substitute_holiday' => 5,
         'summer_leave' => 6,
         'year_end_and_new_year_leave' => 7,
         'organization_anniversary' => 8,
@@ -882,7 +882,8 @@ return [
         'edit_worktime_user_conditional' => 28,
         'TeamViewer' => 29,
         'account_admin' => 30,
-        'clientServer' => 31
+        'clientServer' => 31,
+        'setting_employment' => 32
     ]
 
 ];

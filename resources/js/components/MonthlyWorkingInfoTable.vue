@@ -23,8 +23,8 @@
                     <td class="text-center align-middle mw-rem-4">法定休日</td>
                     <td class="text-center align-middle mw-rem-4">法定外休日</td>
                     <td class="text-center align-middle mw-rem-4">深夜労働</td>
-                    <td class="text-center align-middle mw-rem-4">公外</td>
-                    <td class="text-center align-middle mw-rem-4">私外</td>
+                    <td class="text-center align-middle mw-rem-4">公用外出</td>
+                    <td class="text-center align-middle mw-rem-4">私用外出</td>
                     <td class="text-center align-middle mw-rem-4"
                       data-toggle="tooltip"
                       data-placement="top"
@@ -290,6 +290,8 @@
                     <td class="text-center align-middle mw-rem-4">みなし日数</td>
                     <td class="text-center align-middle mw-rem-4">公傷日数</td>
                     <td class="text-center align-middle mw-rem-4">慶弔日数</td>
+                    <td class="text-center align-middle mw-rem-4">代休日数</td>
+                    <td class="text-center align-middle mw-rem-4">振休日数</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'" bgcolor="#e3f0fb">
                     <td class="text-center align-middle mw-rem-4">出勤日数</td>
@@ -301,6 +303,8 @@
                     <td class="text-center align-middle mw-rem-4">みなし日数</td>
                     <td class="text-center align-middle mw-rem-4">公傷日数</td>
                     <td class="text-center align-middle mw-rem-4">慶弔日数</td>
+                    <td class="text-center align-middle mw-rem-4">代休日数</td>
+                    <td class="text-center align-middle mw-rem-4">振休日数</td>
                   </tr>
                   <tr v-if="calcLists.length && detailOrTotal === 'total' && btnMode ==='basicswitch'" bgcolor="#7fffd4">
                     <td class="text-center align-middle mw-rem-5">出勤日数</td>
@@ -312,6 +316,8 @@
                     <td class="text-center align-middle mw-rem-5">みなし日数</td>
                     <td class="text-center align-middle mw-rem-5">公傷日数</td>
                     <td class="text-center align-middle mw-rem-5">慶弔休暇日数</td>
+                    <td class="text-center align-middle mw-rem-5">代替休日日数</td>
+                    <td class="text-center align-middle mw-rem-5">振替休日日数</td>
                   </tr>
                   <tr v-if="calcLists.length && detailOrTotal === 'total' && btnMode ==='detailswitch'" bgcolor="#7fffd4">
                     <td class="text-center align-middle mw-rem-5">出勤日数</td>
@@ -323,6 +329,8 @@
                     <td class="text-center align-middle mw-rem-5">みなし日数</td>
                     <td class="text-center align-middle mw-rem-5">公傷日数</td>
                     <td class="text-center align-middle mw-rem-5">慶弔休暇日数</td>
+                    <td class="text-center align-middle mw-rem-5">代替休日日数</td>
+                    <td class="text-center align-middle mw-rem-5">振替休日日数</td>
                   </tr>
                 </thead>
                 <tbody>
@@ -337,6 +345,8 @@
                     <td class="text-center align-middle mw-rem-4">{{ calcLists.total_deemed }} 日</td>
                     <td class="text-center align-middle mw-rem-4">{{ calcLists.total_public_damage }} 日</td>
                     <td class="text-center align-middle mw-rem-4">{{ calcLists.total_congratulatory }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_compensation_holiday }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_substitution_holiday }} 日</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'"
                   >
@@ -349,6 +359,8 @@
                     <td class="text-center align-middle mw-rem-4">{{ calcLists.total_deemed }} 日</td>
                     <td class="text-center align-middle mw-rem-4">{{ calcLists.total_public_damage }} 日</td>
                     <td class="text-center align-middle mw-rem-4">{{ calcLists.total_congratulatory }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_compensation_holiday }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_substitution_holiday }} 日</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'total' && btnMode ==='basicswitch'"
                     v-for="(total,index) in calcLists"
@@ -362,6 +374,8 @@
                     <td class="text-center align-middle mw-rem-5">{{ total.total_deemed }} 日</td>
                     <td class="text-center align-middle mw-rem-5">{{ total.total_public_damage }} 日</td>
                     <td class="text-center align-middle mw-rem-5">{{ total.total_congratulatory }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ calcLists.total_compensation_holiday }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ calcLists.total_substitution_holiday }} 日</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'total' && btnMode ==='detailswitch'"
                     v-for="(total,index) in calcLists"
@@ -375,6 +389,8 @@
                     <td class="text-center align-middle mw-rem-5">{{ total.total_deemed }} 日</td>
                     <td class="text-center align-middle mw-rem-5">{{ total.total_public_damage }} 日</td>
                     <td class="text-center align-middle mw-rem-5">{{ total.total_congratulatory }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ calcLists.total_compensation_holiday }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ calcLists.total_substitution_holiday }} 日</td>
                   </tr>
                 </tbody>
               </table>

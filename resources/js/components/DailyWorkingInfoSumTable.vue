@@ -32,14 +32,16 @@
                   >不就労時間</td>
                   <td class="text-center align-middle mw-rem-3">出勤者数</td>
                   <td class="text-center align-middle mw-rem-3">外出者数</td>
-                  <td class="text-center align-middle mw-rem-5">有給休暇者数</td>
-                  <td class="text-center align-middle mw-rem-5">特別休暇者数</td>
+                  <td class="text-center align-middle mw-rem-3">有休者数</td>
+                  <td class="text-center align-middle mw-rem-3">特休者数</td>
                   <td class="text-center align-middle mw-rem-3">早退者数</td>
                   <td class="text-center align-middle mw-rem-3">遅刻者数</td>
                   <td class="text-center align-middle mw-rem-3">欠勤者数</td>
-                  <td class="text-center align-middle mw-rem-4">みなし日数</td>
-                  <td class="text-center align-middle mw-rem-3">公傷日数</td>
-                  <td class="text-center align-middle mw-rem-5">慶弔休暇日数</td>
+                  <td class="text-center align-middle mw-rem-4">みなし者数</td>
+                  <td class="text-center align-middle mw-rem-3">公傷者数</td>
+                  <td class="text-center align-middle mw-rem-3">慶弔者数</td>
+                  <td class="text-center align-middle mw-rem-3">代休者数</td>
+                  <td class="text-center align-middle mw-rem-3">振替者数</td>
                 </tr>
                 <tr v-if="detailOrTotal === 'total' && btnMode ==='detailswitch'" bgcolor="#e3fbef">
                   <td
@@ -73,9 +75,11 @@
                   <td class="text-center align-middle mw-rem-3">早退者数</td>
                   <td class="text-center align-middle mw-rem-3">遅刻者数</td>
                   <td class="text-center align-middle mw-rem-3">欠勤者数</td>
-                  <td class="text-center align-middle mw-rem-4">みなし日数</td>
-                  <td class="text-center align-middle mw-rem-3">公傷日数</td>
-                  <td class="text-center align-middle mw-rem-5">慶弔休暇日数</td>
+                  <td class="text-center align-middle mw-rem-4">みなし者数</td>
+                  <td class="text-center align-middle mw-rem-3">公傷者数</td>
+                  <td class="text-center align-middle mw-rem-5">慶弔休暇者数</td>
+                  <td class="text-center align-middle mw-rem-3">代休者数</td>
+                  <td class="text-center align-middle mw-rem-3">振替者数</td>
                 </tr>
               </thead>
               <tbody>
@@ -107,14 +111,16 @@
                   >{{ calcList.not_employment_working_hours }}</td>
                   <td class="text-center align-middlee mw-rem-3">{{ calcList.total_working_status }}</td>
                   <td class="text-center align-middlee mw-rem-3">{{ calcList.total_go_out }}</td>
-                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_paid_holidays }}</td>
-                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_holiday_kubun }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_paid_holidays }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_holiday_kubun }}</td>
                   <td class="text-center align-middlee mw-rem-3">{{ calcList.total_leave_early }}</td>
                   <td class="text-center align-middlee mw-rem-3">{{ calcList.total_late }}</td>
                   <td class="text-center align-middlee mw-rem-3">{{ calcList.total_absence }}</td>
                   <td class="text-center align-middlee mw-rem-4">{{ calcList.total_deemed }}</td>
                   <td class="text-center align-middlee mw-rem-3">{{ calcList.total_public_damage }}</td>
-                  <td class="text-center align-middlee mw-rem-5">{{ calcList.total_congratulatory }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_congratulatory }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_substitute_holiday }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_compensation_holiday }}</td>
                 </tr>
                 <tr
                   v-if="detailOrTotal === 'total' && btnMode ==='detailswitch'"
@@ -154,6 +160,8 @@
                   <td class="text-center align-middlee mw-rem-4">{{ calcList.total_deemed }}</td>
                   <td class="text-center align-middlee mw-rem-3">{{ calcList.total_public_damage }}</td>
                   <td class="text-center align-middlee mw-rem-5">{{ calcList.total_congratulatory }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_substitute_holiday }}</td>
+                  <td class="text-center align-middlee mw-rem-3">{{ calcList.total_compensation_holiday }}</td>
                 </tr>
               </tbody>
             </table>

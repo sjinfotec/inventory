@@ -910,6 +910,8 @@ class MonthlyWorkingInformationController extends Controller
                 'total_congratulatory' => $working_time_sum_result->total_congratulatory,
                 'total_public_damage' => $working_time_sum_result->total_public_damage,
                 'total_deemed' => $working_time_sum_result->total_deemed,
+                'total_substitute_holiday' => $working_time_sum_result->total_substitute_holiday,
+                'total_compensation_holiday' => $working_time_sum_result->total_compensation_holiday,
                 'date' => $array_date
             );
             break;
@@ -945,6 +947,8 @@ class MonthlyWorkingInformationController extends Controller
                 'total_congratulatory' => 0,
                 'total_public_damage' => 0,
                 'total_deemed' => 0,
+                'total_substitute_holiday' => 0,
+                'total_compensation_holiday' => 0,
                 'date' => $array_date
             );
         }

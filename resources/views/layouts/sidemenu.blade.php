@@ -106,6 +106,9 @@
                                     @if($menu_selections[Config::get('const.MENUITEM.create_department') - 1]->is_select)
                                         <li><a class="px-3 py-1 text-white d-block" href="{{ url('/create_department') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-group-w.svg') }}" alt="">組織設定</a></li>
                                     @endif
+                                    @if($menu_selections[Config::get('const.MENUITEM.setting_employment') - 1]->is_select)
+                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/setting_employment') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-group-w.svg') }}" alt="">雇用形態設定</a></li>
+                                    @endif
                                     @if($menu_selections[Config::get('const.MENUITEM.setting_calc') - 1]->is_select)
                                         <li><a class="px-3 py-1 text-white d-block" href="{{ url('/setting_calc') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-laptop-chromebook-w.svg') }}" alt="">労働時間基本設定</a></li>
                                     @endif

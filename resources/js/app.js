@@ -171,6 +171,12 @@ Vue.component(
     "create-department",
     require("./components/CreateDepartment.vue").default
 );
+// 雇用形態設定
+Vue.component(
+    "setting-employment",
+    require("./components/SettingEmployment.vue").default
+);
+
 // 労働時間基本設定
 Vue.component("setting-calc", require("./components/SettingCalc.vue").default);
 // タイムテーブル設定
