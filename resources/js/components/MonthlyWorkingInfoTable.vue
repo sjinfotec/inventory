@@ -345,8 +345,8 @@
                     <td class="text-center align-middle mw-rem-4">{{ calcLists.total_deemed }} 日</td>
                     <td class="text-center align-middle mw-rem-4">{{ calcLists.total_public_damage }} 日</td>
                     <td class="text-center align-middle mw-rem-4">{{ calcLists.total_congratulatory }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_substitute_holiday }} 日</td>
                     <td class="text-center align-middle mw-rem-4">{{ calcLists.total_compensation_holiday }} 日</td>
-                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_substitution_holiday }} 日</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'detail' && btnMode ==='detailswitch'"
                   >
@@ -359,8 +359,8 @@
                     <td class="text-center align-middle mw-rem-4">{{ calcLists.total_deemed }} 日</td>
                     <td class="text-center align-middle mw-rem-4">{{ calcLists.total_public_damage }} 日</td>
                     <td class="text-center align-middle mw-rem-4">{{ calcLists.total_congratulatory }} 日</td>
+                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_substitute_holiday }} 日</td>
                     <td class="text-center align-middle mw-rem-4">{{ calcLists.total_compensation_holiday }} 日</td>
-                    <td class="text-center align-middle mw-rem-4">{{ calcLists.total_substitution_holiday }} 日</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'total' && btnMode ==='basicswitch'"
                     v-for="(total,index) in calcLists"
@@ -374,8 +374,8 @@
                     <td class="text-center align-middle mw-rem-5">{{ total.total_deemed }} 日</td>
                     <td class="text-center align-middle mw-rem-5">{{ total.total_public_damage }} 日</td>
                     <td class="text-center align-middle mw-rem-5">{{ total.total_congratulatory }} 日</td>
-                    <td class="text-center align-middle mw-rem-5">{{ calcLists.total_compensation_holiday }} 日</td>
-                    <td class="text-center align-middle mw-rem-5">{{ calcLists.total_substitution_holiday }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_substitute_holiday }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_compensation_holiday }} 日</td>
                   </tr>
                   <tr v-if="detailOrTotal === 'total' && btnMode ==='detailswitch'"
                     v-for="(total,index) in calcLists"
@@ -389,8 +389,8 @@
                     <td class="text-center align-middle mw-rem-5">{{ total.total_deemed }} 日</td>
                     <td class="text-center align-middle mw-rem-5">{{ total.total_public_damage }} 日</td>
                     <td class="text-center align-middle mw-rem-5">{{ total.total_congratulatory }} 日</td>
-                    <td class="text-center align-middle mw-rem-5">{{ calcLists.total_compensation_holiday }} 日</td>
-                    <td class="text-center align-middle mw-rem-5">{{ calcLists.total_substitution_holiday }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_substitute_holiday }} 日</td>
+                    <td class="text-center align-middle mw-rem-5">{{ total.total_compensation_holiday }} 日</td>
                   </tr>
                 </tbody>
               </table>
