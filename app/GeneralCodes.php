@@ -15,7 +15,33 @@ class GeneralCodes extends Model
 
     //--------------- メンバー属性 -----------------------------------
 
+    private $id;
     private $identification_id;             // 識別
+    private $code;                          // コード
+    private $sort_seq;                      // 並び順
+    private $identification_name;           // 識別名
+    private $description;                   // 説明
+    private $physical_name;                 // 物理名称
+    private $code_name;                     // 項目名
+    private $secound_code_name;             // 項目名略称
+    private $use_free_item;                 // 用途フリー項目
+    private $created_user;                  // 作成ユーザー
+    private $updated_user;                  // 修正ユーザー
+    private $created_at;                    // 作成日時
+    private $updated_at;                    // 修正日時
+    private $is_deleted;                    // 削除フラグ
+
+
+    // ID
+    public function getIdAttribute()
+    {
+        return $this->id;
+    }
+
+    public function setIdAttribute($value)
+    {
+        $this->id = $value;
+    }
 
     // 識別
     public function getIdentificationidAttribute()
@@ -28,7 +54,6 @@ class GeneralCodes extends Model
         $this->identification_id = $value;
     }
 
-    private $code;                          // コード
 
     // コード
     public function getCodeAttribute()
@@ -41,7 +66,6 @@ class GeneralCodes extends Model
         $this->code = $value;
     }
 
-    private $sort_seq;                      // 並び順
 
     // 並び順
     public function getSortseqAttribute()
@@ -54,7 +78,6 @@ class GeneralCodes extends Model
         $this->sort_seq = $value;
     }
 
-    private $identification_name;           // 識別名
 
     // 識別名
     public function getIdentificationnameAttribute()
@@ -67,7 +90,6 @@ class GeneralCodes extends Model
         $this->identification_name = $value;
     }
 
-    private $description;                   // 説明
 
     // 説明
     public function getDescriptionAttribute()
@@ -80,7 +102,6 @@ class GeneralCodes extends Model
         $this->description = $value;
     }
 
-    private $physical_name;                 // 物理名称
 
     // 物理名称
     public function getPhysicalnameAttribute()
@@ -93,7 +114,6 @@ class GeneralCodes extends Model
         $this->physical_name = $value;
     }
 
-    private $code_name;                     // 項目名
 
     // 項目名
     public function getCodenameAttribute()
@@ -106,7 +126,6 @@ class GeneralCodes extends Model
         $this->code_name = $value;
     }
 
-    private $secound_code_name;             // 項目名略称
 
     // 項目名
     public function getSecoundcodenameAttribute()
@@ -119,7 +138,6 @@ class GeneralCodes extends Model
         $this->secound_code_name = $value;
     }
 
-    private $use_free_item;                 // 用途フリー項目
 
     // 項目名
     public function getUsefreeitemAttribute()
@@ -132,7 +150,6 @@ class GeneralCodes extends Model
         $this->use_free_item = $value;
     }
 
-    private $created_user;                  // 作成ユーザー
 
     // 作成ユーザー
     public function getCreateduserAttribute()
@@ -145,7 +162,6 @@ class GeneralCodes extends Model
         $this->created_user = $value;
     }
 
-    private $updated_user;                  // 修正ユーザー
 
     // 修正ユーザー
     public function getUpdateduserAttribute()
@@ -158,7 +174,6 @@ class GeneralCodes extends Model
         $this->updated_user = $value;
     }
 
-    private $is_deleted;                    // 削除フラグ
 
     // 削除フラグ
     public function getIsdeletedAttribute()
@@ -171,11 +186,34 @@ class GeneralCodes extends Model
         $this->is_deleted = $value;
     }
 
+    // 作成日時
+    public function getCreatedatAttribute()
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedatAttribute($value)
+    {
+        $this->created_at = $value;
+    }
+
+    // 修正日時
+    public function getUpdatedatAttribute()
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedatAttribute($value)
+    {
+        $this->updated_at = $value;
+    }
+
     //--------------- パラメータ項目属性 -----------------------------------
 
     private $param_identification_id;           // 識別
     private $param_array_identification_id;     // 識別（array）
     private $param_code;                        // コード
+    private $param_code_name;                   // コード名称
 
 
     // 識別
@@ -209,6 +247,17 @@ class GeneralCodes extends Model
     public function setParamcodeAttribute($value)
     {
         $this->param_code = $value;
+    }
+
+    // コード名称
+    public function getParamcodenameAttribute()
+    {
+        return $this->param_code_name;
+    }
+
+    public function setParamcodenameAttribute($value)
+    {
+        $this->param_code_name = $value;
     }
 
     //--------------- コード値属性 -----------------------------------
@@ -254,6 +303,7 @@ class GeneralCodes extends Model
         try {
             $data = DB::table($this->table)
                 ->select(
+                    $this->table.'.id',
                     $this->table.'.identification_id as identification_id',
                     $this->table.'.code as code',
                     $this->table.'.sort_seq as sort_seq',
@@ -290,6 +340,191 @@ class GeneralCodes extends Model
         }
         
         return $result;
+    }
+
+    /**
+     * コード名称チェック
+     *
+     * @return boolean
+     */
+    public function isExistsName(){
+        try {
+            $is_exists = DB::table($this->table)
+                ->where('identification_id',$this->param_identification_id)
+                ->where('code_name',$this->param_code_name)
+                ->where('is_deleted',0)
+                ->exists();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $is_exists;
+    }
+
+    /**
+     * 最大コード取得
+     *
+     * @return max_code
+     */
+    public function getMaxCode(){
+        try {
+            $max_code = DB::select($this->maxCodeSql());
+            if(isset($max_code[0]->{'max_code'})){
+                $max_code = $max_code[0]->{'max_code'};
+            }else{
+                $max_code = 0;
+            }
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_maxget_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_maxget_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+        return $max_code;
+    }
+
+    private function maxCodeSql(){
+        $sql = "select";
+        $sql .= " max(CAST(code AS SIGNED)) as max_code";
+        $sql .= " from";
+        $sql .= " ".$this->table;
+        $sql .= " where";
+        $sql .= "   identification_id = '".$this->param_identification_id."' ";
+        $sql .= "   and is_deleted = 0";
+
+        return $sql;
+    }
+
+    /**
+     * 最大seq取得
+     *
+     * @return max_seq
+     */
+    public function getMaxSeq(){
+        try {
+            $max_seq = DB::select($this->maxSeqSql());
+            if(isset($max_seq[0]->{'max_seq'})){
+                $max_seq = $max_seq[0]->{'max_seq'};
+            }else{
+                $max_seq = 0;
+            }
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_maxget_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_maxget_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+        return $max_seq;
+    }
+
+    private function maxSeqSql(){
+        $sql = "select";
+        $sql .= " max(CAST(sort_seq AS SIGNED)) as max_seq";
+        $sql .= " from";
+        $sql .= " ".$this->table;
+        $sql .= " where";
+        $sql .= "   identification_id = '".$this->param_identification_id."' ";
+        $sql .= "   and is_deleted = 0";
+
+        return $sql;
+    }
+
+    /**
+     * 追加
+     *
+     * @return void
+     */
+    public function insertGeneral(){
+        try {
+            DB::table($this->table)->insert(
+                [
+                    'identification_id' => $this->identification_id,
+                    'code' => $this->code,
+                    'sort_seq' => $this->sort_seq,
+                    'identification_name' => $this->identification_name,
+                    'description' => $this->description,
+                    'physical_name' => $this->physical_name,
+                    'code_name' => $this->code_name,
+                    'secound_code_name' => $this->secound_code_name,
+                    'use_free_item' => $this->use_free_item,
+                    'created_user'=>$this->created_user,
+                    'created_at'=>$this->created_at
+                ]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_insert_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 更新
+     *
+     * @return void
+     */
+    public function updateGeneral(){
+        try {
+            DB::table($this->table)
+                ->where('id', $this->id)
+                ->where('is_deleted', 0)
+                ->update([
+                    'code_name' => $this->code_name,
+                    'secound_code_name' => $this->secound_code_name,
+                    'use_free_item' => $this->use_free_item,
+                    'updated_at'=>$this->updated_at,
+                    'updated_user'=>$this->updated_user
+                ]);
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 更新
+     *
+     * @return void
+     */
+    public function updateGeneralIsdelete(){
+        try {
+            DB::table($this->table)
+                ->where('id', $this->id)
+                ->update([
+                    'is_deleted' => 1,
+                    'updated_at'=>$this->updated_at,
+                    'updated_user'=>$this->updated_user
+                ]);
+    }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
     }
 
 }

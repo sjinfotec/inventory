@@ -115,6 +115,13 @@ Route::post('/create_department/store', 'CreateDepartmentController@store')->mid
 Route::post('/create_department/fix', 'CreateDepartmentController@fix')->middleware('auth');
 Route::post('/create_department/del', 'CreateDepartmentController@del')->middleware('auth');
 Route::post('/create_department/edit', 'CreateDepartmentController@edit')->middleware('auth');
+// 雇用形態
+Route::get('/setting_employment', 'SettingEmploymentController@index')->middleware('auth');
+Route::post('/setting_employment/get', 'SettingEmploymentController@getDetails')->middleware('auth');
+Route::post('/setting_employment/store', 'SettingEmploymentController@store')->middleware('auth');
+Route::post('/setting_employment/fix', 'SettingEmploymentController@fix')->middleware('auth');
+Route::post('/setting_employment/del', 'SettingEmploymentController@del')->middleware('auth');
+
 // 労働時間基本設定
 Route::get('/setting_calc', 'SettingCalcController@index')->middleware('auth');
 Route::post('/setting_calc/get', 'SettingCalcController@get')->middleware('auth');

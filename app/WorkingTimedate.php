@@ -2673,8 +2673,6 @@ class WorkingTimedate extends Model
             }
 
             $case_holiday_kubun = "CASE ifnull({0},0) WHEN 0 THEN 0 ";
-            $case_holiday_kubun .= "WHEN {1} THEN 1 ";
-            $case_holiday_kubun .= "WHEN {2} THEN 1 ";
             $case_holiday_kubun .= "WHEN {3} THEN 1 ";
             $case_holiday_kubun .= "WHEN {4} THEN 1 ";
             $case_holiday_kubun .= "WHEN {5} THEN 1 ";
@@ -2723,9 +2721,7 @@ class WorkingTimedate extends Model
             $str_replace_paid_holidays4 =str_replace('{4}', Config::get('const.C013.assign_paid_holiday'), $str_replace_paid_holidays3);
 
             $str_replace_holiday_kubun0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_holiday_kubun);
-            $str_replace_holiday_kubun1 =str_replace('{1}', Config::get('const.C013.substitute_holiday'), $str_replace_holiday_kubun0);
-            $str_replace_holiday_kubun2 =str_replace('{2}', Config::get('const.C013.compensation_holiday'), $str_replace_holiday_kubun1);
-            $str_replace_holiday_kubun3 =str_replace('{3}', Config::get('const.C013.summer_leave'), $str_replace_holiday_kubun2);
+            $str_replace_holiday_kubun3 =str_replace('{3}', Config::get('const.C013.summer_leave'), $str_replace_holiday_kubun0);
             $str_replace_holiday_kubun4 =str_replace('{4}', Config::get('const.C013.year_end_and_new_year_leave'), $str_replace_holiday_kubun3);
             $str_replace_holiday_kubun5 =str_replace('{5}', Config::get('const.C013.organization_anniversary'), $str_replace_holiday_kubun4);
             $str_replace_holiday_kubun6 =str_replace('{6}', Config::get('const.C013.prenatal_postnatal'), $str_replace_holiday_kubun5);
@@ -2754,6 +2750,12 @@ class WorkingTimedate extends Model
             $str_replace_deemed2 =str_replace('{2}', Config::get('const.C013.deemed_direct_go'), $str_replace_deemed1);
             $str_replace_deemed3 =str_replace('{3}', Config::get('const.C013.deemed_direct_return'), $str_replace_deemed2);
             $str_replace_deemed4 =str_replace('{4}', Config::get('const.C013.deemed_direct_go_return'), $str_replace_deemed3);
+
+            $str_replace_substitute_holiday0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_common1);
+            $str_replace_substitute_holiday1 =str_replace('{1}', Config::get('const.C013.substitute_holiday'), $str_replace_substitute_holiday0);
+
+            $str_replace_compensation_holiday0 =str_replace('{0}', $this->table.'.holiday_kubun', $case_common1);
+            $str_replace_compensation_holiday1 =str_replace('{1}', Config::get('const.C013.compensation_holiday'), $str_replace_compensation_holiday0);
 
             $sum_time = "CONCAT( ";
             $sum_time .= "SUM(TRUNCATE(ifnull({0}, 0), 0)) ";
@@ -2819,7 +2821,9 @@ class WorkingTimedate extends Model
                 ->selectRaw('sum('.$str_replace_absence_kubun1.') as total_absence')
                 ->selectRaw('sum('.$str_replace_congratulatory_or_consolatory_leave1.') as total_congratulatory')
                 ->selectRaw('sum('.$str_replace_public_damage1.') as total_public_damage')
-                ->selectRaw('sum('.$str_replace_deemed4.') as total_deemed');
+                ->selectRaw('sum('.$str_replace_deemed4.') as total_deemed')
+                ->selectRaw('sum('.$str_replace_substitute_holiday1.') as total_substitute_holiday')
+                ->selectRaw('sum('.$str_replace_compensation_holiday1.') as total_compensation_holiday');
             if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
                 $subquery->addselect($this->table.'.working_date');
             }
@@ -2875,7 +2879,9 @@ class WorkingTimedate extends Model
                 ->selectRaw('ifnull(t1.total_absence, 0) as total_absence' )
                 ->selectRaw('ifnull(t1.total_congratulatory, 0) as total_congratulatory' )
                 ->selectRaw('ifnull(t1.total_public_damage, 0) as total_public_damage' )
-                ->selectRaw('ifnull(t1.total_deemed, 0) as total_deemed' );
+                ->selectRaw('ifnull(t1.total_deemed, 0) as total_deemed' )
+                ->selectRaw('ifnull(t1.total_substitute_holiday, 0) as total_substitute_holiday' )
+                ->selectRaw('ifnull(t1.total_compensation_holiday, 0) as total_compensation_holiday' );
                 
             $array_setBindingsStr = array();
             $cnt = 0;
