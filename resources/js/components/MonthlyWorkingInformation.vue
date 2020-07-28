@@ -949,20 +949,25 @@ export default {
     },
     // データ編集処理
     setData(res) {
+      console.log('setData');
       if (this.resresults.calcresults != null) {
+        console.log('calcresults != null ');
         this.calcresults = this.resresults.calcresults;
+        console.log('Object.keys(this.calcresults).length' + Object.keys(this.calcresults).length);
         if (Object.keys(this.calcresults).length > 0) {
           this.iscsvbutton = false;
           this.isswitchvisible = true;
         }
       }
       if (this.resresults.sumresults != null) {
+        console.log('sumresults != null ');
         this.sumresults = this.resresults.sumresults;
       }
       this.company_name = this.resresults.company_name;
       if (this.resresults.messagedata.length == 0) {
         this.serchorshow = "show";
       } else {
+        console.log('messagedata ');
         this.htmlMessageSwal("エラー", this.resresults.messagedata, "error", true, false);
         this.serchorshow = "search";
       }

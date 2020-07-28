@@ -167,9 +167,18 @@ class UserAddController extends Controller
         $datas = $params['datas'];
         $fromdate = $users->getApplytermfromAttribute();
         $dt = new Carbon($fromdate);
+        Log::debug(' calendarByUser  $dt = '.$dt);
         $dtfrom = $dt->copy()->subDay();
+        Log::debug(' calendarByUser  $dt = '.$dt);
+        Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
         $todate = new Carbon($dtfrom);
+        Log::debug(' calendarByUser  $dt = '.$dt);
+        Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
+        Log::debug(' calendarByUser  $todate = '.$todate);
         $todate->addYear()->subDay();
+        Log::debug(' calendarByUser  $dt = '.$dt);
+        Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
+        Log::debug(' calendarByUser  $todate = '.$todate);
         try{
             $calendar_setting_model = new CalendarSettingInformation();
             // 作成
@@ -179,6 +188,8 @@ class UserAddController extends Controller
             $calendar_setting_model->getParamemploymentstatusAttribute($users->getEmploymentstatusAttribute());
             $calendar_setting_model->getParamdepartmentcodeAttribute($users->getDepartmentcodeAttribute());
             $calendar_setting_model->setParamusercodeAttribute($users->getCodeAttribute());
+            Log::debug(' calendarByUser  $dtfrom = '.$dtfrom);
+            Log::debug(' calendarByUser  $todate = '.$todate);
             $calendar_setting_model->setParamfromdateAttribute($dtfrom->format('Ymd'));
             $calendar_setting_model->setParamtodateAttribute($todate->format('Ymd'));
             // 削除

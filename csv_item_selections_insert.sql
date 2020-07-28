@@ -6,6 +6,11 @@
 -- ***************************************** --
 
 -- <<generalcodes start コードマスタ>> --
+  set character_set_client = utf8;
+  set @kanji_item1='代替休日日数';
+  set @out_item1='代休日数';
+  set @kanji_item2='振替休日日数';
+  set @out_item2='振休日数';
   delete from csv_item_selections where account_id = 'SSJJOO00' and selection_code = '1' and item_code in (28,29);
   delete from csv_item_selections where account_id = 'SD03TA00' and selection_code = '1' and item_code in (28,29);
   delete from csv_item_selections where account_id = 'CSD1000L' and selection_code = '1' and item_code in (28,29);
@@ -33,8 +38,8 @@
   , 28
   , 23
   , 'total_substitute_holiday'
-  , '代替休日日数'
-  , '代休日数'
+  , @kanji_item1
+  , @out_item1
   , 0
   , 'systemuser'
   , ''
@@ -49,8 +54,8 @@
   , 29
   , 24
   , 'total_compensation_holiday'
-  , '振替休日日数'
-  , '振休日数'
+  , @kanji_item2
+  , @out_item2
   , 0
   , 'systemuser'
   , ''
@@ -65,8 +70,8 @@
   , 28
   , 23
   , 'total_substitute_holiday'
-  , '代替休日日数'
-  , '代休日数'
+  , @kanji_item1
+  , @out_item1
   , 0
   , 'systemuser'
   , ''
@@ -81,8 +86,8 @@
   , 29
   , 24
   , 'total_compensation_holiday'
-  , '振替休日日数'
-  , '振休日数'
+  , @kanji_item2
+  , @out_item2
   , 0
   , 'systemuser'
   , ''
@@ -97,8 +102,8 @@
   , 28
   , 23
   , 'total_substitute_holiday'
-  , '代替休日日数'
-  , '代休日数'
+  , @kanji_item1
+  , @out_item1
   , 1
   , 'systemuser'
   , ''
@@ -113,8 +118,8 @@
   , 29
   , 24
   , 'total_compensation_holiday'
-  , '振替休日日数'
-  , '振休日数'
+  , @kanji_item2
+  , @out_item2
   , 1
   , 'systemuser'
   , ''
@@ -129,8 +134,8 @@
   , 28
   , 23
   , 'total_substitute_holiday'
-  , '代替休日日数'
-  , '代休日数'
+  , @kanji_item1
+  , @out_item1
   , 0
   , 'systemuser'
   , ''
@@ -145,8 +150,8 @@
   , 29
   , 24
   , 'total_compensation_holiday'
-  , '振替休日日数'
-  , '振休日数'
+  , @kanji_item2
+  , @out_item2
   , 0
   , 'systemuser'
   , ''
