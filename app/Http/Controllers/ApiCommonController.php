@@ -49,6 +49,7 @@ use App\FeatureItemSelection;
  *          承認者リスト取得            : getConfirmlList           : confirms
  *      3.ユーザ情報取得
  *          ユーザ情報取得                              : getUserInfo               : users         
+ *          ユーザ情報取得                              : getLoginUserInfo               : users         
  *          ユーザーカレンダーシフト情報取得               : getCalendarInformations    : calendar_setting_informations
  *          ユーザシフト情報取得                        : getShiftInformation               : ShiftInformation        
  *          ログインユーザー部署ロール取得（画面から）      : getLoginUserDepartment            
@@ -1156,6 +1157,109 @@ class ApiCommonController extends Controller
             
     }
 
+    /**
+     *  ユーザ情報取得（画面）
+     *
+     * @return list departments
+     */
+    public function getLoginUserInfo(Request $request){
+        // Log::debug('getLoginUserInfo  in');
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            if (!isset($request->company)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "company", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (!isset($request->user_code)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "user_code", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $departmentcode = null;
+            if (isset($request->department_code)) {
+                $departmentcode = $request->department_code;
+            }
+            $target_date = null;
+            if (isset($request->target_date)) {
+                $target_date = $request->target_date;
+            }
+            $company = $request->company;
+            $usercode = $request->user_code;
+            $dt = null;
+            if (isset($target_date)) {
+                $dt = new Carbon($target_date);
+            } else {
+                $dt = new Carbon();
+            }
+            // Log::debug('getLoginUserInfo  company = '.$company);
+            // Log::debug('getLoginUserInfo  usercode = '.$usercode);
+            // Log::debug('getLoginUserInfo  departmentcode = '.$departmentcode);
+            // Log::debug('getLoginUserInfo  target_date = '.$target_date);
+            $target_date = $dt->format('Ymd');
+            // usersの最大適用開始日付subquery
+            $subquery3 = $this->getUserApplyTermSubquery($target_date);
+            // departmentsの最大適用開始日付subquery
+            $subquery4 = $this->getDepartmentApplyTermSubquery($target_date);
+            $mainquery = DB::table($this->table_users)
+                ->select(
+                    $this->table_users.'.code as code',
+                    $this->table_users.'.name as name',
+                    $this->table_users.'.department_code as department_code',
+                    $this->table_users.'.employment_status as employment_status')
+                ->JoinSub($subquery3, 't1', function ($join) { 
+                    $join->on('t1.code', '=', $this->table_users.'.code');
+                    $join->on('t1.max_apply_term_from', '=', $this->table_users.'.apply_term_from');
+                })
+                ->JoinSub($subquery4, 't2', function ($join) { 
+                    $join->on('t2.code', '=', $this->table_users.'.department_code');
+                });
+            if (isset($usercode)) {
+                $mainquery    
+                    ->where($this->table_users.'.code', $usercode);
+            }
+            if (isset($department_code)) {
+                $mainquery    
+                    ->where($this->table_users.'.department_code', $department_code);
+            }
+            if (isset($employment_status)) {
+                $mainquery    
+                    ->where($this->table_users.'.employment_status', $employment_status);
+            }
+            $data = $mainquery    
+                ->where($this->table_users.'.kill_from_date', ">=", $target_date)
+                ->where($this->table_users.'.is_deleted', 0)
+                ->get();
+            if (count($data) > 0) {
+                $result = true;
+            } else {
+                $result = false;
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_found_data');
+            }
+            return response()->json(
+                ['result' => $result, 'details' => $data,
+                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            );
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+            
+    }
+    
     /**
      * ユーザーカレンダーシフト情報取得
      *

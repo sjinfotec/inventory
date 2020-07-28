@@ -36,3 +36,9 @@ Route::post('attendanceLogUpload', function () {
          throw $e;
     }
 });
+
+// 端末ログイン
+Route::get('get_login_check', 'ApiCommonController@getLoginUserInfo');
+
+// ボタン打刻
+Route::post('button_attendance', 'ApiGetAttendanceResultController@buttonAttendance');

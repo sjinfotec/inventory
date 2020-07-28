@@ -13,6 +13,8 @@
   delete from menu_item_selections where account_id = 'CSD1000L' and selection_code = '5' and item_code in (32);
   delete from menu_item_selections where account_id = 'S02DTA00' and selection_code = '3' and item_code in (32);
   select @row := max(id) from menu_item_selections;
+  set character_set_client = utf8;
+  set @kanji_item="雇用形態設定";
   insert into menu_item_selections (
   id
   , account_id
@@ -32,7 +34,7 @@
   , 1
   , 32
   , 'setting_employment'
-  , '雇用形態設定'
+  , @kanji_item
   , 0
   , 'systemuser'
   , ''
@@ -46,7 +48,7 @@
   , 2
   , 32
   , 'setting_employment'
-  , '雇用形態設定'
+  , @kanji_item
   , 0
   , 'systemuser'
   , ''
@@ -60,7 +62,7 @@
   , 3
   , 32
   , 'setting_employment'
-  , '雇用形態設定'
+  , @kanji_item
   , 0
   , 'systemuser'
   , ''
@@ -74,7 +76,7 @@
   , 3
   , 32
   , 'setting_employment'
-  , '雇用形態設定'
+  , @kanji_item
   , 0
   , 'systemuser'
   , ''
@@ -88,7 +90,7 @@
   , 5
   , 32
   , 'setting_employment'
-  , '雇用形態設定'
+  , @kanji_item
   , 1
   , 'systemuser'
   , ''
@@ -102,7 +104,7 @@
   , 3
   , 32
   , 'setting_employment'
-  , '雇用形態設定'
+  , @kanji_item
   , 0
   , 'systemuser'
   , ''
