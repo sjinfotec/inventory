@@ -444,16 +444,24 @@ export default {
             }
           } else {
             var result = this.jdgeHolidayKbn(this.value_user_holiday_kbn);
-            if (result == ALLDAY) {
-              itemname = '勤怠モード';
-              casename = '勤務区分入力の場合は';
-              chkArray =
-                this.checkDetailNotEnter(this.details[index].mode, itemname, casename, index+1);
-              if (chkArray.length > 0) {
-                if (this.messagevalidatesEdt.length == 0) {
-                  this.messagevalidatesEdt = chkArray;
-                } else {
-                  this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
+            console.log('checkFormFix result = ' + result);
+            if (result == ALLDAY || result == ALLDAYCALC) {
+              // 入力している時刻で最大時刻のモードが退勤であれば勤務区分入力可
+              var chktime = this.checkMaxRowData();
+              console.log('checkFormFix chktime = ' + chktime);
+              if (chktime != LEAVING) {
+                itemname = '勤怠モード';
+                casename = '勤務区分入力の場合は';
+                chkArray =
+                  this.checkDetailNotEnter(this.details[index].mode, itemname, casename, index+1);
+                if (chkArray.length > 0) {
+                  chkArray = [];
+                  chkArray.push("No." + (index+1) + "の勤務区分は" + "勤怠モードに退勤がないと入力できません");
+                  if (this.messagevalidatesEdt.length == 0) {
+                    this.messagevalidatesEdt = chkArray;
+                  } else {
+                    this.messagevalidatesEdt = this.messagevalidatesEdt.concat(chkArray);
+                  }
                 }
               }
             // 半休と遅刻と早退は打刻時刻を優先にするためチェックは勤怠モードと時刻のみ
@@ -830,6 +838,24 @@ export default {
       if (this.details[index].user_holiday_kbn != "" && this.details[index].user_holiday_kbn != null) { return true; }
       return false;
     },
+    checkMaxRowData() {
+      var chktime = null;
+      var chkmode = null;
+      for (var index=0;index<this.details.length;index++) {
+        if (this.details[index].timehis != "" && this.details[index].timehis != null) {
+          if (chktime == null) {
+            chktime = this.details[index].timehis;
+            chkmode = this.details[index].mode;
+          } else {
+            if (chktime < this.details[index].timehis) {
+              chktime = this.details[index].timehis;
+              chkmode = this.details[index].mode;
+            }
+          }
+        }
+      }
+      return chkmode;
+    },
     // 休暇区分判定 みなしは休暇ではないのでfalse
     jdgeHolidayKbn: function(holiday_kbn) {
       if (this.const_C013_data.length) { this.get_C013; }
@@ -859,14 +885,15 @@ export default {
       this.const_C013_data.forEach(item => {
         if (this.value_user_holiday_kbn == item.code) {
           var old_details = this.before_details;
-          this.details = [];
           // 1日休暇
           if (item.description == ALLDAY_NAME) {
-            this.details.push(this.edtDetailesAllDay());
+            // this.details = [];
+            // this.details.push(this.edtDetailesAllDay());
           // 午前半休
           } else if (item.description == HALFDAY_AM_NAME) {
             // 出勤自動設定
             if (this.halfautoset) {
+              this.details = [];
               if (this.before_count == 0) {
                 this.details.push(this.edtDetailesBreakAttendance(edtdetail));    // lunch_end_recordtime
               } else {
@@ -891,6 +918,7 @@ export default {
           } else if (item.code_name == HALFDAY_PM_NAME) {
             // 退勤自動設定
             if (this.halfautoset) {
+              this.details = [];
               if (this.before_count == 0) {
                 this.details.push(this.edtDetailesBreakLeaving(edtdetail));     // lunch_start_recordtime
               } else {
@@ -916,6 +944,7 @@ export default {
             // 出勤自動設定
             // 退勤自動設定
             if (this.halfautoset) {
+              this.details = [];
               if (this.before_count == 0) {
                 this.details.push(this.edtDetailesAttendance(edtdetail));     // regular_start_recordtime
                 this.details.push(this.edtDetailesLeaving(edtdetail));        // regular_end_recordtime
@@ -945,6 +974,7 @@ export default {
           } else if (item.code_name == DEEMED_DIRECT_GO) {
             // 出勤自動設定
             if (this.halfautoset) {
+              this.details = [];
               if (this.before_count == 0) {
                 this.details.push(this.edtDetailesAttendance(edtdetail));     // regular_start_recordtime
               } else {
@@ -968,6 +998,7 @@ export default {
           } else if (item.code_name == DEEMED_DIRECT_RETURN) {
             // 退勤自動設定
             if (this.halfautoset) {
+              this.details = [];
               if (this.before_count == 0) {
                 this.details.push(this.edtDetailesLeaving(edtdetail));        // regular_end_recordtime
               } else {
@@ -992,6 +1023,7 @@ export default {
             // 出勤自動設定
             // 退勤自動設定
             if (this.halfautoset) {
+              this.details = [];
               if (this.before_count == 0) {
                 this.details.push(this.edtDetailesAttendance(edtdetail));    // regular_start_recordtime
                 this.details.push(this.edtDetailesLeaving(edtdetail));       // regular_end_recordtime
@@ -1020,7 +1052,8 @@ export default {
             }
           // 1日集計対象休暇
           } else if (item.description == ALLDAY_CALC_NAME) {
-            this.details.push(this.edtDetailesAllDay());
+              // this.details = [];
+            // this.details.push(this.edtDetailesAllDay());
           }
         }
       });

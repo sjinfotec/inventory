@@ -1816,7 +1816,8 @@ class TempWorkingTimeDate extends Model
                 ->selectRaw('(case when t2.public_going_out_return_time_4 is not null then t2.public_going_out_return_time_4 else null end) as public_going_out_return_time_4')
                 ->selectRaw('(case when t2.public_going_out_return_time_5 is not null then t2.public_going_out_return_time_5 else null end) as public_going_out_return_time_5')
                 ->selectRaw('(case when t2.public_going_out_return_time_6 is not null then t2.public_going_out_return_time_6 else null end) as public_going_out_return_time_6')
-                ->selectRaw('(case when t2.public_going_out_return_time_7 is not null then t2.public_going_out_return_time_7 else null end) as public_going_out_return_time_7');
+                ->selectRaw('(case when t2.public_going_out_return_time_7 is not null then t2.public_going_out_return_time_7 else null end) as public_going_out_return_time_7')
+                ->selectRaw('(case ifnull(t2.holiday_kubun,0) when 0 then t5.code_name else t7.secound_code_name end) as working_status_name');
             $mainquery
                 ->addselect('t2.attendance_time_positions_1')
                 ->addselect('t2.attendance_time_positions_2')
@@ -2039,7 +2040,7 @@ class TempWorkingTimeDate extends Model
                 ->addselect('t2.legal_working_holiday_hours')
                 ->addselect('t2.legal_working_holiday_night_overtime_hours')
                 ->addselect('t2.working_status')
-                ->addselect('t5.code_name as working_status_name')
+                // ->addselect('t5.code_name as working_status_name')
                 ->addselect('t2.note')
                 ->addselect('t2.late')
                 ->addselect('t2.leave_early')
@@ -2084,6 +2085,11 @@ class TempWorkingTimeDate extends Model
                     $join->on('t5.code', '=', 't2.working_status')
                     ->where('t5.identification_id', '=', Config::get('const.C012.value'))
                     ->where('t5.is_deleted', '=', 0);
+                })
+                ->leftJoin($this->table_generalcodes.' as t7', function ($join) { 
+                    $join->on('t7.code', '=', 't2.holiday_kubun')
+                    ->where('t7.identification_id', '=', Config::get('const.C013.value'))
+                    ->where('t7.is_deleted', '=', 0);
                 })
                 ->JoinSub($subquery2, 't6', function ($join) { 
                     $join->on('t6.code', '=', 't1.code');

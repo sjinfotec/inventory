@@ -93,6 +93,49 @@ class User extends Authenticatable
     }
 
     /**
+     * ボタン打刻用ユーザー取得
+     *
+     * @param [type] $card_id
+     * @return void
+     */
+    public function getUserData($user_code){
+        try {
+            // usersの最大適用開始日付subquery
+            // 適用期間日付の取得
+            $apicommon = new ApiCommonController();
+            $subquery2 = $apicommon->getUserApplyTermSubquery(null);
+            $mainquery = DB::table('users')
+                ->select(
+                    'users.id',
+                    'users.department_code as department_code',
+                    'users.employment_status as employment_status',
+                    'users.name as name',
+                    'users.code as code'
+                );
+            $mainquery
+                ->JoinSub($subquery2, 't1', function ($join) { 
+                    $join->on('t1.code', '=', 'users.code');
+                    $join->on('t1.max_apply_term_from', '=', 'users.apply_term_from');
+                });
+            $mainquery
+                ->where('users.code',$user_code)
+                ->where('users.role',"<>",10)
+                ->where('users.is_deleted',0);
+            $data = $mainquery->get();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_erorr')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+        
+        return $data;
+    }
+
+    /**
      * 全ユーザー取得
      *
      * @return void

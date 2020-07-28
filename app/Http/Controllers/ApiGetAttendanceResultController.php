@@ -40,7 +40,7 @@ class ApiGetAttendanceResultController extends Controller
             $user = new User();
             $work_time = new WorkTime();
             $systemdate = Carbon::now();
-            // Log::debug('store systemdate = '.$systemdate);
+            Log::debug('store systemdate = '.$systemdate);
             $response = collect();              // 端末の戻り値
             $this->source_mode = '';
             $array_chkAttendance_result = 
@@ -89,7 +89,7 @@ class ApiGetAttendanceResultController extends Controller
                         } elseif($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.dup_time_check')) {
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.dup_time_check'));
                         } elseif($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.time_autoset')) {
-                            // Log::debug('store time_autoset');
+                            Log::debug('store time_autoset');
                             // insertTable implement
                             $array_impl_insertTable = array (
                                 'user_data' => $user_data,
@@ -99,7 +99,7 @@ class ApiGetAttendanceResultController extends Controller
                                 'systemdate' => $systemdate,
                                 'mode_id' => $array_chkAttendance_result[3]
                             );
-                            // Log::debug('store mode_id = '.$array_chkAttendance_result[3]);
+                            Log::debug('store mode_id = '.$array_chkAttendance_result[3]);
                             $this->insertTable($array_impl_insertTable);
                             $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
                         } else {
@@ -136,6 +136,163 @@ class ApiGetAttendanceResultController extends Controller
             throw $pe;
         }catch(\Exception $e){
             Log::error(str_replace('{0}', 'work_times', Config::get('const.LOG_MSG.data_insert_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * ボタン打刻登録
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function buttonAttendance(Request $request) { 
+        Log::debug('buttonAttendance  in');
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        try {
+            // パラメータチェック
+            if (!isset($request->company)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "company", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (!isset($request->user_code)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "user_code", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            if (!isset($request->mode)) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "mode", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false, 'details' => $details,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
+            $departmentcode = null;
+            if (isset($request->department_code)) {
+                $departmentcode = $request->department_code;
+            }
+            $target_date = null;
+            if (isset($request->target_date)) {
+                $target_date = $request->target_date;
+            }
+            $company = $request->company;
+            $usercode = $request->user_code;
+            $dt = null;
+            if (isset($target_date)) {
+                $dt = new Carbon($target_date);
+            } else {
+                $dt = new Carbon();
+            }
+            $mode = $request->mode;
+            Log::debug('buttonAttendance  company = '.$company);
+            Log::debug('buttonAttendance  usercode = '.$usercode);
+            Log::debug('buttonAttendance  departmentcode = '.$departmentcode);
+            Log::debug('buttonAttendance  target_date = '.$target_date);
+            Log::debug('buttonAttendance  mode = '.$mode);
+            $target_date = $dt->format('Ymd');
+            $user = new User();
+            $work_time = new WorkTime();
+            $systemdate = Carbon::now();
+            Log::debug('store systemdate = '.$systemdate);
+            $response = collect();              // 端末の戻り値
+            $this->source_mode = '';
+            $array_chkAttendance_result = 
+                array(Config::get('const.RESULT_CODE.normal')
+                    , Config::get('const.RESULT_CODE.normal')
+                    , Config::get('const.RESULT_CODE.normal')
+                    , null);
+            $user_datas = $user->getUserData($usercode);
+            if (count($user_datas) > 0) {
+                foreach($user_datas as $user_data) {
+                    // chkAttendance implement
+                    $array_impl_chkAttendance = array (
+                        'user_data' => $user_data,
+                        'mode' => $mode,
+                        'systemdate' => $systemdate
+                    );
+                    $array_chkAttendance_result = $this->chkAttendance($array_impl_chkAttendance);
+                    if($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.normal')){
+                        $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
+                        // insertTable implement
+                        $array_impl_insertTable = array (
+                            'user_data' => $user_data,
+                            'mode' => $mode,
+                            'card_id' => null,
+                            'array_chkAttendance_result' => $array_chkAttendance_result,
+                            'systemdate' => $systemdate,
+                            'mode_id' => null
+                        );
+                        $this->insertTable($array_impl_insertTable);
+                    } elseif($array_chkAttendance_result[0] == Config::get('const.C018.forget_stamp')) {
+                        // エラー追加 20200121
+                        $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.mode_illegal'));
+                        // insertTable implement
+                        $array_impl_insertTable = array (
+                            'user_data' => $user_data,
+                            'mode' => $mode,
+                            'card_id' => null,
+                            'array_chkAttendance_result' => $array_chkAttendance_result,
+                            'systemdate' => $systemdate,
+                            'mode_id' => null
+                        );
+                        $this->insertTable($array_impl_insertTable);
+                    } elseif($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.dup_time_check')) {
+                        $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.dup_time_check'));
+                    } elseif($array_chkAttendance_result[0] == Config::get('const.RESULT_CODE.time_autoset')) {
+                        Log::debug('store time_autoset');
+                        // insertTable implement
+                        $array_impl_insertTable = array (
+                            'user_data' => $user_data,
+                            'mode' => $mode,
+                            'card_id' => null,
+                            'array_chkAttendance_result' => $array_chkAttendance_result,
+                            'systemdate' => $systemdate,
+                            'mode_id' => $array_chkAttendance_result[3]
+                        );
+                        Log::debug('store mode_id = '.$array_chkAttendance_result[3]);
+                        $this->insertTable($array_impl_insertTable);
+                        $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.success'));
+                    } else {
+                        // エラー追加 20200121
+                        $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.unknown'));
+                        // insertTable implement
+                        $array_impl_insertTable = array (
+                            'user_data' => $user_data,
+                            'mode' => $mode,
+                            'card_id' => null,
+                            'array_chkAttendance_result' => $array_chkAttendance_result,
+                            'systemdate' => $systemdate,
+                            'mode_id' => null
+                        );
+                        $this->insertTable($array_impl_insertTable);
+                    }
+                    $response->put(Config::get('const.PUT_ITEM.user_code'),$user_data->code);
+                    $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
+                    $response->put(Config::get('const.PUT_ITEM.record_time'),$systemdate->format('H:i:s'));
+                    $response->put(Config::get('const.PUT_ITEM.source_mode'),$this->source_mode);
+                    break;
+                }
+            } else {
+                // エラー追加 20200121
+                $response->put(Config::get('const.PUT_ITEM.result'),Config::get('const.RESULT_CODE.user_not_exsits'));
+            }
+            return $response;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -210,6 +367,7 @@ class ApiGetAttendanceResultController extends Controller
         if(count($daily_times) > 0){
             $i=0;
             foreach ($daily_times as $result) {
+                $chk_result = Config::get('const.RESULT_CODE.normal');
                 $is_chk_mode_autoset = false;
                 // モードチェック
                 if(isset($result->mode)){
@@ -217,31 +375,32 @@ class ApiGetAttendanceResultController extends Controller
                     $this->source_mode = $result->mode;
                     // モードが同じでタイム間が5秒以内は登録しない（重複打刻防止のため）
                     if ($mode == $this->source_mode ) {
-                        // Log::debug('chkAttendance attendance_time $result->record_datetime = '.$result->record_datetime);
+                        Log::debug('chkAttendance attendance_time $result->record_datetime = '.$result->record_datetime);
                         $check_dup = $apicommon->diffSecoundSerial($result->record_datetime, $systemdate );
-                        // Log::debug('chkAttendance attendance_time $check_dup = '.$check_dup);
+                        Log::debug('chkAttendance attendance_time $check_dup = '.$check_dup);
                         if ($check_dup <= 5) {
                             $chk_result = Config::get('const.RESULT_CODE.dup_time_check');
                         }
                     }
+                    Log::debug('chkAttendance attendance_time $chk_result = '.$chk_result);
                     if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
                         $chk_systemdate = $systemdate->format('Ymd');
                         if ($mode == Config::get('const.C005.attendance_time')) {
                             // 直前の打刻日
-                            // Log::debug('chkAttendance attendance_time $chk_systemdate = '.$chk_systemdate);
-                            // Log::debug('chkAttendance attendance_time $result->record_ymd = '.$result->record_ymd);
+                            Log::debug('chkAttendance attendance_time $chk_systemdate = '.$chk_systemdate);
+                            Log::debug('chkAttendance attendance_time $result->record_ymd = '.$result->record_ymd);
                             if ($chk_systemdate == $result->record_ymd) {
                                 // 休暇区分で自動設定されている場合は重複打刻となるのでモードチェックするかしないかの判定を行う
                                 if ($is_chk_mode_autoset)  {
-                                    // Log::debug('chkAttendance attendance_time $result->record_datetime = '.$result->record_datetime);
-                                    // Log::debug('chkAttendance attendance_time $result->is_editor = '.$result->is_editor);
+                                    Log::debug('chkAttendance attendance_time $result->record_datetime = '.$result->record_datetime);
+                                    Log::debug('chkAttendance attendance_time $result->is_editor = '.$result->is_editor);
                                     if ($result->record_datetime != null && $result->record_datetime != "" && $result->is_editor) {
                                         $is_chk_mode_autoset = true;
-                                        // Log::debug('chkAttendance1 $is_chk_mode_autoset = '.$is_chk_mode_autoset);
+                                        Log::debug('chkAttendance1 $is_chk_mode_autoset = '.$is_chk_mode_autoset);
                                         $mode_autoset_id = $result->id;
                                     } else {
                                         $is_chk_mode_autoset = false;
-                                        // Log::debug('chkAttendance2 $is_chk_mode_autoset = '.$is_chk_mode_autoset);
+                                        Log::debug('chkAttendance2 $is_chk_mode_autoset = '.$is_chk_mode_autoset);
                                     }
                                 }
                             }
@@ -250,21 +409,21 @@ class ApiGetAttendanceResultController extends Controller
                             $work_time_model->setParamdatefromNoneditAttribute($systemdate->format('Ymd '.'23:59:59'));
                             $work_time_model->setParamModeAttribute($mode);
                             $daily_leaving_times = $work_time_model->getDailyMaxData();
-                            // Log::debug('chkAttendance leaving_time $chk_systemdate = '.$chk_systemdate);
+                            Log::debug('chkAttendance leaving_time $chk_systemdate = '.$chk_systemdate);
                             if(count($daily_leaving_times) > 0){
                                 foreach($daily_leaving_times as $item) {
-                                    // Log::debug('chkAttendance leaving_time $item->record_ymd = '.$item->record_ymd);
+                                    Log::debug('chkAttendance leaving_time $item->record_ymd = '.$item->record_ymd);
                                     if ($chk_systemdate == $item->record_ymd) {
                                         if ($is_chk_mode_autoset)  {
-                                            // Log::debug('chkAttendance attendance_time $result->record_datetime = '.$result->record_datetime);
-                                            // Log::debug('chkAttendance attendance_time $result->is_editor = '.$result->is_editor);
+                                            Log::debug('chkAttendance attendance_time $result->record_datetime = '.$result->record_datetime);
+                                            Log::debug('chkAttendance attendance_time $result->is_editor = '.$result->is_editor);
                                             if ($result->record_datetime != null && $result->record_datetime != "" && $result->is_editor) {
                                                 $is_chk_mode_autoset = true;
-                                                // Log::debug('chkAttendance2 $is_chk_mode_autoset = '.$is_chk_mode_autoset);
+                                                Log::debug('chkAttendance2 $is_chk_mode_autoset = '.$is_chk_mode_autoset);
                                                 $mode_autoset_id = $result->id;
                                             } else {
                                                 $is_chk_mode_autoset = false;
-                                                // Log::debug('chkAttendance2 $is_chk_mode_autoset = '.$is_chk_mode_autoset);
+                                                Log::debug('chkAttendance2 $is_chk_mode_autoset = '.$is_chk_mode_autoset);
                                             }
                                         }
                                     }
@@ -272,9 +431,9 @@ class ApiGetAttendanceResultController extends Controller
                                 }
                             }
                         }
-                        // Log::debug('chkAttendance $mode = '.$mode);
-                        // Log::debug('chkAttendance $this->source_mode = '.$this->source_mode);
-                        // Log::debug('chkAttendance $is_chk_mode_autoset = '.$is_chk_mode_autoset);
+                        Log::debug('chkAttendance $mode = '.$mode);
+                        Log::debug('chkAttendance $this->source_mode = '.$this->source_mode);
+                        Log::debug('chkAttendance $is_chk_mode_autoset = '.$is_chk_mode_autoset);
                         $chk_result = $apicommon->chkMode($mode, $this->source_mode, $is_chk_mode_autoset);
                         if ($chk_result == Config::get('const.RESULT_CODE.normal')) {
                             if ($is_chk_mode_autoset) {
@@ -290,19 +449,19 @@ class ApiGetAttendanceResultController extends Controller
                     }
                 } else {
                     // ない場合はis_chk_mode_autosetはfalseとする
-                    // Log::debug('chkAttendance10 $is_chk_mode_autoset = '.$is_chk_mode_autoset);
+                    Log::debug('chkAttendance10 $is_chk_mode_autoset = '.$is_chk_mode_autoset);
                     $chk_result = $apicommon->chkMode($mode, '', $is_chk_mode_autoset);
                 }
                 break;
             }
             if ($i == 0) {
                 // ない場合はis_chk_mode_autosetはfalseとする
-                // Log::debug('chkAttendance11 $is_chk_mode_autoset = '.$is_chk_mode_autoset);
+                Log::debug('chkAttendance11 $is_chk_mode_autoset = '.$is_chk_mode_autoset);
                 $chk_result = $apicommon->chkMode($mode, '', $is_chk_mode_autoset);
             }
         } else {
             // ない場合はis_chk_mode_autosetはfalseとする
-            // Log::debug('chkAttendance12 $is_chk_mode_autoset = '.$is_chk_mode_autoset);
+            Log::debug('chkAttendance12 $is_chk_mode_autoset = '.$is_chk_mode_autoset);
             $chk_result = $apicommon->chkMode($mode, '', $is_chk_mode_autoset);
         }
 
@@ -311,7 +470,7 @@ class ApiGetAttendanceResultController extends Controller
         $work_time_model->setParamUsercodeAttribute($user_data->code);
         $work_time_model->setParamModeAttribute($mode);
         $value_count = $work_time_model->getModeCount();
-        // Log::debug('chkAttendance value_count = '.$value_count);
+        Log::debug('chkAttendance value_count = '.$value_count);
         if (isset($value_count)) {
             if ($value_count >= Config::get('const.C019.max_times')) {
                 $chk_max_times = Config::get('const.RESULT_CODE.max_times');
@@ -369,13 +528,13 @@ class ApiGetAttendanceResultController extends Controller
             // 打刻データ登録
             DB::beginTransaction();
             // mode_idある場合は論理削除
-            // Log::debug('insertTable mode_id = '.$mode_id);
+            Log::debug('insertTable mode_id = '.$mode_id);
             if ($mode_id != null) {
                 $work_time = new WorkTime();
                 $work_time->setIdAttribute($mode_id);
                 $work_time->setSystemDateAttribute($systemdate);
                 $work_time->delWorkTimeBysystem();
-                // Log::debug('insertTable delWorkTimeBysystem ');
+                Log::debug('insertTable delWorkTimeBysystem ');
             }
             // insertTime implement
             $array_impl_insertTime = array (
