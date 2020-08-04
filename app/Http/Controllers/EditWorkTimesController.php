@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Config;
 use App\Http\Requests\StoreUserPost;
 use App\Http\Controllers\ApiCommonController;
 use App\WorkTime;
-use App\UserHolidayKubun;
+// use App\UserHolidayKubun;
 use App\CalendarSettingInformation;
 use Carbon\Carbon;
 

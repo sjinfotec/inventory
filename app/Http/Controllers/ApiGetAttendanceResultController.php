@@ -120,6 +120,10 @@ class ApiGetAttendanceResultController extends Controller
                         $response->put(Config::get('const.PUT_ITEM.user_name'),$user_data->name);
                         $response->put(Config::get('const.PUT_ITEM.record_time'),$systemdate->format('H:i:s'));
                         $response->put(Config::get('const.PUT_ITEM.source_mode'),$this->source_mode);
+                        Log::debug('store $user_data->code = '.$user_data->code);
+                        Log::debug('store $user_data->name = '.$user_data->name);
+                        Log::debug('store $systemdate = '.$systemdate->format('H:i:s'));
+                        Log::debug('store source_mode = '.$this->source_mode);
                         break;
                     }
                 } else {

@@ -9,14 +9,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
-use App\ShiftInformation;
+// use App\ShiftInformation;
 use App\WorkingTimeTable;
 use App\Calendar;
 use App\Setting;
 use App\Demand;
 use App\Confirm;
 use App\Company;
-use App\UserHolidayKubun;
+// use App\UserHolidayKubun;
 use App\ApprovalRouteNo;
 use App\WorkTimeLog;
 use App\WorkTime;
@@ -1712,81 +1712,82 @@ class ApiCommonController extends Controller
      *
      * @return void
      */
-    public function getShiftInformation(Request $request){
-        $this->array_messagedata = array();
-        $details = new Collection();
-        $result = true;
-        try {
-            // パラメータチェック
-            $params = array();
-            if (!isset($request->keyparams)) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => $details,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $params = $request->keyparams;
-            if (!isset($params['usercode'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "usercode", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => $details,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            if (!isset($params['from'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "from", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => $details,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            if (!isset($params['to'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "to", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => $details,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $departmentcode = null;
-            if (isset($params['departmentcode'])) {
-                $departmentcode = $params['departmentcode'];
-            }
-            $usercode = $params['usercode'];
-            $no = null;
-            if (isset($params['no'])) {
-                $no = $params['no'];
-            }
-            $from = new Carbon($params['from']);
-            $from = $from->format("Ymd");
-            $to = new Carbon($params['to']);
-            $to = $to->format("Ymd");
+    // public function getShiftInformation(Request $request){
+    //     $this->array_messagedata = array();
+    //     $details = new Collection();
+    //     $result = true;
+    //     try {
+    //         // パラメータチェック
+    //         $params = array();
+    //         if (!isset($request->keyparams)) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false, 'details' => $details,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         $params = $request->keyparams;
+    //         if (!isset($params['usercode'])) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "usercode", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false, 'details' => $details,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         if (!isset($params['from'])) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "from", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false, 'details' => $details,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         if (!isset($params['to'])) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "to", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false, 'details' => $details,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         $departmentcode = null;
+    //         if (isset($params['departmentcode'])) {
+    //             $departmentcode = $params['departmentcode'];
+    //         }
+    //         $usercode = $params['usercode'];
+    //         $no = null;
+    //         if (isset($params['no'])) {
+    //             $no = $params['no'];
+    //         }
+    //         $from = new Carbon($params['from']);
+    //         $from = $from->format("Ymd");
+    //         $to = new Carbon($params['to']);
+    //         $to = $to->format("Ymd");
 
-            $shift_info = new ShiftInformation();
-            $shift_info->setParamdepartmentcodeAttribute($departmentcode);
-            $shift_info->setParamusercodeAttribute($usercode);
-            $shift_info->setParamWorkingtimetablenoAttribute($no);
-            $shift_info->setParamfromdateAttribute($from);
-            $shift_info->setParamtodateAttribute($to);
-            $details = $shift_info->getUserShift();
+    //         $shift_info = new ShiftInformation();
+    //         $shift_info->setParamdepartmentcodeAttribute($departmentcode);
+    //         $shift_info->setParamusercodeAttribute($usercode);
+    //         $shift_info->setParamWorkingtimetablenoAttribute($no);
+    //         $shift_info->setParamfromdateAttribute($from);
+    //         $shift_info->setParamtodateAttribute($to);
+    //         $details = $shift_info->getUserShift();
 
-            return response()->json(
-                ['result' => true, 'details' => $details,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
+    //         return response()->json(
+    //             ['result' => true, 'details' => $details,
+    //             Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //         );
+    //     }catch(\PDOException $pe){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+    // }
+
     /** ユーザー部署ロール取得（画面から）
      *
      * @return list departments
@@ -4691,6 +4692,8 @@ class ApiCommonController extends Controller
                 ->where('working_time_kubun', '!=', Config::get('const.C004.out_of_regular_working_time'))
                 ->sortBy('from_time');
             foreach($filtered as $result_time) {
+                Log::debug('            analyzeTimeTable from_time = '.$result_time->from_time);
+                Log::debug('            analyzeTimeTable to_time = '.$result_time->to_time);
                 if (isset($result_time->from_time) && isset($result_time->to_time)) {
                     $dt = new Carbon('2019-08-01 '.$result_time->from_time);
                     $check_from_hour = date_format($dt, 'H');
@@ -4764,13 +4767,21 @@ class ApiCommonController extends Controller
                             if ($array_sets[$i][$j] == 0) {
                                 if ($temp_from_time == "") {
                                     $temp_from_time = str_pad($i,2,0,STR_PAD_LEFT).':'.str_pad($j,2,0,STR_PAD_LEFT).':00';
+                                    Log::debug('            analyzeTimeTable 配列=0の範囲を設定する temp_from_time = '.$temp_from_time);
                                 }
                             } else {
                                 if ($temp_from_time == "") {
                                     $temp_to_time ="";
                                 } else {
                                     $temp_to_time = str_pad($i,2,0,STR_PAD_LEFT).':'.str_pad($j,2,0,STR_PAD_LEFT).':00';
+                                    Log::debug('            analyzeTimeTable 配列=0の範囲を設定する temp_to_time = '.$temp_to_time);
                                     $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
+                                    // from to の判定は予備もとで行います。
+                                    // if ($result_time->from_time < $result_time->to_time) {
+                                    //     $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
+                                    // } else {
+                                    //     $temp_times[] = array('from_time' => $temp_to_time , 'to_time' => $temp_from_time);
+                                    // }
                                     $temp_from_time ="";
                                     $temp_to_time ="";
                                 }
@@ -4782,6 +4793,11 @@ class ApiCommonController extends Controller
                     if ($temp_from_time != "") {
                         $temp_from_time = str_pad($save_i,2,0,STR_PAD_LEFT).':'.str_pad($save_j,2,0,STR_PAD_LEFT).':00';
                         $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
+                        // if ($result_time->from_time < $result_time->to_time) {
+                        //     $temp_times[] = array('from_time' => $temp_from_time , 'to_time' => $temp_to_time);
+                        // } else {
+                        //     $temp_times[] = array('from_time' => $temp_to_time , 'to_time' => $temp_from_time);
+                        // }
                     }
                 }
             }

@@ -11,11 +11,11 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ApiCommonController;
 use App\WorkingTimeTable;
-use App\Calendar;
+// use App\Calendar;
 use App\Setting;
 use App\UserModel;
 use App\WorkTime;
-use App\UserHolidayKubun;
+// use App\UserHolidayKubun;
 use App\CalendarSettingInformation;
 
 class EditCalendarController extends Controller
