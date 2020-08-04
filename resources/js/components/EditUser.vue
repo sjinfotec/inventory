@@ -105,6 +105,8 @@
               <!-- /.col -->
             </div>
             <!-- /.row -->
+          </div>
+          <!-- panel contents -->
             <!-- ----------- ボタン部 START ---------------- -->
             <!-- .row -->
             <!-- <div class="row justify-content-between"> -->
@@ -133,9 +135,19 @@
             <!-- </div> -->
             <!-- /.row -->
             <!-- .row -->
+          <div class="card-body pt-2">
+            <!-- .row -->
             <div class="row justify-content-between">
               <!-- col -->
-              <div class="col-md-12 pb-2">
+              <div class="col-md-2 pb-2">
+                <btn-work-time
+                  v-bind:btn-mode="'dummy'"
+                  v-bind:is-push="false"
+                ></btn-work-time>
+              </div>
+              <!-- /.col -->
+              <!-- col -->
+              <div class="col-md-2 pb-2">
                 <btn-work-time
                   v-on:usersupload-event="usersuploadclick"
                   v-bind:btn-mode="'usersupload'"
@@ -144,10 +156,9 @@
               </div>
               <!-- /.col -->
             </div>
-            <!-- /.row -->
             <!-- .row -->
             <div class="row" v-for="(item,index) in get_C037_TARGET">
-              <div class="col-md-12 pb-2">
+              <div class="col-md-2 pb-2">
                 <!-- col -->
                 <btn-csv-download
                   v-bind:btn-mode="item['code']"

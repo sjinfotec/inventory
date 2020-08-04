@@ -86,10 +86,10 @@ Route::post('/edit_work_times/add', 'EditWorkTimesController@add')->middleware('
 // Route::post('/create_shift_time/store', 'CreateShiftTimeController@store')->middleware('auth'); // 未使用
 // Route::post('/create_shift_time/get', 'CreateShiftTimeController@get')->middleware('auth');     // 未使用
 // Route::post('/create_shift_time/del', 'CreateShiftTimeController@del')->middleware('auth');     // 未使用
-Route::get('/setting_shift_time', 'SttingShiftTimeController@index')->middleware('auth');
-Route::post('/setting_shift_time/del', 'SttingShiftTimeController@del')->middleware('auth');
-Route::post('/setting_shift_time/store', 'SttingShiftTimeController@store')->middleware('auth');
-Route::post('/setting_shift_time/range_del', 'SttingShiftTimeController@rangeDel')->middleware('auth');
+// Route::get('/setting_shift_time', 'SttingShiftTimeController@index')->middleware('auth');
+// Route::post('/setting_shift_time/del', 'SttingShiftTimeController@del')->middleware('auth');
+// Route::post('/setting_shift_time/store', 'SttingShiftTimeController@store')->middleware('auth');
+// Route::post('/setting_shift_time/range_del', 'SttingShiftTimeController@rangeDel')->middleware('auth');
 Route::get('/edit_shift_time', 'EditShiftTimeController@index')->middleware('auth');
 Route::post('/edit_shift_time/get', 'EditShiftTimeController@getDetail')->middleware('auth');
 Route::post('/edit_shift_time/fix', 'EditShiftTimeController@fix')->middleware('auth');
@@ -188,7 +188,7 @@ Route::post('/update_paid_informations', 'SettingPaidHolidayController@updatePai
 
 Route::post('/get_user_list', 'ApiCommonController@getUserList')->middleware('auth');
 Route::post('/get_user_list/csv', 'ApiCommonController@getUserListCsv')->middleware('auth');
-Route::post('/get_user_shift', 'ApiCommonController@getShiftInformation')->middleware('auth');
+// Route::post('/get_user_shift', 'ApiCommonController@getShiftInformation')->middleware('auth');
 // 締日取得
 Route::post('/get_closing_day', 'ApiCommonController@getClosingDay')->middleware('auth');
 // ユーザー権限取得

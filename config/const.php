@@ -129,7 +129,8 @@ return [
         'public_damage' => 21,
         'nigth_shift' => 22,
         'deemed_direct_go_return' => 23,
-        'assign_paid_holiday' => 24
+        'assign_paid_holiday' => 24,
+        'weekly_compensation_holiday' => 25
     ],
 
     'C013_DESC_VALUE' => [
@@ -170,7 +171,8 @@ return [
         'public_damage' => "1日集計対象休暇",
         'nigth_shift' => "1日集計対象休暇",
         'deemed_direct_go_return' => "みなし",
-        'assign_paid_holiday' => "1日集計対象休暇"
+        'assign_paid_holiday' => "1日集計対象休暇",
+        'weekly_compensation_holiday' => "1日休暇"
     ],
 
     'C014' => [
@@ -434,7 +436,8 @@ return [
         'edit_worktime_user_conditional' => 28,
         'TeamViewer' => 29,
         'account_admin' => 30,
-        'clientServer' => 31
+        'clientServer' => 31,
+        'setting_employment' => 32
     ],
  
     'C039' => [

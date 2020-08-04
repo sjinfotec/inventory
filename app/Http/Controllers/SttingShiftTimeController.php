@@ -1,5 +1,7 @@
 <?php
 
+// ------------------------------------- 未使用 ------------------------------------------------
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
