@@ -2562,22 +2562,39 @@ class WorkingTimedate extends Model
                 });
 
             if ($dayormonth == Config::get('const.WORKINGTIME_DAY_OR_MONTH.daily_basic')) {
-                if ($business_kubun != Config::get('const.C007.basic')) {
+                // ユーザー一括で取得するよう変更したため個々で固有の$business_kubunで判断はできない
+                // table_temp_working_time_datesに固有のbusiness_kubunを持っているためそれに変更
+                // if ($business_kubun != Config::get('const.C007.basic')) {
+                    // --------------- 休日に出勤した人 ------------------------
                     $mainquery
                         ->Join($this->table_temp_working_time_dates, function ($join) { 
                             $join->on($this->table_temp_working_time_dates.'.department_code', '=', $this->table_users.'.department_code');
                             $join->on($this->table_temp_working_time_dates.'.employment_status', '=', $this->table_users.'.employment_status');
                             $join->on($this->table_temp_working_time_dates.'.user_code', '=', $this->table_users.'.code');
                             $join->on($this->table_temp_working_time_dates.'.working_date', '=', $this->table_calendar_setting_informations.'.date');       // $this->table_calendars
-                        })
-                        ->WhereNotNull($this->table_temp_working_time_dates.'.attendance_time_1')
-                        ->orWhereNotNull($this->table_temp_working_time_dates.'.leaving_time_1')
-                        ->orWhereNotNull($this->table_temp_working_time_dates.'.missing_middle_time_1')
-                        ->orWhereNotNull($this->table_temp_working_time_dates.'.missing_middle_return_time_1')
-                        ->orWhereNotNull($this->table_temp_working_time_dates.'.public_going_out_time_1')
-                        ->orWhereNotNull($this->table_temp_working_time_dates.'.public_going_out_return_time_1');
-                }
-                $mainquery = $this->setWhereSqlUsers($mainquery);
+                        });
+                    $mainquery = $this->setWhereSqlUsers($mainquery);
+                    $value1 = Config::get('const.C007.basic');
+                    $mainquery
+                        ->where(function($mainquery) use ($value1) {
+                            $mainquery
+                                ->Where($this->table_temp_working_time_dates.'.business_kubun', "=", $value1)
+                                ->orWhere(function($mainquery) use ($value1) {
+                                    $mainquery
+                                        ->Where($this->table_temp_working_time_dates.'.business_kubun', "<>", $value1)
+                                        ->where(function($mainquery) {
+                                            $mainquery
+                                                ->WhereNotNull($this->table_temp_working_time_dates.'.attendance_time_1')
+                                                ->orWhereNotNull($this->table_temp_working_time_dates.'.leaving_time_1')
+                                                ->orWhereNotNull($this->table_temp_working_time_dates.'.missing_middle_time_1')
+                                                ->orWhereNotNull($this->table_temp_working_time_dates.'.missing_middle_return_time_1')
+                                                ->orWhereNotNull($this->table_temp_working_time_dates.'.public_going_out_time_1')
+                                                ->orWhereNotNull($this->table_temp_working_time_dates.'.public_going_out_return_time_1');
+                                        });
+                                });
+                        });
+                    // --------------- 休日に出勤した人 ------------------------
+                // }
                 $result = $mainquery
                     ->where($this->table.'.is_deleted', 0)
                     ->distinct()
