@@ -206,7 +206,7 @@ Route::post('/get_working_status/get', 'ApiCommonController@getWorgingStatusInfo
 // CSV項目取得
 Route::post('/get_csv_item', 'ApiCommonController@getCsvItem')->middleware('auth');
 // android apkダウンロード
-Route::get('/download/moc', 'CommonController@downloadMoc');
+Route::get('/download/moc', 'ApiCommonController@downloadMoc');
 
 
 
