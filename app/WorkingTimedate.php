@@ -2508,8 +2508,13 @@ class WorkingTimedate extends Model
                 //     $join->on($this->table.'.working_date', '=', $this->table_calendars.'.date')
                 //     ->where($this->table.'.is_deleted', '=', 0);
                 // })
+                // ->leftJoin($this->table, function ($join) { 
+                //     $join->on($this->table.'.department_code', '=', $this->table_users.'.department_code');
+                //     $join->on($this->table.'.user_code', '=', $this->table_users.'.code');
+                //     $join->on($this->table.'.working_date', '=', $this->table_calendar_setting_informations.'.date')
+                //     ->where($this->table.'.is_deleted', '=', 0);
+                // })
                 ->leftJoin($this->table, function ($join) { 
-                    $join->on($this->table.'.department_code', '=', $this->table_users.'.department_code');
                     $join->on($this->table.'.user_code', '=', $this->table_users.'.code');
                     $join->on($this->table.'.working_date', '=', $this->table_calendar_setting_informations.'.date')
                     ->where($this->table.'.is_deleted', '=', 0);
@@ -3283,6 +3288,85 @@ class WorkingTimedate extends Model
 
         return $query;
 
+    }
+
+    /**
+     * 存在チェック
+     *
+     * @return boolean
+     */
+    public function isExist(){
+        try {
+            $mainquery = DB::table($this->table);
+            if (!empty($this->param_department_code)) {
+                $mainquery
+                    ->where('department_code', '=', $this->param_department_code);
+            }
+            if(!empty($this->param_employment_status)){
+                $query->where($this->table_users.'.employment_status', $this->param_employment_status);         //employment_status指定
+            }
+            if (!empty($this->param_user_code)) {
+                $mainquery
+                    ->where('user_code', '=', $this->param_user_code);
+            }
+            if(!empty($this->param_date_from)){
+                $mainquery->where('working_date', '>=', $this->param_date_from);            // 日付範囲指定
+            }
+            if(!empty($this->param_date_to)){
+                $mainquery->where('working_date', '<=', $this->param_date_to);              // 日付範囲指定
+            }
+            $is_exists =$mainquery
+                ->where('is_deleted',0)
+                ->exists();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $is_exists;
+    }
+
+    /**
+     * 更新（共通）
+     *
+     * @return boolean
+     */
+    public function updateCommon($array_update){
+        try {
+            $mainquery = DB::table($this->table);
+            if (!empty($this->param_department_code)) {
+                $mainquery
+                    ->where('department_code', '=', $this->param_department_code);
+            }
+            if (!empty($this->param_user_code)) {
+                $mainquery
+                    ->where('user_code', '=', $this->param_user_code);
+            }
+            if(!empty($this->param_date_from)){
+                $mainquery->where('working_date', '>=', $this->param_date_from);            // 日付範囲指定
+            }
+            if(!empty($this->param_date_to)){
+                $mainquery->where('working_date', '<=', $this->param_date_to);              // 日付範囲指定
+            }
+            $result =$mainquery
+                ->where('is_deleted',0)
+                ->update($array_update);
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $result;
     }
 
 }
