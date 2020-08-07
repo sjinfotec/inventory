@@ -5,31 +5,31 @@
       <!-- 日次集計 -->
       <div class="p-4" v-if="get_isMenuselection(get_c038[1]['code'])">
         <a class href="/daily">
-          <img width="100" height="100" class src="/images/icon02.svg" alt />
+          <img width="90" height="90" class src="/images/icon02.svg" alt />
         </a>
       </div>
       <!-- 月次集計 -->
       <div class="p-4" v-if="get_isMenuselection(get_c038[2]['code'])">
         <a class href="/monthly">
-          <img width="100" height="100" class src="/images/icon01.svg" alt />
+          <img width="90" height="90" class src="/images/icon01.svg" alt />
         </a>
       </div>
       <!-- 日次警告 -->
       <div class="p-4" v-if="get_isMenuselection(get_c038[4]['code'])">
         <a class href="/daily_alert">
-          <img width="100" height="100" class src="/images/icon04.svg" alt />
+          <img width="90" height="90" class src="/images/icon04.svg" alt />
         </a>
       </div>
       <!-- 月次警告 -->
       <div class="p-4" v-if="get_isMenuselection(get_c038[5]['code'])">
         <a class href="/monthly_alert">
-          <img width="100" height="100" class src="/images/icon03.svg" alt />
+          <img width="90" height="90" class src="/images/icon03.svg" alt />
         </a>
       </div>
       <!-- 勤怠履歴編集 -->
       <div class="p-4" v-if="get_isMenuselection(get_c038[8]['code'])">
         <a class href="/edit_attendancelog">
-          <img width="100" height="100" class src="/images/icon10.svg" alt />
+          <img width="90" height="90" class src="/images/icon10.svg" alt />
         </a>
       </div>
       <!-- シフト編集 -->
@@ -38,7 +38,7 @@
         v-if="get_isMenuselection(get_c038[10]['code']) && login_user_role === get_c025[2]['code']"
       >
         <a class href="/edit_shift_time">
-          <img width="100" height="100" class src="/images/icon08.svg" alt />
+          <img width="90" height="90" class src="/images/icon08.svg" alt />
         </a>
       </div>
       <!-- 勤怠編集 -->
@@ -47,13 +47,13 @@
         v-if="get_isMenuselection(get_c038[11]['code']) && login_user_role === get_c025[2]['code']"
       >
         <a class href="/edit_work_times">
-          <img width="100" height="100" class src="/images/icon09.svg" alt />
+          <img width="90" height="90" class src="/images/icon09.svg" alt />
         </a>
       </div>
       <!-- 各種申請作成 -->
       <div class="p-4" v-if="get_isMenuselection(get_c038[13]['code'])">
         <a class href="/demand">
-          <img width="100" height="100" class src="/images/icon05.svg" alt />
+          <img width="90" height="90" class src="/images/icon05.svg" alt />
         </a>
       </div>
       <!-- 各種申請承認 -->
@@ -62,7 +62,7 @@
         v-if="get_isMenuselection(get_c038[14]['code']) && login_user_role >= get_c025[1]['code']"
       >
         <a class href="/approval">
-          <img width="100" height="100" class src="/images/icon06.svg" alt />
+          <img width="90" height="90" class src="/images/icon06.svg" alt />
         </a>
       </div>
       <!-- 承認者ルート設定 -->
@@ -71,7 +71,7 @@
         v-if="get_isMenuselection(get_c038[15]['code']) && login_user_role >= get_c025[1]['code']"
       >
         <a class href="/confirm">
-          <img width="100" height="100" class src="/images/icon07.svg" alt />
+          <img width="90" height="90" class src="/images/icon07.svg" alt />
         </a>
       </div>
       <!-- 会社設定 -->
@@ -80,7 +80,7 @@
         v-if="get_isMenuselection(get_c038[17]['code']) && login_user_role === get_c025[2]['code']"
       >
         <a class href="/create_company_information">
-          <img width="100" height="100" class src="/images/icon13.svg" alt />
+          <img width="90" height="90" class src="/images/icon13.svg" alt />
         </a>
       </div>
       <!-- 組織設定 -->
@@ -89,7 +89,7 @@
         v-if="get_isMenuselection(get_c038[18]['code']) && login_user_role === get_c025[2]['code']"
       >
         <a class href="/create_department">
-          <img width="100" height="100" class src="/images/icon14.svg" alt />
+          <img width="90" height="90" class src="/images/icon14.svg" alt />
         </a>
       </div>
       <!-- 雇用形態設定 -->
@@ -98,7 +98,7 @@
         v-if="get_isMenuselection(get_c038[19]['code']) && login_user_role === get_c025[2]['code']"
       >
         <a class href="/setting_employment">
-          <img width="100" height="100" class src="/images/icon21.svg" alt />
+          <img width="90" height="90" class src="/images/icon21.svg" alt />
         </a>
       </div>
       <!-- 労働時間基本設定 -->
@@ -107,7 +107,7 @@
         v-if="get_isMenuselection(get_c038[20]['code']) && login_user_role === get_c025[2]['code']"
       >
         <a class href="/setting_calc">
-          <img width="100" height="100" class src="/images/icon15.svg" alt />
+          <img width="90" height="90" class src="/images/icon15.svg" alt />
         </a>
       </div>
       <!-- 勤務帯時間設定 -->
@@ -116,7 +116,7 @@
         v-if="get_isMenuselection(get_c038[21]['code']) && login_user_role === get_c025[2]['code']"
       >
         <a class href="/create_time_table">
-          <img width="100" height="100" class src="/images/icon16.svg" alt />
+          <img width="90" height="90" class src="/images/icon16.svg" alt />
         </a>
       </div>
       <!-- カレンダー設定 -->
@@ -125,7 +125,7 @@
         v-if="get_isMenuselection(get_c038[22]['code']) && login_user_role === get_c025[2]['code']"
       >
         <a class href="/setting_calendar">
-          <img width="100" height="100" class src="/images/icon17.svg" alt />
+          <img width="90" height="90" class src="/images/icon17.svg" alt />
         </a>
       </div>
       <!-- ユーザー情報設定 -->
@@ -134,19 +134,19 @@
         v-if="get_isMenuselection(get_c038[23]['code']) && login_user_role === get_c025[2]['code']"
       >
         <a class href="/edit_user">
-          <img width="100" height="100" class src="/images/icon18.svg" alt />
+          <img width="90" height="90" class src="/images/icon18.svg" alt />
         </a>
       </div>
       <!-- パスワード変更 -->
       <div class="p-4" v-if="get_isMenuselection(get_c038[25]['code'])">
         <a class href="/user_pass">
-          <img width="100" height="100" class src="/images/icon11.svg" alt />
+          <img width="90" height="90" class src="/images/icon11.svg" alt />
         </a>
       </div>
       <!-- ダウンロード -->
       <div class="p-4" v-if="get_isMenuselection(get_c038[26]['code'])">
         <a class href="/file_download">
-          <img width="100" height="100" class src="/images/icon12.svg" alt />
+          <img width="90" height="90" class src="/images/icon12.svg" alt />
         </a>
       </div>
     </div>

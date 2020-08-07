@@ -411,7 +411,7 @@ class CalendarSettingInformation extends Model
     }
 
     /**
-     * 存在チェック
+     * 存在チェック（日付固定）
      *
      * @return boolean
      */
@@ -421,6 +421,49 @@ class CalendarSettingInformation extends Model
             if(!empty($this->paramfromdate)) {
                 $mainquery
                     ->where($this->table.'.date',$this->paramfromdate);
+            }
+            if(!empty($this->paramdepartmentcode)) {
+                $mainquery
+                    ->where($this->table.'.department_code',$this->paramdepartmentcode);
+            }
+            if(!empty($this->paramemploymentstatus)) {
+                $mainquery
+                    ->where($this->table.'.employment_status',$this->paramemploymentstatus);
+            }
+            if(!empty($this->paramusercode)) {
+                $mainquery
+                    ->where($this->table.'.user_code',$this->paramusercode);
+            }
+            $is_exists = $mainquery
+                ->where($this->table.'.is_deleted', 0)
+                ->exists();
+            return $is_exists;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 存在チェック（日付範囲）
+     *
+     * @return boolean
+     */
+    public function isExistsDate(){
+        try {
+            $mainquery = DB::table($this->table);
+            if(!empty($this->paramfromdate)) {
+                $mainquery
+                    ->where($this->table.'.date', '>=', $this->paramfromdate);
+            }
+            if(!empty($this->paramtodate)) {
+                $mainquery
+                    ->where($this->table.'.date', '<=', $this->paramtodate);
             }
             if(!empty($this->paramdepartmentcode)) {
                 $mainquery
@@ -1387,5 +1430,49 @@ class CalendarSettingInformation extends Model
         }
     
         return $data;
+    }
+
+    /**
+     * 更新（共通）
+     *
+     * @return boolean
+     */
+    public function updateCommon($array_update){
+        try {
+            $mainquery = DB::table($this->table);
+            if(!empty($this->paramfromdate)) {
+                $mainquery
+                    ->where($this->table.'.date', '>=', $this->paramfromdate);
+            }
+            if(!empty($this->paramtodate)) {
+                $mainquery
+                    ->where($this->table.'.date', '<=', $this->paramtodate);
+            }
+            if(!empty($this->paramdepartmentcode)) {
+                $mainquery
+                    ->where($this->table.'.department_code',$this->paramdepartmentcode);
+            }
+            if(!empty($this->paramemploymentstatus)) {
+                $mainquery
+                    ->where($this->table.'.employment_status',$this->paramemploymentstatus);
+            }
+            if(!empty($this->paramusercode)) {
+                $mainquery
+                    ->where($this->table.'.user_code',$this->paramusercode);
+            }
+            $result =$mainquery
+                ->where('is_deleted',0)
+                ->update($array_update);
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $result;
     }
 }

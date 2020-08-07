@@ -81,6 +81,45 @@ class CardInformation extends Model
         $this->systemdate = $value;
     }
 
+    // ------------- implements --------------
+
+    private $param_id;                          // id
+    private $param_department_code;             // 部署コード
+    private $param_user_code;                   // ユーザー
+
+    // id
+    public function getParamidAttribute()
+    {
+        return $this->param_id;
+    }
+
+    public function setParamidAttribute($value)
+    {
+        $this->param_id = $value;
+    }
+
+    // 部署コード
+    public function getParamdepartmentcodeAttribute()
+    {
+        return $this->param_department_code;
+    }
+
+    public function setParamdepartmentcodeAttribute($value)
+    {
+        $this->param_department_code = $value;
+    }
+
+    // ユーザー
+    public function getParamusercodeAttribute()
+    {
+        return $this->param_user_code;
+    }
+
+    public function setParamusercodeAttribute($value)
+    {
+        $this->param_user_code = $value;
+    }
+
 
     /**
      * カード情報を持たないユーザーを取得
@@ -122,6 +161,37 @@ class CardInformation extends Model
         return $data;
     }
 
+    /**
+     * 存在チェック
+     *
+     * @return boolean
+     */
+    public function isExists(){
+        try {
+            $mainquery = DB::table($this->table);
+            if(!empty($this->param_department_code)) {
+                $mainquery
+                    ->where($this->table.'.department_code',$this->param_department_code);
+            }
+            if(!empty($this->param_user_code)) {
+                $mainquery
+                    ->where($this->table.'.user_code',$this->param_user_code);
+            }
+            $is_exists = $mainquery
+                ->where($this->table.'.is_deleted', 0)
+                ->exists();
+            return $is_exists;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
     public function insertCardInfo(){
         try {
             // Log::debug('insertCardInfo $this->user_code = '.$this->user_code );
@@ -147,6 +217,38 @@ class CardInformation extends Model
             Log::error($e->getMessage());
             throw $e;
         }
+    }
+
+    /**
+     * 更新（共通）
+     *
+     * @return boolean
+     */
+    public function updateCommon($array_update){
+        try {
+            $mainquery = DB::table($this->table);
+            if(!empty($this->param_department_code)) {
+                $mainquery
+                    ->where($this->table.'.department_code',$this->param_department_code);
+            }
+            if(!empty($this->param_user_code)) {
+                $mainquery
+                    ->where($this->table.'.user_code',$this->param_user_code);
+            }
+            $result =$mainquery
+                ->where('is_deleted',0)
+                ->update($array_update);
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $result;
     }
 
 }

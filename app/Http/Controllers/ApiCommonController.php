@@ -452,11 +452,13 @@ class ApiCommonController extends Controller
                         $details = $mainQuery
                             ->where($this->table_users.'.kill_from_date', '>',$target_date)
                             ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.department_code','asc')
                             ->orderby($this->table_users.'.code','asc')
                             ->get();
                     } else {
                         $details = $mainQuery
                             ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.department_code','asc')
                             ->orderby($this->table_users.'.code','asc')
                             ->get();
                     }
@@ -479,11 +481,13 @@ class ApiCommonController extends Controller
                         $details = $mainQuery
                             ->where($this->table_users.'.kill_from_date', '>',$target_date)
                             ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.department_code','asc')
                             ->orderby($this->table_users.'.code','asc')
                             ->get();
                     } else {
                         $details = $mainQuery
                             ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.department_code','asc')
                             ->orderby($this->table_users.'.code','asc')
                             ->get();
                     }
@@ -508,11 +512,13 @@ class ApiCommonController extends Controller
                         $details = $mainQuery
                             ->where($this->table_users.'.kill_from_date', '>',$target_date)
                             ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.department_code','asc')
                             ->orderby($this->table_users.'.code','asc')
                             ->get();
                     } else {
                         $details = $mainQuery
                             ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.department_code','asc')
                             ->orderby($this->table_users.'.code','asc')
                             ->get();
                     }
@@ -534,10 +540,14 @@ class ApiCommonController extends Controller
                         $details = $mainQuery
                             ->where($this->table_users.'.kill_from_date', '>',$target_date)
                             ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.department_code','asc')
+                            ->orderby($this->table_users.'.code','asc')
                             ->get();
                     } else {
                         $details = $mainQuery
                             ->where($this->table_users.'.is_deleted', 0)
+                            ->orderby($this->table_users.'.department_code','asc')
+                            ->orderby($this->table_users.'.code','asc')
                             ->get();
                     }
                 }

@@ -537,8 +537,10 @@ class AttendanceLog extends Model
                 $mainquery
                     ->where('user_code', '=', $this->param_user_code);
             }
-            if(!empty($this->param_working_date_from) && !empty($this->param_working_date_to)){
+            if(!empty($this->param_working_date_from)){
                 $mainquery->where('working_date', '>=', $this->param_working_date_from);         // 日付範囲指定
+            }
+            if(!empty($this->param_working_date_to)){
                 $mainquery->where('working_date', '<=', $this->param_working_date_to);           // 日付範囲指定
             }
             if (!empty($this->param_event_mode)) {
@@ -655,6 +657,56 @@ class AttendanceLog extends Model
                 $mainquery->where('event_time', '=', $this->param_event_time);
             }
             $array_update = ['event_mode' => $this->event_mode, 'event_time' => $this->event_time ];
+            $result =$mainquery
+                ->where('is_deleted',0)
+                ->update($array_update);
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $result;
+    }
+
+    /**
+     * 更新（共通）
+     *
+     * @return boolean
+     */
+    public function updateCommon($array_update){
+        try {
+            $mainquery = DB::table($this->table);
+            if (!empty($this->param_department_code)) {
+                $mainquery
+                    ->where('department_code', '=', $this->param_department_code);
+            }
+            if (!empty($this->param_employment_status)) {
+                $mainquery
+                    ->where('employment_status', '=', $this->param_employment_status);
+            }
+            if (!empty($this->param_user_code)) {
+                $mainquery
+                    ->where('user_code', '=', $this->param_user_code);
+            }
+            if(!empty($this->param_working_date_from)){
+                $mainquery->where('working_date', '>=', $this->param_working_date_from);         // 日付範囲指定
+            }
+            if(!empty($this->param_working_date_to)){
+                $mainquery->where('working_date', '<=', $this->param_working_date_to);           // 日付範囲指定
+            }
+            if (!empty($this->param_event_mode)) {
+                $mainquery
+                    ->where('event_mode', '=', $this->param_event_mode);
+            }
+            if (!empty($this->param_event_time)) {
+                $mainquery
+                    ->where('event_time', '=', $this->param_event_time);
+            }
             $result =$mainquery
                 ->where('is_deleted',0)
                 ->update($array_update);

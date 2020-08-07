@@ -2110,6 +2110,7 @@ class TempWorkingTimeDate extends Model
             }
             $result = 
                 $mainquery
+                    ->where('t1.is_deleted', '=', 0)
                     ->where('t1.role', '<', Config::get('const.C017.admin_user'))
                     ->get();
 
