@@ -4174,5 +4174,131 @@ class WorkTime extends Model
 
     //     return $result;
     // }
+
+    /**
+     * worktime情報取得
+     *
+     * @return boolean
+     */
+    public function getDetails(){
+        try {
+            $mainquery = DB::table($this->table);
+            if (!empty($this->param_department_code)) {
+                $mainquery
+                    ->where('department_code', '=', $this->param_department_code);
+            }
+            if (!empty($this->param_user_code)) {
+                $mainquery
+                    ->where('user_code', '=', $this->param_user_code);
+            }
+            if(!empty($this->param_date_from)){
+                $mainquery->where('record_time', '>=', $this->param_date_from);         // 日付範囲指定
+            }
+            if(!empty($this->param_date_to)){
+                $mainquery->where('record_time', '<=', $this->param_date_to);           // 日付範囲指定
+            }
+            if (!empty($this->param_mode)) {
+                $mainquery
+                    ->where('mode', '=', $this->param_mode);
+            }
+            $result = $mainquery
+                ->where('is_deleted',0)
+                ->get();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $result;
+    }
+
+    /**
+     * 存在チェック
+     *
+     * @return boolean
+     */
+    public function isExist(){
+        try {
+            $mainquery = DB::table($this->table);
+            if (!empty($this->param_department_code)) {
+                $mainquery
+                    ->where('department_code', '=', $this->param_department_code);
+            }
+            if (!empty($this->param_user_code)) {
+                $mainquery
+                    ->where('user_code', '=', $this->param_user_code);
+            }
+            if(!empty($this->param_date_from)){
+                $mainquery->where('record_time', '>=', $this->param_date_from);         // 日付範囲指定
+            }
+            if(!empty($this->param_date_to)){
+                $mainquery->where('record_time', '<=', $this->param_date_to);           // 日付範囲指定
+            }
+            if (!empty($this->param_mode)) {
+                $mainquery
+                    ->where('mode', '=', $this->param_mode);
+            }
+            $is_exists =$mainquery
+                ->where('is_deleted',0)
+                ->exists();
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $is_exists;
+    }
+
+    /**
+     * 更新（共通）
+     *
+     * @return boolean
+     */
+    public function updateCommon($array_update){
+        try {
+            $mainquery = DB::table($this->table);
+            if (!empty($this->param_department_code)) {
+                $mainquery
+                    ->where('department_code', '=', $this->param_department_code);
+            }
+            if (!empty($this->param_user_code)) {
+                $mainquery
+                    ->where('user_code', '=', $this->param_user_code);
+            }
+            if(!empty($this->param_date_from)){
+                $mainquery->where('record_time', '>=', $this->param_date_from);         // 日付範囲指定
+            }
+            if(!empty($this->param_date_to)){
+                $mainquery->where('record_time', '<=', $this->param_date_to);           // 日付範囲指定
+            }
+            if (!empty($this->param_mode)) {
+                $mainquery
+                    ->where('mode', '=', $this->param_mode);
+            }
+            $result =$mainquery
+                ->where('is_deleted',0)
+                ->update($array_update);
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $result;
+    }
     
 }

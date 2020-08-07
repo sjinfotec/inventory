@@ -611,6 +611,12 @@ class MonthlyWorkingInformationController extends Controller
                 if ($before_user_code == null) {$before_user_code = $current_user_code;}
                 if ($before_date == null) {$before_date = $current_date;}
                 if ($before_result == null) {$before_result = $result;}
+                // // ユーザーが部署・雇用形態変更になった場合の対処で
+                // // 部署・雇用形態は常に同じとする
+                // if ($current_user_code == $before_user_code) {
+                //     $before_employment_status = $current_employment_status;
+                //     $before_department_code = $current_department_code;
+                // }
                 // 同じキーの場合
                 if ($current_employment_status == $before_employment_status &&
                     $current_department_code == $before_department_code &&
@@ -629,9 +635,12 @@ class MonthlyWorkingInformationController extends Controller
                     Log::debug('ユーザーが変わった $before_date = '.$before_date);
                     // 個人合計労働時間の集計を取得する
                     // 労働時間の集計用パラメータは個人の情報に設定する。日付はmakeDateFromToで設定済み
-                    $workingtimedate_model->setParamEmploymentStatusAttribute($before_employment_status);
-                    $workingtimedate_model->setParamDepartmentcodeAttribute($before_department_code);
+                    // ユーザーが部署・雇用形態変更になった場合の対処でnull
+                    // $workingtimedate_model->setParamEmploymentStatusAttribute($before_employment_status);
+                    // $workingtimedate_model->setParamDepartmentcodeAttribute($before_department_code);
                     $workingtimedate_model->setParamUsercodeAttribute($before_user_code);
+                    $workingtimedate_model->setParamEmploymentStatusAttribute(null);
+                    $workingtimedate_model->setParamDepartmentcodeAttribute(null);
                     $working_time_sum = $workingtimedate_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
                     Log::debug('ユーザーが変わった $working_time_sum = '.count($working_time_sum));
                     // this->array_userの設定
@@ -654,8 +663,11 @@ class MonthlyWorkingInformationController extends Controller
                     Log::debug('部署が変わった $$before_result->user_name = '.$before_result->user_name);
                     // 個人合計労働時間の集計を取得する
                     // 労働時間の集計用パラメータは個人の情報に設定する。日付はmakeDateFromToで設定済み
-                    $workingtimedate_model->setParamEmploymentStatusAttribute($before_employment_status);
-                    $workingtimedate_model->setParamDepartmentcodeAttribute($before_department_code);
+                    // ユーザーが部署・雇用形態変更になった場合の対処でnull
+                    // $workingtimedate_model->setParamEmploymentStatusAttribute($before_employment_status);
+                    // $workingtimedate_model->setParamDepartmentcodeAttribute($before_department_code);
+                    $workingtimedate_model->setParamEmploymentStatusAttribute(null);
+                    $workingtimedate_model->setParamDepartmentcodeAttribute(null);
                     $workingtimedate_model->setParamUsercodeAttribute($before_user_code);
                     $working_time_sum = $workingtimedate_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
                     // this->array_userの設定
@@ -679,8 +691,11 @@ class MonthlyWorkingInformationController extends Controller
                     Log::debug('勤務形態が変わった $$before_result->user_name = '.$before_result->user_name);
                     // 個人合計労働時間の集計を取得する
                     // 労働時間の集計用パラメータは個人の情報に設定する。日付はmakeDateFromToで設定済み
-                    $workingtimedate_model->setParamEmploymentStatusAttribute($before_employment_status);
-                    $workingtimedate_model->setParamDepartmentcodeAttribute($before_department_code);
+                    // ユーザーが部署・雇用形態変更になった場合の対処でnull
+                    // $workingtimedate_model->setParamEmploymentStatusAttribute($before_employment_status);
+                    // $workingtimedate_model->setParamDepartmentcodeAttribute($before_department_code);
+                    $workingtimedate_model->setParamEmploymentStatusAttribute(null);
+                    $workingtimedate_model->setParamDepartmentcodeAttribute(null);
                     $workingtimedate_model->setParamUsercodeAttribute($before_user_code);
                     $working_time_sum = $workingtimedate_model->getWorkingTimeDateTimeSum(Config::get('const.WORKINGTIME_DAY_OR_MONTH.monthly_basic'));
                     // this->array_userの設定
@@ -703,8 +718,11 @@ class MonthlyWorkingInformationController extends Controller
             if (count($array_date_time) > 0) {
                 // 個人合計労働時間の集計を取得する
                 // 労働時間の集計用パラメータは個人の情報に設定する。日付はmakeDateFromToで設定済み
-                $workingtimedate_model->setParamEmploymentStatusAttribute($current_employment_status);
-                $workingtimedate_model->setParamDepartmentcodeAttribute($current_department_code);
+                // ユーザーが部署・雇用形態変更になった場合の対処でnull
+                // $workingtimedate_model->setParamEmploymentStatusAttribute($current_employment_status);
+                // $workingtimedate_model->setParamDepartmentcodeAttribute($current_department_code);
+                $workingtimedate_model->setParamEmploymentStatusAttribute(null);
+                $workingtimedate_model->setParamDepartmentcodeAttribute(null);
                 $workingtimedate_model->setParamUsercodeAttribute($current_user_code);
                 Log::debug('残り $current_employment_status = '.$current_employment_status);
                 Log::debug('残り $current_department_code = '.$current_department_code);

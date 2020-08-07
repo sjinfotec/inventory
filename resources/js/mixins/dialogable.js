@@ -39,6 +39,7 @@ export const dialogable = {
         ) {
             this.messagedata = this.arrayTostring(arrayMessage);
             let self = this;
+            // html: '<p style="text-align: left">' + self.messagedata + '</p>',
             return new Promise(function(resolve, reject) {
                 self.$swal({
                     title: title,
@@ -46,6 +47,7 @@ export const dialogable = {
                     icon: icon,
                     showCancelButton: showCancelButton,
                     showConfirmButton: showConfirmButton,
+                    width: "42rem",
                     allowOutsideClick: false, //枠外をクリックしても画面を閉じない
                 }).then(result => {
                     resolve(result.value);

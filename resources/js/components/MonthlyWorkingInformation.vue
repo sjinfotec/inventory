@@ -604,8 +604,8 @@ export default {
     this.valuefromdate = new Date(defaultfromDate);
     this.valuetodate = new Date(defaulttoDate);
     this.applytermdate = ""
-    if (this.valuefromdate) {
-      this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+    if (this.valuetodate) {
+      this.applytermdate = moment(this.valuetodate).format("YYYYMMDD");
     }
     // this.$refs.selectdepartmentlist.getList(this.applytermdate);
     // this.getUserSelected();
@@ -766,17 +766,26 @@ export default {
       this.valuetodate = moment(this.valuefromdate).add(1, 'months').subtract(1, 'days').toDate();
       // パネルに表示
       this.setPanelHeader();
-      // 再取得
-      this.applytermdate = ""
-      if (this.valuefromdate) {
-          this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
-      }
-      this.$refs.selectdepartmentlist.getList(this.applytermdate);
-      this.getUserSelected();
     },
     // 開始日付がクリアされた場合の処理
     fromdateCleared: function() {
       this.valuefromdate = "";
+      // パネルに表示
+      this.setPanelHeader();
+    },
+    // 終了日付が変更された場合の処理
+    todateChanges: function(value, arrayitem) {
+      this.valuetodate = value;
+      // パネルに表示
+      this.setPanelHeader();
+      // 再取得
+      this.applytermdate = moment(new Date()).format("YYYYMMDD");
+      this.$refs.selectdepartmentlist.getList(this.applytermdate);
+      this.getUserSelected();
+    },
+    // 終了日付がクリアされた場合の処理
+    todateCleared: function() {
+      this.valuetodate = "";
       // パネルに表示
       this.setPanelHeader();
       // 再取得
@@ -785,31 +794,23 @@ export default {
       this.getUserSelected();
       this.applytermdate = "";
     },
-    // 終了日付が変更された場合の処理
-    todateChanges: function(value, arrayitem) {
-      this.valuetodate = value;
-      // パネルに表示
-      this.setPanelHeader();
-    },
-    // 終了日付がクリアされた場合の処理
-    todateCleared: function() {
-      this.valuetodate = "";
-      // パネルに表示
-      this.setPanelHeader();
-    },
     // 雇用形態が変更された場合の処理
     employmentChanges: function(value) {
       this.selectedEmploymentValue = value;
       this.getDo = 1;
       // ユーザー選択コンポーネントの取得メソッドを実行
+      this.selectedUserValue = "";
       this.getUserSelected();
+      this.refreshshowuserlist();
     },
     // 部署選択が変更された場合の処理
     departmentChanges: function(value, arrayitem) {
       this.selectedDepartmentValue = value;
       // ユーザー選択コンポーネントの取得メソッドを実行
       this.getDo = 1;
+      this.selectedUserValue = "";
       this.getUserSelected();
+      this.refreshshowuserlist();
     },
     // ユーザー選択が変更された場合の処理
     userChanges: function(value) {
@@ -916,8 +917,8 @@ export default {
     getUserSelected: function() {
       // 再取得
       this.applytermdate = ""
-      if (this.valuefromdate) {
-          this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
+      if (this.valuetodate) {
+          this.applytermdate = moment(this.valuetodate).format("YYYYMMDD");
       }
       this.$refs.selectuserlist.getList(
         this.applytermdate,
@@ -949,26 +950,25 @@ export default {
     },
     // データ編集処理
     setData(res) {
-      console.log('setData');
       if (this.resresults.calcresults != null) {
-        console.log('calcresults != null ');
         this.calcresults = this.resresults.calcresults;
-        console.log('Object.keys(this.calcresults).length' + Object.keys(this.calcresults).length);
         if (Object.keys(this.calcresults).length > 0) {
           this.iscsvbutton = false;
           this.isswitchvisible = true;
         }
       }
       if (this.resresults.sumresults != null) {
-        console.log('sumresults != null ');
         this.sumresults = this.resresults.sumresults;
       }
       this.company_name = this.resresults.company_name;
       if (this.resresults.messagedata.length == 0) {
         this.serchorshow = "show";
       } else {
-        console.log('messagedata ');
-        this.htmlMessageSwal("エラー", this.resresults.messagedata, "error", true, false);
+        var messages = [];
+        for(var i=0 ; i < this.resresults.messagedata.length; i++) {
+          messages.push(this.resresults.messagedata[i].message);
+        }
+        this.htmlMessageSwal("エラー", messages, "error", true, false);
         this.serchorshow = "search";
       }
       this.issearchbutton = false;
@@ -1039,7 +1039,12 @@ export default {
       }
       this.datejaFormat = fromtext + totext;
       this.stringtext = this.datejaFormat + "分を集計";
-    }
+    },
+    refreshshowuserlist() {
+      // 最新リストの表示
+      this.showuserlist = false;
+      this.$nextTick(() => (this.showuserlist = true));
+    },
   }
 };
 </script>

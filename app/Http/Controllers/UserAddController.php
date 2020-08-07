@@ -14,7 +14,12 @@ use App\Department;
 use App\WorkingTimeTable;
 use App\GeneralCodes;
 use App\CalendarSettingInformation;
-use App\ShiftInformation;
+use App\CardInformation;
+use App\WorkTime;
+use App\WorkTimeLog;
+use App\WorkingTimedate;
+// use App\ShiftInformation;
+use App\AttendanceLog;
 use Carbon\Carbon;
 use App\Http\Controllers\ApiCommonController;
 use App\Http\Controllers\SttingShiftTimeController;
@@ -248,8 +253,17 @@ class UserAddController extends Controller
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
+            if (!isset($params['before_details'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "before_details", Config::get('const.LOG_MSG.parameter_illegal')));
+                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+                return response()->json(
+                    ['result' => false,
+                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+                );
+            }
             $details = $params['details'];
-            $this->update($details);
+            $before_details = $params['before_details'];
+            $this->update($details, $before_details);
             return response()->json(
                 ['result' => true,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
@@ -274,87 +288,87 @@ class UserAddController extends Controller
      * @param Request $request
      * @return response
      */
-    public function fixTimeTable(Request $request){
-        $this->array_messagedata = array();
-        $details = array();
-        $result = true;
-        try {
-            // パラメータチェック
-            $params = array();
-            if (!isset($request->keyparams)) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $params = $request->keyparams;
-            if (!isset($params['datefrom'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "datefrom", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            if (!isset($params['dateto'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "dateto", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            if (!isset($params['details'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
-            }
-            $datefrom = $params['datefrom'];
-            $dateto = $params['dateto'];
-            $department_code = null;
-            if (isset($params['department_code'])) {
-                if ($params['department_code'] != "") {
-                    $department_code = $params['department_code'];
-                }
-            }
-            $user_code = null;
-            if (isset($params['user_code'])) {
-                if ($params['user_code'] != "") {
-                    $user_code = $params['user_code'];
-                }
-            }
-            $details = $params['details'];
-            // updateTimetable implement
-            $array_impl_updateTimetable = array (
-                'datefrom' => $datefrom,
-                'dateto' => $dateto,
-                'department_code' => $department_code,
-                'user_code' => $user_code,
-                'details' => $details
-            );
-            $this->updateTimetable($array_impl_updateTimetable);
-            return response()->json(
-                ['result' => true,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\PDOException $pe){
-            return response()->json(
-                ['result' => false,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }catch(\Exception $e){
-            Log::error($e->getMessage());
-            return response()->json(
-                ['result' => false,
-                Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-            );
-        }
-    }
+    // public function fixTimeTable(Request $request){
+    //     $this->array_messagedata = array();
+    //     $details = array();
+    //     $result = true;
+    //     try {
+    //         // パラメータチェック
+    //         $params = array();
+    //         if (!isset($request->keyparams)) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "keyparams", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         $params = $request->keyparams;
+    //         if (!isset($params['datefrom'])) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "datefrom", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         if (!isset($params['dateto'])) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "dateto", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         if (!isset($params['details'])) {
+    //             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
+    //             $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+    //             return response()->json(
+    //                 ['result' => false,
+    //                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //             );
+    //         }
+    //         $datefrom = $params['datefrom'];
+    //         $dateto = $params['dateto'];
+    //         $department_code = null;
+    //         if (isset($params['department_code'])) {
+    //             if ($params['department_code'] != "") {
+    //                 $department_code = $params['department_code'];
+    //             }
+    //         }
+    //         $user_code = null;
+    //         if (isset($params['user_code'])) {
+    //             if ($params['user_code'] != "") {
+    //                 $user_code = $params['user_code'];
+    //             }
+    //         }
+    //         $details = $params['details'];
+    //         // updateTimetable implement
+    //         $array_impl_updateTimetable = array (
+    //             'datefrom' => $datefrom,
+    //             'dateto' => $dateto,
+    //             'department_code' => $department_code,
+    //             'user_code' => $user_code,
+    //             'details' => $details
+    //         );
+    //         $this->updateTimetable($array_impl_updateTimetable);
+    //         return response()->json(
+    //             ['result' => true,
+    //             Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //         );
+    //     }catch(\PDOException $pe){
+    //         return response()->json(
+    //             ['result' => false,
+    //             Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //         );
+    //     }catch(\Exception $e){
+    //         Log::error($e->getMessage());
+    //         return response()->json(
+    //             ['result' => false,
+    //             Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+    //         );
+    //     }
+    // }
 
     /**
      * UPDATE
@@ -362,7 +376,7 @@ class UserAddController extends Controller
      * @param [type] $details
      * @return boolean
      */
-    private function update($data){
+    private function update($data, $before_data){
         $systemdate = Carbon::now();
         $user = Auth::user();
         $user_code = $user->code;
@@ -393,17 +407,55 @@ class UserAddController extends Controller
             $user_model->setCreateduserAttribute($user_code);
             $user_model->setManagementAttribute($data['management']);
             $user_model->setRoleAttribute($data['role']);
+            $isUpdateDepartment = false;
+            $isUpdateEmployment = false;
             if ($data['id'] == "" || $data['id'] == null) {
                 $user_model->setCreateduserAttribute($user_code);
                 $user_model->setCreatedatAttribute($systemdate);
                 // Log::debug('update password = '.$data['code']);
                 $user_model->setPasswordAttribute(bcrypt($data['code']));
                 $user_model->insertNewUser();
+                $isUpdateDepartment = true;
+                $isUpdateEmployment = true;
             } else {
                 $user_model->setIdAttribute($data['id']);   
                 $user_model->setUpdateduserAttribute($user_code);
                 $user_model->setUpdatedatAttribute($systemdate);
                 $user_model->updateUser();
+                $updateapplytermfrom = null;
+                $updateDepartment = null;
+                $updateEmployment = null;
+                $before_updateapplytermfrom = null;
+                $before_updateDepartment = null;
+                $before_updateEmployment = null;
+                if ($data['apply_term_from'] != null && $data['apply_term_from'] != "") { $updateapplytermfrom = $data['apply_term_from']; }
+                if ($before_data['apply_term_from'] != null && $before_data['apply_term_from'] != "") { $before_updateapplytermfrom = $before_data['apply_term_from']; }
+                if ($data['department_code'] != null && $data['department_code'] != "") { $updateDepartment = $data['department_code']; }
+                if ($before_data['department_code'] != null && $before_data['department_code'] != "") { $before_updateDepartment = $before_data['department_code']; }
+                if ($data['employment_status'] != null && $data['employment_status'] != "") { $updateEmployment = $data['employment_status']; }
+                if ($before_data['employment_status'] != null && $before_data['employment_status'] != "") { $before_updateEmployment = $before_data['employment_status']; }
+                if ($updateapplytermfrom != $before_updateapplytermfrom) {
+                    $isUpdateDepartment = true;
+                    $isUpdateEmployment = true;
+                } else {
+                    if ($updateDepartment != $before_updateDepartment) {
+                        $isUpdateDepartment = true;
+                    }
+                    if ($updateEmployment != $before_updateEmployment) {
+                        $isUpdateEmployment = true;
+                    }
+                }
+            }
+            // 部署・雇用形態変更ありの場合
+            if ($isUpdateDepartment || $isUpdateEmployment) {
+                // upDepartmentEmployment implement
+                $array_impl_upDepartmentEmployment = array (
+                    'isUpdateDepartment' => $isUpdateDepartment,
+                    'isUpdateEmployment' => $isUpdateEmployment,
+                    'details' => $data,
+                    'before_details' => $before_data
+                );
+                $this->upDepartmentEmployment($array_impl_upDepartmentEmployment);
             }
             DB::commit();
 
@@ -424,65 +476,65 @@ class UserAddController extends Controller
      * @param [type] $details
      * @return boolean
      */
-    private function updateTimetable($params){
-        $datefrom = $params['datefrom'];
-        $dateto = $params['dateto'];
-        $department_code = $params['department_code'];
-        $user_code = $params['user_code'];
-        $details = $params['details'];
-        $systemdate = Carbon::now();
-        $user = Auth::user();
-        $login_user_code = $user->code;
-        DB::beginTransaction();
-        try{
-            // ユーザー情報のテーブルNOを変更
-            if ($details['timeptn'] == Config::get('const.C041.timetable_batch')) {
-                $user_model = new UserModel();
-                $user_model->setParamcodeAttribute($user_code);
-                $user_model->setParamdepartmentcodeAttribute($department_code);
-                $user_model->setWorkingtimetablenoAttribute($details['timeptn_timetable']);
-                $user_model->setUpdateduserAttribute($login_user_code);
-                $user_model->setUpdatedatAttribute($systemdate);
-                $user_model->updateTimeTableNo();
-            }
-            // ユーザーシフト情報を登録する
-            // 期間内のシフト情報を論理削除する
-            $shift_model = new ShiftInformation();
-            $shift_model->setParamusercodeAttribute($user_code);
-            $shift_model->setParamdepartmentcodeAttribute($department_code);
-            $shift_model->setParamfromdateAttribute($datefrom);
-            $shift_model->setParamtodateAttribute($dateto);
-            $shift_model->setUpdatedatAttribute($systemdate);
-            $shift_model->delShiftInfoIsdelete();
-            // 期間内のシフト情報を曜日ごとに登録する
-            if ($details['timeptn'] == Config::get('const.C041.timetable_week')) {
-                $settingshift_model = new SttingShiftTimeController();
-                $apicommon_model = new ApiCommonController();
-                $user_data = $apicommon_model->getUserInfo($datefrom, $user_code, $department_code, null);
-                foreach($user_data as $item) {
-                    // updateTimetable implement
-                    $array_impl_insertWeek = array (
-                        'datefrom' => $datefrom,
-                        'dateto' => $dateto,
-                        'department_code' => $item->department_code,
-                        'user_code' => $item->code,
-                        'details' => $details
-                    );
-                    $settingshift_model->insertWeek($array_impl_insertWeek);
-                }
-            }
-            DB::commit();
+    // private function updateTimetable($params){
+    //     $datefrom = $params['datefrom'];
+    //     $dateto = $params['dateto'];
+    //     $department_code = $params['department_code'];
+    //     $user_code = $params['user_code'];
+    //     $details = $params['details'];
+    //     $systemdate = Carbon::now();
+    //     $user = Auth::user();
+    //     $login_user_code = $user->code;
+    //     DB::beginTransaction();
+    //     try{
+    //         // ユーザー情報のテーブルNOを変更
+    //         if ($details['timeptn'] == Config::get('const.C041.timetable_batch')) {
+    //             $user_model = new UserModel();
+    //             $user_model->setParamcodeAttribute($user_code);
+    //             $user_model->setParamdepartmentcodeAttribute($department_code);
+    //             $user_model->setWorkingtimetablenoAttribute($details['timeptn_timetable']);
+    //             $user_model->setUpdateduserAttribute($login_user_code);
+    //             $user_model->setUpdatedatAttribute($systemdate);
+    //             $user_model->updateTimeTableNo();
+    //         }
+    //         // ユーザーシフト情報を登録する
+    //         // 期間内のシフト情報を論理削除する
+    //         $shift_model = new ShiftInformation();
+    //         $shift_model->setParamusercodeAttribute($user_code);
+    //         $shift_model->setParamdepartmentcodeAttribute($department_code);
+    //         $shift_model->setParamfromdateAttribute($datefrom);
+    //         $shift_model->setParamtodateAttribute($dateto);
+    //         $shift_model->setUpdatedatAttribute($systemdate);
+    //         $shift_model->delShiftInfoIsdelete();
+    //         // 期間内のシフト情報を曜日ごとに登録する
+    //         if ($details['timeptn'] == Config::get('const.C041.timetable_week')) {
+    //             $settingshift_model = new SttingShiftTimeController();
+    //             $apicommon_model = new ApiCommonController();
+    //             $user_data = $apicommon_model->getUserInfo($datefrom, $user_code, $department_code, null);
+    //             foreach($user_data as $item) {
+    //                 // insertWeek implement
+    //                 $array_impl_insertWeek = array (
+    //                     'datefrom' => $datefrom,
+    //                     'dateto' => $dateto,
+    //                     'department_code' => $item->department_code,
+    //                     'user_code' => $item->code,
+    //                     'details' => $details
+    //                 );
+    //                 $settingshift_model->insertWeek($array_impl_insertWeek);
+    //             }
+    //         }
+    //         DB::commit();
 
-        }catch(\PDOException $pe){
-            DB::rollBack();
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "users shift_informations", Config::get('const.LOG_MSG.data_access_error')));
-            Log::error($e->getMessage());
-            DB::rollBack();
-            throw $e;
-        }
-    }
+    //     }catch(\PDOException $pe){
+    //         DB::rollBack();
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "users shift_informations", Config::get('const.LOG_MSG.data_access_error')));
+    //         Log::error($e->getMessage());
+    //         DB::rollBack();
+    //         throw $e;
+    //     }
+    // }
 
     /**
      * ユーザー削除
@@ -506,26 +558,41 @@ class UserAddController extends Controller
                 );
             }
             $params = $request->keyparams;
-            if (!isset($params['id'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "id", Config::get('const.LOG_MSG.parameter_illegal')));
+            if (!isset($params['details'])) {
+                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "details", Config::get('const.LOG_MSG.parameter_illegal')));
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
                 return response()->json(
                     ['result' => false,
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
-            $id = $params['id'];
+            $details = $params['details'];
+            $id = $details['id'];
+            DB::beginTransaction();
+            // ユーザー履歴削除
             $this->updateIsDelete($id);
+            // ほかのテーブルの部署・雇用形態を戻す
+            // upDepartmentEmploymentTableBefore implement
+            $array_impl_upDepartmentEmploymentTableBefore = array (
+                'isUpdateDepartment' => true,
+                'isUpdateEmployment' => true,
+                'isDelete' => true,
+                'details' => $details
+            );
+            $this->upDepartmentEmploymentTableBefore($array_impl_upDepartmentEmploymentTableBefore);
+            DB::commit();
         
             return response()->json(
                 ['result' => $result,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
         }catch(\PDOException $pe){
+            DB::rollBack();
             throw $pe;
         }catch(\Exception $e){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
             Log::error($e->getMessage());
+            DB::rollBack();
             throw $e;
         }
     }
@@ -536,20 +603,16 @@ class UserAddController extends Controller
      * @param [type] $code
      * @return void
      */
-    public function updateIsDelete($id){
+    private function updateIsDelete($id){
         $users = new UserModel();
         $users->setIdAttribute($id);
         
-        DB::beginTransaction();
         try{
             $users->updateIsDelete();
-            DB::commit();
 
         }catch(\PDOException $pe){
-            DB::rollBack();
             throw $pe;
         }catch(\Exception $e){
-            DB::rollBack();
             Log::error($e->getMessage());
             throw $e;
         }
@@ -818,6 +881,855 @@ class UserAddController extends Controller
         }catch(\Exception $e){
             DB::rollBack();
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 部署雇用形態更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDepartmentEmployment($params){
+        $isUpdateDepartment = $params['isUpdateDepartment'];
+        $isUpdateEmployment = $params['isUpdateEmployment'];
+        $details = $params['details'];
+        $before_details = $params['before_details'];
+        $systemdate = Carbon::now();
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        try{
+            $department_code = null;
+            $employment_status = null;
+            $array_update = array();
+            if ($isUpdateDepartment) {
+                $department_code = $details['department_code'];
+                $array_update = array_merge($array_update, ['department_code' => $department_code]);
+            }
+            if ($isUpdateEmployment) {
+                $employment_status = $details['employment_status'];
+                $array_update = array_merge($array_update, ['employment_status' => $employment_status]);
+            }
+            // update項目があるか
+            if (count($array_update) > 0) {
+                $array_update = array_merge($array_update, ['updated_user' => $login_user_code]);
+                $array_update = array_merge($array_update, ['updated_at' => $systemdate]);
+                // 各テーブル部署雇用形態更新
+                // upDepartmentEmploymentTable implement
+                $array_impl_upDepartmentEmploymentTable = array (
+                    'isUpdateDepartment' => $isUpdateDepartment,
+                    'isUpdateEmployment' => $isUpdateEmployment,
+                    'details' => $details,
+                    'before_details' => $before_details,
+                    'array_update' => $array_update
+                );
+                $this->upDepartmentEmploymentTable($array_impl_upDepartmentEmploymentTable);
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "users", Config::get('const.LOG_MSG.data_access_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 各テーブル部署雇用形態更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDepartmentEmploymentTable($params){
+        $isUpdateDepartment = $params['isUpdateDepartment'];
+        $isUpdateEmployment = $params['isUpdateEmployment'];
+        $details = $params['details'];
+        $before_details = $params['before_details'];
+        $array_update = $params['array_update'];
+        $applyfrom = new Carbon($details['apply_term_from']);
+        $applyfromYmd = $applyfrom->format('Ymd');
+        $w_minus1_applyfromYmd = date_format($applyfrom->copy()->subDay(), 'Ymd');
+        try{
+            // upDETable implement
+            $array_impl_upDETable = array (
+                'details' => $details,
+                'array_update' => $array_update
+            );
+            // attendance_logsの更新
+            $this->upDEAttendancelogsTable($array_impl_upDETable);
+            // calendar_setting_informationsの更新
+            $this->upDECalendarsettinginformationsTable($array_impl_upDETable);
+            // card_informationsの更新
+            $this->upDECardinformationsTable($array_impl_upDETable);
+            // work_time_logsの更新
+            $this->upDEWorktimelogsTable($array_impl_upDETable);
+            // work_timeの更新
+            $this->upDEWorktimeTable($array_impl_upDETable);
+            // working_time_datesの更新
+            $this->upDEWorkingtimedatesTable($array_impl_upDETable);
+
+            // 修正時：修正前の適用日付＜修正後の適用日付の場合、
+            //        修正前の適用日付から修正後の適用日付－１日までを以前の状態に戻す
+            if (count($before_details) > 0) {
+                $before_applyfrom = new Carbon($before_details['apply_term_from']);
+                $before_applyfromYmd = $before_applyfrom->format('Ymd');
+                if ($before_applyfromYmd < $applyfromYmd) {
+                    // 以前の状態に戻す
+                    // upDepartmentEmploymentTableBefore implement
+                    $array_impl_upDepartmentEmploymentTableBefore = array (
+                        'isUpdateDepartment' => $isUpdateDepartment,
+                        'isUpdateEmployment' => $isUpdateEmployment,
+                        'isDelete' => false,
+                        'details' => $details
+                    );
+                    $this->upDepartmentEmploymentTableBefore($array_impl_upDepartmentEmploymentTableBefore);
+                }
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "users", Config::get('const.LOG_MSG.data_access_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * attendance_logsテーブル部署雇用形態更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDEAttendancelogsTable($params){
+        $details = $params['details'];
+        $array_update = $params['array_update'];
+        $applyfrom = new Carbon($details['apply_term_from']);
+        $applyfromYmd = $applyfrom->format('Ymd');
+        try{
+            // attendance_logsの更新
+            $attendancelog_model = new AttendanceLog();
+            $attendancelog_model->setParamusercodeAttribute($details['code']);
+            $attendancelog_model->setParamworkingdatefromAttribute($applyfromYmd);
+            $res = $attendancelog_model->isExist();
+            if ($res) {
+                $attendancelog_model->updateCommon($array_update);
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "attendance_logs", Config::get('const.LOG_MSG.data_access_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * calendar_setting_informationsテーブル部署雇用形態更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDECalendarsettinginformationsTable($params){
+        $details = $params['details'];
+        $array_update = $params['array_update'];
+        $applyfrom = new Carbon($details['apply_term_from']);
+        $applyfromYmd = $applyfrom->format('Ymd');
+        try{
+            // acalendar_setting_informationsの更新
+            $calendarsetting_model = new CalendarSettingInformation();
+            $calendarsetting_model->setParamusercodeAttribute($details['code']);
+            $calendarsetting_model->setParamfromdateAttribute($applyfromYmd);
+            $res = $calendarsetting_model->isExistsDate();
+            if ($res) {
+                $calendarsetting_model->updateCommon($array_update);
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "calendar_setting_informations", Config::get('const.LOG_MSG.data_access_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * card_informationsテーブル部署雇用形態更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDECardinformationsTable($params){
+        $details = $params['details'];
+        $array_update = $params['array_update'];
+        // 雇用形態削除
+        unset($array_update['employment_status']);
+        $applyfrom = new Carbon($details['apply_term_from']);
+        $applyfromYmd = $applyfrom->format('Ymd');
+        try{
+            // card_informationsの更新
+            $card_model = new CardInformation();
+            $card_model->setParamusercodeAttribute($details['code']);
+            $res = $card_model->isExists();
+            if ($res) {
+                $card_model->updateCommon($array_update);
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "card_informations", Config::get('const.LOG_MSG.data_access_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * work_time_logsテーブル部署雇用形態更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDEWorktimelogsTable($params){
+        $details = $params['details'];
+        $array_update = $params['array_update'];
+        $applyfrom = new Carbon($details['apply_term_from']);
+        $applyfromYmd = $applyfrom->format('Ymd');
+        $w_plus1_applyfromYmd = date_format($applyfrom->copy()->addDay(), 'Ymd');
+        try{
+            // work_time_logsのapplyfrom以降の出勤データを取得し開始時刻にする
+            $worktimelog_model = new WorkTimeLog();
+            $worktimelog_model->setParamusercodeAttribute($details['code']);
+            $worktimelog_model->setParamrecordtimefromAttribute($applyfrom);
+            $worktimelog_model->setParammodeAttribute(Config::get('const.C005.attendance_time'));
+            $result_record_time1 = null;
+            $results = $worktimelog_model->getDetails();
+            foreach($results as $item) {
+                if (isset($item->record_time)) {
+                    $result_record_time1 = $item->record_time;
+                    break;
+                }
+            }
+            // work_time_logsのapplyfrom以降の出勤データがない場合も想定し翌日以降の打刻を取得し比較して開始時刻にする
+            $worktimelog_model->setParamusercodeAttribute($details['code']);
+            $worktimelog_model->setParamrecordtimefromAttribute($w_plus1_applyfromYmd);
+            $worktimelog_model->setParammodeAttribute(null);
+            $result_record_time2 = null;
+            $results = $worktimelog_model->getDetails();
+            foreach($results as $item) {
+                if (isset($item->record_time)) {
+                    $result_record_time2 = $item->record_time;
+                    break;
+                }
+            }
+            $from_record_time = null;
+            if ($result_record_time1 != null && $result_record_time1 != "") {
+                if ($result_record_time2 != null && $result_record_time2 != "") {
+                    if ($result_record_time1 < $result_record_time2) {
+                        $from_record_time = $result_record_time1;
+                    } else {
+                        $from_record_time = $result_record_time2;
+                    }
+                } else {
+                    $from_record_time = $result_record_time1;
+                }
+            } else {
+                if ($result_record_time2 != null && $result_record_time2 != "") {
+                    $from_record_time = $result_record_time2;
+                }
+            }
+            // データが存在した場合
+            if ($from_record_time != null) {
+                // work_time_logsの更新
+                $worktimelog_model->setParamusercodeAttribute($details['code']);
+                $worktimelog_model->setParamrecordtimefromnoneditAttribute($from_record_time);
+                $worktimelog_model->setParammodeAttribute(null);
+                $worktimelog_model->updateCommon($array_update);
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "work_time_logs", Config::get('const.LOG_MSG.data_access_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * work_timeテーブル部署雇用形態更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDEWorktimeTable($params){
+        $details = $params['details'];
+        $array_update = $params['array_update'];
+        // 雇用形態削除
+        unset($array_update['employment_status']);
+        $applyfrom = new Carbon($details['apply_term_from']);
+        $applyfromYmd = $applyfrom->format('Ymd');
+        $w_plus1_applyfromYmd = date_format($applyfrom->copy()->addDay(), 'Ymd');
+        try{
+            // work_timeのapplyfrom以降の出勤データを取得し開始時刻にする
+            $worktime_model = new WorkTime();
+            $worktime_model->setParamUsercodeAttribute($details['code']);
+            $worktime_model->setParamdatefromAttribute($applyfrom);
+            $worktime_model->setParamModeAttribute(Config::get('const.C005.attendance_time'));
+            $result_record_time1 = null;
+            $results = $worktime_model->getDetails();
+            foreach($results as $item) {
+                if (isset($item->record_time)) {
+                    $result_record_time1 = $item->record_time;
+                    break;
+                }
+            }
+            // work_timeのapplyfrom以降の出勤データがない場合も想定し翌日以降の打刻を取得し比較して開始時刻にする
+            $worktime_model->setParamUsercodeAttribute($details['code']);
+            $worktime_model->setParamdatefromAttribute($w_plus1_applyfromYmd);
+            $worktime_model->setParamModeAttribute(null);
+            $result_record_time2 = null;
+            $results = $worktime_model->getDetails();
+            foreach($results as $item) {
+                if (isset($item->record_time)) {
+                    $result_record_time2 = $item->record_time;
+                    break;
+                }
+            }
+            $from_record_time = null;
+            if ($result_record_time1 != null && $result_record_time1 != "") {
+                if ($result_record_time2 != null && $result_record_time2 != "") {
+                    if ($result_record_time1 < $result_record_time2) {
+                        $from_record_time = $result_record_time1;
+                    } else {
+                        $from_record_time = $result_record_time2;
+                    }
+                } else {
+                    $from_record_time = $result_record_time1;
+                }
+            } else {
+                if ($result_record_time2 != null && $result_record_time2 != "") {
+                    $from_record_time = $result_record_time2;
+                }
+            }
+            // データが存在した場合
+            if ($from_record_time != null) {
+                // work_timeの更新
+                $worktime_model->setParamUsercodeAttribute($details['code']);
+                $worktime_model->setParamdatefromNoneditAttribute($from_record_time);
+                $worktime_model->setParamModeAttribute(null);
+                $worktime_model->updateCommon($array_update);
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "work_time", Config::get('const.LOG_MSG.data_access_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * working_time_datesテーブル部署雇用形態更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDEWorkingtimedatesTable($params){
+        $details = $params['details'];
+        $array_update = $params['array_update'];
+        $applyfrom = new Carbon($details['apply_term_from']);
+        $applyfromYmd = $applyfrom->format('Ymd');
+        try{
+            // working_time_datesの更新
+            $workingtimedate_model = new WorkingTimedate();
+            $workingtimedate_model->setParamusercodeAttribute($details['code']);
+            $workingtimedate_model->setParamdatefromAttribute($applyfromYmd);
+            $res = $workingtimedate_model->isExist();
+            if ($res) {
+                $workingtimedate_model->updateCommon($array_update);
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "working_time_dates", Config::get('const.LOG_MSG.data_access_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 各テーブル部署雇用形態戻し更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDepartmentEmploymentTableBefore($params){
+        $isUpdateDepartment = $params['isUpdateDepartment'];
+        $isUpdateEmployment = $params['isUpdateEmployment'];
+        $isDelete = $params['isDelete'];
+        $details = $params['details'];
+        $applyfrom = new Carbon($details['apply_term_from']);
+        $applyfromYmd = $applyfrom->format('Ymd');
+        $w_minus1_applyfromYmd = date_format($applyfrom->copy()->subDay(), 'Ymd');
+        $systemdate = Carbon::now();
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        try{
+            // users情報を取得（更新削除されたあとの状態となる）
+            $users = new UserModel();
+            $users->setCodeAttribute($details['code']);
+            $users->setKillvalueAttribute(false);
+            $users_details = $users->getUserDetails();
+            foreach ($users_details as $item) {
+                if (isset($item->apply_term_from)) {
+                    $item_applyfrom = new Carbon($item->apply_term_from);
+                    $item_applyfromYmd = $item_applyfrom->format('Ymd');
+                    if ($item_applyfromYmd < $applyfromYmd) {
+                        $w_plus1_applyfromYmd = date_format($item_applyfrom->copy()->addDay(), 'Ymd');
+                        // 修正前の適用日付から修正後の適用日付－１日まで更新
+                        // ただし削除時は以前の適用日付以降を更新
+                        // upDETableBefore implement
+                        if ($item_applyfromYmd > $w_minus1_applyfromYmd) {
+                            $w_minus1_applyfromYmd = $item_applyfromYmd;
+                        }
+                        $array_impl_upDETableBefore = array (
+                            'user_code' => $details['code'],
+                            'item_applyfromYmd' => $item_applyfromYmd,
+                            'w_minus1_applyfromYmd' => $w_minus1_applyfromYmd,
+                            'w_plus1_applyfromYmd' => $w_plus1_applyfromYmd,
+                            'item_department_code' => $item->department_code,
+                            'item_employment_status' => $item->employment_status,
+                            'isDelete' => $isDelete,
+                            'isUpdateDepartment' => $isUpdateDepartment,
+                            'isUpdateEmployment' => $isUpdateEmployment,
+                            'login_user_code' => $login_user_code,
+                            'systemdate' => $systemdate
+                        );
+                        // attendance_logsの更新
+                        $this->upDEAttendancelogsTableBefore($array_impl_upDETableBefore);
+                        // calendar_setting_informationsの更新
+                        $this->upDECalendarsettinginformationsTableBefore($array_impl_upDETableBefore);
+                        // card_informationsの更新
+                        $this->upDECardinformationsTableBefore($array_impl_upDETableBefore);
+                        // work_time_logsの更新
+                        $this->upDEWorktimelogsTableBefore($array_impl_upDETableBefore);
+                        // work_timeの更新
+                        $this->upDEWorktimeTableBefore($array_impl_upDETableBefore);
+                        // working_time_datesの更新
+                        $this->upDEWorkingtimedatesTableBefore($array_impl_upDETableBefore);
+                        break;
+                    }
+                }
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "users shift_informations", Config::get('const.LOG_MSG.data_access_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * attendance_logsテーブル部署雇用形態戻し更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDEAttendancelogsTableBefore($params){
+        $user_code = $params['user_code'];
+        $item_applyfromYmd = $params['item_applyfromYmd'];
+        $w_minus1_applyfromYmd = $params['w_minus1_applyfromYmd'];
+        $w_plus1_applyfromYmd = $params['w_plus1_applyfromYmd'];
+        $item_department_code = $params['item_department_code'];
+        $item_employment_status = $params['item_employment_status'];
+        $isDelete = $params['isDelete'];
+        $isUpdateDepartment = $params['isUpdateDepartment'];
+        $isUpdateEmployment = $params['isUpdateEmployment'];
+        $login_user_code = $params['login_user_code'];
+        $systemdate = $params['systemdate'];
+        try{
+            // 修正前の適用日付から修正後の適用日付－１日まで更新
+            // ただし削除時は以前の適用日付以降を更新
+            // attendance_logsの更新
+            $attendancelog_model = new AttendanceLog();
+            $attendancelog_model->setParamusercodeAttribute($user_code);
+            $attendancelog_model->setParamworkingdatefromAttribute($item_applyfromYmd);
+            if (!$isDelete) {
+                $attendancelog_model->setParamworkingdatetoAttribute($w_minus1_applyfromYmd);
+            }
+            $res = $attendancelog_model->isExist();
+            if ($res) {
+                $array_before_update = array();
+                if ($isUpdateDepartment) {
+                    $array_before_update = array_merge($array_before_update, ['department_code' => $item_department_code]);
+                }
+                if ($isUpdateEmployment) {
+                    $array_before_update = array_merge($array_before_update, ['employment_status' => $item_employment_status]);
+                }
+                // update項目があるか
+                if (count($array_before_update) > 0) {
+                    $array_before_update = array_merge($array_before_update, ['updated_user' => $login_user_code]);
+                    $array_before_update = array_merge($array_before_update, ['updated_at' => $systemdate]);
+                    $attendancelog_model->updateCommon($array_before_update);
+                }
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "attendance_logs", Config::get('const.LOG_MSG.data_access_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * calendar_setting_informationsテーブル部署雇用形態戻し更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDECalendarsettinginformationsTableBefore($params){
+        $user_code = $params['user_code'];
+        $item_applyfromYmd = $params['item_applyfromYmd'];
+        $w_minus1_applyfromYmd = $params['w_minus1_applyfromYmd'];
+        $w_plus1_applyfromYmd = $params['w_plus1_applyfromYmd'];
+        $item_department_code = $params['item_department_code'];
+        $item_employment_status = $params['item_employment_status'];
+        $isDelete = $params['isDelete'];
+        $isUpdateDepartment = $params['isUpdateDepartment'];
+        $isUpdateEmployment = $params['isUpdateEmployment'];
+        $login_user_code = $params['login_user_code'];
+        $systemdate = $params['systemdate'];
+        try{
+            // 修正前の適用日付から修正後の適用日付－１日まで更新
+            // ただし削除時は以前の適用日付以降を更新
+            // calendar_setting_informationsの更新
+            $calendarsetting_model = new CalendarSettingInformation();
+            $calendarsetting_model->setParamusercodeAttribute($user_code);
+            $calendarsetting_model->setParamfromdateAttribute($item_applyfromYmd);
+            if (!$isDelete) {
+                $calendarsetting_model->setParamtodateAttribute($w_minus1_applyfromYmd);
+            }
+            $res = $calendarsetting_model->isExistsDate();
+            if ($res) {
+                $array_before_update = array();
+                if ($isUpdateDepartment) {
+                    $array_before_update = array_merge($array_before_update, ['department_code' => $item_department_code]);
+                }
+                if ($isUpdateEmployment) {
+                    $array_before_update = array_merge($array_before_update, ['employment_status' => $item_employment_status]);
+                }
+                // update項目があるか
+                if (count($array_before_update) > 0) {
+                    $array_before_update = array_merge($array_before_update, ['updated_user' => $login_user_code]);
+                    $array_before_update = array_merge($array_before_update, ['updated_at' => $systemdate]);
+                    $calendarsetting_model->updateCommon($array_before_update);
+                }
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "calendar_setting_informations", Config::get('const.LOG_MSG.data_access_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * card_informationsテーブル部署雇用形態戻し更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDECardinformationsTableBefore($params){
+        $user_code = $params['user_code'];
+        $item_applyfromYmd = $params['item_applyfromYmd'];
+        $w_minus1_applyfromYmd = $params['w_minus1_applyfromYmd'];
+        $w_plus1_applyfromYmd = $params['w_plus1_applyfromYmd'];
+        $item_department_code = $params['item_department_code'];
+        $item_employment_status = $params['item_employment_status'];
+        $isDelete = $params['isDelete'];
+        $isUpdateDepartment = $params['isUpdateDepartment'];
+        $isUpdateEmployment = $params['isUpdateEmployment'];
+        $login_user_code = $params['login_user_code'];
+        $systemdate = $params['systemdate'];
+        try{
+            // card_informationsの更新
+            $card_model = new CardInformation();
+            $card_model->setParamusercodeAttribute($user_code);
+            $res = $card_model->isExists();
+            if ($res) {
+                $array_before_update = array();
+                if ($isUpdateDepartment) {
+                    $array_before_update = array_merge($array_before_update, ['department_code' => $item_department_code]);
+                }
+                // update項目があるか
+                if (count($array_before_update) > 0) {
+                    $array_before_update = array_merge($array_before_update, ['updated_user' => $login_user_code]);
+                    $array_before_update = array_merge($array_before_update, ['updated_at' => $systemdate]);
+                    $card_model->updateCommon($array_before_update);
+                }
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "card_informations", Config::get('const.LOG_MSG.data_access_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * work_time_logsテーブル部署雇用形態戻し更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDEWorktimelogsTableBefore($params){
+        $user_code = $params['user_code'];
+        $item_applyfromYmd = $params['item_applyfromYmd'];
+        $w_minus1_applyfromYmd = $params['w_minus1_applyfromYmd'];  // 修正後の適用日付－１日
+        $w_plus1_applyfromYmd = $params['w_plus1_applyfromYmd'];
+        $item_department_code = $params['item_department_code'];
+        $item_employment_status = $params['item_employment_status'];
+        $isDelete = $params['isDelete'];
+        $isUpdateDepartment = $params['isUpdateDepartment'];
+        $isUpdateEmployment = $params['isUpdateEmployment'];
+        $login_user_code = $params['login_user_code'];
+        $systemdate = $params['systemdate'];
+        try{
+            // 修正前の適用日付から修正後の適用日付－１日まで更新
+            // ただし削除時は以前の適用日付以降を更新
+            // work_time_logsの更新
+            $worktimelog_model = new WorkTimeLog();
+            $worktimelog_model->setParamusercodeAttribute($user_code);
+            $worktimelog_model->setParamrecordtimefromAttribute($item_applyfromYmd);
+            if (!$isDelete) {
+                $worktimelog_model->setParamrecordtimetoAttribute($w_minus1_applyfromYmd);
+            }
+            $worktimelog_model->setParammodeAttribute(Config::get('const.C005.attendance_time'));
+            $result_record_time1 = null;
+            $results = $worktimelog_model->getDetails();
+            foreach($results as $item) {
+                if (isset($item->record_time)) {
+                    $result_record_time1 = $item->record_time;
+                    break;
+                }
+            }
+            // work_time_logsのapplyfrom以降の出勤データがない場合も想定し翌日以降の打刻を取得し比較して開始時刻にする
+            $result_record_time2 = null;
+            if ($w_plus1_applyfromYmd < $w_minus1_applyfromYmd) {
+                $worktimelog_model->setParamusercodeAttribute($user_code);
+                $worktimelog_model->setParamrecordtimefromAttribute($w_plus1_applyfromYmd);
+                if (!$isDelete) {
+                    $worktimelog_model->setParamrecordtimetoAttribute($w_minus1_applyfromYmd);
+                }
+                $worktimelog_model->setParammodeAttribute(null);
+                $results = $worktimelog_model->getDetails();
+                foreach($results as $item) {
+                    if (isset($item->record_time)) {
+                        $result_record_time2 = $item->record_time;
+                        break;
+                    }
+                }
+            }
+            $from_record_time = null;
+            if ($result_record_time1 != null && $result_record_time1 != "") {
+                if ($result_record_time2 != null && $result_record_time2 != "") {
+                    if ($result_record_time1 < $result_record_time2) {
+                        $from_record_time = $result_record_time1;
+                    } else {
+                        $from_record_time = $result_record_time2;
+                    }
+                } else {
+                    $from_record_time = $result_record_time1;
+                }
+            } else {
+                if ($result_record_time2 != null && $result_record_time2 != "") {
+                    $from_record_time = $result_record_time2;
+                }
+            }
+            // データが存在した場合
+            if ($from_record_time != null) {
+                $array_before_update = array();
+                if ($isUpdateDepartment) {
+                    $array_before_update = array_merge($array_before_update, ['department_code' => $item_department_code]);
+                }
+                if ($isUpdateEmployment) {
+                    $array_before_update = array_merge($array_before_update, ['employment_status' => $item_employment_status]);
+                }
+                // update項目があるか
+                if (count($array_before_update) > 0) {
+                    $array_before_update = array_merge($array_before_update, ['updated_user' => $login_user_code]);
+                    $array_before_update = array_merge($array_before_update, ['updated_at' => $systemdate]);
+                    // work_time_logsの更新
+                    $worktimelog_model->setParamusercodeAttribute($user_code);
+                    $worktimelog_model->setParamrecordtimefromnoneditAttribute($from_record_time);
+                    if (!$isDelete) {
+                        $worktimelog_model->setParamrecordtimetoAttribute($w_minus1_applyfromYmd);
+                    }
+                    $worktimelog_model->setParammodeAttribute(null);
+                    $worktimelog_model->updateCommon($array_before_update);
+                }
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "work_time_logs", Config::get('const.LOG_MSG.data_access_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * work_timeテーブル部署雇用形態戻し更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDEWorktimeTableBefore($params){
+        $user_code = $params['user_code'];
+        $item_applyfromYmd = $params['item_applyfromYmd'];
+        $w_minus1_applyfromYmd = $params['w_minus1_applyfromYmd'];  // 修正後の適用日付－１日
+        $w_plus1_applyfromYmd = $params['w_plus1_applyfromYmd'];
+        $item_department_code = $params['item_department_code'];
+        $item_employment_status = $params['item_employment_status'];
+        $isDelete = $params['isDelete'];
+        $isUpdateDepartment = $params['isUpdateDepartment'];
+        $isUpdateEmployment = $params['isUpdateEmployment'];
+        $login_user_code = $params['login_user_code'];
+        $systemdate = $params['systemdate'];
+        try{
+            // 修正前の適用日付から修正後の適用日付－１日まで更新
+            // ただし削除時は以前の適用日付以降を更新
+            // work_timeの更新
+            $worktime_model = new WorkTime();
+            $worktime_model->setParamUsercodeAttribute($user_code);
+            $worktime_model->setParamdatefromAttribute($item_applyfromYmd);
+            if (!$isDelete) {
+                $worktime_model->setParamdatetoAttribute($w_minus1_applyfromYmd);
+            }
+            $worktime_model->setParamModeAttribute(Config::get('const.C005.attendance_time'));
+            $result_record_time1 = null;
+            $results = $worktime_model->getDetails();
+            foreach($results as $item) {
+                if (isset($item->record_time)) {
+                    $result_record_time1 = $item->record_time;
+                    break;
+                }
+            }
+            // work_time_logsのapplyfrom以降の出勤データがない場合も想定し翌日以降の打刻を取得し比較して開始時刻にする
+            $result_record_time2 = null;
+            if ($w_plus1_applyfromYmd < $w_minus1_applyfromYmd) {
+                $worktime_model->setParamUsercodeAttribute($user_code);
+                $worktime_model->setParamdatefromAttribute($w_plus1_applyfromYmd);
+                if (!$isDelete) {
+                    $worktime_model->setParamdatetoAttribute($w_minus1_applyfromYmd);
+                }
+                $worktime_model->setParamModeAttribute(null);
+                $results = $worktime_model->getDetails();
+                foreach($results as $item) {
+                    if (isset($item->record_time)) {
+                        $result_record_time2 = $item->record_time;
+                        break;
+                    }
+                }
+            }
+            $from_record_time = null;
+            if ($result_record_time1 != null && $result_record_time1 != "") {
+                if ($result_record_time2 != null && $result_record_time2 != "") {
+                    if ($result_record_time1 < $result_record_time2) {
+                        $from_record_time = $result_record_time1;
+                    } else {
+                        $from_record_time = $result_record_time2;
+                    }
+                } else {
+                    $from_record_time = $result_record_time1;
+                }
+            } else {
+                if ($result_record_time2 != null && $result_record_time2 != "") {
+                    $from_record_time = $result_record_time2;
+                }
+            }
+            // データが存在した場合
+            if ($from_record_time != null) {
+                $array_before_update = array();
+                if ($isUpdateDepartment) {
+                    $array_before_update = array_merge($array_before_update, ['department_code' => $item_department_code]);
+                }
+                // update項目があるか
+                if (count($array_before_update) > 0) {
+                    $array_before_update = array_merge($array_before_update, ['updated_user' => $login_user_code]);
+                    $array_before_update = array_merge($array_before_update, ['updated_at' => $systemdate]);
+                    // work_time_logsの更新
+                    $worktime_model->setParamUsercodeAttribute($user_code);
+                    $worktime_model->setParamdatefromNoneditAttribute($from_record_time);
+                    if (!$isDelete) {
+                        $worktime_model->setParamdatetoAttribute($w_minus1_applyfromYmd);
+                    }
+                    $worktime_model->setParamModeAttribute(null);
+                    $worktime_model->updateCommon($array_before_update);
+                }
+
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "work_time", Config::get('const.LOG_MSG.data_access_error')));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * working_time_datesテーブル部署雇用形態戻し更新
+     *
+     * @param [type] $details
+     * @return boolean
+     */
+    private function upDEWorkingtimedatesTableBefore($params){
+        $user_code = $params['user_code'];
+        $item_applyfromYmd = $params['item_applyfromYmd'];
+        $w_minus1_applyfromYmd = $params['w_minus1_applyfromYmd'];
+        $w_plus1_applyfromYmd = $params['w_plus1_applyfromYmd'];
+        $item_department_code = $params['item_department_code'];
+        $item_employment_status = $params['item_employment_status'];
+        $isDelete = $params['isDelete'];
+        $isUpdateDepartment = $params['isUpdateDepartment'];
+        $isUpdateEmployment = $params['isUpdateEmployment'];
+        $login_user_code = $params['login_user_code'];
+        $systemdate = $params['systemdate'];
+        try{
+            // 修正前の適用日付から修正後の適用日付－１日まで更新
+            // ただし削除時は以前の適用日付以降を更新
+            // working_time_datesの更新
+            $workingtimedate_model = new WorkingTimedate();
+            $workingtimedate_model->setParamusercodeAttribute($user_code);
+            $workingtimedate_model->setParamdatefromAttribute($item_applyfromYmd);
+            if (!$isDelete) {
+                $workingtimedate_model->setParamdatetoAttribute($w_minus1_applyfromYmd);
+            }
+            $res = $workingtimedate_model->isExist();
+            if ($res) {
+                $array_before_update = array();
+                if ($isUpdateDepartment) {
+                    $array_before_update = array_merge($array_before_update, ['department_code' => $item_department_code]);
+                }
+                if ($isUpdateEmployment) {
+                    $array_before_update = array_merge($array_before_update, ['employment_status' => $item_employment_status]);
+                }
+                // update項目があるか
+                if (count($array_before_update) > 0) {
+                    $array_before_update = array_merge($array_before_update, ['updated_user' => $login_user_code]);
+                    $array_before_update = array_merge($array_before_update, ['updated_at' => $systemdate]);
+                    $workingtimedate_model->updateCommon($array_before_update);
+                }
+            }
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "working_time_dates", Config::get('const.LOG_MSG.data_access_error')));
             Log::error($e->getMessage());
             throw $e;
         }

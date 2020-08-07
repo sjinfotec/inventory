@@ -856,30 +856,30 @@ export default {
     fromdateChanges: function(value) {
       this.valuefromdate = value;
       this.valuetodate = moment(this.valuefromdate).add(1, 'months').subtract(1, 'days').toDate();
-      // 再取得
-      this.applytermdate = ""
-      if (this.valuefromdate) {
-          this.applytermdate = moment(this.valuefromdate).format("YYYYMMDD");
-      }
-      this.$refs.selectdepartmentlist.getList(this.applytermdate);
-      this.getUserSelected();
     },
     // 開始日付がクリアされた場合の処理
     fromdateCleared: function() {
       this.valuefromdate = "";
+    },
+    // 終了日付が変更された場合の処理
+    todateChanges: function(value, arrayitem) {
+      this.valuetodate = value;
+      // 再取得
+      this.applytermdate = ""
+      if (this.valuetodate) {
+          this.applytermdate = moment(this.valuetodate).format("YYYYMMDD");
+      }
+      this.$refs.selectdepartmentlist.getList(this.applytermdate);
+      this.getUserSelected();
+    },
+    // 終了日付がクリアされた場合の処理
+    todateCleared: function() {
+      this.valuetodate = "";
       // 再取得
       this.applytermdate = moment(new Date()).format("YYYYMMDD");
       this.$refs.selectdepartmentlist.getList(this.applytermdate);
       this.getUserSelected();
       this.applytermdate = "";
-    },
-    // 終了日付が変更された場合の処理
-    todateChanges: function(value, arrayitem) {
-      this.valuetodate = value;
-    },
-    // 終了日付がクリアされた場合の処理
-    todateCleared: function() {
-      this.valuetodate = "";
     },
     // 雇用形態が変更された場合の処理
     employmentChanges: function(value) {
@@ -1078,8 +1078,8 @@ export default {
     // ユーザー選択コンポーネント取得メソッド
     getUserSelected: function() {
       this.applytermdate = "";
-      if (this.valuedate) {
-        this.applytermdate = moment(this.valuedate).format("YYYYMMDD");
+      if (this.valuetodate) {
+        this.applytermdate = moment(this.valuetodate).format("YYYYMMDD");
       }
       this.$refs.selectuserlist.getList(
         this.applytermdate,
