@@ -5206,4 +5206,16 @@ class ApiCommonController extends Controller
     }
     // -------------  9.登録更新  end ---------------------------------------------- //
 
+    /**
+     * モバイルオーダーアプリダウンロード
+     * 直接ＵＲＬを叩いてダウンロードする
+     */
+    public function downloadMoc()
+    {
+        $name = "モバイルオーダーモックapk";
+        $pathToFile = 'public/upload/app-release.apk';
+        $headers = ['Content-Type' => 'application/vnd.android.package-archive'];
+        return response()->download(\Storage::path($pathToFile), $name, $headers);
+    }
+
 }

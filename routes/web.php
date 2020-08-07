@@ -205,5 +205,8 @@ Route::post('/get_working_hours', 'ApiCommonController@getWorkingHours')->middle
 Route::post('/get_working_status/get', 'ApiCommonController@getWorgingStatusInfo')->middleware('auth');
 // CSV項目取得
 Route::post('/get_csv_item', 'ApiCommonController@getCsvItem')->middleware('auth');
+// android apkダウンロード
+Route::get('/download/moc', 'CommonController@downloadMoc');
+
 
 
