@@ -14,8 +14,11 @@ class AddIndexToUsersTable08081713 extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropPrimary('id');
-            $table->primary(['id', 'account_id']);
+        //    $table->integer('id')->change();
+            $table->dropPrimary();
+            $table->String('created_at')->comment('ì¬ƒ†[ƒU[')->change();
+            $table->primary(['account_id', 'apply_term_from', 'code', 'is_deleted', 'created_at'], 'account_apply_code_deleted_created');
+        //    $table->dropColumn('id');
         });
     }
 
