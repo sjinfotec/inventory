@@ -389,6 +389,7 @@ const CONST_C025 = 'C025';
 const CONST_C025_ADMINUSER_PHYSICAL_NAME= "admin_user";
 const CONST_MENU_EDITUSER_PHYSICAL_NAME= "edit_worktime_user";
 const CONST_MENU_EDITUSER_CON_PHYSICAL_NAME= "edit_worktime_user_conditional";
+const CONST_CALCLIST_ALLSELECT_ITEM_CODE = 8;
 
 export default {
   name: "dailyworkingtime",
@@ -403,6 +404,10 @@ export default {
         default: []
     },
     menudatas: {
+        type: Array,
+        default: []
+    },
+    feature_item_selections: {
         type: Array,
         default: []
     },
@@ -458,7 +463,8 @@ export default {
       isUserblank: true,
       login_user_code: "",
       login_user_role: "",
-      adminuserrole: ""
+      adminuserrole: "",
+      isdefault: true
     };
   },
   computed: {
@@ -513,7 +519,8 @@ export default {
     },
     get_IsUserblank: function() {
       this.isUserblank = true;
-      if (this.get_LoginUserRole < this.get_AdminUserRole) {
+      var isAllselectValue = this.get_CalcListAllselectValue;
+      if ((!isAllselectValue) && (this.get_LoginUserRole < this.get_AdminUserRole)) {
         this.isUserblank = false;
       }
       return this.isUserblank;
@@ -527,11 +534,22 @@ export default {
       return this.login_user_role;
     },
     get_SelectedUserCode: function() {
-      if (this.selectedUserValue == null || this.selectedUserValue == "") {
-        if (this.get_LoginUserRole < this.get_AdminUserRole) {
-          this.selectedUserValue = this.get_LoginUserCode;
+      if (this.isdefault) {
+        if (this.selectedUserValue == null || this.selectedUserValue == "") {
+          var isAllselectValue = this.get_CalcListAllselectValue;
+          if (this.get_LoginUserRole < this.get_AdminUserRole) {
+            this.selectedUserValue = this.get_LoginUserCode;
+          }
+        }
+      } else {
+        if (this.selectedUserValue == null || this.selectedUserValue == "") {
+          var isAllselectValue = this.get_CalcListAllselectValue;
+          if ((!isAllselectValue) && (this.get_LoginUserRole < this.get_AdminUserRole)) {
+            this.selectedUserValue = this.get_LoginUserCode;
+          }
         }
       }
+      this.isdefault = false;
       return this.selectedUserValue;
     },
     get_EditUserIndex: function() {
@@ -550,10 +568,10 @@ export default {
     },
     get_EditUserConIndex: function() {
       var edituser_con_index = 0;
-      if (this.menudatas.length > 0) {
+      if (this.feature_item_selections.length > 0) {
         let $this = this;
         var i = 0;
-        this.menudatas.forEach( function( item ) {
+        this.feature_item_selections.forEach( function( item ) {
           if (item.item_name == CONST_MENU_EDITUSER_CON_PHYSICAL_NAME) {
             edituser_con_index = i;
           }
@@ -561,6 +579,22 @@ export default {
         });
       }
       return edituser_con_index;
+    },
+    get_CalcListAllselectValue: function() {
+      var isAllselectValue = false;
+      if (this.feature_item_selections.length > 0) {
+        let $this = this;
+        this.feature_item_selections.forEach( function( item ) {
+          if (item.item_code == CONST_CALCLIST_ALLSELECT_ITEM_CODE) {
+            if (item.value_select != null && item.value_select != "") {
+              if (item.value_select == "1") {
+                isAllselectValue = true;
+              }
+            }
+          }
+        });
+      }
+      return isAllselectValue;
     }
   },
   // マウント時
@@ -610,7 +644,7 @@ export default {
         this.validate = false;
       }
       // 所属部署
-      if (this.get_LoginUserRole < this.get_AdminUserRole) {
+      if ((!this.get_CalcListAllselectValue) && (this.get_LoginUserRole < this.get_AdminUserRole)) {
         required = true;
         equalength = 0;
         maxlength = 0;
@@ -660,7 +694,9 @@ export default {
       if (this.valuedate) {
         this.applytermdate = moment(this.valuedate).format("YYYYMMDD");
       }
-      this.$refs.selectdepartmentlist.getList(this.applytermdate);
+      if (this.get_LoginUserRole >= this.get_AdminUserRole) {
+        this.$refs.selectdepartmentlist.getList(this.applytermdate);
+      }
       this.getUserSelected();
     },
     // 指定日付がクリアされた場合の処理

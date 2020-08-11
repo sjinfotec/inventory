@@ -466,6 +466,7 @@ import {requestable} from '../mixins/requestable.js';
 const CONST_C037 = 'C037';
 const CONST_C025 = 'C025';
 const CONST_C025_ADMINUSER_PHYSICAL_NAME= "admin_user";
+const CONST_CALCLIST_ALLSELECT_ITEM_CODE = 8;
 
 export default {
   name: "monthlyworkingtime",
@@ -530,10 +531,10 @@ export default {
       return this.adminuserrole;
     },
     get_IsUserblank: function() {
-      if (this.get_LoginUserRole < this.get_AdminUserRole) {
+      this.isUserblank = true;
+      var isAllselectValue = this.get_CalcListAllselectValue;
+      if ((!isAllselectValue) && (this.get_LoginUserRole < this.get_AdminUserRole)) {
         this.isUserblank = false;
-      } else {
-        this.isUserblank = true;
       }
       return this.isUserblank;
     },
@@ -546,12 +547,39 @@ export default {
       return this.login_user_role;
     },
     get_SelectedUserCode: function() {
-      if (this.selectedUserValue == null || this.selectedUserValue == "") {
-        if (this.get_LoginUserRole < this.get_AdminUserRole) {
-          this.selectedUserValue = this.get_LoginUserCode;
+      if (this.isdefault) {
+        if (this.selectedUserValue == null || this.selectedUserValue == "") {
+          var isAllselectValue = this.get_CalcListAllselectValue;
+          if (this.get_LoginUserRole < this.get_AdminUserRole) {
+            this.selectedUserValue = this.get_LoginUserCode;
+          }
+        }
+      } else {
+        if (this.selectedUserValue == null || this.selectedUserValue == "") {
+          var isAllselectValue = this.get_CalcListAllselectValue;
+          if ((!isAllselectValue) && (this.get_LoginUserRole < this.get_AdminUserRole)) {
+            this.selectedUserValue = this.get_LoginUserCode;
+          }
         }
       }
+      this.isdefault = false;
       return this.selectedUserValue;
+    },
+    get_CalcListAllselectValue: function() {
+      var isAllselectValue = false;
+      if (this.feature_item_selections.length > 0) {
+        let $this = this;
+        this.feature_item_selections.forEach( function( item ) {
+          if (item.item_code == CONST_CALCLIST_ALLSELECT_ITEM_CODE) {
+            if (item.value_select != null && item.value_select != "") {
+              if (item.value_select == "1") {
+                isAllselectValue = true;
+              }
+            }
+          }
+        });
+      }
+      return isAllselectValue;
     }
   },
   data: function() {
@@ -593,7 +621,8 @@ export default {
       messagedatauser: [],
       general_C025_data: [],
       isUserblank: true,
-      adminuserrole: ""
+      adminuserrole: "",
+      isdefault: true
     };
   },
   // マウント時
@@ -651,7 +680,7 @@ export default {
       equalength = 0;
       maxlength = 0;
       itemname = '氏名';
-      if (this.get_LoginUserRole < this.get_AdminUserRole) {
+      if ((!this.get_CalcListAllselectValue) && (this.get_LoginUserRole < this.get_AdminUserRole)) {
         chkArray = 
           this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
         if (chkArray.length > 0) {
@@ -730,7 +759,7 @@ export default {
       equalength = 0;
       maxlength = 0;
       itemname = '氏名';
-      if (this.get_LoginUserRole < this.get_AdminUserRole) {
+      if ((!this.get_CalcListAllselectValue) && (this.get_LoginUserRole < this.get_AdminUserRole)) {
         chkArray = 
           this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
         if (chkArray.length > 0) {
