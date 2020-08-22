@@ -649,6 +649,7 @@ class WorkTime extends Model
             // mainquery    users
             // subquery1    work_times
             // subquery2    shift_informations
+            // 20200817001 't9.business_kubun as business_kubun' -> 't20.business_kubun as business_kubun'
             $mainquery = DB::table($this->table_users.' AS t1')
                 ->select(
                     't2.record_datetime_id as record_datetime_id',
@@ -673,7 +674,7 @@ class WorkTime extends Model
                     't2.y_positions as y_positions',
                     't9.weekday_kubun as weekday_kubun',
                     't11.code_name as weekday_name',
-                    't9.business_kubun as business_kubun',
+                    't20.business_kubun as business_kubun',
                     't12.code_name as business_name',
                     't9.holiday_kubun as holiday_kubun',
                     't13.use_free_item as use_free_item',
@@ -690,6 +691,7 @@ class WorkTime extends Model
                     't4.interval as interval1',
                     't4.year as year',
                     't9.date as user_working_date',
+                    't20.date as holiday_working_date',
                     't15.code_name as user_holiday_name',
                     't15.description as user_holiday_description',
                     't2.is_editor as is_editor',
@@ -723,6 +725,15 @@ class WorkTime extends Model
                     ->where('t9.is_deleted', '=', 0)
                     ->where('t1.is_deleted', '=', 0);
                 })
+                // 20200817001 add start
+                ->leftJoin($this->table_calendar_setting_informations.' as t20', function ($join) use ($targetdatefrom) {
+                    $join->on('t20.department_code', '=', 't1.department_code');
+                    $join->on('t20.user_code', '=', 't1.code')
+                    ->where('t20.date', '=', $targetdatefrom)
+                    ->where('t20.is_deleted', '=', 0)
+                    ->where('t1.is_deleted', '=', 0);
+                })
+                // 20200817001 add end
                 ->leftJoinSub($subquery4, 't5', function ($join) { 
                     $join->on('t5.code', '=', 't1.department_code')
                     ->where('t1.is_deleted', '=', 0);

@@ -705,6 +705,7 @@ class DailyWorkingInformationController extends Controller
             // Log::debug('                         $result->user_holiday_name  = '.$result->user_holiday_name);
             // Log::debug('                         $result->user_holiday_description  = '.$result->user_holiday_description);
             // Log::debug('                         $result->user_working_date  = '.$result->user_working_date);
+            // Log::debug('                         $result->holiday_working_date  = '.$result->holiday_working_date);
             // Log::debug('         タイムテーブル  no = '.$result->working_timetable_no);
             // Log::debug('         タイムテーブル  name = '.$result->working_timetable_name);
             // Log::debug('         タイムテーブル　開始時刻　$result->working_timetable_from_time = '.$result->working_timetable_from_time);
@@ -722,10 +723,10 @@ class DailyWorkingInformationController extends Controller
                     //     $result->mode != Config::get('const.C005.emergency_time')) {
                         // 夜勤の場合同じ日に休暇ある場合は休暇を当日としない
                         // if ($result->working_timetable_from_time > $result->working_timetable_to_time) {
-                            if ($result->user_working_date != null && $result->user_working_date != "") {
+                            if ($result->holiday_working_date != null && $result->holiday_working_date != "") {
                                 if ($result->user_holiday_description == Config::get('const.C013_DESC_VALUE.target_calc_time') ||
                                     $result->user_holiday_description == Config::get('const.C013_DESC_VALUE.non_calc_time')) {
-                                    if ($target_date_ymd == $result->user_working_date) {
+                                    if ($target_date_ymd == $result->holiday_working_date) {
                                         // Log::debug('        同じ日に休暇ある場合は休暇を当日とする該当 ');
                                         $result->record_datetime = date_format(new Carbon($target_date), 'Y-m-d')." 00:00:01";
                                         $result->record_date = date_format(new Carbon($target_date), 'Ymd');
