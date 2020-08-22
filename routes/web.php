@@ -207,3 +207,4 @@ Route::post('/get_working_status/get', 'ApiCommonController@getWorgingStatusInfo
 Route::post('/get_csv_item', 'ApiCommonController@getCsvItem')->middleware('auth');
 
 
+

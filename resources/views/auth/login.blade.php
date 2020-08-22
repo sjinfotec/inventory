@@ -13,7 +13,7 @@
                         <div class="col pb-2">
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text font-size-sm line-height-xs label-width-90" id="basic-addon1">ログイン ID</span>
+                                    <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">ログイン ID</span>
                                 </div>
                                 <input id="code" type="text" class="form-control{{ $errors->has('code') ? ' is-invalid' : '' }}" name="code" value="{{ old('code') }}" required autofocus>
                                 @if ($errors->has('code'))
@@ -26,12 +26,25 @@
                         <div class="col pb-2">
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text font-size-sm line-height-xs label-width-90" id="basic-addon1">パスワード</span>
+                                    <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">パスワード</span>
                                 </div>
                                 <input id="password" type="password" class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password" required>
                                 @if ($errors->has('password'))
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $errors->first('password') }}</strong>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col pb-2">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">アカウント ID</span>
+                                </div>
+                                <input id="account_id" type="text" class="form-control{{ $errors->has('account_id') ? ' is-invalid' : '' }}" name="account_id" value="{{ old('account_id') }}" required>
+                                @if ($errors->has('account_id'))
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $errors->first('account_id') }}</strong>
                                     </span>
                                 @endif
                             </div>
