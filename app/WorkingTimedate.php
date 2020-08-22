@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\TempWorkingTimeDate;
 use App\Http\Controllers\ApiCommonController;
@@ -1365,6 +1366,9 @@ class WorkingTimedate extends Model
         for ($i=0;$i<12;$i++) {
             $this->array_param_date_from[$i] = null;
         }
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         $set_from_date_flg = false;
         if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
             $search_kbn == Config::get('const.C022.monthly_alert_begining_month_first') ||
@@ -1373,6 +1377,7 @@ class WorkingTimedate extends Model
             $dt_first = null;
             $setting_model = new Setting();
             $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
+            $setting_model->setParamAccountidAttribute($login_user_code_4);
             if ($search_kbn == Config::get('const.C022.monthly_alert_begining_month_closing') ||
                 $search_kbn == Config::get('const.C022.monthly_alert_begining_month_first')) {
                 $settings = $setting_model->getSettingDatasYearOrderBy(1);
@@ -3303,7 +3308,7 @@ class WorkingTimedate extends Model
                     ->where('department_code', '=', $this->param_department_code);
             }
             if(!empty($this->param_employment_status)){
-                $query->where($this->table_users.'.employment_status', $this->param_employment_status);         //employment_status指定
+                $mainquery->where($this->table_users.'.employment_status', $this->param_employment_status);         //employment_status指定
             }
             if (!empty($this->param_user_code)) {
                 $mainquery

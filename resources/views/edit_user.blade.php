@@ -41,12 +41,24 @@
 		@can('admin-higher')
 			<edit-user
 				v-bind:authusers="{{ $authusers }}"
+				v-bind:settingcompanies="{{ $settingtable['companies'] }}"
+				v-bind:settingdepartments="{{ $settingtable['departments'] }}"
+				v-bind:settingsettings="{{ $settingtable['settings'] }}"
+				v-bind:settingworkingtimetables="{{ $settingtable['working_timetables'] }}"
+				v-bind:settingcalendarsettinginformations="{{ $settingtable['calendar_setting_informations'] }}"
+				v-bind:settingusers="{{ $settingtable['users'] }}"
 				v-bind:const_generaldatas="{{ $const_general_datas }}"
 			>
 			</edit-user>
 		@else
 		<edit-user
 				v-bind:authusers="{{ $authusers }}"
+				v-bind:settingcompanies="{{ $settingtable['companies'] }}"
+				v-bind:settingdepartments="{{ $settingtable['departments'] }}"
+				v-bind:settingsettings="{{ $settingtable['settings'] }}"
+				v-bind:settingworkingtimetables="{{ $settingtable['working_timetables'] }}"
+				v-bind:settingcalendarsettinginformations="{{ $settingtable['calendar_setting_informations'] }}"
+				v-bind:settingusers="{{ $settingtable['users'] }}"
 				v-bind:const_generaldatas="{{ $const_general_datas }}"
 			>
 			</edit-user>

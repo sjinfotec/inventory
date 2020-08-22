@@ -189,18 +189,20 @@ class CreateApprovalRouteNoController extends Controller
             $systemdate = Carbon::now();
             $time_table = new WorkingTimeTable();
             $user = Auth::user();
-            $user_code = $user->code;
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $term_from = Config::get('const.INIT_DATE.initdate');
+            $time_table->setParamaccountidAttribute($login_user_code_4);
             $maxno = $time_table->getMaxNo();
             if (isset($maxno)) {
                 $maxno = $maxno + 1;
             } else {
                 $maxno = 1;
             }
-            $time_table->setNoAttribute($maxno);
+            $time_table->setNoAttribute($login_user_code_4.$maxno);
             $time_table->setApplytermfromAttribute($term_from);
             $time_table->setNameAttribute($name);
-            $time_table->setCreateduserAttribute($user_code);
+            $time_table->setCreateduserAttribute($login_user_code);
             $time_table->setCreatedatAttribute($systemdate);
             foreach ($data as $item) {
                $time_table->setWorkingtimekubunAttribute($item['working_time_kubun']);

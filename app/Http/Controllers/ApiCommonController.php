@@ -24,6 +24,10 @@ use App\UserModel;
 use App\CsvItemSelection;
 use App\CalendarSettingInformation;
 use App\FeatureItemSelection;
+use App\DownloadLog;
+use App\Http\Controllers\CreateCompanyInformationController;
+use App\Http\Controllers\CreateDepartmentController;
+use App\Http\Controllers\SettingCalcController;
 
 
 /**
@@ -69,7 +73,9 @@ use App\FeatureItemSelection;
  *          曜日取得                                    : getWeekDay
  *          日付のフォーマット YYYY年MM月DD日（WEEK）    : getYMDWeek                 : Calendar   
  *          勤務状況取得                               : getWorgingStatusInfo       : work_timelogs
-*           CSV対象項目取得                             : getCsvItem                : csv_item_selections
+ *          CSV対象項目取得                             : getCsvItem                : csv_item_selections
+ *          初期設定項目取得                            : getNotSetting              : 
+ *          ダウンロード履歴項目取得                     : getDownloadLog            : download_logs
  *      5.算出情報取得
  *          翌日を求める                                            : getNextDay
  *          指定時間（スタンプ）後を求める                          : getAfterDayTime
@@ -86,6 +92,7 @@ use App\FeatureItemSelection;
  *          出勤時間差をチェック            : chkInteval        : Setting
  *          打刻のモードチェック            : chkMode
  *          緊急かの判定                    : isEmagency
+ *          ダウンロード履歴項目存在チェック                     : isExistDownloadLog            : download_logs
  *      7.変換
  *          時刻日付変換                            : convTimeToDate
  *          時刻日付変換                            : convTimeToDateTarget
@@ -115,6 +122,7 @@ class ApiCommonController extends Controller
     protected $table_approval_route_nos = 'approval_route_nos';
     protected $table_post_informations = 'post_informations';
     protected $table_user_holiday_kubuns = 'user_holiday_kubuns';
+    protected $table_download_logs = 'download_logs';
 
     private $array_messagedata = array();
 
@@ -260,7 +268,7 @@ class ApiCommonController extends Controller
      *
      * @return string サブクエリー
      */
-    public function getTimetableApplyTermSubquery($targetdate){
+    public function getTimetableApplyTermSubquery($targetdate, $account_id){
         try {
             // 適用期間日付の取得
             $dt = null;
@@ -275,6 +283,7 @@ class ApiCommonController extends Controller
             $subquery1 = DB::table($this->table_working_timetables)
                 ->select('no as no')
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
+                ->where('no', 'like', $account_id."%")
                 ->where('apply_term_from', '<=',$target_date)
                 ->where('is_deleted', '=', 0)
                 ->groupBy('no');
@@ -291,6 +300,7 @@ class ApiCommonController extends Controller
                     $join->on('t1.no', '=', 't2.no');
                     $join->on('t1.apply_term_from', '=', 't2.max_apply_term_from');
                 })
+                ->where('no', 'like', $account_id."%")
                 ->whereNotNull('t1.from_time')
                 ->where('t1.is_deleted', '=', 0);
                 return $subquery2;
@@ -327,6 +337,7 @@ class ApiCommonController extends Controller
         $makeSql .= "     from ";
         $makeSql .= "       ".$this->table_working_timetables;
         $makeSql .= "     where ? = ? ";
+        $makeSql .= "       and t1.no like ? ";
         if (!empty($apply_date)) {
             $makeSql .= "   and apply_term_from <= ? ";
         }
@@ -336,6 +347,7 @@ class ApiCommonController extends Controller
         $makeSql .= "   on t1.no = t2.no ";
         $makeSql .= "   and t1.apply_term_from = t2.max_apply_term_from ";
         $makeSql .= " where ? = ? ";
+        $makeSql .= "   and t1.no like ? ";
         $makeSql .= "   and t1.no < ? ";
         $makeSql .= "   and t1.from_time is not null ";
         $makeSql .= "   and t1.is_deleted = ? ";
@@ -669,6 +681,7 @@ class ApiCommonController extends Controller
 
             // ログインユーザの権限取得
             $chk_user_id = Auth::user()->code;
+            $chk_user_id_4 = substr($chk_user_id,4, mb_strlen($chk_user_id) - 4);
             $role = $this->getUserRole($chk_user_id, $target_date);
             if(!isset($role)) {
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_setting_role');
@@ -683,6 +696,7 @@ class ApiCommonController extends Controller
                 ->selectRaw('MAX(apply_term_from) as max_apply_term_from')
                 ->selectRaw('code as code')
                 ->where('apply_term_from', '<=',$target_date)
+                ->where('code', 'like', $chk_user_id_4.'%')
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
 
@@ -2530,11 +2544,15 @@ class ApiCommonController extends Controller
             }
             $target_date = $params['target_date'];
             // 設定マスタより締め日取得
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $target_date = $this->setRequestQeury($params['target_date']);
             $setting_model = new Setting();
             $target_dateYmd = new Carbon($target_date.'15');
             $setting_model->setParamFiscalmonthAttribute(date_format($target_dateYmd, 'm'));
             $setting_model->setParamYearAttribute(date_format($target_dateYmd, 'Y'));
+            $setting_model->setParamAccountidAttribute($login_user_code_4);
             $closing = $setting_model->getMonthClosing();
             return response()->json(
                 ['result' => true, 'closing' => $closing,
@@ -2559,12 +2577,16 @@ class ApiCommonController extends Controller
      */
     public function getCommonClosingDay($target_ym){
         $closing = null;
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try {
             // 設定マスタより締め日取得
             $target_dateYmd = new Carbon($target_ym.'15');
             $setting_model = new Setting();
             $setting_model->setParamFiscalmonthAttribute(date_format($target_dateYmd, 'm'));
             $setting_model->setParamYearAttribute(date_format($target_dateYmd, 'Y'));
+            $setting_model->setParamAccountidAttribute($login_user_code_4);
             $closing = $setting_model->getMonthClosing();
             return $closing;
         }catch(\PDOException $pe){
@@ -2736,7 +2758,6 @@ class ApiCommonController extends Controller
         }
     }
 
-
     /**
      * CSV対象項目取得
      *
@@ -2788,6 +2809,112 @@ class ApiCommonController extends Controller
             throw $pe;
         }catch(\Exception $e){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_users, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 初期設定項目取得
+     *      初期設定が必要である項目を返却する
+     *          会社情報
+     *          部署情報
+     *          労働時間基本設定
+     *          勤務帯時間設定
+     *          ユーザー情報設定
+     *          カレンダー設定
+     * @param [type] $dt
+     * @param [type] $format
+     * @return array
+     */
+    public function getNotSetting(){
+        try {
+            $array_result = array(
+                "companies" => 0,
+                "departments" => 0,
+                "settings" => 0,
+                "working_timetables" => 0,
+                "calendar_setting_informations" => 0,
+                "users" => 0
+            );
+            // 1.会社情報
+            $company_controller = new CreateCompanyInformationController();
+            $details = $company_controller->getCompanyInfoFunc();
+            $r_cnt = 0;
+            foreach($details as $item) {
+                $r_cnt++;
+                break;
+            }
+            if ($r_cnt > 0) { $array_result["companies"] = 1; }
+            // 2.部署情報
+            $department_controller = new CreateDepartmentController();
+            $array_impl_getCompanyInfoFunc = array (
+                'code' => null,
+                'killvalue' => true
+            );
+            $details = $company_controller->getCompanyInfoFunc($array_impl_getCompanyInfoFunc);
+            $r_cnt = 0;
+            foreach($details as $item) {
+                $r_cnt++;
+                break;
+            }
+            if ($r_cnt > 0) { $array_result["departments"] = 1; }
+            // 3.労働時間基本設定
+            $dt = new Carbon();
+            $target_year = $dt->format('Y');
+            $setting_controller = new SettingCalcController();
+            $array_impl_getDetailFunc = array (
+                'year' => $target_year
+            );
+            $details = $setting_controller->getDetailFunc($array_impl_getDetailFunc);
+            $r_cnt = 0;
+            foreach($details as $item) {
+                $r_cnt++;
+                break;
+            }
+            if ($r_cnt > 0) { $array_result["settings"] = 1; }
+
+            return $array_result;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_download_logs, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_download_logs, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * ダウンロード履歴項目取得
+     *
+     * @param [type] $dt
+     * @param [type] $format
+     * @return array
+     */
+    public function getDownloadLog($params){
+        $account_id = $params['account_id'];
+        $downloadfile_no = $params['downloadfile_no'];
+        $downloadfile_date = $params['downloadfile_date'];
+        $downloadfile_time = $params['downloadfile_time'];
+        $downloadfile_name = $params['downloadfile_name'];
+        try {
+            // ダウンロード履歴項目取得
+            $downloadlog_model = new DownloadLog();
+            $downloadlog_model->setParamAccountidAttribute($account_id);
+            $downloadlog_model->setParamDownlodfilenoAttribute($downloadfile_no);
+            $downloadlog_model->setParamDownlodfiledateAttribute($downloadfile_date);
+            $downloadlog_model->setParamDownlodfiletimeAttribute($downloadfile_time);
+            $downloadlog_model->setParamDownlodfilenameAttribute($downloadfile_name);
+            $details = $downloadlog_model->getDownloadlog();
+            return $details;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_download_logs, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_download_logs, Config::get('const.LOG_MSG.data_select_error')).'$e');
             Log::error($e->getMessage());
             throw $e;
         }
@@ -4376,10 +4503,14 @@ class ApiCommonController extends Controller
      */
     public function chkInteval($target_datetime, $before_datetime){
         // 設定項目よりインターバル時間を取得
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         $setting_model = new Setting();
         $dt = new Carbon($target_datetime);
         $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
         $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
+        $setting_model->setParamAccountidAttribute($login_user_code_4);
         $settings = $setting_model->getSettingDatas();
         $interval = 0;
         foreach($settings as $setting) {
@@ -4492,6 +4623,45 @@ class ApiCommonController extends Controller
         }
         return false;
     }
+  
+    /**
+     * ダウンロード履歴項目存在チェック
+     * 
+     *
+     * @return 
+     */
+    public function isExistDownloadLog($params)
+    {
+        $account_id = $params['account_id'];
+        $downloadfile_no = $params['downloadfile_no'];
+        $downloadfile_date = $params['downloadfile_date'];
+        $downloadfile_time = $params['downloadfile_time'];
+        $downloadfile_name = $params['downloadfile_name'];
+        $downloadfile_cnt = $params['downloadfile_cnt'];
+        try {
+            // ダウンロード履歴項目取得
+            $downloadlog_model = new DownloadLog();
+            $downloadlog_model->setParamAccountidAttribute($account_id);
+            $downloadlog_model->setParamDownlodfilenoAttribute($downloadfile_no);
+            $downloadlog_model->setParamDownlodfiledateAttribute($downloadfile_date);
+            $downloadlog_model->setParamDownlodfiletimeAttribute($downloadfile_time);
+            $downloadlog_model->setParamDownlodfilenameAttribute($downloadfile_name);
+            $downloadlog_model->setParamDownlodfilecntAttribute($downloadfile_cnt);
+            $isExists = $downloadlog_model->isExistsLogs();
+            Log::debug('isExists = '.$isExists);
+            return $isExists;
+        }catch(\PDOException $pe){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_download_logs, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+            Log::error($pe->getMessage());
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table_download_logs, Config::get('const.LOG_MSG.data_select_error')).'$e');
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    
     // -------------  6.判定・チェック end ----------------------------------------------------- //
 
 
@@ -4634,10 +4804,14 @@ class ApiCommonController extends Controller
      */
     public function getIntevalMinute($target_date){
         // 設定項目よりインターバル時間を取得
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         $setting_model = new Setting();
         $dt = new Carbon($target_date);
         $setting_model->setParamYearAttribute(date_format($dt, 'Y'));
         $setting_model->setParamFiscalmonthAttribute(date_format($dt, 'm'));
+        $setting_model->setParamAccountidAttribute($login_user_code_4);
         $settings = $setting_model->getSettingDatas();
         $interval = 0;
         foreach($settings as $setting) {

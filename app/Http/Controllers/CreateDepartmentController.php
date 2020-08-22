@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Department;
+use App\Http\Controllers\ApiCommonController;
 
 class CreateDepartmentController extends Controller
 {
@@ -24,7 +25,15 @@ class CreateDepartmentController extends Controller
      */
     public function index()
     {
-        return view('create_department');
+        $authusers = Auth::user();
+        $apicommon = new ApiCommonController();
+        // 設定項目要否判定
+        $settingtable = $apicommon->getNotSetting();
+        return view('create_department',
+            compact(
+                'authusers',
+                'settingtable'
+            ));
     }
 
     /**
@@ -35,7 +44,6 @@ class CreateDepartmentController extends Controller
      */
     public function getDetails(Request $request){
         $this->array_messagedata = array();
-        $details = new Collection();
         $result = true;
         try {
             // パラメータチェック
@@ -49,27 +57,21 @@ class CreateDepartmentController extends Controller
                 );
             }
             $params = $request->keyparams;
-            if (!isset($params['code'])) {
-                Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "code", Config::get('const.LOG_MSG.parameter_illegal')));
-                $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
-                return response()->json(
-                    ['result' => false, 'details' => $details,
-                    Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
-                );
+            // if (!isset($params['code'])) {
+            //     Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', "code", Config::get('const.LOG_MSG.parameter_illegal')));
+            //     $this->array_messagedata[] = Config::get('const.MSG_ERROR.parameter_illegal');
+            //     return response()->json(
+            //         ['result' => false, 'details' => $details,
+            //         Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
+            //     );
+            // }
+            $details = $this->getDetailsFunc($params);
+            $r_cnt = 0;
+            foreach($details as $item) {
+                $r_cnt++;
+                break;
             }
-            $code =  $params['code'];
-            $department_model = new Department();
-            $dt = new Carbon();
-            $from = $dt->copy()->format('Ymd');
-            $department_model->setParamapplytermfromAttribute($from);
-            $department_model->setParamcodeAttribute($code);
-            $killvalue = false;
-            if (isset($params['killvalue'])) {
-                $killvalue =  $params['killvalue'];
-            }
-            $department_model->setKillvalueAttribute($killvalue);
-            $details = $department_model->getDetails();
-            if (count($details) == 0) {
+            if ($r_cnt == 0) {
                 $this->array_messagedata[] = Config::get('const.MSG_ERROR.not_found_data');
                 $result = false;
             }
@@ -88,6 +90,40 @@ class CreateDepartmentController extends Controller
     }
 
     /**
+     * 部署取得
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function getDetailsFunc($params){
+        $code =  $params['code'];
+        $killvalue =  $params['killvalue'];
+        $this->array_messagedata = array();
+        $details = new Collection();
+        $result = true;
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        try {
+            $department_model = new Department();
+            $dt = new Carbon();
+            $from = $dt->copy()->format('Ymd');
+            $department_model->setParamapplytermfromAttribute($from);
+            $department_model->setParamcodeAttribute($code);
+            $department_model->setKillvalueAttribute($killvalue);
+            $department_model->setParamAccountidAttribute($login_user_code_4);
+            $details = $department_model->getDetails();
+            return $details;
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.Config::get('const.LOG_MSG.unknown_error'));
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
      * 部署登録
      *
      * @param Request $request
@@ -97,6 +133,9 @@ class CreateDepartmentController extends Controller
         $this->array_messagedata = array();
         $code = '';
         $result = true;
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try {
             // パラメータチェック
             $params = array();
@@ -130,6 +169,7 @@ class CreateDepartmentController extends Controller
             if ($name != "") {
                 $department_model = new Department();
                 $department_model->setNameAttribute($name);
+                $department_model->setParamAccountidAttribute($login_user_code_4);
                 $isExists = $department_model->isExistsName();
                 if ($isExists) {
                     $this->array_messagedata[] = str_replace('{0}', "部署", Config::get('const.MSG_ERROR.already_name'));
@@ -213,10 +253,12 @@ class CreateDepartmentController extends Controller
         try{
             $systemdate = Carbon::now();
             $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $department = new Department();
-            $user_code = $user->code;
             $from = Config::get('const.INIT_DATE.initdate');
             $maxdate = Config::get('const.INIT_DATE.maxdate');
+            $department->setParamAccountidAttribute($login_user_code_4);
             $max_code = $department->getMaxCode();          // code 自動採番
             if (isset($max_code)) {
                 $code = $max_code + 1;
@@ -224,11 +266,11 @@ class CreateDepartmentController extends Controller
                 $code = 1;
             }
             $department->setApplytermfromAttribute($from);
-            $department->setCodeAttribute($code);
+            $department->setCodeAttribute($login_user_code_4.$code);
             $department->setNameAttribute($name);
             $department->setKillfromdateAttribute($maxdate);
             $department->setCreatedatAttribute($systemdate);
-            $department->setCreateduserAttribute($user_code);
+            $department->setCreateduserAttribute($login_user_code);
             $department->insertDepartment();
         
             DB::commit();
@@ -253,31 +295,33 @@ class CreateDepartmentController extends Controller
      */
     private function fixData($details){
         $systemdate = Carbon::now();
-        $department = new Department();
+        $department_model = new Department();
         $user = Auth::user();
-        $user_code = $user->code;
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
 
         DB::beginTransaction();
         try{
             $carbon = new Carbon($details['apply_term_from']);
             $from = $carbon->copy()->format('Ymd');
-            $department->setApplytermfromAttribute($from);
-            $department->setCodeAttribute($details['code']);
-            $department->setNameAttribute($details['name']);
+            $department_model->setApplytermfromAttribute($from);
+            $department_model->setCodeAttribute($details['code']);
+            $department_model->setNameAttribute($details['name']);
             if ($details['kill_from_date'] == "" || $details['kill_from_date'] == null) {
-                $department->setKillfromdateAttribute(Config::get('const.INIT_DATE.maxdate'));
+                $department_model->setKillfromdateAttribute(Config::get('const.INIT_DATE.maxdate'));
             } else {
                 $dt = new Carbon($details['kill_from_date']);
                 $to = $dt->copy()->format('Ymd');
-                $department->setKillfromdateAttribute($to);
+                $department_model->setKillfromdateAttribute($to);
             }
-            $department->setUpdatedatAttribute($systemdate);   
-            $department->setUpdateduserAttribute($user_code);   
+            $department_model->setUpdatedatAttribute($systemdate);   
+            $department_model->setUpdateduserAttribute($login_user_code);   
             if ($details['id'] == "" || $details['id'] == null) {
-                $department->insertDepartment();
+                $department_model->insertDepartment();
             } else {
-                $department->setIdAttribute($details['id']);   
-                $department->updateDepartment();
+                $department_model->setParamAccountidAttribute($login_user_code_4);
+                $department_model->setIdAttribute($details['id']);   
+                $department_model->updateDepartment();
             }
             DB::commit();
 
@@ -346,9 +390,13 @@ class CreateDepartmentController extends Controller
      * @return void
      */
     public function updateIsDelete($id){
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         DB::beginTransaction();
         try{
             DB::table('departments')
+            ->where('code', 'like', $login_user_code_4."%")
             ->where('id', $id)
             ->update(['is_deleted' => 1]);
             DB::commit();
@@ -368,9 +416,13 @@ class CreateDepartmentController extends Controller
      */
     public function updateName($id,$name){
         $systemdate = Carbon::now();
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         DB::beginTransaction();
         try{
             DB::table('departments')
+            ->where('code', 'like', $login_user_code_4."%")
             ->where('id', $id)
             ->where('is_deleted', 0)
             ->update(['name' => $name,'updated_at' => $systemdate]);

@@ -28,7 +28,8 @@
 				<!-- panel header -->
 				<div class="card-header bg-transparent pb-0 border-0">
 					<!-- <h1 class="float-sm-left font-size-rg">操作メニュー</h1> -->
-					<span class="float-sm-right font-size-sm"></span>
+					<span class="float-sm-right font-size-sm">
+					</span>
 				</div>
 				<!-- /.panel header -->
 				<div class="card-body pt-2">
@@ -37,6 +38,13 @@
 					<div class="row justify-content-between">
 						<home-component
 							v-bind:authusers="{{ $authusers }}"
+							v-bind:isexistdownload="{{ $isexistdownload }}"
+							v-bind:settingcompanies="{{ $settingtable['companies'] }}"
+							v-bind:settingdepartments="{{ $settingtable['departments'] }}"
+							v-bind:settingsettings="{{ $settingtable['settings'] }}"
+							v-bind:settingworkingtimetables="{{ $settingtable['working_timetables'] }}"
+							v-bind:settingcalendarsettinginformations="{{ $settingtable['calendar_setting_informations'] }}"
+							v-bind:settingusers="{{ $settingtable['users'] }}"
 							v-bind:accountdatas="{{ $account_datas }}"
 							v-bind:menudatas="{{ $menu_selections }}"
 							v-bind:const_generaldatas="{{ $const_general_datas }}"

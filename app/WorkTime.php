@@ -717,10 +717,11 @@ class WorkTime extends Model
                     ->where('t2.is_deleted', '=', 0)
                     ->where('t1.is_deleted', '=', 0);
                 })
-                ->leftJoin($this->table_calendar_setting_informations.' as t9', function ($join) {
-                    $join->on('t9.date', '=', 't2.record_date');
+                ->leftJoin($this->table_calendar_setting_informations.' as t9', function ($join) use ($targetdatefrom) {    // 20200817001 use add
+                    // $join->on('t9.date', '=', 't2.record_date');     // 20200817001 del
                     $join->on('t9.department_code', '=', 't1.department_code');
                     $join->on('t9.user_code', '=', 't1.code')
+                    ->where('t9.date', '=', $targetdatefrom)            // 20200817001 add
                     ->where('t9.is_deleted', '=', 0)
                     ->where('t1.is_deleted', '=', 0);
                 })

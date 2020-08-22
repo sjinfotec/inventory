@@ -245,6 +245,36 @@ import {requestable} from '../mixins/requestable.js';
 export default {
   name: "Createdetailsrmation",
   mixins: [ dialogable, checkable, requestable ],
+  props: {
+    authusers: {
+      type: Array,
+      default: []
+    },
+    settingcompanies: {
+      type: String,
+      default: ""
+    },
+    settingdepartments: {
+      type: String,
+      default: ""
+    },
+    settingsettings: {
+      type: String,
+      default: ""
+    },
+    settingworkingtimetables: {
+      type: String,
+      default: ""
+    },
+    settingcalendarsettinginformations: {
+      type: String,
+      default: ""
+    },
+    settingusers: {
+      type: String,
+      default: ""
+    }
+  },
   data() {
     return {
       form: {
@@ -261,6 +291,7 @@ export default {
         email: ""
       },
       messagevalidatesNew: [],
+      settingmessage: [],
       details: []
     };
   },
@@ -448,6 +479,17 @@ export default {
           this.serverCatch("取得");
         });
     },
+    // カスタマ取得処理
+    getItemCustom() {
+      this.inputClear();
+      this.postRequest("/customer_information/get",  [])
+        .then(response  => {
+          this.getThenCustom(response);
+        })
+        .catch(reason => {
+          this.serverCatch("取得");
+        });
+    },
     // 会社登録処理
     storeclick() {
       if (this.checkFormStore()) {
@@ -482,6 +524,8 @@ export default {
           this.form.represent_name = this.details[0].represent_name;
           this.form.represent_kana = this.details[0].represent_kana;
           this.form.email = this.details[0].email;
+        } else {
+          this.getItemCustom();
         }
       } else {
         if (res.messagedata.length > 0) {
@@ -491,12 +535,89 @@ export default {
         }
       }
     },
+    // 取得正常処理（カスタマ）
+    getThenCustom(response) {
+      var res = response.data;
+      if (res.result) {
+        this.details = res.details;
+        this.count = this.details.length;
+        this.before_count = this.count;
+        if ( this.details.length > 0) {
+          this.form.name = this.details[0].company_name;
+          this.form.kana = "";
+          this.form.address1 = this.details[0].address_value;
+          this.form.address2 = "";
+          this.form.address_kana = "";
+          this.form.post_code = this.details[0].post_code;
+          this.form.tel_no = this.details[0].phone_number;
+          this.form.fax_no = "";
+          this.form.represent_name = "";
+          this.form.represent_kana = "";
+          this.form.email = this.details[0].email_value;
+        }
+      } else {
+        if (res.messagedata.length > 0) {
+          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
+        } else {
+          this.serverCatch("取得");
+        }
+      }
+    },
+    // 部署取得正常処理
+    getThenDepartment(response) {
+      this.settingmessage = [];
+      this.settingmessage.push(
+        "部署情報を設定する必要がありますので部署を設定します。"
+      );
+      this.htmlMessageSwalLink("通知",
+        this.settingmessage,
+        "info",
+        false,
+        true,
+        '<a href="http://192.168.0.47/create_department">部署を設定する</a>')
+      .then(result  => {
+        if (!result) {
+          if (this.settingsettings == 0) {
+            this.getThenSetting();
+          } else if (this.settingworkingtimetables == 0) {
+            // this.getThenSetting();
+          } else if (this.settingcalendarsettinginformations == 0) {
+            // this.getThenSetting();
+          } else if (this.settingusers == 0) {
+            // this.getThenSetting();
+          }
+        }
+      });
+    },
+    // 設定情報正常処理
+    getThenSetting(response) {
+      this.settingmessage = [];
+      this.settingmessage.push(
+        "労働時間の基本設定する必要がありますので基本設定します。"
+      );
+      this.htmlMessageSwalLink("通知",
+        this.settingmessage,
+        "info",
+        false,
+        true,
+        '<a href="http://192.168.0.47/setting_calc">労働時間基本を設定する</a>')
+        .then(result  => {
+            if (this.settingworkingtimetables == 0) {
+              // this.getThenSetting();
+            } else if (this.settingcalendarsettinginformations == 0) {
+              // this.getThenSetting();
+            } else if (this.settingusers == 0) {
+              // this.getThenSetting();
+            }
+        });
+    },
     // 更新系正常処理
     putThenHead(response, eventtext) {
       var messages = [];
       var res = response.data;
-      if (res.result) {0
+      if (res.result) {
         this.$toasted.show("会社情報を" + eventtext + "しました");
+        this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -510,6 +631,21 @@ export default {
       var messages = [];
       messages.push("会社情報" + eventtext + "に失敗しました");
       this.htmlMessageSwal("エラー", messages, "error", true, false);
+    },
+    
+    // 設定要否取得処理
+    getNotSetting() {
+      if (this.settingdepartments == 0) {
+        this.getThenDepartment();
+      } else if (this.settingsettings == 0) {
+        this.getThenSetting();
+      } else if (this.settingworkingtimetables == 0) {
+        // this.getThenSetting();
+      } else if (this.settingcalendarsettinginformations == 0) {
+        // this.getThenSetting();
+      } else if (this.settingusers == 0) {
+        // this.getThenSetting();
+      }
     },
     inputClear() {
       this.details = [];

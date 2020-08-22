@@ -108,6 +108,8 @@ Route::post('/edit_attendancelog/fix', 'EditAttendanceLogController@fix')->middl
 Route::get('/create_company_information', 'CreateCompanyInformationController@index')->middleware('auth');
 Route::post('/create_company_information/get', 'CreateCompanyInformationController@getCompanyInfo')->middleware('auth');
 Route::post('/create_company_information/store', 'CreateCompanyInformationController@store')->middleware('auth');
+// カスタマ情報
+Route::post('/customer_information/get', 'CustomerInformationController@getCustomerInfo')->middleware('auth');
 // 部署
 Route::get('/create_department', 'CreateDepartmentController@index')->middleware('auth');
 Route::post('/create_department/get', 'CreateDepartmentController@getDetails')->middleware('auth');

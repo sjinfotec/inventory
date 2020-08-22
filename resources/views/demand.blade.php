@@ -38,6 +38,9 @@
 		</div>
 		<!-- /main contentns row -->
 		@endif
-		<make-demand></make-demand>
+		<make-demand
+			v-bind:authusers="{{ $authusers }}"
+			v-bind:const_generaldatas="{{ $const_general_datas }}">
+		</make-demand>
 		<!-- /main contentns row -->
 @endsection

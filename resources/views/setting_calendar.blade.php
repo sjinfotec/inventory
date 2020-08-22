@@ -39,6 +39,13 @@
 	@endif
 	@can('admin-higher')
 		<setting-calendar
+			v-bind:authusers="{{ $authusers }}"
+			v-bind:settingcompanies="{{ $settingtable['companies'] }}"
+			v-bind:settingdepartments="{{ $settingtable['departments'] }}"
+			v-bind:settingsettings="{{ $settingtable['settings'] }}"
+			v-bind:settingworkingtimetables="{{ $settingtable['working_timetables'] }}"
+			v-bind:settingcalendarsettinginformations="{{ $settingtable['calendar_setting_informations'] }}"
+			v-bind:settingusers="{{ $settingtable['users'] }}"
 			v-bind:feature_item_selections="{{ $feature_item_selections }}"
 			v-bind:const_generaldatas="{{ $const_general_datas }}"
 		></setting-calendar>

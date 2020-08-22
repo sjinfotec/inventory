@@ -53,6 +53,7 @@ class CommonServiceProvider extends ServiceProvider
         $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
         $feature_data = $feature_model->getItem();
         View::share('feature_item_selections', $feature_data);
+        $collect_feature_data = collect($feature_data);
         //const
         $general_model = new GeneralCodes();
         $general_datas = $general_model->getGeneralcode();

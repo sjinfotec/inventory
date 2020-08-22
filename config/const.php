@@ -697,14 +697,57 @@ return [
         'STORAGE' => 'private/'
     ],
  
+    'FILE_DOWNLOAD_NO' => [
+        'file1' => 1,
+        'file2' => 2,
+        'file3' => 3,
+        'file4' => 4,
+        'file5' => 5,
+        'file6' => 6,
+        'file7' => 7,
+        'file8' => 8,
+        'file9' => 9,
+        'file10' => 10,
+        'file11' => 11,
+        'file12' => 12,
+        'file13' => 13,
+        'file14' => 14,
+        'file15' => 15,
+        'file16' => 16,
+        'file17' => 17,
+        'file18' => 18,
+        'file19' => 19,
+        'file20' => 20,
+        'file21' => 21,
+        'file22' => 22,
+        'file23' => 23,
+        'file24' => 24,
+        'file25' => 25,
+        'file26' => 26,
+        'file27' => 27,
+        'file28' => 28,
+        'file29' => 29,
+        'file30' => 30,
+        'file31' => 31,
+        'file32' => 32,
+        'file33' => 33,
+        'file34' => 34,
+        'file35' => 35,
+        'file36' => 36,
+        'file37' => 37,
+        'file38' => 38,
+        'file39' => 39,
+        'file40' => 40
+    ],
+ 
     'FILE_DOWNLOAD_NAME' => [
         'file1' => 'croud_install.zip',
         'file2' => 'pceventlog.zip',
         'file3' => 'TeamViewer_Setup.exe',
         'file4' => 'users_template_org.xlsx',
-        'file5' => '',
-        'file6' => '',
-        'file7' => '',
+        'file5' => 'OneDawnSetupForWin64.zip',
+        'file6' => 'OneDawnSetupForWin64.xlsx',
+        'file7' => 'OneDawnSetupForWin64.pdf',
         'file8' => '',
         'file9' => '',
         'file10' => '',
@@ -826,7 +869,7 @@ return [
     ],
 
     'EDITION' => [
-        'EDITION' => 5
+        'EDITION' => 2
     ],
 
     'EDITION_VALUE' => [
@@ -838,7 +881,7 @@ return [
     ],
 
     'ACCOUNTID' => [
-        'account_id' => 'CSD1000L'
+        'account_id' => 'SSJJOO00'
     ],
 
     // メニュー項目数   未使用

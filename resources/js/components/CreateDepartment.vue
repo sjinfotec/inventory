@@ -134,11 +134,11 @@
           <div class="card-header bg-transparent pt-3 border-0">
             <h1 class="float-sm-left font-size-rg">
               <span>
-                <button class="btn btn-success btn-lg font-size-rg" v-on:click="appendRowClick">+</button>
+                <button class="btn btn-success btn-lg font-size-rg" v-on:click="appendRowClick">+履歴追加</button>
               </span>
               {{ this.selectedName }}
             </h1>
-            <span class="float-sm-right font-size-sm">「＋」アイコンで新たに追加することができます</span>
+            <span class="float-sm-right font-size-sm">部署名が変更になった、廃止になった場合「＋」アイコンで履歴を追加します</span>
           </div>
           <div class="card-body pt-2" v-if="details.length">
             <!-- panel contents -->
@@ -165,11 +165,11 @@
                         <table class="table table-striped border-bottom font-size-sm text-nowrap">
                           <thead>
                             <tr>
-                              <td class="text-center align-middle w-35 mw-rem-10">No</td>
-                              <td class="text-center align-middle w-30">適用開始日</td>
-                              <td class="text-center align-middle w-30">廃止開始日</td>
+                              <td class="text-center align-middle w-20 mw-rem-5">No</td>
+                              <td class="text-center align-middle w-15 mw-rem-5">適用開始日</td>
+                              <td class="text-center align-middle w-15 mw-rem-5">廃止開始日</td>
                               <td class="text-center align-middle w-35 mw-rem-10">部署名</td>
-                              <td colspan="2" class="text-center align-middle w-35 mw-rem-10">操作</td>
+                              <td colspan="2" class="text-center align-middle w-15 mw-rem-10">操作</td>
                             </tr>
                           </thead>
                           <tbody>
@@ -274,6 +274,7 @@
   </div>
 </template>
 <script>
+import moment from "moment";
 import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
@@ -281,6 +282,36 @@ import {requestable} from '../mixins/requestable.js';
 export default {
   name: "CreateDepartment",
   mixins: [ dialogable, checkable, requestable ],
+  props: {
+    authusers: {
+      type: Array,
+      default: []
+    },
+    settingcompanies: {
+      type: String,
+      default: ""
+    },
+    settingdepartments: {
+      type: String,
+      default: ""
+    },
+    settingsettings: {
+      type: String,
+      default: ""
+    },
+    settingworkingtimetables: {
+      type: String,
+      default: ""
+    },
+    settingcalendarsettinginformations: {
+      type: String,
+      default: ""
+    },
+    settingusers: {
+      type: String,
+      default: ""
+    }
+  },
   data() {
     return {
       form: {
@@ -305,7 +336,9 @@ export default {
       before_count: 0,
       showdepartmentlist: true,
       confirmresult: true,
-      oldId: ""
+      oldId: "",
+      infoMsgcnt: 0,
+      settingmessage: []
     };
   },
   methods: {
@@ -491,6 +524,19 @@ export default {
           this.serverCatch("取得");
         });
     },
+    // 設定情報取得処理
+    getItemSetting() {
+      var nowDate = moment(new Date());
+      var nowYaer = moment(nowDate).format("YYYY");
+      var arrayParams = { year : nowYaer };
+      this.postRequest("/setting_calc/get", arrayParams)
+        .then(response  => {
+          this.getThenSetting(response);
+        })
+        .catch(reason => {
+          this.serverCatch("取得");
+        });
+    },
     // 部署登録処理
     store() {
       var messages = [];
@@ -544,6 +590,30 @@ export default {
         }
       }
     },
+    // 設定情報正常処理
+    getThenSetting(response) {
+      this.settingmessage = [];
+      this.settingmessage.push(
+        "労働時間の基本設定する必要がありますので基本設定します。"
+      );
+      this.htmlMessageSwalLink("通知",
+        this.settingmessage,
+        "info",
+        false,
+        true,
+        '<a href="http://192.168.0.47/setting_calc">労働時間基本を設定する</a>')
+      .then(result  => {
+        if (!result) {
+          if (this.settingworkingtimetables == 0) {
+            // this.getThenSetting();
+          } else if (this.settingcalendarsettinginformations == 0) {
+            // this.getThenSetting();
+          } else if (this.settingusers == 0) {
+            // this.getThenSetting();
+          }
+        }
+      });
+    },
     // 更新系正常処理
     putThenHead(response, eventtext) {
       var messages = [];
@@ -551,6 +621,7 @@ export default {
       if (res.result) {
         this.$toasted.show("部署を" + eventtext + "しました");
         this.refreshtDepartmentList();
+        this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -569,12 +640,26 @@ export default {
         this.getDepartment();
         this.count = this.details.length;
         this.before_count = this.count;
+        this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
         } else {
           this.serverCatch(eventtext);
         }
+      }
+    },
+    
+    // 設定要否取得処理
+    getNotSetting() {
+      if (this.settingsettings == 0) {
+        this.getThenSetting();
+      } else if (this.settingworkingtimetables == 0) {
+        // this.getThenSetting();
+      } else if (this.settingcalendarsettinginformations == 0) {
+        // this.getThenSetting();
+      } else if (this.settingusers == 0) {
+        // this.getThenSetting();
       }
     },
     // 異常処理

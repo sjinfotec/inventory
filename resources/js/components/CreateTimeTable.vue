@@ -788,6 +788,34 @@ export default {
   name: "CreateTimeTable",
   mixins: [ dialogable, checkable, requestable ],
   props: {
+    authusers: {
+      type: Array,
+      default: []
+    },
+    settingcompanies: {
+      type: String,
+      default: ""
+    },
+    settingdepartments: {
+      type: String,
+      default: ""
+    },
+    settingsettings: {
+      type: String,
+      default: ""
+    },
+    settingworkingtimetables: {
+      type: String,
+      default: ""
+    },
+    settingcalendarsettinginformations: {
+      type: String,
+      default: ""
+    },
+    settingusers: {
+      type: String,
+      default: ""
+    },
     feature_item_selections: {
         type: Array,
         default: []

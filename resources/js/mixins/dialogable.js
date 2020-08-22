@@ -54,6 +54,33 @@ export const dialogable = {
                 });
             });
         },
+        // メッセージ表示
+        htmlMessageSwalLink: function(
+            title,
+            arrayMessage,
+            icon,
+            showConfirmButton,
+            showCancelButton,
+            tourl
+        ) {
+            this.messagedata = this.arrayTostring(arrayMessage);
+            let self = this;
+            // html: '<p style="text-align: left">' + self.messagedata + '</p>',
+            return new Promise(function(resolve, reject) {
+                self.$swal({
+                    title: title,
+                    html: self.messagedata,
+                    icon: icon,
+                    showCancelButton: showCancelButton,
+                    showConfirmButton: showConfirmButton,
+                    width: "42rem",
+                    allowOutsideClick: false, //枠外をクリックしても画面を閉じない
+                    footer: tourl,
+                }).then(result => {
+                    resolve(result.value);
+                });
+            });
+        },
         // エラー個数メッセージ表示
         countswal(title, arrayMessage, icon, showConfirmButton, showCancelButton, dangerMode) {
             if (icon == "warning") {

@@ -20,10 +20,14 @@
                                 </h3>
                                 <ul class="collapse show list-unstyled" id="collapseAggregate">
                                     @if($menu_selections[Config::get('const.MENUITEM.daily') - 1]->is_select)
-                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/daily') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">日次集計</a></li>
+                                        @cannot('system-only')
+                                            <li><a class="px-3 py-1 text-white d-block" href="{{ url('/daily') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">日次集計</a></li>
+                                        @endcannot
                                     @endif
                                     @if($menu_selections[Config::get('const.MENUITEM.monthly') - 1]->is_select)
-                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/monthly') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">月次集計</a></li>
+                                        @cannot('system-only')
+                                            <li><a class="px-3 py-1 text-white d-block" href="{{ url('/monthly') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">月次集計</a></li>
+                                        @endcannot
                                     @endif
                                 </ul>
                             @endif
@@ -34,10 +38,14 @@
                                 </h3>
                                 <ul class="collapse show list-unstyled" id="collapseAggregate">
                                     @if($menu_selections[Config::get('const.MENUITEM.daily_alert') - 1]->is_select)
-                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/daily_alert') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">日次警告通知</a></li>
+                                        @cannot('system-only')
+                                            <li><a class="px-3 py-1 text-white d-block" href="{{ url('/daily_alert') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-none-w.svg') }}" alt="">日次警告通知</a></li>
+                                        @endcannot
                                     @endif
                                     @if($menu_selections[Config::get('const.MENUITEM.monthly_alert') - 1]->is_select)
-                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/monthly_alert') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">月次警告通知</a></li>
+                                        @cannot('system-only')
+                                            <li><a class="px-3 py-1 text-white d-block" href="{{ url('/monthly_alert') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">月次警告通知</a></li>
+                                        @endcannot
                                     @endif
                                 </ul>
                             @endif
@@ -48,10 +56,14 @@
                                 </h3>
                                 <ul class="collapse show list-unstyled" id="collapseEdit">
                                     @if($menu_selections[Config::get('const.MENUITEM.store_attendancelog') - 1]->is_select)
-                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/store_attendancelog') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">勤怠ログ登録</a></li>
+                                        @cannot('system-only')
+                                            <li><a class="px-3 py-1 text-white d-block" href="{{ url('/store_attendancelog') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">勤怠ログ登録</a></li>
+                                        @endcannot
                                     @endif
                                     @if($menu_selections[Config::get('const.MENUITEM.edit_attendancelog') - 1]->is_select)
-                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_attendancelog') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">勤怠ログ編集</a></li>
+                                        @cannot('system-only')
+                                            <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_attendancelog') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-notifications-w.svg') }}" alt="">勤怠ログ編集</a></li>
+                                        @endcannot
                                     @endif
                                 </ul>
                             @endif
@@ -64,10 +76,14 @@
                                     <!-- <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_calendar') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-outlined-flag-w.svg') }}" alt="">カレンダー編集</a></li> -->
                                     @can('admin-higher')
                                         @if($menu_selections[Config::get('const.MENUITEM.create_shift_time') - 1]->is_select)
-                                            <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_shift_time') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-access-time-w.svg') }}" alt="">シフト編集</a></li>
+                                            @cannot('system-only')
+                                                <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_shift_time') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-access-time-w.svg') }}" alt="">シフト編集</a></li>
+                                            @endcannot
                                         @endif
                                         @if($menu_selections[Config::get('const.MENUITEM.edit_work_times') - 1]->is_select)
-                                            <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_work_times') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-access-time-w.svg') }}" alt="">勤怠編集</a></li>
+                                            @cannot('system-only')
+                                                <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_work_times') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-access-time-w.svg') }}" alt="">勤怠編集</a></li>
+                                            @endcannot
                                         @endif
                                     @endcan
                                 </ul>
@@ -115,11 +131,11 @@
                                     @if($menu_selections[Config::get('const.MENUITEM.create_time_table') - 1]->is_select)
                                         <li><a class="px-3 py-1 text-white d-block" href="{{ url('/create_time_table') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-restore-w.svg') }}" alt="">勤務帯時間設定</a></li>
                                     @endif
-                                    @if($menu_selections[Config::get('const.MENUITEM.setting_calendar') - 1]->is_select)
-                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/setting_calendar') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-flag-w.svg') }}" alt="">カレンダー設定</a></li>
-                                    @endif
                                     @if($menu_selections[Config::get('const.MENUITEM.edit_user') - 1]->is_select)
                                         <li><a class="px-3 py-1 text-white d-block" href="{{ url('/edit_user') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-assignment-ind-w.svg') }}" alt="">ユーザ情報設定</a></li>
+                                    @endif
+                                    @if($menu_selections[Config::get('const.MENUITEM.setting_calendar') - 1]->is_select)
+                                        <li><a class="px-3 py-1 text-white d-block" href="{{ url('/setting_calendar') }}"><img class="icon-size-sm mr-3" src="{{ asset('images/round-flag-w.svg') }}" alt="">カレンダー設定</a></li>
                                     @endif
                                 </ul>
                                 @endcan

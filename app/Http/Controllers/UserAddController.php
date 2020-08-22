@@ -34,9 +34,13 @@ class UserAddController extends Controller
     public function index()
     {
         $authusers = Auth::user();
+        $apicommon = new ApiCommonController();
+        // 設定項目要否判定
+        $settingtable = $apicommon->getNotSetting();
         return view('edit_user',
             compact(
-                'authusers'
+                'authusers',
+                'settingtable'
             ));
     }
 
@@ -774,11 +778,13 @@ class UserAddController extends Controller
         DB::beginTransaction();
         try {
             $login_user_code = Auth::user()->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             $systemdate = Carbon::now();
             $temp_systemdate = $systemdate->copy()->format('Ymd');
             // 部署情報
             $department_model = new Department();
             $department_model->setParamapplytermfromAttribute($temp_systemdate);
+            $department_model->setParamAccountidAttribute($login_user_code_4);
             $departments = $department_model->getDetails();
             // 雇用形態情報
             $generalcode_model = new GeneralCodes();

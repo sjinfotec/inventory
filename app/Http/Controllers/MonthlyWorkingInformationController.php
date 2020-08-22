@@ -520,18 +520,23 @@ class MonthlyWorkingInformationController extends Controller
         $make_todate = '';
         // 表示区分
         if($displayKbn == Config::get('const.C016.display_closing')){
+            $user = Auth::user();
+            $login_user_code = $user->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
             // 設定マスタより締め日取得
             $setting_model = new Setting();
             $target_dateYmd = new Carbon($dateYm.'01');
             // 当月締め日
             $setting_model->setParamFiscalmonthAttribute(date_format($target_dateYmd, 'm'));
             $setting_model->setParamYearAttribute(date_format($target_dateYmd, 'Y'));
+            $setting_model->setParamAccountidAttribute($login_user_code_4);
             $closing = $setting_model->getMonthClosing();
             if (isset($closing)) {
                 // 前月締め日
                 $beformonth_endOfMonth = $target_dateYmd->firstOfMonth()->addDay(-1);
                 $setting_model->setParamFiscalmonthAttribute(date_format($beformonth_endOfMonth, 'm'));
                 $setting_model->setParamYearAttribute(date_format($target_dateYmd, 'Y'));
+                $setting_model->setParamAccountidAttribute($login_user_code_4);
                 $beformonth_closing = $setting_model->getMonthClosing();
                 if (isset($beformonth_closing)) {
 

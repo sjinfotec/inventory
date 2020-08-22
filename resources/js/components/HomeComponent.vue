@@ -3,31 +3,31 @@
     <!-- main contentns row -->
     <div class="d-flex flex-row flex-wrap align-content-between">
       <!-- 日次集計 -->
-      <div class="p-4" v-if="get_isMenuselection(get_c038[1]['code'])">
+      <div class="p-4" v-if="get_isMenuselection(get_c038[1]['code']) && login_user_role !== get_c025[3]['code']">
         <a class href="/daily">
           <img width="90" height="90" class src="/images/icon02.svg" alt />
         </a>
       </div>
       <!-- 月次集計 -->
-      <div class="p-4" v-if="get_isMenuselection(get_c038[2]['code'])">
+      <div class="p-4" v-if="get_isMenuselection(get_c038[2]['code']) && login_user_role !== get_c025[3]['code']">
         <a class href="/monthly">
           <img width="90" height="90" class src="/images/icon01.svg" alt />
         </a>
       </div>
       <!-- 日次警告 -->
-      <div class="p-4" v-if="get_isMenuselection(get_c038[4]['code'])">
+      <div class="p-4" v-if="get_isMenuselection(get_c038[4]['code']) && login_user_role !== get_c025[3]['code']">
         <a class href="/daily_alert">
           <img width="90" height="90" class src="/images/icon04.svg" alt />
         </a>
       </div>
       <!-- 月次警告 -->
-      <div class="p-4" v-if="get_isMenuselection(get_c038[5]['code'])">
+      <div class="p-4" v-if="get_isMenuselection(get_c038[5]['code']) && login_user_role !== get_c025[3]['code']">
         <a class href="/monthly_alert">
           <img width="90" height="90" class src="/images/icon03.svg" alt />
         </a>
       </div>
       <!-- 勤怠履歴編集 -->
-      <div class="p-4" v-if="get_isMenuselection(get_c038[8]['code'])">
+      <div class="p-4" v-if="get_isMenuselection(get_c038[8]['code']) && login_user_role !== get_c025[3]['code']">
         <a class href="/edit_attendancelog">
           <img width="90" height="90" class src="/images/icon10.svg" alt />
         </a>
@@ -44,7 +44,7 @@
       <!-- 勤怠編集 -->
       <div
         class="p-4"
-        v-if="get_isMenuselection(get_c038[11]['code']) && login_user_role === get_c025[2]['code']"
+        v-if="get_isMenuselection(get_c038[11]['code']) && login_user_role <= get_c025[2]['code']">
       >
         <a class href="/edit_work_times">
           <img width="90" height="90" class src="/images/icon09.svg" alt />
@@ -77,7 +77,7 @@
       <!-- 会社設定 -->
       <div
         class="p-4"
-        v-if="get_isMenuselection(get_c038[17]['code']) && login_user_role === get_c025[2]['code']"
+        v-if="get_isMenuselection(get_c038[17]['code']) && (login_user_role === get_c025[2]['code'] || login_user_role === get_c025[3]['code'])"
       >
         <a class href="/create_company_information">
           <img width="90" height="90" class src="/images/icon13.svg" alt />
@@ -86,7 +86,7 @@
       <!-- 組織設定 -->
       <div
         class="p-4"
-        v-if="get_isMenuselection(get_c038[18]['code']) && login_user_role === get_c025[2]['code']"
+        v-if="get_isMenuselection(get_c038[18]['code']) && (login_user_role === get_c025[2]['code'] || login_user_role === get_c025[3]['code'])"
       >
         <a class href="/create_department">
           <img width="90" height="90" class src="/images/icon14.svg" alt />
@@ -95,7 +95,7 @@
       <!-- 雇用形態設定 -->
       <div
         class="p-4"
-        v-if="get_isMenuselection(get_c038[19]['code']) && login_user_role === get_c025[2]['code']"
+        v-if="get_isMenuselection(get_c038[19]['code']) && (login_user_role === get_c025[2]['code'] || login_user_role === get_c025[3]['code'])"
       >
         <a class href="/setting_employment">
           <img width="90" height="90" class src="/images/icon21.svg" alt />
@@ -104,7 +104,7 @@
       <!-- 労働時間基本設定 -->
       <div
         class="p-4"
-        v-if="get_isMenuselection(get_c038[20]['code']) && login_user_role === get_c025[2]['code']"
+        v-if="get_isMenuselection(get_c038[20]['code']) && (login_user_role === get_c025[2]['code'] || login_user_role === get_c025[3]['code'])"
       >
         <a class href="/setting_calc">
           <img width="90" height="90" class src="/images/icon15.svg" alt />
@@ -113,28 +113,28 @@
       <!-- 勤務帯時間設定 -->
       <div
         class="p-4"
-        v-if="get_isMenuselection(get_c038[21]['code']) && login_user_role === get_c025[2]['code']"
+        v-if="get_isMenuselection(get_c038[21]['code']) && (login_user_role === get_c025[2]['code'] || login_user_role === get_c025[3]['code'])"
       >
         <a class href="/create_time_table">
           <img width="90" height="90" class src="/images/icon16.svg" alt />
         </a>
       </div>
-      <!-- カレンダー設定 -->
-      <div
-        class="p-4"
-        v-if="get_isMenuselection(get_c038[22]['code']) && login_user_role === get_c025[2]['code']"
-      >
-        <a class href="/setting_calendar">
-          <img width="90" height="90" class src="/images/icon17.svg" alt />
-        </a>
-      </div>
       <!-- ユーザー情報設定 -->
       <div
         class="p-4"
-        v-if="get_isMenuselection(get_c038[23]['code']) && login_user_role === get_c025[2]['code']"
+        v-if="get_isMenuselection(get_c038[23]['code']) && (login_user_role === get_c025[2]['code'] || login_user_role === get_c025[3]['code'])"
       >
         <a class href="/edit_user">
           <img width="90" height="90" class src="/images/icon18.svg" alt />
+        </a>
+      </div>
+      <!-- カレンダー設定 -->
+      <div
+        class="p-4"
+        v-if="get_isMenuselection(get_c038[22]['code']) && (login_user_role === get_c025[2]['code'] || login_user_role === get_c025[3]['code'])"
+      >
+        <a class href="/setting_calendar">
+          <img width="90" height="90" class src="/images/icon17.svg" alt />
         </a>
       </div>
       <!-- パスワード変更 -->
@@ -168,7 +168,7 @@
           <div class="row justify-content-between print-none" v-if="infomationmessage.length">
             <!-- col -->
             <!-- <div class="col-md-12"> -->
-            <div v-if="login_user_role === get_c025[2]['code']">
+            <div v-if="login_user_role === get_c025[2]['code'] || login_user_role === get_c025[3]['code']">
               <a
                 class
                 href="/daily_alert/home"
@@ -302,6 +302,34 @@ export default {
       type: Array,
       default: []
     },
+    isexistdownload: {
+      type: String,
+      default: ""
+    },
+    settingcompanies: {
+      type: String,
+      default: ""
+    },
+    settingdepartments: {
+      type: String,
+      default: ""
+    },
+    settingsettings: {
+      type: String,
+      default: ""
+    },
+    settingworkingtimetables: {
+      type: String,
+      default: ""
+    },
+    settingcalendarsettinginformations: {
+      type: String,
+      default: ""
+    },
+    settingusers: {
+      type: String,
+      default: ""
+    },
     accountdatas: {
       type: Array,
       default: []
@@ -315,8 +343,8 @@ export default {
       default: []
     },
     feature_item_selections: {
-        type: Array,
-        default: []
+      type: Array,
+      default: []
     }
   },
   data() {
@@ -329,9 +357,11 @@ export default {
       dialogVisible: false,
       messageshowsearch: false,
       infomationmessage: [],
+      settingmessage: [],
       showeditworktimestable: true,
       const_C025_data: [],
-      const_C038_data: []
+      const_C038_data: [],
+      infoMsgcnt: 0
     };
   },
   computed: {
@@ -373,6 +403,9 @@ export default {
         });
         return isItem;
       }
+    },
+    get_isexistdownload: function() {
+      return this.isexistdownload;
     }
   },
   // マウント時
@@ -381,9 +414,35 @@ export default {
     this.login_user_role = this.authusers["role"];
     this.getDayAlert();
     this.getPostInformations();
+    if (this.isexistdownload == "0") {
+      this.installdownload();
+    } else {
+      this.getNotSetting();
+    }
   },
   methods: {
     // ------------------------ サーバー処理 ----------------------------
+    // インストール情報処理
+    installdownload() {
+      this.getThenDownload();
+    },
+    
+    // 設定要否取得処理
+    getNotSetting() {
+      if (this.settingcompanies == 0) {
+        this.getThenCompany();
+      } else if (this.settingdepartments == 0) {
+        this.getThenDepartment();
+      } else if (this.settingsettings == 0) {
+        this.getThenSetting();
+      } else if (this.settingworkingtimetables == 0) {
+        // this.getThenSetting();
+      } else if (this.settingcalendarsettinginformations == 0) {
+        // this.getThenSetting();
+      } else if (this.settingusers == 0) {
+        // this.getThenSetting();
+      }
+    },
     // 日次警告取得処理
     getDayAlert() {
       // 処理中メッセージ表示
@@ -451,6 +510,91 @@ export default {
         });
     },
     // -------------------- 共通 ----------------------------
+    // -------正常処理（インストールダウンロード処理）
+    getThenDownload() {
+      this.settingmessage.push(
+        "打刻端末の打刻プログラムをダウンロードしてインストールします。"
+      );
+      this.htmlMessageSwalLink("通知",
+        this.settingmessage,
+        "info",
+        false,
+        true,
+        '<a href="http://192.168.0.47/file_download">インストールする</a>')
+    },
+    // 取得正常処理（会社情報処理）
+    getThenCompany() {
+      this.settingmessage.push(
+        "会社情報を設定する必要がありますので会社を設定します。"
+      );
+      this.htmlMessageSwalLink("通知",
+        this.settingmessage,
+        "info",
+        false,
+        true,
+        '<a href="http://192.168.0.47/create_company_information">会社を設定する</a>')
+        .then(result  => {
+          if (!result) {
+            if (this.settingdepartments == 0) {
+              this.getThenDepartment();
+            } else if (this.settingsettings == 0) {
+              this.getThenSetting();
+            } else if (this.settingworkingtimetables == 0) {
+              // this.getThenSetting();
+            } else if (this.settingcalendarsettinginformations == 0) {
+              // this.getThenSetting();
+            } else if (this.settingusers == 0) {
+              // this.getThenSetting();
+            }
+          }
+        });
+    },
+    // 部署取得正常処理
+    getThenDepartment() {
+      this.settingmessage.push(
+        "部署情報を設定する必要がありますので部署を設定します。"
+      );
+      this.htmlMessageSwalLink("通知",
+        this.settingmessage,
+        "info",
+        false,
+        true,
+        '<a href="http://192.168.0.47/create_department">部署を設定する</a>')
+        .then(result  => {
+          if (!result) {
+            if (this.settingsettings == 0) {
+              this.getThenSetting();
+            } else if (this.settingworkingtimetables == 0) {
+              // this.getThenSetting();
+            } else if (this.settingcalendarsettinginformations == 0) {
+              // this.getThenSetting();
+            } else if (this.settingusers == 0) {
+              // this.getThenSetting();
+            }
+          }
+        });
+    },
+    // 設定情報正常処理
+    getThenSetting(response) {
+      this.settingmessage.push(
+        "労働時間の基本設定する必要がありますので基本設定します。"
+      );
+      this.htmlMessageSwalLink("通知",
+        this.settingmessage,
+        "info",
+        false,
+        true,
+        '<a href="http://192.168.0.47/setting_calc">労働時間基本を設定する</a>')
+        .then(result  => {
+            if (this.settingworkingtimetables == 0) {
+              // this.getThenSetting();
+            } else if (this.settingcalendarsettinginformations == 0) {
+              // this.getThenSetting();
+            } else if (this.settingusers == 0) {
+              // this.getThenSetting();
+            }
+        });
+    },
     // 取得正常処理（アラート）
     getThen(response) {
       var res = response.data;
