@@ -17,7 +17,7 @@
             <div class="row justify-content-between">
               <!-- .col -->
               <div class="col-md-6 pb-2">
-                <div v-if="this.identification_id" class="input-group">
+                <div v-if="this.get_Identification" class="input-group">
                   <div class="input-group-prepend">
                     <label
                       class="input-group-text font-size-sm line-height-xs label-width-120"
@@ -1040,6 +1040,15 @@ import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
 
 
+const CONST_C025 = 'C025';
+const CONST_C026 = 'C026';
+const CONST_C032 = 'C032';
+const CONST_C025_GENERALUSER_PHYSICAL_NAME= "general_user";
+const CONST_C025_ADMINUSER_PHYSICAL_NAME= "admin_user";
+const CONST_C025_APPROVERUSER_PHYSICAL_NAME= "general_approver__user";
+const CONST_C025_HIGHUSER_PHYSICAL_NAME= "high_user";
+const CONST_MENU_EDITUSER_PHYSICAL_NAME= "edit_worktime_user";
+const CONST_MENU_EDITUSER_CON_PHYSICAL_NAME= "edit_worktime_user_conditional";
 const dateRE   = /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/
 const timeRE   = /^[0-9]{2}:[0-9]{2}$/
 const timecountRE   = /^([1-9][0-9]{0,2}|0)(\.[0-9]{1,2})?$/
@@ -1047,6 +1056,16 @@ const timecountRE   = /^([1-9][0-9]{0,2}|0)(\.[0-9]{1,2})?$/
 export default {
   name: "MakeDemand",
   mixins: [ dialogable, checkable, requestable ],
+  props: {
+    authusers: {
+        type: Array,
+        default: []
+    },
+    const_generaldatas: {
+        type: Array,
+        default: []
+    }
+  },
   data() {
     return {
       getDo: 0,
@@ -1098,18 +1117,108 @@ export default {
       demandDetails: [],
       userroleList: [],
       userrole: "",
-      userdepartment_code: "",
       identification_id: '',
       generalList_m: [],
-      userList: []
+      userList: [],
+      general_C025_data: [],
+      general_C026_data: [],
+      general_C032_data: [],
+      isUserblank: true,
+      login_user_code: "",
+      login_user_role: "",
+      login_user_department_code: "",
+      generaluserrole: "",
+      adminuserrole: ""
     };
   },
-  // マウント時
-  mounted() {
-    this.getUserDepartmentRole();
-    //this.getUserRole();
-  },
   computed: {
+    get_C025: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C025) {
+          $this.general_C025_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.general_C025_data;
+    },
+    get_C026: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C026) {
+          $this.general_C026_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.general_C025_data;
+    },
+    get_C032: function() {
+      let $this = this;
+      var i = 0;
+      this.const_generaldatas.forEach( function( item ) {
+        if (item.identification_id == CONST_C032) {
+          $this.general_C032_data.push($this.const_generaldatas[i]);
+        }
+        i++;
+      });    
+      return this.general_C025_data;
+    },
+    get_AdminUserRole: function() {
+      if (this.adminuserrole == null || this.adminuserrole == "") {
+        if (this.general_C025_data.length == 0) {
+          let $this = this;
+          this.get_C025.forEach( function( item ) {
+            if (item.physical_name == CONST_C025_ADMINUSER_PHYSICAL_NAME) {
+              $this.adminuserrole = item.code;
+            }
+          });    
+        } else {
+          let $this = this;
+          this.general_C025_data.forEach( function( item ) {
+            if (item.physical_name == CONST_C025_ADMINUSER_PHYSICAL_NAME) {
+              $this.adminuserrole = item.code;
+            }
+          });    
+        }
+      }
+      return this.adminuserrole;
+    },
+    get_LoginUserCode: function() {
+      this.login_user_code = this.authusers['code'];
+      return this.login_user_code;
+    },
+    get_LoginUserRole: function() {
+      this.login_user_role = this.authusers['role'];
+      return this.login_user_role;
+    },
+    get_Identification: function() {
+      if (this.get_LoginUserRole == null || this.get_LoginUserRole == "") {
+        this.get_LoginUserRole;
+      }
+      if (this.general_C025_data.length == 0) {
+        let $this = this;
+        this.get_C025.forEach( function( item ) {
+          if (item.physical_name == CONST_C025_GENERALUSER_PHYSICAL_NAME) {
+            $this.generaluserrole = item.code;
+          }
+        });    
+      } else {
+        let $this = this;
+        this.general_C025_data.forEach( function( item ) {
+          if (item.physical_name == CONST_C025_GENERALUSER_PHYSICAL_NAME) {
+            $this.generaluserrole = item.code;
+          }
+        });    
+      }
+      if (this.get_LoginUserRole == this.generaluserrole) {
+        this.identification_id = CONST_C032;
+      } else {
+        this.identification_id = CONST_C026;
+      }
+      return this.identification_id;
+    },
     validation() {
       const edit = this.edit
       return {
@@ -1124,7 +1233,12 @@ export default {
         .every(function (key) {
           return validation[key]
        })
-     }
+    },
+  },
+  // マウント時
+  mounted() {
+    // this.getUserDepartmentRole();
+    //this.getUserRole();
   },
   methods: {
     // バリデーション
@@ -1238,13 +1352,13 @@ export default {
       e.preventDefault();
     },
     // 申請書類選択が変更された場合の処理
-    doccodeChange: function(value, name) {
+    doccodeChange: function(value, arrayData) {
       this.array_demandresult = [];
       this.array_demand = [];
       this.array_demanddeatail = [];
       this.demandDetails = [];
       this.selectedDoccodeValue = value;
-      this.valueselecteddocname = name;
+      this.valueselecteddocname = arrayData['name'];
       this.getDo = 1;
       // 申請一覧取得
       if (this.selectedDoccodeValue) {
@@ -1312,7 +1426,8 @@ export default {
     backclick: function(e) {
       this.displayphase = "";
       this.demanditemClear();
-      this.doccodeChange(this.selectedDoccodeValue, this.valueselecteddocname);
+      var arrayData = {'rowindex' : 0, 'name' : this.valueselecteddocname};
+      this.doccodeChange(this.selectedDoccodeValue, arrayData);
     },
     // ラジオボタンがクリックされた場合の処理
     radiochange: function(index) {
@@ -1345,43 +1460,43 @@ export default {
       }
     },
     // ログインユーザーの権限を取得
-    getUserDepartmentRole: function() {
-      this.$axios
-        .get("/get_login_user_department", {
-        })
-        .then(response => {
-          this.userroleList = response.data;
-          for ( var i=0; i<this.userroleList.length; i++ ) {
-              this.userdepartment_code = this.userroleList[i]["department_code"];
-              this.userrole = this.userroleList[i]["role"];
-          }
-          this.getUserList('', this.userdepartment_code);
-        })
-        .catch(reason => {
-          alert("ログインユーザー権限取得エラー");
-        });
-    },
+    // getUserDepartmentRole: function() {
+    //   this.$axios
+    //     .get("/get_login_user_department", {
+    //     })
+    //     .then(response => {
+    //       this.userroleList = response.data;
+    //       for ( var i=0; i<this.userroleList.length; i++ ) {
+    //           this.login_user_department_code = this.userroleList[i]["department_code"];
+    //           this.userrole = this.userroleList[i]["role"];
+    //       }
+    //       this.getUserList('', this.login_user_department_code);
+    //     })
+    //     .catch(reason => {
+    //       alert("ログインユーザー権限取得エラー");
+    //     });
+    // },
     // 氏名選択リスト取得処理
     getUserList(targetdate){
       if (targetdate == '') {
         targetdate = moment(new Date()).format("YYYYMMDD");
       }
-      if (this.userdepartment_code == "") { this.userdepartment_code = null; }
+      if (this.login_user_department_code == "") { this.login_user_department_code = null; }
       this.postRequest("/get_user_list",
         { targetdate: targetdate,
           killvalue: this.killValue,
           getDo : this.getDo,
-          departmentcode : this.userdepartment_code,
+          departmentcode : this.login_user_department_code,
           employmentcode : null
         })
         .then(response  => {
           this.getThenuser(response);
-          if (this.userdepartment_code == null) { this.userdepartment_code = ""; }
+          if (this.login_user_department_code == null) { this.login_user_department_code = ""; }
           // 固有処理 END
         })
         .catch(reason => {
           this.serverCatch("氏名", "取得");
-          if (this.userdepartment_code == null) { this.userdepartment_code = ""; }
+          if (this.login_user_department_code == null) { this.login_user_department_code = ""; }
         });
     },
     getGeneralList(value) {
@@ -1541,16 +1656,16 @@ export default {
     },
     // ------------------------ サーバー処理 ----------------------------
     // ログインユーザーの権限を取得
-    getUserRole: function() {
-      var arrayParams = [];
-      this.postRequest("/get_login_user_role", arrayParams)
-        .then(response  => {
-          this.getThenrole(response);
-        })
-        .catch(reason => {
-          this.serverCatch("ユーザー権限", "取得");
-        });
-    },
+    // getUserRole: function() {
+    //   var arrayParams = [];
+    //   this.postRequest("/get_login_user_role", arrayParams)
+    //     .then(response  => {
+    //       this.getThenrole(response);
+    //     })
+    //     .catch(reason => {
+    //       this.serverCatch("ユーザー権限", "取得");
+    //     });
+    // },
 
     // ----------------- 共通メソッド ----------------------------------
     // 取得正常処理（ユーザー権限）

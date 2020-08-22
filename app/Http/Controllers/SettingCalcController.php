@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use App\Setting;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreSettingPost;
+use App\Http\Controllers\ApiCommonController;
 
 
 class SettingCalcController extends Controller
@@ -22,7 +23,15 @@ class SettingCalcController extends Controller
      */
     public function index()
     {
-        return view('setting_calc');
+        $authusers = Auth::user();
+        $apicommon = new ApiCommonController();
+        // 設定項目要否判定
+        $settingtable = $apicommon->getNotSetting();
+        return view('setting_calc',
+            compact(
+                'authusers',
+                'settingtable'
+            ));
     }
 
     /**
@@ -35,6 +44,9 @@ class SettingCalcController extends Controller
         $this->array_messagedata = array();
         $details = new Collection();
         $result = true;
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try{
             // パラメータチェック
             $params = array();
@@ -55,14 +67,36 @@ class SettingCalcController extends Controller
                     Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
                 );
             }
-            $target_year = $params['year'];
-            $setting = new Setting();
-            $setting->setFiscalyearAttribute($target_year);
-            $details = $setting->getDetails();
+            $details = $this->getDetailFunc($params);
             return response()->json(
                 ['result' => true, 'details' => $details,
                 Config::get('const.RESPONCE_ITEM.messagedata') => $this->array_messagedata]
             );
+        }catch(\PDOException $pe){
+            throw $pe;
+        }catch(\Exception $e){
+            Log::error($e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * 詳細取得
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function getDetailFunc($params){
+        $target_year = $params['year'];
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
+        try{
+            $setting_model = new Setting();
+            $setting_model->setParamAccountidAttribute($login_user_code_4);
+            $setting_model->setFiscalyearAttribute($target_year);
+            $details = $setting_model->getDetails();
+            return $details;
         }catch(\PDOException $pe){
             throw $pe;
         }catch(\Exception $e){
@@ -188,15 +222,18 @@ class SettingCalcController extends Controller
         $systemdate = Carbon::now();
         $user = Auth::user();
         $user_code = $user->code;
+        $login_user_code_4 = substr($user_code, 0 ,4);
 
         DB::beginTransaction();
         try{
+            $setting->setParamAccountidAttribute($login_user_code_4);
             $setting->setFiscalyearAttribute($fiscal_year);
             // 既に存在した場合削除新規する
             $is_exists = $setting->isExistsSetting();    
             if($is_exists){
                 $setting->delSetting();
             }
+            $setting->setAccountidAttribute($login_user_code_4);
             $setting->setCalcautotimeAttribute($calc_auto_time);
             $setting->setMax1MonthtotalAttribute($oneMonthTotal);
             $setting->setMax2MonthtotalAttribute($twoMonthTotal);

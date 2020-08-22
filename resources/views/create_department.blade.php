@@ -39,6 +39,14 @@
 		<!-- /main contentns row -->
 		@endif
 		@can('admin-higher')
-			<create-department></create-department>
+			<create-department
+				v-bind:authusers="{{ $authusers }}"
+				v-bind:settingcompanies="{{ $settingtable['companies'] }}"
+				v-bind:settingdepartments="{{ $settingtable['departments'] }}"
+				v-bind:settingsettings="{{ $settingtable['settings'] }}"
+				v-bind:settingworkingtimetables="{{ $settingtable['working_timetables'] }}"
+				v-bind:settingcalendarsettinginformations="{{ $settingtable['calendar_setting_informations'] }}"
+				v-bind:settingusers="{{ $settingtable['users'] }}"
+			></create-department>
 		@endcan
 @endsection

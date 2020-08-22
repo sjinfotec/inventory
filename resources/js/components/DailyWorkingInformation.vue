@@ -42,7 +42,24 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2" v-if="this.get_LoginUserRole >= this.get_AdminUserRole">
+              <div class="col-md-6 pb-2" v-if="!this.get_CalcListAllselectValue && this.get_LoginUserRole >= this.get_AdminUserRole">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      for="target_employmentstatus"
+                    >雇用形態</label>
+                  </div>
+                  <select-employmentstatuslist
+                    ref="selectemploymentstatuslist"
+                    v-bind:blank-data="true"
+                    v-bind:placeholder-data="'雇用形態を選択してください'"
+                    v-bind:selected-value="selectedEmploymentValue"
+                    v-on:change-event="employmentChanges"
+                  ></select-employmentstatuslist>
+                </div>
+              </div>
+              <div class="col-md-6 pb-2" v-if="this.get_CalcListAllselectValue">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
@@ -61,7 +78,32 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2" v-if="this.get_LoginUserRole >= this.get_AdminUserRole">
+              <div class="col-md-6 pb-2" v-if="!this.get_CalcListAllselectValue && this.get_LoginUserRole >= this.get_AdminUserRole">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      for="target_department"
+                    >所属部署</label>
+                  </div>
+                  <select-departmentlist
+                    ref="selectdepartmentlist"
+                    v-bind:blank-data="true"
+                    v-bind:placeholder-data="'部署を選択してください'"
+                    v-bind:selected-department="selectedDepartmentValue"
+                    v-bind:add-new="false"
+                    v-bind:date-value="''"
+                    v-bind:kill-value="valueDepartmentkillcheck"
+                    v-bind:row-index="0"
+                    v-on:change-event="departmentChanges"
+                  ></select-departmentlist>
+                </div>
+                <message-data
+                  v-bind:message-datas="messagedatadepartment"
+                  v-bind:message-class="'warning'"
+                ></message-data>
+              </div>
+              <div class="col-md-6 pb-2" v-if="this.get_CalcListAllselectValue">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
@@ -464,7 +506,9 @@ export default {
       login_user_code: "",
       login_user_role: "",
       adminuserrole: "",
-      isdefault: true
+      isdefault: true,
+      isAllselect: false,
+      isSetAllselect: false
     };
   },
   computed: {
@@ -537,13 +581,6 @@ export default {
       if (this.isdefault) {
         if (this.selectedUserValue == null || this.selectedUserValue == "") {
           var isAllselectValue = this.get_CalcListAllselectValue;
-          if (this.get_LoginUserRole < this.get_AdminUserRole) {
-            this.selectedUserValue = this.get_LoginUserCode;
-          }
-        }
-      } else {
-        if (this.selectedUserValue == null || this.selectedUserValue == "") {
-          var isAllselectValue = this.get_CalcListAllselectValue;
           if ((!isAllselectValue) && (this.get_LoginUserRole < this.get_AdminUserRole)) {
             this.selectedUserValue = this.get_LoginUserCode;
           }
@@ -581,8 +618,10 @@ export default {
       return edituser_con_index;
     },
     get_CalcListAllselectValue: function() {
+      if (this.isSetAllselect) { return this.isAllselect; }
       var isAllselectValue = false;
       if (this.feature_item_selections.length > 0) {
+        this.isSetAllselect = true;
         let $this = this;
         this.feature_item_selections.forEach( function( item ) {
           if (item.item_code == CONST_CALCLIST_ALLSELECT_ITEM_CODE) {
@@ -594,6 +633,7 @@ export default {
           }
         });
       }
+      this.isAllselect = isAllselectValue;
       return isAllselectValue;
     }
   },

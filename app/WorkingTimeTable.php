@@ -167,6 +167,7 @@ class WorkingTimeTable extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
 
+    private $param_account_id;                  // ログインユーザーのアカウント
     private $param_no;                          // タイムテーブルNo
     private $param_date_from;                   // 開始日付
     private $param_date_to;                     // 終了日付
@@ -176,8 +177,16 @@ class WorkingTimeTable extends Model
     private $param_apply_term_from;             // 適用期間開始
     private $param_ago_time_no;                 // 出勤時刻前の場合のリンクNO
 
-    private $massegedata;                       // メッセージ
+    // ログインユーザーのアカウント
+    public function getParamaccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
 
+    public function setParamaccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
+    }
 
     // タイムテーブルNo
     public function getParamnoAttribute()
@@ -286,12 +295,11 @@ class WorkingTimeTable extends Model
      */
     public function getMaxNo(){
         try {
-            $mainquery = DB::table($this->table)
-                        ->where($this->table.'.no', '<', Config::get('const.C999_NAME.from_timetable_no'))
-                        ->limit(1);
-            $results = $mainquery->max('no');
-            return $results;
-    
+            $max_no = 0;
+            $max_result = DB::select($this->maxNoSql());
+            if(isset($max_result[0]->{'max_no'})){
+                $max_no = $max_result[0]->{'max_no'};
+            }
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_maxget_error')).'$pe');
             Log::error($pe->getMessage());
@@ -301,7 +309,21 @@ class WorkingTimeTable extends Model
             Log::error($e->getMessage());
             throw $e;
         }
+        return $max_no;
     
+    }
+
+    private function maxNoSql(){
+        $sql = "select";
+        $sql .= " max(CAST((substr(no, 5,char_length(no) - 4)) as unsigned)) as max_no";
+        $sql .= " from";
+        $sql .= " ".$this->table
+        $sql .= " where";
+        $sql .= " no like '".$this->param_account_id."%'";
+        $sql .= " no <> ".Config::get('const.C999_NAME.from_timetable_no');
+        $sql .= " and is_deleted = 0";
+
+        return $sql;
     }
 
     /**
@@ -332,10 +354,12 @@ class WorkingTimeTable extends Model
             // subquery2
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id."%";
             $array_setBindingsStr[] = $target_date;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id."%";
             $array_setBindingsStr[] = Config::get('const.C999_NAME.from_timetable_no');
             $array_setBindingsStr[] = 0;
             $result = DB::select($sqlString, $array_setBindingsStr);
@@ -390,10 +414,12 @@ class WorkingTimeTable extends Model
             // subquery2
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id."%";
             $array_setBindingsStr[] = $target_date;
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = 1;
             $array_setBindingsStr[] = 1;
+            $array_setBindingsStr[] = $this->param_account_id."%";
             $array_setBindingsStr[] = Config::get('const.C999_NAME.from_timetable_no');
             $array_setBindingsStr[] = 0;
             $array_setBindingsStr[] = Config::get('const.C999_NAME.link_end_timetable_no');
@@ -449,36 +475,36 @@ class WorkingTimeTable extends Model
      *
      * @return void
      */
-    public function updateDetail(){
-        try {
-            DB::table($this->table)
-            ->where($this->table.'.id', $this->id)
-            ->where($this->table.'.is_deleted', 0)
-            ->update(
-                [
-                    'apply_term_from' => $this->apply_term_from,
-                    'name' => $this->name,
-                    'working_time_kubun' => $this->working_time_kubun,
-                    'from_time' => $this->from_time,
-                    'to_time' => $this->to_time,
-                    'ago_time_no' => $this->ago_time_no,
-                    'updated_user' => $this->updated_user,
-                    'updated_at' => $this->updated_at,
-                ]
-            );
-            return true;
+    // public function updateDetail(){
+    //     try {
+    //         DB::table($this->table)
+    //         ->where($this->table.'.id', $this->id)
+    //         ->where($this->table.'.is_deleted', 0)
+    //         ->update(
+    //             [
+    //                 'apply_term_from' => $this->apply_term_from,
+    //                 'name' => $this->name,
+    //                 'working_time_kubun' => $this->working_time_kubun,
+    //                 'from_time' => $this->from_time,
+    //                 'to_time' => $this->to_time,
+    //                 'ago_time_no' => $this->ago_time_no,
+    //                 'updated_user' => $this->updated_user,
+    //                 'updated_at' => $this->updated_at,
+    //             ]
+    //         );
+    //         return true;
     
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
+    //     }catch(\PDOException $pe){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$pe');
+    //         Log::error($pe->getMessage());
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_update_error')).'$e');
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
 
-    }
+    // }
 
     /**
      * 詳細取得
@@ -1070,55 +1096,55 @@ class WorkingTimeTable extends Model
      * タイムテーブル編集
      * @return void
      */
-    public function edtWorkingTime(){
-        try {
-            //
-            $dt = $this->param_date_from;
-            $dt1 = new Carbon($dt);
-            $target_today = $dt1->format('Y-m-d');
-            $target_addtoday = $dt1->addDay()->format('Y-m-d');
+    // public function edtWorkingTime(){
+    //     try {
+    //         //
+    //         $dt = $this->param_date_from;
+    //         $dt1 = new Carbon($dt);
+    //         $target_today = $dt1->format('Y-m-d');
+    //         $target_addtoday = $dt1->addDay()->format('Y-m-d');
    
-            $apicommon = new ApiCommonController();
-            // working_timetablesの最大適用開始日付subquery
-            $subquery33 = $apicommon->makeWorkingTimeTableApplyTermSql($this->param_date_from);
+    //         $apicommon = new ApiCommonController();
+    //         // working_timetablesの最大適用開始日付subquery
+    //         $subquery33 = $apicommon->makeWorkingTimeTableApplyTermSql($this->param_date_from);
 
-            $sqlString = $subquery33;
-            if (!empty($this->param_no)) {
-                $sqlString .= "   and t1.no = ? ";
-            }
-            $sqlString .= "order by t1.no asc ";
-            $sqlString .= ", t1.working_time_kubun asc ";
+    //         $sqlString = $subquery33;
+    //         if (!empty($this->param_no)) {
+    //             $sqlString .= "   and t1.no = ? ";
+    //         }
+    //         $sqlString .= "order by t1.no asc ";
+    //         $sqlString .= ", t1.working_time_kubun asc ";
         
-            // バインド
-            $array_setBindingsStr = array();
-            //
-            // subquery33
-            $array_setBindingsStr[] = 1;
-            $array_setBindingsStr[] = 1;
-            if (!empty($this->param_date_from)) {
-                $array_setBindingsStr[] = $this->param_date_from;
-            }
-            $array_setBindingsStr[] = 0;
-            $array_setBindingsStr[] = 1;
-            $array_setBindingsStr[] = 1;
-            $array_setBindingsStr[] = Config::get('const.C999_NAME.from_timetable_no');
-            $array_setBindingsStr[] = 0;
-            if (!empty($this->param_no)) {
-                $array_setBindingsStr[] = $this->param_no;
-            }
-            $result = DB::select($sqlString, $array_setBindingsStr);
+    //         // バインド
+    //         $array_setBindingsStr = array();
+    //         //
+    //         // subquery33
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = 1;
+    //         if (!empty($this->param_date_from)) {
+    //             $array_setBindingsStr[] = $this->param_date_from;
+    //         }
+    //         $array_setBindingsStr[] = 0;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = 1;
+    //         $array_setBindingsStr[] = Config::get('const.C999_NAME.from_timetable_no');
+    //         $array_setBindingsStr[] = 0;
+    //         if (!empty($this->param_no)) {
+    //             $array_setBindingsStr[] = $this->param_no;
+    //         }
+    //         $result = DB::select($sqlString, $array_setBindingsStr);
         
-            return $result;
+    //         return $result;
     
-        }catch(\PDOException $pe){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
-            Log::error($pe->getMessage());
-            throw $pe;
-        }catch(\Exception $e){
-            Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
-            Log::error($e->getMessage());
-            throw $e;
-        }
-    }
+    //     }catch(\PDOException $pe){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
+    //         Log::error($pe->getMessage());
+    //         throw $pe;
+    //     }catch(\Exception $e){
+    //         Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$e');
+    //         Log::error($e->getMessage());
+    //         throw $e;
+    //     }
+    // }
 
 }

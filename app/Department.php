@@ -141,6 +141,7 @@ class Department extends Model
     private $param_apply_term_from;               // 適用期間開始
     private $param_code;                          // 部署コード
     private $param_killvalue;                     // 廃止開始日を条件に含む(true)
+    private $param_account_id;                    // ログインユーザーのアカウント
 
     // 適用期間開始
     public function getParamapplytermfromAttribute()
@@ -174,6 +175,17 @@ class Department extends Model
     {
         $this->param_killvalue = $value;
     }
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
+    }
     
 
     /**
@@ -197,6 +209,7 @@ class Department extends Model
                 $subquery->where('kill_from_date', '>',$this->param_apply_term_from);
             }
             $subquery
+                ->where('code', 'like', $this->param_account_id."%")
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
 
@@ -220,6 +233,7 @@ class Department extends Model
                 $mainquery->where('t1.code', $this->param_code);
             }
             $details = $mainquery
+                ->where('t1.code', 'like', $this->param_account_id."%")
                 ->where('t1.is_deleted', 0)
                 ->orderBy('t1.apply_term_from', 'desc')
                 ->get();
@@ -243,6 +257,7 @@ class Department extends Model
     public function isExistsName(){
         try {
             $is_exists = DB::table($this->table)
+                ->where('code', 'like', $this->param_account_id."%")
                 ->where('name',$this->name)
                 ->where('is_deleted',0)
                 ->exists();
@@ -296,6 +311,7 @@ class Department extends Model
     public function updateDepartment(){
         try {
             DB::table($this->table)
+                ->where('code', 'like', $this->param_account_id."%")
                 ->where('id', $this->id)
                 ->where('is_deleted', 0)
                 ->update([
@@ -343,11 +359,12 @@ class Department extends Model
 
     private function maxCodeSql(){
         $sql = "select";
-        $sql .= " max(CAST(code AS SIGNED)) as max_code";
+        $sql .= " max(CAST((substr(code, 5,char_length(code) - 4)) as unsigned)) as max_code";
         $sql .= " from";
         $sql .= " departments";
         $sql .= " where";
-        $sql .= " is_deleted = 0";
+        $sql .= " code like '".$this->param_account_id."%'";
+        $sql .= " and is_deleted = 0";
 
         return $sql;
     }

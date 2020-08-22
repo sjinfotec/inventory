@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
+use Carbon\Carbon;
+use App\Http\Controllers\ApiCommonController;
+use App\DownloadLog;
 
 class FileDownloadController extends Controller
 {
@@ -24,9 +27,30 @@ class FileDownloadController extends Controller
             return $this->getfileDownload($request);
         } else {
             $authusers = Auth::user();
+            // 打刻端末インストールダウンロード情報
+            $login_user_code = $authusers->code;
+            $login_user_code_4 = substr($login_user_code, 0 ,4);
+            $apicommon = new ApiCommonController();
+            $account_id = $login_user_code_4;
+            $downloadfile_no = Config::get('const.FILE_DOWNLOAD_NO.file5');
+            $downloadfile_cnt = 0;
+            $array_impl_isExistDownloadLog = array (
+                'account_id' => $account_id,
+                'downloadfile_no' => $downloadfile_no,
+                'downloadfile_date' => null,
+                'downloadfile_time' => null,
+                'downloadfile_name' => null,
+                'downloadfile_cnt' => $downloadfile_cnt
+            );
+            $isExistDownloadLogs = $apicommon->isExistDownloadLog($array_impl_isExistDownloadLog);
+            $isexistdownload = "0";
+            if ($isExistDownloadLogs) {
+                $isexistdownload = "1";
+            }
             return view('file_download',
                 compact(
-                    'authusers'
+                    'authusers',
+                    'isexistdownload'
                 ));
         }
     }
@@ -92,6 +116,61 @@ class FileDownloadController extends Controller
                 $mimeType = Storage::mimeType($filePath);
                 $headers = [['Content-Type' => $mimeType]];
                 $disposition = 'attachment';        // 画像ファイルを表示せずダウンロード
+                // ダウンロード履歴登録
+                $authusers = Auth::user();
+                // 打刻端末インストールダウンロード情報
+                $login_user_code = $authusers->code;
+                $login_user_code_4 = substr($login_user_code, 0 ,4);
+                $apicommon = new ApiCommonController();
+                $account_id = $login_user_code_4;
+                $downloadfile_no = $filekbn;
+                $downloadfile_cnt = 0;
+                $array_impl_getDownloadLog = array (
+                    'account_id' => $account_id,
+                    'downloadfile_no' => $downloadfile_no,
+                    'downloadfile_date' => null,
+                    'downloadfile_time' => null,
+                    'downloadfile_name' => null,
+                    'downloadfile_cnt' => $downloadfile_cnt
+                );
+                $details = $apicommon->getDownloadLog($array_impl_getDownloadLog);
+                $r_cnt = 0;
+                foreach($details as $item) {
+                    $downloadfile_cnt = $item->downloadfile_cnt;
+                    $r_cnt++;
+                    break;
+                }
+                $systemdate = Carbon::now();
+                $current_date =  $systemdate;
+                $target_ymd = $current_date->format('Ymd');
+                $target_his = $current_date->format('His');
+                $downloadfile_cnt++;
+                $downloadlog_model = new DownloadLog();
+                if ($r_cnt == 0) {
+                    $downloadlog_model->setAccountidAttribute($login_user_code_4);
+                    $downloadlog_model->setDownloadfilenoAttribute($downloadfile_no);
+                    $downloadlog_model->setDownloadfiledateAttribute($target_ymd);
+                    $downloadlog_model->setDownloadfiletimeAttribute($target_his);
+                    $downloadlog_model->setDownloadfilenameAttribute($fileName);
+                    $downloadlog_model->setDownloadfilecntAttribute($downloadfile_cnt);
+                    $downloadlog_model->setDownloadfileaccountidAttribute($login_user_code);
+                    $downloadlog_model->setCreateduserAttribute($login_user_code);
+                    $downloadlog_model->setCreatedatAttribute($systemdate);
+                    $downloadlog_model->insertDownloadlog();
+                } else {
+                    $downloadlog_model->setParamAccountidAttribute($login_user_code_4);
+                    $downloadlog_model->setParamDownlodfilenoAttribute($downloadfile_no);
+                    $array_update = [
+                        'downloadfile_date' => $target_ymd,
+                        'downloadfile_time' => $target_his,
+                        'downloadfile_name' => $fileName,
+                        'downloadfile_cnt' => $downloadfile_cnt,
+                        'downloadfile_account_id' => $login_user_code,
+                        'updated_user' => $login_user_code,
+                        'updated_at' => $systemdate
+                    ];
+                    $downloadlog_model->updDownloadlog($array_update);
+                }
             }
 
             return Storage::download($filePath, $fileName, $headers, $disposition);

@@ -20,6 +20,7 @@ class Setting extends Model
     protected $guarded = array('id');
 
     //--------------- 項目属性 -----------------------------------
+    private $account_id;                    // アカウントID
     private $fiscal_year;                   // 年度
     private $fiscal_month;                  // 月
     private $closing;                       // 締日
@@ -45,6 +46,17 @@ class Setting extends Model
     private $created_at;                    // 作成日次
     private $updated_at;                    // 更新日時
     private $is_deleted;                    // 削除フラグ
+
+    // アカウントID
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
+    }
 
     // 年度
     public function getFiscalyearAttribute()
@@ -338,11 +350,23 @@ class Setting extends Model
 
     //--------------- パラメータ項目属性 -----------------------------------
 
+    private $param_account_id;                  // アカウントID
     private $param_fiscal_year;                 // 年度
     private $param_fiscal_month;                // 月
     private $param_year;                        // 年
 
     private $massegedata;                       // メッセージ
+
+    // アカウントID
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
+    }
 
     // 年度
     public function getParamFiscalyearAttribute()
@@ -404,6 +428,7 @@ class Setting extends Model
             // 取得SQL作成
             $mainquery = DB::table($this->table)
                 ->select(
+                    $this->table.'.account_id',
                     $this->table.'.fiscal_year',
                     $this->table.'.fiscal_month',
                     $this->table.'.closing',
@@ -438,7 +463,9 @@ class Setting extends Model
                 $mainquery->where($this->table.'.year', $this->param_year);                         //年指定
             }
 
-            $data = $mainquery->where($this->table.'.is_deleted', '=', 0)
+            $data = $mainquery
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
+                ->where($this->table.'.is_deleted', '=', 0)
                 ->get();
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
@@ -472,11 +499,13 @@ class Setting extends Model
                 $sunquery1->where($this->table.'.year', $this->param_year);                         //年指定
             }
             $sunquery1
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
                 ->where($this->table.'.is_deleted', '=', 0)
                 ->groupBy($this->table.'.year');
 
             $mainquery = DB::table($this->table)
                 ->select(
+                    $this->table.'.account_id',
                     $this->table.'.fiscal_year',
                     $this->table.'.fiscal_month',
                     $this->table.'.closing',
@@ -501,6 +530,7 @@ class Setting extends Model
                 ->JoinSub($sunquery1, 't2', function ($join) { 
                     $join->on('t2.fiscal_year', '=', $this->table.'.fiscal_year');
                 })
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
                 ->where($this->table.'.is_deleted', '=', 0);
 
             if (isset($orderby)) {
@@ -539,6 +569,7 @@ class Setting extends Model
         // 取得
         try {
             return $mainquery = DB::table($this->table)
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
                 ->where($this->table.'.year', $this->param_year)
                 ->where($this->table.'.fiscal_month', $this->param_fiscal_month)
                 ->where($this->table.'.is_deleted', 0)
@@ -567,6 +598,7 @@ class Setting extends Model
         try {
             // 取得
             return $mainquery = DB::table($this->table)
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
                 ->where($this->table.'.year', $this->param_year)
                 ->where($this->table.'.is_deleted', 0)
                 ->value($this->table.'.beginning_month');
@@ -586,6 +618,7 @@ class Setting extends Model
         try {
             DB::table($this->table)->insert(
                 [
+                    'account_id' => $this->account_id,
                     'fiscal_year' => $this->fiscal_year,
                     'fiscal_month' => $this->fiscal_month,
                     'closing' => $this->closing,
@@ -628,6 +661,7 @@ class Setting extends Model
     public function isExistsSetting(){
         try {
             $is_exists = DB::table($this->table)
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
                 ->where('fiscal_year',$this->fiscal_year)
                 ->where('is_deleted',0)
                 ->exists();
@@ -652,6 +686,7 @@ class Setting extends Model
     public function getDetails(){
         try {
             $details = DB::table($this->table)
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
                 ->where('fiscal_year',$this->fiscal_year)
                 ->where('is_deleted',0)
                 ->get();
@@ -676,6 +711,7 @@ class Setting extends Model
     public function delSetting(){
         try {
             DB::table($this->table)
+                ->where($this->table.'.account_id', '=', $this->param_account_id)
                 ->where('fiscal_year',$this->fiscal_year)
                 ->delete();
         }catch(\PDOException $pe){

@@ -12,6 +12,7 @@ class Company extends Model
 {
     protected $table = 'companies';
 
+    private $account_id;                        // アカウントID
     private $apply_term_from;                   // 適用期間開始
     private $name;                              // 会社名
     private $kana;                              // 会社カナ
@@ -29,6 +30,17 @@ class Company extends Model
     private $updated_user;                      // 修正ユーザー
     private $created_at;                        // 作成日時
     private $updated_at;                        // 修正日時
+
+    // アカウントID
+    public function getAccountidAttribute()
+    {
+        return $this->account_id;
+    }
+
+    public function setAccountidAttribute($value)
+    {
+        $this->account_id = $value;
+    }
 
     // 適用期間開始
     public function getApplytermfromAttribute()
@@ -243,6 +255,7 @@ class Company extends Model
         try {
             DB::table($this->table)->insert(
                 [
+                    'account_id' => $this->account_id,
                     'apply_term_from' => $this->apply_term_from,
                     'name' => $this->name,
                     'kana' => $this->kana,
@@ -279,6 +292,7 @@ class Company extends Model
         try {
             $data = DB::table($this->table)
             ->select(
+                    'account_id',
                     'apply_term_from',
                     'name',
                     'kana',
@@ -291,10 +305,13 @@ class Company extends Model
                     'represent_name',
                     'represent_kana',
                     'email'
-            )
-            ->where('is_deleted',0)
+            );
+            if (!empty($this->account_id)) {
+                $data->where('account_id',$this->account_id);
+            }
+            $result = $data->where('is_deleted',0)
             ->get();
-            return $data;
+            return $result;
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_select_error')).'$pe');
             Log::error($pe->getMessage());
@@ -354,8 +371,11 @@ class Company extends Model
      */
     public function isExistsInfo(){
         try {
-            $is_exists = DB::table($this->table)
-                ->where('is_deleted',0)
+            $mainQuery = DB::table($this->table);
+            if (!empty($this->account_id)) {
+                $mainQuery->where('account_id',$this->account_id);
+            }
+            $is_exists = $mainQuery->where('is_deleted',0)
                 ->exists();
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_exists_error')).'$pe');
@@ -377,9 +397,11 @@ class Company extends Model
      */
     public function delInfo(){
         try {
-            DB::table($this->table)
-                ->where('is_deleted',0)
-                ->delete();
+            $mainQuery = DB::table($this->table);
+            if (!empty($this->account_id)) {
+                $mainQuery->where('account_id',$this->account_id);
+            }
+            $result = $mainQuery->where('is_deleted',0)->delete();
         }catch(\PDOException $pe){
             Log::error('class = '.__CLASS__.' method = '.__FUNCTION__.' '.str_replace('{0}', $this->table, Config::get('const.LOG_MSG.data_delete_error')).'$pe');
             Log::error($pe->getMessage());

@@ -396,7 +396,7 @@
                               <select class="form-control" v-model="form.closingDate[index]" @change="days_maxChanges(index)">
                                 <option value></option>
                                 <option
-                                  v-for="n in days_max[index]"
+                                  v-for="n in get_Days(index)"
                                   :value="n"
                                   v-bind:key="n"
                                 >{{ n }} 日</option>
@@ -422,7 +422,7 @@
                               <select class="form-control" v-model="form.timeunit[index]" @change="timeunitChanges(index)">
                                 <option value></option>
                                 <option
-                                  v-for="tulist in TimeUnitList"
+                                  v-for="tulist in get_c009"
                                   :value="tulist.code"
                                   v-bind:key="tulist.code"
                                 >{{ tulist.code_name }}</option>
@@ -434,7 +434,7 @@
                               <select class="form-control" v-model="form.timeround[index]" @change="timeroundChanges(index)">
                                 <option value></option>
                                 <option
-                                  v-for="trlist in TimeRoundingList"
+                                  v-for="trlist in get_c010"
                                   :value="trlist.code"
                                   v-bind:key="trlist.code"
                                 >{{ trlist.code_name }}</option>
@@ -481,10 +481,47 @@ import moment from "moment";
 import {dialogable} from '../mixins/dialogable.js';
 import {checkable} from '../mixins/checkable.js';
 import {requestable} from '../mixins/requestable.js';
+// CONST
+const CONST_C009 = "C009";
+const CONST_C010 = "C010";
 
 export default {
   name: "SettingCalc",
   mixins: [ dialogable, checkable, requestable ],
+  props: {
+    authusers: {
+      type: Array,
+      default: []
+    },
+    settingcompanies: {
+      type: String,
+      default: ""
+    },
+    settingdepartments: {
+      type: String,
+      default: ""
+    },
+    settingsettings: {
+      type: String,
+      default: ""
+    },
+    settingworkingtimetables: {
+      type: String,
+      default: ""
+    },
+    settingcalendarsettinginformations: {
+      type: String,
+      default: ""
+    },
+    settingusers: {
+      type: String,
+      default: ""
+    },
+    const_generaldatas: {
+      type: Array,
+      default: []
+    }
+  },
   data() {
     return {
       defaultDate: new Date(),
@@ -518,9 +555,7 @@ export default {
         timeround: [{}]
       },
       edtString: "",
-      TimeUnitList: [],
-      TimeRoundingList: [],
-      days_max: [{}],
+      days_max: [],
       baseYear: "",
       details: [],
       hidden: "",
@@ -542,8 +577,58 @@ export default {
       messagedatatimeunit: [],
       messagedatatimeround: [],
       messagedatastore: [],
+      const_C009_data: [],
+      const_C010_data: [],
       storeisPush: false
     };
+  },
+  computed: {
+    get_c009: function() {
+      if (this.const_C009_data.length == 0) {
+        var i = 0;
+        let $this = this;
+        this.const_generaldatas.forEach(function(item) {
+          if (item.identification_id == CONST_C009) {
+            $this.const_C009_data.push($this.const_generaldatas[i]);
+          }
+          i++;
+        });
+      }
+      return this.const_C009_data;
+    },
+    get_c010: function() {
+      if (this.const_C010_data.length == 0) {
+        var i = 0;
+        let $this = this;
+        this.const_generaldatas.forEach(function(item) {
+          if (item.identification_id == CONST_C010) {
+            $this.const_C010_data.push($this.const_generaldatas[i]);
+          }
+          i++;
+        });
+      }
+      return this.const_C010_data;
+    },
+    // 月の月末リスト作成
+    get_Maxdays: function() {
+      if (this.days_max.length == 0) {
+        for (let index = 0; index < 12; index++) {
+          var month = index + 1;
+          this.days_max[index] = new Date(this.form.year, month, 0).getDate();
+        }
+      }
+      return this.days_max;
+    },
+    // 月の月末取得
+    get_Days: function() {
+      if (this.days_max.length == 0) {
+        this.get_Maxdays;
+      }
+      let self = this;
+      return function (index) {
+        return self.days_max[index];
+      }
+    }
   },
   // マウント時
   mounted() {
@@ -552,11 +637,8 @@ export default {
     this.year = moment(this.valueymd).format("YYYY");
     this.inputClear();
     this.messageClear();
-    this.baseYear = date.getFullYear();
-    this.get_days();
+    // this.baseYear = date.getFullYear();
     this.getItem();
-    this.getGeneralList("C009");
-    this.getGeneralList("C010");
   },
   methods: {
     // ------------------------ バリデーション ------------------------------------
@@ -947,27 +1029,6 @@ export default {
         });
       }
     },
-    // コード選択リスト取得処理
-    getGeneralList(value) {
-      var arrayParams = { identificationid : value };
-      this.postRequest("/get_general_list", arrayParams)
-        .then(response  => {
-          if (value == "C009") {
-            this.getThentimeUnit(response, "時間単位");
-          }
-          if (value == "C010") {
-            this.getThentimeRounding(response, "時間の丸め");
-          }
-        })
-        .catch(reason => {
-          if (value == "C009") {
-            this.serverCatch("時間単位", "取得");
-          }
-          if (value == "C010") {
-            this.serverCatch("時間の丸め", "取得");
-          }
-        });
-    },
     // -------------------- 共通 ----------------------------
     // 取得正常処理
     getThen(response) {
@@ -1046,12 +1107,37 @@ export default {
         }
       }
     },
+    // 設定情報正常処理
+    getThenWorkingtimetables(response) {
+      this.settingmessage = [];
+      this.settingmessage.push(
+        "勤務帯の時間設定する必要がありますので設定します。"
+      );
+      this.htmlMessageSwalLink("通知",
+        this.settingmessage,
+        "info",
+        false,
+        true,
+        '<a href="http://192.168.0.47/create_time_table">勤務帯時間を設定する</a>')
+      .then(result  => {
+        if (!result) {
+          if (this.settingworkingtimetables == 0) {
+            // this.getThenSetting();
+          } else if (this.settingcalendarsettinginformations == 0) {
+            // this.getThenSetting();
+          } else if (this.settingusers == 0) {
+            // this.getThenSetting();
+          }
+        }
+      });
+    },
     // 更新系正常処理
     putThenHead(response, eventtext) {
       var messages = [];
       var res = response.data;
       if (res.result) {
         this.$toasted.show("労働時間基本設定を" + eventtext + "しました");
+        this.getNotSetting();
       } else {
         if (res.messagedata.length > 0) {
           this.htmlMessageSwal("警告", res.messagedata, "warning", true, false);
@@ -1066,30 +1152,15 @@ export default {
       messages.push("労働時間基本設定" + eventtext + "に失敗しました");
       this.htmlMessageSwal("エラー", messages, "error", true, false);
     },
-    // 取得正常処理（明細時間単位リスト）
-    getThentimeUnit(response) {
-      var res = response.data;
-      if (res.result) {
-        this.TimeUnitList = res.details;
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
-        } else {
-          this.serverCatch("時間単位", "取得");
-        }
-      }
-    },
-    // 取得正常処理（明細時間の丸め選択リスト）
-    getThentimeRounding(response, value) {
-      var res = response.data;
-      if (res.result) {
-        this.TimeRoundingList = res.details;
-      } else {
-        if (res.messagedata.length > 0) {
-          this.htmlMessageSwal("エラー", res.messagedata, "error", true, false);
-        } else {
-          this.serverCatch("時間の丸め", "取得");
-        }
+    
+    // 設定要否取得処理
+    getNotSetting() {
+      if (this.settingworkingtimetables == 0) {
+        this.getThenWorkingtimetables();
+      } else if (this.settingcalendarsettinginformations == 0) {
+        // this.getThenSetting();
+      } else if (this.settingusers == 0) {
+        // this.getThenSetting();
       }
     },
     // 項目クリア
@@ -1150,14 +1221,7 @@ export default {
       if (value2.length > 0) {
         this.edtString = this.edtString + '\n' + value2;
       }
-    },
-    // 月の日付リづと作成
-    get_days: function() {
-      for (let index = 0; index < 12; index++) {
-        var month = index + 1;
-        this.days_max[index] = new Date(this.form.year, month, 0).getDate();
-      }
-    },
+    }
   }
 };
 </script>

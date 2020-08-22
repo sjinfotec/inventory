@@ -15,6 +15,39 @@
             <!-- panel contents -->
             <!-- .row -->
             <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=5">・打刻端末インストール（64bit zip 最新版） -- ファイル名：OneDawnSetupForWin64.zip</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=6">・打刻端末インストール説明書（EXCEL 最新版） -- ファイル名：OneDawnSetupForWin64.xlsx</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between">
+              <!-- .col -->
+              <div class="col-md-12 pb-2">
+                <div class="input-group">
+                  <a href="/file_download?filekbn=6">・打刻端末インストール説明書（pdf 最新版） -- ファイル名：OneDawnSetupForWin64.pdf</a>
+                </div>
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <!-- .row -->
+            <div class="row justify-content-between" v-if="isexistdownload === 1">
               <!-- panel header -->
               <daily-working-information-panel-header
                 v-bind:header-text1="'◆ＯｎｅＤａｗｎインストールファイルダウンロード'"
@@ -25,7 +58,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between" v-if="isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -37,7 +70,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="menudatas[get_c038[6]['sort_seq'] - 1]['is_select']">
+              v-if="menudatas[get_c038[6]['sort_seq'] - 1]['is_select'] && isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -49,7 +82,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="menudatas[get_c038[28]['sort_seq'] - 1]['is_select']">
+              v-if="menudatas[get_c038[28]['sort_seq'] - 1]['is_select'] && isexistdownload === 1">
               <!-- panel header -->
               <daily-working-information-panel-header
                 v-bind:header-text1="'◆遠隔リモートインストールファイルダウンロード'"
@@ -61,7 +94,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="menudatas[get_c038[28]['sort_seq'] - 1]['is_select']">
+              v-if="menudatas[get_c038[28]['sort_seq'] - 1]['is_select'] && isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -73,7 +106,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="authusers['role'] === get_c025[2]['code']">
+              v-if="authusers['role'] === get_c025[2]['code'] && isexistdownload === 1">
               <!-- panel header -->
               <daily-working-information-panel-header
                 v-bind:header-text1="'◆ツールファイルダウンロード'"
@@ -85,7 +118,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="authusers['role'] === get_c025[2]['code']">
+              v-if="authusers['role'] === get_c025[2]['code'] && isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -96,7 +129,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between" v-if="isexistdownload === 1">
               <!-- panel header -->
               <daily-working-information-panel-header
                 v-bind:header-text1="'◆説明書ダウンロード'"
@@ -108,7 +141,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="menudatas[get_c038[29]['sort_seq'] - 1]['is_select'] && authusers['role'] === get_c025[2]['code']">
+              v-if="menudatas[get_c038[29]['sort_seq'] - 1]['is_select'] && authusers['role'] === get_c025[2]['code'] && isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -120,7 +153,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="menudatas[get_c038[29]['sort_seq'] - 1]['is_select'] && authusers['role'] === get_c025[2]['code']">
+              v-if="menudatas[get_c038[29]['sort_seq'] - 1]['is_select'] && authusers['role'] === get_c025[2]['code'] && isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -132,7 +165,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="menudatas[get_c038[30]['sort_seq'] - 1]['is_select']">
+              v-if="menudatas[get_c038[30]['sort_seq'] - 1]['is_select'] && isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -144,7 +177,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="menudatas[get_c038[30]['sort_seq'] - 1]['is_select']">
+              v-if="menudatas[get_c038[30]['sort_seq'] - 1]['is_select'] && isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -155,7 +188,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between" v-if="isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -166,7 +199,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between" v-if="isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -177,7 +210,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between" v-if="isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -188,7 +221,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between" v-if="isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -199,7 +232,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between" v-if="isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -210,7 +243,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between" v-if="isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -221,7 +254,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between" v-if="isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -232,7 +265,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between" v-if="isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -243,7 +276,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between" v-if="isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -254,7 +287,7 @@
             </div>
             <!-- /.row -->
             <!-- .row -->
-            <div class="row justify-content-between">
+            <div class="row justify-content-between" v-if="isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -266,7 +299,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="menudatas[get_c038[6]['sort_seq'] - 1]['is_select']">
+              v-if="menudatas[get_c038[6]['sort_seq'] - 1]['is_select'] && isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -278,7 +311,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="menudatas[get_c038[6]['sort_seq'] - 1]['is_select']">
+              v-if="menudatas[get_c038[6]['sort_seq'] - 1]['is_select'] && isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -290,7 +323,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="menudatas[get_c038[28]['sort_seq'] - 1]['is_select']">
+              v-if="menudatas[get_c038[28]['sort_seq'] - 1]['is_select'] && isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -302,7 +335,7 @@
             <!-- /.row -->
             <!-- .row -->
             <div class="row justify-content-between"
-              v-if="menudatas[get_c038[28]['sort_seq'] - 1]['is_select']">
+              v-if="menudatas[get_c038[28]['sort_seq'] - 1]['is_select'] && isexistdownload === 1">
               <!-- .col -->
               <div class="col-md-12 pb-2">
                 <div class="input-group">
@@ -332,6 +365,10 @@ export default {
     authusers: {
         type: Array,
         default: []
+    },
+    isexistdownload: {
+      type: String,
+      default: ""
     },
     accountdatas: {
         type: Array,

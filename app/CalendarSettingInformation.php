@@ -189,6 +189,7 @@ class CalendarSettingInformation extends Model
         $this->is_deleted = $value;
     }
 
+    private $param_account_id;                    // ログインユーザーのアカウント
     private $paramfromdate;
     private $paramtodate;
     private $paramdepartmentcode;
@@ -198,6 +199,17 @@ class CalendarSettingInformation extends Model
     private $paramworkingtimetableno;     
     private $paramholidaykubun;     
     private $paramlimit;
+
+    // ログインユーザーのアカウント
+    public function getParamAccountidAttribute()
+    {
+        return $this->param_account_id;
+    }
+
+    public function setParamAccountidAttribute($value)
+    {
+        $this->param_account_id = $value;
+    }
     
     // 開始日付
     public function getParamfromdateAttribute()
@@ -786,7 +798,7 @@ class CalendarSettingInformation extends Model
             // departmentsの最大適用開始日付subquery
             $subquery2 = $apicommon->getDepartmentApplyTermSubquery($this->paramtodate);
             // working_timetablesの最大適用開始日付subquery
-            $subquery3 = $apicommon->getTimetableApplyTermSubquery($this->paramtodate);
+            $subquery3 = $apicommon->getTimetableApplyTermSubquery($this->paramtodate, $this->param_account_id);
             $mainquery
                 ->leftJoin($this->table_users.' as t1', function ($join) { 
                     $join->on('t1.code', '=', $this->table.'.user_code');

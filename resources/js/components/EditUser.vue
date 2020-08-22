@@ -1645,6 +1645,30 @@ export default {
       type: Array,
       default: []
     },
+    settingcompanies: {
+      type: String,
+      default: ""
+    },
+    settingdepartments: {
+      type: String,
+      default: ""
+    },
+    settingsettings: {
+      type: String,
+      default: ""
+    },
+    settingworkingtimetables: {
+      type: String,
+      default: ""
+    },
+    settingcalendarsettinginformations: {
+      type: String,
+      default: ""
+    },
+    settingusers: {
+      type: String,
+      default: ""
+    },
     const_generaldatas: {
         type: Array,
         default: []

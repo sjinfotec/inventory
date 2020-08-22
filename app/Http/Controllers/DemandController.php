@@ -26,7 +26,11 @@ class DemandController extends Controller
      */
     public function index()
     {
-        return view('demand');
+        $authusers = Auth::user();
+        return view('demand',
+            compact(
+                'authusers'
+            ));
     }
 
     /**

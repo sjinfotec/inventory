@@ -7,9 +7,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\ApiCommonController;
+use Carbon\Carbon;
 use App\WorkingTimeTable;
 // use App\Calendar;
 use App\Setting;
@@ -17,6 +16,7 @@ use App\UserModel;
 use App\WorkTime;
 // use App\UserHolidayKubun;
 use App\CalendarSettingInformation;
+use App\Http\Controllers\ApiCommonController;
 
 class EditCalendarController extends Controller
 {
@@ -30,7 +30,15 @@ class EditCalendarController extends Controller
      */
     public function index()
     {
-        return view('setting_calendar');
+        $authusers = Auth::user();
+        $apicommon = new ApiCommonController();
+        // 設定項目要否判定
+        $settingtable = $apicommon->getNotSetting();
+        return view('setting_calendar',
+            compact(
+                'authusers',
+                'settingtable'
+            ));
     }
 
     /**
@@ -1040,6 +1048,9 @@ class EditCalendarController extends Controller
         $formdata = $params['formdata'];
         $fromdate = "";
         $todate = "";
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         DB::beginTransaction();
         try{
             $calendar_setting_model = new CalendarSettingInformation();
@@ -1056,6 +1067,7 @@ class EditCalendarController extends Controller
                     // 期首月取得
                     $setting_model = new Setting();
                     $setting_model->setParamYearAttribute($dateyear);
+                    $setting_model->setParamAccountidAttribute($login_user_code_4);
                     $begining = $setting_model->getBeginingMonth();
                     if (isset($begining)) {
                         $fromdate = new Carbon($dateyear.str_pad($begining, 2, "0", STR_PAD_LEFT).'01');

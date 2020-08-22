@@ -7,12 +7,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
-use App\Http\Requests\StoreTimeTablePost;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
-use App\WorkingTimeTable;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\StoreTimeTablePost;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+use App\WorkingTimeTable;
 use App\FeatureItemSelection;
+use App\Http\Controllers\ApiCommonController;
 
 class CreateTimeTableController extends Controller
 {
@@ -26,7 +27,15 @@ class CreateTimeTableController extends Controller
      */
     public function index()
     {
-        return view('create_time_table');
+        $authusers = Auth::user();
+        $apicommon = new ApiCommonController();
+        // 設定項目要否判定
+        $settingtable = $apicommon->getNotSetting();
+        return view('create_time_table',
+            compact(
+                'authusers',
+                'settingtable'
+            ));
     }
 
     /**
@@ -215,23 +224,26 @@ class CreateTimeTableController extends Controller
      * @return void
      */
     private function insert($data, $no, $name){
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         DB::beginTransaction();
         try{
             $systemdate = Carbon::now();
             $time_table = new WorkingTimeTable();
-            $user = Auth::user();
-            $user_code = $user->code;
             $term_from = Config::get('const.INIT_DATE.initdate');
+            $time_table->setParamaccountidAttribute($login_user_code_4);
+            $time_table->setNoAttribute($maxno);
             $maxno = $time_table->getMaxNo();
             if (isset($maxno)) {
                 $maxno = $maxno + 1;
             } else {
                 $maxno = 1;
             }
-            $time_table->setNoAttribute($maxno);
+            $time_table->setNoAttribute($login_user_code_4.$maxno);
             $time_table->setApplytermfromAttribute($term_from);
             $time_table->setNameAttribute($name);
-            $time_table->setCreateduserAttribute($user_code);
+            $time_table->setCreateduserAttribute($login_user_code);
             $time_table->setCreatedatAttribute($systemdate);
             for ($i=0;$i<count($data);$i++) {
                 $time_table->setWorkingtimekubunAttribute($data[$i]['working_time_kubun']);

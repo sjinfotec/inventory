@@ -69,11 +69,16 @@ class MonthlyWorkingAlertController extends Controller
         $array_alert_date = $workingtimedate_model->getArrayParamdatetoAttribute();
         $alert_from_ym = date_format(new Carbon($array_alert_date[0]), 'Ym');
         // setting
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         $target_year = date_format(new Carbon($array_alert_date[0]), 'Y');
         $target_month = date_format(new Carbon($array_alert_date[0]), 'm');
         $setting = new Setting();
         $setting->setYearAttribute($target_year);
+        $setting->setParamAccountidAttribute($login_user_code_4);
         $setting_details = $setting->getSettingDatas();
+
         $sp_chk = false;
         $ave_2_6_time_sp = 0;
         $max_12month_total_sp = 0;

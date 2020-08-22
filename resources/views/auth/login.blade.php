@@ -10,6 +10,11 @@
                     </div>
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
+                        @if (count($errors) > 0)
+                            <div>
+                                <p style="color:red">ログインできませんでした</p>
+                            </div>
+                        @endif                  
                         <div class="col pb-2">
                             <div class="input-group">
                                 <div class="input-group-prepend">
@@ -36,7 +41,7 @@
                                 @endif
                             </div>
                         </div>
-                        <div class="col pb-2">
+                        <!-- <div class="col pb-2">
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text font-size-sm line-height-xs label-width-120" id="basic-addon1">アカウント ID</span>
@@ -48,7 +53,7 @@
                                     </span>
                                 @endif
                             </div>
-                        </div>
+                        </div> -->
                         <div class="col pb-2">
                             <div class="custom-control custom-checkbox">
                                 <input type="checkbox" class="custom-control-input" id="customCheck" name="remember" {{ old('remember') ? 'checked' : '' }}>
