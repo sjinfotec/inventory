@@ -69,7 +69,24 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2" v-if="this.get_LoginUserRole >= this.get_AdminUserRole">
+              <div class="col-md-6 pb-2" v-if="!this.get_CalcListAllselectValue && this.get_LoginUserRole >= this.get_AdminUserRole">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      for="inputGroupSelect01"
+                    >雇用形態</label>
+                  </div>
+                  <select-employmentstatuslist
+                    ref="selectemploymentstatuslist"
+                    v-bind:blank-data="true"
+                    v-bind:placeholder-data="'雇用形態を選択してください'"
+                    v-bind:selected-value="selectedEmploymentValue"
+                    v-on:change-event="employmentChanges"
+                  ></select-employmentstatuslist>
+                </div>
+              </div>
+              <div class="col-md-6 pb-2" v-if="this.get_CalcListAllselectValue">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
@@ -88,7 +105,29 @@
               </div>
               <!-- /.col -->
               <!-- .col -->
-              <div class="col-md-6 pb-2" v-if="this.get_LoginUserRole >= this.get_AdminUserRole">
+              <div class="col-md-6 pb-2" v-if="!this.get_CalcListAllselectValue && this.get_LoginUserRole >= this.get_AdminUserRole">
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <label
+                      class="input-group-text font-size-sm line-height-xs label-width-120"
+                      for="inputGroupSelect01"
+                    >所属部署</label>
+                  </div>
+                  <select-departmentlist
+                    ref="selectdepartmentlist"
+                    v-bind:blank-data="true"
+                    v-bind:placeholder-data="'部署を選択してください'"
+                    v-bind:selected-department="selectedDepartmentValue"
+                    v-bind:add-new="false"
+                    v-bind:date-value="''"
+                    v-bind:kill-value="valueDepartmentkillcheck"
+                    v-bind:row-index=0
+                    v-on:change-event="departmentChanges"
+                  ></select-departmentlist>
+                </div>
+                <message-data v-bind:message-datas="messagedatadepartment" v-bind:message-class="'warning'"></message-data>
+              </div>
+              <div class="col-md-6 pb-2" v-if="this.get_CalcListAllselectValue">
                 <div class="input-group">
                   <div class="input-group-prepend">
                     <label
@@ -466,6 +505,7 @@ import {requestable} from '../mixins/requestable.js';
 const CONST_C037 = 'C037';
 const CONST_C025 = 'C025';
 const CONST_C025_ADMINUSER_PHYSICAL_NAME= "admin_user";
+const CONST_CALCLIST_ALLSELECT_ITEM_CODE = 8;
 
 export default {
   name: "monthlyworkingtime",
@@ -530,10 +570,10 @@ export default {
       return this.adminuserrole;
     },
     get_IsUserblank: function() {
-      if (this.get_LoginUserRole < this.get_AdminUserRole) {
+      this.isUserblank = true;
+      var isAllselectValue = this.get_CalcListAllselectValue;
+      if ((!isAllselectValue) && (this.get_LoginUserRole < this.get_AdminUserRole)) {
         this.isUserblank = false;
-      } else {
-        this.isUserblank = true;
       }
       return this.isUserblank;
     },
@@ -546,12 +586,35 @@ export default {
       return this.login_user_role;
     },
     get_SelectedUserCode: function() {
-      if (this.selectedUserValue == null || this.selectedUserValue == "") {
-        if (this.get_LoginUserRole < this.get_AdminUserRole) {
-          this.selectedUserValue = this.get_LoginUserCode;
+      if (this.isdefault) {
+        if (this.selectedUserValue == null || this.selectedUserValue == "") {
+          var isAllselectValue = this.get_CalcListAllselectValue;
+          if ((!isAllselectValue) && (this.get_LoginUserRole < this.get_AdminUserRole)) {
+            this.selectedUserValue = this.get_LoginUserCode;
+          }
         }
       }
+      this.isdefault = false;
       return this.selectedUserValue;
+    },
+    get_CalcListAllselectValue: function() {
+      if (this.isSetAllselect) { return this.isAllselect; }
+      var isAllselectValue = false;
+      if (this.feature_item_selections.length > 0) {
+        this.isSetAllselect = true;
+        let $this = this;
+        this.feature_item_selections.forEach( function( item ) {
+          if (item.item_code == CONST_CALCLIST_ALLSELECT_ITEM_CODE) {
+            if (item.value_select != null && item.value_select != "") {
+              if (item.value_select == "1") {
+                isAllselectValue = true;
+              }
+            }
+          }
+        });
+      }
+      this.isAllselect = isAllselectValue;
+      return isAllselectValue;
     }
   },
   data: function() {
@@ -593,7 +656,10 @@ export default {
       messagedatauser: [],
       general_C025_data: [],
       isUserblank: true,
-      adminuserrole: ""
+      adminuserrole: "",
+      isdefault: true,
+      isAllselect: false,
+      isSetAllselect: false
     };
   },
   // マウント時
@@ -651,7 +717,7 @@ export default {
       equalength = 0;
       maxlength = 0;
       itemname = '氏名';
-      if (this.get_LoginUserRole < this.get_AdminUserRole) {
+      if ((!this.get_CalcListAllselectValue) && (this.get_LoginUserRole < this.get_AdminUserRole)) {
         chkArray = 
           this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
         if (chkArray.length > 0) {
@@ -730,7 +796,7 @@ export default {
       equalength = 0;
       maxlength = 0;
       itemname = '氏名';
-      if (this.get_LoginUserRole < this.get_AdminUserRole) {
+      if ((!this.get_CalcListAllselectValue) && (this.get_LoginUserRole < this.get_AdminUserRole)) {
         chkArray = 
           this.checkHeader(this.selectedUserValue, required, equalength, maxlength, itemname);
         if (chkArray.length > 0) {

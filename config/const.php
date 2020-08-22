@@ -887,6 +887,18 @@ return [
         'account_admin' => 30,
         'clientServer' => 31,
         'setting_employment' => 32
+    ],
+
+    // feature_item_selections
+    'FEATUREITEM' => [
+        'attendance_count' => 1,            // 所定時間帯設定数
+        'half_holiday' => 2,                // 半休自動設定
+        'rest_count' => 3,                  // 休憩時間帯設定数
+        'mode_list' => 4,                   // レコードタイムモードリスト
+        'early_time' => 5,                  // 早出時間集計
+        'select_clear' => 6,                // 日付変更時の選択リストクリア
+        'half_holiday' => 7,                // 休暇区分選択リスト設定項目
+        'calc_list_allselect' => 8          // 日次月次集計選択リスト
     ]
 
 ];
