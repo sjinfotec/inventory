@@ -686,7 +686,26 @@ class ApiCommonController extends Controller
                 ->where('is_deleted', '=', 0)
                 ->groupBy('code');
 
+            // 日次月次集計選択リスト取得
+            //feature selection
+            $feature_model = new FeatureItemSelection();
+            $feature_model->setParamaccountidAttribute(Config::get('const.ACCOUNTID.account_id'));
+            $feature_model->setParamselectioncodeAttribute(Config::get('const.EDITION.EDITION'));
+            $feature_model->setParamitemcodeAttribute(Config::get('const.FEATUREITEM.calc_list_allselect'));
+            $feature_data = $feature_model->getItem();
+            $calc_list_allselect = true;
+            foreach ($feature_data as $item) {
+                $calc_list_allselect = $item->value_select;
+                break;
+            }
+            $role_general_user = false;
             if($role == Config::get('const.C025.general_user')){
+                if (!$calc_list_allselect) {
+                    $role_general_user = true;
+                }
+            }
+
+            if($role_general_user){
                 $mainQuery = DB::table($this->table_departments)
                     ->JoinSub($subquery1, 't1', function ($join) { 
                         $join->on('t1.code', '=', $this->table_departments.'.code');
@@ -698,35 +717,35 @@ class ApiCommonController extends Controller
                     })
                     ->select($this->table_departments.'.code',$this->table_departments.'.name')
                     ->where($this->table_users.'.code','=',$chk_user_id);
-                    if (!$killvalue) {
-                        $mainQuery
-                            ->where($this->table_departments.'.kill_from_date', '>',$target_date)
-                            ->where($this->table_departments.'.is_deleted', 0)
-                            ->orderby($this->table_departments.'.code','asc');
-                    } else {
-                        $mainQuery
-                            ->where($this->table_departments.'.is_deleted', 0)
-                            ->orderby($this->table_departments.'.code','asc');
-                    }
-                    $details = $mainQuery->get();
+                if (!$killvalue) {
+                    $mainQuery
+                        ->where($this->table_departments.'.kill_from_date', '>',$target_date)
+                        ->where($this->table_departments.'.is_deleted', 0)
+                        ->orderby($this->table_departments.'.code','asc');
                 } else {
-                    $mainQuery = DB::table($this->table_departments)
-                        ->select($this->table_departments.'.code',$this->table_departments.'.name')
-                        ->JoinSub($subquery1, 't1', function ($join) { 
-                            $join->on('t1.code', '=', $this->table_departments.'.code');
-                            $join->on('t1.max_apply_term_from', '=', $this->table_departments.'.apply_term_from');
-                        });
-                    if (!$killvalue) {
-                        $mainQuery
-                            ->where($this->table_departments.'.kill_from_date', '>',$target_date)
-                            ->where($this->table_departments.'.is_deleted', 0)
-                            ->orderby($this->table_departments.'.code','asc');
-                    } else {
-                        $mainQuery
-                            ->where($this->table_departments.'.is_deleted', 0)
-                            ->orderby($this->table_departments.'.code','asc');
-                    }
-                    $details = $mainQuery->get();
+                    $mainQuery
+                        ->where($this->table_departments.'.is_deleted', 0)
+                        ->orderby($this->table_departments.'.code','asc');
+                }
+                $details = $mainQuery->get();
+            } else {
+                $mainQuery = DB::table($this->table_departments)
+                    ->select($this->table_departments.'.code',$this->table_departments.'.name')
+                    ->JoinSub($subquery1, 't1', function ($join) { 
+                        $join->on('t1.code', '=', $this->table_departments.'.code');
+                        $join->on('t1.max_apply_term_from', '=', $this->table_departments.'.apply_term_from');
+                    });
+                if (!$killvalue) {
+                    $mainQuery
+                        ->where($this->table_departments.'.kill_from_date', '>',$target_date)
+                        ->where($this->table_departments.'.is_deleted', 0)
+                        ->orderby($this->table_departments.'.code','asc');
+                } else {
+                    $mainQuery
+                        ->where($this->table_departments.'.is_deleted', 0)
+                        ->orderby($this->table_departments.'.code','asc');
+                }
+                $details = $mainQuery->get();
             }
             return response()->json(
                 ['result' => true, 'details' => $details,

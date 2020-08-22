@@ -51,7 +51,7 @@
         </a>
       </div>
       <!-- 各種申請作成 -->
-      <div class="p-4" v-if="get_isMenuselection(get_c038[13]['code'])">
+      <div class="p-4" v-if="get_isMenuselection(get_c038[13]['code']) && login_user_role <= get_c025[2]['code']">
         <a class href="/demand">
           <img width="90" height="90" class src="/images/icon05.svg" alt />
         </a>
@@ -59,7 +59,7 @@
       <!-- 各種申請承認 -->
       <div
         class="p-4"
-        v-if="get_isMenuselection(get_c038[14]['code']) && login_user_role >= get_c025[1]['code']"
+        v-if="get_isMenuselection(get_c038[14]['code']) && (login_user_role >= get_c025[1]['code'] && login_user_role <= get_c025[2]['code'])"
       >
         <a class href="/approval">
           <img width="90" height="90" class src="/images/icon06.svg" alt />
@@ -68,7 +68,7 @@
       <!-- 承認者ルート設定 -->
       <div
         class="p-4"
-        v-if="get_isMenuselection(get_c038[15]['code']) && login_user_role >= get_c025[1]['code']"
+        v-if="get_isMenuselection(get_c038[15]['code']) && (login_user_role >= get_c025[1]['code'] && login_user_role <= get_c025[2]['code'])"
       >
         <a class href="/confirm">
           <img width="90" height="90" class src="/images/icon07.svg" alt />

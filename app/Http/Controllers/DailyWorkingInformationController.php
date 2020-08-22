@@ -18,6 +18,14 @@ use App\FeatureItemSelection;
 use App\Http\Controllers\ApiCommonController;
 
 
+/**
+ * 日次集計
+ *
+ *  履歴
+ *          20200817001 出勤日者が表示されていない対応
+ *          20200817002 打刻ミスの場合翌日分が当日分となってしまう
+ *
+ */
 class DailyWorkingInformationController extends Controller
 {
 
@@ -697,6 +705,7 @@ class DailyWorkingInformationController extends Controller
             // Log::debug('                         $result->user_holiday_name  = '.$result->user_holiday_name);
             // Log::debug('                         $result->user_holiday_description  = '.$result->user_holiday_description);
             // Log::debug('                         $result->user_working_date  = '.$result->user_working_date);
+            // Log::debug('                         $result->holiday_working_date  = '.$result->holiday_working_date);
             // Log::debug('         タイムテーブル  no = '.$result->working_timetable_no);
             // Log::debug('         タイムテーブル  name = '.$result->working_timetable_name);
             // Log::debug('         タイムテーブル　開始時刻　$result->working_timetable_from_time = '.$result->working_timetable_from_time);
@@ -714,10 +723,10 @@ class DailyWorkingInformationController extends Controller
                     //     $result->mode != Config::get('const.C005.emergency_time')) {
                         // 夜勤の場合同じ日に休暇ある場合は休暇を当日としない
                         // if ($result->working_timetable_from_time > $result->working_timetable_to_time) {
-                            if ($result->user_working_date != null && $result->user_working_date != "") {
+                            if ($result->holiday_working_date != null && $result->holiday_working_date != "") {
                                 if ($result->user_holiday_description == Config::get('const.C013_DESC_VALUE.target_calc_time') ||
                                     $result->user_holiday_description == Config::get('const.C013_DESC_VALUE.non_calc_time')) {
-                                    if ($target_date_ymd == $result->user_working_date) {
+                                    if ($target_date_ymd == $result->holiday_working_date) {
                                         // Log::debug('        同じ日に休暇ある場合は休暇を当日とする該当 ');
                                         $result->record_datetime = date_format(new Carbon($target_date), 'Y-m-d')." 00:00:01";
                                         $result->record_date = date_format(new Carbon($target_date), 'Ymd');
@@ -757,12 +766,32 @@ class DailyWorkingInformationController extends Controller
                         $current_result = $result;
                         // 日付or部署orユーザーが１件前と異なれば
                         // 出勤打刻flgをfalseに初期設定
+                        // Log::debug('        出勤打刻flgをfalseにするか $current_date = '.$current_date);
+                        // Log::debug('        出勤打刻flgをfalseにするか $before_date = '.$before_date);
+                        // Log::debug('        出勤打刻flgをfalseにするか $current_department_code = '.$current_department_code);
+                        // Log::debug('        出勤打刻flgをfalseにするか $before_department_code = '.$before_department_code);
+                        // Log::debug('        出勤打刻flgをfalseにするか $current_user_code = '.$current_user_code);
+                        // Log::debug('        出勤打刻flgをfalseにするか $before_user_code = '.$before_user_code);
                         if ($current_date != $before_date ||
                             $current_department_code != $before_department_code ||
                             $current_user_code != $before_user_code) {
                             $attendance_target_flg = false;
                             $attendance_work_time = null;
                             $attendance_business_kubun = null;
+                        } else {           // 20200817002 add --start
+                            // 出勤回数が単数回の場合は直前が退勤であれば出勤打刻flgをfalseに初期設定
+                            if ($feature_attendance_count == 1) {
+                                if ($before_result != null) {
+                                    // Log::debug('        出勤回数が単数回の場合は直前が退勤であれば出勤打刻flgをfalseに初期設定 $result->mode = '.$result->mode);
+                                    // Log::debug('        出勤回数が単数回の場合は直前が退勤であれば出勤打刻flgをfalseに初期設定 $before_result->mode = '.$before_result->mode);
+                                    if ($before_result->mode == Config::get('const.C005.leaving_time')) {
+                                        $attendance_target_flg = false;
+                                        $attendance_work_time = null;
+                                        $attendance_business_kubun = null;
+                                    }
+                                }
+                            }
+                            // 20200817002 add --end
                         }
                         // 出勤回数が複数回の場合はタイムテーブルの開始終了時刻が正しく対応順に取得されない場合があるので
                         // 対応するタイムテーブルの開始終了時刻を新たに設定する
@@ -1941,12 +1970,14 @@ class DailyWorkingInformationController extends Controller
         if ($cnt == 0) {
             if ($before_value_mode == Config::get('const.C005.attendance_time') ||
                 $before_value_mode == Config::get('const.C005.emergency_time')) {           // １個前のモードが出勤である場合
+                // Log::debug('        １個前のモードが出勤である場合 ');
                 if ($record_before_datetime < $attendance_from_date) {                      // １個前の打刻時刻 < 出勤1日のはじめ
                     // パターン２（打刻ミス（出勤済）（要確認）。勤務状態は打刻なし）
                     $ptn = '2';
                 }
             } elseif ($before_value_mode == Config::get('const.C005.leaving_time') ||
                     $before_value_mode == Config::get('const.C005.emergency_return_time')) {       // １個前のモードが退勤である場合
+                // Log::debug('        １個前のモードが退勤である場合 ');
                 if ($record_datetime >= $attendance_from_date &&
                     $record_datetime <= $timetable_from_date) {                             // 出勤1日のはじめ <= 打刻時刻 < タイムテーブルの始業時刻
                     $ptn = '1';
@@ -1982,12 +2013,14 @@ class DailyWorkingInformationController extends Controller
                 }
             } elseif ($before_value_mode == Config::get('const.C005.missing_middle_time') ||
                 $before_value_mode == Config::get('const.C005.public_going_out_time')) {    // １個前のモードが私用または公用外出である場合
+                // Log::debug('        １個前のモードが私用または公用外出である場合 ');
                 if ($record_before_datetime < $attendance_from_date) {                      // １個前の打刻時刻 < 出勤1日のはじめ
                     // パターン５（打刻ミス（外出戻りしていない）。勤務状態は打刻なし）
                     $ptn = '5';
                 }
-            } elseif ($before_value_mode == Config::get('const.C005.missing_middle_time_return_time') ||
+            } elseif ($before_value_mode == Config::get('const.C005.missing_middle_return_time') ||
                 $before_value_mode == Config::get('const.C005.public_going_out_return_time')) {     // １個前のモードが戻り
+                // Log::debug('        １個前のモードが戻り '.$before_value_mode);
                 if ($record_before_datetime < $attendance_from_date) {                      // １個前の打刻時刻 < 出勤1日のはじめ
                     // パターン６（打刻ミス（退勤していない）。勤務状態は打刻なし）
                     $ptn = '6';
@@ -4268,7 +4301,7 @@ class DailyWorkingInformationController extends Controller
                 $before_value_mode == Config::get('const.C005.public_going_out_time')) {    // １個前のモードが私用または公用外出である場合
                 // パターン５（打刻ミス（外出戻りしていない）。勤務状態は打刻なし）
                 $ptn = '5';
-            } elseif ($before_value_mode == Config::get('const.C005.missing_middle_time_return_time') ||
+            } elseif ($before_value_mode == Config::get('const.C005.missing_middle_return_time') ||
                 $before_value_mode == Config::get('const.C005.public_going_out_return_time')) {     // １個前のモードが戻り
                 // パターン６（打刻ミス（退勤していない）。勤務状態は打刻なし）
                 $ptn = '6';
@@ -4799,7 +4832,8 @@ class DailyWorkingInformationController extends Controller
             $temp_calc_model->setModeAttribute('0');
             $temp_calc_model->setRecorddatetimeAttribute('');
             $temp_calc_model->setWorkingtimetablenoAttribute($value_working_timetable_no);
-            $temp_calc_model->setWorkingstatusAttribute('0');
+            // $temp_calc_model->setWorkingstatusAttribute('0');    //  20200817001 0->Config::get('const.C012.unknown')
+            $temp_calc_model->setWorkingstatusAttribute(Config::get('const.C012.forget'));
             if (isset($user_holiday_name) && $user_holiday_name != '') {
                 $temp_calc_model->setNoteAttribute('');
                 if ($target_date == $hpliday_date) {
