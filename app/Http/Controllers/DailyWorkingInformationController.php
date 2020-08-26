@@ -83,9 +83,14 @@ class DailyWorkingInformationController extends Controller
     public function index()
     {
         $authusers = Auth::user();
+        $login_user_code = $authusers->code;
+        $accountid = substr($login_user_code, 0 ,4);
+        $edition = Config::get('const.EDITION.EDITION');
         return view('daily_working_information',
             compact(
-                'authusers'
+                'authusers',
+                'accountid',
+                'edition',
             ));
     }
 

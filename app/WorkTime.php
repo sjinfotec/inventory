@@ -2602,7 +2602,7 @@ class WorkTime extends Model
                                 t1.current_record_date desc
                                 , t1.user_code asc
                                 , t1.department_code asc
-                                , t1.current_record_time asc";
+                                , t1.current_record_time_ asc";
             // バインド
             // インターバル時間取得
             $apicommon = new ApiCommonController();

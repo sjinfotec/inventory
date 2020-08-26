@@ -28,9 +28,14 @@ class EditWorkTimesController extends Controller
     public function index()
     {
         $authusers = Auth::user();
+        $login_user_code = $authusers->code;
+        $accountid = substr($login_user_code, 0 ,4);
+        $edition = Config::get('const.EDITION.EDITION');
         return view('edit_work_times',
             compact(
-                'authusers'
+                'authusers',
+                'accountid',
+                'edition'
             ));
     }
 
