@@ -158,7 +158,7 @@
           v-bind:const_c025="get_C025"
           v-bind:const_generaldatas="const_generaldatas"
           v-bind:heads="detailsEdt"
-          v-bind:accountdatas="accountdatas"
+          v-bind:accountdatas="accountid"
           v-bind:halfautoset="get_IsAutoHalfSet"
           v-bind:feature-item-selections="feature_item_selections"
           v-on:backclick-event="backclick"
@@ -188,13 +188,17 @@ export default {
   name: "dailyworkingtime",
   mixins: [ dialogable, checkable, requestable ],
   props: {
-    accountdatas: {
-        type: Array,
-        default: []
-    },
     authusers: {
-        type: Array,
-        default: []
+      type: Array,
+      default: []
+    },
+    accountid: {
+      type: String,
+      default: ""
+    },
+    edition: {
+      type: String,
+      default: ""
     },
     feature_item_selections: {
         type: Array,

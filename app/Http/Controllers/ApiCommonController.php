@@ -2801,6 +2801,9 @@ class ApiCommonController extends Controller
     public function getWorgingStatusInfo(Request $request){
         $result = true;
         $details = array();
+        $user = Auth::user();
+        $login_user_code = $user->code;
+        $login_user_code_4 = substr($login_user_code, 0 ,4);
         try {
             $worktimelog_model = new WorkTimeLog();
             // パラメータチェック
@@ -2824,6 +2827,7 @@ class ApiCommonController extends Controller
             }
             // $params['target_date'] = "2020-04-08 08:00:00";
             $target_date = $params['target_date'];
+            $details = $worktimelog_model->setParamAccountidAttribute($login_user_code_4);
             $details = $worktimelog_model->getWorkinTimeLog(date_format(new Carbon($target_date), 'Ymd'));
             $result_details = Collect($details);
             $ondetails = $result_details->whereIn('mode', [

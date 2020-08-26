@@ -25,10 +25,15 @@ class DailyWorkingAlertController extends Controller
     public function index()
     {
         $authusers = Auth::user();
+        $login_user_code = $authusers->code;
+        $accountid = substr($login_user_code, 0 ,4);
+        $edition = Config::get('const.EDITION.EDITION');
         $indexorhome = 1;       // メニューより起動
         return view('daily_working_alert',
             compact(
                 'authusers',
+                'accountid',
+                'edition',
                 'indexorhome'
             ));
     }
@@ -52,10 +57,15 @@ class DailyWorkingAlertController extends Controller
     public function alerthome()
     {
         $authusers = Auth::user();
+        $login_user_code = $authusers->code;
+        $accountid = substr($login_user_code, 0 ,4);
+        $edition = Config::get('const.EDITION.EDITION');
         $indexorhome = 2;       // ホームより起動
         return view('daily_working_alert',
             compact(
                 'authusers',
+                'accountid',
+                'edition',
                 'indexorhome'
             ));
     }

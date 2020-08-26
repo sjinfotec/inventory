@@ -155,7 +155,7 @@
           v-bind:const_c025="get_C025"
           v-bind:const_generaldatas="const_generaldatas"
           v-bind:heads="heads"
-          v-bind:accountdatas="accountdatas"
+          v-bind:accountdatas="accountid"
           v-bind:halfautoset="get_AutoHalfSet"
           v-bind:feature-item-selections="feature_item_selections"
           v-on:backclick-event="backclick"
@@ -186,13 +186,17 @@ export default {
   name: "EditWorkTimes",
   mixins: [ dialogable, checkable, requestable ],
   props: {
-    accountdatas: {
-        type: Array,
-        default: []
-    },
     authusers: {
         type: Array,
         default: []
+    },
+    accountid: {
+      type: String,
+      default: ""
+    },
+    edition: {
+      type: String,
+      default: ""
     },
     feature_item_selections: {
         type: Array,
@@ -305,15 +309,6 @@ export default {
         i++;
       });    
       return this.selectclear_code;
-    },
-    get_Account: function() {
-      let $this = this;
-      this.accountdata_data = [];
-      this.accountdatas.forEach( function( item ) {
-        $this.accountdata_data.push($this.accountdatas[i]);
-        return this.accountdata_data;
-      });    
-      return this.accountdata_data;
     },
     get_C025: function() {
       let $this = this;
